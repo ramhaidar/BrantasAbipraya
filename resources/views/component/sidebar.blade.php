@@ -126,8 +126,8 @@
                                                 </a>
                                             </li>
                                             <li class="nav-item proyek-item">
-                                                <a class="nav-link" data-bs-toggle="collapse" data-bs-target="#subMenuMasterData" href="#" aria-expanded="false">
-                                                    <i class="bi me-2 nav-icon fs-5 bi-briefcase-fill"></i>
+                                                <a class="nav-link" data-bs-toggle="collapse" data-bs-target="#subMenuMasterData" href="#" aria-expanded="false">                                                
+                                                    <i class="bi me-2 nav-icon fs-5 bi-database-fill-gear"></i>
                                                     <p class="truncate-text">
                                                         <span class="text-content">Master Data</span>
                                                     </p>
@@ -142,14 +142,14 @@
                                                     </li>
                                                     <li class="nav-item">
                                                         <a class="nav-link" href="{{ route('master_data_supplier') }}">
-                                                            <i class="bi me-2 nav-icon fs-5 bi-database-fill-gear"></i>
-                                                            <p>Master Data Supplier</p>
+                                                            <i class="bi me-2 nav-icon fs-5 bi-tools"></i>
+                                                            <p>Master Data Sparepart</p>
                                                         </a>
                                                     </li>
                                                     <li class="nav-item">
                                                         <a class="nav-link" href="{{ route('master_data_sparepart') }}">
-                                                            <i class="bi me-2 nav-icon fs-5 bi-database-fill-gear"></i>
-                                                            <p>Master Data Sparepart</p>
+                                                            <i class="bi me-2 nav-icon fs-5 bi-people-fill"></i>
+                                                            <p>Master Data Supplier</p>
                                                         </a>
                                                     </li>
                                                 </ul>

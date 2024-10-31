@@ -360,7 +360,7 @@
                                     foreach ($detailDataAPB as $data) {
                                         if ($data['suku_cadang'] == 'PEMELIHARAAN') {
                                             if ($data['tipe'] == 'Hutang Unit Alat') {
-                                                $ata['total_net'];
+                                                $data['total_net'];
                                             } elseif ($data['tipe'] == 'Panjar Unit Alat') {
                                                 $total_net_apb_perbaikan_ex_panjar_unit_alat += $data['total_net'];
                                             } elseif ($data['tipe'] == 'Panjar Proyek') {

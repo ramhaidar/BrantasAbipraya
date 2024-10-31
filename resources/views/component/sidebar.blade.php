@@ -261,7 +261,7 @@
                                                     </ul>
                                                 </li>
                                             @endforeach
-                                            @can('admin')
+                                            @if (Auth::user()->role == 'Admin')
                                                 <li class="nav-item">
                                                     <a class="nav-link" href="{{ route('proyek') }}">
                                                         <i class="bi me-2 nav-icon bi-kanban"></i>
@@ -274,7 +274,7 @@
                                                         <p>User</p>
                                                     </a>
                                                 </li>
-                                            @endcan
+                                            @endif
                                             <div class="pb-5">
                                                 <p></p>
                                             </div>

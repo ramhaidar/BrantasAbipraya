@@ -101,7 +101,17 @@ class DashboardController extends Controller
             } );
             $totalSemuaAlat        = Alat::where ( 'id_user', $user->id )->count ();
         }
-        return view ( 'home', [ 'page' => 'Dashboard', 'proyeks' => $proyeks, 'totalHargaBarangMasuk' => $totalHargaBarangMasuk, 'totalHargaBarangKeluar' => $totalHargaBarangKeluar, 'totalHargaSemuaBarang' => $totalHargaSemuaBarang, 'totalSemuaUser' => $totalSemuaUser ?? 0, 'atbsHabis' => $atbsHabis, 'totalSemuaAlat' => $totalSemuaAlat, 'totalProyek' => $totalProyek ?? 0,] );
+        return view ( 'home', [ 
+            'page'                   => 'Dashboard',
+            'proyeks'                => $proyeks,
+            'totalHargaBarangMasuk'  => $totalHargaBarangMasuk,
+            'totalHargaBarangKeluar' => $totalHargaBarangKeluar,
+            'totalHargaSemuaBarang'  => $totalHargaSemuaBarang,
+            'totalSemuaUser'         => $totalSemuaUser ?? 0,
+            'atbsHabis'              => $atbsHabis,
+            'totalSemuaAlat'         => $totalSemuaAlat,
+            'totalProyek'            => $totalProyek ?? 0,
+        ] );
     }
 
     public function filterByProyek ( $id )

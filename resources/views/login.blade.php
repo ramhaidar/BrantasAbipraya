@@ -125,22 +125,17 @@
                                 <i class="fa fa-eye" id="togglePassword" style="cursor:pointer"></i>
                             </span>
                         </div>
-                        <div class="input-group">
-                            <span class="input-group-text RefreshCaptcha" style="opacity:1;border:none;background:0 0;border-radius:0">
-                                {!! captcha_img('math') !!}
-                            </span>
-                            <input class="form-control form-control-user @error('captcha') is-invalid @enderror" id="captcha" name="captcha" data-validation="required">
-                            <span class="input-group-text p-0" style="border:none;background:0 0;border-bottom:1px solid #b4b4b4; border-radius:0">
-                                <a class="btn btn-success" id="btn-recaptcha">
-                                    <i class="bi bi-arrow-repeat"></i>
-                                </a>
-                            </span>
+
+                        <!-- CloudFlare Turnstile Component -->
+                        <div class="mb-3">
+                            <x-turnstile />
+                            @error('turnstile')
+                                <div class="text-danger">
+                                    <strong>{{ $message }}</strong>
+                                </div>
+                            @enderror
                         </div>
-                        @error('captcha')
-                            <div class="input-group text-danger">
-                                <strong>Invalid captcha!</strong>
-                            </div>
-                        @enderror
+
                         <div class="form-group pb-3">
                             <button class="btn btn-warning text-light fs-5 fw-medium my-3" type="submit" style="--bs-btn-padding-x: 3rem; --bs-btn-padding-y: 1rem; --bs-btn-bg: #E99D02;">Masuk</button>
                         </div>
@@ -150,6 +145,9 @@
 
         </div>
     </div>
+
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.14.3/sweetalert2.min.js" integrity="sha512-zK+mEmgBJpVrlnQXcbEfs6Ao4e+ESmepuHso+2UpRwMJbfhPGYNxAZz+IqsiK6/hGn8S1nx1mFOVBoJXJGx8PQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>

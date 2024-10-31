@@ -20,6 +20,8 @@
     <link type="image/x-icon" href="/favicon.ico" rel="shortcut icon">
     <title>Dashboard | DPP Digital Logistic</title>
 
+    @turnstileScripts()
+
     <style>
         .nav-link {
             display: flex;

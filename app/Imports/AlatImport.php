@@ -23,7 +23,7 @@ class AlatImport implements ToModel, WithHeadingRow, WithMultipleSheets
     public function sheets () : array
     {
         return [ 
-            'DATABASE ALAT' => $this, // Sheet yang kita targetkan adalah "DATABASE_ALAT"
+            'DATABASE_ALAT' => $this, // Sheet yang kita targetkan adalah "DATABASE_ALAT"
         ];
     }
 

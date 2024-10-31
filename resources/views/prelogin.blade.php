@@ -84,8 +84,8 @@
                 </div>
             </div>
             <div class="col-lg-4 align-items-center d-flex flex-column justify-content-center">
-                <p class="fs-1 mt-5 fw-semibold">Mesin Berat, Masa Depan<br>Pembangunan</p>
-                <p class="fs-5 text-dark text-opacity-50">Masuk dan nikmati pengalaman yang terbaik</p>
+                <p class="fs-1 mt-5 fw-semibold">DPP DIGITAL LOGISTIC</p>
+                <p class="fs-5 text-dark text-opacity-50">Masuk dan nikmati pengalaman terbaik anda</p>
                 <a class="btn btn-warning text-light fs-5 fw-medium my-5" href="{{ route('login') }}" role="button" style="--bs-btn-padding-x: 2rem; --bs-btn-padding-y: 1rem; --bs-btn-bg: #E99D02;">Lanjutkan dengan Nama Pengguna</a>
             </div>
         </div>

@@ -2,65 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\MasterDataSupplier;
-use App\Http\Requests\StoreMasterDataSupplierRequest;
-use App\Http\Requests\UpdateMasterDataSupplierRequest;
+use App\Models\Alat;
+use App\Models\Proyek;
+use Illuminate\Http\Request;
 
 class MasterDataSupplierController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index ()
     {
-        //
-    }
+        $proyeks = Proyek::with ( "users" )->orderBy ( "created_at", "asc" )->orderBy ( "id", "asc" )->get ();
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreMasterDataSupplierRequest $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(MasterDataSupplier $masterDataSupplier)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(MasterDataSupplier $masterDataSupplier)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateMasterDataSupplierRequest $request, MasterDataSupplier $masterDataSupplier)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(MasterDataSupplier $masterDataSupplier)
-    {
-        //
+        $alat = Alat::with ( 'proyek', 'user' )
+            ->orderBy ( 'updated_at', 'desc' )
+            ->get ();
+        return view ( 'dashboard.masterdata.supplier.supplier', [ 
+            'proyek'     => $proyeks,
+            'alat'       => $alat,
+            'headerPage' => "Master Data Supplier",
+            'page'       => 'Data Supplier',
+            'proyeks'    => $proyeks,
+        ] );
     }
 }

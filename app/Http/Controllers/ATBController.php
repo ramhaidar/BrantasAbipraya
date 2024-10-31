@@ -183,9 +183,13 @@ class ATBController extends Controller
         $totalPemeliharaanFormatted = "Rp" . number_format ( $totalPemeliharaan, 0, ",", "." );
         $totalWorkshopFormatted     = "Rp" . number_format ( $totalWorkshop, 0, ",", "." );
 
+        // $page = $proyek->nama_proyek;
+
         return view ( "dashboard.atb.atb", [ 
+            // "page"              => $page,
             "proyek"            => $proyek,
             "proyeks"           => $proyeks,
+            "headerPage"        => $proyek->nama_proyek,
             "page"              => $pageTitle,
             "atbList"           => $atb,
             "komponen"          => $komponen,

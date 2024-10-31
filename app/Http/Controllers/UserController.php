@@ -13,10 +13,11 @@ class UserController extends Controller
         return view (
             'users.user',
             [ 
-                'page'    => 'Data User',
-                "proyeks" => Proyek::with ( "users" )->orderByDesc ( "updated_at" )->get (),
-                'users'   => User::orderByDesc ( 'updated_at' )->get (),
-                'proyek'  => Proyek::orderByDesc ( 'updated_at' )->get (),
+                'headerPage' => 'User',
+                'page'       => 'Data User',
+                "proyeks"    => Proyek::with ( "users" )->orderByDesc ( "updated_at" )->get (),
+                'users'      => User::orderByDesc ( 'updated_at' )->get (),
+                'proyek'     => Proyek::orderByDesc ( 'updated_at' )->get (),
             ]
         );
     }

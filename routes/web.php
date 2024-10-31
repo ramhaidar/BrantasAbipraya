@@ -1,9 +1,9 @@
 <?php
+use App\Http\Controllers\MasterDataSparepartController;
 use App\Http\Middleware\CheckRole;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\APBController;
 use App\Http\Controllers\ATBController;
-use App\Http\Controllers\AlatController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\NilaiController;
 use App\Http\Controllers\SaldoController;
@@ -14,6 +14,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PerbaikanController;
 use App\Http\Controllers\MasterDataController;
 use App\Http\Controllers\PemeliharaanController;
+use App\Http\Controllers\MasterDataAlatController;
+use App\Http\Controllers\MasterDataSupplierController;
 
 Route::get ( '/', function ()
 {
@@ -313,27 +315,68 @@ Route::get ( '/delapb/{id}', [ APBController::class, 'destroy' ] )->middleware (
 ] )
     ->name ( 'apb.del.test' );
 
-Route::get ( '/alat', [ AlatController::class, 'index' ] )->middleware ( [ 
+Route::get ( '/master-data-alat', [ MasterDataAlatController::class, 'index' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
-    ->name ( 'alat' );
-Route::post ( '/alat', [ AlatController::class, 'store' ] )->middleware ( [ 
+    ->name ( 'master_data_alat' );
+Route::post ( '/master-data-alat', [ MasterDataAlatController::class, 'store' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
-    ->name ( 'alat.store' );
-Route::get ( '/alat/{id}', [ AlatController::class, 'show' ] )->middleware ( [ 
+    ->name ( 'master_data_alat.store' );
+Route::get ( '/master-data-alat/{id}', [ MasterDataAlatController::class, 'show' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
-    ->name ( 'alat.show' );
-Route::post ( '/alat/{id}', [ AlatController::class, 'update' ] )->middleware ( [ 
+    ->name ( 'master_data_alat.show' );
+Route::post ( '/master-data-alat/{id}', [ MasterDataAlatController::class, 'update' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
-    ->name ( 'alat.update' );
-Route::delete ( '/alat/{id}', [ AlatController::class, 'destroy' ] )->middleware ( [ 
+    ->name ( 'master_data_alat.update' );
+Route::delete ( '/master-data-alat/{id}', [ MasterDataAlatController::class, 'destroy' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
-    ->name ( 'alat.destroy' );
+    ->name ( 'master_data_alat.destroy' );
 
+Route::get ( '/master-data-supplier', [ MasterDataSupplierController::class, 'index' ] )->middleware ( [ 
+    CheckRole::class . ':Admin,Pegawai,Boss'
+] )
+    ->name ( 'master_data_supplier' );
+Route::post ( '/master-data-supplier', [ MasterDataSupplierController::class, 'store' ] )->middleware ( [ 
+    CheckRole::class . ':Admin,Pegawai,Boss'
+] )
+    ->name ( 'master_data_supplier.store' );
+Route::get ( '/master-data-supplier/{id}', [ MasterDataSupplierController::class, 'show' ] )->middleware ( [ 
+    CheckRole::class . ':Admin,Pegawai,Boss'
+] )
+    ->name ( 'master_data_supplier.show' );
+Route::post ( '/master-data-supplier/{id}', [ MasterDataSupplierController::class, 'update' ] )->middleware ( [ 
+    CheckRole::class . ':Admin,Pegawai,Boss'
+] )
+    ->name ( 'master_data_supplier.update' );
+Route::delete ( '/master-data-supplier/{id}', [ MasterDataSupplierController::class, 'destroy' ] )->middleware ( [ 
+    CheckRole::class . ':Admin,Pegawai,Boss'
+] )
+    ->name ( 'master_data_supplier.destroy' );
+
+Route::get ( '/master-data-sparepart', [ MasterDataSparepartController::class, 'index' ] )->middleware ( [ 
+    CheckRole::class . ':Admin,Pegawai,Boss'
+] )
+    ->name ( 'master_data_sparepart' );
+Route::post ( '/master-data-sparepart', [ MasterDataSparepartController::class, 'store' ] )->middleware ( [ 
+    CheckRole::class . ':Admin,Pegawai,Boss'
+] )
+    ->name ( 'master_data_sparepart.store' );
+Route::get ( '/master-data-sparepart/{id}', [ MasterDataSparepartController::class, 'show' ] )->middleware ( [ 
+    CheckRole::class . ':Admin,Pegawai,Boss'
+] )
+    ->name ( 'master_data_sparepart.show' );
+Route::post ( '/master-data-sparepart/{id}', [ MasterDataSparepartController::class, 'update' ] )->middleware ( [ 
+    CheckRole::class . ':Admin,Pegawai,Boss'
+] )
+    ->name ( 'master_data_sparepart.update' );
+Route::delete ( '/master-data-sparepart/{id}', [ MasterDataSparepartController::class, 'destroy' ] )->middleware ( [ 
+    CheckRole::class . ':Admin,Pegawai,Boss'
+] )
+    ->name ( 'master_data_sparepart.destroy' );
 
 Route::get ( '/master_data', [ MasterDataController::class, 'index' ] )
     ->middleware ( [ 
@@ -342,7 +385,7 @@ Route::get ( '/master_data', [ MasterDataController::class, 'index' ] )
     ->name ( 'master_data' );
 
 Route::post ( '/master_data', [ MasterDataController::class, 'store' ] )
-    ->middleware ( [ 
+    ->middleware ( middleware: [ 
         CheckRole::class . ':Admin,Pegawai,Boss'
     ] )
     ->name ( 'master_data.store' );

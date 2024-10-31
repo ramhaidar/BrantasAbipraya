@@ -138,6 +138,7 @@ class SaldoController extends Controller
         return view ( 'dashboard.saldo.saldo', [ 
             'proyek'     => $proyek,
             'proyeks'    => $proyeks,
+            'headerPage' => $proyek->nama_proyek,
             'page'       => $pageTitle,
             'saldoList'  => $saldo,
             'komponen'   => $komponen,

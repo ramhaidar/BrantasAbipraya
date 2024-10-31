@@ -13,9 +13,10 @@ class ProyekController extends Controller
         $proyek = Proyek::get ()->all ();
 
         return view ( "dashboard.proyek.proyek", [ 
-            "page"    => "Data Proyek",
-            "proyek"  => $proyek,
-            "proyeks" => Proyek::with ( "users" )->orderByDesc ( "updated_at" )->get (),
+            "headerPage" => "Proyek",
+            "page"       => "Data Proyek",
+            "proyek"     => $proyek,
+            "proyeks"    => Proyek::with ( "users" )->orderByDesc ( "updated_at" )->get (),
         ] );
     }
 

@@ -43,44 +43,43 @@
         }
     </style>
 @endsection
+
 @section('content')
     <div class="fade-in-up page-content">
         <div class="ibox">
-            {{-- check if user role is admin --}}
-            @if (Auth::user()->role == 'Pegawai')
-                <div class="ibox-head pe-0 ps-0">
-                    <div class="ibox-title">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}</div>
+            {{-- Cek apakah user role adalah Pegawai --}}
+            <div class="ibox-head pe-0 ps-0">
+                <div class="ibox-title">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}</div>
+                @if (Auth::user()->role == 'Pegawai')
                     <a class="btn btn-primary btn-sm" id="button-for-modal-add" onclick="showModalAdd()">
                         <i class="fa fa-plus"></i> <span class="ms-2">Tambah Data</span>
                     </a>
-                </div>
-            @endif
+                @endif
+            </div>
             <div class="ibox-body mt-3 table-responsive">
                 <table class="border-dark m-0 table table-bordered table-striped" id="table-data" style="width:100%">
                     <thead class="table-primary">
                         <tr>
-                            <th>Nama Proyek</th>
-                            <th>Jenis Alat</th>
-                            <th>Kode Alat</th>
-                            <th>Merek Alat</th>
-                            <th>Tipe Alat</th>
+                            {{-- <th>Supplier</th> --}}
+                            <th>Sparepart</th>
+                            <th>Part Number</th>
+                            <th>Buffer Stock</th>
                             @if (Auth::user()->role == 'Pegawai')
                                 <th>Aksi</th>
                             @endif
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($alat as $alt)
+                        @foreach ($masterData as $data)
                             <tr>
-                                <td>{{ $alt->nama_proyek }}</td>
-                                <td>{{ $alt->jenis_alat }}</td>
-                                <td>{{ $alt->kode_alat }}</td>
-                                <td>{{ $alt->merek_alat }}</td>
-                                <td>{{ $alt->tipe_alat }}</td>
+                                {{-- <td>{{ $data->supplier }}</td> --}}
+                                <td>{{ $data->sparepart }}</td>
+                                <td>{{ $data->part_number }}</td>
+                                <td>{{ $data->buffer_stock }}</td>
                                 @if (Auth::user()->role == 'Pegawai')
                                     <td class="center space-nowrap">
-                                        <button class="btn btn-danger deleteBtn" data-id="{{ $alt->id }}"><i class="bi bi-trash"></i></button>
-                                        <button class="btn btn-warning ms-3 ubahBtn" data-id="{{ $alt->id }}" onclick='fillFormEdit("{{ $alt->id }}")'><i class="bi bi-pencil-square"></i></button>
+                                        <button class="btn btn-danger deleteBtn" data-id="{{ $data->id }}"><i class="bi bi-trash"></i></button>
+                                        <button class="btn btn-warning ms-3 ubahBtn" data-id="{{ $data->id }}" onclick='fillFormEdit("{{ $data->id }}")'><i class="bi bi-pencil-square"></i></button>
                                     </td>
                                 @endif
                             </tr>
@@ -91,41 +90,37 @@
         </div>
     </div>
 
-    <!-- Modal for Adding Data -->
+    <!-- Modal untuk Tambah Data -->
     <div class="fade modal" id="modalForAdd" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true" aria-labelledby="staticBackdropLabel" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="fs-5 modal-title" id="modalForEditLabel">Tambah Barang</h1>
+                    <h1 class="fs-5 modal-title" id="modalForAddLabel">Tambah Data Master</h1>
                     <button class="btn-close" type="button" onclick="closeModalAdd()"></button>
                 </div>
-                <form class="d-flex w-100 align-items-center flex-column gap-3" style="overflow-y:auto" method="POST" action="/alat">
+                <form class="d-flex w-100 align-items-center flex-column gap-3" style="overflow-y:auto" method="POST" action="{{ route('master_data.store') }}">
                     @csrf
                     <div class="d-flex w-100 align-items-center flex-column modal-body">
                         <div id="form-group">
-                            <label class="form-label mb-0" for="nama_proyek">Nama Proyek</label>
-                            <input class="form-control" id="nama_proyek" name="nama_proyek" type="text" placeholder="Nama Proyek">
+                            <label class="form-label mb-0" for="supplier">Supplier</label>
+                            <input class="form-control" id="supplier" name="supplier" type="text" placeholder="Supplier" required>
                         </div>
                         <div id="form-group">
-                            <label class="form-label mb-0" for="jenis_alat">Jenis Alat</label>
-                            <input class="form-control" id="jenis_alat" name="jenis_alat" type="text" placeholder="Jenis Alat" required>
+                            <label class="form-label mb-0" for="sparepart">Sparepart</label>
+                            <input class="form-control" id="sparepart" name="sparepart" type="text" placeholder="Sparepart" required>
                         </div>
                         <div id="form-group">
-                            <label class="form-label mb-0" for="merek_alat">Merek Alat</label>
-                            <input class="form-control" id="merek_alat" name="merek_alat" type="text" placeholder="Merek Alat" required>
+                            <label class="form-label mb-0" for="part_number">Part Number</label>
+                            <input class="form-control" id="part_number" name="part_number" type="text" placeholder="Part Number">
                         </div>
                         <div id="form-group">
-                            <label class="form-label mb-0" for="tipe_alat">Tipe Alat</label>
-                            <input class="form-control" id="tipe_alat" name="tipe_alat" type="text" placeholder="Tipe Alat" required>
-                        </div>
-                        <div id="form-group">
-                            <label class="form-label mb-0" for="kode_alat">Kode Alat</label>
-                            <input class="form-control" id="kode_alat" name="kode_alat" type="text" placeholder="Kode Alat" required>
+                            <label class="form-label mb-0" for="buffer_stock">Buffer Stock</label>
+                            <input class="form-control" id="buffer_stock" name="buffer_stock" type="number" placeholder="Buffer Stock" required>
                         </div>
                     </div>
                     <div class="d-flex w-100 justify-content-between modal-footer">
                         <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Batal</button>
-                        <button class="btn btn-primary" id="add-barang" type="submit">Simpan</button>
+                        <button class="btn btn-primary" id="add-data" type="submit">Simpan</button>
                     </div>
                 </form>
             </div>
@@ -137,36 +132,33 @@
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="fs-5 modal-title" id="modalForEditLabel">Ubah Data Barang</h1>
+                    <h1 class="fs-5 modal-title" id="modalForEditLabel">Ubah Data Master</h1>
                     <button class="btn-close" type="button" onclick="closeModalEdit()"></button>
                 </div>
-                <form class="d-flex w-100 align-items-center flex-column gap-3" style="overflow-y:auto" method="POST">
+                <form class="d-flex w-100 align-items-center flex-column gap-3" style="overflow-y:auto" method="POST" action="">
                     @csrf
+                    @method('PUT') <!-- Tambahkan PUT method untuk update -->
                     <div class="d-flex w-100 align-items-center flex-column modal-body">
                         <div id="form-group">
-                            <label class="form-label mb-0" for="nama_proyek">Nama Proyek</label>
-                            <input class="form-control" id="nama_proyek" name="nama_proyek" type="text" placeholder="Nama Proyek">
+                            <label class="form-label mb-0" for="supplier">Supplier</label>
+                            <input class="form-control" id="supplier" name="supplier" type="text" placeholder="Supplier" required>
                         </div>
                         <div id="form-group">
-                            <label class="form-label mb-0" for="jenis_alat">Jenis Alat</label>
-                            <input class="form-control" id="jenis_alat" name="jenis_alat" type="text" placeholder="Jenis Alat" required>
+                            <label class="form-label mb-0" for="sparepart">Sparepart</label>
+                            <input class="form-control" id="sparepart" name="sparepart" type="text" placeholder="Sparepart" required>
                         </div>
                         <div id="form-group">
-                            <label class="form-label mb-0" for="merek_alat">Merek Alat</label>
-                            <input class="form-control" id="merek_alat" name="merek_alat" type="text" placeholder="Merek Alat" required>
+                            <label class="form-label mb-0" for="part_number">Part Number</label>
+                            <input class="form-control" id="part_number" name="part_number" type="text" placeholder="Part Number" required>
                         </div>
                         <div id="form-group">
-                            <label class="form-label mb-0" for="tipe_alat">Tipe Alat</label>
-                            <input class="form-control" id="tipe_alat" name="tipe_alat" type="text" placeholder="Tipe Alat" required>
-                        </div>
-                        <div id="form-group">
-                            <label class="form-label mb-0" for="kode_alat">Kode Alat</label>
-                            <input class="form-control" id="kode_alat" name="kode_alat" type="text" placeholder="Kode Alat" required>
+                            <label class="form-label mb-0" for="buffer_stock">Buffer Stock</label>
+                            <input class="form-control" id="buffer_stock" name="buffer_stock" type="number" placeholder="Buffer Stock" required>
                         </div>
                     </div>
                     <div class="d-flex w-100 justify-content-between modal-footer">
                         <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Batal</button>
-                        <button class="btn btn-primary" id="update-barang" type="submit">Simpan</button>
+                        <button class="btn btn-primary" id="update-data" type="submit">Simpan</button>
                     </div>
                 </form>
             </div>
@@ -189,9 +181,6 @@
                 [10, 25, 50, -1],
                 [10, 25, 50, "All"]
             ],
-            // order: [
-            //     [2, 'asc']
-            // ],
             ordering: true,
         });
 
@@ -235,36 +224,36 @@
 
         // Fungsi untuk mengisi form edit dengan data yang didapat dari server
         function fillFormEdit(id) {
-            showModalEdit(); // Memastikan modal edit muncul
-            document.querySelector('#modalForEdit form').action = `/alat/${id}`;
-            getAlat(id)
+            showModalEdit(); // Ensure modal opens
+
+            // Set the form action to the correct update route
+            const form = document.querySelector('#modalForEdit form');
+            form.action = `/master_data/${id}`;
+
+            getMasterData(id)
                 .then(data => {
-                    // Mengisi form dengan data yang diterima
-                    document.querySelector('#modalForEdit #nama_proyek').value = data.data.nama_proyek;
-                    document.querySelector('#modalForEdit #jenis_alat').value = data.data.jenis_alat;
-                    document.querySelector('#modalForEdit #merek_alat').value = data.data.merek_alat;
-                    document.querySelector('#modalForEdit #tipe_alat').value = data.data.tipe_alat;
-                    document.querySelector('#modalForEdit #kode_alat').value = data.data.kode_alat;
+                    // Fill the form inputs with the data
+                    document.querySelector('#modalForEdit #supplier').value = data.data.supplier;
+                    document.querySelector('#modalForEdit #sparepart').value = data.data.sparepart;
+                    document.querySelector('#modalForEdit #part_number').value = data.data.part_number;
+                    document.querySelector('#modalForEdit #buffer_stock').value = data.data.buffer_stock;
                 })
                 .catch(error => {
-                    showSweetAlert2('Gagal mengambil data alat', 'error');
+                    showSweetAlert2('Gagal mengambil data master', 'error');
                 });
         }
 
-        // Fungsi untuk mengambil data alat berdasarkan ID menggunakan AJAX
-        function getAlat(id) {
+        // Fungsi untuk mengambil data master berdasarkan ID menggunakan AJAX
+        function getMasterData(id) {
             return new Promise(function(resolve, reject) {
                 $.ajax({
-                    url: `/alat/${id}`,
+                    url: `/master_data/${id}`,
                     type: 'GET',
-                    data: {
-                        '_token': '{{ csrf_token() }}',
-                    },
                     success: function(response) {
-                        resolve(response);
+                        resolve(response); // Resolving data received
                     },
                     error: function(xhr, status, error) {
-                        reject(error);
+                        reject(error); // Reject in case of error
                     }
                 });
             });
@@ -280,7 +269,7 @@
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
-                confirmButtonText: 'Ya, hapus barang!',
+                confirmButtonText: 'Ya, hapus data!',
                 reverseButtons: true,
                 customClass: {
                     confirmButton: 'custom-confirm-delete',
@@ -290,7 +279,7 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: `/alat/${id}`,
+                        url: `/master_data/${id}`,
                         type: 'DELETE',
                         data: {
                             _token: $('meta[name="csrf-token"]').attr('content'),
@@ -298,7 +287,7 @@
                         success: function(response) {
                             Swal.fire(
                                 'Terhapus!',
-                                'Barang telah dihapus.',
+                                'Data telah dihapus.',
                                 'success'
                             ).then(function() {
                                 location.reload();
@@ -307,7 +296,7 @@
                         error: function(xhr) {
                             Swal.fire(
                                 'Error!',
-                                'Terjadi kesalahan saat menghapus barang.',
+                                'Terjadi kesalahan saat menghapus data.',
                                 'error'
                             );
                         }

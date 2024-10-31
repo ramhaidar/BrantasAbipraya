@@ -2,13 +2,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Alat;
-use App\Models\Barang;
 use App\Models\Proyek;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 
-class AlatController extends Controller
+class MasterDataAlatController extends Controller
 {
     public function index ()
     {
@@ -68,11 +66,12 @@ class AlatController extends Controller
         }
 
         // Render tampilan dengan data yang difilter
-        return view ( 'dashboard.alat', [ 
-            'proyek'  => $proyeks,
-            'alat'    => $alat,
-            'page'    => 'Data Alat',
-            'proyeks' => $proyeks, // Pastikan proyeks selalu terisi
+        return view ( 'dashboard.masterdata.alat.alat', [ 
+            'proyek'     => $proyeks,
+            'alat'       => $alat,
+            'headerPage' => "Master Data Alat",
+            'page'       => 'Data Alat',
+            'proyeks'    => $proyeks,
         ] );
     }
 

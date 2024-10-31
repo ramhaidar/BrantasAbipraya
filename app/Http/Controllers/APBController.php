@@ -188,6 +188,7 @@ class APBController extends Controller
         $data = [ 
             'proyek'            => $proyek,
             'proyeks'           => $proyeks,
+            'headerPage'        => $proyek->nama_proyek,
             'page'              => $pageTitle,
             'atbList'           => $atb,
             'atbAll'            => $atbAll,

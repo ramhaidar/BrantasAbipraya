@@ -188,7 +188,7 @@
                     </a>
                 @endif
             </div>
-            <div class="ibox-body mt-0 table-responsive">
+            <div class="ibox-body ms-0 ps-0 table-responsive">
                 <table class="border-dark m-0 table table-bordered table-striped" id="table-data" style="width:100%">
                     <thead class="table-primary">
                         <tr>

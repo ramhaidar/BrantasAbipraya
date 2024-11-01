@@ -1,179 +1,8 @@
 @extends('layouts.app')
 
 @push('styles_2')
-    <style>
-        /* Existing styles */
-        td {
-            white-space: nowrap;
-        }
-
-        .alert-custom-css {
-            max-width: 400px;
-            width: 90%;
-        }
-
-        #form-group {
-            width: 90%;
-        }
-
-        .space-nowrap {
-            white-space: nowrap;
-        }
-
-        .center {
-            text-align: center !important;
-        }
-
-        .custom-confirm-delete {
-            margin-right: 5%;
-        }
-
-        .custom-cancel-delete {
-            margin-left: 5%;
-        }
-
-        .custom-action-delete {
-            width: 100% !important;
-            justify-content: space-between;
-        }
-
-        @media screen and (max-width: 500px) {
-            #button-for-modal-add span {
-                display: none;
-            }
-
-            #button-for-modal-add {
-                font-size: 20px;
-            }
-        }
-
-        /* DataTables and layout-specific styles */
-        .ibox {
-            position: relative;
-            margin-bottom: 25px;
-            padding: 20px 20px 0px 20px;
-            background-color: #fff;
-            box-shadow: 0px 0px 10px 5px rgba(0, 0, 0, .2);
-        }
-
-        .ibox .ibox-head {
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 50px;
-        }
-
-        .ibox .ibox-body {
-            padding: 15px 20px 20px 20px;
-        }
-
-        #table-data_wrapper {
-            display: flex;
-            flex-wrap: wrap;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 5px;
-        }
-
-        #table-data {
-            padding-left: 20px;
-            padding-right: 20px;
-        }
-
-        #table-data th {
-            white-space: nowrap;
-        }
-
-        .dataTables_length {
-            display: flex;
-        }
-
-        #table-data_filter {
-            display: flex;
-            justify-content: flex-end;
-        }
-
-        .pagination {
-            display: flex;
-            justify-content: flex-end;
-        }
-
-        .sorting:hover {
-            cursor: pointer;
-        }
-
-        .table-responsive {
-            width: 100%;
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        .table-responsive .row:first-child {
-            width: calc(100% + 22px);
-            position: sticky;
-            top: 0;
-            background-color: white;
-            z-index: 2;
-        }
-
-        .table-responsive .row:nth-child(2) {
-            width: calc(100% + 22px);
-            overflow-x: auto;
-        }
-
-        .table-responsive .row:nth-child(2) .col-sm-12 {
-            padding-left: 0px;
-            padding-right: 0px;
-        }
-
-        .table-responsive .row:nth-child(3) {
-            width: calc(100% + 22px);
-            position: sticky;
-            top: 0;
-            background-color: white;
-            z-index: 2;
-        }
-
-        #table-data_wrapper .row:first-child:first-child .col-sm-12.col-md-6:first-child {
-            padding: 0px;
-        }
-
-        @media only screen and (max-width: 768.7px) {
-            .row:first-child {
-                justify-content: space-between;
-                gap: 10px;
-            }
-
-            .col-sm-12.col-md-5 {
-                display: none;
-            }
-
-            .col-sm-12.col-md-6:first-child {
-                min-width: 200px;
-            }
-
-            .col-sm-12.col-md-6:nth-child(2) {
-                min-width: 280px;
-                padding-left: 0px;
-            }
-
-            .col-sm-12.col-md-6 {
-                width: 45%;
-                padding-right: 0px;
-            }
-
-            #table-data_filter {
-                justify-content: flex-start;
-            }
-        }
-
-        @media only screen and (max-width: 626px) {
-            #table-data_filter {
-                justify-content: flex-start;
-            }
-        }
-    </style>
+    <link href="{{ asset('css/dashboard.css') }}" rel="stylesheet">
+    </link>
 @endpush
 
 @section('content')
@@ -188,14 +17,14 @@
                     </a>
                 @endif
             </div>
-            <div class="ibox-body mt-0 table-responsive">
+            <div class="ibox-body ms-0 ps-0 table-responsive">
                 <table class="border-dark m-0 table table-bordered table-striped" id="table-data" style="width:100%">
                     <thead class="table-primary">
                         <tr>
                             {{-- <th>Supplier</th> --}}
-                            <th>Sparepart</th>
-                            <th>Part Number</th>
-                            <th>Buffer Stock</th>
+                            <th class="text-start">Sparepart</th>
+                            <th class="text-start">Part Number</th>
+                            <th class="text-start">Buffer Stock</th>
                             @if (Auth::user()->role == 'Pegawai')
                                 <th>Aksi</th>
                             @endif
@@ -313,7 +142,7 @@
                 [10, 25, 50, -1],
                 [10, 25, 50, "All"]
             ],
-            ordering: true,
+            order: [],
         });
 
         // Fungsi untuk menutup modal tambah data

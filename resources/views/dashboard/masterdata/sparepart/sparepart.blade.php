@@ -1,48 +1,180 @@
-@extends('component.sidebar')
-@section('css')
-    <link href=/css/random-css-datatable.css rel=stylesheet>
+@extends('layouts.app')
+
+@push('styles_2')
     <style>
+        /* Existing styles */
+        td {
+            white-space: nowrap;
+        }
+
         .alert-custom-css {
             max-width: 400px;
-            width: 90%
+            width: 90%;
         }
 
         #form-group {
-            width: 90%
+            width: 90%;
         }
 
         .space-nowrap {
-            white-space: nowrap
+            white-space: nowrap;
         }
 
         .center {
-            text-align: center !important
+            text-align: center !important;
         }
 
         .custom-confirm-delete {
-            margin-right: 5%
+            margin-right: 5%;
         }
 
         .custom-cancel-delete {
-            margin-left: 5%
+            margin-left: 5%;
         }
 
         .custom-action-delete {
             width: 100% !important;
-            justify-content: space-between
+            justify-content: space-between;
         }
 
-        @media screen and (max-width:500px) {
+        @media screen and (max-width: 500px) {
             #button-for-modal-add span {
-                display: none
+                display: none;
             }
 
             #button-for-modal-add {
-                font-size: 20px
+                font-size: 20px;
+            }
+        }
+
+        /* DataTables and layout-specific styles */
+        .ibox {
+            position: relative;
+            margin-bottom: 25px;
+            padding: 20px 20px 0px 20px;
+            background-color: #fff;
+            box-shadow: 0px 0px 10px 5px rgba(0, 0, 0, .2);
+        }
+
+        .ibox .ibox-head {
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 50px;
+        }
+
+        .ibox .ibox-body {
+            padding: 15px 20px 20px 20px;
+        }
+
+        #table-data_wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 5px;
+        }
+
+        #table-data {
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+
+        #table-data th {
+            white-space: nowrap;
+        }
+
+        .dataTables_length {
+            display: flex;
+        }
+
+        #table-data_filter {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .sorting:hover {
+            cursor: pointer;
+        }
+
+        .table-responsive {
+            width: 100%;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .table-responsive .row:first-child {
+            width: calc(100% + 22px);
+            position: sticky;
+            top: 0;
+            background-color: white;
+            z-index: 2;
+        }
+
+        .table-responsive .row:nth-child(2) {
+            width: calc(100% + 22px);
+            overflow-x: auto;
+        }
+
+        .table-responsive .row:nth-child(2) .col-sm-12 {
+            padding-left: 0px;
+            padding-right: 0px;
+        }
+
+        .table-responsive .row:nth-child(3) {
+            width: calc(100% + 22px);
+            position: sticky;
+            top: 0;
+            background-color: white;
+            z-index: 2;
+        }
+
+        #table-data_wrapper .row:first-child:first-child .col-sm-12.col-md-6:first-child {
+            padding: 0px;
+        }
+
+        @media only screen and (max-width: 768.7px) {
+            .row:first-child {
+                justify-content: space-between;
+                gap: 10px;
+            }
+
+            .col-sm-12.col-md-5 {
+                display: none;
+            }
+
+            .col-sm-12.col-md-6:first-child {
+                min-width: 200px;
+            }
+
+            .col-sm-12.col-md-6:nth-child(2) {
+                min-width: 280px;
+                padding-left: 0px;
+            }
+
+            .col-sm-12.col-md-6 {
+                width: 45%;
+                padding-right: 0px;
+            }
+
+            #table-data_filter {
+                justify-content: flex-start;
+            }
+        }
+
+        @media only screen and (max-width: 626px) {
+            #table-data_filter {
+                justify-content: flex-start;
             }
         }
     </style>
-@endsection
+@endpush
 
 @section('content')
     <div class="fade-in-up page-content">
@@ -166,7 +298,7 @@
     </div>
 @endsection
 
-@section('script')
+@push('scripts_2')
     <script>
         // Inisialisasi DataTables dengan konfigurasi khusus
         $('#table-data').DataTable({
@@ -328,4 +460,4 @@
             showSweetAlert2(errInput, "error");
         </script>
     @endif
-@endsection
+@endpush

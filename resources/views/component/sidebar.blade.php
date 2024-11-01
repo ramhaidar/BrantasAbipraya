@@ -64,14 +64,16 @@
                                                 <p>Master Data Alat</p>
                                             </a>
                                         </li>
+
                                         <li class="nav-item">
-                                            <a class="nav-link" href="{{ route('master_data_supplier') }}">
+                                            <a class="nav-link" href="{{ route('master_data_sparepart') }}">
                                                 <i class="bi me-2 nav-icon fs-5 bi-tools"></i>
                                                 <p>Master Data Sparepart</p>
                                             </a>
                                         </li>
+
                                         <li class="nav-item">
-                                            <a class="nav-link" href="{{ route('master_data_sparepart') }}">
+                                            <a class="nav-link" href="{{ route('master_data_supplier') }}">
                                                 <i class="bi me-2 nav-icon fs-5 bi-people-fill"></i>
                                                 <p>Master Data Supplier</p>
                                             </a>

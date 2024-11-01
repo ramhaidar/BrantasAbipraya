@@ -1,8 +1,6 @@
 @extends('layouts.app')
 
 @push('styles_2')
-    {{-- <link href="{{ asset('css/random-css-datatable.css') }}" rel=stylesheet> --}}
-
     <style>
         /* Existing styles */
         td {

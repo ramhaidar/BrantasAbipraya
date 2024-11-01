@@ -56,7 +56,7 @@
                     </a>
                 </div>
             @endif
-            <div class="ibox-body mt-3 table-responsive">
+            <div class="ibox-body mt-0 table-responsive">
                 <table class="border-dark m-0 table table-bordered table-striped" id="table-data" style="width:100%">
                     <thead class="table-primary">
                         <tr>
@@ -118,7 +118,7 @@
     <!-- Modal untuk Edit Data -->
     <div class="fade modal" id="modalForEdit" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true" aria-labelledby="staticBackdropLabel" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content">  
+            <div class="modal-content">
                 <div class="modal-header">
                     <h1 class="fs-5 modal-title" id="modalForEditLabel">Edit Buyer Data Master</h1>
                     <button class="btn-close" type="button" onclick="closeModalEdit()"></button>
@@ -128,11 +128,11 @@
                     @method('PUT') <!-- Tambahkan PUT method untuk update -->
                     <div class="d-flex w-100 align-items-center flex-column modal-body">
                         <div id="form-group">
-                            <label class="form-label mb-0" for="supplier">Supplier</label>  
+                            <label class="form-label mb-0" for="supplier">Supplier</label>
                             <input class="form-control" id="supplier" name="supplier" type="text" placeholder="Supplier" required>
                         </div>
                     </div>
-                    <div class="d-flex w-100 justify-content-between modal-footer">                        
+                    <div class="d-flex w-100 justify-content-between modal-footer">
                         <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Batal</button>
                         <button class="btn btn-primary" id="update-data" type="submit">Simpan</button>
                     </div>

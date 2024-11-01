@@ -55,9 +55,9 @@
                     </a>
                 {{-- @endif --}}
             </div>
-            <div class="mt-3 ibox-body table-responsive">
-                <table class="border-dark m-0 table table-bordered table-striped" id=table-data style=width:100%>
-                    <thead class=table-primary>
+            <div class="ibox-body mt-0 table-responsive">
+                <table class="border-dark m-0 table table-bordered table-striped" id="table-data" style="width:100%">
+                    <thead class="table-primary">
                         <tr>
                             <th scope=col hidden>
                             <th scope=col>Supplier

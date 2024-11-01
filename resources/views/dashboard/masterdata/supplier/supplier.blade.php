@@ -49,40 +49,31 @@
             {{-- check if user role is admin --}}
             <div class="ibox-head pe-0 ps-0">
                 <div class="ibox-title">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}</div>
-                @if (Auth::user()->role == 'Pegawai')
+                {{-- @if (Auth::user()->role == 'Pegawai') --}}
                     <a class="btn btn-primary btn-sm" id="button-for-modal-add" onclick="showModalAdd()">
                         <i class="fa fa-plus"></i> <span class="ms-2">Tambah Data</span>
                     </a>
-                @endif
+                {{-- @endif --}}
             </div>
-            <div class="ibox-body mt-3 table-responsive">
-                <table class="border-dark m-0 table table-bordered table-striped" id="table-data" style="width:100%">
-                    <thead class="table-primary">
+            <div class="mt-3 ibox-body table-responsive">
+                <table class="border-dark m-0 table table-bordered table-striped" id=table-data style=width:100%>
+                    <thead class=table-primary>
                         <tr>
-                            <th>Nama Proyek</th>
-                            <th>Jenis Alat</th>
-                            <th>Kode Alat</th>
-                            <th>Merek Alat</th>
-                            <th>Tipe Alat</th>
-                            @if (Auth::user()->role == 'Pegawai')
-                                <th>Aksi</th>
-                            @endif
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($alat as $alt)
+                            <th scope=col hidden>
+                            <th scope=col>Supplier
+                            <th scope=col>Detail
+                            <th scope=col>
+                    <tbody id=body-table>
+                        @foreach ($proyeks as $proyek)
                             <tr>
-                                <td>{{ $alt->nama_proyek }}</td>
-                                <td>{{ $alt->jenis_alat }}</td>
-                                <td>{{ $alt->kode_alat }}</td>
-                                <td>{{ $alt->merek_alat }}</td>
-                                <td>{{ $alt->tipe_alat }}</td>
-                                @if (Auth::user()->role == 'Pegawai')
-                                    <td class="center space-nowrap">
-                                        <button class="btn btn-danger deleteBtn" data-id="{{ $alt->id }}"><i class="bi bi-trash"></i></button>
-                                        <button class="btn btn-warning ms-3 ubahBtn" data-id="{{ $alt->id }}" onclick='fillFormEdit("{{ $alt->id }}")'><i class="bi bi-pencil-square"></i></button>
-                                    </td>
-                                @endif
+                                <td scope=col hidden>
+                                <td scope=col>{{ $proyek->nama_proyek }}
+                                <td class="m-0 p-0">
+                                    <button class="btn text-primary m-0 ps-2" onclick='getDetailProyek("{{ $proyek->id }}")'>Detail</button>
+                                </td>
+                                <td class=center scope=col>
+                                    <button class="btn btn-danger" data-bs-target=#modalForDelete data-bs-toggle=modal onclick="validationSecond({{ $proyek->id }},'{{ $proyek->nama_proyek }}')"><i class="bi bi-trash3"></i></button>
+                                    <a class="btn btn-warning ms-3" data-bs-target=#modalForEdit data-bs-toggle=modal onclick="fillFormEdit({{ $proyek->id }})"><i class="bi bi-pencil-square"></i></a>
                             </tr>
                         @endforeach
                     </tbody>
@@ -92,81 +83,41 @@
     </div>
 
     <!-- Modal for Adding Data -->
-    <div class="fade modal" id="modalForAdd" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true" aria-labelledby="staticBackdropLabel" tabindex="-1">
+    <div class="fade modal" id="modalDetailProyek" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true" aria-labelledby="modalDetailProyekLabel" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="fs-5 modal-title" id="modalForEditLabel">Tambah Barang</h1>
-                    <button class="btn-close" type="button" onclick="closeModalAdd()"></button>
+                    <h1 class="fs-5 modal-title fw-bold" id="modalDetailProyekLabel">Nilai</h1>
+                    <button class="btn-close" type="button" onclick="closeModalProyek()"></button>
                 </div>
-                <form class="d-flex w-100 align-items-center flex-column gap-3" style="overflow-y:auto" method="POST" action="/alat">
-                    @csrf
-                    <div class="d-flex w-100 align-items-center flex-column modal-body">
-                        <div id="form-group">
-                            <label class="form-label mb-0" for="nama_proyek">Nama Proyek</label>
-                            <input class="form-control" id="nama_proyek" name="nama_proyek" type="text" placeholder="Nama Proyek">
-                        </div>
-                        <div id="form-group">
-                            <label class="form-label mb-0" for="jenis_alat">Jenis Alat</label>
-                            <input class="form-control" id="jenis_alat" name="jenis_alat" type="text" placeholder="Jenis Alat" required>
-                        </div>
-                        <div id="form-group">
-                            <label class="form-label mb-0" for="merek_alat">Merek Alat</label>
-                            <input class="form-control" id="merek_alat" name="merek_alat" type="text" placeholder="Merek Alat" required>
-                        </div>
-                        <div id="form-group">
-                            <label class="form-label mb-0" for="tipe_alat">Tipe Alat</label>
-                            <input class="form-control" id="tipe_alat" name="tipe_alat" type="text" placeholder="Tipe Alat" required>
-                        </div>
-                        <div id="form-group">
-                            <label class="form-label mb-0" for="kode_alat">Kode Alat</label>
-                            <input class="form-control" id="kode_alat" name="kode_alat" type="text" placeholder="Kode Alat" required>
-                        </div>
-                    </div>
-                    <div class="d-flex w-100 justify-content-between modal-footer">
-                        <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Batal</button>
-                        <button class="btn btn-primary" id="add-barang" type="submit">Simpan</button>
-                    </div>
-                </form>
+                <div class="modal-body">
+                    <ol class="list-group" id="list-users">
+                        <li class="list-group-item">Placeholder</li>
+                    </ol>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Modal for Editing Data -->
-    <div class="fade modal" id="modalForEdit" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true" aria-labelledby="staticBackdropLabel" tabindex="-1">
+    <div class="fade modal" id=modalForEdit data-bs-backdrop=static data-bs-keyboard=false aria-hidden=true aria-labelledby=staticBackdropLabel tabindex=-1>
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="fs-5 modal-title" id="modalForEditLabel">Ubah Data Barang</h1>
-                    <button class="btn-close" type="button" onclick="closeModalEdit()"></button>
+            <div class=modal-content>
+                <div class=modal-header>
+                    <h1 class="fs-5 modal-title" id=modalForEditLabel>Ubah Data Proyek</h1>
+                    <button class=btn-close type=button onclick=closeModalEdit()></button>
                 </div>
-                <form class="d-flex w-100 align-items-center flex-column gap-3" style="overflow-y:auto" method="POST">
+                <form class="w-100 d-flex align-items-center flex-column gap-3" style=overflow-y:auto method=POST>
                     @csrf
-                    <div class="d-flex w-100 align-items-center flex-column modal-body">
-                        <div id="form-group">
-                            <label class="form-label mb-0" for="nama_proyek">Nama Proyek</label>
-                            <input class="form-control" id="nama_proyek" name="nama_proyek" type="text" placeholder="Nama Proyek">
-                        </div>
-                        <div id="form-group">
-                            <label class="form-label mb-0" for="jenis_alat">Jenis Alat</label>
-                            <input class="form-control" id="jenis_alat" name="jenis_alat" type="text" placeholder="Jenis Alat" required>
-                        </div>
-                        <div id="form-group">
-                            <label class="form-label mb-0" for="merek_alat">Merek Alat</label>
-                            <input class="form-control" id="merek_alat" name="merek_alat" type="text" placeholder="Merek Alat" required>
-                        </div>
-                        <div id="form-group">
-                            <label class="form-label mb-0" for="tipe_alat">Tipe Alat</label>
-                            <input class="form-control" id="tipe_alat" name="tipe_alat" type="text" placeholder="Tipe Alat" required>
-                        </div>
-                        <div id="form-group">
-                            <label class="form-label mb-0" for="kode_alat">Kode Alat</label>
-                            <input class="form-control" id="kode_alat" name="kode_alat" type="text" placeholder="Kode Alat" required>
+                    <div class="w-100 d-flex align-items-center flex-column modal-body">
+                        <div class="w-100 form-floating mb-3 rounded">
+                            <input class="border-dark-subtle border form-control" id=nama_proyek name=nama_proyek placeholder="Nama Proyek" required>
+                            <label for=nama_proyek style="width:calc(100% - 20px)">Nama Proyek<span class="fw-bold text-danger">*</span></label>
                         </div>
                     </div>
-                    <div class="d-flex w-100 justify-content-between modal-footer">
-                        <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Batal</button>
-                        <button class="btn btn-primary" id="update-barang" type="submit">Simpan</button>
+                    <div class="w-100 d-flex justify-content-between modal-footer">
+                        <button class="btn btn-secondary" data-bs-dismiss=modal type=button>Batal</button>
+                        <button class="btn btn-primary" type=submit>Simpan</button>
                     </div>
                 </form>
             </div>

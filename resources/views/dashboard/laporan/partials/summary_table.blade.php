@@ -4,7 +4,7 @@
     $detailDataSaldo = collect($detailDataSaldo);
 @endphp
 
-<div class="mt-3 ibox-body table-responsive" style="overflow-x:auto;">
+<div class="mt-0 ibox-body table-responsive" style="overflow-x:auto;">
 
     @php
         // Penerimaan

@@ -101,7 +101,8 @@ class DashboardController extends Controller
             } );
             $totalSemuaAlat        = Alat::where ( 'id_user', $user->id )->count ();
         }
-        return view ( 'home', [ 
+
+        return view ( 'dashboard', [ 
             'headerPage'             => 'Dashboard',
             'page'                   => 'Dashboard',
             'proyeks'                => $proyeks,

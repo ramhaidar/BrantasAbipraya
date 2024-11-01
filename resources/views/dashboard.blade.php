@@ -1,4 +1,4 @@
-@extends('component.sidebar')
+@extends('layouts.app')
 
 @if ($page == 'Dashboard')
 
@@ -150,7 +150,7 @@
     @endsection
 @endif
 
-@section('script')
+@push('scripts_2')
     <script>
         document.getElementById('table_search').addEventListener('keyup', function() {
             // Ambil nilai input
@@ -233,7 +233,4 @@
             });
         });
     </script>
-@endsection
-
-@section('playTest')
-@endsection
+@endpush

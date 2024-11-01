@@ -1,4 +1,4 @@
-@extends('home')
+@extends('dashboard')
 
 @section('css')
     <link href="/css/random-css-datatable.css" rel="stylesheet">
@@ -125,7 +125,7 @@
                 </div>
             </div>
 
-            <div class="mt-3 ibox-body table-responsive" style="overflow-x: auto">
+            <div class="mt-0 ibox-body table-responsive" style="overflow-x: auto">
                 <table class="m-0 border-dark table table-bordered table-striped" id="table-data" style="width:100%">
                     <thead class="table-primary">
                         <tr>

@@ -1,27 +1,6 @@
-<!doctype html>
-<html lang="en">
+@extends('layouts.app')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" crossorigin="anonymous" integrity="sha512-nMNlpuaDPrqlEls3IX/Q56H36qvBASwb3ipuo3MxeWbsQB1881ox0cRv7UPTgBlriqoynt35KjEwgGUeUXIPnw==" referrerpolicy="no-referrer">
-    <link href="https://cdn.datatables.net/2.0.7/css/dataTables.dataTables.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" crossorigin="anonymous" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" referrerpolicy="no-referrer">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/css/adminlte.min.css" rel="stylesheet" crossorigin="anonymous" integrity="sha512-IuO+tczf4J43RzbCMEFggCWW5JuX78IrCJRFFBoQEXNvGI6gkUw4OjuwMidiS4Lm9Q2lILzpJwZuMWuSEeT9UQ==" referrerpolicy="no-referrer">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/overlayscrollbars/1.13.0/css/OverlayScrollbars.min.css" rel="stylesheet" crossorigin="anonymous" integrity="sha512-pYQcc5kgavar0ah58/O8hw/6Tbo3mWlmQTmvoi1i96cBz7jQYS9as5J+Nfy32rAHY6CgR9ExwnFMcBdGVcKM7g==" referrerpolicy="no-referrer">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.3/themes/base/jquery-ui.min.css" rel="stylesheet" crossorigin="anonymous" integrity="sha512-8PjjnSP8Bw/WNPxF6wkklW6qlQJdWJc/3w/ZQPvZ/1bjVDkrrSqLe9mfPYrMxtnzsXFPc434+u4FHLnLjXTSsg==" referrerpolicy="no-referrer">
-    <link href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css" rel="stylesheet">
-    <link type="image/x-icon" href="/favicon.ico" rel="shortcut icon">
-    <title>Dashboard | DPP Digital Logistic</title>
-
-    @turnstileScripts()
-
+@push('style')
     <style>
         .nav-link {
             display: flex;
@@ -66,292 +45,257 @@
             }
         }
     </style>
+@endpush
 
-    @yield('css')
-</head>
+@section('sidebar')
+    <a class="brand-link ms-0 ps-0 container-fluid pt-3">
+        <img class="brand-image elevation-3 img-circle" src="/favicon.ico" alt="Abipraya Logo" style="opacity:.8">
+        <span class="brand-text font-weight-light">PT. Brantas Abipraya</span>
+    </a>
 
-<body class="layout-fixed sidebar-mini" data-panel-auto-height-mode="height" style="height:auto">
-    <div class="wrapper">
-        @include('component.navbar')
-        <aside class="elevation-4 main-sidebar sidebar-dark-primary" style="background-color: #212529">
-            <a class="brand-link ms-0 ps-0 container-fluid pt-3">
-                <img class="brand-image elevation-3 img-circle" src="/favicon.ico" alt="Abipraya Logo" style="opacity:.8">
-                <span class="brand-text font-weight-light">PT. Brantas Abipraya</span>
-            </a>
+    @auth
+        <div class="user-panel ms-0 ps-0 py-2 d-flex collapse-user-panel justify-content-start align-items-center">
+            <div class="image me-2">
+                <img class="img-circle elevation-2" src="{{ Auth::user()->path_profile ?? 'dist/img/user2-160x160.jpg' }}" alt="User Image" style="border-radius: 50%; width: 40px; height: 40px; border: 2pt solid #fff;">
+            </div>
+            <div class="info">
+                <a class="d-block user-info-text text-white truncate-text" href="#">
+                    <span class="text-content">{{ Auth::user()->name }} - {{ ucfirst(Auth::user()->role) }}</span>
+                </a>
+            </div>
+        </div>
 
-            @auth
-                <div class="user-panel ms-0 ps-0 py-2 d-flex collapse-user-panel justify-content-start align-items-center">
-                    <div class="image me-2">
-                        <img class="img-circle elevation-2" src="{{ Auth::user()->path_profile ?? 'dist/img/user2-160x160.jpg' }}" alt="User Image" style="border-radius: 50%; width: 40px; height: 40px; border: 2pt solid #fff;">
-                    </div>
-                    <div class="info">
-                        <a class="d-block user-info-text text-white truncate-text" href="#">
-                            <span class="text-content">{{ Auth::user()->name }} - {{ ucfirst(Auth::user()->role) }}</span>
-                        </a>
-                    </div>
+        <div class="form-inline mt-0 mx-0">
+            <div class="input-group" data-widget="sidebar-search">
+                <input class="form-control form-control-sidebar" id="searchProyek" type="search" aria-label="Search" placeholder="Search">
+                <div class="input-group-append">
+                    <button class="btn btn-sidebar">
+                        <i class="fas fa-fw fa-search"></i>
+                    </button>
                 </div>
+            </div>
+        </div>
+    @endauth
 
-                <div class="form-inline mt-0 mx-0">
-                    <div class="input-group" data-widget="sidebar-search">
-                        <input class="form-control form-control-sidebar" id="searchProyek" type="search" aria-label="Search" placeholder="Search">
-                        <div class="input-group-append">
-                            <button class="btn btn-sidebar">
-                                <i class="fas fa-fw fa-search"></i>
-                            </button>
-                        </div>
-                    </div>
+    <div class="sidebar m-0 p-0">
+        <div class="scrollable-sidebar p-0 m-0">
+            <div class="os-host os-host-overflow os-host-overflow-y os-host-resize-disabled os-host-scrollbar-horizontal-hidden os-host-transition os-theme-light sidebar">
+                <div class="observed os-resize-observer-host">
+                    <div class="os-resize-observer" style="left:0;right:auto"></div>
                 </div>
-            @endauth
+                <div class="observed os-size-auto-observer" style="height:calc(100% + 1px);float:left">
+                    <div class="os-resize-observer"></div>
+                </div>
+                <div class="os-content-glue" style="margin:0 -8px;width:249px;height:866px"></div>
+                <div class="os-padding mb-5" style="background-color: #343a40">
+                    <div class="os-viewport os-viewport-native-scrollbars-invisible" style="overflow-y:scroll">
+                        <div class="os-content" style="padding:0 8px;height:100%;width:100%">
+                            <nav class="mt-2">
+                                <ul class="nav flex-column nav-pills nav-sidebar" data-accordion="false" data-widget="treeview" role="menu">
 
-            <div class="sidebar m-0 p-0">
-                <div class="scrollable-sidebar p-0 m-0">
-                    <div class="os-host os-host-overflow os-host-overflow-y os-host-resize-disabled os-host-scrollbar-horizontal-hidden os-host-transition os-theme-light sidebar">
-                        <div class="observed os-resize-observer-host">
-                            <div class="os-resize-observer" style="left:0;right:auto"></div>
-                        </div>
-                        <div class="observed os-size-auto-observer" style="height:calc(100% + 1px);float:left">
-                            <div class="os-resize-observer"></div>
-                        </div>
-                        <div class="os-content-glue" style="margin:0 -8px;width:249px;height:866px"></div>
-                        <div class="os-padding mb-5" style="background-color: #343a40">
-                            <div class="os-viewport os-viewport-native-scrollbars-invisible" style="overflow-y:scroll">
-                                <div class="os-content" style="padding:0 8px;height:100%;width:100%">
-                                    <nav class="mt-2">
-                                        <ul class="nav flex-column nav-pills nav-sidebar" data-accordion="false" data-widget="treeview" role="menu">
-
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="{{ route('dashboard') }}">
+                                            <i class="bi me-2 nav-icon fs-5 bi-house-fill"></i>
+                                            <p>Dashboard</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item proyek-item">
+                                        <a class="nav-link" data-bs-toggle="collapse" data-bs-target="#subMenuMasterData" href="#" aria-expanded="false">
+                                            <i class="bi me-2 nav-icon fs-5 bi-database-fill-gear"></i>
+                                            <p class="truncate-text">
+                                                <span class="text-content">Master Data</span>
+                                            </p>
+                                            <i class="bi bi-caret-right-fill right"></i>
+                                        </a>
+                                        <ul class="collapse nav flex-column ms-1" id="subMenuMasterData">
                                             <li class="nav-item">
-                                                <a class="nav-link" href="{{ route('dashboard') }}">
-                                                    <i class="bi me-2 nav-icon fs-5 bi-house-fill"></i>
-                                                    <p>Dashboard</p>
+                                                <a class="nav-link" href="{{ route('master_data_alat') }}">
+                                                    <i class="bi me-2 nav-icon fs-5 bi-gear-wide-connected"></i>
+                                                    <p>Master Data Alat</p>
                                                 </a>
                                             </li>
-                                            <li class="nav-item proyek-item">
-                                                <a class="nav-link" data-bs-toggle="collapse" data-bs-target="#subMenuMasterData" href="#" aria-expanded="false">                                                
-                                                    <i class="bi me-2 nav-icon fs-5 bi-database-fill-gear"></i>
-                                                    <p class="truncate-text">
-                                                        <span class="text-content">Master Data</span>
-                                                    </p>
-                                                    <i class="bi bi-caret-right-fill right"></i>
+                                            <li class="nav-item">
+                                                <a class="nav-link" href="{{ route('master_data_supplier') }}">
+                                                    <i class="bi me-2 nav-icon fs-5 bi-tools"></i>
+                                                    <p>Master Data Sparepart</p>
                                                 </a>
-                                                <ul class="collapse nav flex-column ms-1" id="subMenuMasterData">
-                                                    <li class="nav-item">
-                                                        <a class="nav-link" href="{{ route('master_data_alat') }}">
-                                                            <i class="bi me-2 nav-icon fs-5 bi-gear-wide-connected"></i>
-                                                            <p>Master Data Alat</p>
-                                                        </a>
-                                                    </li>
-                                                    <li class="nav-item">
-                                                        <a class="nav-link" href="{{ route('master_data_supplier') }}">
-                                                            <i class="bi me-2 nav-icon fs-5 bi-tools"></i>
-                                                            <p>Master Data Sparepart</p>
-                                                        </a>
-                                                    </li>
-                                                    <li class="nav-item">
-                                                        <a class="nav-link" href="{{ route('master_data_sparepart') }}">
-                                                            <i class="bi me-2 nav-icon fs-5 bi-people-fill"></i>
-                                                            <p>Master Data Supplier</p>
-                                                        </a>
-                                                    </li>
-                                                </ul>
                                             </li>
+                                            <li class="nav-item">
+                                                <a class="nav-link" href="{{ route('master_data_sparepart') }}">
+                                                    <i class="bi me-2 nav-icon fs-5 bi-people-fill"></i>
+                                                    <p>Master Data Supplier</p>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
 
-                                            @if (Auth::user()->role == 'Admin')
+                                    @if (Auth::user()->role == 'Admin')
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="{{ route('proyek') }}">
+                                                <i class="bi me-2 nav-icon bi-kanban"></i>
+                                                <p>Proyek</p>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="/users">
+                                                <i class="bi me-2 nav-icon bi-people-fill"></i>
+                                                <p>User</p>
+                                            </a>
+                                        </li>
+                                    @endif
+
+                                    <li class="nav-header mt-2">LIST PROYEK: {{ $proyeks->count() }}</li>
+
+                                    @foreach ($proyeks as $item)
+                                        <li class="nav-item proyek-item">
+                                            <a class="nav-link" data-bs-toggle="collapse" data-bs-target="#subMenuProyek_{{ $item->id }}" href="#" aria-expanded="false">
+                                                <i class="bi me-2 nav-icon fs-5 bi-briefcase-fill"></i>
+                                                <p class="truncate-text">
+                                                    <span class="text-content">{{ $item->nama_proyek }}</span>
+                                                </p>
+                                                <i class="bi bi-caret-right-fill right"></i>
+                                            </a>
+                                            <ul class="collapse nav flex-column ms-1" id="subMenuProyek_{{ $item->id }}">
                                                 <li class="nav-item">
-                                                    <a class="nav-link" href="{{ route('proyek') }}">
-                                                        <i class="bi me-2 nav-icon bi-kanban"></i>
-                                                        <p>Proyek</p>
+                                                    <a class="nav-link submenu" data-bs-toggle="collapse" data-bs-target="#subMenuATB_{{ $item->id }}" href="#" aria-expanded="false">
+                                                        <i class="bi me-2 nav-icon fs-5 bi-calendar-week-fill"></i>
+                                                        <p>ATB <i class="bi bi-caret-right-fill right"></i></p>
                                                     </a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a class="nav-link" href="/users">
-                                                        <i class="bi me-2 nav-icon bi-people-fill"></i>
-                                                        <p>User</p>
-                                                    </a>
-                                                </li>
-                                            @endif
-
-                                            <li class="nav-header mt-2">LIST PROYEK: {{ $proyeks->count() }}</li>
-
-                                            @foreach ($proyeks as $item)
-                                                <li class="nav-item proyek-item">
-                                                    <a class="nav-link" data-bs-toggle="collapse" data-bs-target="#subMenuProyek_{{ $item->id }}" href="#" aria-expanded="false">
-                                                        <i class="bi me-2 nav-icon fs-5 bi-briefcase-fill"></i>
-                                                        <p class="truncate-text">
-                                                            <span class="text-content">{{ $item->nama_proyek }}</span>
-                                                        </p>
-                                                        <i class="bi bi-caret-right-fill right"></i>
-                                                    </a>
-                                                    <ul class="collapse nav flex-column ms-1" id="subMenuProyek_{{ $item->id }}">
+                                                    <ul class="collapse nav flex-column ms-3" id="subMenuATB_{{ $item->id }}">
                                                         <li class="nav-item">
-                                                            <a class="nav-link submenu" data-bs-toggle="collapse" data-bs-target="#subMenuATB_{{ $item->id }}" href="#" aria-expanded="false">
+                                                            <a class="nav-link" href="{{ route('atb_hutang_unit_alat', ['id_proyek' => $item->id]) }}">
                                                                 <i class="bi me-2 nav-icon fs-5 bi-calendar-week-fill"></i>
-                                                                <p>ATB <i class="bi bi-caret-right-fill right"></i></p>
+                                                                <p>Hutang Unit Alat</p>
                                                             </a>
-                                                            <ul class="collapse nav flex-column ms-3" id="subMenuATB_{{ $item->id }}">
-                                                                <li class="nav-item">
-                                                                    <a class="nav-link" href="{{ route('atb_hutang_unit_alat', ['id_proyek' => $item->id]) }}">
-                                                                        <i class="bi me-2 nav-icon fs-5 bi-calendar-week-fill"></i>
-                                                                        <p>Hutang Unit Alat</p>
-                                                                    </a>
-                                                                </li>
-                                                                <li class="nav-item">
-                                                                    <a class="nav-link" href="{{ route('atb_panjar_unit_alat', ['id_proyek' => $item->id]) }}">
-                                                                        <i class="bi me-2 nav-icon fs-5 bi-calendar-week-fill"></i>
-                                                                        <p>Panjar Unit Alat</p>
-                                                                    </a>
-                                                                </li>
-                                                                <li class="nav-item">
-                                                                    <a class="nav-link" href="{{ route('atb_mutasi_proyek', ['id_proyek' => $item->id]) }}">
-                                                                        <i class="bi me-2 nav-icon fs-5 bi-calendar-week-fill"></i>
-                                                                        <p>Mutasi Proyek</p>
-                                                                    </a>
-                                                                </li>
-                                                                <li class="nav-item">
-                                                                    <a class="nav-link" href="{{ route('atb_panjar_proyek', ['id_proyek' => $item->id]) }}">
-                                                                        <i class="bi me-2 nav-icon fs-5 bi-calendar-week-fill"></i>
-                                                                        <p>Panjar Proyek</p>
-                                                                    </a>
-                                                                </li>
-                                                            </ul>
                                                         </li>
-
                                                         <li class="nav-item">
-                                                            <a class="nav-link submenu" data-bs-toggle="collapse" data-bs-target="#subMenuAPB_{{ $item->id }}" href="#" aria-expanded="false">
-                                                                <i class="bi me-2 nav-icon fs-5 bi-calendar-range-fill"></i>
-                                                                <p>APB <i class="bi bi-caret-right-fill right"></i></p>
+                                                            <a class="nav-link" href="{{ route('atb_panjar_unit_alat', ['id_proyek' => $item->id]) }}">
+                                                                <i class="bi me-2 nav-icon fs-5 bi-calendar-week-fill"></i>
+                                                                <p>Panjar Unit Alat</p>
                                                             </a>
-                                                            <ul class="collapse nav flex-column ms-3" id="subMenuAPB_{{ $item->id }}">
-                                                                <li class="nav-item">
-                                                                    <a class="nav-link" href="{{ route('apb_ex_unit_alat', ['id_proyek' => $item->id]) }}">
-                                                                        <i class="bi me-2 nav-icon fs-5 bi-calendar-range-fill"></i>
-                                                                        <p>EX Unit Alat</p>
-                                                                    </a>
-                                                                </li>
-                                                                <li class="nav-item">
-                                                                    <a class="nav-link" href="{{ route('apb_ex_panjar_unit_alat', ['id_proyek' => $item->id]) }}">
-                                                                        <i class="bi me-2 nav-icon fs-5 bi-calendar-range-fill"></i>
-                                                                        <p>EX Panjar Unit Alat</p>
-                                                                    </a>
-                                                                </li>
-                                                                <li class="nav-item">
-                                                                    <a class="nav-link" href="{{ route('apb_ex_mutasi_saldo', ['id_proyek' => $item->id]) }}">
-                                                                        <i class="bi me-2 nav-icon fs-5 bi-calendar-range-fill"></i>
-                                                                        <p>EX Mutasi Saldo</p>
-                                                                    </a>
-                                                                </li>
-                                                                <li class="nav-item">
-                                                                    <a class="nav-link" href="{{ route('apb_ex_panjar_proyek', ['id_proyek' => $item->id]) }}">
-                                                                        <i class="bi me-2 nav-icon fs-5 bi-calendar-range-fill"></i>
-                                                                        <p>EX Panjar Proyek</p>
-                                                                    </a>
-                                                                </li>
-                                                            </ul>
                                                         </li>
-
                                                         <li class="nav-item">
-                                                            <a class="nav-link submenu" data-bs-toggle="collapse" data-bs-target="#subMenuSaldo_{{ $item->id }}" href="#" aria-expanded="false">
-                                                                <i class="bi me-2 nav-icon fs-5 bi-cash-stack"></i>
-                                                                <p>Saldo <i class="bi bi-caret-right-fill right"></i>
-                                                                </p>
+                                                            <a class="nav-link" href="{{ route('atb_mutasi_proyek', ['id_proyek' => $item->id]) }}">
+                                                                <i class="bi me-2 nav-icon fs-5 bi-calendar-week-fill"></i>
+                                                                <p>Mutasi Proyek</p>
                                                             </a>
-                                                            <ul class="collapse nav flex-column ms-3" id="subMenuSaldo_{{ $item->id }}">
-                                                                <li class="nav-item">
-                                                                    <a class="nav-link" href="{{ route('saldo_ex_unit_alat', ['id_proyek' => $item->id]) }}">
-                                                                        <i class="bi me-2 nav-icon fs-5 bi-cash-stack"></i>
-                                                                        <p>EX Unit Alat</p>
-                                                                    </a>
-                                                                </li>
-                                                                <li class="nav-item">
-                                                                    <a class="nav-link" href="{{ route('saldo_ex_panjar_unit_alat', ['id_proyek' => $item->id]) }}">
-                                                                        <i class="bi me-2 nav-icon fs-5 bi-cash-stack"></i>
-                                                                        <p>EX Panjar Unit Alat</p>
-                                                                    </a>
-                                                                </li>
-                                                                <li class="nav-item">
-                                                                    <a class="nav-link" href="{{ route('saldo_ex_panjar_proyek', ['id_proyek' => $item->id]) }}">
-                                                                        <i class="bi me-2 nav-icon fs-5 bi-cash-stack"></i>
-                                                                        <p>EX Panjar Proyek</p>
-                                                                    </a>
-                                                                </li>
-                                                            </ul>
                                                         </li>
-
                                                         <li class="nav-item">
-                                                            <a class="nav-link submenu" data-bs-toggle="collapse" data-bs-target="#subMenuLaporan_{{ $item->id }}" href="#" aria-expanded="false">
-                                                                <i class="bi me-2 nav-icon fs-5 bi-newspaper"></i>
-                                                                <p>Laporan <i class="bi bi-caret-right-fill right"></i>
-                                                                </p>
+                                                            <a class="nav-link" href="{{ route('atb_panjar_proyek', ['id_proyek' => $item->id]) }}">
+                                                                <i class="bi me-2 nav-icon fs-5 bi-calendar-week-fill"></i>
+                                                                <p>Panjar Proyek</p>
                                                             </a>
-                                                            <ul class="collapse nav flex-column ms-3" id="subMenuLaporan_{{ $item->id }}">
-                                                                <li class="nav-item">
-                                                                    <a class="nav-link" href="{{ route('laporan.summary', ['id_proyek' => $item->id]) }}">
-                                                                        <i class="bi me-2 nav-icon fs-5 bi-newspaper"></i>
-                                                                        <p>Summary</p>
-                                                                    </a>
-                                                                </li>
-
-                                                            </ul>
                                                         </li>
                                                     </ul>
                                                 </li>
-                                            @endforeach
 
-                                            <div class="pb-5">
-                                                <p></p>
-                                            </div>
-                                        </ul>
-                                    </nav>
-                                </div>
-                            </div>
+                                                <li class="nav-item">
+                                                    <a class="nav-link submenu" data-bs-toggle="collapse" data-bs-target="#subMenuAPB_{{ $item->id }}" href="#" aria-expanded="false">
+                                                        <i class="bi me-2 nav-icon fs-5 bi-calendar-range-fill"></i>
+                                                        <p>APB <i class="bi bi-caret-right-fill right"></i></p>
+                                                    </a>
+                                                    <ul class="collapse nav flex-column ms-3" id="subMenuAPB_{{ $item->id }}">
+                                                        <li class="nav-item">
+                                                            <a class="nav-link" href="{{ route('apb_ex_unit_alat', ['id_proyek' => $item->id]) }}">
+                                                                <i class="bi me-2 nav-icon fs-5 bi-calendar-range-fill"></i>
+                                                                <p>EX Unit Alat</p>
+                                                            </a>
+                                                        </li>
+                                                        <li class="nav-item">
+                                                            <a class="nav-link" href="{{ route('apb_ex_panjar_unit_alat', ['id_proyek' => $item->id]) }}">
+                                                                <i class="bi me-2 nav-icon fs-5 bi-calendar-range-fill"></i>
+                                                                <p>EX Panjar Unit Alat</p>
+                                                            </a>
+                                                        </li>
+                                                        <li class="nav-item">
+                                                            <a class="nav-link" href="{{ route('apb_ex_mutasi_saldo', ['id_proyek' => $item->id]) }}">
+                                                                <i class="bi me-2 nav-icon fs-5 bi-calendar-range-fill"></i>
+                                                                <p>EX Mutasi Saldo</p>
+                                                            </a>
+                                                        </li>
+                                                        <li class="nav-item">
+                                                            <a class="nav-link" href="{{ route('apb_ex_panjar_proyek', ['id_proyek' => $item->id]) }}">
+                                                                <i class="bi me-2 nav-icon fs-5 bi-calendar-range-fill"></i>
+                                                                <p>EX Panjar Proyek</p>
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </li>
+
+                                                <li class="nav-item">
+                                                    <a class="nav-link submenu" data-bs-toggle="collapse" data-bs-target="#subMenuSaldo_{{ $item->id }}" href="#" aria-expanded="false">
+                                                        <i class="bi me-2 nav-icon fs-5 bi-cash-stack"></i>
+                                                        <p>Saldo <i class="bi bi-caret-right-fill right"></i>
+                                                        </p>
+                                                    </a>
+                                                    <ul class="collapse nav flex-column ms-3" id="subMenuSaldo_{{ $item->id }}">
+                                                        <li class="nav-item">
+                                                            <a class="nav-link" href="{{ route('saldo_ex_unit_alat', ['id_proyek' => $item->id]) }}">
+                                                                <i class="bi me-2 nav-icon fs-5 bi-cash-stack"></i>
+                                                                <p>EX Unit Alat</p>
+                                                            </a>
+                                                        </li>
+                                                        <li class="nav-item">
+                                                            <a class="nav-link" href="{{ route('saldo_ex_panjar_unit_alat', ['id_proyek' => $item->id]) }}">
+                                                                <i class="bi me-2 nav-icon fs-5 bi-cash-stack"></i>
+                                                                <p>EX Panjar Unit Alat</p>
+                                                            </a>
+                                                        </li>
+                                                        <li class="nav-item">
+                                                            <a class="nav-link" href="{{ route('saldo_ex_panjar_proyek', ['id_proyek' => $item->id]) }}">
+                                                                <i class="bi me-2 nav-icon fs-5 bi-cash-stack"></i>
+                                                                <p>EX Panjar Proyek</p>
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </li>
+
+                                                <li class="nav-item">
+                                                    <a class="nav-link submenu" data-bs-toggle="collapse" data-bs-target="#subMenuLaporan_{{ $item->id }}" href="#" aria-expanded="false">
+                                                        <i class="bi me-2 nav-icon fs-5 bi-newspaper"></i>
+                                                        <p>Laporan <i class="bi bi-caret-right-fill right"></i>
+                                                        </p>
+                                                    </a>
+                                                    <ul class="collapse nav flex-column ms-3" id="subMenuLaporan_{{ $item->id }}">
+                                                        <li class="nav-item">
+                                                            <a class="nav-link" href="{{ route('laporan.summary', ['id_proyek' => $item->id]) }}">
+                                                                <i class="bi me-2 nav-icon fs-5 bi-newspaper"></i>
+                                                                <p>Summary</p>
+                                                            </a>
+                                                        </li>
+
+                                                    </ul>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                    @endforeach
+
+                                    <div class="pb-5">
+                                        <p></p>
+                                    </div>
+                                </ul>
+                            </nav>
                         </div>
-                        <div class="os-scrollbar os-scrollbar-auto-hidden os-scrollbar-horizontal os-scrollbar-unusable">
-                            <div class="os-scrollbar-track">
-                                <div class="os-scrollbar-handle" style="width:100%;transform:translate(0,0)"></div>
-                            </div>
-                        </div>
-                        <div class="os-scrollbar os-scrollbar-auto-hidden os-scrollbar-vertical">
-                            <div class="os-scrollbar-track">
-                                <div class="os-scrollbar-handle" style="height:78.8182%;transform:translate(0,0)">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="os-scrollbar-corner"></div>
                     </div>
                 </div>
-            </div>
-        </aside>
-        <div class="content-wrapper" style="height:auto;background-color:#fff">
-            <div class="content-header">
-                <div class="container-fluid">
-                    <div class="mb-2">
-                        <div class="w-100">
-                            <h4 class="mt-2 fw-bold m-0 pe-3 ps-3">
-                                {{ $headerPage ?? 'Buat variabel $headerPage di controller sesuai nama halaman' }}
-                                {{-- @if ($page == 'Master Data')
-                                    Master Data Sparepart
-                                @elseif ($page == 'Summary Laporan')
-                                    Laporan Summary
-                                @elseif ($page == 'Data Alat')
-                                    Master Data Alat
-                                @elseif (isset($proyek->nama_proyek))
-                                    {{ $proyek->nama_proyek }}
-                                @elseif (isset($proyek->nama_proyek) && $page == 'Dashboard')
-                                    Dashboard
-                                @else
-                                    Dashboard
-                                @endif --}}
-                                {{-- - {{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}</h4> --}}
-                                </h3>
+                <div class="os-scrollbar os-scrollbar-auto-hidden os-scrollbar-horizontal os-scrollbar-unusable">
+                    <div class="os-scrollbar-track">
+                        <div class="os-scrollbar-handle" style="width:100%;transform:translate(0,0)"></div>
+                    </div>
+                </div>
+                <div class="os-scrollbar os-scrollbar-auto-hidden os-scrollbar-vertical">
+                    <div class="os-scrollbar-track">
+                        <div class="os-scrollbar-handle" style="height:78.8182%;transform:translate(0,0)">
                         </div>
                     </div>
                 </div>
+                <div class="os-scrollbar-corner"></div>
             </div>
-            <section class="content p-4" style="padding-top:0!important">
-                @yield('content')
-            </section>
         </div>
     </div>
+@endsection
 
+@push('script')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" crossorigin="anonymous" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.3/jquery-ui.min.js" crossorigin="anonymous" integrity="sha512-Ww1y9OuQ2kehgVWSD/3nhgfrb424O3802QYP/A5gPXoM4+rRjiKrjHdGxQKrMGQykmsJ/86oGdHszfcVgUr4hA==" referrerpolicy="no-referrer"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -581,6 +525,4 @@
             });
         </script>
     @endif
-</body>
-
-</html>
+@endpush

@@ -17,37 +17,9 @@
                     </a>
                 @endif
             </div>
-            <div class="ibox-body ms-0 ps-0 table-responsive">
-                <table class="border-dark m-0 table table-bordered table-striped" id="table-data" style="width:100%">
-                    <thead class="table-primary">
-                        <tr>
-                            {{-- <th>Supplier</th> --}}
-                            <th class="text-start">Sparepart</th>
-                            <th class="text-start">Part Number</th>
-                            <th class="text-start">Buffer Stock</th>
-                            @if (Auth::user()->role == 'Pegawai')
-                                <th>Aksi</th>
-                            @endif
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($masterData as $data)
-                            <tr>
-                                {{-- <td>{{ $data->supplier }}</td> --}}
-                                <td>{{ $data->sparepart }}</td>
-                                <td>{{ $data->part_number }}</td>
-                                <td>{{ $data->buffer_stock }}</td>
-                                @if (Auth::user()->role == 'Pegawai')
-                                    <td class="center space-nowrap">
-                                        <button class="btn btn-danger deleteBtn" data-id="{{ $data->id }}"><i class="bi bi-trash"></i></button>
-                                        <button class="btn btn-warning ms-3 ubahBtn" data-id="{{ $data->id }}" onclick='fillFormEdit("{{ $data->id }}")'><i class="bi bi-pencil-square"></i></button>
-                                    </td>
-                                @endif
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+
+            @include('dashboard.masterdata.sparepart.partials.table', ['masterData' => $masterData])
+
         </div>
     </div>
 
@@ -131,18 +103,55 @@
     <script>
         // Inisialisasi DataTables dengan konfigurasi khusus
         $('#table-data').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: "{{ route('master-data.sparepart.getData') }}", // Pastikan route ini sesuai dengan endpoint untuk mengambil data
+                type: "GET"
+            },
             language: {
                 paginate: {
                     previous: '<i class="bi bi-caret-left"></i>',
                     next: '<i class="bi bi-caret-right"></i>'
                 }
             },
-            pageLength: -1,
+            pageLength: 10,
             lengthMenu: [
-                [10, 25, 50, -1],
-                [10, 25, 50, "All"]
+                [10, 25, 50],
+                [10, 25, 50]
             ],
-            order: [],
+            ordering: true,
+            columns: [{
+                    data: 'sparepart',
+                    name: 'sparepart'
+                },
+                {
+                    data: 'part_number',
+                    name: 'part_number'
+                },
+                {
+                    data: 'buffer_stock',
+                    name: 'buffer_stock'
+                },
+                @if (Auth::user()->role == 'Pegawai')
+                    {
+                        data: 'aksi',
+                        name: 'aksi',
+                        orderable: false,
+                        searchable: false,
+                        render: function(data, type, row) {
+                            return `
+                    <button class="btn btn-danger deleteBtn" data-id="${row.id}">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                    <button class="btn btn-warning ms-3 ubahBtn" data-id="${row.id}" onclick='fillFormEdit("${row.id}")'>
+                        <i class="bi bi-pencil-square"></i>
+                    </button>
+                `;
+                        }
+                    }
+                @endif
+            ]
         });
 
         // Fungsi untuk menutup modal tambah data

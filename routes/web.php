@@ -73,10 +73,10 @@ Route::get ( '/atb/hutang_unit_alat/{atb}', [ ATBController::class, 'showByID' ]
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'atb.showATBByID' );
-Route::post ( '/atb/hutang_unit_alat/edit/{id}', [ ATBController::class, 'update' ] )->middleware ( [ 
+Route::post ( '/atb/hutang_unit_alat/edit/actions/{id}', [ ATBController::class, 'update' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] );
-Route::delete ( '/atb/hutang_unit_alat/{id}', [ ATBController::class, 'destroy' ] )->middleware ( [ 
+Route::delete ( '/atb/hutang_unit_alat/actions/{id}', [ ATBController::class, 'destroy' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] );
 
@@ -92,10 +92,10 @@ Route::get ( '/atb/panjar_unit_alat/{atb}', [ ATBController::class, 'showByID' ]
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'atb.showATBByID' );
-Route::post ( '/atb/panjar_unit_alat/edit/{id}', [ ATBController::class, 'update' ] )->middleware ( [ 
+Route::post ( '/atb/panjar_unit_alat/edit/actions/{id}', [ ATBController::class, 'update' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] );
-Route::delete ( '/atb/panjar_unit_alat/{id}', [ ATBController::class, 'destroy' ] )->middleware ( [ 
+Route::delete ( '/atb/panjar_unit_alat/actions/{id}', [ ATBController::class, 'destroy' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] );
 
@@ -111,10 +111,10 @@ Route::get ( '/atb/mutasi_proyek/{atb}', [ ATBController::class, 'showByID' ] )-
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'atb.showATBByID' );
-Route::post ( '/atb/mutasi_proyek/edit/{id}', [ ATBController::class, 'update' ] )->middleware ( [ 
+Route::post ( '/atb/mutasi_proyek/edit/actions/{id}', [ ATBController::class, 'update' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] );
-Route::delete ( '/atb/mutasi_proyek/{id}', [ ATBController::class, 'destroy' ] )->middleware ( [ 
+Route::delete ( '/atb/mutasi_proyek/actions/{id}', [ ATBController::class, 'destroy' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] );
 
@@ -130,10 +130,10 @@ Route::get ( '/atb/panjar_proyek/{atb}', [ ATBController::class, 'showByID' ] )-
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'atb.showATBByID' );
-Route::post ( '/atb/panjar_proyek/edit/{id}', [ ATBController::class, 'update' ] )->middleware ( [ 
+Route::post ( '/atb/panjar_proyek/edit/actions/{id}', [ ATBController::class, 'update' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] );
-Route::delete ( '/atb/panjar_proyek/{id}', [ ATBController::class, 'destroy' ] )->middleware ( [ 
+Route::delete ( '/atb/panjar_proyek/actions/{id}', [ ATBController::class, 'destroy' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] );
 
@@ -145,15 +145,15 @@ Route::post ( '/atb/store', [ ATBController::class, 'store' ] )->middleware ( [
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'atb.store' );
-Route::put ( '/atb/{id}', [ ATBController::class, 'update' ] )->middleware ( [ 
+Route::put ( '/atb/actions/{id}', [ ATBController::class, 'update' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'atb.update' );
-Route::delete ( '/atb/{id}', [ ATBController::class, 'destroy' ] )->middleware ( [ 
+Route::delete ( '/atb/actions/{id}', [ ATBController::class, 'destroy' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'atb.destroy' );
-Route::get ( '/delatb/{id}', [ ATBController::class, 'destroy' ] )->middleware ( [ 
+Route::get ( '/delatb/actions/{id}', [ ATBController::class, 'destroy' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'atb.del.test' );
@@ -214,10 +214,10 @@ Route::get ( '/apb/ex_panjar_unit_alat/apb/{apb}', [ APBController::class, 'getA
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'apb.showAPBByID' );
-Route::post ( '/apb/ex_panjar_unit_alat/edit/{id}', [ APBController::class, 'update' ] )->middleware ( [ 
+Route::post ( '/apb/ex_panjar_unit_alat/edit/actions/{id}', [ APBController::class, 'update' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] );
-Route::delete ( '/apb/ex_panjar_unit_alat/{id}', [ APBController::class, 'destroy' ] )->middleware ( [ 
+Route::delete ( '/apb/ex_panjar_unit_alat/actions/{id}', [ APBController::class, 'destroy' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] );
 
@@ -237,10 +237,10 @@ Route::get ( '/apb/ex_panjar_proyek/apb/{apb}', [ APBController::class, 'getAPBb
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'apb.showAPBByID' );
-Route::post ( '/apb/ex_panjar_proyek/edit/{id}', [ APBController::class, 'update' ] )->middleware ( [ 
+Route::post ( '/apb/ex_panjar_proyek/edit/actions/{id}', [ APBController::class, 'update' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] );
-Route::delete ( '/apb/ex_panjar_proyek/{id}', [ APBController::class, 'destroy' ] )->middleware ( [ 
+Route::delete ( '/apb/ex_panjar_proyek/actions/{id}', [ APBController::class, 'destroy' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] );
 
@@ -260,10 +260,10 @@ Route::get ( '/apb/ex_unit_alat/apb/{apb}', [ APBController::class, 'getAPBbyID'
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'apb.showAPBByID' );
-Route::post ( '/apb/ex_unit_alat/edit/{id}', [ APBController::class, 'update' ] )->middleware ( [ 
+Route::post ( '/apb/ex_unit_alat/edit/actions/{id}', [ APBController::class, 'update' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] );
-Route::delete ( '/apb/ex_unit_alat/{id}', [ APBController::class, 'destroy' ] )->middleware ( [ 
+Route::delete ( '/apb/ex_unit_alat/actions/{id}', [ APBController::class, 'destroy' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] );
 
@@ -283,10 +283,10 @@ Route::get ( '/apb/ex_mutasi_saldo/apb/{apb}', [ APBController::class, 'getAPBby
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'apb.showAPBByID' );
-Route::post ( '/apb/ex_mutasi_saldo/edit/{id}', [ APBController::class, 'update' ] )->middleware ( [ 
+Route::post ( '/apb/ex_mutasi_saldo/edit/actions/{id}', [ APBController::class, 'update' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] );
-Route::delete ( '/apb/ex_mutasi_saldo/{id}', [ APBController::class, 'destroy' ] )->middleware ( [ 
+Route::delete ( '/apb/ex_mutasi_saldo/actions/{id}', [ APBController::class, 'destroy' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] );
 
@@ -298,19 +298,19 @@ Route::post ( '/apb/store', [ APBController::class, 'store' ] )->middleware ( [
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'apb.store' );
-Route::get ( '/apb/{id}', [ APBController::class, 'show' ] )->middleware ( [ 
+Route::get ( '/apb/actions/{id}', [ APBController::class, 'show' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'apb.show' );
-Route::put ( '/apb/{id}', [ APBController::class, 'update' ] )->middleware ( [ 
+Route::put ( '/apb/actions/{id}', [ APBController::class, 'update' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'apb.update' );
-Route::delete ( '/apb/{id}', [ APBController::class, 'destroy' ] )->middleware ( [ 
+Route::delete ( '/apb/actions/{id}', [ APBController::class, 'destroy' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'apb.destroy' );
-Route::get ( '/delapb/{id}', [ APBController::class, 'destroy' ] )->middleware ( [ 
+Route::get ( '/delapb/actions/{id}', [ APBController::class, 'destroy' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'apb.del.test' );
@@ -323,15 +323,18 @@ Route::post ( '/master-data-alat', [ MasterDataAlatController::class, 'store' ] 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'master_data_alat.store' );
-Route::get ( '/master-data-alat/{id}', [ MasterDataAlatController::class, 'show' ] )->middleware ( [ 
+
+Route::get ( '/master-data-alat/actions/{id}', [ MasterDataAlatController::class, 'show' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
+
     ->name ( 'master_data_alat.show' );
-Route::post ( '/master-data-alat/{id}', [ MasterDataAlatController::class, 'update' ] )->middleware ( [ 
+Route::post ( '/master-data-alat/actions/{id}', [ MasterDataAlatController::class, 'update' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
+
     ->name ( 'master_data_alat.update' );
-Route::delete ( '/master-data-alat/{id}', [ MasterDataAlatController::class, 'destroy' ] )->middleware ( [ 
+Route::delete ( '/master-data-alat/actions/{id}', [ MasterDataAlatController::class, 'destroy' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'master_data_alat.destroy' );
@@ -344,15 +347,15 @@ Route::post ( '/master-data-supplier', [ MasterDataSupplierController::class, 's
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'master_data_supplier.store' );
-Route::get ( '/master-data-supplier/{id}', [ MasterDataSupplierController::class, 'show' ] )->middleware ( [ 
+Route::get ( '/master-data-supplier/actions/{id}', [ MasterDataSupplierController::class, 'show' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'master_data_supplier.show' );
-Route::post ( '/master-data-supplier/{id}', [ MasterDataSupplierController::class, 'update' ] )->middleware ( [ 
+Route::post ( '/master-data-supplier/actions/{id}', [ MasterDataSupplierController::class, 'update' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'master_data_supplier.update' );
-Route::delete ( '/master-data-supplier/{id}', [ MasterDataSupplierController::class, 'destroy' ] )->middleware ( [ 
+Route::delete ( '/master-data-supplier/actions/{id}', [ MasterDataSupplierController::class, 'destroy' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'master_data_supplier.destroy' );
@@ -365,15 +368,15 @@ Route::post ( '/master-data-sparepart', [ MasterDataSparepartController::class, 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'master_data_sparepart.store' );
-Route::get ( '/master-data-sparepart/{id}', [ MasterDataSparepartController::class, 'show' ] )->middleware ( [ 
+Route::get ( '/master-data-sparepart/actions/{id}', [ MasterDataSparepartController::class, 'show' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'master_data_sparepart.show' );
-Route::post ( '/master-data-sparepart/{id}', [ MasterDataSparepartController::class, 'update' ] )->middleware ( [ 
+Route::post ( '/master-data-sparepart/actions/{id}', [ MasterDataSparepartController::class, 'update' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'master_data_sparepart.update' );
-Route::delete ( '/master-data-sparepart/{id}', [ MasterDataSparepartController::class, 'destroy' ] )->middleware ( [ 
+Route::delete ( '/master-data-sparepart/actions/{id}', [ MasterDataSparepartController::class, 'destroy' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'master_data_sparepart.destroy' );
@@ -390,19 +393,19 @@ Route::post ( '/master_data', [ MasterDataController::class, 'store' ] )
     ] )
     ->name ( 'master_data.store' );
 
-Route::get ( '/master_data/{id}', [ MasterDataController::class, 'show' ] )
+Route::get ( '/master_data/actions/{id}', [ MasterDataController::class, 'show' ] )
     ->middleware ( [ 
         CheckRole::class . ':Admin,Pegawai,Boss'
     ] )
     ->name ( 'master_data.show' );
 
-Route::put ( '/master_data/{id}', [ MasterDataController::class, 'update' ] )
+Route::put ( '/master_data/actions/{id}', [ MasterDataController::class, 'update' ] )
     ->middleware ( [ 
         CheckRole::class . ':Admin,Pegawai,Boss'
     ] )
     ->name ( 'master_data.update' );
 
-Route::delete ( '/master_data/{id}', [ MasterDataController::class, 'destroy' ] )
+Route::delete ( '/master_data/actions/{id}', [ MasterDataController::class, 'destroy' ] )
     ->middleware ( [ 
         CheckRole::class . ':Admin,Pegawai,Boss'
     ] )
@@ -424,10 +427,10 @@ Route::get ( '/saldo/ex_panjar_unit_alat/{saldo}', [ SaldoController::class, 'sh
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'saldo.showSaldoByID' );
-Route::post ( '/saldo/ex_panjar_unit_alat/edit/{id}', [ SaldoController::class, 'update' ] )->middleware ( [ 
+Route::post ( '/saldo/ex_panjar_unit_alat/edit/actions/{id}', [ SaldoController::class, 'update' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] );
-Route::delete ( '/saldo/ex_panjar_unit_alat/{id}', [ SaldoController::class, 'destroy' ] )->middleware ( [ 
+Route::delete ( '/saldo/ex_panjar_unit_alat/actions/{id}', [ SaldoController::class, 'destroy' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] );
 
@@ -443,10 +446,10 @@ Route::get ( '/saldo/ex_panjar_proyek/{saldo}', [ SaldoController::class, 'showB
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'saldo.showSaldoByID' );
-Route::post ( '/saldo/ex_panjar_proyek/edit/{id}', [ SaldoController::class, 'update' ] )->middleware ( [ 
+Route::post ( '/saldo/ex_panjar_proyek/edit/actions/{id}', [ SaldoController::class, 'update' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] );
-Route::delete ( '/saldo/ex_panjar_proyek/{id}', [ SaldoController::class, 'destroy' ] )->middleware ( [ 
+Route::delete ( '/saldo/ex_panjar_proyek/actions/{id}', [ SaldoController::class, 'destroy' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] );
 
@@ -462,10 +465,10 @@ Route::get ( '/saldo/ex_unit_alat/{saldo}', [ SaldoController::class, 'showByID'
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'saldo.showSaldoByID' );
-Route::post ( '/saldo/ex_unit_alat/edit/{id}', [ SaldoController::class, 'update' ] )->middleware ( [ 
+Route::post ( '/saldo/ex_unit_alat/edit/actions/{id}', [ SaldoController::class, 'update' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] );
-Route::delete ( '/saldo/ex_unit_alat/{id}', [ SaldoController::class, 'destroy' ] )->middleware ( [ 
+Route::delete ( '/saldo/ex_unit_alat/actions/{id}', [ SaldoController::class, 'destroy' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] );
 
@@ -481,10 +484,10 @@ Route::get ( '/saldo/ex_mutasi_saldo/{saldo}', [ SaldoController::class, 'showBy
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'saldo.showSaldoByID' );
-Route::post ( '/saldo/ex_mutasi_saldo/edit/{id}', [ SaldoController::class, 'update' ] )->middleware ( [ 
+Route::post ( '/saldo/ex_mutasi_saldo/edit/actions/{id}', [ SaldoController::class, 'update' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] );
-Route::delete ( '/saldo/ex_mutasi_saldo/{id}', [ SaldoController::class, 'destroy' ] )->middleware ( [ 
+Route::delete ( '/saldo/ex_mutasi_saldo/actions/{id}', [ SaldoController::class, 'destroy' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] );
 
@@ -496,19 +499,19 @@ Route::post ( '/saldo/store', [ SaldoController::class, 'store' ] )->middleware 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'saldo.store' );
-Route::get ( '/saldo/{id}', [ SaldoController::class, 'show' ] )->middleware ( [ 
+Route::get ( '/saldo/actions/{id}', [ SaldoController::class, 'show' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'saldo.show' );
-Route::put ( '/saldo/{id}', [ SaldoController::class, 'update' ] )->middleware ( [ 
+Route::put ( '/saldo/actions/{id}', [ SaldoController::class, 'update' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'saldo.update' );
-Route::delete ( '/saldo/{id}', [ SaldoController::class, 'destroy' ] )->middleware ( [ 
+Route::delete ( '/saldo/actions/{id}', [ SaldoController::class, 'destroy' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'saldo.destroy' );
-Route::get ( '/delsaldo/{id}', [ SaldoController::class, 'destroy' ] )->middleware ( [ 
+Route::get ( '/delsaldo/actions/{id}', [ SaldoController::class, 'destroy' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'saldo.del.test' );
@@ -525,15 +528,15 @@ Route::post ( '/proyek/store', [ ProyekController::class, 'store' ] )->middlewar
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'proyek.store' );
-Route::get ( '/proyek/{id}', [ ProyekController::class, 'showByID' ] )->middleware ( [ 
+Route::get ( '/proyek/actions/{id}', [ ProyekController::class, 'showByID' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'proyek.show' );
-Route::post ( '/proyek/edit/{id}', [ ProyekController::class, 'update' ] )->middleware ( [ 
+Route::post ( '/proyek/edit/actions/{id}', [ ProyekController::class, 'update' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'proyek.update' );
-Route::delete ( '/proyek/delete/{id}', [ ProyekController::class, 'destroy' ] )->middleware ( [ 
+Route::delete ( '/proyek/delete/actions/{id}', [ ProyekController::class, 'destroy' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss'
 ] )
     ->name ( 'proyek.destroy' );
@@ -567,7 +570,7 @@ Route::prefix ( 'ajax' )->group ( function ()
     Route::get ( '/summary/fetch-data', [ LaporanController::class, 'fetchData' ] )->name ( 'summary.fetchData' );
 } );
 
-Route::get ( '/dashboard/proyek/{id}', [ DashboardController::class, 'filterByProyek' ] )
+Route::get ( '/dashboard/proyek/actions/{id}', [ DashboardController::class, 'filterByProyek' ] )
     ->middleware ( [ 
         CheckRole::class . ':Admin,Pegawai,Boss'
     ] )
@@ -587,3 +590,22 @@ Route::get (
 )
     ->name ( 'apb.dokumentasi' )
     ->middleware ( 'auth' );
+
+// Pagination Handler
+Route::get (
+    '/master-data-alat/data',
+    [ MasterDataAlatController::class, 'getData' ]
+)->middleware ( 'auth' )
+    ->name ( 'master-data.alat.getData' );
+
+Route::get (
+    '/master-data-sparepart/data',
+    [ MasterDataSparepartController::class, 'getData' ]
+)->middleware ( 'auth' )
+    ->name ( 'master-data.sparepart.getData' );
+
+Route::get (
+    '/master-data-supplier/data',
+    [ MasterDataSupplierController::class, 'getData' ]
+)->middleware ( 'auth' )
+    ->name ( 'master-data.supplier.getData' );

@@ -17,7 +17,8 @@ return new class extends Migration
             $table->string ( 'id_supplier' );
             $table->string ( 'sparepart' );
             $table->string ( 'part_number' );
-            $table->integer ( 'buffer_stock' )->nullable();;
+            $table->integer ( 'buffer_stock' )->nullable ();
+            ;
             $table->unsignedBigInteger ( 'id_user' )->nullable ();
             $table->foreign ( 'id_user' )->references ( 'id' )->on ( 'users' )->onDelete ( 'cascade' );
             $table->timestamps ();

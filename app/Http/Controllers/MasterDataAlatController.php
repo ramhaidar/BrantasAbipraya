@@ -8,70 +8,60 @@ use Illuminate\Support\Facades\Auth;
 
 class MasterDataAlatController extends Controller
 {
-    public function index ()
+    public function index ( Request $request )
     {
         $user = Auth::user ();
 
-        // Inisialisasi variabel $proyeks
+        // Inisialisasi variabel $proyeks dan $alat
         $proyeks = [];
+        $alat    = [];
 
         if ( $user->role === 'Admin' )
         {
-            // Jika user adalah Admin, ambil semua proyek dengan relasi users
             $proyeks = Proyek::with ( "users" )
                 ->orderBy ( "created_at", "asc" )
                 ->orderBy ( "id", "asc" )
                 ->get ();
 
-            // Mengambil semua alat dengan relasi proyek dan user untuk Admin
             $alat = Alat::with ( 'proyek', 'user' )
-                // ->orderByDesc ( 'updated_at' )
                 ->orderBy ( 'updated_at', 'desc' )
-                ->get ();
+                ->paginate ( $request->input ( 'length', 10 ) ); // Default 10 rows per page
         }
         elseif ( $user->role === 'Boss' )
         {
-            // Jika user adalah Boss, ambil proyek yang terkait dengan boss tersebut
             $proyeks = $user->proyek ()
                 ->with ( "users" )
                 ->orderBy ( "created_at", "asc" )
                 ->orderBy ( "id", "asc" )
                 ->get ();
 
-            // Ambil user dari proyek-proyek tersebut
             $usersInProyek = $proyeks->pluck ( 'users.*.id' )->flatten ();
-
-            // Mengambil semua alat yang terkait dengan user dari proyek yang bisa diakses oleh boss
-            $alat = Alat::whereIn ( 'id_user', $usersInProyek )
-                ->with ( 'proyek', 'user' ) // Asumsikan alat terkait proyek dan user
+            $alat          = Alat::whereIn ( 'id_user', $usersInProyek )
+                ->with ( 'proyek', 'user' )
                 ->orderBy ( 'updated_at', 'desc' )
-                ->get ();
+                ->paginate ( $request->input ( 'length', 10 ) );
         }
         elseif ( $user->role === 'Pegawai' )
         {
-            // Jika user bukan Admin, ambil proyek yang terkait dengan user
             $proyeks = $user->proyek ()
                 ->with ( "users" )
                 ->orderBy ( "created_at", "asc" )
                 ->orderBy ( "id", "asc" )
                 ->get ();
 
-            // Mengambil alat yang diassign kepada Pegawai berdasarkan id_user saja
             $alat = Alat::where ( 'id_user', $user->id )
                 ->with ( 'proyek', 'user' )
-                // ->orderByDesc ( 'updated_at' )
                 ->orderBy ( 'updated_at', 'desc' )
-                ->get ();
-
+                ->paginate ( $request->input ( 'length', 10 ) );
         }
 
-        // Render tampilan dengan data yang difilter
+        // Render tampilan dengan data paginasi
         return view ( 'dashboard.masterdata.alat.alat', [ 
+            'proyeks'    => $proyeks,
             'proyek'     => $proyeks,
             'alat'       => $alat,
             'headerPage' => "Master Data Alat",
             'page'       => 'Data Alat',
-            'proyeks'    => $proyeks,
         ] );
     }
 
@@ -148,4 +138,56 @@ class MasterDataAlatController extends Controller
         $alat->delete ();
         return response ()->json ( [ 'success' => 'Menghapus Data Barang' ] );
     }
+
+    public function getData ( Request $request )
+    {
+        $query = Alat::query ()->with ( 'proyek', 'user' );
+
+        // Filter berdasarkan search term
+        if ( $search = $request->input ( 'search.value' ) )
+        {
+            $query->where ( function ($q) use ($search)
+            {
+                $q->where ( 'nama_proyek', 'like', "%{$search}%" )
+                    ->orWhere ( 'jenis_alat', 'like', "%{$search}%" )
+                    ->orWhere ( 'kode_alat', 'like', "%{$search}%" )
+                    ->orWhere ( 'merek_alat', 'like', "%{$search}%" )
+                    ->orWhere ( 'tipe_alat', 'like', "%{$search}%" );
+            } );
+        }
+
+        // Sorting
+        if ( $order = $request->input ( 'order' ) )
+        {
+            $columnIndex   = $order[ 0 ][ 'column' ];
+            $columnName    = $request->input ( 'columns' )[ $columnIndex ][ 'data' ];
+            $sortDirection = $order[ 0 ][ 'dir' ];
+            $query->orderBy ( $columnName, $sortDirection );
+        }
+        else
+        {
+            $query->orderBy ( 'updated_at', 'desc' ); // Default order
+        }
+
+        // Handle pagination
+        $start           = $request->input ( 'start', 0 );
+        $length          = $request->input ( 'length', 10 );
+        $totalRecords    = Alat::count (); // Total records without filtering
+        $filteredRecords = $query->count (); // Total records after filtering
+
+        // Apply pagination
+        $alat = $query->skip ( $start )->take ( $length )->get ();
+
+        return response ()->json ( [ 
+            'draw'            => $request->input ( 'draw' ),
+            'recordsTotal'    => $totalRecords,
+            'recordsFiltered' => $filteredRecords,
+            'data'            => $alat,
+        ] );
+    }
+
+
+
+
+
 }

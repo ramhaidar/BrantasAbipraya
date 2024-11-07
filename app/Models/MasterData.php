@@ -25,4 +25,10 @@ class MasterData extends Model
         return $this->hasMany ( ATB::class, 'id_master_data' );
     }
 
+    public function user ()
+    {
+        return $this->belongsTo ( User::class, 'id_user' ); // Asumsi foreign key adalah 'id_user'
+    }
+
+
 }

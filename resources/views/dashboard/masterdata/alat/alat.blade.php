@@ -188,39 +188,9 @@
                     </a>
                 @endif
             </div>
-            <div class="ibox-body ms-0 ps-0 table-responsive">
-                <table class="border-dark m-0 table table-bordered table-striped" id="table-data" style="width:100%">
-                    <thead class="table-primary">
-                        <tr>
-                            <th>Nama Proyek</th>
-                            <th>Jenis Alat</th>
-                            <th>Kode Alat</th>
-                            <th>Merek Alat</th>
-                            <th>Tipe Alat</th>
-                            @if (Auth::user()->role == 'Pegawai')
-                                <th>Aksi</th>
-                            @endif
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($alat as $alt)
-                            <tr>
-                                <td>{{ $alt->nama_proyek }}</td>
-                                <td>{{ $alt->jenis_alat }}</td>
-                                <td>{{ $alt->kode_alat }}</td>
-                                <td>{{ $alt->merek_alat }}</td>
-                                <td>{{ $alt->tipe_alat }}</td>
-                                @if (Auth::user()->role == 'Pegawai')
-                                    <td class="center space-nowrap">
-                                        <button class="btn btn-danger deleteBtn" data-id="{{ $alt->id }}"><i class="bi bi-trash"></i></button>
-                                        <button class="btn btn-warning ms-3 ubahBtn" data-id="{{ $alt->id }}" onclick='fillFormEdit("{{ $alt->id }}")'><i class="bi bi-pencil-square"></i></button>
-                                    </td>
-                                @endif
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+
+            @include('dashboard.masterdata.alat.partials.table', ['alat' => $alat])
+
         </div>
     </div>
 
@@ -311,22 +281,65 @@
     <script>
         // Inisialisasi DataTables dengan konfigurasi khusus
         $('#table-data').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: "{{ route('master-data.alat.getData') }}",
+                type: "GET"
+            },
             language: {
                 paginate: {
                     previous: '<i class="bi bi-caret-left"></i>',
                     next: '<i class="bi bi-caret-right"></i>'
                 }
             },
-            pageLength: -1,
+            pageLength: 10,
             lengthMenu: [
-                [10, 25, 50, -1],
-                [10, 25, 50, "All"]
+                [10, 25, 50],
+                [10, 25, 50]
             ],
-            // order: [
-            //     [2, 'asc']
-            // ],
             ordering: true,
+            columns: [{
+                    data: 'nama_proyek',
+                    name: 'nama_proyek'
+                },
+                {
+                    data: 'jenis_alat',
+                    name: 'jenis_alat'
+                },
+                {
+                    data: 'kode_alat',
+                    name: 'kode_alat'
+                },
+                {
+                    data: 'merek_alat',
+                    name: 'merek_alat'
+                },
+                {
+                    data: 'tipe_alat',
+                    name: 'tipe_alat'
+                },
+                @if (Auth::user()->role == 'Pegawai')
+                    {
+                        data: 'aksi',
+                        name: 'aksi',
+                        orderable: false,
+                        searchable: false,
+                        render: function(data, type, row) {
+                            return `
+                    <button class="btn btn-danger deleteBtn" data-id="${row.id}">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                    <button class="btn btn-warning ms-3 ubahBtn" data-id="${row.id}" onclick='fillFormEdit("${row.id}")'>
+                        <i class="bi bi-pencil-square"></i>
+                    </button>
+                `;
+                        }
+                    }
+                @endif
+            ]
         });
+
 
         // Fungsi untuk menutup modal tambah data
         function closeModalAdd() {

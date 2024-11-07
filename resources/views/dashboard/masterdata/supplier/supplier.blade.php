@@ -188,28 +188,9 @@
                 </a>
                 {{-- @endif --}}
             </div>
-            <div class="ibox-body ms-0 ps-0 table-responsive">
-                <table class="border-dark m-0 table table-bordered table-striped" id="table-data" style="width:100%">
-                    <thead class="table-primary">
-                        <tr>
-                            <th scope=col>Supplier
-                            <th scope=col>Detail
-                            <th scope=col>
-                    <tbody id=body-table>
-                        @foreach ($proyeks as $proyek)
-                            <tr>
-                                <td scope=col>{{ $proyek->nama_proyek }}
-                                <td class="m-0 p-0">
-                                    <button class="btn text-primary m-0 ps-2" onclick='getDetailProyek("{{ $proyek->id }}")'>Detail</button>
-                                </td>
-                                <td class=center scope=col>
-                                    <button class="btn btn-danger" data-bs-target=#modalForDelete data-bs-toggle=modal onclick="validationSecond({{ $proyek->id }},'{{ $proyek->nama_proyek }}')"><i class="bi bi-trash3"></i></button>
-                                    <a class="btn btn-warning ms-3" data-bs-target=#modalForEdit data-bs-toggle=modal onclick="fillFormEdit({{ $proyek->id }})"><i class="bi bi-pencil-square"></i></a>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+
+            @include('dashboard.masterdata.supplier.partials.table', ['proyeks' => $proyeks])
+
         </div>
     </div>
 
@@ -260,22 +241,58 @@
     <script>
         // Inisialisasi DataTables dengan konfigurasi khusus
         $('#table-data').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: "{{ route('master-data.supplier.getData') }}",
+                type: "GET"
+            },
             language: {
                 paginate: {
                     previous: '<i class="bi bi-caret-left"></i>',
                     next: '<i class="bi bi-caret-right"></i>'
                 }
             },
-            pageLength: -1,
+            pageLength: 10,
             lengthMenu: [
                 [10, 25, 50, -1],
                 [10, 25, 50, "All"]
             ],
-            // order: [
-            //     [2, 'asc']
-            // ],
             ordering: true,
+            columns: [{
+                    data: 'nama_proyek',
+                    name: 'nama_proyek'
+                },
+                {
+                    data: 'id', // Menggunakan 'id' untuk merender tombol detail
+                    name: 'detail',
+                    orderable: false,
+                    searchable: false,
+                    render: function(data, type, row) {
+                        return `
+                    <button class="btn text-primary m-0 ps-2" onclick="getDetailProyek('${data}')">Detail</button>
+                `;
+                    }
+                },
+                {
+                    data: 'id', // Menggunakan 'id' untuk merender tombol aksi
+                    name: 'aksi',
+                    orderable: false,
+                    searchable: false,
+                    render: function(data, type, row) {
+                        return `
+                    <button class="btn btn-danger" data-bs-target="#modalForDelete" data-bs-toggle="modal" onclick="validationSecond(${data}, '${row.nama_proyek}')">
+                        <i class="bi bi-trash3"></i>
+                    </button>
+                    <a class="btn btn-warning ms-3" data-bs-target="#modalForEdit" data-bs-toggle="modal" onclick="fillFormEdit(${data})">
+                        <i class="bi bi-pencil-square"></i>
+                    </a>
+                `;
+                    }
+                }
+            ]
         });
+
 
         // Fungsi untuk menutup modal tambah data
         function closeModalAdd() {

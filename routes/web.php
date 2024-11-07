@@ -609,3 +609,8 @@ Route::get (
     [ MasterDataSupplierController::class, 'getData' ]
 )->middleware ( 'auth' )
     ->name ( 'master-data.supplier.getData' );
+
+Route::get ( '/test', function ()
+{
+    return view ( 'test' );
+} );

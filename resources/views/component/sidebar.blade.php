@@ -1,3 +1,46 @@
+@push('styles_1')
+    <style>
+        .nav-link {
+            display: flex;
+            align-items: center;
+        }
+
+        th {
+            white-space: nowrap;
+        }
+
+        .nav-treeview {
+            display: none;
+        }
+
+        .menu-open .nav-treeview {
+            display: block;
+        }
+
+        .scrollable-sidebar {
+            height: auto;
+            overflow-y: auto;
+        }
+
+        .sidebar-mini.sidebar-collapse .collapse-user-panel .user-info-text {
+            display: none !important;
+        }
+
+        .sidebar-mini.sidebar-collapse:hover .collapse-user-panel .user-info-text {
+            display: block !important;
+            opacity: 1;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                height: auto;
+                overflow-y: auto;
+            }
+        }
+    </style>
+@endpush
+
 <a class="brand-link ms-0 ps-0 container-fluid pt-3">
     <img class="brand-image elevation-3 img-circle" src="/favicon.ico" alt="Abipraya Logo" style="opacity:.8">
     <span class="brand-text font-weight-light">PT. Brantas Abipraya</span>
@@ -41,99 +84,118 @@
                 <div class="os-viewport os-viewport-native-scrollbars-invisible" style="overflow-y:scroll">
                     <div class="os-content" style="padding:0 8px;height:100%;width:100%">
                         <nav class="mt-2">
-                            <ul class="nav flex-column nav-pills nav-sidebar" data-accordion="false" data-widget="treeview" role="menu">
+                            <ul class="nav nav-pills nav-sidebar flex-column" data-accordion="false" data-widget="treeview" role="menu">
 
                                 <li class="nav-item">
-                                    <a class="nav-link" href="{{ route('dashboard') }}">
+                                    <a class="nav-link {{ str_contains($page, 'Dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
                                         <i class="bi me-2 nav-icon fs-5 bi-house-fill"></i>
-                                        <p>Dashboard</p>
+                                        <p class="truncate-text">
+                                            <span class="text-content">Dashboard</span>
+                                        </p>
                                     </a>
                                 </li>
-                                <li class="nav-item proyek-item">
-                                    <a class="nav-link" data-bs-toggle="collapse" data-bs-target="#subMenuMasterData" href="#" aria-expanded="false">
+
+                                <!-- Master Data Menu with Submenu -->
+                                <li class="nav-item has-treeview {{ str_contains($headerPage, 'Master Data') ? 'menu-open' : '' }}">
+                                    <a class="nav-link {{ str_contains($headerPage, 'Master Data') ? 'active' : '' }}" href="#">
                                         <i class="bi me-2 nav-icon fs-5 bi-database-fill-gear"></i>
                                         <p class="truncate-text">
                                             <span class="text-content">Master Data</span>
                                         </p>
-                                        <i class="bi bi-caret-right-fill right"></i>
+                                        <i class="right bi bi-caret-right-fill"></i>
                                     </a>
-                                    <ul class="collapse nav flex-column ms-1" id="subMenuMasterData">
+                                    <ul class="nav nav-treeview">
                                         <li class="nav-item">
-                                            <a class="nav-link" href="{{ route('master_data_alat') }}">
+                                            <a class="nav-link {{ str_contains($page, 'Data Alat') ? 'active' : '' }}" href="{{ route('master_data_alat') }}">
                                                 <i class="bi me-2 nav-icon fs-5 bi-gear-wide-connected"></i>
-                                                <p>Master Data Alat</p>
+                                                <p class="truncate-text">
+                                                    <span class="text-content">Alat</span>
+                                                </p>
                                             </a>
                                         </li>
-
                                         <li class="nav-item">
-                                            <a class="nav-link" href="{{ route('master_data_sparepart') }}">
+                                            <a class="nav-link {{ str_contains($page, 'Data Sparepart') ? 'active' : '' }}" href="{{ route('master_data_sparepart') }}">
                                                 <i class="bi me-2 nav-icon fs-5 bi-tools"></i>
-                                                <p>Master Data Sparepart</p>
+                                                <p class="truncate-text">
+                                                    <span class="text-content">Sparepart</span>
+                                                </p>
                                             </a>
                                         </li>
-
                                         <li class="nav-item">
-                                            <a class="nav-link" href="{{ route('master_data_supplier') }}">
+                                            <a class="nav-link {{ str_contains($page, 'Data Supplier') ? 'active' : '' }}" href="{{ route('master_data_supplier') }}">
                                                 <i class="bi me-2 nav-icon fs-5 bi-people-fill"></i>
-                                                <p>Master Data Supplier</p>
+                                                <p class="truncate-text">
+                                                    <span class="text-content">Supplier</span>
+                                                </p>
                                             </a>
                                         </li>
                                     </ul>
                                 </li>
 
+                                <!-- Menu for Admin Role Only -->
                                 @if (Auth::user()->role == 'Admin')
                                     <li class="nav-item">
-                                        <a class="nav-link" href="{{ route('proyek') }}">
+                                        <a class="nav-link {{ str_contains($page, 'Data Proyek') ? 'active' : '' }}" href="{{ route('proyek') }}">
                                             <i class="bi me-2 nav-icon bi-kanban"></i>
-                                            <p>Proyek</p>
+                                            <p class="truncate-text">
+                                                <span class="text-content">Proyek</span>
+                                            </p>
                                         </a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link" href="/users">
+                                        <a class="nav-link {{ str_contains($page, 'Data User') ? 'active' : '' }}" href="/users">
                                             <i class="bi me-2 nav-icon bi-people-fill"></i>
-                                            <p>User</p>
+                                            <p class="truncate-text">
+                                                <span class="text-content">User</span>
+                                            </p>
                                         </a>
                                     </li>
                                 @endif
 
                                 <li class="nav-header mt-2">LIST PROYEK: {{ $proyeks->count() }}</li>
 
+                                <!-- Dynamic Project Menus -->
                                 @foreach ($proyeks as $item)
-                                    <li class="nav-item proyek-item">
-                                        <a class="nav-link" data-bs-toggle="collapse" data-bs-target="#subMenuProyek_{{ $item->id }}" href="#" aria-expanded="false">
+                                    <li class="nav-item proyek-item has-treeview {{ str_contains($headerPage, $item->nama_proyek) ? 'menu-open' : '' }}">
+                                        <a class="nav-link {{ str_contains($headerPage, $item->nama_proyek) ? 'active' : '' }}" href="#">
                                             <i class="bi me-2 nav-icon fs-5 bi-briefcase-fill"></i>
                                             <p class="truncate-text">
                                                 <span class="text-content">{{ $item->nama_proyek }}</span>
                                             </p>
-                                            <i class="bi bi-caret-right-fill right"></i>
+                                            <i class="right bi bi-caret-right-fill"></i>
                                         </a>
-                                        <ul class="collapse nav flex-column ms-1" id="subMenuProyek_{{ $item->id }}">
-                                            <li class="nav-item">
-                                                <a class="nav-link submenu" data-bs-toggle="collapse" data-bs-target="#subMenuATB_{{ $item->id }}" href="#" aria-expanded="false">
+                                        <ul class="nav nav-treeview">
+
+                                            <!-- ATB Submenu -->
+                                            <li class="nav-item has-treeview {{ str_contains($page, 'ATB') && str_contains($headerPage, $item->nama_proyek) ? 'menu-open' : '' }}">
+                                                <a class="nav-link {{ str_contains($page, 'ATB') && str_contains($headerPage, $item->nama_proyek) ? 'active' : '' }}" href="#">
                                                     <i class="bi me-2 nav-icon fs-5 bi-calendar-week-fill"></i>
-                                                    <p>ATB <i class="bi bi-caret-right-fill right"></i></p>
+                                                    <p>
+                                                        ATB
+                                                        <i class="right bi bi-caret-right-fill"></i>
+                                                    </p>
                                                 </a>
-                                                <ul class="collapse nav flex-column ms-3" id="subMenuATB_{{ $item->id }}">
+                                                <ul class="nav nav-treeview">
                                                     <li class="nav-item">
-                                                        <a class="nav-link" href="{{ route('atb_hutang_unit_alat', ['id_proyek' => $item->id]) }}">
+                                                        <a class="nav-link {{ str_contains($page, 'Hutang Unit Alat') && str_contains($headerPage, $item->nama_proyek) ? 'active' : '' }}" href="{{ route('atb_hutang_unit_alat', ['id_proyek' => $item->id]) }}">
                                                             <i class="bi me-2 nav-icon fs-5 bi-calendar-week-fill"></i>
                                                             <p>Hutang Unit Alat</p>
                                                         </a>
                                                     </li>
                                                     <li class="nav-item">
-                                                        <a class="nav-link" href="{{ route('atb_panjar_unit_alat', ['id_proyek' => $item->id]) }}">
+                                                        <a class="nav-link {{ str_contains($page, 'Panjar Unit Alat') && str_contains($headerPage, $item->nama_proyek) ? 'active' : '' }}" href="{{ route('atb_panjar_unit_alat', ['id_proyek' => $item->id]) }}">
                                                             <i class="bi me-2 nav-icon fs-5 bi-calendar-week-fill"></i>
                                                             <p>Panjar Unit Alat</p>
                                                         </a>
                                                     </li>
                                                     <li class="nav-item">
-                                                        <a class="nav-link" href="{{ route('atb_mutasi_proyek', ['id_proyek' => $item->id]) }}">
+                                                        <a class="nav-link {{ str_contains($page, 'Mutasi Proyek') && str_contains($headerPage, $item->nama_proyek) ? 'active' : '' }}" href="{{ route('atb_mutasi_proyek', ['id_proyek' => $item->id]) }}">
                                                             <i class="bi me-2 nav-icon fs-5 bi-calendar-week-fill"></i>
                                                             <p>Mutasi Proyek</p>
                                                         </a>
                                                     </li>
                                                     <li class="nav-item">
-                                                        <a class="nav-link" href="{{ route('atb_panjar_proyek', ['id_proyek' => $item->id]) }}">
+                                                        <a class="nav-link {{ str_contains($page, 'Panjar Proyek') && str_contains($headerPage, $item->nama_proyek) ? 'active' : '' }}" href="{{ route('atb_panjar_proyek', ['id_proyek' => $item->id]) }}">
                                                             <i class="bi me-2 nav-icon fs-5 bi-calendar-week-fill"></i>
                                                             <p>Panjar Proyek</p>
                                                         </a>
@@ -141,32 +203,36 @@
                                                 </ul>
                                             </li>
 
-                                            <li class="nav-item">
-                                                <a class="nav-link submenu" data-bs-toggle="collapse" data-bs-target="#subMenuAPB_{{ $item->id }}" href="#" aria-expanded="false">
+                                            <!-- APB Submenu -->
+                                            <li class="nav-item has-treeview {{ str_contains($page, 'APB') && str_contains($headerPage, $item->nama_proyek) ? 'menu-open' : '' }}">
+                                                <a class="nav-link {{ str_contains($page, 'APB') && str_contains($headerPage, $item->nama_proyek) ? 'active' : '' }}" href="#">
                                                     <i class="bi me-2 nav-icon fs-5 bi-calendar-range-fill"></i>
-                                                    <p>APB <i class="bi bi-caret-right-fill right"></i></p>
+                                                    <p>
+                                                        APB
+                                                        <i class="right bi bi-caret-right-fill"></i>
+                                                    </p>
                                                 </a>
-                                                <ul class="collapse nav flex-column ms-3" id="subMenuAPB_{{ $item->id }}">
+                                                <ul class="nav nav-treeview">
                                                     <li class="nav-item">
-                                                        <a class="nav-link" href="{{ route('apb_ex_unit_alat', ['id_proyek' => $item->id]) }}">
+                                                        <a class="nav-link {{ str_contains($page, 'EX Unit Alat') && str_contains($headerPage, $item->nama_proyek) ? 'active' : '' }}" href="{{ route('apb_ex_unit_alat', ['id_proyek' => $item->id]) }}">
                                                             <i class="bi me-2 nav-icon fs-5 bi-calendar-range-fill"></i>
                                                             <p>EX Unit Alat</p>
                                                         </a>
                                                     </li>
                                                     <li class="nav-item">
-                                                        <a class="nav-link" href="{{ route('apb_ex_panjar_unit_alat', ['id_proyek' => $item->id]) }}">
+                                                        <a class="nav-link {{ str_contains($page, 'EX Panjar Unit Alat') && str_contains($headerPage, $item->nama_proyek) ? 'active' : '' }}" href="{{ route('apb_ex_panjar_unit_alat', ['id_proyek' => $item->id]) }}">
                                                             <i class="bi me-2 nav-icon fs-5 bi-calendar-range-fill"></i>
                                                             <p>EX Panjar Unit Alat</p>
                                                         </a>
                                                     </li>
                                                     <li class="nav-item">
-                                                        <a class="nav-link" href="{{ route('apb_ex_mutasi_saldo', ['id_proyek' => $item->id]) }}">
+                                                        <a class="nav-link {{ str_contains($page, 'EX Mutasi Saldo') && str_contains($headerPage, $item->nama_proyek) ? 'active' : '' }}" href="{{ route('apb_ex_mutasi_saldo', ['id_proyek' => $item->id]) }}">
                                                             <i class="bi me-2 nav-icon fs-5 bi-calendar-range-fill"></i>
                                                             <p>EX Mutasi Saldo</p>
                                                         </a>
                                                     </li>
                                                     <li class="nav-item">
-                                                        <a class="nav-link" href="{{ route('apb_ex_panjar_proyek', ['id_proyek' => $item->id]) }}">
+                                                        <a class="nav-link {{ str_contains($page, 'EX Panjar Proyek') && str_contains($headerPage, $item->nama_proyek) ? 'active' : '' }}" href="{{ route('apb_ex_panjar_proyek', ['id_proyek' => $item->id]) }}">
                                                             <i class="bi me-2 nav-icon fs-5 bi-calendar-range-fill"></i>
                                                             <p>EX Panjar Proyek</p>
                                                         </a>
@@ -174,58 +240,34 @@
                                                 </ul>
                                             </li>
 
-                                            <li class="nav-item">
-                                                <a class="nav-link submenu" data-bs-toggle="collapse" data-bs-target="#subMenuSaldo_{{ $item->id }}" href="#" aria-expanded="false">
-                                                    <i class="bi me-2 nav-icon fs-5 bi-cash-stack"></i>
-                                                    <p>Saldo <i class="bi bi-caret-right-fill right"></i>
-                                                    </p>
-                                                </a>
-                                                <ul class="collapse nav flex-column ms-3" id="subMenuSaldo_{{ $item->id }}">
-                                                    <li class="nav-item">
-                                                        <a class="nav-link" href="{{ route('saldo_ex_unit_alat', ['id_proyek' => $item->id]) }}">
-                                                            <i class="bi me-2 nav-icon fs-5 bi-cash-stack"></i>
-                                                            <p>EX Unit Alat</p>
-                                                        </a>
-                                                    </li>
-                                                    <li class="nav-item">
-                                                        <a class="nav-link" href="{{ route('saldo_ex_panjar_unit_alat', ['id_proyek' => $item->id]) }}">
-                                                            <i class="bi me-2 nav-icon fs-5 bi-cash-stack"></i>
-                                                            <p>EX Panjar Unit Alat</p>
-                                                        </a>
-                                                    </li>
-                                                    <li class="nav-item">
-                                                        <a class="nav-link" href="{{ route('saldo_ex_panjar_proyek', ['id_proyek' => $item->id]) }}">
-                                                            <i class="bi me-2 nav-icon fs-5 bi-cash-stack"></i>
-                                                            <p>EX Panjar Proyek</p>
-                                                        </a>
-                                                    </li>
-                                                </ul>
-                                            </li>
-
-                                            <li class="nav-item">
-                                                <a class="nav-link submenu" data-bs-toggle="collapse" data-bs-target="#subMenuLaporan_{{ $item->id }}" href="#" aria-expanded="false">
+                                            <!-- Laporan Submenu -->
+                                            <li class="nav-item has-treeview {{ str_contains($page, 'Summary') && str_contains($headerPage, $item->nama_proyek) ? 'menu-open' : '' }}">
+                                                <a class="nav-link {{ str_contains($page, 'Summary') && str_contains($headerPage, $item->nama_proyek) ? 'active' : '' }}" href="#">
                                                     <i class="bi me-2 nav-icon fs-5 bi-newspaper"></i>
-                                                    <p>Laporan <i class="bi bi-caret-right-fill right"></i>
+                                                    <p>
+                                                        Laporan
+                                                        <i class="right bi bi-caret-right-fill"></i>
                                                     </p>
                                                 </a>
-                                                <ul class="collapse nav flex-column ms-3" id="subMenuLaporan_{{ $item->id }}">
+                                                <ul class="nav nav-treeview">
                                                     <li class="nav-item">
-                                                        <a class="nav-link" href="{{ route('laporan.summary', ['id_proyek' => $item->id]) }}">
+                                                        <a class="nav-link {{ str_contains($page, 'Summary') && str_contains($headerPage, $item->nama_proyek) ? 'active' : '' }}" href="{{ route('laporan.summary', ['id_proyek' => $item->id]) }}">
                                                             <i class="bi me-2 nav-icon fs-5 bi-newspaper"></i>
                                                             <p>Summary</p>
                                                         </a>
                                                     </li>
-
                                                 </ul>
                                             </li>
+
                                         </ul>
                                     </li>
                                 @endforeach
 
-                                <div class="pb-5">
+                                <div class="mb-5">
                                     <p></p>
                                 </div>
                             </ul>
+
                         </nav>
                     </div>
                 </div>
@@ -246,53 +288,6 @@
     </div>
 </div>
 
-@push('styles_1')
-    <style>
-        .nav-link {
-            display: flex;
-            align-items: center;
-        }
-
-        th {
-            white-space: nowrap;
-        }
-
-        .nav-treeview {
-            display: none;
-        }
-
-        .menu-open .nav-treeview {
-            display: block;
-        }
-
-        .scrollable-sidebar {
-            height: auto;
-            overflow-y: auto;
-        }
-
-        .custom-truncate {
-            max-width: 150px;
-        }
-
-        .sidebar-mini.sidebar-collapse .collapse-user-panel .user-info-text {
-            display: none !important;
-        }
-
-        .sidebar-mini.sidebar-collapse:hover .collapse-user-panel .user-info-text {
-            display: block !important;
-            opacity: 1;
-            transition: opacity 0.3s ease-in-out;
-        }
-
-        @media (max-width: 991.98px) {
-            .sidebar {
-                height: auto;
-                overflow-y: auto;
-            }
-        }
-    </style>
-@endpush
-
 @push('scripts_1')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/locale/id.min.js" integrity="sha512-he8U4ic6kf3kustvJfiERUpojM8barHoz0WYpAUDWQVn61efpm3aVAD8RWL8OloaDDzMZ1gZiubF9OSdYBqHfQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -302,49 +297,6 @@
     </script>
 
     <script>
-        const eventNavLink = target => {
-            const elTarget = document.querySelector(target);
-            elTarget.style.display = elTarget.style.display == 'none' ? 'block' : 'none';
-
-            const navLink = elTarget.closest('.nav-item');
-            if (!navLink.classList.contains('menu-is-opening')) {
-                navLink.classList.add('menu-is-opening', 'menu-open');
-            } else {
-                navLink.classList.remove('menu-is-opening', 'menu-open');
-            }
-        };
-
-        window.addEventListener('load', () => {
-            const documentWidth = document.documentElement.clientWidth;
-
-            if (documentWidth < 991.98) {
-                document.querySelector('body').classList.add('sidebar-collapse');
-            } else {
-                document.querySelector('body').classList.remove('sidebar-collapse');
-            }
-        });
-
-        window.addEventListener('resize', () => {
-            const documentWidth = document.documentElement.clientWidth;
-            if (documentWidth < 991.98) {
-                document.querySelector('body').classList.add('sidebar-collapse');
-            } else {
-                document.querySelector('body').classList.remove('sidebar-collapse');
-            }
-        });
-
-        $(document).ready(function() {
-            $('.nav-link').on('click', function(event) {
-                let $nextElement = $(this).next('.nav-treeview');
-                if ($nextElement.length) {
-                    event.preventDefault();
-                    $nextElement.toggle();
-                    $(this).parent().toggleClass('menu-open');
-                    event.stopPropagation();
-                }
-            });
-        });
-
         $(document).ready(function() {
             function toProperCase(text) {
                 return text.replace(/\w\S*/g, function(word) {
@@ -352,7 +304,7 @@
                 });
             }
 
-            const truncateLength = 15;
+            const truncateLength = 13;
 
             $(".truncate-text .text-content").each(function() {
                 let text = $(this).text().trim();
@@ -372,25 +324,76 @@
             });
         });
 
+        const eventNavLink = target => {
+            const elTarget = document.querySelector(target);
+            elTarget.style.display = elTarget.style.display == 'none' ? 'block' : 'none';
+
+            const navLink = elTarget.closest('.nav-item');
+            if (!navLink.classList.contains('menu-is-opening')) {
+                navLink.classList.add('menu-is-opening', 'menu-open');
+            } else {
+                navLink.classList.remove('menu-is-opening', 'menu-open');
+            }
+        };
+
+        window.addEventListener('load', () => {
+            const documentWidth = document.documentElement.clientWidth;
+
+            if (documentWidth < 768) {
+                document.querySelector('body').classList.add('sidebar-collapse');
+            } else {
+                // document.querySelector('body').classList.remove('sidebar-collapse');
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            const documentWidth = document.documentElement.clientWidth;
+            if (documentWidth < 768) {
+                document.querySelector('body').classList.add('sidebar-collapse');
+            } else {
+                // document.querySelector('body').classList.remove('sidebar-collapse');
+            }
+        });
+
+        $(document).ready(function() {
+            $('.nav-link').on('click', function(event) {
+                let $nextElement = $(this).next('.nav-treeview');
+                if ($nextElement.length) {
+                    event.preventDefault();
+                    $nextElement.toggle();
+                    $(this).parent().toggleClass('menu-open');
+                    event.stopPropagation();
+                }
+            });
+        });
+
+
+
 
         $(document).ready(function() {
 
             function toggleUserPanelText(isCollapsed) {
                 const userPanel = document.querySelector('.collapse-user-panel .user-info-text');
+                const caretIcons = document.querySelectorAll('.nav-link .bi-caret-right-fill'); // Select all caret icons
 
                 if (isCollapsed) {
-
                     userPanel.style.display = 'none';
                     userPanel.style.opacity = '0';
                     userPanel.style.visibility = 'hidden';
-                } else {
 
+                    // Hide all caret icons
+                    caretIcons.forEach(icon => icon.style.display = 'none');
+                } else {
                     userPanel.style.display = 'block';
                     userPanel.style.opacity = '1';
                     userPanel.style.visibility = 'visible';
+
+                    // Show all caret icons
+                    caretIcons.forEach(icon => icon.style.display = 'inline');
                 }
             }
 
+            // Listen for sidebar collapse events
             $(document).on('collapsed.lte.pushmenu', function() {
                 toggleUserPanelText(true);
             });
@@ -399,19 +402,24 @@
                 toggleUserPanelText(false);
             });
 
+            // Initial check on page load
             toggleUserPanelText($('body').hasClass('sidebar-collapse'));
 
             const sidebar = document.querySelector('.main-sidebar');
-            sidebar.addEventListener('mouseenter', function() {
 
+            sidebar.addEventListener('mouseenter', function() {
                 const userPanel = document.querySelector('.collapse-user-panel .user-info-text');
+                const caretIcons = document.querySelectorAll('.nav-link .bi-caret-right-fill');
+
                 userPanel.style.display = 'block';
                 userPanel.style.opacity = '1';
                 userPanel.style.visibility = 'visible';
+
+                // Show all caret icons on hover
+                caretIcons.forEach(icon => icon.style.display = 'inline');
             });
 
             sidebar.addEventListener('mouseleave', function() {
-
                 toggleUserPanelText($('body').hasClass('sidebar-collapse'));
             });
         });
@@ -465,6 +473,21 @@
             toggleSearchIcon();
         });
     </script>
-    
+
+    <script>
+        $(document).ready(function() {
+            // Temukan elemen dengan kelas `active` dalam sidebar
+            const activeElement = document.querySelector('.nav-sidebar .active');
+
+            if (activeElement) {
+                // Gulir ke elemen `active` jika ditemukan
+                activeElement.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }
+        });
+    </script>
+
     @yield('script')
 @endpush

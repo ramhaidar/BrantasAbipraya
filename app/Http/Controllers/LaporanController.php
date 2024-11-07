@@ -126,8 +126,8 @@ class LaporanController extends Controller
         // $totalSaldo       = $totalPengeluaran - $totalPenerimaan;
 
         return view ( "dashboard.laporan.summary", [ 
-            "headerPage"       => "Laporan",
-            "page"             => "Laporan Summary",
+            "headerPage"       => $proyek->nama_proyek,
+            "page"             => "Summary",
             "proyek"           => $proyek,
             "proyeks"          => $proyeks,
             "totalPenerimaan"  => $totalPenerimaan,

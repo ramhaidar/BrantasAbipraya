@@ -109,7 +109,7 @@ class ATBController extends Controller
         }
 
         // if ( $tipe != "Mutasi Proyek" )
-        // {
+// {
         $atb = ATB::with ( [ 
             'komponen.first_group',
             'masterData',
@@ -119,18 +119,18 @@ class ATBController extends Controller
             ->where ( 'id_proyek', $id_proyek )
             ->get ();
         // }
-        // else
-        // {
-        //     $atb = ATB::with ( [ 
-        //         'komponen.first_group',
-        //         'masterData',
-        //     ] )
-        //         ->orderBy ( 'tanggal', 'asc' )
-        //         ->where ( 'tipe', "Hutang Unit Alat" )
-        //         ->whereNotNull ( 'id_asal_proyek' )
-        //         ->where ( 'id_proyek', $id_proyek )
-        //         ->get ();
-        // }
+// else
+// {
+//     $atb = ATB::with ( [ 
+//         'komponen.first_group',
+//         'masterData',
+//     ] )
+//         ->orderBy ( 'tanggal', 'asc' )
+//         ->where ( 'tipe', "Hutang Unit Alat" )
+//         ->whereNotNull ( 'id_asal_proyek' )
+//         ->where ( 'id_proyek', $id_proyek )
+//         ->get ();
+// }
 
         $komponen = Komponen::with ( [ "first_group", "second_group" ] )
             ->get ()

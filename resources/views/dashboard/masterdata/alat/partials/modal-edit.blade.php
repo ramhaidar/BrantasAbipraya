@@ -52,15 +52,17 @@
     </div>
 </div>
 
-<style>
-    /* CSS for required asterisk */
-    .form-label.required::after {
-        content: " *";
-        color: red;
-        font-weight: bold;
-        margin-left: 2px;
-    }
-</style>
+@push('styles_3')
+    <style>
+        /* CSS for required asterisk */
+        .form-label.required::after {
+            content: " *";
+            color: red;
+            font-weight: bold;
+            margin-left: 2px;
+        }
+    </style>
+@endpush
 
 @push('scripts_3')
     <script>

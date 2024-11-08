@@ -51,7 +51,7 @@
     </div>
 </div>
 
-@push('scripts_3')
+@push('styles_3')
     <style>
         /* CSS for required asterisk */
         .form-label.required::after {
@@ -61,7 +61,9 @@
             margin-left: 2px;
         }
     </style>
+@endpush
 
+@push('scripts_3')
     <script>
         (() => {
             'use strict'

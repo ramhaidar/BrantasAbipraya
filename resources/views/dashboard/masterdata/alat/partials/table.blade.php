@@ -1,16 +1,16 @@
 <div class="ibox-body ms-0 ps-0 table-responsive">
-    <table class="border-dark m-0 table table-bordered table-striped" id="table-data" style="width:100%">
+    <table class="m-0 table table-bordered table-striped" id="table-data">
         <thead class="table-primary">
             <tr>
-                <th>Jenis Alat</th>
-                <th>Kode Alat</th>
-                <th>Merek Alat</th>
-                <th>Tipe Alat</th>
-                <th class="col-action text-center">Aksi</th>
+                <th class="text-center">Jenis Alat</th>
+                <th class="text-center">Kode Alat</th>
+                <th class="text-center">Merek Alat</th>
+                <th class="text-center">Tipe Alat</th>
+                <th class="text-center">Aksi</th>
             </tr>
         </thead>
         <tbody>
-            @foreach ($alat as $alt)
+            {{-- @foreach ($alat as $alt)
                 <tr>
                     <td>{{ $alt->jenis_alat }}</td>
                     <td>{{ $alt->kode_alat }}</td>
@@ -25,22 +25,21 @@
                         </button>
                     </td>
                 </tr>
-            @endforeach
+            @endforeach --}}
         </tbody>
     </table>
 </div>
 
-<style>
-    .col-action {
-        width: 1%;
-        white-space: nowrap;
-    }
-</style>
+@push('styles_3')
+    <style>
+    </style>
+@endpush
 
 @push('scripts_3')
     <script>
         $('#table-data').DataTable({
             processing: true,
+            responsive: true,
             serverSide: true,
             ajax: {
                 url: "{{ route('master-data.alat.getData') }}",
@@ -59,6 +58,23 @@
             ],
             ordering: true,
             order: [],
+            columnDefs: [{
+                targets: 4, // Indeks kolom 'Aksi'
+                className: 'text-center nowrap-column', // Tambahkan kelas CSS khusus untuk kolom ini
+                orderable: false,
+                searchable: false,
+                width: "1%", // Atur agar kolom ini mengambil ruang minimum
+                render: function(data, type, row) {
+                    return `
+                        <button class="btn btn-danger deleteBtn" data-id="${row.id}">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                        <button class="btn btn-warning ms-3 ubahBtn" data-id="${row.id}" onclick="fillFormEdit(${row.id})">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                    `;
+                }
+            }],
             columns: [{
                     data: 'jenis_alat',
                     name: 'jenis_alat'
@@ -77,19 +93,7 @@
                 },
                 {
                     data: 'aksi',
-                    name: 'aksi',
-                    orderable: false,
-                    searchable: false,
-                    render: function(data, type, row) {
-                        return `
-        <button class="btn btn-danger deleteBtn" data-id="${row.id}">
-            <i class="bi bi-trash"></i>
-        </button>
-        <button class="btn btn-warning ms-3 ubahBtn" data-id="${row.id}" onclick="fillFormEdit(${row.id})">
-            <i class="bi bi-pencil-square"></i>
-        </button>
-    `;
-                    }
+                    name: 'aksi'
                 }
             ]
         });

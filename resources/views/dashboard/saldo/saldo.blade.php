@@ -308,7 +308,7 @@
                     <h5 class="fs-5 modal-title fw-bold"id=modalForAddLabel>Tambah Data ATB Baru</h5><button class=btn-close type=button onclick=closeModalAdd()></button>
                 </div>
                 <div class="w-100 modal-body row">
-                    <form class="w-100 align-items-center flex-column gap-0"id=addDataForm method=POST action="{{ route('atb.store') }}">@csrf<div class=mb-4><label class=form-label for=tipe_atb>Tipe ATB</label>
+                    <form class="w-100 align-items-center flex-column gap-0"id=addDataForm method=POST action="{{ route('atb.post.store') }}">@csrf<div class=mb-4><label class=form-label for=tipe_atb>Tipe ATB</label>
                             <div class=input-group><select class=form-control id=pilihan-proyek1 name=tipe_atb>
                                     <option value=hutang-unit-alat>Hutang Unit Alat
                                     <option value=panjar-unit-alat>Panjar Unit Alat

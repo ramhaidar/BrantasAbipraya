@@ -421,7 +421,7 @@
                     <button class="btn-close" type="button" onclick="closeModalAdd()"></button>
                 </div>
                 <div class="w-100 modal-body row">
-                    <form class="w-100 align-items-center flex-column gap-0" id="addDataForm" method="POST" action="{{ route('atb.store') }}" enctype="multipart/form-data">
+                    <form class="w-100 align-items-center flex-column gap-0" id="addDataForm" method="POST" action="{{ route('atb.post.store') }}" enctype="multipart/form-data">
                         @csrf
                         <div class="mb-4" hidden>
                             <label class="form-label" for="tipe">Tipe ATB</label>
@@ -661,7 +661,7 @@
                     <h5 class="modal-title" id="staticBackdropLabel">Import Data</h5>
                     <button class="btn-close" data-bs-dismiss="modal" type="button" aria-label="Close"></button>
                 </div>
-                <form action="{{ route('atb.import') }}" method="post" enctype="multipart/form-data">
+                <form action="{{ route('atb.import.post') }}" method="post" enctype="multipart/form-data">
                     @csrf
                     <div class="modal-body">
                         <div class="form-group">

@@ -1,3 +1,47 @@
+td {
+    white-space: nowrap;
+}
+
+.alert-custom-css {
+    max-width: 400px;
+    width: 90%;
+}
+
+#form-group {
+    width: 90%;
+}
+
+.space-nowrap {
+    white-space: nowrap;
+}
+
+.center {
+    text-align: center !important;
+}
+
+.custom-confirm-delete {
+    margin-right: 5%;
+}
+
+.custom-cancel-delete {
+    margin-left: 5%;
+}
+
+.custom-action-delete {
+    width: 100% !important;
+    justify-content: space-between;
+}
+
+@media screen and (max-width: 500px) {
+    #button-for-modal-add span {
+        display: none;
+    }
+
+    #button-for-modal-add {
+        font-size: 20px;
+    }
+}
+
 .ibox {
     position: relative;
     margin-bottom: 25px;
@@ -5,25 +49,19 @@
     background-color: #fff;
     box-shadow: 0px 0px 10px 5px rgba(0, 0, 0, 0.2);
 }
+
 .ibox .ibox-head {
     border-bottom: 1px solid #eee;
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: -ms-flexbox;
     display: flex;
-    -webkit-box-pack: justify;
-    -webkit-justify-content: space-between;
-    -ms-flex-pack: justify;
     justify-content: space-between;
-    -webkit-box-align: center;
-    -webkit-align-items: center;
-    -ms-flex-align: center;
     align-items: center;
     height: 50px;
 }
+
 .ibox .ibox-body {
     padding: 15px 20px 20px 20px;
 }
+
 #table-data_wrapper {
     display: flex;
     flex-wrap: wrap;
@@ -31,18 +69,14 @@
     gap: 15px;
     margin-top: 5px;
 }
+
 #table-data {
     padding-left: 20px;
     padding-right: 20px;
 }
+
 #table-data th {
     white-space: nowrap;
-}
-
-label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
 }
 
 .dataTables_length {
@@ -95,19 +129,6 @@ label {
     z-index: 2;
 }
 
-.col-sm-12.col-md-6:nth-child(2) {
-    padding-right: 0px;
-}
-
-.col-sm-12.col-md-7:nth-child(2) {
-    padding-right: 0px;
-}
-
-.container.head-content,
-.container.table-responsive,
-.container.alert {
-    max-width: 700px;
-}
 #table-data_wrapper
     .row:first-child:first-child
     .col-sm-12.col-md-6:first-child {
@@ -119,32 +140,30 @@ label {
         justify-content: space-between;
         gap: 10px;
     }
+
     .col-sm-12.col-md-5 {
         display: none;
     }
+
     .col-sm-12.col-md-6:first-child {
         min-width: 200px;
     }
+
     .col-sm-12.col-md-6:nth-child(2) {
         min-width: 280px;
         padding-left: 0px;
     }
+
     .col-sm-12.col-md-6 {
         width: 45%;
         padding-right: 0px;
     }
-    .container {
-        max-width: 700px;
-        width: 90%;
-    }
-    .col-sm-12.col-md-7 {
-        padding-left: 0px;
-        padding-right: 0px;
-    }
+
     #table-data_filter {
         justify-content: flex-start;
     }
 }
+
 @media only screen and (max-width: 626px) {
     #table-data_filter {
         justify-content: flex-start;

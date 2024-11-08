@@ -138,7 +138,7 @@
             padding: 0px;
         }
 
-        @media only screen and (max-width: 768.7px) {
+        @media only screen and (max-width: 768px) {
             .row:first-child {
                 justify-content: space-between;
                 gap: 10px;
@@ -384,10 +384,14 @@
                 });
         }
 
+        const proyekUrl = "{{ route('proyek.show', ':params') }}";
+
         function getProyek(params) {
             return new Promise(function(resolve, reject) {
+                const url = proyekUrl.replace(':params', params);
+
                 $.ajax({
-                    url: "/proyek/" + params,
+                    url: url,
                     type: 'GET',
                     dataType: 'json',
                     success: function(response) {

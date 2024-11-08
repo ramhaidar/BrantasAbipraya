@@ -109,7 +109,7 @@
                 </div>
             </div>
             <div class="col-lg-4 align-items-center login d-flex flex-column justify-content-center">
-                <form id="loginForm" method="post" action="/login">
+                <form id="loginForm" method="post" action="{{ route('login.post') }}">
                     <div class="container-fluid w-100 h-100">
                         @csrf
                         <p class="fs-1 mt-5 fw-semibold">Selamat datang di

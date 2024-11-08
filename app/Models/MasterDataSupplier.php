@@ -3,13 +3,23 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class MasterDataSupplier extends Model
 {
-    protected $table = 'master_data_supplier'; //nama tabel master data
+    protected $table = 'master_data_suppliers';
 
-    protected $fillable = [
-        'id',
-        'supplier',
+    protected $fillable = [ 
+        'nama',
     ];
+
+    protected $casts = [ 
+        'id'   => 'integer',
+        'nama' => 'string',
+    ];
+
+    public function spareparts () : BelongsToMany
+    {
+        return $this->belongsToMany ( MasterDataSparepart::class, 'link_supplier_sparepart', 'id_supplier', 'id_sparepart' );
+    }
 }

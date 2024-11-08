@@ -31,7 +31,8 @@
                     <h1 class="fs-5 modal-title" id="modalForAddLabel">Tambah Data Master</h1>
                     <button class="btn-close" type="button" onclick="closeModalAdd()"></button>
                 </div>
-                <form class="d-flex w-100 align-items-center flex-column gap-3" style="overflow-y:auto" method="POST" action="{{ route('master_data.store') }}">
+                {{-- <form class="d-flex w-100 align-items-center flex-column gap-3" style="overflow-y:auto" method="POST" action="{{ route('master_data.store') }}"> --}}
+                <form class="d-flex w-100 align-items-center flex-column gap-3" style="overflow-y:auto" method="POST" action="#">
                     @csrf
                     <div class="d-flex w-100 align-items-center flex-column modal-body">
                         <div id="form-group">

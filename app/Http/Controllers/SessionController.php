@@ -1,17 +1,11 @@
 <?php
 namespace App\Http\Controllers;
-use App\Models\User;
-use App\Models\Dealer;
-use App\Models\CarType;
-use App\Models\Regency;
-use App\Models\CarColor;
-use App\Models\CarModel;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
-class SessionContrroller extends Controller
+class SessionController extends Controller
 {
     public function index ()
     {

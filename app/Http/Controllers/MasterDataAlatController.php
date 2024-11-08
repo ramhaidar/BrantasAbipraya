@@ -1,18 +1,17 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use App\Models\Alat;
+use App\Models\MasterDataAlat;
 use App\Models\Proyek;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class MasterDataAlatController extends Controller
 {
-    public function index ( Request $request )
+    public function render ( Request $request )
     {
-        $user = Auth::user ();
-
-        // Inisialisasi variabel $proyeks dan $alat
+        $user    = Auth::user ();
         $proyeks = [];
         $alat    = [];
 
@@ -23,9 +22,8 @@ class MasterDataAlatController extends Controller
                 ->orderBy ( "id", "asc" )
                 ->get ();
 
-            $alat = Alat::with ( 'proyek', 'user' )
-                ->orderBy ( 'updated_at', 'desc' )
-                ->paginate ( $request->input ( 'length', 10 ) ); // Default 10 rows per page
+            $alat = MasterDataAlat::orderBy ( 'updated_at', 'desc' )
+                ->paginate ( $request->input ( 'length', 10 ) );
         }
         elseif ( $user->role === 'Boss' )
         {
@@ -36,8 +34,7 @@ class MasterDataAlatController extends Controller
                 ->get ();
 
             $usersInProyek = $proyeks->pluck ( 'users.*.id' )->flatten ();
-            $alat          = Alat::whereIn ( 'id_user', $usersInProyek )
-                ->with ( 'proyek', 'user' )
+            $alat          = MasterDataAlat::whereIn ( 'id_user', $usersInProyek )
                 ->orderBy ( 'updated_at', 'desc' )
                 ->paginate ( $request->input ( 'length', 10 ) );
         }
@@ -49,13 +46,11 @@ class MasterDataAlatController extends Controller
                 ->orderBy ( "id", "asc" )
                 ->get ();
 
-            $alat = Alat::where ( 'id_user', $user->id )
-                ->with ( 'proyek', 'user' )
+            $alat = MasterDataAlat::where ( 'id_user', $user->id )
                 ->orderBy ( 'updated_at', 'desc' )
                 ->paginate ( $request->input ( 'length', 10 ) );
         }
 
-        // Render tampilan dengan data paginasi
         return view ( 'dashboard.masterdata.alat.alat', [ 
             'proyeks'    => $proyeks,
             'proyek'     => $proyeks,
@@ -65,98 +60,91 @@ class MasterDataAlatController extends Controller
         ] );
     }
 
+    /**
+     * Store a newly created resource in storage.
+     */
     public function store ( Request $request )
     {
-        $request->validate ( [ 
-            'nama_proyek' => [ 'string', 'nullable' ],
-            'jenis_alat'  => [ 'required', 'string' ],
-            'merek_alat'  => [ 'required', 'string' ],
-            'tipe_alat'   => [ 'required', 'string' ],
-            'kode_alat'   => [ 'required', 'string' ],
+        $validatedData = $request->validate ( [ 
+            'jenis_alat'    => 'required|string',
+            'kode_alat'     => 'required|string',
+            'merek_alat'    => 'required|string',
+            'tipe_alat'     => 'required|string',
+            'serial_number' => 'required|string',
         ] );
 
-        $alat              = new Alat;
-        $alat->nama_proyek = $request->nama_proyek;
-        $alat->jenis_alat  = $request->jenis_alat;
-        $alat->merek_alat  = $request->merek_alat;
-        $alat->tipe_alat   = $request->tipe_alat;
-        $alat->kode_alat   = $request->kode_alat;
-        $alat->id_user     = Auth::id (); // Menyimpan ID user yang menambahkan alat
-        $alat->save ();
+        $alat = MasterDataAlat::create ( $validatedData );
 
-        return back ()->with ( 'success', 'Data Alat Berhasil Ditambahkan' );
+        return redirect ()->route ( 'master_data_alat' )->with ( 'success', 'Master Data Alat berhasil ditambahkan' );
     }
 
+    /**
+     * Display the specified resource.
+     */
     public function show ( $id )
     {
-        $alat = Alat::find ( $id );
-        if ( $alat )
-        {
-            return response ()->json ( [ 'message' => 'Data barang berhasil ditemukan', 'data' => $alat ] );
-        }
-        else
-        {
-            return response ()->json ( [ 'message' => 'Barang not found' ], 404 );
-        }
+        $alat = MasterDataAlat::findOrFail ( $id );
+
+        return response ()->json ( $alat );
     }
 
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit ( $id )
+    {
+        $alat = MasterDataAlat::findOrFail ( $id );
+
+        return view ( 'dashboard.masterdata.alat.edit', compact ( 'alat' ) );
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
     public function update ( Request $request, $id )
     {
-        $alat = Alat::find ( $id );
-        if ( $alat )
-        {
-            $request->validate ( [ 
-                'nama_proyek' => [ 'string', 'nullable' ],
-                'jenis_alat'  => [ 'required', 'string' ],
-                'merek_alat'  => [ 'required', 'string' ],
-                'tipe_alat'   => [ 'required', 'string' ],
-                'kode_alat'   => [ 'required', 'string' ],
-            ] );
+        $alat = MasterDataAlat::findOrFail ( $id );
 
-            $alat->nama_proyek = $request->nama_proyek;
-            $alat->jenis_alat  = $request->jenis_alat;
-            $alat->merek_alat  = $request->merek_alat;
-            $alat->tipe_alat   = $request->tipe_alat;
-            $alat->kode_alat   = $request->kode_alat;
-            $alat->save ();
+        $validatedData = $request->validate ( [ 
+            'jenis_alat'    => 'required|string',
+            'kode_alat'     => 'required|string',
+            'merek_alat'    => 'required|string',
+            'tipe_alat'     => 'required|string',
+            'serial_number' => 'required|string',
+        ] );
 
-            return back ()->with ( 'success', 'Mengubah Data Barang' );
-        }
-        else
-        {
-            return back ()->with ( 'error', 'Barang tidak ditemukan!' );
-        }
+        $alat->update ( $validatedData );
+
+        return redirect ()->route ( 'master_data_alat' )->with ( 'success', 'Master Data Alat berhasil diperbarui' );
     }
 
+    /**
+     * Remove the specified resource from storage.
+     */
     public function destroy ( $id )
     {
-        $alat = Alat::find ( $id );
-        if ( ! $alat )
-        {
-            return response ()->json ( [ 'message' => 'Alat not found' ], 404 );
-        }
+        $alat = MasterDataAlat::findOrFail ( $id );
         $alat->delete ();
-        return response ()->json ( [ 'success' => 'Menghapus Data Barang' ] );
+
+        return redirect ()->route ( 'master_data_alat' )->with ( 'success', 'Master Data Alat berhasil dihapus' );
     }
 
     public function getData ( Request $request )
     {
-        $query = Alat::query ()->with ( 'proyek', 'user' );
+        $query = MasterDataAlat::query ();
 
-        // Filter berdasarkan search term
         if ( $search = $request->input ( 'search.value' ) )
         {
             $query->where ( function ($q) use ($search)
             {
-                $q->where ( 'nama_proyek', 'like', "%{$search}%" )
-                    ->orWhere ( 'jenis_alat', 'like', "%{$search}%" )
+                $q->where ( 'jenis_alat', 'like', "%{$search}%" )
                     ->orWhere ( 'kode_alat', 'like', "%{$search}%" )
                     ->orWhere ( 'merek_alat', 'like', "%{$search}%" )
-                    ->orWhere ( 'tipe_alat', 'like', "%{$search}%" );
+                    ->orWhere ( 'tipe_alat', 'like', "%{$search}%" )
+                    ->orWhere ( 'serial_number', 'like', "%{$search}%" );
             } );
         }
 
-        // Sorting
         if ( $order = $request->input ( 'order' ) )
         {
             $columnIndex   = $order[ 0 ][ 'column' ];
@@ -166,16 +154,14 @@ class MasterDataAlatController extends Controller
         }
         else
         {
-            $query->orderBy ( 'updated_at', 'desc' ); // Default order
+            $query->orderBy ( 'updated_at', 'desc' );
         }
 
-        // Handle pagination
         $start           = $request->input ( 'start', 0 );
         $length          = $request->input ( 'length', 10 );
-        $totalRecords    = Alat::count (); // Total records without filtering
-        $filteredRecords = $query->count (); // Total records after filtering
+        $totalRecords    = MasterDataAlat::count ();
+        $filteredRecords = $query->count ();
 
-        // Apply pagination
         $alat = $query->skip ( $start )->take ( $length )->get ();
 
         return response ()->json ( [ 
@@ -185,9 +171,4 @@ class MasterDataAlatController extends Controller
             'data'            => $alat,
         ] );
     }
-
-
-
-
-
 }

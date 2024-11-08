@@ -20,7 +20,8 @@ class DatabaseSeeder extends Seeder
                 ProyekSeeder::class,
                     // ATBSeeder::class,
                     // APBSeeder::class,
-                MasterDataSeeder::class,
+                    // MasterDataSeeder::class,
+                MasterDataAlatSeeder::class,
             ]
         );
     }

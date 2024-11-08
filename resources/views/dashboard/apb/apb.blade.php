@@ -519,7 +519,7 @@
                     <button class="btn-close" type="button" onclick="closeModalAdd()"></button>
                 </div>
                 <div class="w-100 modal-body row">
-                    <form class="w-100 align-items-center flex-column gap-0" id="addDataForm" method="POST" action="{{ route('apb.store') }}" enctype="multipart/form-data">
+                    <form class="w-100 align-items-center flex-column gap-0" id="addDataForm" method="POST" action="{{ route('apb.post.store') }}" enctype="multipart/form-data">
                         @csrf
                         @if ($page != 'Data APB EX Mutasi Saldo')
                             <div class="mb-3">

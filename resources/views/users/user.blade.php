@@ -139,7 +139,7 @@
             padding: 0px;
         }
 
-        @media only screen and (max-width: 768.7px) {
+        @media only screen and (max-width: 768px) {
             .row:first-child {
                 justify-content: space-between;
                 gap: 10px;

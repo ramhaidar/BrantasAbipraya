@@ -25,7 +25,7 @@ class User extends Authenticatable
         'role',
         'phone',
         'email',
-        'password'
+        'password',
     ];
 
     /**
@@ -46,10 +46,21 @@ class User extends Authenticatable
     protected function casts () : array
     {
         return [ 
-            'email_verified_at' => 'datetime',
-            'password'          => 'hashed',
+            'id'             => 'integer',
+            'name'           => 'string',
+            'username'       => 'string',
+            'sex'            => 'string',
+            'path_profile'   => 'string',
+            'role'           => 'string',
+            'phone'          => 'string',
+            'email'          => 'string',
+            'password'       => 'hashed',
+            'remember_token' => 'string',
+            'created_at'     => 'datetime',
+            'updated_at'     => 'datetime',
         ];
     }
+
 
     public function userProyek ()
     {

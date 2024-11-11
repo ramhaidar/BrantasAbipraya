@@ -5,37 +5,41 @@ namespace App\Http\Controllers;
 use App\Models\Alat;
 use App\Models\Proyek;
 use Illuminate\Http\Request;
+use App\Models\MasterDataSupplier;
+use App\Http\Controllers\Controller;
 
 class MasterDataSupplierController extends Controller
 {
     public function index ()
     {
         $proyeks = Proyek::with ( "users" )->orderBy ( "created_at", "asc" )->orderBy ( "id", "asc" )->get ();
+        $alat    = Alat::with ( 'proyek', 'user' )->orderBy ( 'updated_at', 'desc' )->get ();
 
-        $alat = Alat::with ( 'proyek', 'user' )
-            ->orderBy ( 'updated_at', 'desc' )
-            ->get ();
+        $spareparts = \App\Models\MasterDataSparepart::all ();
+
         return view ( 'dashboard.masterdata.supplier.supplier', [ 
             'proyek'     => $proyeks,
             'alat'       => $alat,
+            'proyeks'    => $proyeks,
+            'spareparts' => $spareparts,
+
             'headerPage' => "Master Data Supplier",
             'page'       => 'Data Supplier',
-            'proyeks'    => $proyeks,
         ] );
     }
 
     public function getData ( Request $request )
     {
-        // Query dasar untuk mengambil data Proyek
-        $query = Proyek::query ();
+        // Query dari model MasterDataSupplier
+        $query = MasterDataSupplier::query ();
 
         // Filter berdasarkan search term
         if ( $search = $request->input ( 'search.value' ) )
         {
-            $query->where ( 'nama_proyek', 'like', "%{$search}%" );
+            $query->where ( 'nama', 'like', "%{$search}%" );
         }
 
-        // Sorting
+        // Sorting berdasarkan permintaan dari DataTables
         if ( $order = $request->input ( 'order' ) )
         {
             $columnIndex   = $order[ 0 ][ 'column' ];
@@ -45,25 +49,75 @@ class MasterDataSupplierController extends Controller
         }
         else
         {
-            $query->orderBy ( 'created_at', 'asc' )->orderBy ( 'id', 'asc' ); // Default order
+            $query->orderBy ( 'created_at', 'asc' )->orderBy ( 'id', 'asc' );
         }
 
         // Handle pagination
         $start           = $request->input ( 'start', 0 );
         $length          = $request->input ( 'length', 10 );
-        $totalRecords    = Proyek::count (); // Total records without filtering
-        $filteredRecords = $query->count (); // Total records after filtering
+        $totalRecords    = MasterDataSupplier::count ();
+        $filteredRecords = $query->count ();
 
-        // Apply pagination
-        $proyeks = $query->skip ( $start )->take ( $length )->get ( [ 'id', 'nama_proyek' ] );
+        // Ambil data dengan pagination
+        $suppliers = $query->skip ( $start )->take ( $length )->get ( [ 'id', 'nama' ] );
 
-        // Return data dalam format DataTables
+        // Return data dalam format yang diterima oleh DataTables
         return response ()->json ( [ 
             'draw'            => $request->input ( 'draw' ),
             'recordsTotal'    => $totalRecords,
             'recordsFiltered' => $filteredRecords,
-            'data'            => $proyeks,
+            'data'            => $suppliers,
         ] );
     }
 
+    public function show ( $id )
+    {
+        $supplier = MasterDataSupplier::with ( 'spareparts' )->findOrFail ( $id );
+
+        return response ()->json ( [ 
+            'data' => $supplier,
+        ] );
+    }
+
+    public function store ( Request $request )
+    {
+        $validatedData = $request->validate ( [ 
+            'nama'         => 'required|string|max:255',
+            'spareparts.*' => 'exists:master_data_spareparts,id', // Pastikan hanya spareparts yang valid yang bisa dipilih
+        ] );
+
+        // Buat Supplier baru
+        $supplier = MasterDataSupplier::create ( [ 
+            'nama' => $validatedData[ 'nama' ],
+        ] );
+
+        // Lampirkan spareparts jika ada yang dipilih
+        if ( ! empty ( $validatedData[ 'spareparts' ] ) )
+        {
+            $supplier->spareparts ()->attach ( $validatedData[ 'spareparts' ] );
+        }
+
+        return redirect ()->route ( 'master_data_supplier' )->with ( 'success', 'Master Data Supplier berhasil ditambahkan' );
+    }
+
+    public function update ( Request $request, $id )
+    {
+        $supplier = MasterDataSupplier::findOrFail ( $id );
+
+        $validatedData = $request->validate ( [ 
+            'nama' => 'required|string|max:255',
+        ] );
+
+        $supplier->update ( $validatedData );
+
+        return redirect ()->route ( 'master_data_supplier' )->with ( 'success', 'Master Data Supplier berhasil diubah' );
+    }
+
+    public function destroy ( $id )
+    {
+        $supplier = MasterDataSupplier::findOrFail ( $id );
+        $supplier->delete ();
+
+        return redirect ()->route ( 'master_data_supplier' )->with ( 'success', 'Master Data Supplier berhasil dihapus' );
+    }
 }

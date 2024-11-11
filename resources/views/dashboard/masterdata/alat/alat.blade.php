@@ -19,7 +19,7 @@
                     </a>
                 </div>
 
-                @include('dashboard.masterdata.alat.partials.table', ['alat' => $alat])
+                @include('dashboard.masterdata.alat.partials.table')
 
             </div>
         </div>
@@ -37,25 +37,4 @@
 
 @push('scripts_2')
     @stack('scripts_3')
-
-    <script>
-        // Fungsi untuk mengambil data alat berdasarkan ID menggunakan AJAX
-        function getAlat(id) {
-            return new Promise(function(resolve, reject) {
-                $.ajax({
-                    url: `/alat/${id}`,
-                    type: 'GET',
-                    data: {
-                        '_token': '{{ csrf_token() }}',
-                    },
-                    success: function(response) {
-                        resolve(response);
-                    },
-                    error: function(xhr, status, error) {
-                        reject(error);
-                    }
-                });
-            });
-        }
-    </script>
 @endpush

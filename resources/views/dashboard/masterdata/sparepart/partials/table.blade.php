@@ -5,7 +5,7 @@
                 <th class="text-center">Nama</th>
                 <th class="text-center">Part Number</th>
                 <th class="text-center">Merk</th>
-                <th class="text-center">Detail</th>
+                <th class="text-center">Supplier</th>
                 <th class="text-center">Aksi</th>
             </tr>
         </thead>
@@ -16,8 +16,6 @@
 </div>
 
 @push('styles_3')
-    <style>
-    </style>
 @endpush
 
 @push('scripts_3')
@@ -51,10 +49,10 @@
                     width: "1%",
                     render: function(data, type, row) {
                         return `
-                    <button class="btn btn-info detailBtn" data-id="${row.id}" onclick="showDetailModal(${row.id})">
-                        <i class="bi bi-eye"></i> Detail
-                    </button>
-                `;
+<button class="btn btn-info detailBtn" data-id="${row.id}">
+<i class="bi bi-eye"></i>
+</button>
+`;
                     }
                 },
                 {
@@ -65,13 +63,13 @@
                     width: "1%",
                     render: function(data, type, row) {
                         return `
-                    <button class="btn btn-danger deleteBtn" data-id="${row.id}">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                    <button class="btn btn-warning ms-3 ubahBtn" data-id="${row.id}" onclick="fillFormEdit(${row.id})">
-                        <i class="bi bi-pencil-square"></i>
-                    </button>
-                `;
+<button class="btn btn-danger mx-1 deleteBtn" data-id="${row.id}">
+<i class="bi bi-trash"></i>
+</button>
+<button class="btn btn-warning mx-1 ubahBtn" data-id="${row.id}" onclick="fillFormEdit(${row.id})">
+<i class="bi bi-pencil-square"></i>
+</button>
+`;
                     }
                 }
             ],
@@ -88,13 +86,13 @@
                     name: 'merk'
                 },
                 {
-                    data: 'detail',
-                    name: 'detail'
-                }, // "Detail" column with button
+                    data: 'supplier',
+                    name: 'supplier'
+                },
                 {
                     data: 'aksi',
                     name: 'aksi'
-                } // "Aksi" column
+                }
             ]
         });
     </script>

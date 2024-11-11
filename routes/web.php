@@ -568,3 +568,24 @@ Route::middleware ( 'auth' )->group ( function ()
         [ MasterDataSparepartController::class, 'destroy' ]
     )->name ( 'master_data_sparepart.destroy' );
 } );
+
+// Rute Master Data Supplier [MasterDataSupplierController]
+Route::middleware ( 'auth' )->group ( function ()
+{
+    Route::get (
+        'master-data-suppliers/{id}',
+        [ MasterDataSupplierController::class, 'show' ]
+    )->name ( 'master_data_supplier.show' );
+    Route::post (
+        'master-data-suppliers',
+        [ MasterDataSupplierController::class, 'store' ]
+    )->name ( 'master_data_supplier.store' );
+    Route::put (
+        'master-data-suppliers/{id}',
+        [ MasterDataSupplierController::class, 'update' ]
+    )->name ( 'master_data_supplier.update' );
+    Route::delete (
+        'master-data-suppliers/{id}',
+        [ MasterDataSupplierController::class, 'destroy' ]
+    )->name ( 'master_data_supplier.destroy' );
+} );

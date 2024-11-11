@@ -1,0 +1,127 @@
+<div class="fade modal" id="modalForEdit" aria-hidden="true" aria-labelledby="staticBackdropLabel" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content rounded-4">
+            <div class="pt-3 px-3 m-0 d-flex w-100 justify-content-between">
+                <h1 class="fs-5" id="modalForEditLabel">Ubah Master Data Supplier</h1>
+                <button class="btn-close" data-bs-dismiss="modal" type="button" aria-label="Close"></button>
+            </div>
+            <hr class="p-0 m-0 border border-secondary-subtle border-2 opacity-50">
+            <form class="needs-validation" id="editSupplierForm" novalidate method="POST">
+                @csrf
+                @method('PUT')
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label required" for="nama">Nama Supplier</label>
+                            <input class="form-control" id="nama" name="nama" type="text" placeholder="Nama Supplier" required>
+                            <div class="invalid-feedback">Nama Supplier diperlukan.</div>
+                        </div>
+
+                        <!-- Multi-select for Spareparts -->
+                        <div class="col-12">
+                            <label class="form-label" for="spareparts">Spareparts</label>
+                            <select class="form-control" id="edit_spareparts" name="spareparts[]" multiple="multiple">
+                                @foreach ($spareparts as $sparepart)
+                                    <option value="{{ $sparepart->id }}">{{ $sparepart->nama }}</option>
+                                @endforeach
+                            </select>
+                            <div class="invalid-feedback">Sparepart diperlukan.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer d-flex w-100 justify-content-end">
+                    <button class="btn btn-secondary me-2 w-25" data-bs-dismiss="modal" type="button">Batal</button>
+                    <button class="btn btn-primary w-25" id="update-supplier" type="submit">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@push('styles_3')
+    <style>
+        /* CSS for required asterisk */
+        .form-label.required::after {
+            content: " *";
+            color: red;
+            font-weight: bold;
+            margin-left: 2px;
+        }
+    </style>
+@endpush
+
+@push('scripts_3')
+    <script>
+        (() => {
+            'use strict'
+
+            // Form edit untuk validasi
+            const editForm = document.querySelector('#editSupplierForm');
+
+            // Validasi saat submit form
+            editForm.addEventListener('submit', (event) => {
+                if (!editForm.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                editForm.classList.add('was-validated');
+            });
+
+            // Validasi saat blur (out of focus) untuk setiap input di form edit
+            editForm.querySelectorAll('input').forEach((input) => {
+                input.addEventListener('blur', () => {
+                    if (!input.checkValidity()) {
+                        input.classList.add('is-invalid');
+                    } else {
+                        input.classList.remove('is-invalid');
+                        input.classList.add('is-valid');
+                    }
+                });
+            });
+        })();
+
+        // Initialize Select2 for multi-select in edit modal
+        $('#edit_spareparts').select2({
+            placeholder: "Pilih Sparepart",
+            allowClear: true,
+            closeOnSelect: false,
+            dropdownParent: $('#modalForEdit'),
+            width: '100%'
+        });
+
+        // Function to display modal for editing and populate form with server data
+        function fillFormEdit(id) {
+            const url = `/master-data-suppliers/${id}`;
+
+            // AJAX GET request to fetch supplier data along with selected spareparts
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function(response) {
+                    // Populate fields with data
+                    $('#editSupplierForm #nama').val(response.data.nama);
+
+                    // Set selected spareparts
+                    const selectedSpareparts = response.data.spareparts.map(sparepart => sparepart.id);
+                    $('#edit_spareparts').val(selectedSpareparts).trigger('change');
+
+                    // Set action form to update the specific supplier with PUT method
+                    $('#editSupplierForm').attr('action', `/master-data-suppliers/${id}`);
+
+                    // Display the edit modal
+                    $('#modalForEdit').modal('show');
+                },
+                error: function(xhr) {
+                    alert("Gagal mengambil data. Silakan coba lagi.");
+                }
+            });
+        }
+
+        // Event listener untuk tombol edit di tabel
+        $(document).on('click', '.ubahBtn', function() {
+            const id = $(this).data('id'); // Ambil ID dari atribut data-id
+            fillFormEdit(id); // Panggil fungsi untuk mengisi form edit
+        });
+    </script>
+@endpush

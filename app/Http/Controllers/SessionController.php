@@ -20,9 +20,9 @@ class SessionController extends Controller
         ];
 
         $credentials = $request->validate ( [ 
-            'username'              => 'required',
-            'password'              => 'required',
-            'cf-turnstile-response' => [ 'required', Rule::turnstile () ],
+            'username' => 'required',
+            'password' => 'required',
+            // 'cf-turnstile-response' => [ 'required', Rule::turnstile () ],
         ], $messages );
 
         if (

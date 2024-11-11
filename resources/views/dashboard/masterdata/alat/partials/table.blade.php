@@ -16,8 +16,6 @@
 </div>
 
 @push('styles_3')
-    <style>
-    </style>
 @endpush
 
 @push('scripts_3')
@@ -51,10 +49,10 @@
                 width: "1%", // Atur agar kolom ini mengambil ruang minimum
                 render: function(data, type, row) {
                     return `
-<button class="btn btn-danger deleteBtn" data-id="${row.id}">
+<button class="btn btn-danger mx-1 deleteBtn" data-id="${row.id}">
 <i class="bi bi-trash"></i>
 </button>
-<button class="btn btn-warning ms-3 ubahBtn" data-id="${row.id}" onclick="fillFormEdit(${row.id})">
+<button class="btn btn-warning mx-1 ubahBtn" data-id="${row.id}" onclick="fillFormEdit(${row.id})">
 <i class="bi bi-pencil-square"></i>
 </button>
 `;

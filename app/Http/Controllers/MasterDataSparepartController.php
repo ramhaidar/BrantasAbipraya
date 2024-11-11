@@ -114,11 +114,8 @@ class MasterDataSparepartController extends Controller
         $masterData = MasterDataSparepart::findOrFail ( $id );
         $masterData->update ( $request->only ( [ 'nama', 'part_number', 'merk' ] ) );
 
-        // Sync suppliers
-        if ( $request->has ( 'suppliers' ) )
-        {
-            $masterData->suppliers ()->sync ( $request->suppliers );
-        }
+        // Sync suppliers, even if empty
+        $masterData->suppliers ()->sync ( $request->input ( 'suppliers', [] ) );
 
         return redirect ()->route ( 'master_data_sparepart' )->with ( 'success', 'Master Data Sparepart berhasil diperbarui' );
     }

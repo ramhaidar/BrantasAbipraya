@@ -76,7 +76,7 @@
                             $('#supplierList').append(`<li class="list-group-item">${supplier.nama}</li>`);
                         });
                     } else {
-                        $('#supplierList').append(`<li class="list-group-item">Tidak ada Supplier yang menyediakan Sparepart ini.</li>`);
+                        $('#supplierList').append(`<li class="list-group-item">Tidak ada Supplier yang menyediakan Sparepart ini</li>`);
                     }
 
                     // Tampilkan modal detail

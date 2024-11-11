@@ -19,7 +19,7 @@
                     </a>
                 </div>
 
-                @include('dashboard.masterdata.sparepart.partials.table', ['masterData' => $masterData])
+                @include('dashboard.masterdata.sparepart.partials.table')
 
             </div>
         </div>
@@ -40,25 +40,4 @@
 
 @push('scripts_2')
     @stack('scripts_3')
-
-    <script>
-        // Fungsi untuk mengambil data alat berdasarkan ID menggunakan AJAX
-        function getAlat(id) {
-            return new Promise(function(resolve, reject) {
-                $.ajax({
-                    url: `/sparepart/${id}`,
-                    type: 'GET',
-                    data: {
-                        '_token': '{{ csrf_token() }}',
-                    },
-                    success: function(response) {
-                        resolve(response);
-                    },
-                    error: function(xhr, status, error) {
-                        reject(error);
-                    }
-                });
-            });
-        }
-    </script>
 @endpush

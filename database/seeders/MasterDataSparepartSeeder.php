@@ -2,16 +2,16 @@
 
 namespace Database\Seeders;
 
-use App\Models\MasterDataAlat;
 use Illuminate\Database\Seeder;
+use App\Models\MasterDataSparepart;
 
-class MasterDataAlatSeeder extends Seeder
+class MasterDataSparepartSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run ()
     {
-        MasterDataAlat::factory ()->count ( 300 )->create ();
+        MasterDataSparepart::factory ()->count ( 300 )->create ();
     }
 }

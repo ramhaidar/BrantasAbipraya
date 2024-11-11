@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\MasterDataAlat;
 use App\Models\Proyek;
 use Illuminate\Http\Request;
+use App\Models\MasterDataAlat;
+use App\Models\MasterDataSupplier;
 use Illuminate\Support\Facades\Auth;
 
 class MasterDataAlatController extends Controller
@@ -50,11 +51,11 @@ class MasterDataAlatController extends Controller
                 ->orderBy ( 'updated_at', 'desc' )
                 ->paginate ( $request->input ( 'length', 10 ) );
         }
-
         return view ( 'dashboard.masterdata.alat.alat', [ 
             'proyeks'    => $proyeks,
             'proyek'     => $proyeks,
             'alat'       => $alat,
+
             'headerPage' => "Master Data Alat",
             'page'       => 'Data Alat',
         ] );

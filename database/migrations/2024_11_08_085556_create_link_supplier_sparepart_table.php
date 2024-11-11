@@ -10,10 +10,10 @@ return new class extends Migration
     {
         Schema::create ( 'link_supplier_sparepart', function (Blueprint $table)
         {
-            $table->id (); // PK | id: Integer
-            $table->timestamps (); // + timestamps()
-            $table->foreignId ( 'id_supplier' )->constrained ( 'master_data_suppliers' ); // FK | id_supplier: ForeignID
-            $table->foreignId ( 'id_sparepart' )->constrained ( 'master_data_spareparts' ); // FK | id_sparepart: ForeignID
+            $table->id ();
+            $table->foreignId ( 'id_supplier' )->constrained ( 'master_data_suppliers' )->nullOnDelete ();
+            $table->foreignId ( 'id_sparepart' )->constrained ( 'master_data_spareparts' )->cascadeOnDelete ();
+            $table->timestamps ();
         } );
     }
 

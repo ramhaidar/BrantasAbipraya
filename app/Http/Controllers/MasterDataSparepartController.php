@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\MasterData;  // Gunakan model MasterData
-use App\Models\Proyek;      // Gunakan model Proyek
+use App\Models\Proyek;
 use Illuminate\Http\Request;
+use App\Models\MasterDataSupplier;
+use App\Models\MasterDataSparepart;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 
 class MasterDataSparepartController extends Controller
@@ -17,130 +19,157 @@ class MasterDataSparepartController extends Controller
 
         if ( $user->role === 'Admin' )
         {
-            $proyeks    = Proyek::with ( "users" )->orderBy ( "created_at", "asc" )->orderBy ( "id", "asc" )->get ();
-            $masterData = MasterData::with ( 'atbs' )->orderBy ( 'updated_at', 'desc' )->paginate ( $request->input ( 'length', 10 ) );
+            $proyeks = Proyek::with ( "users" )
+                ->orderBy ( "created_at", "asc" )
+                ->orderBy ( "id", "asc" )
+                ->get ();
+
+            $masterData = MasterDataSparepart::orderBy ( 'updated_at', 'desc' )
+                ->paginate ( $request->input ( 'length', 10 ) );
         }
         elseif ( $user->role === 'Boss' )
         {
-            $proyeks       = $user->proyek ()->with ( "users" )->orderBy ( "created_at", "asc" )->orderBy ( "id", "asc" )->get ();
+            $proyeks = $user->proyek ()
+                ->with ( "users" )
+                ->orderBy ( "created_at", "asc" )
+                ->orderBy ( "id", "asc" )
+                ->get ();
+
             $usersInProyek = $proyeks->pluck ( 'users.*.id' )->flatten ();
-            $masterData    = MasterData::whereIn ( 'id_user', $usersInProyek )
-                ->with ( 'atbs' )
+            $masterData    = MasterDataSparepart::whereIn ( 'id_user', $usersInProyek )
                 ->orderBy ( 'updated_at', 'desc' )
                 ->paginate ( $request->input ( 'length', 10 ) );
         }
         elseif ( $user->role === 'Pegawai' )
         {
-            $proyeks    = $user->proyek ()->with ( "users" )->orderBy ( "created_at", "asc" )->orderBy ( "id", "asc" )->get ();
-            $masterData = MasterData::where ( 'id_user', $user->id )
-                ->with ( 'atbs' )
+            $proyeks = $user->proyek ()
+                ->with ( "users" )
+                ->orderBy ( "created_at", "asc" )
+                ->orderBy ( "id", "asc" )
+                ->get ();
+
+            $masterData = MasterDataSparepart::where ( 'id_user', $user->id )
                 ->orderBy ( 'updated_at', 'desc' )
                 ->paginate ( $request->input ( 'length', 10 ) );
         }
 
+        $suppliers = MasterDataSupplier::all ();
+
         return view ( 'dashboard.masterdata.sparepart.sparepart', [ 
-            'proyek'     => $proyeks,
+            'proyeks'    => $proyeks,
             'masterData' => $masterData,
+            'suppliers'  => $suppliers,
+
             'headerPage' => "Master Data Sparepart",
             'page'       => 'Data Sparepart',
-            'proyeks'    => $proyeks,
         ] );
     }
 
     public function store ( Request $request )
     {
         $request->validate ( [ 
-            'supplier'     => [ 'required', 'string', 'max:255' ],
-            'sparepart'    => [ 'required', 'string', 'max:255' ],
-            'part_number'  => [ 'required', 'string', 'max:255', 'unique:master_data' ],
-            'buffer_stock' => [ 'required', 'integer', 'min:0' ],
+            'nama'        => [ 'required', 'string', 'max:255' ],
+            'part_number' => [ 'required', 'string', 'max:255' ],
+            'merk'        => [ 'required', 'string', 'max:255' ],
+            'suppliers'   => [ 'array' ], // Validasi bahwa suppliers adalah array
+            'suppliers.*' => [ 'exists:master_data_suppliers,id' ], // Pastikan setiap supplier ID valid
         ] );
 
-        $masterData               = new MasterData;
-        $masterData->supplier     = $request->supplier;
-        $masterData->sparepart    = $request->sparepart;
-        $masterData->part_number  = $request->part_number;
-        $masterData->buffer_stock = $request->buffer_stock;
-        $masterData->id_user      = Auth::id (); // Menyimpan ID user yang menambahkan data master
+        // Simpan data utama MasterDataSparepart
+        $masterData              = new MasterDataSparepart;
+        $masterData->nama        = $request->nama;
+        $masterData->part_number = $request->part_number;
+        $masterData->merk        = $request->merk;
         $masterData->save ();
 
-        return back ()->with ( 'success', 'Data Master berhasil ditambahkan' );
+        // Sinkronisasi suppliers menggunakan relasi many-to-many
+        if ( $request->has ( 'suppliers' ) )
+        {
+            $masterData->suppliers ()->sync ( $request->suppliers );
+        }
+
+        return redirect ()->route ( 'master_data_sparepart' )
+            ->with ( 'success', 'Data Master Sparepart berhasil ditambahkan' );
     }
 
-    // Fungsi untuk mendapatkan data MasterData berdasarkan ID (untuk keperluan edit)
     public function show ( $id )
     {
-        $masterData = MasterData::findOrFail ( $id );
-        return response ()->json ( [ 'data' => $masterData ] );
+        $masterData = MasterDataSparepart::with ( 'suppliers' )->findOrFail ( $id );
+
+        return response ()->json ( [ 
+            'data' => $masterData
+        ] );
     }
 
-    // Fungsi untuk memperbarui data MasterData
     public function update ( Request $request, $id )
     {
         $request->validate ( [ 
-            'supplier'     => [ 'required', 'string', 'max:255' ],
-            'sparepart'    => [ 'required', 'string', 'max:255' ],
-            'part_number'  => [ 'required', 'string', 'max:255', "unique:master_data,part_number,{$id}" ],
-            'buffer_stock' => [ 'required', 'integer', 'min:0' ],
+            'nama'        => [ 'required', 'string', 'max:255' ],
+            'part_number' => [ 'required', 'string', 'max:255' ],
+            'merk'        => [ 'required', 'string', 'max:255' ],
+            'suppliers'   => [ 'array' ],
+            'suppliers.*' => [ 'exists:master_data_suppliers,id' ],
         ] );
 
-        $masterData = MasterData::findOrFail ( $id );
-        $masterData->update ( $request->all () );
+        $masterData = MasterDataSparepart::findOrFail ( $id );
+        $masterData->update ( $request->only ( [ 'nama', 'part_number', 'merk' ] ) );
 
-        return back ()->with ( 'success', 'Data Master berhasil diperbarui' );
+        // Sync suppliers
+        if ( $request->has ( 'suppliers' ) )
+        {
+            $masterData->suppliers ()->sync ( $request->suppliers );
+        }
+
+        return redirect ()->route ( 'master_data_sparepart' )->with ( 'success', 'Master Data Sparepart berhasil diperbarui' );
     }
 
-    // Fungsi untuk menghapus data MasterData
     public function destroy ( $id )
     {
-        $masterData = MasterData::findOrFail ( $id );
+        $masterData = MasterDataSparepart::findOrFail ( $id );
         $masterData->delete ();
 
-        return response ()->json ( [ 'success' => 'Data berhasil dihapus' ] );
+        return redirect ()->route ( 'master_data_sparepart' )->with ( 'success', 'Master Data Sparepart berhasil dihapus' );
     }
 
     public function getData ( Request $request )
     {
-        $query = MasterData::query ()->with ( 'atbs', 'user' ); // Pastikan relasi 'user' ada pada model
+        $query = MasterDataSparepart::with ( 'suppliers' ); // Load suppliers relationship
 
-        // Filter berdasarkan search term
         if ( $search = $request->input ( 'search.value' ) )
         {
             $query->where ( function ($q) use ($search)
             {
-                $q->where ( 'sparepart', 'like', "%{$search}%" )
+                $q->where ( 'nama', 'like', "%{$search}%" )
                     ->orWhere ( 'part_number', 'like', "%{$search}%" )
-                    ->orWhere ( 'buffer_stock', 'like', "%{$search}%" );
+                    ->orWhere ( 'merk', 'like', "%{$search}%" );
             } );
         }
 
-        // Sorting
         if ( $order = $request->input ( 'order' ) )
         {
-            $columnIndex = $order[ 0 ][ 'column' ];
-            $columnName  = $request->input ( 'columns' )[ $columnIndex ][ 'data' ];
-
-            // Ensure column name is valid to prevent SQL injection
-            $sortableColumns = [ 'sparepart', 'part_number', 'buffer_stock', 'id_supplier', 'id_user' ];
-            if ( in_array ( $columnName, $sortableColumns ) )
-            {
-                $sortDirection = $order[ 0 ][ 'dir' ];
-                $query->orderBy ( $columnName, $sortDirection );
-            }
+            $columnIndex   = $order[ 0 ][ 'column' ];
+            $columnName    = $request->input ( 'columns' )[ $columnIndex ][ 'data' ];
+            $sortDirection = $order[ 0 ][ 'dir' ];
+            $query->orderBy ( $columnName, $sortDirection );
         }
         else
         {
-            $query->orderBy ( 'updated_at', 'desc' ); // Default order
+            $query->orderBy ( 'updated_at', 'desc' );
         }
 
-        // Handle pagination
         $start           = $request->input ( 'start', 0 );
         $length          = $request->input ( 'length', 10 );
-        $totalRecords    = MasterData::count (); // Total records without filtering
-        $filteredRecords = $query->count (); // Total records after filtering
+        $totalRecords    = MasterDataSparepart::count ();
+        $filteredRecords = $query->count ();
 
-        // Apply pagination
         $masterData = $query->skip ( $start )->take ( $length )->get ();
+
+        // Format suppliers into a string for each sparepart
+        $masterData->transform ( function ($item)
+        {
+            $item->detail = $item->suppliers->pluck ( 'nama' )->implode ( ', ' );
+            return $item;
+        } );
 
         return response ()->json ( [ 
             'draw'            => $request->input ( 'draw' ),
@@ -149,4 +178,5 @@ class MasterDataSparepartController extends Controller
             'data'            => $masterData,
         ] );
     }
+
 }

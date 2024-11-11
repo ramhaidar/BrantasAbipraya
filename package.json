@@ -3,7 +3,7 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "php artisan config:clear && php artisan cache:clear && php artisan route:clear && vite & php artisan serve --host=0.0.0.0"
+        "dev": "php artisan config:clear && php artisan cache:clear && php artisan route:clear && vite && php artisan serve --host=0.0.0.0"
     },
     "devDependencies": {
         "autoprefixer": "^10.4.20",

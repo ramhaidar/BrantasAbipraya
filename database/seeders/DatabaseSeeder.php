@@ -22,6 +22,8 @@ class DatabaseSeeder extends Seeder
                     // APBSeeder::class,
                     // MasterDataSeeder::class,
                 MasterDataAlatSeeder::class,
+                MasterDataSparepartSeeder::class,
+                MasterDataSupplierSeeder::class,
             ]
         );
     }

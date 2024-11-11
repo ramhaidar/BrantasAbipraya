@@ -584,16 +584,25 @@
 
     <script>
         $(document).ready(function() {
-            // Temukan elemen dengan kelas `active` dalam sidebar
-            const activeElement = document.querySelector('.nav-sidebar .active');
+            // Auto-scroll to the active element
+            function scrollToActiveElement() {
+                // Select the active element within the sidebar
+                const activeElement = $('.sidebar .nav-link.active').last();
 
-            if (activeElement) {
-                // Gulir ke elemen `active` jika ditemukan
-                activeElement.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'center'
-                });
+                // Check if there is an active element to scroll to
+                if (activeElement.length) {
+                    // Scroll the sidebar to bring the active element into view
+                    $('.sidebar .os-viewport').animate({
+                        scrollTop: activeElement.offset().top - $('.sidebar .os-viewport').offset().top + $('.sidebar .os-viewport').scrollTop() - 125
+                    }, 200);
+                }
             }
+
+            // Call the scroll function on page load
+            scrollToActiveElement();
+
+            // Optionally, also call it when toggling between collapsed and expanded views
+            $(document).on('shown.lte.pushmenu', scrollToActiveElement);
         });
     </script>
 

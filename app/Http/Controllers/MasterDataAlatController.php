@@ -134,6 +134,7 @@ class MasterDataAlatController extends Controller
     {
         $query = MasterDataAlat::query ();
 
+        // Handle search input
         if ( $search = $request->input ( 'search.value' ) )
         {
             $query->where ( function ($q) use ($search)
@@ -146,6 +147,7 @@ class MasterDataAlatController extends Controller
             } );
         }
 
+        // Handle ordering
         if ( $order = $request->input ( 'order' ) )
         {
             $columnIndex   = $order[ 0 ][ 'column' ];
@@ -158,11 +160,16 @@ class MasterDataAlatController extends Controller
             $query->orderBy ( 'updated_at', 'desc' );
         }
 
-        $start           = $request->input ( 'start', 0 );
-        $length          = $request->input ( 'length', 10 );
+        // Calculate pagination parameters
+        $page   = $request->input ( 'page', 1 );
+        $length = $request->input ( 'length', 10 );
+        $start  = ( $page - 1 ) * $length;
+
+        // Get total records count and filtered count
         $totalRecords    = MasterDataAlat::count ();
         $filteredRecords = $query->count ();
 
+        // Fetch the data with pagination
         $alat = $query->skip ( $start )->take ( $length )->get ();
 
         return response ()->json ( [ 
@@ -172,4 +179,5 @@ class MasterDataAlatController extends Controller
             'data'            => $alat,
         ] );
     }
+
 }

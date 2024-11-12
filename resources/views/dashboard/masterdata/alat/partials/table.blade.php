@@ -20,65 +20,82 @@
 
 @push('scripts_3')
     <script>
-        $('#table-data').DataTable({
-            processing: true,
-            responsive: true,
-            serverSide: true,
-            ajax: {
-                url: "{{ route('master-data.alat.getData') }}",
-                type: "GET"
-            },
-            language: {
-                paginate: {
-                    previous: '<i class="bi bi-caret-left"></i>',
-                    next: '<i class="bi bi-caret-right"></i>'
-                }
-            },
-            pageLength: 10,
-            lengthMenu: [
-                [10, 25, 50],
-                [10, 25, 50]
-            ],
-            ordering: true,
-            order: [],
-            columnDefs: [{
-                targets: 4, // Indeks kolom 'Aksi'
-                className: 'text-center nowrap-column', // Tambahkan kelas CSS khusus untuk kolom ini
-                orderable: false,
-                searchable: false,
-                width: "1%", // Atur agar kolom ini mengambil ruang minimum
-                render: function(data, type, row) {
-                    return `
-<button class="btn btn-danger mx-1 deleteBtn" data-id="${row.id}">
-<i class="bi bi-trash"></i>
-</button>
-<button class="btn btn-warning mx-1 ubahBtn" data-id="${row.id}" onclick="fillFormEdit(${row.id})">
-<i class="bi bi-pencil-square"></i>
-</button>
-`;
-                }
-            }],
-            columns: [{
-                    data: 'jenis_alat',
-                    name: 'jenis_alat'
+        $(document).ready(function() {
+            // Ambil halaman terakhir dari localStorage, jika ada
+            var lastPage = localStorage.getItem('lastPage') ? parseInt(localStorage.getItem('lastPage')) : 0;
+
+            var table = $('#table-data').DataTable({
+                processing: true,
+                responsive: true,
+                serverSide: true,
+                ajax: {
+                    url: "{{ route('master-data.alat.getData') }}",
+                    type: "GET"
                 },
-                {
-                    data: 'kode_alat',
-                    name: 'kode_alat'
+                language: {
+                    paginate: {
+                        previous: '<i class="bi bi-caret-left"></i>',
+                        next: '<i class="bi bi-caret-right"></i>'
+                    }
                 },
-                {
-                    data: 'merek_alat',
-                    name: 'merek_alat'
-                },
-                {
-                    data: 'tipe_alat',
-                    name: 'tipe_alat'
-                },
-                {
-                    data: 'aksi',
-                    name: 'aksi'
-                }
-            ]
+                pageLength: 10,
+                lengthMenu: [
+                    [10, 25, 50],
+                    [10, 25, 50]
+                ],
+                ordering: true,
+                order: [],
+                displayStart: lastPage * 10, // Mulai dari halaman terakhir yang disimpan
+                columnDefs: [{
+                    targets: 4, // Indeks kolom 'Aksi'
+                    className: 'text-center nowrap-column',
+                    orderable: false,
+                    searchable: false,
+                    width: "1%",
+                    render: function(data, type, row) {
+                        return `
+                    <button class="btn btn-danger mx-1 deleteBtn" data-id="${row.id}">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                    <button class="btn btn-warning mx-1 ubahBtn" data-id="${row.id}" onclick="fillFormEdit(${row.id})">
+                        <i class="bi bi-pencil-square"></i>
+                    </button>
+                `;
+                    }
+                }],
+                columns: [{
+                        data: 'jenis_alat',
+                        name: 'jenis_alat'
+                    },
+                    {
+                        data: 'kode_alat',
+                        name: 'kode_alat'
+                    },
+                    {
+                        data: 'merek_alat',
+                        name: 'merek_alat'
+                    },
+                    {
+                        data: 'tipe_alat',
+                        name: 'tipe_alat'
+                    },
+                    {
+                        data: 'aksi',
+                        name: 'aksi'
+                    }
+                ]
+            });
+
+            // Simpan halaman terakhir ke localStorage setiap kali halaman berubah
+            table.on('page', function() {
+                var currentPage = table.page();
+                localStorage.setItem('lastPage', currentPage);
+            });
+
+            // Bersihkan lastPage dari localStorage setelah halaman diinisialisasi ulang
+            table.on('init', function() {
+                localStorage.removeItem('lastPage');
+            });
         });
     </script>
 @endpush

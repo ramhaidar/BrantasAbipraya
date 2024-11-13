@@ -36,6 +36,7 @@ Route::middleware ( 'guest' )->group ( function ()
         name ( 'login.post' );
 } );
 
+
 // Rute Logout [SessionController]
 Route::middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )->group ( function ()
 {

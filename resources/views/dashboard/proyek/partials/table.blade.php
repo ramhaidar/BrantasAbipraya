@@ -13,11 +13,11 @@
     </style>
 @endpush
 
-<div class="ibox-body ms-0 ps-0 table-responsive">
-    <table class="m-0 table table-bordered table-striped" id="table-data">
+<div class="ibox-body table-responsive">
+    <table class="table table-bordered table-striped" id="table-data" style="width: 100%;">
         <thead class="table-primary">
             <tr>
-                <th class="text-center">Nama Supplier</th>
+                <th class="text-center">Nama Proyek</th>
                 <th class="text-center">Detail</th>
                 <th class="text-center">Aksi</th>
             </tr>
@@ -32,7 +32,7 @@
     <script>
         $(document).ready(function() {
             // Unique key for localStorage specific to this page
-            const lastPageKey = 'lastPage_supplier';
+            const lastPageKey = 'lastPage_proyek';
 
             // Retrieve the last page number from localStorage, if available
             var lastPage = localStorage.getItem(lastPageKey) ? parseInt(localStorage.getItem(lastPageKey)) : 0;
@@ -42,7 +42,7 @@
                 responsive: true,
                 serverSide: true,
                 ajax: {
-                    url: "{{ route('master-data.supplier.getData') }}",
+                    url: "{{ route('proyek.getData') }}",
                     type: "GET"
                 },
                 language: {
@@ -92,8 +92,8 @@
                     }
                 ],
                 columns: [{
-                        data: 'nama',
-                        name: 'nama'
+                        data: 'nama_proyek',
+                        name: 'nama_proyek'
                     },
                     {
                         data: 'detail',
@@ -111,11 +111,6 @@
                 var currentPage = table.page();
                 localStorage.setItem(lastPageKey, currentPage);
             });
-
-            // Clear lastPage for this specific page key after table initialization
-            // table.on('init', function() {
-            //     localStorage.removeItem(lastPageKey);
-            // });
         });
     </script>
 @endpush

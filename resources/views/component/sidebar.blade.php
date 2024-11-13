@@ -114,7 +114,7 @@
                                 <!-- Menu for Admin Role Only -->
                                 @if (Auth::user()->role == 'Admin')
                                     <li class="nav-item">
-                                        <a class="nav-link {{ str_contains($page, 'Data Proyek') ? 'active' : '' }}" href="{{ route('proyek') }}" style="{{ str_contains($headerPage, 'Proyek') ? 'background-color: #483D8B; color: #ffffff;' : '' }}">
+                                        <a class="nav-link {{ str_contains($page, 'Data Proyek') ? 'active' : '' }}" href="{{ route('proyek.index') }}" style="{{ str_contains($headerPage, 'Proyek') ? 'background-color: #483D8B; color: #ffffff;' : '' }}">
                                             <i class="bi me-2 nav-icon bi-kanban"></i>
                                             <p class="truncate-text">
                                                 <span class="text-content">Proyek</span>

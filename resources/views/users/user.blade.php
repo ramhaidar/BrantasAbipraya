@@ -222,7 +222,7 @@
             <div class=modal-content>
                 <div class=modal-header>
                     <h1 class="fs-5 modal-title" id=modalForEditLabel>Ubah Data User</h1>
-                    <button class=btn-close type=button onclick=closeModalEdit()></button>
+                    <button class=btn-close data-bs-dismiss="modal" type=button></button>
                 </div>
                 <form class="w-100 d-flex align-items-center flex-column gap-3" style=overflow-y:auto method=POST>@csrf
                     <div class="w-100 d-flex flex-column modal-body">

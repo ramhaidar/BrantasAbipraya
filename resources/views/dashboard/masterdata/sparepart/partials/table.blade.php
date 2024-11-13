@@ -20,6 +20,10 @@
                 <th class="text-center">Nama</th>
                 <th class="text-center">Part Number</th>
                 <th class="text-center">Merk</th>
+                <th class="text-center">Kode</th> <!-- Header baru -->
+                <th class="text-center">Jenis</th> <!-- Header baru -->
+                <th class="text-center">Sub Jenis</th> <!-- Header baru -->
+                <th class="text-center">Kategori</th> <!-- Header baru -->
                 <th class="text-center">Supplier</th>
                 <th class="text-center">Aksi</th>
             </tr>
@@ -63,34 +67,34 @@
                 order: [],
                 displayStart: lastPage * 10, // Start from the last saved page for this table
                 columnDefs: [{
-                        targets: 3, // Index of "Detail" column
+                        targets: 7, // Index of "Detail" column
                         className: 'text-center nowrap-column',
                         orderable: false,
                         searchable: false,
                         width: "1%",
                         render: function(data, type, row) {
                             return `
-                    <button class="btn btn-info detailBtn" data-id="${row.id}">
-                        <i class="bi bi-eye"></i>
-                    </button>
-                `;
+<button class="btn btn-info detailBtn" data-id="${row.id}">
+<i class="bi bi-eye"></i>
+</button>
+`;
                         }
                     },
                     {
-                        targets: 4, // Index of "Aksi" column
+                        targets: 8, // Index of "Aksi" column
                         className: 'text-center nowrap-column',
                         orderable: false,
                         searchable: false,
                         width: "1%",
                         render: function(data, type, row) {
                             return `
-                    <button class="btn btn-danger mx-1 deleteBtn" data-id="${row.id}">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                    <button class="btn btn-warning mx-1 ubahBtn" data-id="${row.id}" onclick="fillFormEdit(${row.id})">
-                        <i class="bi bi-pencil-square"></i>
-                    </button>
-                `;
+<button class="btn btn-danger mx-1 deleteBtn" data-id="${row.id}">
+<i class="bi bi-trash"></i>
+</button>
+<button class="btn btn-warning mx-1 ubahBtn" data-id="${row.id}" onclick="fillFormEdit(${row.id})">
+<i class="bi bi-pencil-square"></i>
+</button>
+`;
                         }
                     }
                 ],
@@ -106,6 +110,23 @@
                         data: 'merk',
                         name: 'merk'
                     },
+                    {
+                        data: 'kode_kategori',
+                        name: 'kode_kategori'
+                    }, // Tambahkan kode kategori
+
+                    {
+                        data: 'jenis_kategori',
+                        name: 'jenis_kategori'
+                    }, // Tambahkan jenis kategori
+                    {
+                        data: 'sub_jenis_kategori',
+                        name: 'sub_jenis_kategori'
+                    }, // Tambahkan sub_jenis kategori
+                    {
+                        data: 'nama_kategori',
+                        name: 'nama_kategori'
+                    }, // Tambahkan nama kategori
                     {
                         data: 'supplier',
                         name: 'supplier'

@@ -1,3 +1,15 @@
+@push('styles_3')
+    <style>
+        /* CSS for required asterisk */
+        .form-label.required::after {
+            content: " *";
+            color: red;
+            font-weight: bold;
+            margin-left: 2px;
+        }
+    </style>
+@endpush
+
 <div class="fade modal" id="modalForEdit" aria-hidden="true" aria-labelledby="staticBackdropLabel" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content rounded-4">
@@ -29,6 +41,17 @@
                             <div class="invalid-feedback">Merk diperlukan.</div>
                         </div>
 
+                        <div class="col-12">
+                            <label class="form-label required" for="edit_kategori">Kategori</label>
+                            <select class="form-control" id="edit_kategori" name="kategori" required>
+                                <option value="">Pilih Kategori</option>
+                                @foreach ($categories as $category)
+                                    <option value="{{ $category->id }}">{{ $category->kode }} - {{ $category->nama }}</option>
+                                @endforeach
+                            </select>
+                            <div class="invalid-feedback">Kategori diperlukan.</div>
+                        </div>
+
                         <!-- Multi-select for Supplier -->
                         <div class="col-12">
                             <label class="form-label" for="suppliers">Supplier</label>
@@ -50,18 +73,6 @@
         </div>
     </div>
 </div>
-
-@push('styles_3')
-    <style>
-        /* CSS for required asterisk */
-        .form-label.required::after {
-            content: " *";
-            color: red;
-            font-weight: bold;
-            margin-left: 2px;
-        }
-    </style>
-@endpush
 
 @push('scripts_3')
     <script>
@@ -95,6 +106,13 @@
     </script>
 
     <script>
+        $('#edit_kategori').select2({
+            placeholder: "Pilih Kategori",
+            allowClear: true,
+            dropdownParent: $('#modalForEdit'),
+            width: '100%'
+        });
+
         // Initialize Select2 for multi-select in edit modal
         $('#edit_suppliers').select2({
             placeholder: "Pilih Supplier",
@@ -108,7 +126,7 @@
         function fillFormEdit(id) {
             const url = "{{ route('master_data_sparepart.update', ':id') }}".replace(':id', id);
 
-            // AJAX GET request to fetch sparepart data along with selected suppliers
+            // AJAX GET request to fetch sparepart data along with selected suppliers and kategori
             $.ajax({
                 url: url,
                 type: 'GET',
@@ -117,6 +135,9 @@
                     $('#editSparepartForm #nama').val(response.data.nama);
                     $('#editSparepartForm #part_number').val(response.data.part_number);
                     $('#editSparepartForm #merk').val(response.data.merk);
+
+                    // Set selected kategori
+                    $('#edit_kategori').val(response.data.id_kategori).trigger('change');
 
                     // Set selected suppliers
                     const selectedSuppliers = response.data.suppliers.map(supplier => supplier.id);

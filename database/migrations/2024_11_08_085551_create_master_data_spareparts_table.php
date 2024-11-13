@@ -14,6 +14,10 @@ return new class extends Migration
             $table->string ( 'nama' ); // + nama: String
             $table->string ( 'part_number' ); // + part_number: String
             $table->string ( 'merk' ); // + merk: String
+            $table->foreignId ( 'id_kategori' )
+                ->nullable () // Kolom harus nullable
+                ->constrained ( 'kategori_sparepart' )
+                ->nullOnDelete (); // Foreign key dengan ON DELETE SET NULL
             $table->timestamps (); // + timestamps()
         } );
     }

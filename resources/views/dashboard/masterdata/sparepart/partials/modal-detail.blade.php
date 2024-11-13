@@ -9,18 +9,38 @@
             <div class="modal-body">
                 <div class="row g-3">
                     <div class="col-12">
-                        <label class="form-label required" for="nama">Nama Sparepart</label>
+                        <label class="form-label" for="nama">Nama Sparepart</label>
                         <input class="form-control" id="nama" name="nama" type="text" placeholder="Nama Sparepart" readonly>
                     </div>
 
                     <div class="col-12">
-                        <label class="form-label required" for="part_number">Part Number</label>
+                        <label class="form-label" for="part_number">Part Number</label>
                         <input class="form-control" id="part_number" name="part_number" type="text" placeholder="Part Number" readonly>
                     </div>
 
                     <div class="col-12">
-                        <label class="form-label required" for="merk">Merk</label>
+                        <label class="form-label" for="merk">Merk</label>
                         <input class="form-control" id="merk" name="merk" type="text" placeholder="Merk" readonly>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label" for="kategori">Kategori</label>
+                        <input class="form-control" id="kategori" name="kategori" type="text" placeholder="Kategori" readonly>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label" for="kode">Kode</label>
+                        <input class="form-control" id="kode" name="kode" type="text" placeholder="Kode" readonly>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label" for="jenis">Jenis</label>
+                        <input class="form-control" id="jenis" name="jenis" type="text" placeholder="Jenis" readonly>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label" for="sub_jenis">Sub Jenis</label>
+                        <input class="form-control" id="sub_jenis" name="sub_jenis" type="text" placeholder="---" readonly>
                     </div>
 
                     <!-- Add Suppliers List if needed -->
@@ -40,26 +60,14 @@
     </div>
 </div>
 
-@push('styles_3')
-    <style>
-        /* CSS for required asterisk */
-        .form-label.required::after {
-            content: " *";
-            color: red;
-            font-weight: bold;
-            margin-left: 2px;
-        }
-    </style>
-@endpush
-
 @push('scripts_3')
     <script>
         // Fungsi untuk menampilkan modal detail dan mengisi data dari server
         function fillFormDetail(id) {
-            // Set URL untuk mendapatkan data sparepart berdasarkan ID menggunakan route() helper
+            // Set URL untuk mendapatkan data sparepart berdasarkan ID
             const url = `{{ route('master_data_sparepart.show', ':id') }}`.replace(':id', id);
 
-            // Lakukan AJAX GET request ke server untuk mengambil data item
+            // Lakukan AJAX GET request ke server
             $.ajax({
                 url: url,
                 type: 'GET',
@@ -68,6 +76,12 @@
                     $('#modalForDetail #nama').val(response.data.nama);
                     $('#modalForDetail #part_number').val(response.data.part_number);
                     $('#modalForDetail #merk').val(response.data.merk);
+
+                    // Mengisi data kategori, kode, jenis, dan sub jenis
+                    $('#modalForDetail #kategori').val(response.data.kategori ? response.data.kategori.nama : 'Tidak ada kategori');
+                    $('#modalForDetail #kode').val(response.data.kategori ? response.data.kategori.kode : 'Tidak ada kode');
+                    $('#modalForDetail #jenis').val(response.data.kategori ? response.data.kategori.jenis : 'Tidak ada jenis');
+                    $('#modalForDetail #sub_jenis').val(response.data.kategori ? response.data.kategori.sub_jenis : 'Tidak ada sub jenis');
 
                     // Clear previous suppliers and add new list
                     $('#supplierList').empty();

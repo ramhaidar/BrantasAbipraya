@@ -1,3 +1,15 @@
+@push('styles_3')
+    <style>
+        /* CSS for required asterisk */
+        .form-label.required::after {
+            content: " *";
+            color: red;
+            font-weight: bold;
+            margin-left: 2px;
+        }
+    </style>
+@endpush
+
 <div class="fade modal" id="modalForAdd" aria-hidden="true" aria-labelledby="staticBackdropLabel" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content rounded-4">
@@ -28,6 +40,18 @@
                             <div class="invalid-feedback">Merk diperlukan.</div>
                         </div>
 
+                        <!-- Selection for Kategori (Select2) -->
+                        <div class="col-12">
+                            <label class="form-label required" for="kategori">Kategori</label>
+                            <select class="form-control" id="kategori" name="kategori" required>
+                                <option value="">Pilih Kategori</option>
+                                @foreach ($categories as $category)
+                                    <option value="{{ $category->id }}">{{ $category->kode }} - {{ $category->nama }}</option>
+                                @endforeach
+                            </select>
+                            <div class="invalid-feedback">Kategori diperlukan.</div>
+                        </div>
+
                         <!-- Multi-select for Supplier -->
                         <div class="col-12">
                             <label class="form-label" for="suppliers">Supplier</label>
@@ -49,9 +73,6 @@
         </div>
     </div>
 </div>
-
-@push('styles_3')
-@endpush
 
 @push('scripts_3')
     <script>
@@ -83,7 +104,17 @@
                 });
             });
 
-            // Initialize Select2 for multi-select
+            // Initialize Select2 for Kategori
+            $('#kategori').select2({
+                placeholder: "Pilih Kategori",
+                allowClear: true,
+                dropdownParent: $('#modalForAdd'),
+                width: '100%'
+            }).on("select2:select select2:unselect", function() {
+                validateSelect2();
+            });
+
+            // Initialize Select2 for multi-select (Suppliers)
             $('#suppliers').select2({
                 placeholder: "Pilih Supplier",
                 allowClear: true,
@@ -94,19 +125,44 @@
             }).on("select2:select select2:unselect", function() {
                 validateSelect2();
             });
+
+            // Custom validation for Select2
+            function validateSelect2() {
+                let isValid = true;
+
+                // Validate Kategori
+                const kategori = $('#kategori');
+                if (kategori.val() === "" || kategori.val() === null) {
+                    kategori.next('.select2').find('.select2-selection').addClass('is-invalid');
+                    isValid = false;
+                } else {
+                    kategori.next('.select2').find('.select2-selection').removeClass('is-invalid');
+                }
+
+                return isValid;
+            }
+
+            // Handle form reset to reset Select2 fields
+            form.addEventListener('reset', () => {
+                setTimeout(() => {
+                    $('#kategori').val('').trigger('change'); // Reset kategori
+                    $('#suppliers').val(null).trigger('change'); // Reset suppliers
+                    form.classList.remove('was-validated'); // Remove validation styles
+                }, 0); // Ensure this runs after the form reset
+            });
         })();
 
-        $(document).ready(function() {
-            // Find all input fields that are required
-            $("input[required]").each(function() {
-                // Find the label associated with the input
-                const label = $(this).closest(".col-12").find("label");
+        // $(document).ready(function() {
+        //     // Find all input fields that are required
+        //     $("input[required]").each(function() {
+        //         // Find the label associated with the input
+        //         const label = $(this).closest(".col-12").find("label");
 
-                // Append the asterisk only if the label exists
-                if (label.length) {
-                    label.append(' <span class="text-danger required-asterisk">*</span>');
-                }
-            });
-        });
+        //         // Append the asterisk only if the label exists
+        //         if (label.length) {
+        //             label.append(' <span class="text-danger required-asterisk">*</span>');
+        //         }
+        //     });
+        // });
     </script>
 @endpush

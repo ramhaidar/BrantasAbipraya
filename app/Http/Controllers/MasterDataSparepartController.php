@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\KategoriSparepart;
 use App\Models\Proyek;
 use Illuminate\Http\Request;
 use App\Models\MasterDataSupplier;
@@ -54,11 +55,13 @@ class MasterDataSparepartController extends Controller
         }
 
         $suppliers = MasterDataSupplier::all ();
+        $kategori  = KategoriSparepart::all ();
 
         return view ( 'dashboard.masterdata.sparepart.sparepart', [ 
             'proyeks'    => $proyeks,
             'masterData' => $sparepart,
             'suppliers'  => $suppliers,
+            'categories' => $kategori,
 
             'headerPage' => "Master Data Sparepart",
             'page'       => 'Data Sparepart',
@@ -94,10 +97,26 @@ class MasterDataSparepartController extends Controller
 
     public function show ( $id )
     {
-        $sparepart = MasterDataSparepart::with ( 'suppliers' )->findOrFail ( $id );
+        $sparepart = MasterDataSparepart::with ( 'suppliers', 'kategori' )->findOrFail ( $id );
 
         return response ()->json ( [ 
-            'data' => $sparepart
+            'data' => [ 
+                'id'          => $sparepart->id,
+                'nama'        => $sparepart->nama,
+                'part_number' => $sparepart->part_number,
+                'merk'        => $sparepart->merk,
+                'id_kategori' => optional ( $sparepart->kategori )->id, // Include ID kategori
+                'kategori'    => $sparepart->kategori ? [ 
+                    'nama'      => $sparepart->kategori->nama,
+                    'kode'      => $sparepart->kategori->kode,
+                    'jenis'     => $sparepart->kategori->jenis,
+                    'sub_jenis' => $sparepart->kategori->sub_jenis,
+                ] : null,
+                'suppliers'   => $sparepart->suppliers->map ( function ($supplier)
+                {
+                    return [ 'id' => $supplier->id, 'nama' => $supplier->nama ];
+                } ),
+            ]
         ] );
     }
 
@@ -107,12 +126,20 @@ class MasterDataSparepartController extends Controller
             'nama'        => [ 'required', 'string', 'max:255' ],
             'part_number' => [ 'required', 'string', 'max:255' ],
             'merk'        => [ 'required', 'string', 'max:255' ],
+            'kategori'    => [ 'required', 'exists:kategori_sparepart,id' ], // Validasi id_kategori
             'suppliers'   => [ 'array' ],
             'suppliers.*' => [ 'exists:master_data_suppliers,id' ],
         ] );
 
+        // Temukan sparepart berdasarkan ID
         $sparepart = MasterDataSparepart::findOrFail ( $id );
-        $sparepart->update ( $request->only ( [ 'nama', 'part_number', 'merk' ] ) );
+
+        // Update data sparepart
+        $sparepart->update ( $request->only ( [ 'nama', 'part_number', 'merk', 'kategori' ] ) );
+
+        // Update id_kategori
+        $sparepart->id_kategori = $request->input ( 'kategori' );
+        $sparepart->save ();
 
         // Sync suppliers, even if empty
         $sparepart->suppliers ()->sync ( $request->input ( 'suppliers', [] ) );
@@ -130,18 +157,28 @@ class MasterDataSparepartController extends Controller
 
     public function getData ( Request $request )
     {
-        $query = MasterDataSparepart::with ( 'suppliers' ); // Load suppliers relationship
+        // Load related models
+        $query = MasterDataSparepart::with ( 'suppliers', 'kategori' );
 
+        // Apply search filters
         if ( $search = $request->input ( 'search.value' ) )
         {
             $query->where ( function ($q) use ($search)
             {
                 $q->where ( 'nama', 'like', "%{$search}%" )
                     ->orWhere ( 'part_number', 'like', "%{$search}%" )
-                    ->orWhere ( 'merk', 'like', "%{$search}%" );
+                    ->orWhere ( 'merk', 'like', "%{$search}%" )
+                    ->orWhereHas ( 'kategori', function ($subQuery) use ($search)
+                    {
+                        $subQuery->where ( 'kode', 'like', "%{$search}%" )
+                            ->orWhere ( 'nama', 'like', "%{$search}%" )
+                            ->orWhere ( 'jenis', 'like', "%{$search}%" )
+                            ->orWhere ( 'sub_jenis', 'like', "%{$search}%" );
+                    } );
             } );
         }
 
+        // Apply sorting
         if ( $order = $request->input ( 'order' ) )
         {
             $columnIndex   = $order[ 0 ][ 'column' ];
@@ -154,26 +191,31 @@ class MasterDataSparepartController extends Controller
             $query->orderBy ( 'updated_at', 'desc' );
         }
 
+        // Pagination
         $start           = $request->input ( 'start', 0 );
         $length          = $request->input ( 'length', 10 );
         $totalRecords    = MasterDataSparepart::count ();
         $filteredRecords = $query->count ();
 
-        $sparepart = $query->skip ( $start )->take ( $length )->get ();
+        $spareparts = $query->skip ( $start )->take ( $length )->get ();
 
-        // Format suppliers into a string for each sparepart
-        $sparepart->transform ( function ($item)
+        // Transform data
+        $spareparts->transform ( function ($item)
         {
-            $item->detail = $item->suppliers->pluck ( 'nama' )->implode ( ', ' );
+            $item->detail             = $item->suppliers->pluck ( 'nama' )->implode ( ', ' ); // Supplier names
+            $item->kode_kategori      = optional ( $item->kategori )->kode; // Kategori kode
+            $item->nama_kategori      = optional ( $item->kategori )->nama; // Kategori nama
+            $item->jenis_kategori     = optional ( $item->kategori )->jenis; // Kategori jenis
+            $item->sub_jenis_kategori = optional ( $item->kategori )->sub_jenis; // Kategori sub_jenis
             return $item;
         } );
 
+        // Return JSON response
         return response ()->json ( [ 
             'draw'            => $request->input ( 'draw' ),
             'recordsTotal'    => $totalRecords,
             'recordsFiltered' => $filteredRecords,
-            'data'            => $sparepart,
+            'data'            => $spareparts,
         ] );
     }
-
 }

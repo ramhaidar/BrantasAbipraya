@@ -1,3 +1,15 @@
+@push('styles_3')
+    <style>
+        /* CSS for required asterisk */
+        .form-label.required::after {
+            content: " *";
+            color: red;
+            font-weight: bold;
+            margin-left: 2px;
+        }
+    </style>
+@endpush
+
 <div class="fade modal" id="modalForAdd" aria-hidden="true" aria-labelledby="staticBackdropLabel" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content rounded-4">
@@ -51,9 +63,6 @@
     </div>
 </div>
 
-@push('styles_3')
-@endpush
-
 @push('scripts_3')
     <script>
         (() => {
@@ -84,17 +93,17 @@
             });
         })()
 
-        $(document).ready(function() {
-            // Find all input fields that are required
-            $("input[required]").each(function() {
-                // Find the label associated with the input
-                const label = $(this).closest(".col-12").find("label");
+        // $(document).ready(function() {
+        //     // Find all input fields that are required
+        //     $("input[required]").each(function() {
+        //         // Find the label associated with the input
+        //         const label = $(this).closest(".col-12").find("label");
 
-                // Append the asterisk only if the label exists
-                if (label.length) {
-                    label.append(' <span class="text-danger required-asterisk">*</span>');
-                }
-            });
-        });
+        //         // Append the asterisk only if the label exists
+        //         if (label.length) {
+        //             label.append(' <span class="text-danger required-asterisk">*</span>');
+        //         }
+        //     });
+        // });
     </script>
 @endpush

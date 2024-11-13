@@ -1,4 +1,13 @@
 @push('styles_3')
+    <style>
+        /* CSS for required asterisk */
+        .form-label.required::after {
+            content: " *";
+            color: red;
+            font-weight: bold;
+            margin-left: 2px;
+        }
+    </style>
 @endpush
 
 <div class="fade modal" id="modalForEdit" aria-hidden="true" aria-labelledby="staticBackdropLabel" tabindex="-1">

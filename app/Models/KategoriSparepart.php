@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\MasterDataSparepart;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -33,9 +34,8 @@ class KategoriSparepart extends Model
         ];
     }
 
-    public function spareparts () : BelongsToMany
+    public function spareparts () : HasMany
     {
-        return $this->belongsToMany ( MasterDataSparepart::class, 'link_sparepart_kategori', 'id_kategori', 'id_sparepart' )
-            ->withTimestamps ();
+        return $this->hasMany ( MasterDataSparepart::class, 'id_kategori' );
     }
 }

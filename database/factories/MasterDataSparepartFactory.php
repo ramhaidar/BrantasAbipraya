@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\MasterDataAlat;
+use App\Models\KategoriSparepart;
 use App\Models\MasterDataSparepart;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -28,6 +29,7 @@ class MasterDataSparepartFactory extends Factory
             'nama'        => $this->faker->randomElement ( self::$nama ),
             'part_number' => $this->faker->randomElement ( self::$part_number ),
             'merk'        => $this->faker->randomElement ( self::$merk ),
+            'id_kategori' => KategoriSparepart::query ()->inRandomOrder ()->value ( 'id' ),
         ];
     }
 }

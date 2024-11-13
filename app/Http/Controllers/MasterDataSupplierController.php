@@ -116,8 +116,6 @@ class MasterDataSupplierController extends Controller
 
         $supplier->spareparts ()->sync ( $request->input ( 'spareparts', [] ) );
 
-        // dd ( $validatedData );
-
         // Redirect kembali ke halaman indeks dengan pesan sukses
         return redirect ()->route ( 'master_data_supplier.index' )->with ( 'success', 'Master Data Supplier berhasil diubah' );
     }

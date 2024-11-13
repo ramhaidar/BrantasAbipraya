@@ -376,7 +376,7 @@
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class=modal-content>
                 <div class=modal-header>
-                    <h5 class="fs-5 modal-title fw-bold"id=modalForEditLabel>Ubah Data ATB</h5><button class=btn-close type=button onclick=closeModalEdit()></button>
+                    <h5 class="fs-5 modal-title fw-bold"id=modalForEditLabel>Ubah Data ATB</h5><button class=btn-close data-bs-dismiss="modal" type=button></button>
                 </div>
                 <div class="w-100 modal-body row">
                     <form class="w-100 align-items-center flex-column gap-0"id=editDataForm method=POST>@csrf<div class=mb-4><label class=form-label for=tipe_atb>Tipe ATB</label>

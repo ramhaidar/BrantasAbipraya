@@ -1,15 +1,12 @@
-@push('styles_3')
-@endpush
-
 <div class="modal fade" id="modalForDelete" aria-hidden="true" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Konfirmasi Hapus</h5>
+                <h5 class="modal-title">Konfirmasi Hapus Proyek</h5>
                 <button class="btn-close" data-bs-dismiss="modal" type="button"></button>
             </div>
             <div class="modal-body">
-                <span>Apakah Anda yakin ingin menghapus item ini?</span>
+                <span>Apakah Anda yakin ingin menghapus Proyek ini?</span>
                 <br class="p-0 m-0">
                 <span>Tindakan ini tidak dapat dibatalkan!</span>
             </div>
@@ -21,6 +18,7 @@
     </div>
 </div>
 
+<!-- Hidden form untuk mengirimkan permintaan DELETE -->
 <form id="deleteForm" style="display: none;" method="POST">
     @csrf
     @method('DELETE')
@@ -28,36 +26,32 @@
 
 @push('scripts_3')
     <script>
-        // Event listener for all delete buttons
+        // Event listener untuk semua tombol delete
         $(document).on('click', '.deleteBtn', function() {
-            const id = $(this).data('id'); // Retrieve ID from data-id attribute
-            showModalDelete(id); // Show delete modal with the item ID
+            const id = $(this).data('id'); // Ambil ID dari atribut data-id
+            showModalDelete(id); // Tampilkan modal delete dengan ID item
         });
 
-        // Function to show the delete modal and set the ID of the item to delete
+        // Fungsi untuk membuka modal delete dan menyetel ID item yang akan dihapus
         function showModalDelete(id) {
-            $('#confirmDeleteButton').data('id', id); // Set data-id with item ID
+            $('#confirmDeleteButton').data('id', id); // Set data-id dengan ID item
             $('#modalForDelete').modal('show');
         }
 
-        // Function to close the delete modal
-        function closeModalDelete() {
-            $('#modalForDelete').modal('hide');
-        }
-
-        // Event handler for the "Delete" button in the delete modal
+        // Event handler untuk tombol "Hapus" di modal delete
         $('#confirmDeleteButton').on('click', function() {
-            const id = $(this).data('id'); // Get item ID from button data-id
-            deleteWithForm(id); // Call function to delete with form
+            const id = $(this).data('id'); // Ambil ID item dari data-id tombol
+            deleteWithForm(id); // Panggil fungsi untuk menghapus dengan form
         });
 
-        // Function to delete data by submitting the DELETE form
+        // Fungsi untuk menghapus data dengan mengirimkan form DELETE
         function deleteWithForm(id) {
             const form = document.getElementById('deleteForm');
-            // Generate action URL using named route and replace ':id' with the item ID
-            const actionUrl = "{{ route('master_data_alat.destroy', ':id') }}".replace(':id', id);
-            form.action = actionUrl;
-            form.submit(); // Submit the form
+
+            // Gunakan route() untuk membuat URL dinamis
+            form.action = `{{ route('proyek.destroy', ['id' => ':id']) }}`.replace(':id', id);
+
+            form.submit(); // Kirim form
         }
     </script>
 @endpush

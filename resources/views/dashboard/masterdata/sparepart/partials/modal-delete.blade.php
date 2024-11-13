@@ -3,7 +3,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Konfirmasi Hapus</h5>
-                <button class="btn-close" type="button" onclick="closeModalDelete()"></button>
+                <button class="btn-close" data-bs-dismiss="modal" type="button"></button>
             </div>
             <div class="modal-body">
                 <span>Apakah Anda yakin ingin menghapus item ini?</span>
@@ -11,7 +11,7 @@
                 <span>Tindakan ini tidak dapat dibatalkan!</span>
             </div>
             <div class="modal-footer d-flex w-100 justify-content-end">
-                <button class="btn btn-secondary me-2 w-25" onclick="closeModalDelete()">Batal</button>
+                <button class="btn btn-secondary me-2 w-25" data-bs-dismiss="modal">Batal</button>
                 <button class="btn btn-danger w-25" id="confirmDeleteButton">Hapus</button>
             </div>
         </div>

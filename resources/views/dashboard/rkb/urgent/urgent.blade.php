@@ -18,7 +18,7 @@
                     </a>
                 </div>
 
-                {{-- @include('dashboard.masterdata.sparepart.partials.table') --}}
+                @include('dashboard.rkb.urgent.partials.table')
 
             </div>
         </div>

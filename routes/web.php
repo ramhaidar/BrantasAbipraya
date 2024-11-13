@@ -459,6 +459,12 @@ Route::prefix ( 'pagination' )->middleware ( 'auth' )->group ( function ()
         [ MasterDataSupplierController::class, 'getData' ]
     )
         ->name ( 'master-data.supplier.getData' );
+
+    Route::get (
+        '/rkb-general/data',
+        [ RKBGeneralController::class, 'getData' ]
+    )
+        ->name ( 'rkb.general.getData' );
 } );
 
 Route::get ( '/test', function ()

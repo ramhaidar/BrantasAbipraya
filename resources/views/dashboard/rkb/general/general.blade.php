@@ -18,11 +18,14 @@
                     </a>
                 </div>
 
-                {{-- @include('dashboard.masterdata.sparepart.partials.table') --}}
+                @include('dashboard.rkb.general.partials.table')
 
             </div>
         </div>
     </div>
+
+    <!-- Modal for Adding Data -->
+    @include('dashboard.rkb.general.partials.modal-add')
 @endsection
 
 @push('scripts_2')

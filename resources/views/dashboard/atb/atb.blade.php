@@ -259,7 +259,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h1 class="fs-5 modal-title">Form Konfirmasi</h1>
-                    <button class="btn-close" type="button" onclick="closeModalDelete()"></button>
+                    <button class="btn-close" data-bs-dismiss="modal" type="button"></button>
                 </div>
                 <form method="POST">
                     @csrf
@@ -273,7 +273,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <a class="btn btn-secondary" onclick="closeModalDelete()">Batal</a>
+                        <a class="btn btn-secondary" data-bs-dismiss="modal">Batal</a>
                         <button class="btn btn-danger" type="submit">Hapus</button>
                     </div>
                 </form>

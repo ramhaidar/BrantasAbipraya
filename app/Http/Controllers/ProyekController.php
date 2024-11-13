@@ -20,6 +20,15 @@ class ProyekController extends Controller
         ] );
     }
 
+    public function show ( $id )
+    {
+        $proyek = Proyek::findOrFail ( $id );
+
+        return response ()->json ( [ 
+            'data' => $proyek,
+        ] );
+    }
+
     public function store ( Request $request )
     {
         $credentials = $request->validate ( [ 
@@ -29,12 +38,6 @@ class ProyekController extends Controller
         return back ()->with ( "success", "Berhasil menambahkan data proyek." );
     }
 
-    public function showByID ( Proyek $id )
-    {
-        $id->load ( 'users' );
-
-        return response ()->json ( $id );
-    }
     public function update ( Request $request, Proyek $id )
     {
         $credentials = $request->validate ( [ 
@@ -51,5 +54,51 @@ class ProyekController extends Controller
         $msg = "Berhasil menghapus data proyek";
 
         return back ()->with ( "success", $msg );
+    }
+
+    public function getData ( Request $request )
+    {
+        $query = Proyek::query ();
+
+        // Handle search input
+        if ( $search = $request->input ( 'search.value' ) )
+        {
+            $query->where ( function ($q) use ($search)
+            {
+                $q->where ( 'nama_proyek', 'like', "%{$search}%" );
+            } );
+        }
+
+        // Handle ordering
+        if ( $order = $request->input ( 'order' ) )
+        {
+            $columnIndex   = $order[ 0 ][ 'column' ];
+            $columnName    = $request->input ( 'columns' )[ $columnIndex ][ 'data' ];
+            $sortDirection = $order[ 0 ][ 'dir' ];
+            $query->orderBy ( $columnName, $sortDirection );
+        }
+        else
+        {
+            $query->orderBy ( 'updated_at', 'desc' );
+        }
+
+        // Calculate pagination parameters
+        $draw   = $request->input ( 'draw' );
+        $start  = $request->input ( 'start', 0 );
+        $length = $request->input ( 'length', 10 );
+
+        // Get total records count and filtered count
+        $totalRecords    = Proyek::count ();
+        $filteredRecords = $query->count ();
+
+        // Fetch the data with pagination
+        $proyeks = $query->skip ( $start )->take ( $length )->get ();
+
+        return response ()->json ( [ 
+            'draw'            => $draw,
+            'recordsTotal'    => $totalRecords,
+            'recordsFiltered' => $filteredRecords,
+            'data'            => $proyeks,
+        ] );
     }
 }

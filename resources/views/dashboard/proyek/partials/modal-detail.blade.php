@@ -10,27 +10,27 @@
     </style>
 @endpush
 
-<div class="fade modal" id="modalForDetail" aria-hidden="true" aria-labelledby="staticBackdropLabel" tabindex="-1">
+<div class="fade modal" id="modalDetailProyek" aria-hidden="true" aria-labelledby="staticBackdropLabel" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content rounded-4">
             <div class="pt-3 px-3 m-0 d-flex w-100 justify-content-between">
-                <h1 class="fs-5" id="modalForDetailLabel">Detail Supplier</h1>
+                <h1 class="fs-5" id="modalDetailProyekLabel">Detail Proyek</h1>
                 <button class="btn-close" data-bs-dismiss="modal" type="button" aria-label="Close"></button>
             </div>
             <hr class="p-0 m-0 border border-secondary-subtle border-2 opacity-50">
             <div class="modal-body">
                 <div class="row g-3">
                     <div class="col-12">
-                        <label class="form-label required" for="supplier_nama">Nama Supplier</label>
-                        <input class="form-control" id="supplier_nama" name="supplier_nama" type="text" placeholder="Nama Supplier" readonly>
+                        <label class="form-label required" for="proyek_nama">Nama Proyek</label>
+                        <input class="form-control" id="proyek_nama" name="proyek_nama" type="text" placeholder="Nama Proyek" readonly>
                     </div>
 
-                    <!-- List of Spareparts provided by the supplier -->
+                    <!-- List of Users associated with the project -->
                     <div class="col-12">
-                        <label class="form-label" for="spareparts">Spareparts</label>
-                        <ul class="list-group" id="sparepartList">
-                            <!-- Sparepart names will be appended here -->
-                        </ul>
+                        <label class="form-label" for="list-users">Users</label>
+                        <ol class="list-group" id="list-users">
+                            <!-- User names will be appended here -->
+                        </ol>
                     </div>
                 </div>
             </div>
@@ -44,31 +44,31 @@
 
 @push('scripts_3')
     <script>
-        // Fungsi untuk menampilkan modal detail Supplier dan mengisi data dari server
+        // Fungsi untuk menampilkan modal detail Proyek dan mengisi data dari server
         function fillFormDetail(id) {
-            // Set URL untuk mendapatkan data supplier berdasarkan ID
-            const url = `{{ route('master_data_supplier.show', ':id') }}`.replace(':id', id);
+            // Set URL untuk mendapatkan data proyek berdasarkan ID
+            const url = `{{ route('proyek.show', ':id') }}`.replace(':id', id);
 
-            // Lakukan AJAX GET request ke server untuk mengambil data supplier
+            // Lakukan AJAX GET request ke server untuk mengambil data proyek
             $.ajax({
                 url: url,
                 type: 'GET',
                 success: function(response) {
-                    // Mengisi nilai input di modal detail dengan data supplier yang diterima
-                    $('#modalForDetail #supplier_nama').val(response.data.nama);
+                    // Mengisi nilai input di modal detail dengan data proyek yang diterima
+                    $('#modalDetailProyek #proyek_nama').val(response.data.nama_proyek);
 
-                    // Clear previous spareparts and add new list
-                    $('#sparepartList').empty();
-                    if (response.data.spareparts && response.data.spareparts.length > 0) {
-                        response.data.spareparts.forEach(sparepart => {
-                            $('#sparepartList').append(`<li class="list-group-item">${sparepart.nama} — ${sparepart.part_number} — ${sparepart.merk}</li>`);
+                    // Clear previous user list and add new list
+                    $('#list-users').empty();
+                    if (response.data.users && response.data.users.length > 0) {
+                        response.data.users.forEach(user => {
+                            $('#list-users').append(`<li class="list-group-item">${user.name} — ${user.email}</li>`);
                         });
                     } else {
-                        $('#sparepartList').append(`<li class="list-group-item">Tidak ada Sparepart yang disediakan oleh Supplier ini</li>`);
+                        $('#list-users').append(`<li class="list-group-item">Tidak ada pengguna terkait dengan proyek ini</li>`);
                     }
 
                     // Tampilkan modal detail
-                    $('#modalForDetail').modal('show');
+                    $('#modalDetailProyek').modal('show');
                 },
                 error: function(xhr) {
                     alert("Gagal mengambil data. Silakan coba lagi.");

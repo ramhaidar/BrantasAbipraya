@@ -15,6 +15,11 @@ use App\Http\Controllers\MasterDataAlatController;
 use App\Http\Controllers\MasterDataSupplierController;
 use App\Http\Controllers\MasterDataSparepartController;
 
+Route::get ( '/test', function ()
+{
+    return view ( 'test' );
+} );
+
 // Rute untuk Halaman Landing (HomePage)
 Route::get ( '/', function ()
 {
@@ -365,30 +370,6 @@ Route::prefix ( 'saldo' )
             ->name ( 'saldo.export' );
     } );
 
-// Rute Proyek [ProyekController]
-Route::prefix ( 'proyek' )
-    ->middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )
-    ->group ( function ()
-    {
-        Route::get ( '/', [ ProyekController::class, 'index' ] )
-            ->name ( 'proyek' );
-
-        Route::get ( '/add', [ ProyekController::class, 'data_baru_proyek' ] )
-            ->name ( 'proyek.new' );
-
-        Route::post ( '/store', [ ProyekController::class, 'store' ] )
-            ->name ( 'proyek.post.store' );
-
-        Route::get ( '/actions/{id}', [ ProyekController::class, 'showByID' ] )
-            ->name ( 'proyek.show' );
-
-        Route::post ( '/edit/actions/{id}', [ ProyekController::class, 'update' ] )
-            ->name ( 'proyek.post.update' );
-
-        Route::delete ( '/delete/actions/{id}', [ ProyekController::class, 'destroy' ] )
-            ->name ( 'proyek.delete.destroy' );
-    } );
-
 Route::get ( '/laporan/summary', [ LaporanController::class, 'summary' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss',
 ] )
@@ -459,12 +440,49 @@ Route::prefix ( 'pagination' )->middleware ( 'auth' )->group ( function ()
         [ MasterDataSupplierController::class, 'getData' ]
     )
         ->name ( 'master-data.supplier.getData' );
+
+    Route::get (
+        '/proyek/data',
+        [ ProyekController::class, 'getData' ]
+    )
+        ->name ( 'proyek.getData' );
 } );
 
-Route::get ( '/test', function ()
-{
-    return view ( 'test' );
-} );
+// Rute Proyek [ProyekController]
+Route::prefix ( 'proyek' )
+    ->middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )
+    ->group ( function ()
+    {
+        Route::get (
+            '/',
+            [ ProyekController::class, 'index' ]
+        )
+            ->name ( 'proyek.index' );
+
+        Route::get (
+            '{id}',
+            [ ProyekController::class, 'show' ]
+        )
+            ->name ( 'proyek.show' );
+
+        Route::post (
+            '/',
+            [ ProyekController::class, 'store' ]
+        )
+            ->name ( 'proyek.store' );
+
+        Route::put (
+            '{id}',
+            [ ProyekController::class, 'update' ]
+        )
+            ->name ( 'proyek.update' );
+
+        Route::delete (
+            '{id}',
+            [ ProyekController::class, 'destroy' ]
+        )
+            ->name ( 'proyek.destroy' );
+    } );
 
 // Rute Master Data Alat [MasterDataAlatController]
 Route::middleware ( 'auth' )

@@ -1,3 +1,18 @@
+@push('styles_3')
+    <style>
+        #table-data {
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        #table-data td,
+        #table-data th {
+            padding: 4px 8px;
+            vertical-align: middle;
+        }
+    </style>
+@endpush
+
 <div class="ibox-body ms-0 ps-0 table-responsive">
     <table class="m-0 table table-bordered table-striped" id="table-data">
         <thead class="table-primary">
@@ -6,6 +21,7 @@
                 <th class="text-center">Kode Alat</th>
                 <th class="text-center">Merek Alat</th>
                 <th class="text-center">Tipe Alat</th>
+                <th class="text-center">Serial Number</th>
                 <th class="text-center">Aksi</th>
             </tr>
         </thead>
@@ -15,14 +31,14 @@
     </table>
 </div>
 
-@push('styles_3')
-@endpush
-
 @push('scripts_3')
     <script>
         $(document).ready(function() {
-            // Ambil halaman terakhir dari localStorage, jika ada
-            var lastPage = localStorage.getItem('lastPage') ? parseInt(localStorage.getItem('lastPage')) : 0;
+            // Unique key for localStorage specific to this page
+            const lastPageKey = 'lastPage_alat';
+
+            // Retrieve the last page number from localStorage, if available
+            var lastPage = localStorage.getItem(lastPageKey) ? parseInt(localStorage.getItem(lastPageKey)) : 0;
 
             var table = $('#table-data').DataTable({
                 processing: true,
@@ -47,20 +63,20 @@
                 order: [],
                 displayStart: lastPage * 10, // Mulai dari halaman terakhir yang disimpan
                 columnDefs: [{
-                    targets: 4, // Indeks kolom 'Aksi'
+                    targets: 5, // Indeks kolom 'Aksi'
                     className: 'text-center nowrap-column',
                     orderable: false,
                     searchable: false,
                     width: "1%",
                     render: function(data, type, row) {
                         return `
-                    <button class="btn btn-danger mx-1 deleteBtn" data-id="${row.id}">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                    <button class="btn btn-warning mx-1 ubahBtn" data-id="${row.id}" onclick="fillFormEdit(${row.id})">
-                        <i class="bi bi-pencil-square"></i>
-                    </button>
-                `;
+<button class="btn btn-danger mx-1 deleteBtn" data-id="${row.id}">
+<i class="bi bi-trash"></i>
+</button>
+<button class="btn btn-warning mx-1 ubahBtn" data-id="${row.id}" onclick="fillFormEdit(${row.id})">
+<i class="bi bi-pencil-square"></i>
+</button>
+`;
                     }
                 }],
                 columns: [{
@@ -80,22 +96,26 @@
                         name: 'tipe_alat'
                     },
                     {
+                        data: 'serial_number',
+                        name: 'serial_number'
+                    },
+                    {
                         data: 'aksi',
                         name: 'aksi'
                     }
                 ]
             });
 
-            // Simpan halaman terakhir ke localStorage setiap kali halaman berubah
+            // Save the current page number to localStorage each time the page changes
             table.on('page', function() {
                 var currentPage = table.page();
-                localStorage.setItem('lastPage', currentPage);
+                localStorage.setItem(lastPageKey, currentPage);
             });
 
-            // Bersihkan lastPage dari localStorage setelah halaman diinisialisasi ulang
-            table.on('init', function() {
-                localStorage.removeItem('lastPage');
-            });
+            // Clear lastPage for this specific page key after table initialization
+            // table.on('init', function() {
+            //     localStorage.removeItem(lastPageKey);
+            // });
         });
     </script>
 @endpush

@@ -10,14 +10,14 @@ return new class extends Migration
     {
         Schema::table ( 'atb', function (Blueprint $table)
         {
-            $table->foreign ( 'id_komponen' )->references ( 'id' )->on ( 'komponen' )->onDelete ( 'cascade' );
-            $table->foreign ( 'id_saldo' )->references ( 'id' )->on ( 'saldo' )->onDelete ( 'cascade' );
+            $table->foreign ( 'id_komponen' )->references ( 'id' )->on ( 'komponen' )->cascadeOnDelete ();
+            $table->foreign ( 'id_saldo' )->references ( 'id' )->on ( 'saldo' )->cascadeOnDelete ();
         } );
 
         Schema::table ( 'apb', function (Blueprint $table)
         {
-            $table->foreign ( 'id_alat' )->references ( 'id' )->on ( 'alat' )->onDelete ( 'cascade' );
-            $table->foreign ( 'id_saldo' )->references ( 'id' )->on ( 'saldo' )->onDelete ( 'cascade' );
+            $table->foreign ( 'id_alat' )->references ( 'id' )->on ( 'alat' )->cascadeOnDelete ();
+            $table->foreign ( 'id_saldo' )->references ( 'id' )->on ( 'saldo' )->cascadeOnDelete ();
         } );
     }
 

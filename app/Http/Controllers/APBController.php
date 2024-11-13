@@ -62,12 +62,12 @@ class APBController extends Controller
         if ( $user->role === 'Admin' )
         {
             $proyek  = Proyek::findOrFail ( $id_proyek );
-            $proyeks = Proyek::with ( "users" )->orderBy ( "created_at", "asc" )->orderBy ( "id", "asc" )->get ();
+            $proyeks = Proyek::with ( "users" )->orderBy ( "updated_at", "asc" )->orderBy ( "id", "asc" )->get ();
             $alat    = Alat::get ();
         }
         else
         {
-            $proyeks = $user->proyek ()->with ( "users" )->orderBy ( "created_at", "asc" )->orderBy ( "id", "asc" )->get ();
+            $proyeks = $user->proyek ()->with ( "users" )->orderBy ( "updated_at", "asc" )->orderBy ( "id", "asc" )->get ();
             if ( ! $proyeks->pluck ( 'id' )->contains ( $id_proyek ) )
             {
                 abort ( 403, 'Anda tidak memiliki akses ke proyek ini.' );
@@ -182,7 +182,7 @@ class APBController extends Controller
 
         if ( $type == "Mutasi Saldo" )
         {
-            $allProyek = Proyek::with ( "users" )->orderBy ( "created_at", "asc" )->orderBy ( "id", "asc" )->get ();
+            $allProyek = Proyek::with ( "users" )->orderBy ( "updated_at", "asc" )->orderBy ( "id", "asc" )->get ();
         }
 
         $data = [ 
@@ -348,7 +348,7 @@ class APBController extends Controller
         {
             // Cek apakah filter proyek ID ada
             $proyeksQuery = Proyek::with ( "users" )
-                ->orderBy ( "created_at", "asc" )
+                ->orderBy ( "updated_at", "asc" )
                 ->orderBy ( "id", "asc" );
 
             // Jika ada filterProyekId, tambahkan kondisi untuk memfilter berdasarkan ID tersebut
@@ -364,7 +364,7 @@ class APBController extends Controller
             // Pegawai hanya dapat mengakses proyek yang diassign kepada mereka
             $proyeksQuery = $user->proyek ()
                 ->with ( "users" )
-                ->orderBy ( "created_at", "asc" )
+                ->orderBy ( "updated_at", "asc" )
                 ->orderBy ( "id", "asc" );
 
             // Jika ada filterProyekId, tambahkan kondisi untuk memfilter berdasarkan ID tersebut
@@ -434,7 +434,7 @@ class APBController extends Controller
         if ( $user->role === 'Admin' )
         {
             $proyeks = Proyek::with ( "users" )
-                ->orderBy ( "created_at", "asc" )
+                ->orderBy ( "updated_at", "asc" )
                 ->orderBy ( "id", "asc" )
                 ->get ();
         }
@@ -442,7 +442,7 @@ class APBController extends Controller
         {
             $proyeks = $user->proyek ()
                 ->with ( "users" )
-                ->orderBy ( "created_at", "asc" )
+                ->orderBy ( "updated_at", "asc" )
                 ->orderBy ( "id", "asc" )
                 ->get ();
 

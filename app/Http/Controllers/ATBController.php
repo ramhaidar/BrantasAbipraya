@@ -70,7 +70,7 @@ class ATBController extends Controller
         {
             $proyek  = Proyek::findOrFail ( $id_proyek );
             $proyeks = Proyek::with ( "users" )
-                ->orderBy ( "created_at", "asc" )
+                ->orderBy ( "updated_at", "asc" )
                 ->orderBy ( "id", "asc" )
                 ->get ();
 
@@ -80,7 +80,7 @@ class ATBController extends Controller
         {
             $proyeks = $user->proyek ()
                 ->with ( "users" )
-                ->orderBy ( "created_at", "asc" )
+                ->orderBy ( "updated_at", "asc" )
                 ->orderBy ( "id", "asc" )
                 ->get ();
 
@@ -94,7 +94,7 @@ class ATBController extends Controller
         {
             $proyeks = $user->proyek ()
                 ->with ( "users" )
-                ->orderBy ( "created_at", "asc" )
+                ->orderBy ( "updated_at", "asc" )
                 ->orderBy ( "id", "asc" )
                 ->get ();
 

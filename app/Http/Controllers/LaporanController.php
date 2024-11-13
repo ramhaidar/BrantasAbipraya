@@ -21,7 +21,7 @@ class LaporanController extends Controller
             // Admin dapat mengakses semua proyek
             $proyek  = Proyek::findOrFail ( $request->id_proyek );
             $proyeks = Proyek::with ( "users" )
-                ->orderBy ( "created_at", "asc" )
+                ->orderBy ( "updated_at", "asc" )
                 ->orderBy ( "id", "asc" )
                 ->get ();
         }
@@ -30,7 +30,7 @@ class LaporanController extends Controller
             // Pegawai hanya dapat mengakses proyek yang diassign kepada mereka
             $proyeks = $user->proyek ()
                 ->with ( "users" )
-                ->orderBy ( "created_at", "asc" )
+                ->orderBy ( "updated_at", "asc" )
                 ->orderBy ( "id", "asc" )
                 ->get ();
 
@@ -149,7 +149,7 @@ class LaporanController extends Controller
         {
             $proyek  = Proyek::findOrFail ( $request->id_proyek );
             $proyeks = Proyek::with ( "users" )
-                ->orderBy ( "created_at", "asc" )
+                ->orderBy ( "updated_at", "asc" )
                 ->orderBy ( "id", "asc" )
                 ->get ();
         }
@@ -157,7 +157,7 @@ class LaporanController extends Controller
         {
             $proyeks = $user->proyek ()
                 ->with ( "users" )
-                ->orderBy ( "created_at", "asc" )
+                ->orderBy ( "updated_at", "asc" )
                 ->orderBy ( "id", "asc" )
                 ->get ();
 
@@ -296,7 +296,7 @@ class LaporanController extends Controller
         {
             $proyek  = Proyek::findOrFail ( $request->id_proyek );
             $proyeks = Proyek::with ( "users" )
-                ->orderBy ( "created_at", "asc" )
+                ->orderBy ( "updated_at", "asc" )
                 ->orderBy ( "id", "asc" )
                 ->get ();
         }
@@ -304,7 +304,7 @@ class LaporanController extends Controller
         {
             $proyeks = $user->proyek ()
                 ->with ( "users" )
-                ->orderBy ( "created_at", "asc" )
+                ->orderBy ( "updated_at", "asc" )
                 ->orderBy ( "id", "asc" )
                 ->get ();
 

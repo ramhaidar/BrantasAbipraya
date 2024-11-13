@@ -10,18 +10,18 @@ return new class extends Migration
     {
         Schema::table ( 'alat', function (Blueprint $table)
         {
-            $table->foreign ( 'id_proyek' )->references ( 'id' )->on ( 'proyek' )->onDelete ( 'set null' );
+            $table->foreign ( 'id_proyek' )->references ( 'id' )->on ( 'proyek' )->nullOnDelete ();
         } );
 
         Schema::table ( 'atb', function (Blueprint $table)
         {
-            $table->foreign ( 'id_proyek' )->references ( 'id' )->on ( 'proyek' )->onDelete ( 'cascade' );
-            $table->foreign ( 'id_asal_proyek' )->references ( 'id' )->on ( 'proyek' )->onDelete ( 'cascade' );
+            $table->foreign ( 'id_proyek' )->references ( 'id' )->on ( 'proyek' )->cascadeOnDelete ();
+            $table->foreign ( 'id_asal_proyek' )->references ( 'id' )->on ( 'proyek' )->cascadeOnDelete ();
         } );
 
         Schema::table ( 'apb', function (Blueprint $table)
         {
-            $table->foreign ( 'id_tujuan_proyek' )->references ( 'id' )->on ( 'proyek' )->onDelete ( 'cascade' );
+            $table->foreign ( 'id_tujuan_proyek' )->references ( 'id' )->on ( 'proyek' )->cascadeOnDelete ();
         } );
 
     }

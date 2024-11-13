@@ -52,6 +52,7 @@
     <!-- Styles -->
     @stack('styles_1')
     @stack('styles_2')
+    @stack('styles_3')
 </head>
 
 <body class="layout-fixed sidebar-mini sidebar-collapse" data-panel-auto-height-mode="height" style="height:auto">
@@ -66,12 +67,13 @@
         </aside>
 
         <!-- Content Wrapper -->
-        <div class="content-wrapper" style="height:auto; background-color:#fff">
-            <!-- Main Content -->
-            <section class="content h-100 px-2 pt-2">
-                @yield('content')
-            </section>
-
+        <div class="content-wrapper" style="background-color: transparent">
+            <div class="" style="padding-top: 1dvh; padding-bottom: 1dvh; background-color:#fff">
+                <!-- Main Content -->
+                <section class="px-2 ">
+                    @yield('content')
+                </section>
+            </div>
         </div>
     </div>
 
@@ -154,6 +156,7 @@
 
     @stack('scripts_1')
     @stack('scripts_2')
+    @stack('scripts_3')
 </body>
 
 </html>

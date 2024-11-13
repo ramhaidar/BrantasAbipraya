@@ -1,3 +1,18 @@
+@push('styles_3')
+    <style>
+        #table-data {
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        #table-data td,
+        #table-data th {
+            padding: 4px 8px;
+            vertical-align: middle;
+        }
+    </style>
+@endpush
+
 <div class="ibox-body ms-0 ps-0 table-responsive">
     <table class="m-0 table table-bordered table-striped" id="table-data">
         <thead class="table-primary">
@@ -15,85 +30,103 @@
     </table>
 </div>
 
-@push('styles_3')
-@endpush
-
 @push('scripts_3')
     <script>
-        $('#table-data').DataTable({
-            processing: true,
-            responsive: true,
-            serverSide: true,
-            ajax: {
-                url: "{{ route('master-data.sparepart.getData') }}",
-                type: "GET"
-            },
-            language: {
-                paginate: {
-                    previous: '<i class="bi bi-caret-left"></i>',
-                    next: '<i class="bi bi-caret-right"></i>'
-                }
-            },
-            pageLength: 10,
-            lengthMenu: [
-                [10, 25, 50],
-                [10, 25, 50]
-            ],
-            ordering: true,
-            order: [],
-            columnDefs: [{
-                    targets: 3, // Index of "Detail" column
-                    className: 'text-center nowrap-column',
-                    orderable: false,
-                    searchable: false,
-                    width: "1%",
-                    render: function(data, type, row) {
-                        return `
-<button class="btn btn-info detailBtn" data-id="${row.id}">
-<i class="bi bi-eye"></i>
-</button>
-`;
+        $(document).ready(function() {
+
+            // Define a unique key for this page's DataTable pagination state
+            const lastPageKey = 'lastPage_sparepart';
+
+            // Retrieve the last page number from localStorage, if available
+            var lastPage = localStorage.getItem(lastPageKey) ? parseInt(localStorage.getItem(lastPageKey)) : 0;
+
+            var table = $('#table-data').DataTable({
+                processing: true,
+                responsive: true,
+                serverSide: true,
+                ajax: {
+                    url: "{{ route('master-data.sparepart.getData') }}",
+                    type: "GET"
+                },
+                language: {
+                    paginate: {
+                        previous: '<i class="bi bi-caret-left"></i>',
+                        next: '<i class="bi bi-caret-right"></i>'
                     }
                 },
-                {
-                    targets: 4, // Index of "Aksi" column
-                    className: 'text-center nowrap-column',
-                    orderable: false,
-                    searchable: false,
-                    width: "1%",
-                    render: function(data, type, row) {
-                        return `
-<button class="btn btn-danger mx-1 deleteBtn" data-id="${row.id}">
-<i class="bi bi-trash"></i>
-</button>
-<button class="btn btn-warning mx-1 ubahBtn" data-id="${row.id}" onclick="fillFormEdit(${row.id})">
-<i class="bi bi-pencil-square"></i>
-</button>
-`;
+                pageLength: 10,
+                lengthMenu: [
+                    [10, 25, 50],
+                    [10, 25, 50]
+                ],
+                ordering: true,
+                order: [],
+                displayStart: lastPage * 10, // Start from the last saved page for this table
+                columnDefs: [{
+                        targets: 3, // Index of "Detail" column
+                        className: 'text-center nowrap-column',
+                        orderable: false,
+                        searchable: false,
+                        width: "1%",
+                        render: function(data, type, row) {
+                            return `
+                    <button class="btn btn-info detailBtn" data-id="${row.id}">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                `;
+                        }
+                    },
+                    {
+                        targets: 4, // Index of "Aksi" column
+                        className: 'text-center nowrap-column',
+                        orderable: false,
+                        searchable: false,
+                        width: "1%",
+                        render: function(data, type, row) {
+                            return `
+                    <button class="btn btn-danger mx-1 deleteBtn" data-id="${row.id}">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                    <button class="btn btn-warning mx-1 ubahBtn" data-id="${row.id}" onclick="fillFormEdit(${row.id})">
+                        <i class="bi bi-pencil-square"></i>
+                    </button>
+                `;
+                        }
                     }
-                }
-            ],
-            columns: [{
-                    data: 'nama',
-                    name: 'nama'
-                },
-                {
-                    data: 'part_number',
-                    name: 'part_number'
-                },
-                {
-                    data: 'merk',
-                    name: 'merk'
-                },
-                {
-                    data: 'supplier',
-                    name: 'supplier'
-                },
-                {
-                    data: 'aksi',
-                    name: 'aksi'
-                }
-            ]
+                ],
+                columns: [{
+                        data: 'nama',
+                        name: 'nama'
+                    },
+                    {
+                        data: 'part_number',
+                        name: 'part_number'
+                    },
+                    {
+                        data: 'merk',
+                        name: 'merk'
+                    },
+                    {
+                        data: 'supplier',
+                        name: 'supplier'
+                    },
+                    {
+                        data: 'aksi',
+                        name: 'aksi'
+                    }
+                ]
+            });
+
+            // Save the current page number to localStorage each time the page changes
+            table.on('page', function() {
+                var currentPage = table.page();
+                localStorage.setItem(lastPageKey, currentPage);
+            });
+
+            // Clear lastPage for this specific page key after table initialization
+            // table.on('init', function() {
+            //     localStorage.removeItem(lastPageKey);
+            // });
         });
     </script>
 @endpush

@@ -18,23 +18,11 @@
                     </a>
                 </div>
 
-                @include('dashboard.masterdata.sparepart.partials.table')
+                {{-- @include('dashboard.masterdata.sparepart.partials.table') --}}
 
             </div>
         </div>
     </div>
-
-    <!-- Modal for Adding Data -->
-    @include('dashboard.masterdata.sparepart.partials.modal-add')
-
-    <!-- Modal for Editing Data -->
-    @include('dashboard.masterdata.sparepart.partials.modal-edit')
-
-    <!-- Modal for Delete Confirmation -->
-    @include('dashboard.masterdata.sparepart.partials.modal-delete')
-
-    <!-- Modal for Detail Data -->
-    @include('dashboard.masterdata.sparepart.partials.modal-detail')
 @endsection
 
 @push('scripts_2')

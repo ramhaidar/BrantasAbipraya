@@ -20,11 +20,11 @@ return new class extends Migration
             $table->bigInteger ( 'net' );
             $table->bigInteger ( 'ppn' )->nullable ();
             $table->bigInteger ( 'bruto' )->nullable ();
-            $table->foreignId ( 'id_komponen' )->nullable ()->onDelete ( 'set null' );
-            $table->foreignId ( 'id_saldo' )->nullable ()->unique ()->onDelete ( 'set null' );
-            $table->foreignId ( 'id_proyek' )->nullable ()->onDelete ( 'set null' );
-            $table->foreignId ( 'id_master_data' )->nullable ()->onDelete ( 'set null' );
-            $table->foreignId ( 'id_asal_proyek' )->nullable ()->onDelete ( 'set null' );
+            $table->foreignId ( 'id_komponen' )->nullable ()->nullOnDelete ();
+            $table->foreignId ( 'id_saldo' )->nullable ()->unique ()->nullOnDelete ();
+            $table->foreignId ( 'id_proyek' )->nullable ()->nullOnDelete ();
+            $table->foreignId ( 'id_master_data' )->nullable ()->nullOnDelete ();
+            $table->foreignId ( 'id_asal_proyek' )->nullable ()->nullOnDelete ();
             $table->timestamps ();
         } );
     }

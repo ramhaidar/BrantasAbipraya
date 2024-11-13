@@ -92,7 +92,7 @@
 
         // Function to display modal for editing and populate form with server data
         function fillFormEdit(id) {
-            const url = `/master-data-suppliers/${id}`;
+            const url = "{{ route('master_data_supplier.show', ':id') }}".replace(':id', id);
 
             // AJAX GET request to fetch supplier data along with selected spareparts
             $.ajax({
@@ -107,7 +107,7 @@
                     $('#edit_spareparts').val(selectedSpareparts).trigger('change');
 
                     // Set action form to update the specific supplier with PUT method
-                    $('#editSupplierForm').attr('action', `/master-data-suppliers/${id}`);
+                    $('#editSupplierForm').attr('action', url);
 
                     // Display the edit modal
                     $('#modalForEdit').modal('show');

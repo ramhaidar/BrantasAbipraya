@@ -1,3 +1,6 @@
+@push('styles_3')
+@endpush
+
 <div class="modal fade" id="modalForDelete" aria-hidden="true" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
@@ -25,34 +28,36 @@
 
 @push('scripts_3')
     <script>
-        // Event listener untuk semua tombol delete
+        // Event listener for all delete buttons
         $(document).on('click', '.deleteBtn', function() {
-            const id = $(this).data('id'); // Ambil ID dari atribut data-id
-            showModalDelete(id); // Tampilkan modal delete dengan ID item
+            const id = $(this).data('id'); // Retrieve ID from data-id attribute
+            showModalDelete(id); // Show delete modal with the item ID
         });
 
-        // Fungsi untuk membuka modal delete dan menyetel ID item yang akan dihapus
+        // Function to show the delete modal and set the ID of the item to delete
         function showModalDelete(id) {
-            $('#confirmDeleteButton').data('id', id); // Set data-id dengan ID item
+            $('#confirmDeleteButton').data('id', id); // Set data-id with item ID
             $('#modalForDelete').modal('show');
         }
 
-        // Fungsi untuk menutup modal delete
+        // Function to close the delete modal
         function closeModalDelete() {
             $('#modalForDelete').modal('hide');
         }
 
-        // Event handler untuk tombol "Hapus" di modal delete
+        // Event handler for the "Delete" button in the delete modal
         $('#confirmDeleteButton').on('click', function() {
-            const id = $(this).data('id'); // Ambil ID item dari data-id tombol
-            deleteWithForm(id); // Panggil fungsi untuk menghapus dengan form
+            const id = $(this).data('id'); // Get item ID from button data-id
+            deleteWithForm(id); // Call function to delete with form
         });
 
-        // Fungsi untuk menghapus data dengan mengirimkan form DELETE
+        // Function to delete data by submitting the DELETE form
         function deleteWithForm(id) {
             const form = document.getElementById('deleteForm');
-            form.action = `/master-data-alats/${id}`; // Set URL action form dengan ID item
-            form.submit(); // Kirim form
+            // Generate action URL using named route and replace ':id' with the item ID
+            const actionUrl = "{{ route('master_data_alat.destroy', ':id') }}".replace(':id', id);
+            form.action = actionUrl;
+            form.submit(); // Submit the form
         }
     </script>
 @endpush

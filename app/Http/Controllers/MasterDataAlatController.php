@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Auth;
 
 class MasterDataAlatController extends Controller
 {
-    public function render ( Request $request )
+    public function index ( Request $request )
     {
         $user    = Auth::user ();
         $proyeks = [];
@@ -19,7 +19,7 @@ class MasterDataAlatController extends Controller
         if ( $user->role === 'Admin' )
         {
             $proyeks = Proyek::with ( "users" )
-                ->orderBy ( "created_at", "asc" )
+                ->orderBy ( "updated_at", "asc" )
                 ->orderBy ( "id", "asc" )
                 ->get ();
 
@@ -30,7 +30,7 @@ class MasterDataAlatController extends Controller
         {
             $proyeks = $user->proyek ()
                 ->with ( "users" )
-                ->orderBy ( "created_at", "asc" )
+                ->orderBy ( "updated_at", "asc" )
                 ->orderBy ( "id", "asc" )
                 ->get ();
 
@@ -43,7 +43,7 @@ class MasterDataAlatController extends Controller
         {
             $proyeks = $user->proyek ()
                 ->with ( "users" )
-                ->orderBy ( "created_at", "asc" )
+                ->orderBy ( "updated_at", "asc" )
                 ->orderBy ( "id", "asc" )
                 ->get ();
 
@@ -54,7 +54,7 @@ class MasterDataAlatController extends Controller
         return view ( 'dashboard.masterdata.alat.alat', [ 
             'proyeks'    => $proyeks,
             'proyek'     => $proyeks,
-            'alat'       => $alat,
+            // 'alat'       => $alat,
 
             'headerPage' => "Master Data Alat",
             'page'       => 'Data Alat',
@@ -76,7 +76,7 @@ class MasterDataAlatController extends Controller
 
         $alat = MasterDataAlat::create ( $validatedData );
 
-        return redirect ()->route ( 'master_data_alat' )->with ( 'success', 'Master Data Alat berhasil ditambahkan' );
+        return redirect ()->route ( 'master_data_alat.index' )->with ( 'success', 'Master Data Alat berhasil ditambahkan' );
     }
 
     /**
@@ -116,7 +116,7 @@ class MasterDataAlatController extends Controller
 
         $alat->update ( $validatedData );
 
-        return redirect ()->route ( 'master_data_alat' )->with ( 'success', 'Master Data Alat berhasil diperbarui' );
+        return redirect ()->route ( 'master_data_alat.index' )->with ( 'success', 'Master Data Alat berhasil diperbarui' );
     }
 
     /**
@@ -127,7 +127,7 @@ class MasterDataAlatController extends Controller
         $alat = MasterDataAlat::findOrFail ( $id );
         $alat->delete ();
 
-        return redirect ()->route ( 'master_data_alat' )->with ( 'success', 'Master Data Alat berhasil dihapus' );
+        return redirect ()->route ( 'master_data_alat.index' )->with ( 'success', 'Master Data Alat berhasil dihapus' );
     }
 
     public function getData ( Request $request )
@@ -161,9 +161,9 @@ class MasterDataAlatController extends Controller
         }
 
         // Calculate pagination parameters
-        $page   = $request->input ( 'page', 1 );
+        $draw   = $request->input ( 'draw' );
+        $start  = $request->input ( 'start', 0 );
         $length = $request->input ( 'length', 10 );
-        $start  = ( $page - 1 ) * $length;
 
         // Get total records count and filtered count
         $totalRecords    = MasterDataAlat::count ();
@@ -173,11 +173,10 @@ class MasterDataAlatController extends Controller
         $alat = $query->skip ( $start )->take ( $length )->get ();
 
         return response ()->json ( [ 
-            'draw'            => $request->input ( 'draw' ),
+            'draw'            => $draw,
             'recordsTotal'    => $totalRecords,
             'recordsFiltered' => $filteredRecords,
             'data'            => $alat,
         ] );
     }
-
 }

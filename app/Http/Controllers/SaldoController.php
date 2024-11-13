@@ -52,7 +52,7 @@ class SaldoController extends Controller
             // Admin dapat mengakses semua proyek
             $proyek  = Proyek::findOrFail ( $id_proyek );
             $proyeks = Proyek::with ( "users" )
-                ->orderBy ( "created_at", "asc" )
+                ->orderBy ( "updated_at", "asc" )
                 ->orderBy ( "id", "asc" )
                 ->get ();
         }
@@ -61,7 +61,7 @@ class SaldoController extends Controller
             // Pegawai hanya dapat mengakses proyek yang diassign kepada mereka
             $proyeks = $user->proyek ()
                 ->with ( "users" )
-                ->orderBy ( "created_at", "asc" )
+                ->orderBy ( "updated_at", "asc" )
                 ->orderBy ( "id", "asc" )
                 ->get ();
 

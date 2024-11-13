@@ -8,17 +8,18 @@ return new class extends Migration
 {
     public function up () : void
     {
-        Schema::create ( 'link_supplier_sparepart', function (Blueprint $table)
+        Schema::create ( 'link_sparepart_kategori', function (Blueprint $table)
         {
             $table->id ();
-            $table->foreignId ( 'id_supplier' )->constrained ( 'master_data_suppliers' )->cascadeOnDelete ();
             $table->foreignId ( 'id_sparepart' )->constrained ( 'master_data_spareparts' )->cascadeOnDelete ();
+            $table->foreignId ( 'id_kategori' )->constrained ( 'kategori_sparepart' )->cascadeOnDelete ();
             $table->timestamps ();
         } );
     }
 
     public function down () : void
     {
-        Schema::dropIfExists ( 'link_supplier_sparepart' );
+        Schema::dropIfExists ( 'link_sparepart_kategori' );
     }
+
 };

@@ -1,17 +1,19 @@
 <?php
-use App\Http\Controllers\APBController;
-use App\Http\Controllers\ATBController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\LaporanController;
-use App\Http\Controllers\MasterDataAlatController;
-use App\Http\Controllers\MasterDataSparepartController;
-use App\Http\Controllers\MasterDataSupplierController;
-use App\Http\Controllers\ProyekController;
-use App\Http\Controllers\SaldoController;
-use App\Http\Controllers\SessionController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\RKBUrgentController;
 use App\Http\Middleware\CheckRole;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\APBController;
+use App\Http\Controllers\ATBController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\SaldoController;
+use App\Http\Controllers\ProyekController;
+use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\SessionController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\RKBGeneralController;
+use App\Http\Controllers\MasterDataAlatController;
+use App\Http\Controllers\MasterDataSupplierController;
+use App\Http\Controllers\MasterDataSparepartController;
 
 // Rute untuk Halaman Landing (HomePage)
 Route::get ( '/', function ()
@@ -272,69 +274,6 @@ Route::prefix ( 'apb' )
             ->name ( 'apb.del.test' );
     } );
 
-// Rute Master Data Alat [MasterDataAlatController]
-Route::prefix ( 'master-data-alat' )
-    ->middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )
-    ->group ( function ()
-    {
-        Route::get ( '/', [ MasterDataAlatController::class, 'render' ] )
-            ->name ( 'master_data_alat' );
-
-        Route::post ( '/', [ MasterDataAlatController::class, 'store' ] )
-            ->name ( 'master_data_alat.store' );
-
-        Route::get ( '/actions/{id}', [ MasterDataAlatController::class, 'show' ] )
-            ->name ( 'master_data_alat.show' );
-
-        Route::post ( '/actions/{id}', [ MasterDataAlatController::class, 'update' ] )
-            ->name ( 'master_data_alat.update' );
-
-        Route::delete ( '/actions/{id}', [ MasterDataAlatController::class, 'destroy' ] )
-            ->name ( 'master_data_alat.destroy' );
-    } );
-
-// Rute Master Data Supplier [MasterDataSupplierController]
-Route::prefix ( 'master-data-supplier' )
-    ->middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )
-    ->group ( function ()
-    {
-        Route::get ( '/', [ MasterDataSupplierController::class, 'index' ] )
-            ->name ( 'master_data_supplier' );
-
-        Route::post ( '/', [ MasterDataSupplierController::class, 'store' ] )
-            ->name ( 'master_data_supplier.store' );
-
-        Route::get ( '/actions/{id}', [ MasterDataSupplierController::class, 'show' ] )
-            ->name ( 'master_data_supplier.show' );
-
-        Route::post ( '/actions/{id}', [ MasterDataSupplierController::class, 'update' ] )
-            ->name ( 'master_data_supplier.update' );
-
-        Route::delete ( '/actions/{id}', [ MasterDataSupplierController::class, 'destroy' ] )
-            ->name ( 'master_data_supplier.destroy' );
-    } );
-
-// Rute Master Data Sparepart [MasterDataSparepartController]
-Route::prefix ( 'master-data-sparepart' )
-    ->middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )
-    ->group ( function ()
-    {
-        Route::get ( '/', [ MasterDataSparepartController::class, 'index' ] )
-            ->name ( 'master_data_sparepart' );
-
-        Route::post ( '/', [ MasterDataSparepartController::class, 'store' ] )
-            ->name ( 'master_data_sparepart.store' );
-
-        Route::get ( '/actions/{id}', [ MasterDataSparepartController::class, 'show' ] )
-            ->name ( 'master_data_sparepart.show' );
-
-        Route::post ( '/actions/{id}', [ MasterDataSparepartController::class, 'update' ] )
-            ->name ( 'master_data_sparepart.update' );
-
-        Route::delete ( '/actions/{id}', [ MasterDataSparepartController::class, 'destroy' ] )
-            ->name ( 'master_data_sparepart.destroy' );
-    } );
-
 // Rute Saldo [SaldoController]
 Route::prefix ( 'saldo' )
     ->middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )
@@ -528,64 +467,156 @@ Route::get ( '/test', function ()
 } );
 
 // Rute Master Data Alat [MasterDataAlatController]
-Route::middleware ( 'auth' )->group ( function ()
-{
-    Route::get (
-        'master-data-alats/{id}',
-        [ MasterDataAlatController::class, 'show' ]
-    )->name ( 'master_data_alat.show' );
-    Route::post (
-        'master-data-alats',
-        [ MasterDataAlatController::class, 'store' ]
-    )->name ( 'master_data_alat.store' );
-    Route::put (
-        'master-data-alats/{id}',
-        [ MasterDataAlatController::class, 'update' ]
-    )->name ( 'master_data_alat.update' );
-    Route::delete (
-        'master-data-alats/{id}',
-        [ MasterDataAlatController::class, 'destroy' ]
-    )->name ( 'master_data_alat.destroy' );
-} );
+Route::middleware ( 'auth' )
+    ->prefix ( 'master-data-alat' )
+    ->group ( function ()
+    {
+        Route::get (
+            '/',
+            [ MasterDataAlatController::class, 'index' ]
+        )->name ( 'master_data_alat.index' );
+
+        Route::get (
+            '{id}',
+            [ MasterDataAlatController::class, 'show' ]
+        )->name ( 'master_data_alat.show' );
+
+        Route::post (
+            '/',
+            [ MasterDataAlatController::class, 'store' ]
+        )->name ( 'master_data_alat.store' );
+
+        Route::put (
+            '{id}',
+            [ MasterDataAlatController::class, 'update' ]
+        )->name ( 'master_data_alat.update' );
+
+        Route::delete (
+            '{id}',
+            [ MasterDataAlatController::class, 'destroy' ]
+        )->name ( 'master_data_alat.destroy' );
+    } );
 
 // Rute Master Data Sparepart [MasterDataSparepartController]
-Route::middleware ( 'auth' )->group ( function ()
-{
-    Route::get (
-        'master-data-spareparts/{id}',
-        [ MasterDataSparepartController::class, 'show' ]
-    )->name ( 'master_data_sparepart.show' );
-    Route::post (
-        'master-data-spareparts',
-        [ MasterDataSparepartController::class, 'store' ]
-    )->name ( 'master_data_sparepart.store' );
-    Route::put (
-        'master-data-spareparts/{id}',
-        [ MasterDataSparepartController::class, 'update' ]
-    )->name ( 'master_data_sparepart.update' );
-    Route::delete (
-        'master-data-spareparts/{id}',
-        [ MasterDataSparepartController::class, 'destroy' ]
-    )->name ( 'master_data_sparepart.destroy' );
-} );
+Route::middleware ( 'auth' )
+    ->prefix ( 'master-data-sparepart' )
+    ->group ( function ()
+    {
+        Route::get (
+            '/',
+            [ MasterDataSparepartController::class, 'index' ]
+        )->name ( 'master_data_sparepart.index' );
+
+        Route::get (
+            '{id}',
+            [ MasterDataSparepartController::class, 'show' ]
+        )->name ( 'master_data_sparepart.show' );
+
+        Route::post (
+            '/',
+            [ MasterDataSparepartController::class, 'store' ]
+        )->name ( 'master_data_sparepart.store' );
+
+        Route::put (
+            '{id}',
+            [ MasterDataSparepartController::class, 'update' ]
+        )->name ( 'master_data_sparepart.update' );
+
+        Route::delete (
+            '{id}',
+            [ MasterDataSparepartController::class, 'destroy' ]
+        )->name ( 'master_data_sparepart.destroy' );
+    } );
 
 // Rute Master Data Supplier [MasterDataSupplierController]
-Route::middleware ( 'auth' )->group ( function ()
-{
-    Route::get (
-        'master-data-suppliers/{id}',
-        [ MasterDataSupplierController::class, 'show' ]
-    )->name ( 'master_data_supplier.show' );
-    Route::post (
-        'master-data-suppliers',
-        [ MasterDataSupplierController::class, 'store' ]
-    )->name ( 'master_data_supplier.store' );
-    Route::put (
-        'master-data-suppliers/{id}',
-        [ MasterDataSupplierController::class, 'update' ]
-    )->name ( 'master_data_supplier.update' );
-    Route::delete (
-        'master-data-suppliers/{id}',
-        [ MasterDataSupplierController::class, 'destroy' ]
-    )->name ( 'master_data_supplier.destroy' );
-} );
+Route::middleware ( 'auth' )
+    ->prefix ( 'master-data-supplier' )
+    ->group ( function ()
+    {
+        Route::get (
+            '/',
+            [ MasterDataSupplierController::class, 'index' ]
+        )->name ( 'master_data_supplier.index' );
+
+        Route::get (
+            '{id}',
+            [ MasterDataSupplierController::class, 'show' ]
+        )->name ( 'master_data_supplier.show' );
+
+        Route::post (
+            '/',
+            [ MasterDataSupplierController::class, 'store' ]
+        )->name ( 'master_data_supplier.store' );
+
+        Route::put (
+            '{id}',
+            [ MasterDataSupplierController::class, 'update' ]
+        )->name ( 'master_data_supplier.update' );
+
+        Route::delete (
+            '{id}',
+            [ MasterDataSupplierController::class, 'destroy' ]
+        )->name ( 'master_data_supplier.destroy' );
+    } );
+
+// Rute RKB General [RKBGeneralController]
+Route::middleware ( 'auth' )
+    ->prefix ( 'rkb-general' )
+    ->group ( function ()
+    {
+        Route::get (
+            '/',
+            [ RKBGeneralController::class, 'index' ]
+        )->name ( 'rkb_general.index' );
+
+        Route::get (
+            '{id}',
+            [ RKBGeneralController::class, 'show' ]
+        )->name ( 'rkb_general.show' );
+
+        Route::post (
+            '/',
+            [ RKBGeneralController::class, 'store' ]
+        )->name ( 'rkb_general.store' );
+
+        Route::put (
+            '{id}',
+            [ RKBGeneralController::class, 'update' ]
+        )->name ( 'rkb_general.update' );
+
+        Route::delete (
+            '{id}',
+            [ RKBGeneralController::class, 'destroy' ]
+        )->name ( 'rkb_general.destroy' );
+    } );
+
+// Rute RKB General [RKBGeneralController]
+Route::middleware ( 'auth' )
+    ->prefix ( 'rkb-urgent' )
+    ->group ( function ()
+    {
+        Route::get (
+            '/',
+            [ RKBUrgentController::class, 'index' ]
+        )->name ( 'rkb_urgent.index' );
+
+        Route::get (
+            '{id}',
+            [ RKBUrgentController::class, 'show' ]
+        )->name ( 'rkb_urgent.show' );
+
+        Route::post (
+            '/',
+            [ RKBUrgentController::class, 'store' ]
+        )->name ( 'rkb_urgent.store' );
+
+        Route::put (
+            '{id}',
+            [ RKBUrgentController::class, 'update' ]
+        )->name ( 'rkb_urgent.update' );
+
+        Route::delete (
+            '{id}',
+            [ RKBUrgentController::class, 'destroy' ]
+        )->name ( 'rkb_urgent.destroy' );
+    } );

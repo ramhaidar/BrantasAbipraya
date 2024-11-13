@@ -111,49 +111,6 @@
                                     </a>
                                 </li>
 
-                                <!-- Master Data Menu with Submenu -->
-                                <li class="nav-item has-treeview {{ str_contains($headerPage, 'Master Data') ? 'menu-open' : '' }}">
-                                    <a class="nav-link {{ str_contains($headerPage, 'Master Data') ? 'active' : '' }}" href="#" style="{{ str_contains($headerPage, 'Master Data') ? 'background-color: #483D8B; color: #ffffff;' : '' }}">
-                                        <i class="bi me-2 nav-icon fs-5 bi-database-fill-gear"></i>
-                                        <p class="truncate-text">
-                                            <span class="text-content">Master Data</span>
-                                        </p>
-                                        <i class="right bi bi-caret-right-fill"></i>
-                                    </a>
-                                    <ul class="nav nav-treeview">
-
-                                        <!-- Level 2 Item: Data Alat -->
-                                        <li class="nav-item">
-                                            <a class="nav-link level-1 {{ str_contains($page, 'Data Alat') ? 'active' : '' }}" href="{{ route('master_data_alat') }}" style="{{ str_contains($page, 'Data Alat') ? 'background-color: #66CDAA; color: #ffffff;' : '' }}">
-                                                <i class="bi me-2 nav-icon fs-5 bi-gear-wide-connected"></i>
-                                                <p class="truncate-text">
-                                                    <span class="text-content">Alat</span>
-                                                </p>
-                                            </a>
-                                        </li>
-
-                                        <!-- Level 2 Item: Data Sparepart -->
-                                        <li class="nav-item">
-                                            <a class="nav-link level-1 {{ str_contains($page, 'Data Sparepart') ? 'active' : '' }}" href="{{ route('master_data_sparepart') }}" style="{{ str_contains($page, 'Data Sparepart') ? 'background-color: #66CDAA; color: #ffffff;' : '' }}">
-                                                <i class="bi me-2 nav-icon fs-5 bi-tools"></i>
-                                                <p class="truncate-text">
-                                                    <span class="text-content">Sparepart</span>
-                                                </p>
-                                            </a>
-                                        </li>
-
-                                        <!-- Level 2 Item: Data Supplier -->
-                                        <li class="nav-item">
-                                            <a class="nav-link level-1 {{ str_contains($page, 'Data Supplier') ? 'active' : '' }}" href="{{ route('master_data_supplier') }}" style="{{ str_contains($page, 'Data Supplier') ? 'background-color: #66CDAA; color: #ffffff;' : '' }}">
-                                                <i class="bi me-2 nav-icon fs-5 bi-truck"></i>
-                                                <p class="truncate-text">
-                                                    <span class="text-content">Supplier</span>
-                                                </p>
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </li>
-
                                 <!-- Menu for Admin Role Only -->
                                 @if (Auth::user()->role == 'Admin')
                                     <li class="nav-item">
@@ -173,6 +130,84 @@
                                         </a>
                                     </li>
                                 @endif
+
+                                <!-- Master Data Menu with Submenu -->
+                                <li class="nav-item has-treeview {{ str_contains($headerPage, 'Master Data') ? 'menu-open' : '' }}">
+                                    <a class="nav-link {{ str_contains($headerPage, 'Master Data') ? 'active' : '' }}" href="#" style="{{ str_contains($headerPage, 'Master Data') ? 'background-color: #483D8B; color: #ffffff;' : '' }}">
+                                        <i class="bi me-2 nav-icon fs-5 bi-database-fill-gear"></i>
+                                        <p class="truncate-text">
+                                            <span class="text-content">Master Data</span>
+                                        </p>
+                                        <i class="right bi bi-caret-right-fill"></i>
+                                    </a>
+                                    <ul class="nav nav-treeview">
+
+                                        <!-- Level 2 Item: Data Alat -->
+                                        <li class="nav-item">
+                                            <a class="nav-link level-1 {{ str_contains($page, 'Data Alat') ? 'active' : '' }}" href="{{ route('master_data_alat.index') }}" style="{{ str_contains($page, 'Data Alat') ? 'background-color: #66CDAA; color: #ffffff;' : '' }}">
+                                                <i class="bi me-2 nav-icon fs-5 bi-gear-wide-connected"></i>
+                                                <p class="truncate-text">
+                                                    <span class="text-content">Alat</span>
+                                                </p>
+                                            </a>
+                                        </li>
+
+                                        <!-- Level 2 Item: Data Sparepart -->
+                                        <li class="nav-item">
+                                            <a class="nav-link level-1 {{ str_contains($page, 'Data Sparepart') ? 'active' : '' }}" href="{{ route('master_data_sparepart.index') }}" style="{{ str_contains($page, 'Data Sparepart') ? 'background-color: #66CDAA; color: #ffffff;' : '' }}">
+                                                <i class="bi me-2 nav-icon fs-5 bi-tools"></i>
+                                                <p class="truncate-text">
+                                                    <span class="text-content">Sparepart</span>
+                                                </p>
+                                            </a>
+                                        </li>
+
+                                        <!-- Level 2 Item: Data Supplier -->
+                                        <li class="nav-item">
+                                            <a class="nav-link level-1 {{ str_contains($page, 'Data Supplier') ? 'active' : '' }}" href="{{ route('master_data_supplier.index') }}" style="{{ str_contains($page, 'Data Supplier') ? 'background-color: #66CDAA; color: #ffffff;' : '' }}">
+                                                <i class="bi me-2 nav-icon fs-5 bi-truck"></i>
+                                                <p class="truncate-text">
+                                                    <span class="text-content">Supplier</span>
+                                                </p>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+
+                                <!-- Rancangan Kebutuhan Barang Menu with SubMenu -->
+                                <li class="nav-item has-treeview {{ str_contains($headerPage, 'RKB') ? 'menu-open' : '' }}">
+                                    <a class="nav-link {{ str_contains($headerPage, 'RKB') ? 'active' : '' }}" href="#" style="{{ str_contains($headerPage, 'RKB') ? 'background-color: #483D8B; color: #ffffff;' : '' }}">
+                                        <i class="bi me-2 nav-icon fs-5 bi-building-fill"></i>
+                                        <p class="truncate-text">
+                                            <span class="text-content">RKB</span>
+                                        </p>
+                                        <i class="right bi bi-caret-right-fill"></i>
+                                    </a>
+                                    <ul class="nav nav-treeview">
+
+                                        <!-- Level 2 Item: Data Alat -->
+                                        <li class="nav-item">
+                                            <a class="nav-link level-1 {{ str_contains($page, 'RKB Non Urgent') ? 'active' : '' }}" href="{{ route('rkb_general.index') }}" style="{{ str_contains($page, 'Data RKB General') ? 'background-color: #66CDAA; color: #ffffff;' : '' }}">
+                                                <i class="bi me-2 nav-icon fs-5 bi bi-plus-square-fill"></i>
+                                                {{-- <i class="fa-solid fa-building me-2 fs-5 nav-icon"></i> --}}
+                                                <p class="truncate-text">
+                                                    <span class="text-content">General</span>
+                                                </p>
+                                            </a>
+                                        </li>
+
+                                        <!-- Level 2 Item: Data Sparepart -->
+                                        <li class="nav-item">
+                                            <a class="nav-link level-1 {{ str_contains($page, 'RKB Urgent') ? 'active' : '' }}" href="{{ route('rkb_urgent.index') }}" style="{{ str_contains($page, 'Data RKB Urgent') ? 'background-color: #66CDAA; color: #ffffff;' : '' }}">
+                                                <i class="bi me-2 nav-icon fs-5 bi bi-exclamation-square-fill"></i>
+                                                {{-- <i class="fa-solid fa-building-circle-exclamation ms-2 me-2 fs-5 nav-icon"></i> --}}
+                                                <p class="truncate-text">
+                                                    <span class="text-content">Urgent</span>
+                                                </p>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
 
                                 <li class="nav-header mt-2">LIST PROYEK: {{ $proyeks->count() }}</li>
 
@@ -589,11 +624,14 @@
                 // Select the active element within the sidebar
                 const activeElement = $('.sidebar .nav-link.active').last();
 
+                // Calculate half of the dynamic view height (dvh)
+                const halfDvh = window.innerHeight / 2;
+
                 // Check if there is an active element to scroll to
                 if (activeElement.length) {
                     // Scroll the sidebar to bring the active element into view
                     $('.sidebar .os-viewport').animate({
-                        scrollTop: activeElement.offset().top - $('.sidebar .os-viewport').offset().top + $('.sidebar .os-viewport').scrollTop() - 125
+                        scrollTop: activeElement.offset().top - $('.sidebar .os-viewport').offset().top + $('.sidebar .os-viewport').scrollTop() - halfDvh
                     }, 200);
                 }
             }

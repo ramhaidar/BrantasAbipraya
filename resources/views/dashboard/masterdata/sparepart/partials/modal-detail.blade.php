@@ -56,8 +56,8 @@
     <script>
         // Fungsi untuk menampilkan modal detail dan mengisi data dari server
         function fillFormDetail(id) {
-            // Set URL untuk mendapatkan data sparepart berdasarkan ID
-            const url = `/master-data-spareparts/${id}`;
+            // Set URL untuk mendapatkan data sparepart berdasarkan ID menggunakan route() helper
+            const url = `{{ route('master_data_sparepart.show', ':id') }}`.replace(':id', id);
 
             // Lakukan AJAX GET request ke server untuk mengambil data item
             $.ajax({

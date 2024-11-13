@@ -20,7 +20,7 @@ class MasterDataSparepartController extends Controller
         if ( $user->role === 'Admin' )
         {
             $proyeks = Proyek::with ( "users" )
-                ->orderBy ( "created_at", "asc" )
+                ->orderBy ( "updated_at", "asc" )
                 ->orderBy ( "id", "asc" )
                 ->get ();
 
@@ -31,7 +31,7 @@ class MasterDataSparepartController extends Controller
         {
             $proyeks = $user->proyek ()
                 ->with ( "users" )
-                ->orderBy ( "created_at", "asc" )
+                ->orderBy ( "updated_at", "asc" )
                 ->orderBy ( "id", "asc" )
                 ->get ();
 
@@ -44,7 +44,7 @@ class MasterDataSparepartController extends Controller
         {
             $proyeks = $user->proyek ()
                 ->with ( "users" )
-                ->orderBy ( "created_at", "asc" )
+                ->orderBy ( "updated_at", "asc" )
                 ->orderBy ( "id", "asc" )
                 ->get ();
 
@@ -88,7 +88,7 @@ class MasterDataSparepartController extends Controller
             $masterData->suppliers ()->sync ( $request->suppliers );
         }
 
-        return redirect ()->route ( 'master_data_sparepart' )
+        return redirect ()->route ( 'master_data_sparepart.index' )
             ->with ( 'success', 'Data Master Sparepart berhasil ditambahkan' );
     }
 
@@ -117,7 +117,7 @@ class MasterDataSparepartController extends Controller
         // Sync suppliers, even if empty
         $masterData->suppliers ()->sync ( $request->input ( 'suppliers', [] ) );
 
-        return redirect ()->route ( 'master_data_sparepart' )->with ( 'success', 'Master Data Sparepart berhasil diperbarui' );
+        return redirect ()->route ( 'master_data_sparepart.index' )->with ( 'success', 'Master Data Sparepart berhasil diperbarui' );
     }
 
     public function destroy ( $id )
@@ -125,7 +125,7 @@ class MasterDataSparepartController extends Controller
         $masterData = MasterDataSparepart::findOrFail ( $id );
         $masterData->delete ();
 
-        return redirect ()->route ( 'master_data_sparepart' )->with ( 'success', 'Master Data Sparepart berhasil dihapus' );
+        return redirect ()->route ( 'master_data_sparepart.index' )->with ( 'success', 'Master Data Sparepart berhasil dihapus' );
     }
 
     public function getData ( Request $request )

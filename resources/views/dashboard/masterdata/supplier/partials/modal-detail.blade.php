@@ -47,7 +47,8 @@
         // Fungsi untuk menampilkan modal detail Supplier dan mengisi data dari server
         function fillFormDetail(id) {
             // Set URL untuk mendapatkan data supplier berdasarkan ID
-            const url = `/master-data-suppliers/${id}`;
+            const url = `{{ route('master_data_supplier.show', ':id') }}`.replace(':id', id);
+
 
             // Lakukan AJAX GET request ke server untuk mengambil data supplier
             $.ajax({

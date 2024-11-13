@@ -30,4 +30,10 @@ class MasterDataSparepart extends Model
         return $this->belongsToMany ( MasterDataSupplier::class, 'link_supplier_sparepart', 'id_sparepart', 'id_supplier' )
             ->withTimestamps ();
     }
+
+    public function kategoriSpareparts () : BelongsToMany
+    {
+        return $this->belongsToMany ( KategoriSparepart::class, 'link_sparepart_kategori', 'id_sparepart', 'id_kategori' )
+            ->withTimestamps ();
+    }
 }

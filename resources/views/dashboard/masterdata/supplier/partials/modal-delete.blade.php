@@ -52,7 +52,10 @@
         // Fungsi untuk menghapus data dengan mengirimkan form DELETE
         function deleteWithForm(id) {
             const form = document.getElementById('deleteForm');
-            form.action = `/master-data-suppliers/${id}`; // Set URL action form dengan ID supplier
+
+            // Gunakan route() untuk membuat URL dinamis
+            form.action = `{{ route('master_data_supplier.destroy', ['id' => ':id']) }}`.replace(':id', id);
+
             form.submit(); // Kirim form
         }
     </script>

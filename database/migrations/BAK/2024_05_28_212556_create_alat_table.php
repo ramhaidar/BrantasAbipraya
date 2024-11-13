@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string ( 'tipe_alat' );
 
             $table->foreignId ( 'id_proyek' )->nullable ();
-            $table->foreignId ( 'id_user' )->constrained ( 'users' )->onDelete ( 'cascade' );
+            $table->foreignId ( 'id_user' )->constrained ( 'users' )->cascadeOnDelete ();
 
             $table->timestamps ();
         } );

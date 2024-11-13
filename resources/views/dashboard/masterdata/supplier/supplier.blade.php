@@ -1,7 +1,6 @@
 @extends('layouts.app')
 
 @push('styles_2')
-    @stack('styles_3')
 @endpush
 
 @section('content')
@@ -39,5 +38,4 @@
 @endsection
 
 @push('scripts_2')
-    @stack('scripts_3')
 @endpush

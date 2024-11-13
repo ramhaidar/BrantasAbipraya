@@ -12,14 +12,12 @@ class MasterDataSupplierController extends Controller
 {
     public function index ()
     {
-        $proyeks = Proyek::with ( "users" )->orderBy ( "created_at", "asc" )->orderBy ( "id", "asc" )->get ();
-        $alat    = Alat::with ( 'proyek', 'user' )->orderBy ( 'updated_at', 'desc' )->get ();
+        $proyeks = Proyek::with ( "users" )->orderBy ( "updated_at", "asc" )->orderBy ( "id", "asc" )->get ();
 
         $spareparts = \App\Models\MasterDataSparepart::all ();
 
         return view ( 'dashboard.masterdata.supplier.supplier', [ 
             'proyek'     => $proyeks,
-            'alat'       => $alat,
             'proyeks'    => $proyeks,
             'spareparts' => $spareparts,
 
@@ -49,7 +47,7 @@ class MasterDataSupplierController extends Controller
         }
         else
         {
-            $query->orderBy ( 'created_at', 'asc' )->orderBy ( 'id', 'asc' );
+            $query->orderBy ( 'updated_at', 'desc' );
         }
 
         // Handle pagination
@@ -97,7 +95,7 @@ class MasterDataSupplierController extends Controller
             $supplier->spareparts ()->attach ( $validatedData[ 'spareparts' ] );
         }
 
-        return redirect ()->route ( 'master_data_supplier' )->with ( 'success', 'Master Data Supplier berhasil ditambahkan' );
+        return redirect ()->route ( 'master_data_supplier.index' )->with ( 'success', 'Master Data Supplier berhasil ditambahkan' );
     }
 
     public function update ( Request $request, $id )
@@ -110,7 +108,7 @@ class MasterDataSupplierController extends Controller
 
         $supplier->update ( $validatedData );
 
-        return redirect ()->route ( 'master_data_supplier' )->with ( 'success', 'Master Data Supplier berhasil diubah' );
+        return redirect ()->route ( 'master_data_supplier.index' )->with ( 'success', 'Master Data Supplier berhasil diubah' );
     }
 
     public function destroy ( $id )
@@ -118,6 +116,6 @@ class MasterDataSupplierController extends Controller
         $supplier = MasterDataSupplier::findOrFail ( $id );
         $supplier->delete ();
 
-        return redirect ()->route ( 'master_data_supplier' )->with ( 'success', 'Master Data Supplier berhasil dihapus' );
+        return redirect ()->route ( 'master_data_supplier.index' )->with ( 'success', 'Master Data Supplier berhasil dihapus' );
     }
 }

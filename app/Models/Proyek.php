@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\User;
+use Database\Factories\ProyekFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -12,7 +13,16 @@ class Proyek extends Model
 
     protected $table = 'proyek';
 
-    protected $fillable = [ 'nama_proyek' ];
+    protected $fillable = [ 
+        'nama_proyek'
+    ];
+
+    protected $casts = [ 
+        'id'          => 'integer',
+        'nama_proyek' => 'string',
+        'created_at'  => 'datetime',
+        'updated_at'  => 'datetime',
+    ];
 
     public function userProyeks ()
     {

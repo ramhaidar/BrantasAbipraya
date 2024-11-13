@@ -20,13 +20,13 @@ return new class extends Migration
             $table->integer ( 'buffer_stock' )->nullable ();
             ;
             $table->unsignedBigInteger ( 'id_user' )->nullable ();
-            $table->foreign ( 'id_user' )->references ( 'id' )->on ( 'users' )->onDelete ( 'cascade' );
+            $table->foreign ( 'id_user' )->references ( 'id' )->on ( 'users' )->cascadeOnDelete ();
             $table->timestamps ();
         } );
 
         Schema::table ( 'atb', function (Blueprint $table)
         {
-            $table->foreign ( 'id_master_data' )->references ( 'id' )->on ( 'master_data' )->onDelete ( 'cascade' );
+            $table->foreign ( 'id_master_data' )->references ( 'id' )->on ( 'master_data' )->cascadeOnDelete ();
         } );
 
     }

@@ -51,7 +51,7 @@
         // Fungsi untuk menghapus data dengan mengirimkan form DELETE
         function deleteWithForm(id) {
             const form = document.getElementById('deleteForm');
-            form.action = `/master-data-spareparts/${id}`; // Set URL action form dengan ID item
+            form.action = `{{ route('master_data_sparepart.destroy', ':id') }}`.replace(':id', id); // Set URL action form dengan ID item
             form.submit(); // Kirim form
         }
     </script>

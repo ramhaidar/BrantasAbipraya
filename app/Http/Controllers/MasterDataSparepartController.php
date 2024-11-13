@@ -13,9 +13,9 @@ class MasterDataSparepartController extends Controller
 {
     public function index ( Request $request )
     {
-        $user       = Auth::user ();
-        $proyeks    = [];
-        $masterData = [];
+        $user      = Auth::user ();
+        $proyeks   = [];
+        $sparepart = [];
 
         if ( $user->role === 'Admin' )
         {
@@ -24,7 +24,7 @@ class MasterDataSparepartController extends Controller
                 ->orderBy ( "id", "asc" )
                 ->get ();
 
-            $masterData = MasterDataSparepart::orderBy ( 'updated_at', 'desc' )
+            $sparepart = MasterDataSparepart::orderBy ( 'updated_at', 'desc' )
                 ->paginate ( $request->input ( 'length', 10 ) );
         }
         elseif ( $user->role === 'Boss' )
@@ -36,7 +36,7 @@ class MasterDataSparepartController extends Controller
                 ->get ();
 
             $usersInProyek = $proyeks->pluck ( 'users.*.id' )->flatten ();
-            $masterData    = MasterDataSparepart::whereIn ( 'id_user', $usersInProyek )
+            $sparepart     = MasterDataSparepart::whereIn ( 'id_user', $usersInProyek )
                 ->orderBy ( 'updated_at', 'desc' )
                 ->paginate ( $request->input ( 'length', 10 ) );
         }
@@ -48,7 +48,7 @@ class MasterDataSparepartController extends Controller
                 ->orderBy ( "id", "asc" )
                 ->get ();
 
-            $masterData = MasterDataSparepart::where ( 'id_user', $user->id )
+            $sparepart = MasterDataSparepart::where ( 'id_user', $user->id )
                 ->orderBy ( 'updated_at', 'desc' )
                 ->paginate ( $request->input ( 'length', 10 ) );
         }
@@ -57,7 +57,7 @@ class MasterDataSparepartController extends Controller
 
         return view ( 'dashboard.masterdata.sparepart.sparepart', [ 
             'proyeks'    => $proyeks,
-            'masterData' => $masterData,
+            'masterData' => $sparepart,
             'suppliers'  => $suppliers,
 
             'headerPage' => "Master Data Sparepart",
@@ -76,16 +76,16 @@ class MasterDataSparepartController extends Controller
         ] );
 
         // Simpan data utama MasterDataSparepart
-        $masterData              = new MasterDataSparepart;
-        $masterData->nama        = $request->nama;
-        $masterData->part_number = $request->part_number;
-        $masterData->merk        = $request->merk;
-        $masterData->save ();
+        $sparepart              = new MasterDataSparepart;
+        $sparepart->nama        = $request->nama;
+        $sparepart->part_number = $request->part_number;
+        $sparepart->merk        = $request->merk;
+        $sparepart->save ();
 
         // Sinkronisasi suppliers menggunakan relasi many-to-many
         if ( $request->has ( 'suppliers' ) )
         {
-            $masterData->suppliers ()->sync ( $request->suppliers );
+            $sparepart->suppliers ()->sync ( $request->suppliers );
         }
 
         return redirect ()->route ( 'master_data_sparepart.index' )
@@ -94,10 +94,10 @@ class MasterDataSparepartController extends Controller
 
     public function show ( $id )
     {
-        $masterData = MasterDataSparepart::with ( 'suppliers' )->findOrFail ( $id );
+        $sparepart = MasterDataSparepart::with ( 'suppliers' )->findOrFail ( $id );
 
         return response ()->json ( [ 
-            'data' => $masterData
+            'data' => $sparepart
         ] );
     }
 
@@ -111,19 +111,19 @@ class MasterDataSparepartController extends Controller
             'suppliers.*' => [ 'exists:master_data_suppliers,id' ],
         ] );
 
-        $masterData = MasterDataSparepart::findOrFail ( $id );
-        $masterData->update ( $request->only ( [ 'nama', 'part_number', 'merk' ] ) );
+        $sparepart = MasterDataSparepart::findOrFail ( $id );
+        $sparepart->update ( $request->only ( [ 'nama', 'part_number', 'merk' ] ) );
 
         // Sync suppliers, even if empty
-        $masterData->suppliers ()->sync ( $request->input ( 'suppliers', [] ) );
+        $sparepart->suppliers ()->sync ( $request->input ( 'suppliers', [] ) );
 
         return redirect ()->route ( 'master_data_sparepart.index' )->with ( 'success', 'Master Data Sparepart berhasil diperbarui' );
     }
 
     public function destroy ( $id )
     {
-        $masterData = MasterDataSparepart::findOrFail ( $id );
-        $masterData->delete ();
+        $sparepart = MasterDataSparepart::findOrFail ( $id );
+        $sparepart->delete ();
 
         return redirect ()->route ( 'master_data_sparepart.index' )->with ( 'success', 'Master Data Sparepart berhasil dihapus' );
     }
@@ -159,10 +159,10 @@ class MasterDataSparepartController extends Controller
         $totalRecords    = MasterDataSparepart::count ();
         $filteredRecords = $query->count ();
 
-        $masterData = $query->skip ( $start )->take ( $length )->get ();
+        $sparepart = $query->skip ( $start )->take ( $length )->get ();
 
         // Format suppliers into a string for each sparepart
-        $masterData->transform ( function ($item)
+        $sparepart->transform ( function ($item)
         {
             $item->detail = $item->suppliers->pluck ( 'nama' )->implode ( ', ' );
             return $item;
@@ -172,7 +172,7 @@ class MasterDataSparepartController extends Controller
             'draw'            => $request->input ( 'draw' ),
             'recordsTotal'    => $totalRecords,
             'recordsFiltered' => $filteredRecords,
-            'data'            => $masterData,
+            'data'            => $sparepart,
         ] );
     }
 

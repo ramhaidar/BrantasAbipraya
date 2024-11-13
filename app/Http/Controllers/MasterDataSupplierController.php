@@ -100,14 +100,25 @@ class MasterDataSupplierController extends Controller
 
     public function update ( Request $request, $id )
     {
-        $supplier = MasterDataSupplier::findOrFail ( $id );
-
+        // Validasi data request
         $validatedData = $request->validate ( [ 
-            'nama' => 'required|string|max:255',
+            'nama'         => [ 'required', 'string', 'max:255' ],
+            'spareparts'   => [ 'array' ], // Validasi bahwa sparepart adalah array
+            'spareparts.*' => [ 'exists:master_data_spareparts,id' ], // Pastikan setiap sparepart ID valid
+            // Tambahkan validasi lain jika diperlukan
         ] );
 
-        $supplier->update ( $validatedData );
+        // Temukan data supplier berdasarkan ID
+        $supplier = MasterDataSupplier::findOrFail ( $id );
 
+        // Perbarui data supplier menggunakan hasil validasi
+        $supplier->update ( $request->only ( 'nama' ) );
+
+        $supplier->spareparts ()->sync ( $request->input ( 'spareparts', [] ) );
+
+        // dd ( $validatedData );
+
+        // Redirect kembali ke halaman indeks dengan pesan sukses
         return redirect ()->route ( 'master_data_supplier.index' )->with ( 'success', 'Master Data Supplier berhasil diubah' );
     }
 

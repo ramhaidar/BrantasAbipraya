@@ -32,7 +32,7 @@ class ProyekController extends Controller
     public function store ( Request $request )
     {
         $credentials = $request->validate ( [ 
-            "nama_proyek" => "required",
+            "nama" => "required",
         ] );
         Proyek::create ( $credentials );
         return back ()->with ( "success", "Berhasil menambahkan data proyek." );
@@ -41,7 +41,7 @@ class ProyekController extends Controller
     public function update ( Request $request, Proyek $id )
     {
         $credentials = $request->validate ( [ 
-            "nama_proyek" => "required",
+            "nama" => "required",
         ] );
         $id->update ( $credentials );
         $id->save ();
@@ -65,7 +65,7 @@ class ProyekController extends Controller
         {
             $query->where ( function ($q) use ($search)
             {
-                $q->where ( 'nama_proyek', 'like', "%{$search}%" );
+                $q->where ( 'nama', 'like', "%{$search}%" );
             } );
         }
 

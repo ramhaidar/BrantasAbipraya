@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create ( 'alat', function (Blueprint $table)
         {
             $table->id ();
-            $table->string ( 'nama_proyek' )->nullable ();
+            $table->string ( 'nama' )->nullable ();
             $table->string ( 'jenis_alat' );
             $table->string ( 'kode_alat' );
             $table->string ( 'merek_alat' );

@@ -10,7 +10,7 @@ class MasterDataAlat extends Model
 {
     use HasFactory;
 
-    protected $table = 'master_data_alats';
+    protected $table = 'master_data_alat';
 
     protected $fillable = [ 
         'jenis_alat',

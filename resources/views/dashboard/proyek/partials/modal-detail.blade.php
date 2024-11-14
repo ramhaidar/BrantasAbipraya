@@ -55,7 +55,7 @@
                 type: 'GET',
                 success: function(response) {
                     // Mengisi nilai input di modal detail dengan data proyek yang diterima
-                    $('#modalDetailProyek #proyek_nama').val(response.data.nama_proyek);
+                    $('#modalDetailProyek #proyek_nama').val(response.data.nama);
 
                     // Clear previous user list and add new list
                     $('#list-users').empty();

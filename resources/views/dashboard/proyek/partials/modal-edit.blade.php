@@ -12,8 +12,8 @@
                 <div class="modal-body">
                     <div class="row g-3">
                         <div class="col-12">
-                            <label class="form-label required" for="nama_proyek">Nama Proyek</label>
-                            <input class="form-control" id="nama_proyek" name="nama_proyek" type="text" placeholder="Nama Proyek" required>
+                            <label class="form-label required" for="nama">Nama Proyek</label>
+                            <input class="form-control" id="nama" name="nama" type="text" placeholder="Nama Proyek" required>
                             <div class="invalid-feedback">Nama Proyek diperlukan.</div>
                         </div>
                     </div>
@@ -80,7 +80,7 @@
                 type: 'GET',
                 success: function(response) {
                     // Populate fields with data
-                    $('#editProyekForm #nama_proyek').val(response.data.nama_proyek);
+                    $('#editProyekForm #nama').val(response.data.nama);
 
                     // Set action form to update the specific proyek with PUT method
                     $('#editProyekForm').attr('action', url);

@@ -92,8 +92,8 @@
                     }
                 ],
                 columns: [{
-                        data: 'nama_proyek',
-                        name: 'nama_proyek'
+                        data: 'nama',
+                        name: 'nama'
                     },
                     {
                         data: 'detail',

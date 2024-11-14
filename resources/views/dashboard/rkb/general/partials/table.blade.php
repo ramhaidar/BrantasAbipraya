@@ -40,6 +40,7 @@
                 <th class="text-center">No RKB</th>
                 <th class="text-center">Proyek</th>
                 <th class="text-center">Periode</th>
+                <th class="text-center">Ubah Detail</th>
                 <th class="text-center">Aksi</th>
             </tr>
         </thead>
@@ -51,13 +52,102 @@
 
 @push('scripts_3')
     <script>
+        // Perbaikan JavaScript untuk DataTable dengan tabel RKB
         $(document).ready(function() {
-
-            // Define a unique key for this page's DataTable pagination state
-            const lastPageKey = 'lastPage_sparepart';
+            // Unique key for localStorage specific to this page
+            const lastPageKey = 'lastPage_rkb';
 
             // Retrieve the last page number from localStorage, if available
             var lastPage = localStorage.getItem(lastPageKey) ? parseInt(localStorage.getItem(lastPageKey)) : 0;
+
+            var table = $('#table-data').DataTable({
+                processing: true,
+                responsive: true,
+                serverSide: true,
+                ajax: {
+                    url: "{{ route('rkb_general.getData') }}",
+                    type: "GET"
+                },
+                language: {
+                    paginate: {
+                        previous: '<i class="bi bi-caret-left"></i>',
+                        next: '<i class="bi bi-caret-right"></i>'
+                    }
+                },
+                pageLength: 10,
+                lengthMenu: [
+                    [10, 25, 50],
+                    [10, 25, 50]
+                ],
+                ordering: true,
+                order: [],
+                displayStart: lastPage * 10, // Start from the last saved page
+                columnDefs: [{
+                        targets: 3, // Index of "Aksi" column
+                        className: 'text-center nowrap-column',
+                        orderable: false,
+                        searchable: false,
+                        width: "1%",
+                        render: function(data, type, row) {
+                            return `
+                            <button class="btn btn-info mx-1 detailBtn" data-id="${row.id}" onclick="redirectToDetail(${row.id})">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        `;
+                        }
+                    },
+                    {
+                        targets: 4, // Index of "Aksi" column
+                        className: 'text-center nowrap-column',
+                        orderable: false,
+                        searchable: false,
+                        width: "1%",
+                        render: function(data, type, row) {
+                            return `
+                            <button class="btn btn-danger mx-1 deleteBtn" data-id="${row.id}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                            <button class="btn btn-warning mx-1 ubahBtn" data-id="${row.id}" onclick="fillFormEditRKB(${row.id})">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                        `;
+                        }
+                    }
+                ],
+                columns: [{
+                        data: 'nomor',
+                        name: 'nomor',
+                        className: 'text-center'
+                    },
+                    {
+                        data: 'proyek',
+                        name: 'proyek',
+                        className: 'text-center'
+                    },
+                    {
+                        data: 'periode',
+                        name: 'periode',
+                        className: 'text-center'
+                    },
+                    {
+                        data: 'aksi',
+                        name: 'aksi',
+                        className: 'text-center'
+                    }
+                ]
+            });
+
+            // Save the current page number to localStorage each time the page changes
+            table.on('page', function() {
+                var currentPage = table.page();
+                localStorage.setItem(lastPageKey, currentPage);
+            });
         });
+
+        // Function to redirect to detail page
+        function redirectToDetail(id) {
+            const detailUrl = "{{ route('rkb_general.detail.index', ':id') }}".replace(':id', id); // Construct the URL dynamically
+            window.location.href = detailUrl;
+        }
     </script>
 @endpush

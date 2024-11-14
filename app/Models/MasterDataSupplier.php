@@ -10,7 +10,7 @@ class MasterDataSupplier extends Model
 {
     use HasFactory;
 
-    protected $table = 'master_data_suppliers';
+    protected $table = 'master_data_supplier';
 
     protected $fillable = [ 
         'nama',

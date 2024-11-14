@@ -18,35 +18,26 @@
                 <button class="btn-close" data-bs-dismiss="modal" type="button" aria-label="Close"></button>
             </div>
             <hr class="p-0 m-0 border border-secondary-subtle border-2 opacity-50">
-            <form class="needs-validation" id="rkbgeneralForm" novalidate method="POST"
-                action="{{ route('rkb_general.store') }}">
+            <form class="needs-validation" id="rkbgeneralForm" novalidate method="POST" action="{{ route('rkb_general.store') }}">
                 @csrf
                 <div class="modal-body">
                     <div class="row g-3">
                         <div class="col-12">
-                            <label class="form-label required" for="no_rkb">No RKB</label>
-                            <input class="form-control" id="no_rkb" name="no_rkb" type="text"
-                                placeholder="No RKB" required>
+                            <label class="form-label required" for="nomor">No RKB</label>
+                            <input class="form-control" id="nomor" name="nomor" type="text" placeholder="No RKB" required>
                             <div class="invalid-feedback">No RKB diperlukan.</div>
                         </div>
 
                         <!-- Single-select for Proyek -->
                         <div class="col-12">
-                            <label class="form-label required" for="proyeks">Proyek</label>
-                            <select class="form-control" id="proyeks" name="proyeks" required>
+                            <label class="form-label required" for="proyek">Proyek</label>
+                            <select class="form-control" id="proyek" name="proyek" required>
                                 <option value="">Pilih Proyek</option>
                                 @foreach ($proyeks as $proyek)
-                                    <option value="{{ $proyek->id }}">{{ $proyek->nama_proyek }}</option>
+                                    <option value="{{ $proyek->id }}">{{ $proyek->nama }}</option>
                                 @endforeach
                             </select>
                             <div class="invalid-feedback">Proyek diperlukan.</div>
-                        </div>
-
-                        <div class="col-12">
-                            <label class="form-label required" for="periode">Periode</label>
-                            <input class="form-control" id="periode" name="periode" type="text"
-                                placeholder="Periode" required>
-                            <div class="invalid-feedback">Periode diperlukan.</div>
                         </div>
 
                         <div class="col-12">
@@ -97,7 +88,7 @@
             });
 
             // Initialize Select2 for Proyek
-            $('#proyeks').select2({
+            $('#proyek').select2({
                 placeholder: "Pilih Proyek",
                 allowClear: true,
                 dropdownParent: $('#modalForAdd'),
@@ -129,6 +120,23 @@
                     form.classList.remove('was-validated'); // Remove validation styles
                 }, 0); // Ensure this runs after the form reset
             });
+
+            // Set default value for Periode
+            document.addEventListener('DOMContentLoaded', () => {
+                const periodeInput = document.getElementById('periode');
+
+                // Get the current year and month
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0'); // Add leading zero to month if needed
+
+                // Set the default value to current year and month
+                periodeInput.value = `${year}-${month}`;
+            });
+
+            document.getElementById('periode').addEventListener('click', function() {
+                this.showPicker();
+            })
         })();
     </script>
 @endpush

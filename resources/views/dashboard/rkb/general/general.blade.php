@@ -26,6 +26,12 @@
 
     <!-- Modal for Adding Data -->
     @include('dashboard.rkb.general.partials.modal-add')
+
+    <!-- Modal for Deleting Data -->
+    @include('dashboard.rkb.general.partials.modal-delete')
+
+    <!-- Modal for Editing Data -->
+    @include('dashboard.rkb.general.partials.modal-edit')
 @endsection
 
 @push('scripts_2')

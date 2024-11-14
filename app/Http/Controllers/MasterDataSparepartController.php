@@ -75,7 +75,7 @@ class MasterDataSparepartController extends Controller
             'part_number' => [ 'required', 'string', 'max:255' ],
             'merk'        => [ 'required', 'string', 'max:255' ],
             'suppliers'   => [ 'array' ], // Validasi bahwa suppliers adalah array
-            'suppliers.*' => [ 'exists:master_data_suppliers,id' ], // Pastikan setiap supplier ID valid
+            'suppliers.*' => [ 'exists:master_data_supplier,id' ], // Pastikan setiap supplier ID valid
         ] );
 
         // Simpan data utama MasterDataSparepart
@@ -128,7 +128,7 @@ class MasterDataSparepartController extends Controller
             'merk'        => [ 'required', 'string', 'max:255' ],
             'kategori'    => [ 'required', 'exists:kategori_sparepart,id' ], // Validasi id_kategori
             'suppliers'   => [ 'array' ],
-            'suppliers.*' => [ 'exists:master_data_suppliers,id' ],
+            'suppliers.*' => [ 'exists:master_data_supplier,id' ],
         ] );
 
         // Temukan sparepart berdasarkan ID
@@ -157,24 +157,29 @@ class MasterDataSparepartController extends Controller
 
     public function getData ( Request $request )
     {
-        // Load related models
-        $query = MasterDataSparepart::with ( 'suppliers', 'kategori' );
+        // Create base query with join
+        $query = MasterDataSparepart::query ()
+            ->leftJoin ( 'kategori_sparepart as kategori', 'master_data_sparepart.id_kategori', '=', 'kategori.id' )
+            ->select (
+                'master_data_sparepart.*',
+                'kategori.kode as kode_kategori',
+                'kategori.nama as nama_kategori',
+                'kategori.jenis as jenis_kategori',
+                'kategori.sub_jenis as sub_jenis_kategori'
+            );
 
         // Apply search filters
         if ( $search = $request->input ( 'search.value' ) )
         {
             $query->where ( function ($q) use ($search)
             {
-                $q->where ( 'nama', 'like', "%{$search}%" )
-                    ->orWhere ( 'part_number', 'like', "%{$search}%" )
-                    ->orWhere ( 'merk', 'like', "%{$search}%" )
-                    ->orWhereHas ( 'kategori', function ($subQuery) use ($search)
-                    {
-                        $subQuery->where ( 'kode', 'like', "%{$search}%" )
-                            ->orWhere ( 'nama', 'like', "%{$search}%" )
-                            ->orWhere ( 'jenis', 'like', "%{$search}%" )
-                            ->orWhere ( 'sub_jenis', 'like', "%{$search}%" );
-                    } );
+                $q->where ( 'master_data_sparepart.nama', 'like', "%{$search}%" )
+                    ->orWhere ( 'master_data_sparepart.part_number', 'like', "%{$search}%" )
+                    ->orWhere ( 'master_data_sparepart.merk', 'like', "%{$search}%" )
+                    ->orWhere ( 'kategori.kode', 'like', "%{$search}%" )
+                    ->orWhere ( 'kategori.nama', 'like', "%{$search}%" )
+                    ->orWhere ( 'kategori.jenis', 'like', "%{$search}%" )
+                    ->orWhere ( 'kategori.sub_jenis', 'like', "%{$search}%" );
             } );
         }
 
@@ -184,11 +189,27 @@ class MasterDataSparepartController extends Controller
             $columnIndex   = $order[ 0 ][ 'column' ];
             $columnName    = $request->input ( 'columns' )[ $columnIndex ][ 'data' ];
             $sortDirection = $order[ 0 ][ 'dir' ];
-            $query->orderBy ( $columnName, $sortDirection );
+
+            // Map DataTable columns to database columns
+            $allowedSortColumns = [ 
+                'kode_kategori'      => 'kategori.kode',
+                'jenis_kategori'     => 'kategori.jenis',
+                'sub_jenis_kategori' => 'kategori.sub_jenis',
+                'nama_kategori'      => 'kategori.nama',
+                'nama'               => 'master_data_sparepart.nama',
+                'part_number'        => 'master_data_sparepart.part_number',
+                'merk'               => 'master_data_sparepart.merk',
+            ];
+
+            // Apply sorting only if the column is valid
+            if ( isset ( $allowedSortColumns[ $columnName ] ) )
+            {
+                $query->orderBy ( $allowedSortColumns[ $columnName ], $sortDirection );
+            }
         }
         else
         {
-            $query->orderBy ( 'updated_at', 'desc' );
+            $query->orderBy ( 'master_data_sparepart.updated_at', 'desc' );
         }
 
         // Pagination
@@ -199,14 +220,10 @@ class MasterDataSparepartController extends Controller
 
         $spareparts = $query->skip ( $start )->take ( $length )->get ();
 
-        // Transform data
+        // Transform data for DataTable
         $spareparts->transform ( function ($item)
         {
-            $item->detail             = $item->suppliers->pluck ( 'nama' )->implode ( ', ' ); // Supplier names
-            $item->kode_kategori      = optional ( $item->kategori )->kode; // Kategori kode
-            $item->nama_kategori      = optional ( $item->kategori )->nama; // Kategori nama
-            $item->jenis_kategori     = optional ( $item->kategori )->jenis; // Kategori jenis
-            $item->sub_jenis_kategori = optional ( $item->kategori )->sub_jenis; // Kategori sub_jenis
+            $item->detail = $item->suppliers->pluck ( 'nama' )->implode ( ', ' ); // Supplier names
             return $item;
         } );
 

@@ -81,7 +81,7 @@ class MasterDataSupplierController extends Controller
     {
         $validatedData = $request->validate ( [ 
             'nama'         => 'required|string|max:255',
-            'spareparts.*' => 'exists:master_data_spareparts,id', // Pastikan hanya spareparts yang valid yang bisa dipilih
+            'spareparts.*' => 'exists:master_data_sparepart,id', // Pastikan hanya spareparts yang valid yang bisa dipilih
         ] );
 
         // Buat Supplier baru
@@ -104,7 +104,7 @@ class MasterDataSupplierController extends Controller
         $validatedData = $request->validate ( [ 
             'nama'         => [ 'required', 'string', 'max:255' ],
             'spareparts'   => [ 'array' ], // Validasi bahwa sparepart adalah array
-            'spareparts.*' => [ 'exists:master_data_spareparts,id' ], // Pastikan setiap sparepart ID valid
+            'spareparts.*' => [ 'exists:master_data_sparepart,id' ], // Pastikan setiap sparepart ID valid
             // Tambahkan validasi lain jika diperlukan
         ] );
 

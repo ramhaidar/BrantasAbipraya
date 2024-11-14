@@ -447,6 +447,18 @@ Route::prefix ( 'pagination' )->middleware ( 'auth' )->group ( function ()
         [ ProyekController::class, 'getData' ]
     )
         ->name ( 'proyek.getData' );
+
+    Route::get (
+        '/rkb-general/data',
+        [ RKBGeneralController::class, 'getData' ]
+    )
+        ->name ( 'rkb_general.getData' );
+
+    Route::get (
+        '/rkb-urgent/data',
+        [ RKBUrgentController::class, 'getData' ]
+    )
+        ->name ( 'rkb_urgent.getData' );
 } );
 
 // Rute Proyek [ProyekController]
@@ -589,6 +601,11 @@ Route::middleware ( 'auth' )
         )->name ( 'rkb_general.index' );
 
         Route::get (
+            '/detail/{id}',
+            [ RKBGeneralController::class, 'detail_index' ]
+        )->name ( 'rkb_general.detail.index' );
+
+        Route::get (
             '{id}',
             [ RKBGeneralController::class, 'show' ]
         )->name ( 'rkb_general.show' );
@@ -609,7 +626,7 @@ Route::middleware ( 'auth' )
         )->name ( 'rkb_general.destroy' );
     } );
 
-// Rute RKB General [RKBGeneralController]
+// Rute RKB Urgent [RKBUrgentController]
 Route::middleware ( 'auth' )
     ->prefix ( 'rkb-urgent' )
     ->group ( function ()

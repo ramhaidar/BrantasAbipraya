@@ -20,7 +20,7 @@ class ProyekFactory extends Factory
     public function definition () : array
     {
         return [ 
-            'nama_proyek' => $this->faker->sentence ( 3 ) // Placeholder jika dibutuhkan data acak, tapi tidak akan digunakan dalam seeding
+            'nama' => $this->faker->sentence ( 3 ) // Placeholder jika dibutuhkan data acak, tapi tidak akan digunakan dalam seeding
         ];
     }
 }

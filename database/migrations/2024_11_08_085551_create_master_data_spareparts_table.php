@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up () : void
     {
-        Schema::create ( 'master_data_spareparts', function (Blueprint $table)
+        Schema::create ( 'master_data_sparepart', function (Blueprint $table)
         {
             $table->id (); // PK | id: Integer
             $table->string ( 'nama' ); // + nama: String
@@ -24,6 +24,6 @@ return new class extends Migration
 
     public function down () : void
     {
-        Schema::dropIfExists ( 'master_data_spareparts' );
+        Schema::dropIfExists ( 'master_data_sparepart' );
     }
 };

@@ -23,8 +23,8 @@
                 <div class="modal-body">
                     <div class="row g-3">
                         <div class="col-12">
-                            <label class="form-label required" for="nama_proyek">Nama Proyek</label>
-                            <input class="form-control" id="nama_proyek" name="nama_proyek" type="text" placeholder="Nama Proyek" required>
+                            <label class="form-label required" for="nama">Nama Proyek</label>
+                            <input class="form-control" id="nama" name="nama" type="text" placeholder="Nama Proyek" required>
                             <div class="invalid-feedback">Nama Proyek diperlukan.</div>
                         </div>
                     </div>

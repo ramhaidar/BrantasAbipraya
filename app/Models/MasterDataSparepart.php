@@ -13,7 +13,7 @@ class MasterDataSparepart extends Model
 {
     use HasFactory;
 
-    protected $table = 'master_data_spareparts';
+    protected $table = 'master_data_sparepart';
 
     protected $fillable = [ 
         'nama',

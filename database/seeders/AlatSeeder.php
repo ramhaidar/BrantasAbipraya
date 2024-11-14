@@ -118,7 +118,7 @@ class AlatSeeder extends Seeder
         foreach ( $data as &$item )
         {
             // Tambahkan kolom 'nama_proyek' dengan Faker
-            $item[ 'nama_proyek' ] = $faker->company;
+            $item[ 'nama' ] = $faker->company;
         }
 
         foreach ( $data as $item )

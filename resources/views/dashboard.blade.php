@@ -9,7 +9,7 @@
                     <option disabled selected>Pilih Proyek</option>
                     <option value="all">Semua Proyek</option>
                     @foreach ($proyeks as $proyek)
-                        <option value="{{ $proyek->id }}">{{ $proyek->nama_proyek }}</option>
+                        <option value="{{ $proyek->id }}">{{ $proyek->nama }}</option>
                     @endforeach
                 </select>
             </div>
@@ -130,7 +130,7 @@
                                 <tbody>
                                     @foreach ($atbsHabis as $atb)
                                         <tr>
-                                            <td>{{ $atb->proyek->nama_proyek ?? 'N/A' }}</td>
+                                            <td>{{ $atb->proyek->nama ?? 'N/A' }}</td>
                                             <td>{{ $atb->komponen->kode }}</td>
                                             <td>{{ $atb->masterData->supplier }}</td>
                                             <td>{{ $atb->masterData->sparepart }}</td>
@@ -212,7 +212,7 @@
                             response.atbsHabis.forEach(function(atb) {
                                 $('#tabelDataBarangHabis tbody').append(`
                             <tr>
-                                <td>${atb.proyek.nama_proyek || 'N/A'}</td>
+                                <td>${atb.proyek.nama || 'N/A'}</td>
                                 <td>${atb.komponen.kode || 'N/A'}</td>
                                 <td>${atb.master_data ? atb.master_data.supplier : 'N/A'}</td>
                                 <td>${atb.master_data ? atb.master_data.sparepart : 'N/A'}</td>

@@ -17,9 +17,9 @@
     <table class="m-0 table table-bordered table-striped" id="table-data">
         <thead class="table-primary">
             <tr>
-                <th class="text-center">Nama</th>
+                <th class="text-center">Nama Sparepart</th>
                 <th class="text-center">Part Number</th>
-                <th class="text-center">Merk</th>
+                <th class="text-center">Merk Sparepart</th>
                 <th class="text-center">Kode</th> <!-- Header baru -->
                 <th class="text-center">Jenis</th> <!-- Header baru -->
                 <th class="text-center">Sub Jenis</th> <!-- Header baru -->
@@ -64,8 +64,7 @@
                     [10, 25, 50]
                 ],
                 ordering: true,
-                order: [],
-                displayStart: lastPage * 10, // Start from the last saved page for this table
+                order: [], // Default ordering
                 columnDefs: [{
                         targets: 7, // Index of "Detail" column
                         className: 'text-center nowrap-column',
@@ -74,10 +73,10 @@
                         width: "1%",
                         render: function(data, type, row) {
                             return `
-<button class="btn btn-info detailBtn" data-id="${row.id}">
-<i class="bi bi-eye"></i>
-</button>
-`;
+                <button class="btn btn-info detailBtn" data-id="${row.id}">
+                <i class="bi bi-eye"></i>
+                </button>
+                `;
                         }
                     },
                     {
@@ -88,13 +87,13 @@
                         width: "1%",
                         render: function(data, type, row) {
                             return `
-<button class="btn btn-danger mx-1 deleteBtn" data-id="${row.id}">
-<i class="bi bi-trash"></i>
-</button>
-<button class="btn btn-warning mx-1 ubahBtn" data-id="${row.id}" onclick="fillFormEdit(${row.id})">
-<i class="bi bi-pencil-square"></i>
-</button>
-`;
+                <button class="btn btn-danger mx-1 deleteBtn" data-id="${row.id}">
+                <i class="bi bi-trash"></i>
+                </button>
+                <button class="btn btn-warning mx-1 ubahBtn" data-id="${row.id}" onclick="fillFormEdit(${row.id})">
+                <i class="bi bi-pencil-square"></i>
+                </button>
+                `;
                         }
                     }
                 ],
@@ -113,29 +112,30 @@
                     {
                         data: 'kode_kategori',
                         name: 'kode_kategori'
-                    }, // Tambahkan kode kategori
-
+                    },
                     {
                         data: 'jenis_kategori',
                         name: 'jenis_kategori'
-                    }, // Tambahkan jenis kategori
+                    },
                     {
                         data: 'sub_jenis_kategori',
                         name: 'sub_jenis_kategori'
-                    }, // Tambahkan sub_jenis kategori
+                    },
                     {
                         data: 'nama_kategori',
                         name: 'nama_kategori'
-                    }, // Tambahkan nama kategori
+                    },
                     {
                         data: 'supplier',
                         name: 'supplier'
                     },
                     {
                         data: 'aksi',
-                        name: 'aksi'
+                        name: 'aksi',
+                        orderable: false,
+                        searchable: false
                     }
-                ]
+                ],
             });
 
             // Save the current page number to localStorage each time the page changes

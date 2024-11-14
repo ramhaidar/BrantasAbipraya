@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up () : void
     {
-        Schema::create ( 'master_data_suppliers', function (Blueprint $table)
+        Schema::create ( 'master_data_supplier', function (Blueprint $table)
         {
             $table->id (); // PK | id: Integer
             $table->string ( 'nama' ); // + nama: String
@@ -18,6 +18,6 @@ return new class extends Migration
 
     public function down () : void
     {
-        Schema::dropIfExists ( 'master_data_suppliers' );
+        Schema::dropIfExists ( 'master_data_supplier' );
     }
 };

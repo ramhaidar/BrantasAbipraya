@@ -16,6 +16,7 @@ class RKBGeneralController extends Controller
 
         return view ( 'dashboard.rkb.general.general', [ 
             'proyeks'    => $proyeks,
+
             'headerPage' => "RKB General",
             'page'       => 'Data RKB General',
         ] );
@@ -23,8 +24,16 @@ class RKBGeneralController extends Controller
 
     public function detail_index ( $id )
     {
-        $rkb = RKB::with ( [ 'proyek', 'linkRkbDetails' ] )->find ( $id );
-        dd ( $rkb );
+        $rkb     = RKB::with ( [ 'proyek', 'linkRkbDetails' ] )->find ( $id );
+        $proyeks = Proyek::orderByDesc ( 'updated_at' )->get ();
+
+        return view ( 'dashboard.rkb.general.detail.detail', [ 
+            'rkb'        => $rkb,
+            'proyeks'    => $proyeks,
+
+            'headerPage' => "RKB General",
+            'page'       => 'Detail RKB General',
+        ] );
     }
 
     public function show ( $id )

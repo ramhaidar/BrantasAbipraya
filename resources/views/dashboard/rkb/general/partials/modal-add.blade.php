@@ -48,6 +48,12 @@
                                 placeholder="Periode" required>
                             <div class="invalid-feedback">Periode diperlukan.</div>
                         </div>
+
+                        <div class="col-12">
+                            <label class="form-label required" for="periode">Periode</label>
+                            <input class="form-control" id="periode" name="periode" type="month" placeholder="Periode" required>
+                            <div class="invalid-feedback">Periode diperlukan.</div>
+                        </div>
                     </div>
                 </div>
 

@@ -22,10 +22,25 @@
                 @csrf
                 <div class="modal-body">
                     <div class="row g-3">
+                        <!-- Nama Supplier -->
                         <div class="col-12">
                             <label class="form-label required" for="nama">Nama Supplier</label>
                             <input class="form-control" id="nama" name="nama" type="text" placeholder="Nama Supplier" required>
                             <div class="invalid-feedback">Nama Supplier diperlukan.</div>
+                        </div>
+
+                        <!-- Alamat -->
+                        <div class="col-12">
+                            <label class="form-label required" for="alamat">Alamat</label>
+                            <textarea class="form-control" id="alamat" name="alamat" rows="3" placeholder="Alamat" required></textarea>
+                            <div class="invalid-feedback">Alamat diperlukan.</div>
+                        </div>
+
+                        <!-- Contact Person -->
+                        <div class="col-12">
+                            <label class="form-label required" for="contact_person">Contact Person</label>
+                            <input class="form-control" id="contact_person" name="contact_person" type="text" placeholder="Contact Person" required>
+                            <div class="invalid-feedback">Contact Person diperlukan.</div>
                         </div>
 
                         <!-- Multi-select for Spareparts -->
@@ -68,7 +83,7 @@
             });
 
             // Apply validation on blur (out of focus) for each input in the form
-            form.querySelectorAll('input').forEach((input) => {
+            form.querySelectorAll('input, textarea').forEach((input) => {
                 input.addEventListener('blur', () => {
                     if (!input.checkValidity()) {
                         input.classList.add('is-invalid');
@@ -89,18 +104,5 @@
                 width: '100%'
             });
         })();
-
-        // $(document).ready(function() {
-        //     // Find all input fields that are required
-        //     $("input[required]").each(function() {
-        //         // Find the label associated with the input
-        //         const label = $(this).closest(".col-12").find("label");
-
-        //         // Append the asterisk only if the label exists
-        //         if (label.length) {
-        //             label.append(' <span class="text-danger required-asterisk">*</span>');
-        //         }
-        //     });
-        // });
     </script>
 @endpush

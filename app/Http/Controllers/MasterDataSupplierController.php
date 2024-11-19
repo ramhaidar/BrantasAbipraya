@@ -91,14 +91,20 @@ class MasterDataSupplierController extends Controller
 
     public function store ( Request $request )
     {
+        // Validasi data yang diterima
         $validatedData = $request->validate ( [ 
-            'nama'         => 'required|string|max:255',
-            'spareparts.*' => 'exists:master_data_sparepart,id', // Pastikan hanya spareparts yang valid yang bisa dipilih
+            'nama'           => 'required|string|max:255',
+            'alamat'         => 'required|string|max:500',
+            'contact_person' => 'required|string|max:255',
+            'spareparts'     => 'array', // Validasi bahwa spareparts adalah array
+            'spareparts.*'   => 'exists:master_data_sparepart,id', // Pastikan spareparts yang dipilih valid
         ] );
 
         // Buat Supplier baru
         $supplier = MasterDataSupplier::create ( [ 
-            'nama' => $validatedData[ 'nama' ],
+            'nama'           => $validatedData[ 'nama' ],
+            'alamat'         => $validatedData[ 'alamat' ],
+            'contact_person' => $validatedData[ 'contact_person' ],
         ] );
 
         // Lampirkan spareparts jika ada yang dipilih
@@ -107,29 +113,38 @@ class MasterDataSupplierController extends Controller
             $supplier->spareparts ()->attach ( $validatedData[ 'spareparts' ] );
         }
 
-        return redirect ()->route ( 'master_data_supplier.index' )->with ( 'success', 'Master Data Supplier berhasil ditambahkan' );
+        // Redirect ke halaman indeks dengan pesan sukses
+        return redirect ()->route ( 'master_data_supplier.index' )
+            ->with ( 'success', 'Master Data Supplier berhasil ditambahkan' );
     }
 
     public function update ( Request $request, $id )
     {
         // Validasi data request
         $validatedData = $request->validate ( [ 
-            'nama'         => [ 'required', 'string', 'max:255' ],
-            'spareparts'   => [ 'array' ], // Validasi bahwa sparepart adalah array
-            'spareparts.*' => [ 'exists:master_data_sparepart,id' ], // Pastikan setiap sparepart ID valid
-            // Tambahkan validasi lain jika diperlukan
+            'nama'           => 'required|string|max:255',
+            'alamat'         => 'required|string|max:500',
+            'contact_person' => 'required|string|max:255',
+            'spareparts'     => 'array', // Validasi bahwa spareparts adalah array
+            'spareparts.*'   => 'exists:master_data_sparepart,id', // Pastikan setiap sparepart ID valid
         ] );
 
         // Temukan data supplier berdasarkan ID
         $supplier = MasterDataSupplier::findOrFail ( $id );
 
         // Perbarui data supplier menggunakan hasil validasi
-        $supplier->update ( $request->only ( 'nama' ) );
+        $supplier->update ( [ 
+            'nama'           => $validatedData[ 'nama' ],
+            'alamat'         => $validatedData[ 'alamat' ],
+            'contact_person' => $validatedData[ 'contact_person' ],
+        ] );
 
+        // Sinkronisasi spareparts
         $supplier->spareparts ()->sync ( $request->input ( 'spareparts', [] ) );
 
-        // Redirect kembali ke halaman indeks dengan pesan sukses
-        return redirect ()->route ( 'master_data_supplier.index' )->with ( 'success', 'Master Data Supplier berhasil diubah' );
+        // Redirect ke halaman indeks dengan pesan sukses
+        return redirect ()->route ( 'master_data_supplier.index' )
+            ->with ( 'success', 'Master Data Supplier berhasil diubah' );
     }
 
     public function destroy ( $id )

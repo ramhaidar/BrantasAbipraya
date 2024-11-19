@@ -74,22 +74,21 @@ class MasterDataSparepartController extends Controller
             'nama'        => [ 'required', 'string', 'max:255' ],
             'part_number' => [ 'required', 'string', 'max:255' ],
             'merk'        => [ 'required', 'string', 'max:255' ],
+            'kategori'    => [ 'required', 'exists:kategori_sparepart,id' ], // Validasi id_kategori
             'suppliers'   => [ 'array' ], // Validasi bahwa suppliers adalah array
             'suppliers.*' => [ 'exists:master_data_supplier,id' ], // Pastikan setiap supplier ID valid
         ] );
 
         // Simpan data utama MasterDataSparepart
         $sparepart              = new MasterDataSparepart;
-        $sparepart->nama        = $request->nama;
-        $sparepart->part_number = $request->part_number;
-        $sparepart->merk        = $request->merk;
+        $sparepart->nama        = $request->input ( 'nama' );
+        $sparepart->part_number = $request->input ( 'part_number' );
+        $sparepart->merk        = $request->input ( 'merk' );
+        $sparepart->id_kategori = $request->input ( 'kategori' );
         $sparepart->save ();
 
         // Sinkronisasi suppliers menggunakan relasi many-to-many
-        if ( $request->has ( 'suppliers' ) )
-        {
-            $sparepart->suppliers ()->sync ( $request->suppliers );
-        }
+        $sparepart->suppliers ()->sync ( $request->input ( 'suppliers', [] ) );
 
         return redirect ()->route ( 'master_data_sparepart.index' )
             ->with ( 'success', 'Data Master Sparepart berhasil ditambahkan' );

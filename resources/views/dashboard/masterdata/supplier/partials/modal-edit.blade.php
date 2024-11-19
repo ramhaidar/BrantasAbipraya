@@ -11,10 +11,25 @@
                 @method('PUT')
                 <div class="modal-body">
                     <div class="row g-3">
+                        <!-- Nama Supplier -->
                         <div class="col-12">
                             <label class="form-label required" for="nama">Nama Supplier</label>
                             <input class="form-control" id="nama" name="nama" type="text" placeholder="Nama Supplier" required>
                             <div class="invalid-feedback">Nama Supplier diperlukan.</div>
+                        </div>
+
+                        <!-- Alamat -->
+                        <div class="col-12">
+                            <label class="form-label required" for="alamat">Alamat</label>
+                            <textarea class="form-control" id="alamat" name="alamat" rows="3" placeholder="Alamat" required></textarea>
+                            <div class="invalid-feedback">Alamat diperlukan.</div>
+                        </div>
+
+                        <!-- Contact Person -->
+                        <div class="col-12">
+                            <label class="form-label required" for="contact_person">Contact Person</label>
+                            <input class="form-control" id="contact_person" name="contact_person" type="text" placeholder="Contact Person" required>
+                            <div class="invalid-feedback">Contact Person diperlukan.</div>
                         </div>
 
                         <!-- Multi-select for Spareparts -->
@@ -69,7 +84,7 @@
             });
 
             // Validasi saat blur (out of focus) untuk setiap input di form edit
-            editForm.querySelectorAll('input').forEach((input) => {
+            editForm.querySelectorAll('input, textarea').forEach((input) => {
                 input.addEventListener('blur', () => {
                     if (!input.checkValidity()) {
                         input.classList.add('is-invalid');
@@ -101,13 +116,15 @@
                 success: function(response) {
                     // Populate fields with data
                     $('#editSupplierForm #nama').val(response.data.nama);
+                    $('#editSupplierForm #alamat').val(response.data.alamat);
+                    $('#editSupplierForm #contact_person').val(response.data.contact_person);
 
                     // Set selected spareparts
                     const selectedSpareparts = response.data.spareparts.map(sparepart => sparepart.id);
                     $('#edit_spareparts').val(selectedSpareparts).trigger('change');
 
                     // Set action form to update the specific supplier with PUT method
-                    $('#editSupplierForm').attr('action', url);
+                    $('#editSupplierForm').attr('action', "{{ route('master_data_supplier.update', ':id') }}".replace(':id', id));
 
                     // Display the edit modal
                     $('#modalForEdit').modal('show');

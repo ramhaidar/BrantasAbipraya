@@ -18,6 +18,8 @@
         <thead class="table-primary">
             <tr>
                 <th class="text-center">Nama Supplier</th>
+                <th class="text-center">Alamat Supplier</th>
+                <th class="text-center">Contact Person</th>
                 <th class="text-center">Detail</th>
                 <th class="text-center">Aksi</th>
             </tr>
@@ -60,7 +62,7 @@
                 order: [],
                 displayStart: lastPage * 10, // Start from the last saved page
                 columnDefs: [{
-                        targets: 1, // Index of "Detail" column
+                        targets: 3, // Index of "Detail" column
                         className: 'text-center nowrap-column',
                         orderable: false,
                         searchable: false,
@@ -74,7 +76,7 @@
                         }
                     },
                     {
-                        targets: 2, // Index of "Aksi" column
+                        targets: 4, // Index of "Aksi" column
                         className: 'text-center nowrap-column',
                         orderable: false,
                         searchable: false,
@@ -94,6 +96,14 @@
                 columns: [{
                         data: 'nama',
                         name: 'nama'
+                    },
+                    {
+                        data: 'alamat',
+                        name: 'alamat'
+                    },
+                    {
+                        data: 'contact_person',
+                        name: 'contact_person'
                     },
                     {
                         data: 'detail',

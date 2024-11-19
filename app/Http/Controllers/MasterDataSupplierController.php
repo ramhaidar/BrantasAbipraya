@@ -34,7 +34,13 @@ class MasterDataSupplierController extends Controller
         // Filter berdasarkan search term
         if ( $search = $request->input ( 'search.value' ) )
         {
-            $query->where ( 'nama', 'like', "%{$search}%" );
+            // Cari berdasarkan nama, alamat, atau contact_person
+            $query->where ( function ($query) use ($search)
+            {
+                $query->where ( 'nama', 'like', "%{$search}%" )
+                    ->orWhere ( 'alamat', 'like', "%{$search}%" )
+                    ->orWhere ( 'contact_person', 'like', "%{$search}%" );
+            } );
         }
 
         // Sorting berdasarkan permintaan dari DataTables
@@ -43,10 +49,16 @@ class MasterDataSupplierController extends Controller
             $columnIndex   = $order[ 0 ][ 'column' ];
             $columnName    = $request->input ( 'columns' )[ $columnIndex ][ 'data' ];
             $sortDirection = $order[ 0 ][ 'dir' ];
-            $query->orderBy ( $columnName, $sortDirection );
+
+            // Pastikan kolom yang di-sort adalah kolom yang ada di tabel
+            if ( in_array ( $columnName, [ 'id', 'nama', 'alamat', 'contact_person', 'updated_at' ] ) )
+            {
+                $query->orderBy ( $columnName, $sortDirection );
+            }
         }
         else
         {
+            // Default sorting berdasarkan updated_at
             $query->orderBy ( 'updated_at', 'desc' );
         }
 
@@ -57,7 +69,7 @@ class MasterDataSupplierController extends Controller
         $filteredRecords = $query->count ();
 
         // Ambil data dengan pagination
-        $suppliers = $query->skip ( $start )->take ( $length )->get ( [ 'id', 'nama' ] );
+        $suppliers = $query->skip ( $start )->take ( $length )->get ( [ 'id', 'nama', 'alamat', 'contact_person' ] );
 
         // Return data dalam format yang diterima oleh DataTables
         return response ()->json ( [ 

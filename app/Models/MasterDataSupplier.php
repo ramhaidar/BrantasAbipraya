@@ -14,11 +14,15 @@ class MasterDataSupplier extends Model
 
     protected $fillable = [ 
         'nama',
+        'alamat',
+        'contact_person',
     ];
 
     protected $casts = [ 
-        'id'   => 'integer',
-        'nama' => 'string',
+        'id'             => 'integer',
+        'nama'           => 'string',
+        'alamat'         => 'string',
+        'contact_person' => 'string',
     ];
 
     public function spareparts () : BelongsToMany

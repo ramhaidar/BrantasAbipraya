@@ -20,7 +20,9 @@ class MasterDataSupplierFactory extends Factory
     public function definition ()
     {
         return [ 
-            'nama' => $this->faker->company (),
+            'nama'           => $this->faker->company (),
+            'alamat'         => $this->faker->address (),
+            'contact_person' => $this->faker->firstName () . ' (' . $this->faker->phoneNumber () . ')',
         ];
     }
 }

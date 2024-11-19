@@ -12,6 +12,8 @@ return new class extends Migration
         {
             $table->id (); // PK | id: Integer
             $table->string ( 'nama' ); // + nama: String
+            $table->string ( 'alamat' ); // + alamat: String
+            $table->string ( 'contact_person' ); // + contact_person: String
             $table->timestamps (); // + timestamps()
         } );
     }

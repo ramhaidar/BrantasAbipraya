@@ -187,7 +187,7 @@
 
                                         <!-- Level 2 Item: Data Alat -->
                                         <li class="nav-item">
-                                            <a class="nav-link level-1 {{ str_contains($page, 'RKB Non Urgent') ? 'active' : '' }}" href="{{ route('rkb_general.index') }}" style="{{ str_contains($page, 'Data RKB General') ? 'background-color: #66CDAA; color: #ffffff;' : '' }}">
+                                            <a class="nav-link level-1 {{ str_contains($page, 'RKB General') ? 'active' : '' }}" href="{{ route('rkb_general.index') }}" style="{{ str_contains($page, 'Data RKB General') || str_contains($page, 'Detail RKB General') ? 'background-color: #66CDAA; color: #ffffff;' : '' }}">
                                                 <i class="bi me-2 nav-icon fs-5 bi bi-plus-square-fill"></i>
                                                 {{-- <i class="fa-solid fa-building me-2 fs-5 nav-icon"></i> --}}
                                                 <p class="truncate-text">
@@ -198,9 +198,40 @@
 
                                         <!-- Level 2 Item: Data Sparepart -->
                                         <li class="nav-item">
-                                            <a class="nav-link level-1 {{ str_contains($page, 'RKB Urgent') ? 'active' : '' }}" href="{{ route('rkb_urgent.index') }}" style="{{ str_contains($page, 'Data RKB Urgent') ? 'background-color: #66CDAA; color: #ffffff;' : '' }}">
+                                            <a class="nav-link level-1 {{ str_contains($page, 'RKB Urgent') ? 'active' : '' }}" href="{{ route('rkb_urgent.index') }}" style="{{ str_contains($page, 'Data RKB Urgent') || str_contains($page, 'Detail RKB Urgent') ? 'background-color: #66CDAA; color: #ffffff;' : '' }}">
                                                 <i class="bi me-2 nav-icon fs-5 bi bi-exclamation-square-fill"></i>
                                                 {{-- <i class="fa-solid fa-building-circle-exclamation ms-2 me-2 fs-5 nav-icon"></i> --}}
+                                                <p class="truncate-text">
+                                                    <span class="text-content">Urgent</span>
+                                                </p>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+
+                                <!-- Evaluasi Menu with SubMenu -->
+                                <li class="nav-item has-treeview {{ str_contains($headerPage, 'Evaluasi') ? 'menu-open' : '' }}">
+                                    <a class="nav-link {{ str_contains($headerPage, 'Evaluasi') ? 'active' : '' }}" href="#" style="{{ str_contains($headerPage, 'Evaluasi') ? 'background-color: #483D8B; color: #ffffff;' : '' }}">
+                                        <i class="bi me-2 nav-icon fs-5 bi-bar-chart-fill"></i> <!-- Icon updated to chart icon -->
+                                        <p class="truncate-text">
+                                            <span class="text-content">Evaluasi</span>
+                                        </p>
+                                        <i class="right bi bi-caret-right-fill"></i>
+                                    </a>
+                                    <ul class="nav nav-treeview">
+                                        <!-- Level 2 Item: Evaluasi General -->
+                                        <li class="nav-item">
+                                            <a class="nav-link level-1 {{ str_contains($page, 'Evaluasi RKB General') ? 'active' : '' }}" href="{{ route('rkb_general.index') }}" style="{{ str_contains($page, 'Evaluasi RKB General') ? 'background-color: #66CDAA; color: #ffffff;' : '' }}">
+                                                <i class="bi me-2 nav-icon fs-5 bi-clipboard-check-fill"></i> <!-- Icon for general -->
+                                                <p class="truncate-text">
+                                                    <span class="text-content">General</span>
+                                                </p>
+                                            </a>
+                                        </li>
+                                        <!-- Level 2 Item: Evaluasi Urgent -->
+                                        <li class="nav-item">
+                                            <a class="nav-link level-1 {{ str_contains($page, 'Evaluasi RKB Urgent') ? 'active' : '' }}" href="{{ route('rkb_urgent.index') }}" style="{{ str_contains($page, 'Evaluasi RKB Urgent') ? 'background-color: #66CDAA; color: #ffffff;' : '' }}">
+                                                <i class="bi me-2 nav-icon fs-5 bi-alarm-fill"></i> <!-- Icon for urgent -->
                                                 <p class="truncate-text">
                                                     <span class="text-content">Urgent</span>
                                                 </p>

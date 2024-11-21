@@ -88,7 +88,7 @@
                         data: 'kategoriSparepart',
                         name: 'kategoriSparepart',
                         className: 'text-center'
-                    }, // Display as "Kode: Nama"
+                    },
                     {
                         data: 'masterDataSparepart',
                         name: 'masterDataSparepart',

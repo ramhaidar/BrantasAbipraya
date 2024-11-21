@@ -607,64 +607,63 @@ Route::middleware ( 'auth' )
 // Rute RKB General [RKBGeneralController]
 Route::middleware ( 'auth' )
     ->prefix ( 'rkb-general' )
+    ->as ( 'rkb_general.' )
     ->group ( function ()
     {
+        // RKB General Routes
         Route::get (
             '/',
             [ RKBGeneralController::class, 'index' ]
-        )->name ( 'rkb_general.index' );
-
+        )->name ( 'index' );
         Route::get (
-            '/detail/{id}',
-            [ DetailRKBGeneralController::class, 'index' ]
-        )->name ( 'rkb_general.detail.index' );
-
-        Route::get (
-            '{id}',
+            '/{id}',
             [ RKBGeneralController::class, 'show' ]
-        )->name ( 'rkb_general.show' );
-
+        )->name ( 'show' );
         Route::post (
             '/',
             [ RKBGeneralController::class, 'store' ]
-        )->name ( 'rkb_general.store' );
-
+        )->name ( 'store' );
         Route::put (
-            '{id}',
+            '/{id}',
             [ RKBGeneralController::class, 'update' ]
-        )->name ( 'rkb_general.update' );
-
+        )->name ( 'update' );
         Route::delete (
-            '{id}',
+            '/{id}',
             [ RKBGeneralController::class, 'destroy' ]
-        )->name ( 'rkb_general.destroy' );
-
+        )->name ( 'destroy' );
         Route::post (
             '/finalize/{id}',
             [ RKBGeneralController::class, 'finalize' ]
-        )->name ( 'rkb_general.finalize' );
+        )->name ( 'finalize' );
 
         // Rute Detail RKB General [DetailRKBGeneralController]
-        Route::post (
-            '/detail',
-            [ DetailRKBGeneralController::class, 'store' ]
-        )->name ( 'rkb_general.detail.store' );
-
-        Route::get (
-            '/detail/show/{id}',
-            [ DetailRKBGeneralController::class, 'show' ]
-        )->name ( 'rkb_general.detail.show' );
-
-        Route::put (
-            '/detail/{id}',
-            [ DetailRKBGeneralController::class, 'update' ]
-        )->name ( 'rkb_general.detail.update' );
-
-        Route::delete (
-            '/detail/{id}',
-            [ DetailRKBGeneralController::class, 'destroy' ]
-        )->name ( 'rkb_general.detail.destroy' );
+        Route::prefix ( 'detail' )
+            ->as ( 'detail.' )
+            ->group ( function ()
+        {
+            Route::get (
+                '/{id}',
+                [ DetailRKBGeneralController::class, 'index' ]
+            )->name ( 'index' );
+            Route::get (
+                '/show/{id}',
+                [ DetailRKBGeneralController::class, 'show' ]
+            )->name ( 'show' );
+            Route::post (
+                '/',
+                [ DetailRKBGeneralController::class, 'store' ]
+            )->name ( 'store' );
+            Route::put (
+                '/{id}',
+                [ DetailRKBGeneralController::class, 'update' ]
+            )->name ( 'update' );
+            Route::delete (
+                '/{id}',
+                [ DetailRKBGeneralController::class, 'destroy' ]
+            )->name ( 'destroy' );
+        } );
     } );
+
 
 
 // Rute RKB Urgent [RKBUrgentController]

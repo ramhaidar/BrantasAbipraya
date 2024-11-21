@@ -16,7 +16,8 @@ class DetailRKBGeneral extends Model
     protected $table = 'detail_rkb_general';
 
     protected $fillable = [ 
-        'quantity',
+        'quantity_requested',
+        'quantity_approved',
         'satuan',
         'id_alat',
         'id_kategori_sparepart',
@@ -25,7 +26,8 @@ class DetailRKBGeneral extends Model
 
     protected $casts = [ 
         'id'                    => 'integer',
-        'quantity'              => 'string',
+        'quantity_requested'    => 'integer',
+        'quantity_approved'     => 'integer',
         'satuan'                => 'string',
         'id_alat'               => 'integer',
         'id_kategori_sparepart' => 'integer',

@@ -14,13 +14,15 @@ return new class extends Migration
         Schema::create ( 'detail_rkb_general', function (Blueprint $table)
         {
             $table->id ();
-            $table->string ( 'quantity' )->nullable ();
+            $table->integer ( 'quantity_requested' )->nullable ();
+            $table->integer ( 'quantity_approved' )->nullable ();
             $table->string ( 'satuan' )->nullable ();
-            $table->timestamps ();
 
             $table->foreignId ( 'id_alat' )->nullable ()->constrained ( 'master_data_alat' )->nullOnDelete ();
             $table->foreignId ( 'id_kategori_sparepart' )->nullable ()->constrained ( 'kategori_sparepart' )->nullOnDelete ();
             $table->foreignId ( 'id_sparepart' )->nullable ()->constrained ( 'master_data_sparepart' )->nullOnDelete ();
+
+            $table->timestamps ();
         } );
     }
 

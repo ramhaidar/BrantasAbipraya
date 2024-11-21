@@ -20,13 +20,15 @@ class RKB extends Model
         'nomor',
         'periode',
         'id_proyek',
+        'is_finalized'
     ];
 
     protected $casts = [ 
-        'id'        => 'integer',
-        'nomor'     => 'string',
-        'periode'   => 'date',
-        'id_proyek' => 'integer',
+        'id'           => 'integer',
+        'nomor'        => 'string',
+        'periode'      => 'date',
+        'id_proyek'    => 'integer',
+        'is_finalized' => 'boolean'
     ];
 
     public function proyek () : BelongsTo
@@ -36,6 +38,6 @@ class RKB extends Model
 
     public function linkRkbDetails () : HasMany
     {
-        return $this->hasMany ( LinkRKBDetail::class, 'id_rkb' );
+        return $this->hasMany ( Link_RKBDetail::class, 'id_rkb' );
     }
 }

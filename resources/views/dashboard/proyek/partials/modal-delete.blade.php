@@ -2,7 +2,7 @@
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Konfirmasi Hapus Proyek</h5>
+                <h5 class="modal-title w-100 pb-2">Konfirmasi Hapus Proyek</h5>
                 <button class="btn-close" data-bs-dismiss="modal" type="button"></button>
             </div>
             <div class="modal-body">

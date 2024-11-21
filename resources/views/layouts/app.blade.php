@@ -53,6 +53,8 @@
     @stack('styles_1')
     @stack('styles_2')
     @stack('styles_3')
+
+    <link href="{{ asset('css/dashboard_content.css') }}" rel="stylesheet">
 </head>
 
 <body class="layout-fixed sidebar-mini sidebar-collapse" data-panel-auto-height-mode="height" style="height:auto">
@@ -157,6 +159,8 @@
     @stack('scripts_1')
     @stack('scripts_2')
     @stack('scripts_3')
+
+    <script src="{{ asset('js/dashboard_content.js') }}"></script>
 </body>
 
 </html>

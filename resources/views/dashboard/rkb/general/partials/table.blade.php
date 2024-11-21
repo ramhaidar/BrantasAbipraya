@@ -90,10 +90,10 @@
                         width: "1%",
                         render: function(data, type, row) {
                             return `
-                            <button class="btn btn-info mx-1 detailBtn" data-id="${row.id}" onclick="redirectToDetail(${row.id})">
-                                <i class="bi bi-eye"></i>
-                            </button>
-                        `;
+<button class="btn btn-info mx-1 detailBtn" data-id="${row.id}" onclick="redirectToDetail(${row.id})">
+<i class="fa-solid fa-file-pen"></i>
+</button>
+`;
                         }
                     },
                     {
@@ -103,14 +103,15 @@
                         searchable: false,
                         width: "1%",
                         render: function(data, type, row) {
+                            const disabled = row.is_finalized ? 'disabled' : '';
                             return `
-                            <button class="btn btn-danger mx-1 deleteBtn" data-id="${row.id}">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                            <button class="btn btn-warning mx-1 ubahBtn" data-id="${row.id}" onclick="fillFormEditRKB(${row.id})">
-                                <i class="bi bi-pencil-square"></i>
-                            </button>
-                        `;
+<button class="btn btn-warning mx-1 ubahBtn" ${disabled} data-id="${row.id}" onclick="fillFormEditRKB(${row.id})">
+<i class="bi bi-pencil-square"></i>
+</button>
+<button class="btn btn-danger mx-1 deleteBtn" ${disabled} data-id="${row.id}">
+<i class="bi bi-trash"></i>
+</button>
+`;
                         }
                     }
                 ],

@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string ( 'phone' )->unique ();
             $table->string ( 'email' )->unique ();
             $table->string ( 'password' );
+
             $table->rememberToken ();
             $table->timestamps ();
         } );
@@ -30,6 +31,7 @@ return new class extends Migration
         {
             $table->string ( 'email' )->primary ();
             $table->string ( 'token' );
+
             $table->timestamp ( 'created_at' )->nullable ();
         } );
 

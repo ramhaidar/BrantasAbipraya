@@ -4,8 +4,6 @@
 @endpush
 
 @section('content')
-    <link href="{{ asset('css/dashboard_content.css') }}" rel="stylesheet">
-
     <div class="h-100">
         <div class="fade-in-up page-content" style="max-height: 50%">
             <div class="ibox">

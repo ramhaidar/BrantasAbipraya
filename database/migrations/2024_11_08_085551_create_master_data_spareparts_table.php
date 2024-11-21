@@ -18,6 +18,7 @@ return new class extends Migration
                 ->nullable () // Kolom harus nullable
                 ->constrained ( 'kategori_sparepart' )
                 ->nullOnDelete (); // Foreign key dengan ON DELETE SET NULL
+
             $table->timestamps (); // + timestamps()
         } );
     }

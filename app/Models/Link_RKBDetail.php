@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use PhpParser\Node\Expr\Cast;
 
-class LinkRKBDetail extends Model
+class Link_RKBDetail extends Model
 {
     protected $table = 'link_rkb_detail';
 

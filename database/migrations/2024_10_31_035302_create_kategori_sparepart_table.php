@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string ( 'nama' );
             $table->string ( 'jenis' )->nullable ();      // Add jenis column
             $table->string ( 'sub_jenis' )->nullable ();   // Add sub_jenis column
+
             $table->timestamps ();
         } );
     }

@@ -13,6 +13,7 @@ return new class extends Migration
             $table->id ();
             $table->foreignId ( 'id_supplier' )->constrained ( 'master_data_supplier' )->cascadeOnDelete ();
             $table->foreignId ( 'id_sparepart' )->constrained ( 'master_data_sparepart' )->cascadeOnDelete ();
+
             $table->timestamps ();
         } );
     }

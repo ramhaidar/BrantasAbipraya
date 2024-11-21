@@ -16,9 +16,12 @@ return new class extends Migration
             $table->id ();
             $table->string ( 'nomor' );
             $table->date ( 'periode' ); // Format mm-yyyy dapat diatur di aplikasi
-            $table->timestamps ();
 
             $table->foreignId ( 'id_proyek' )->nullable ()->constrained ( 'proyek' )->nullOnDelete ();
+
+            $table->boolean ( 'is_finalized' )->default ( false );
+
+            $table->timestamps ();
         } );
     }
 

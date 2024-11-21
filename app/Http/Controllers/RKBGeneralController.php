@@ -6,6 +6,9 @@ use Carbon\Carbon;
 use App\Models\RKB;
 use App\Models\Proyek;
 use Illuminate\Http\Request;
+use App\Models\MasterDataAlat;
+use App\Models\KategoriSparepart;
+use App\Models\MasterDataSparepart;
 use App\Http\Controllers\Controller;
 
 class RKBGeneralController extends Controller
@@ -19,20 +22,6 @@ class RKBGeneralController extends Controller
 
             'headerPage' => "RKB General",
             'page'       => 'Data RKB General',
-        ] );
-    }
-
-    public function detail_index ( $id )
-    {
-        $rkb     = RKB::with ( [ 'proyek', 'linkRkbDetails' ] )->find ( $id );
-        $proyeks = Proyek::orderByDesc ( 'updated_at' )->get ();
-
-        return view ( 'dashboard.rkb.general.detail.detail', [ 
-            'rkb'        => $rkb,
-            'proyeks'    => $proyeks,
-
-            'headerPage' => "RKB General",
-            'page'       => 'Detail RKB General',
         ] );
     }
 
@@ -70,6 +59,7 @@ class RKBGeneralController extends Controller
         // Redirect dengan pesan sukses
         return redirect ()->route ( 'rkb_general.index' )->with ( 'success', 'RKB successfully created' );
     }
+
     public function update ( Request $request, $id )
     {
         $rkb = RKB::find ( $id );
@@ -109,6 +99,21 @@ class RKBGeneralController extends Controller
         return redirect ()->route ( 'rkb_general.index' )->with ( 'success', 'RKB successfully deleted' );
     }
 
+    public function finalize ( $id )
+    {
+        $rkb = RKB::find ( $id );
+
+        if ( ! $rkb )
+        {
+            return redirect ()->route ( 'rkb_general.index' )->with ( 'error', 'RKB not found' );
+        }
+
+        $rkb->is_finalized = true;
+        $rkb->save ();
+
+        return redirect ()->route ( 'rkb_general.index' )->with ( 'success', 'RKB successfully finalized' );
+    }
+
     public function getData ( Request $request )
     {
         $query = RKB::with ( 'proyek' )->select ( 'rkb.*' );
@@ -141,8 +146,8 @@ class RKBGeneralController extends Controller
             }
             elseif ( $columnName === 'proyek' )
             {
-                $query->join ( 'proyeks', 'rkb.id_proyek', '=', 'proyeks.id' )
-                    ->orderBy ( 'proyeks.nama', $sortDirection );
+                $query->join ( 'proyek', 'rkb.id_proyek', '=', 'proyek.id' )
+                    ->orderBy ( 'proyek.nama', $sortDirection );
             }
         }
         else
@@ -166,10 +171,11 @@ class RKBGeneralController extends Controller
         $data = $rkbData->map ( function ($item)
         {
             return [ 
-                'nomor'   => $item->nomor,
-                'proyek'  => $item->proyek->nama ?? '-',
-                'periode' => Carbon::parse ( $item->periode )->translatedFormat ( 'F Y' ),
-                'id'      => $item->id
+                'is_finalized' => $item->is_finalized,
+                'nomor'        => $item->nomor,
+                'proyek'       => $item->proyek->nama ?? '-',
+                'periode'      => Carbon::parse ( $item->periode )->translatedFormat ( 'F Y' ),
+                'id'           => $item->id
             ];
         } );
 

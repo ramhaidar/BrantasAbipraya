@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string ( 'merek_alat' ); // + merek_alat: String
             $table->string ( 'tipe_alat' ); // + tipe_alat: String
             $table->string ( 'serial_number' ); // + serial_number: String
+
             $table->timestamps (); // + timestamps()
         } );
     }

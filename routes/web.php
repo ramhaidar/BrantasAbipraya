@@ -1,5 +1,4 @@
 <?php
-use App\Http\Controllers\RKBUrgentController;
 use App\Http\Middleware\CheckRole;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\APBController;
@@ -10,8 +9,10 @@ use App\Http\Controllers\ProyekController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\RKBUrgentController;
 use App\Http\Controllers\RKBGeneralController;
 use App\Http\Controllers\MasterDataAlatController;
+use App\Http\Controllers\DetailRKBGeneralController;
 use App\Http\Controllers\MasterDataSupplierController;
 use App\Http\Controllers\MasterDataSparepartController;
 
@@ -455,6 +456,13 @@ Route::prefix ( 'pagination' )->middleware ( 'auth' )->group ( function ()
         ->name ( 'rkb_general.getData' );
 
     Route::get (
+        '/rkb-general/detail/{id_rkb}',
+        [ DetailRKBGeneralController::class, 'getData' ]
+    )
+        ->name ( 'detail_rkb_general.getData' );
+
+
+    Route::get (
         '/rkb-urgent/data',
         [ RKBUrgentController::class, 'getData' ]
     )
@@ -559,6 +567,12 @@ Route::middleware ( 'auth' )
         )->name ( 'master_data_sparepart.destroy' );
     } );
 
+Route::get (
+    '/spareparts-by-category/{id}',
+    [ MasterDataSparepartController::class, 'getSparepartsByCategory' ]
+)->name ( 'spareparts-by-category' );
+
+
 // Rute Master Data Supplier [MasterDataSupplierController]
 Route::middleware ( 'auth' )
     ->prefix ( 'master-data-supplier' )
@@ -602,7 +616,7 @@ Route::middleware ( 'auth' )
 
         Route::get (
             '/detail/{id}',
-            [ RKBGeneralController::class, 'detail_index' ]
+            [ DetailRKBGeneralController::class, 'index' ]
         )->name ( 'rkb_general.detail.index' );
 
         Route::get (
@@ -624,7 +638,34 @@ Route::middleware ( 'auth' )
             '{id}',
             [ RKBGeneralController::class, 'destroy' ]
         )->name ( 'rkb_general.destroy' );
+
+        Route::post (
+            '/finalize/{id}',
+            [ RKBGeneralController::class, 'finalize' ]
+        )->name ( 'rkb_general.finalize' );
+
+        // Rute Detail RKB General [DetailRKBGeneralController]
+        Route::post (
+            '/detail',
+            [ DetailRKBGeneralController::class, 'store' ]
+        )->name ( 'rkb_general.detail.store' );
+
+        Route::get (
+            '/detail/show/{id}',
+            [ DetailRKBGeneralController::class, 'show' ]
+        )->name ( 'rkb_general.detail.show' );
+
+        Route::put (
+            '/detail/{id}',
+            [ DetailRKBGeneralController::class, 'update' ]
+        )->name ( 'rkb_general.detail.update' );
+
+        Route::delete (
+            '/detail/{id}',
+            [ DetailRKBGeneralController::class, 'destroy' ]
+        )->name ( 'rkb_general.detail.destroy' );
     } );
+
 
 // Rute RKB Urgent [RKBUrgentController]
 Route::middleware ( 'auth' )

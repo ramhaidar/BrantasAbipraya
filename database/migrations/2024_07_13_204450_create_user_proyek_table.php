@@ -13,6 +13,7 @@ return new class extends Migration
             $table->id ();
             $table->foreignId ( 'id_proyek' )->constrained ( 'proyek' )->cascadeOnDelete ();
             $table->foreignId ( 'id_user' )->constrained ( 'users' )->cascadeOnDelete ();
+
             $table->timestamps ();
         } );
     }

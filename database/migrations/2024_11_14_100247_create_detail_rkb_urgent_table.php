@@ -17,11 +17,12 @@ return new class extends Migration
             $table->string ( 'quantity' )->nullable ();
             $table->string ( 'satuan' )->nullable ();
             $table->string ( 'kronologi' )->nullable ();
-            $table->timestamps ();
 
             $table->foreignId ( 'id_alat' )->nullable ()->constrained ( 'master_data_alat' )->nullOnDelete ();
             $table->foreignId ( 'id_kategori_sparepart' )->nullable ()->constrained ( 'kategori_sparepart' )->nullOnDelete ();
             $table->foreignId ( 'id_sparepart' )->nullable ()->constrained ( 'master_data_sparepart' )->nullOnDelete ();
+
+            $table->timestamps ();
         } );
     }
 

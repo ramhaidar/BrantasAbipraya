@@ -234,4 +234,11 @@ class MasterDataSparepartController extends Controller
             'data'            => $spareparts,
         ] );
     }
+
+    public function getSparepartsByCategory ( $id )
+    {
+        $spareparts = MasterDataSparepart::where ( 'id_kategori', $id )->get ();
+
+        return response ()->json ( $spareparts );
+    }
 }

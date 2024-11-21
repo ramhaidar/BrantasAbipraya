@@ -14,6 +14,7 @@ return new class extends Migration
             $table->string ( 'nama' ); // + nama: String
             $table->string ( 'alamat' ); // + alamat: String
             $table->string ( 'contact_person' ); // + contact_person: String
+
             $table->timestamps (); // + timestamps()
         } );
     }

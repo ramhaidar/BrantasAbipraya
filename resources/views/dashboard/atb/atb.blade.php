@@ -658,7 +658,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="staticBackdropLabel">Import Data</h5>
+                    <h5 class="modal-title w-100 pb-2" id="staticBackdropLabel">Import Data</h5>
                     <button class="btn-close" data-bs-dismiss="modal" type="button" aria-label="Close"></button>
                 </div>
                 <form action="{{ route('atb.import.post') }}" method="post" enctype="multipart/form-data">
@@ -682,7 +682,7 @@
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modalDokumentasiLabel">Dokumentasi ATB</h5>
+                    <h5 class="modal-title w-100 pb-2" id="modalDokumentasiLabel">Dokumentasi ATB</h5>
                     <button class="btn-close" data-bs-dismiss="modal" type="button" aria-label="Close"></button>
                 </div>
                 <div class="modal-body text-center">

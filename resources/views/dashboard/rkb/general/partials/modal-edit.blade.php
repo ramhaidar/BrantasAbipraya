@@ -1,9 +1,12 @@
+@push('styles_3')
+@endpush
+
 <div class="fade modal" id="modalForEdit" data-bs-keyboard="false" aria-hidden="true" aria-labelledby="modalForEditLabel" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content rounded-4">
             <div class="pt-3 px-3 m-0 d-flex w-100 justify-content-between">
-                <h1 class="fs-5" id="modalForEditLabel">Ubah Data RKB</h1>
-                <button class="btn-close" data-bs-dismiss="modal" type="button" aria-label="Close"></button>
+                <h5 class="modal-title w-100 pb-2" id="modalForEditLabel">Ubah Data RKB</h1>
+                    <button class="btn-close" data-bs-dismiss="modal" type="button" aria-label="Close"></button>
             </div>
             <hr class="p-0 m-0 border border-secondary-subtle border-2 opacity-50">
             <form class="needs-validation" id="editRKBForm" novalidate method="POST">
@@ -43,24 +46,12 @@
     </div>
 </div>
 
-@push('styles_3')
-    <style>
-        /* CSS for required asterisk */
-        .form-label.required::after {
-            content: " *";
-            color: red;
-            font-weight: bold;
-            margin-left: 2px;
-        }
-    </style>
-@endpush
-
 @push('scripts_3')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/locale/id.min.js"></script>
 
     <script>
-        (() => {
+        $(document).ready(function() {
             'use strict';
 
             // Form edit untuk validasi
@@ -98,7 +89,7 @@
             document.getElementById('periode2').addEventListener('click', function() {
                 this.showPicker();
             })
-        })();
+        });
 
         // Function to display modal for editing and populate form with server data
         // Function to display modal for editing and populate form with server data
@@ -134,11 +125,5 @@
                 }
             });
         }
-
-        // Event listener untuk tombol edit di tabel
-        $(document).on('click', '.ubahBtnRKB', function() {
-            const id = $(this).data('id'); // Ambil ID dari atribut data-id
-            fillFormEditRKB(id); // Panggil fungsi untuk mengisi form edit
-        });
     </script>
 @endpush

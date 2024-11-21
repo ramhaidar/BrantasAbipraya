@@ -14,11 +14,12 @@ return new class extends Migration
         Schema::create ( 'link_rkb_detail', function (Blueprint $table)
         {
             $table->id ();
-            $table->timestamps ();
 
             $table->foreignId ( 'id_rkb' )->nullable ()->constrained ( 'rkb' )->cascadeOnDelete ();
             $table->foreignId ( 'id_detail_rkb_general' )->nullable ()->constrained ( 'detail_rkb_general' )->nullOnDelete ();
             $table->foreignId ( 'id_detail_rkb_urgent' )->nullable ()->constrained ( 'detail_rkb_urgent' )->nullOnDelete ();
+
+            $table->timestamps ();
         } );
     }
 

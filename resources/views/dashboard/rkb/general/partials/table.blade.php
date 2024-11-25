@@ -40,6 +40,7 @@
                 <th class="text-center">No RKB</th>
                 <th class="text-center">Proyek</th>
                 <th class="text-center">Periode</th>
+                <th class="text-center">Status</th>
                 <th class="text-center">Ubah Detail</th>
                 <th class="text-center">Aksi</th>
             </tr>
@@ -52,7 +53,6 @@
 
 @push('scripts_3')
     <script>
-        // Perbaikan JavaScript untuk DataTable dengan tabel RKB
         $(document).ready(function() {
             // Unique key for localStorage specific to this page
             const lastPageKey = 'lastPage_rkb';
@@ -83,7 +83,24 @@
                 order: [],
                 displayStart: lastPage * 10, // Start from the last saved page
                 columnDefs: [{
-                        targets: 3, // Index of "Aksi" column
+                        targets: 3, // Kolom "Status"
+                        className: 'text-center',
+                        orderable: false,
+                        data: 'status', // Menggunakan data yang dikembalikan dari backend
+                        render: function(data, type, row) {
+                            if (row.status === "Pengajuan") {
+                                return `<span class="badge bg-primary w-100">Pengajuan</span>`;
+                            } else if (row.status === "Evaluasi") {
+                                return `<span class="badge bg-warning w-100">Evaluasi</span>`;
+                            } else if (row.status === "Disetujui") {
+                                return `<span class="badge bg-success w-100">Disetujui</span>`;
+                            } else {
+                                return `<span class="badge bg-secondary w-100">Tidak Diketahui</span>`;
+                            }
+                        }
+                    },
+                    {
+                        targets: 4, // Kolom "Aksi" untuk detail
                         className: 'text-center nowrap-column',
                         orderable: false,
                         searchable: false,
@@ -97,7 +114,7 @@
                         }
                     },
                     {
-                        targets: 4, // Index of "Aksi" column
+                        targets: 5, // Kolom "Aksi" untuk edit dan delete
                         className: 'text-center nowrap-column',
                         orderable: false,
                         searchable: false,
@@ -131,9 +148,19 @@
                         className: 'text-center'
                     },
                     {
-                        data: 'aksi',
+                        data: null,
+                        name: 'status',
+                        className: 'text-center',
+                    },
+                    {
+                        data: null,
                         name: 'aksi',
-                        className: 'text-center'
+                        className: 'text-center',
+                    },
+                    {
+                        data: null,
+                        name: 'aksi',
+                        className: 'text-center',
                     }
                 ]
             });
@@ -147,7 +174,7 @@
 
         // Function to redirect to detail page
         function redirectToDetail(id) {
-            const detailUrl = "{{ route('rkb_general.detail.index', ':id') }}".replace(':id', id); // Construct the URL dynamically
+            const detailUrl = "{{ route('rkb_general.detail.index', ':id') }}".replace(':id', id);
             window.location.href = detailUrl;
         }
     </script>

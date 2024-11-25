@@ -26,60 +26,6 @@ class MasterDataSupplierController extends Controller
         ] );
     }
 
-    public function getData ( Request $request )
-    {
-        // Query dari model MasterDataSupplier
-        $query = MasterDataSupplier::query ();
-
-        // Filter berdasarkan search term
-        if ( $search = $request->input ( 'search.value' ) )
-        {
-            // Cari berdasarkan nama, alamat, atau contact_person
-            $query->where ( function ($query) use ($search)
-            {
-                $query->where ( 'nama', 'like', "%{$search}%" )
-                    ->orWhere ( 'alamat', 'like', "%{$search}%" )
-                    ->orWhere ( 'contact_person', 'like', "%{$search}%" );
-            } );
-        }
-
-        // Sorting berdasarkan permintaan dari DataTables
-        if ( $order = $request->input ( 'order' ) )
-        {
-            $columnIndex   = $order[ 0 ][ 'column' ];
-            $columnName    = $request->input ( 'columns' )[ $columnIndex ][ 'data' ];
-            $sortDirection = $order[ 0 ][ 'dir' ];
-
-            // Pastikan kolom yang di-sort adalah kolom yang ada di tabel
-            if ( in_array ( $columnName, [ 'id', 'nama', 'alamat', 'contact_person', 'updated_at' ] ) )
-            {
-                $query->orderBy ( $columnName, $sortDirection );
-            }
-        }
-        else
-        {
-            // Default sorting berdasarkan updated_at
-            $query->orderBy ( 'updated_at', 'desc' );
-        }
-
-        // Handle pagination
-        $start           = $request->input ( 'start', 0 );
-        $length          = $request->input ( 'length', 10 );
-        $totalRecords    = MasterDataSupplier::count ();
-        $filteredRecords = $query->count ();
-
-        // Ambil data dengan pagination
-        $suppliers = $query->skip ( $start )->take ( $length )->get ( [ 'id', 'nama', 'alamat', 'contact_person' ] );
-
-        // Return data dalam format yang diterima oleh DataTables
-        return response ()->json ( [ 
-            'draw'            => $request->input ( 'draw' ),
-            'recordsTotal'    => $totalRecords,
-            'recordsFiltered' => $filteredRecords,
-            'data'            => $suppliers,
-        ] );
-    }
-
     public function show ( $id )
     {
         $supplier = MasterDataSupplier::with ( 'spareparts' )->findOrFail ( $id );
@@ -153,5 +99,58 @@ class MasterDataSupplierController extends Controller
         $supplier->delete ();
 
         return redirect ()->route ( 'master_data_supplier.index' )->with ( 'success', 'Master Data Supplier berhasil dihapus' );
+    }
+
+    public function getData ( Request $request )
+    {
+        // Mulai query menggunakan model MasterDataSupplier
+        $query = MasterDataSupplier::query ();
+
+        // Filter berdasarkan search term
+        if ( $search = $request->input ( 'search.value' ) )
+        {
+            $query->where ( function ($query) use ($search)
+            {
+                $query->where ( 'nama', 'like', "%{$search}%" )
+                    ->orWhere ( 'alamat', 'like', "%{$search}%" )
+                    ->orWhere ( 'contact_person', 'like', "%{$search}%" );
+            } );
+        }
+
+        // Sorting berdasarkan permintaan dari DataTables
+        if ( $order = $request->input ( 'order' ) )
+        {
+            $columnIndex   = $order[ 0 ][ 'column' ];
+            $columnName    = $request->input ( 'columns' )[ $columnIndex ][ 'data' ];
+            $sortDirection = $order[ 0 ][ 'dir' ];
+
+            // Pastikan kolom yang di-sort adalah kolom yang ada di tabel
+            if ( in_array ( $columnName, [ 'id', 'nama', 'alamat', 'contact_person', 'updated_at' ] ) )
+            {
+                $query->orderBy ( $columnName, $sortDirection );
+            }
+        }
+        else
+        {
+            // Default sorting berdasarkan updated_at
+            $query->orderBy ( 'updated_at', 'desc' );
+        }
+
+        // Pagination
+        $start           = $request->input ( 'start', 0 );
+        $length          = $request->input ( 'length', 10 );
+        $totalRecords    = MasterDataSupplier::count ();
+        $filteredRecords = $query->count ();
+
+        // Ambil data dengan pagination
+        $suppliers = $query->skip ( $start )->take ( $length )->get ( [ 'id', 'nama', 'alamat', 'contact_person' ] );
+
+        // Return data dalam format yang diterima oleh DataTables
+        return response ()->json ( [ 
+            'draw'            => $request->input ( 'draw' ),
+            'recordsTotal'    => $totalRecords,
+            'recordsFiltered' => $filteredRecords,
+            'data'            => $suppliers,
+        ] );
     }
 }

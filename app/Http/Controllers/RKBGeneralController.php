@@ -27,14 +27,58 @@ class RKBGeneralController extends Controller
 
     public function show ( $id )
     {
-        $rkb = RKB::with ( [ 'proyek', 'linkRkbDetails' ] )->find ( $id );
+        // Gunakan eager loading untuk relasi terkait
+        $rkb = RKB::with ( [ 
+            'proyek', // Relasi ke Proyek
+            'linkAlatDetailRkbs.linkRkbDetails.detailRkbGeneral.kategoriSparepart',
+            'linkAlatDetailRkbs.linkRkbDetails.detailRkbGeneral.masterDataSparepart'
+        ] )->find ( $id );
 
+        // Cek apakah RKB ditemukan
         if ( ! $rkb )
         {
-            return redirect ()->route ( 'rkb_general.index' )->with ( 'error', 'RKB Tidak Ditemukan.' );
+            return response ()->json ( [ 
+                'success' => false,
+                'message' => 'RKB Tidak Ditemukan.'
+            ], 404 );
         }
 
-        return response ()->json ( [ 'data' => $rkb ] );
+        // Format data untuk respons JSON
+        $formattedData = [ 
+            'id'      => $rkb->id,
+            'nomor'   => $rkb->nomor,
+            'periode' => Carbon::parse ( $rkb->periode )->format ( 'Y-m' ), // Format periode ke 'YYYY-MM'
+            'proyek'  => [ 
+                'id'   => $rkb->proyek->id ?? null,
+                'nama' => $rkb->proyek->nama ?? '-'
+            ],
+            'details' => $rkb->linkAlatDetailRkbs->flatMap ( function ($linkAlat)
+            {
+                return $linkAlat->linkRkbDetails->map ( function ($detail)
+                {
+                    $general = $detail->detailRkbGeneral;
+                    return [ 
+                        'quantity_requested' => $general->quantity_requested ?? null,
+                        'quantity_approved'  => $general->quantity_approved ?? null,
+                        'satuan'             => $general->satuan ?? null,
+                        'kategori_sparepart' => [ 
+                            'id'   => $general->kategoriSparepart->id ?? null,
+                            'nama' => $general->kategoriSparepart->nama ?? '-',
+                        ],
+                        'sparepart'          => [ 
+                            'id'          => $general->masterDataSparepart->id ?? null,
+                            'nama'        => $general->masterDataSparepart->nama ?? '-',
+                            'part_number' => $general->masterDataSparepart->part_number ?? null,
+                        ]
+                    ];
+                } );
+            } )
+        ];
+
+        return response ()->json ( [ 
+            'success' => true,
+            'data'    => $formattedData
+        ] );
     }
 
     public function store ( Request $request )
@@ -118,7 +162,7 @@ class RKBGeneralController extends Controller
     {
         $query = RKB::with ( 'proyek' )->select ( 'rkb.*' );
 
-        // Handle search input
+        // Filter pencarian
         if ( $search = $request->input ( 'search.value' ) )
         {
             $query->where ( function ($q) use ($search)
@@ -128,18 +172,23 @@ class RKBGeneralController extends Controller
                     {
                         $q->where ( 'nama', 'like', "%{$search}%" );
                     } )
-                    ->orWhere ( 'periode', 'like', "%{$search}%" );
+                    ->orWhere ( 'periode', 'like', "%{$search}%" )
+                    ->orWhereRaw ( "CASE 
+WHEN is_finalized = 1 AND is_approved = 1 THEN 'Disetujui'
+WHEN is_finalized = 0 THEN 'Pengajuan'
+ELSE 'Evaluasi' 
+END LIKE ?", [ "%{$search}%" ] );
             } );
         }
 
-        // Handle ordering
+        // Sorting
+// Sorting
         if ( $order = $request->input ( 'order' ) )
         {
             $columnIndex   = $order[ 0 ][ 'column' ];
             $columnName    = $request->input ( 'columns' )[ $columnIndex ][ 'data' ];
             $sortDirection = $order[ 0 ][ 'dir' ];
 
-            // Ensure column exists in the table
             if ( in_array ( $columnName, [ 'nomor', 'periode' ] ) )
             {
                 $query->orderBy ( $columnName, $sortDirection );
@@ -155,27 +204,36 @@ class RKBGeneralController extends Controller
             $query->orderBy ( 'updated_at', 'desc' );
         }
 
-        // Calculate pagination parameters
+
+        // Pagination
         $draw   = $request->input ( 'draw' );
         $start  = $request->input ( 'start', 0 );
         $length = $request->input ( 'length', 10 );
 
-        // Get total records count and filtered count
         $totalRecords    = RKB::count ();
         $filteredRecords = $query->count ();
 
-        // Fetch the data with pagination
         $rkbData = $query->skip ( $start )->take ( $length )->get ();
 
-        // Transform data for DataTables
+        // Mapping data
         $data = $rkbData->map ( function ($item)
         {
+            $isFinalized = $item->is_finalized ?? false;
+            $isApproved = $item->is_approved ?? false;
+
+            $status = match ( true )
+            {
+                $isFinalized && $isApproved => 'Disetujui',
+                ! $isFinalized => 'Pengajuan',
+                default => 'Evaluasi',
+            };
+
             return [ 
-                'is_finalized' => $item->is_finalized,
-                'nomor'        => $item->nomor,
-                'proyek'       => $item->proyek->nama ?? '-',
-                'periode'      => Carbon::parse ( $item->periode )->translatedFormat ( 'F Y' ),
-                'id'           => $item->id
+                'id'      => $item->id,
+                'nomor'   => $item->nomor,
+                'proyek'  => $item->proyek->nama ?? '-',
+                'periode' => Carbon::parse ( $item->periode )->translatedFormat ( 'F Y' ),
+                'status'  => $status,
             ];
         } );
 
@@ -183,7 +241,7 @@ class RKBGeneralController extends Controller
             'draw'            => $draw,
             'recordsTotal'    => $totalRecords,
             'recordsFiltered' => $filteredRecords,
-            'data'            => $data
+            'data'            => $data,
         ] );
     }
 }

@@ -47,7 +47,7 @@
     <link type="image/x-icon" href="/favicon.ico" rel="shortcut icon">
 
     <!-- Title -->
-    <title>@yield('title', 'Dashboard | DPP Digital Logistic')</title>
+    <title>@yield('title', 'Dashboard') | DPP Digital Logistic</title>
 
     <!-- Styles -->
     @stack('styles_1')

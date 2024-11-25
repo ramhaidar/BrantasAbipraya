@@ -132,6 +132,7 @@ class MasterDataAlatController extends Controller
 
     public function getData ( Request $request )
     {
+        // Base query
         $query = MasterDataAlat::query ();
 
         // Handle search input
@@ -153,25 +154,31 @@ class MasterDataAlatController extends Controller
             $columnIndex   = $order[ 0 ][ 'column' ];
             $columnName    = $request->input ( 'columns' )[ $columnIndex ][ 'data' ];
             $sortDirection = $order[ 0 ][ 'dir' ];
-            $query->orderBy ( $columnName, $sortDirection );
+
+            // Prevent ordering by columns that are not in the database
+            if ( in_array ( $columnName, [ 'jenis_alat', 'kode_alat', 'merek_alat', 'tipe_alat', 'serial_number', 'updated_at' ] ) )
+            {
+                $query->orderBy ( $columnName, $sortDirection );
+            }
         }
         else
         {
             $query->orderBy ( 'updated_at', 'desc' );
         }
 
-        // Calculate pagination parameters
+        // Pagination parameters
         $draw   = $request->input ( 'draw' );
         $start  = $request->input ( 'start', 0 );
         $length = $request->input ( 'length', 10 );
 
-        // Get total records count and filtered count
+        // Get total and filtered counts
         $totalRecords    = MasterDataAlat::count ();
         $filteredRecords = $query->count ();
 
         // Fetch the data with pagination
         $alat = $query->skip ( $start )->take ( $length )->get ();
 
+        // Return response
         return response ()->json ( [ 
             'draw'            => $draw,
             'recordsTotal'    => $totalRecords,
@@ -179,4 +186,5 @@ class MasterDataAlatController extends Controller
             'data'            => $alat,
         ] );
     }
+
 }

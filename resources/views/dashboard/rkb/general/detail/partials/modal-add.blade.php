@@ -1,4 +1,24 @@
 @push('styles_3')
+    <style>
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1050;
+            /* Ensure it's above modal content */
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+    </style>
 @endpush
 
 <div class="fade modal" id="modalForAdd" aria-hidden="true" aria-labelledby="staticBackdropLabel" tabindex="-1">
@@ -17,8 +37,8 @@
                         <input id="id_rkb" name="id_rkb" type="hidden" value="{{ $rkb->id }}">
 
                         <div class="col-12">
-                            <label class="form-label required" for="id_alat">Alat</label>
-                            <select class="form-control" id="id_alat" name="id_alat" required>
+                            <label class="form-label required" for="id_master_data_alat">Alat</label>
+                            <select class="form-control" id="id_master_data_alat" name="id_master_data_alat" required>
                                 <option value="">Pilih Alat</option>
                                 @foreach ($master_data_alat as $alat)
                                     <option value="{{ $alat->id }}">{{ $alat->kode_alat }} - {{ $alat->jenis_alat }}</option>
@@ -28,8 +48,8 @@
                         </div>
 
                         <div class="col-12">
-                            <label class="form-label required" for="id_kategori_sparepart">Kategori Sparepart</label>
-                            <select class="form-control" id="id_kategori_sparepart" name="id_kategori_sparepart" required>
+                            <label class="form-label required" for="id_kategori_sparepart_sparepart">Kategori Sparepart</label>
+                            <select class="form-control" id="id_kategori_sparepart_sparepart" name="id_kategori_sparepart_sparepart" required>
                                 <option value="">Pilih Kategori</option>
                                 @foreach ($kategori_sparepart as $kategori)
                                     <option value="{{ $kategori->id }}">{{ $kategori->kode }}: {{ $kategori->nama }}</option>
@@ -39,8 +59,8 @@
                         </div>
 
                         <div class="col-12">
-                            <label class="form-label required" for="id_sparepart">Sparepart</label>
-                            <select class="form-control" id="id_sparepart" name="id_sparepart" required>
+                            <label class="form-label required" for="id_master_data_sparepart">Sparepart</label>
+                            <select class="form-control" id="id_master_data_sparepart" name="id_master_data_sparepart" required>
                                 <option value="">Pilih Sparepart</option>
                                 @foreach ($master_data_sparepart as $sparepart)
                                     <option value="{{ $sparepart->id }}">{{ $sparepart->nama }} - {{ $sparepart->part_number }} - {{ $sparepart->merk }}</option>
@@ -100,7 +120,7 @@
             });
 
             // Initialize select2 for dropdowns
-            const $select2Elements = $('#id_alat, #id_kategori_sparepart, #id_sparepart, #satuan');
+            const $select2Elements = $('#id_master_data_alat, #id_kategori_sparepart_sparepart, #id_master_data_sparepart, #satuan');
             $select2Elements.select2({
                 placeholder: "Pilih",
                 allowClear: true,
@@ -109,12 +129,19 @@
             });
 
             // Handle kategori_sparepart change
-            $('#id_kategori_sparepart').on('change', function() {
+            $('#id_kategori_sparepart_sparepart').on('change', function() {
                 const kategoriId = $(this).val();
-                const $sparepartSelect = $('#id_sparepart');
+                const $sparepartSelect = $('#id_master_data_sparepart');
 
                 // Clear the sparepart select
                 $sparepartSelect.empty().trigger('change');
+
+                // Show loading spinner
+                const $loadingOverlay = $('<div class="loading-overlay"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+                $('#modalForAdd').append($loadingOverlay);
+
+                // Disable sparepart dropdown
+                $sparepartSelect.prop('disabled', true);
 
                 if (kategoriId) {
                     $.ajax({
@@ -134,11 +161,27 @@
 
                             // Refresh the select2 dropdown
                             $sparepartSelect.trigger('change');
+
+                            // Enable sparepart dropdown
+                            $sparepartSelect.prop('disabled', false);
+
+                            // Remove loading spinner
+                            $loadingOverlay.remove();
                         },
                         error: function() {
                             alert('Gagal memuat sparepart');
+
+                            // Enable sparepart dropdown even if there's an error
+                            $sparepartSelect.prop('disabled', false);
+
+                            // Remove loading spinner
+                            $loadingOverlay.remove();
                         }
                     });
+                } else {
+                    // Enable sparepart dropdown and remove spinner if no kategori is selected
+                    $sparepartSelect.prop('disabled', false);
+                    $loadingOverlay.remove();
                 }
             });
 

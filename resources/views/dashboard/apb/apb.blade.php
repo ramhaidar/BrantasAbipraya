@@ -532,7 +532,7 @@
                             </div>
                             <div class="mb-3">
                                 <label class="form-label" for="pilihan-alat1">Alat</label>
-                                <select class="form-control" id="pilihan-alat1" name="id_alat" required>
+                                <select class="form-control" id="pilihan-alat1" name="id_master_data_alat" required>
                                     @foreach ($alatList as $alat)
                                         <option value="{{ $alat->id }}">{{ $alat->jenis_alat }} - {{ $alat->tipe_alat }} ({{ $alat->kode_alat }})</option>
                                     @endforeach
@@ -605,7 +605,7 @@
 
                         <div class="mb-3">
                             <label class="form-label" for="pilihan-alat2">Alat</label>
-                            <select class="form-control" id="pilihan-alat2" name="id_alat" required>
+                            <select class="form-control" id="pilihan-alat2" name="id_master_data_alat" required>
                                 @foreach ($alatList as $alat)
                                     <option value="{{ $alat->id }}">{{ $alat->jenis_alat }} - {{ $alat->tipe_alat }} ({{ $alat->kode_alat }})</option>
                                 @endforeach
@@ -731,7 +731,7 @@
             });
         }
 
-        function fillFormEdit(params, quantity, id_alat, id_apb) {
+        function fillFormEdit(params, quantity, id_master_data_alat, id_apb) {
             document.querySelector('#modalForEdit form').action = `/apb/ex_panjar_unit_alat/edit/${params}`;
             getATB(params)
                 .then(data => {
@@ -743,7 +743,7 @@
                     }
 
                     // Set data ke form modal
-                    $('#pilihan-alat2').val(id_alat).trigger('change');
+                    $('#pilihan-alat2').val(id_master_data_alat).trigger('change');
                     document.querySelector('#modalForEdit #id_atb').value = data.id;
                     document.querySelector('#modalForEdit #pilihan-proyek2').value = data.proyek.id;
                     document.querySelector('#modalForEdit #pilihan-proyek2-tampilan').value = data.proyek.nama_proyek + " - " + data.sparepart + " (" + data.saldo.current_quantity + " tersedia)";

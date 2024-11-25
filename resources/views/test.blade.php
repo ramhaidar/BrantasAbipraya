@@ -4,147 +4,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AdminLTE 3 Sidebar Example with Active Submenu</title>
-
-    <!-- AdminLTE CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css" rel="stylesheet">
-    <!-- Font Awesome Icons -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <!-- Google Font: Source Sans Pro -->
-    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet" rel="stylesheet">
-
+    <title>DataTables Merge Example</title>
+    <link href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 </head>
 
-<body class="hold-transition sidebar-mini layout-fixed">
-    <div class="wrapper">
+<body>
+    <table class="display" id="example" style="width:100%">
+        <thead>
+            <tr>
+                <th>Nama Alat</th>
+                <th>Kategori Sparepart</th>
+                <th>Sparepart</th>
+                <th>Quantity Requested</th>
+                <th>Quantity Approved</th>
+                <th>Quantity in Stock</th>
+                <th>Satuan</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Alat 1</td>
+                <td>Kategori A</td>
+                <td>Sparepart X</td>
+                <td>5</td>
+                <td>5</td>
+                <td>50</td>
+                <td>PCS</td>
+                <td>Edit</td>
+            </tr>
+            <tr>
+                <td>Alat 2</td>
+                <td>Kategori B</td>
+                <td>Sparepart X</td>
+                <td>10</td>
+                <td>10</td>
+                <td>50</td>
+                <td>PCS</td>
+                <td>Edit</td>
+            </tr>
+            <tr>
+                <td>Alat 3</td>
+                <td>Kategori C</td>
+                <td>Sparepart Y</td>
+                <td>3</td>
+                <td>3</td>
+                <td>30</td>
+                <td>PCS</td>
+                <td>Edit</td>
+            </tr>
+            <tr>
+                <td>Alat 4</td>
+                <td>Kategori D</td>
+                <td>Sparepart Z</td>
+                <td>8</td>
+                <td>6</td>
+                <td>20</td>
+                <td>PCS</td>
+                <td>Edit</td>
+            </tr>
+            <tr>
+                <td>Alat 5</td>
+                <td>Kategori E</td>
+                <td>Sparepart Z</td>
+                <td>4</td>
+                <td>4</td>
+                <td>20</td>
+                <td>PCS</td>
+                <td>Edit</td>
+            </tr>
+        </tbody>
+    </table>
 
-        <!-- Main Sidebar Container -->
-        <aside class="main-sidebar sidebar-dark-primary elevation-4">
-            <!-- Brand Logo -->
-            <a class="brand-link" href="index3.html">
-                <img class="brand-image img-circle elevation-3" src="dist/img/AdminLTELogo.png" alt="AdminLTE Logo" style="opacity: .8">
-                <span class="brand-text font-weight-light">AdminLTE 3</span>
-            </a>
+    <script>
+        $(document).ready(function() {
+            $('#example').DataTable({
+                order: [
+                    [2, 'asc']
+                ], // Urutkan berdasarkan Sparepart
+                drawCallback: function(settings) {
+                    var api = this.api();
+                    var rows = api.rows({
+                        page: 'current'
+                    }).nodes();
+                    var lastSparepart = null;
+                    var lastStockCell = null;
+                    var rowspan = 1;
 
-            <!-- Sidebar -->
-            <div class="sidebar">
-                <!-- Sidebar Menu -->
-                <nav class="mt-2">
-                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" data-accordion="false" role="menu">
+                    api.rows({
+                        page: 'current'
+                    }).data().each(function(row, i) {
+                        var sparepart = row[2]; // Kolom Sparepart
+                        var stockCell = $('td:nth-child(6)', rows[i]); // Kolom Quantity in Stock
 
-                        <!-- Parent Menu Item -->
-                        <li class="nav-item has-treeview menu-open"> <!-- Set menu-open to keep this menu open -->
-                            <a class="nav-link" href="#">
-                                <i class="nav-icon fas fa-tachometer-alt"></i>
-                                <p>
-                                    Dashboard
-                                    <i class="right fas fa-angle-left"></i>
-                                </p>
-                            </a>
-
-                            <!-- Submenu Level 1 -->
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <a class="nav-link" href="#">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Dashboard v1</p>
-                                    </a>
-                                </li>
-
-                                <!-- Active Submenu Level 1 Item -->
-                                <li class="nav-item has-treeview menu-open"> <!-- Set menu-open to keep this submenu open -->
-                                    <a class="nav-link active" href="#"> <!-- Set active to highlight this submenu -->
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>
-                                            Dashboard v2
-                                            <i class="right fas fa-angle-left"></i>
-                                        </p>
-                                    </a>
-
-                                    <!-- Active Subsubmenu Level 2 -->
-                                    <ul class="nav nav-treeview">
-                                        <li class="nav-item">
-                                            <a class="nav-link" href="#">
-                                                <i class="far fa-dot-circle nav-icon"></i>
-                                                <p>Sub Dashboard v2.1</p>
-                                            </a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a class="nav-link active" href="#"> <!-- Set active to highlight this subsubmenu item -->
-                                                <i class="far fa-dot-circle nav-icon"></i>
-                                                <p>Sub Dashboard v2.2</p>
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </li>
-
-                                <li class="nav-item">
-                                    <a class="nav-link" href="#">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Dashboard v3</p>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-
-                        <!-- Another Parent Menu Item -->
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <i class="nav-icon fas fa-th"></i>
-                                <p>
-                                    Simple Link
-                                </p>
-                            </a>
-                        </li>
-
-                    </ul>
-                </nav>
-                <!-- /.sidebar-menu -->
-            </div>
-            <!-- /.sidebar -->
-        </aside>
-
-        <!-- Content Wrapper. Contains page content -->
-        <div class="content-wrapper">
-            <!-- Main content -->
-            <section class="content">
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="col-12">
-                            <h1>Welcome to AdminLTE 3</h1>
-                            <p>This is a sample page to demonstrate the sidebar with active submenus and sub-submenus.</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            <!-- /.content -->
-        </div>
-        <!-- /.content-wrapper -->
-
-        <!-- Control Sidebar -->
-        <aside class="control-sidebar control-sidebar-dark">
-            <!-- Control sidebar content goes here -->
-        </aside>
-        <!-- /.control-sidebar -->
-
-        <!-- Main Footer -->
-        <footer class="main-footer">
-            <strong>Copyright &copy; 2023 <a href="https://adminlte.io">AdminLTE.io</a>.</strong>
-            All rights reserved.
-            <div class="float-right d-none d-sm-inline-block">
-                <b>Version</b> 3.2.0
-            </div>
-        </footer>
-    </div>
-    <!-- ./wrapper -->
-
-    <!-- jQuery -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <!-- Bootstrap 4 -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- AdminLTE App -->
-    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
-
+                        if (sparepart === lastSparepart) {
+                            rowspan++; // Tambahkan rowspan
+                            stockCell.remove(); // Hapus sel stock pada baris ini
+                            $(lastStockCell).attr('rowspan', rowspan); // Set rowspan pada sel pertama
+                        } else {
+                            lastSparepart = sparepart;
+                            lastStockCell = stockCell; // Simpan referensi ke sel stock terakhir
+                            rowspan = 1; // Reset rowspan
+                        }
+                    });
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>

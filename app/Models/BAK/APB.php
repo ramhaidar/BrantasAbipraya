@@ -12,7 +12,7 @@ class APB extends Model
         'tanggal',
         'quantity',
         'dokumentasi',
-        'id_alat',
+        'id_master_data_alat',
         'id_saldo',
         'id_tujuan_proyek',
     ];
@@ -23,7 +23,7 @@ class APB extends Model
 
     public function alat ()
     {
-        return $this->belongsTo ( Alat::class, 'id_alat' );
+        return $this->belongsTo ( Alat::class, 'id_master_data_alat' );
     }
 
     public function saldo ()

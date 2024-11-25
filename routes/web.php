@@ -13,8 +13,10 @@ use App\Http\Controllers\RKBUrgentController;
 use App\Http\Controllers\RKBGeneralController;
 use App\Http\Controllers\MasterDataAlatController;
 use App\Http\Controllers\DetailRKBGeneralController;
+use App\Http\Controllers\EvaluasiRKBGeneralController;
 use App\Http\Controllers\MasterDataSupplierController;
 use App\Http\Controllers\MasterDataSparepartController;
+use App\Http\Controllers\EvaluasiDetailRKBGeneralController;
 
 Route::get ( '/test', function ()
 {
@@ -461,6 +463,17 @@ Route::prefix ( 'pagination' )->middleware ( 'auth' )->group ( function ()
     )
         ->name ( 'detail_rkb_general.getData' );
 
+    Route::get (
+        '/evaluasi-rkb-general/data',
+        [ EvaluasiRKBGeneralController::class, 'getData' ]
+    )
+        ->name ( 'evaluasi_rkb_general.getData' );
+
+    Route::get (
+        '/evaluasi-rkb-general/detail/{id_rkb}',
+        [ EvaluasiDetailRKBGeneralController::class, 'getData' ]
+    )
+        ->name ( 'evaluasi_detail_rkb_general.getData' );
 
     Route::get (
         '/rkb-urgent/data',
@@ -610,27 +623,31 @@ Route::middleware ( 'auth' )
     ->as ( 'rkb_general.' )
     ->group ( function ()
     {
-        // RKB General Routes
         Route::get (
             '/',
             [ RKBGeneralController::class, 'index' ]
         )->name ( 'index' );
+
         Route::get (
             '/{id}',
             [ RKBGeneralController::class, 'show' ]
         )->name ( 'show' );
+
         Route::post (
             '/',
             [ RKBGeneralController::class, 'store' ]
         )->name ( 'store' );
+
         Route::put (
             '/{id}',
             [ RKBGeneralController::class, 'update' ]
         )->name ( 'update' );
+
         Route::delete (
             '/{id}',
             [ RKBGeneralController::class, 'destroy' ]
         )->name ( 'destroy' );
+
         Route::post (
             '/finalize/{id}',
             [ RKBGeneralController::class, 'finalize' ]
@@ -645,18 +662,22 @@ Route::middleware ( 'auth' )
                 '/{id}',
                 [ DetailRKBGeneralController::class, 'index' ]
             )->name ( 'index' );
+
             Route::get (
                 '/show/{id}',
                 [ DetailRKBGeneralController::class, 'show' ]
             )->name ( 'show' );
+
             Route::post (
                 '/',
                 [ DetailRKBGeneralController::class, 'store' ]
             )->name ( 'store' );
+
             Route::put (
                 '/{id}',
                 [ DetailRKBGeneralController::class, 'update' ]
             )->name ( 'update' );
+
             Route::delete (
                 '/{id}',
                 [ DetailRKBGeneralController::class, 'destroy' ]
@@ -695,4 +716,73 @@ Route::middleware ( 'auth' )
             '{id}',
             [ RKBUrgentController::class, 'destroy' ]
         )->name ( 'rkb_urgent.destroy' );
+    } );
+
+// Rute Evaluasi RKB General [EvaluasiRKBGeneralController]
+Route::middleware ( 'auth' )
+    ->prefix ( 'evaluasi-rkb-general' )
+    ->as ( 'evaluasi_rkb_general.' )
+    ->group ( function ()
+    {
+        Route::get (
+            '/',
+            [ EvaluasiRKBGeneralController::class, 'index' ]
+        )->name ( 'index' );
+
+        Route::get (
+            '/{id}',
+            [ EvaluasiRKBGeneralController::class, 'show' ]
+        )->name ( 'show' );
+
+        Route::post (
+            '/',
+            [ EvaluasiRKBGeneralController::class, 'store' ]
+        )->name ( 'store' );
+
+        Route::put (
+            '/{id}',
+            [ EvaluasiRKBGeneralController::class, 'update' ]
+        )->name ( 'update' );
+
+        Route::delete (
+            '/{id}',
+            [ EvaluasiRKBGeneralController::class, 'destroy' ]
+        )->name ( 'destroy' );
+
+        // Rute Detail RKB General [DetailRKBGeneralController]
+        Route::prefix ( 'detail' )
+            ->as ( 'detail.' )
+            ->group ( function ()
+        {
+            Route::get (
+                '/{id}',
+                [ EvaluasiDetailRKBGeneralController::class, 'index' ]
+            )->name ( 'index' );
+
+            Route::get (
+                '/show/{id}',
+                [ EvaluasiDetailRKBGeneralController::class, 'show' ]
+            )->name ( 'show' );
+
+            Route::post (
+                '/',
+                [ EvaluasiDetailRKBGeneralController::class, 'store' ]
+            )->name ( 'store' );
+
+            Route::put (
+                '/{id}',
+                [ EvaluasiDetailRKBGeneralController::class, 'update' ]
+            )->name ( 'update' );
+
+            Route::delete (
+                '/{id}',
+                [ EvaluasiDetailRKBGeneralController::class, 'destroy' ]
+            )->name ( 'destroy' );
+
+            Route::post (
+                '/approve/{id}',
+                [ EvaluasiDetailRKBGeneralController::class, 'approve' ]
+            )->name ( 'approve' );
+
+        } );
     } );

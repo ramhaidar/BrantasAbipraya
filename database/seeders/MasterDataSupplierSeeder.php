@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\MasterDataSupplier;
-use App\Models\Link_SupplierSparepart;
+use App\Models\LinkSupplierSparepart;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class MasterDataSupplierSeeder extends Seeder
@@ -75,29 +75,29 @@ class MasterDataSupplierSeeder extends Seeder
             MasterDataSupplier::factory ()->create ( [ 'nama' => $company ] );
         }
 
-        Link_SupplierSparepart::create ( [ 
-            'id_supplier'  => 1,
-            'id_sparepart' => 1,
+        LinkSupplierSparepart::create ( [ 
+            'id_master_data_supplier'  => 1,
+            'id_master_data_sparepart' => 1,
         ] );
 
-        Link_SupplierSparepart::create ( [ 
-            'id_supplier'  => 2,
-            'id_sparepart' => 2,
+        LinkSupplierSparepart::create ( [ 
+            'id_master_data_supplier'  => 2,
+            'id_master_data_sparepart' => 2,
         ] );
 
-        Link_SupplierSparepart::create ( [ 
-            'id_supplier'  => 2,
-            'id_sparepart' => 3,
+        LinkSupplierSparepart::create ( [ 
+            'id_master_data_supplier'  => 2,
+            'id_master_data_sparepart' => 3,
         ] );
 
-        Link_SupplierSparepart::create ( [ 
-            'id_supplier'  => 3,
-            'id_sparepart' => 4,
+        LinkSupplierSparepart::create ( [ 
+            'id_master_data_supplier'  => 3,
+            'id_master_data_sparepart' => 4,
         ] );
 
-        Link_SupplierSparepart::create ( [ 
-            'id_supplier'  => 4,
-            'id_sparepart' => 5,
+        LinkSupplierSparepart::create ( [ 
+            'id_master_data_supplier'  => 4,
+            'id_master_data_sparepart' => 5,
         ] );
 
     }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\MasterDataSparepart;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -27,7 +28,7 @@ class MasterDataSupplier extends Model
 
     public function spareparts () : BelongsToMany
     {
-        return $this->belongsToMany ( MasterDataSparepart::class, 'link_supplier_sparepart', 'id_supplier', 'id_sparepart' )
+        return $this->belongsToMany ( MasterDataSparepart::class, 'link_supplier_sparepart', 'id_master_data_supplier', 'id_master_data_sparepart' )
             ->withTimestamps ();
     }
 }

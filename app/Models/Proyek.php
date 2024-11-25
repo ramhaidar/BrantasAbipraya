@@ -2,8 +2,11 @@
 
 namespace App\Models;
 
+use App\Models\APB;
+use App\Models\ATB;
+use App\Models\Alat;
 use App\Models\User;
-use Database\Factories\ProyekFactory;
+use App\Models\UserProyek;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 

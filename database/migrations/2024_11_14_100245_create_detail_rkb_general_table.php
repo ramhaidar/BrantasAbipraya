@@ -6,29 +6,25 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up () : void
     {
         Schema::create ( 'detail_rkb_general', function (Blueprint $table)
         {
-            $table->id ();
-            $table->integer ( 'quantity_requested' )->nullable ();
-            $table->integer ( 'quantity_approved' )->nullable ();
-            $table->string ( 'satuan' )->nullable ();
+            $table->id (); // PK
+            $table->bigInteger ( 'quantity_requested' )->nullable (); // Jumlah diminta
+            $table->bigInteger ( 'quantity_approved' )->nullable (); // Jumlah disetujui
+            $table->string ( 'satuan' )->nullable (); // Satuan barang
 
-            $table->foreignId ( 'id_alat' )->nullable ()->constrained ( 'master_data_alat' )->nullOnDelete ();
-            $table->foreignId ( 'id_kategori_sparepart' )->nullable ()->constrained ( 'kategori_sparepart' )->nullOnDelete ();
-            $table->foreignId ( 'id_sparepart' )->nullable ()->constrained ( 'master_data_sparepart' )->nullOnDelete ();
+            $table->foreignId ( 'id_kategori_sparepart_sparepart' )->nullable ()
+                ->constrained ( 'kategori_sparepart' )->nullOnDelete (); // Kategori sparepart
 
-            $table->timestamps ();
+            $table->foreignId ( 'id_master_data_sparepart' )->nullable ()
+                ->constrained ( 'master_data_sparepart' )->nullOnDelete (); // Sparepart
+
+            $table->timestamps (); // Timestamp pencatatan
         } );
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down () : void
     {
         Schema::dropIfExists ( 'detail_rkb_general' );

@@ -218,7 +218,7 @@ class APBController extends Controller
 
         if ( ! $request->filled ( 'id_tujuan_proyek' ) )
         {
-            $rules[ 'id_alat' ] = 'required|exists:alat,id';
+            $rules[ 'id_master_data_alat' ] = 'required|exists:alat,id';
         }
         else
         {
@@ -272,11 +272,11 @@ class APBController extends Controller
         }
 
         $apb = APB::create ( [ 
-            'tanggal'     => $request->tanggal,
-            'quantity'    => $request->quantity,
-            'id_alat'     => $request->id_alat,
-            'id_saldo'    => $saldo->id,
-            'dokumentasi' => $dokumentasiPath
+            'tanggal'             => $request->tanggal,
+            'quantity'            => $request->quantity,
+            'id_master_data_alat' => $request->id_master_data_alat,
+            'id_saldo'            => $saldo->id,
+            'dokumentasi'         => $dokumentasiPath
         ] );
 
         $saldo->current_quantity -= $request->quantity;
@@ -507,11 +507,11 @@ class APBController extends Controller
         }
 
         $request->validate ( [ 
-            'id_atb'      => 'required|exists:atb,id',
-            'id_alat'     => 'required|exists:alat,id',
-            'tanggal'     => 'required|date',
-            'quantity'    => 'required|numeric|min:1',
-            'dokumentasi' => 'nullable|mimes:jpeg,jpg,png,heic,heif|max:2048', // Validasi untuk dokumentasi
+            'id_atb'              => 'required|exists:atb,id',
+            'id_master_data_alat' => 'required|exists:alat,id',
+            'tanggal'             => 'required|date',
+            'quantity'            => 'required|numeric|min:1',
+            'dokumentasi'         => 'nullable|mimes:jpeg,jpg,png,heic,heif|max:2048', // Validasi untuk dokumentasi
         ] );
 
         // Ambil data ATB terkait
@@ -525,7 +525,7 @@ class APBController extends Controller
         }
 
         // Ambil id_proyek dari alat yang digunakan
-        $alat = Alat::find ( $request->id_alat );
+        $alat = Alat::find ( $request->id_master_data_alat );
 
         // Upload dokumentasi baru jika ada
         $dokumentasiPath = $apb->dokumentasi; // Simpan path dokumentasi lama
@@ -543,11 +543,11 @@ class APBController extends Controller
 
         // Update data APB
         $apb->update ( [ 
-            'tanggal'     => $request->tanggal,
-            'quantity'    => $request->quantity,
-            'id_alat'     => $request->id_alat,
-            'id_saldo'    => $saldo->id,
-            'dokumentasi' => $dokumentasiPath, // Simpan path dokumentasi
+            'tanggal'             => $request->tanggal,
+            'quantity'            => $request->quantity,
+            'id_master_data_alat' => $request->id_master_data_alat,
+            'id_saldo'            => $saldo->id,
+            'dokumentasi'         => $dokumentasiPath, // Simpan path dokumentasi
         ] );
 
         // Update current_quantity di saldo

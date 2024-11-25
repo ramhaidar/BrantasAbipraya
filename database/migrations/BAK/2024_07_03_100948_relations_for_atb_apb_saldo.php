@@ -16,7 +16,7 @@ return new class extends Migration
 
         Schema::table ( 'apb', function (Blueprint $table)
         {
-            $table->foreign ( 'id_alat' )->references ( 'id' )->on ( 'alat' )->cascadeOnDelete ();
+            $table->foreign ( 'id_master_data_alat' )->references ( 'id' )->on ( 'alat' )->cascadeOnDelete ();
             $table->foreign ( 'id_saldo' )->references ( 'id' )->on ( 'saldo' )->cascadeOnDelete ();
         } );
     }
@@ -31,7 +31,7 @@ return new class extends Migration
 
         Schema::table ( 'apb', function (Blueprint $table)
         {
-            $table->dropForeign ( [ 'id_alat' ] );
+            $table->dropForeign ( [ 'id_master_data_alat' ] );
             $table->dropForeign ( [ 'id_saldo' ] );
         } );
     }

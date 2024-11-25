@@ -19,8 +19,8 @@ class Link_SparepartKategoriFactory extends Factory
     public function definition () : array
     {
         return [ 
-            'id_kategori'  => KategoriSparepart::query ()->inRandomOrder ()->value ( 'id' ),
-            'id_sparepart' => MasterDataSparepart::query ()->inRandomOrder ()->value ( 'id' ),
+            'id_kategori_sparepart'    => KategoriSparepart::query ()->inRandomOrder ()->value ( 'id' ),
+            'id_master_data_sparepart' => MasterDataSparepart::query ()->inRandomOrder ()->value ( 'id' ),
         ];
     }
 }

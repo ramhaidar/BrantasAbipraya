@@ -2,13 +2,11 @@
 
 namespace App\Models;
 
-use App\Models\Proyek;
-use App\Models\DetailRKBUrgent;
-use App\Models\DetailRKBGeneral;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class RKB extends Model
 {
@@ -20,24 +18,30 @@ class RKB extends Model
         'nomor',
         'periode',
         'id_proyek',
-        'is_finalized'
+        'is_finalized',
+        'is_approved',
     ];
 
-    protected $casts = [ 
-        'id'           => 'integer',
-        'nomor'        => 'string',
-        'periode'      => 'date',
-        'id_proyek'    => 'integer',
-        'is_finalized' => 'boolean'
-    ];
+    protected function casts () : array
+    {
+        return [ 
+            'id'           => 'integer',
+            'nomor'        => 'string',
+            'periode'      => 'date',
+            'is_finalized' => 'boolean',
+            'is_approved'  => 'boolean',
+            'created_at'   => 'datetime',
+            'updated_at'   => 'datetime',
+        ];
+    }
 
     public function proyek () : BelongsTo
     {
         return $this->belongsTo ( Proyek::class, 'id_proyek' );
     }
 
-    public function linkRkbDetails () : HasMany
+    public function linkAlatDetailRkbs () : HasMany
     {
-        return $this->hasMany ( Link_RKBDetail::class, 'id_rkb' );
+        return $this->hasMany ( LinkAlatDetailRkb::class, 'id_rkb' );
     }
 }

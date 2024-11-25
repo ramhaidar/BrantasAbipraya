@@ -4,8 +4,6 @@
 @endpush
 
 @section('content')
-    <script src="{{ asset('js/dashboard_content.js') }}"></script>
-
     <div class="h-100">
         <div class="fade-in-up page-content">
             <div class="ibox">

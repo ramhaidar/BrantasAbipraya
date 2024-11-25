@@ -58,15 +58,13 @@ class ProyekController extends Controller
 
     public function getData ( Request $request )
     {
+        // Base query
         $query = Proyek::query ();
 
         // Handle search input
         if ( $search = $request->input ( 'search.value' ) )
         {
-            $query->where ( function ($q) use ($search)
-            {
-                $q->where ( 'nama', 'like', "%{$search}%" );
-            } );
+            $query->where ( 'nama', 'like', "%{$search}%" );
         }
 
         // Handle ordering
@@ -82,18 +80,19 @@ class ProyekController extends Controller
             $query->orderBy ( 'updated_at', 'desc' );
         }
 
-        // Calculate pagination parameters
+        // Pagination parameters
         $draw   = $request->input ( 'draw' );
         $start  = $request->input ( 'start', 0 );
         $length = $request->input ( 'length', 10 );
 
-        // Get total records count and filtered count
+        // Get total records and filtered records
         $totalRecords    = Proyek::count ();
         $filteredRecords = $query->count ();
 
-        // Fetch the data with pagination
+        // Fetch paginated data
         $proyeks = $query->skip ( $start )->take ( $length )->get ();
 
+        // Return JSON response
         return response ()->json ( [ 
             'draw'            => $draw,
             'recordsTotal'    => $totalRecords,

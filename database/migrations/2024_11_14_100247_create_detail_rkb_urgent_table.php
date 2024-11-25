@@ -6,29 +6,28 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up () : void
     {
         Schema::create ( 'detail_rkb_urgent', function (Blueprint $table)
         {
-            $table->id ();
-            $table->string ( 'quantity' )->nullable ();
-            $table->string ( 'satuan' )->nullable ();
-            $table->string ( 'kronologi' )->nullable ();
+            $table->id (); // PK
+            $table->bigInteger ( 'quantity_requested' )->nullable (); // Jumlah diminta
+            $table->bigInteger ( 'quantity_approved' )->nullable (); // Jumlah disetujui
+            $table->string ( 'satuan' )->nullable (); // Satuan barang
+            $table->string ( 'kronologi' )->nullable (); // Penjelasan urgensi
+            $table->string ( 'nama_mekanik' )->nullable (); // Nama mekanik terkait
+            $table->string ( 'dokumentasi' )->nullable (); // Dokumentasi file (path)
 
-            $table->foreignId ( 'id_alat' )->nullable ()->constrained ( 'master_data_alat' )->nullOnDelete ();
-            $table->foreignId ( 'id_kategori_sparepart' )->nullable ()->constrained ( 'kategori_sparepart' )->nullOnDelete ();
-            $table->foreignId ( 'id_sparepart' )->nullable ()->constrained ( 'master_data_sparepart' )->nullOnDelete ();
+            $table->foreignId ( 'id_kategori_sparepart_sparepart' )->nullable ()
+                ->constrained ( 'kategori_sparepart' )->nullOnDelete (); // Kategori sparepart
 
-            $table->timestamps ();
+            $table->foreignId ( 'id_master_data_sparepart' )->nullable ()
+                ->constrained ( 'master_data_sparepart' )->nullOnDelete (); // Sparepart
+
+            $table->timestamps (); // Timestamp pencatatan
         } );
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down () : void
     {
         Schema::dropIfExists ( 'detail_rkb_urgent' );

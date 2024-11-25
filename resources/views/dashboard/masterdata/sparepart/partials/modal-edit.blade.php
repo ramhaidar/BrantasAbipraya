@@ -128,7 +128,7 @@
                     $('#editSparepartForm #merk').val(response.data.merk);
 
                     // Set selected kategori
-                    $('#edit_kategori').val(response.data.id_kategori).trigger('change');
+                    $('#edit_kategori').val(response.data.id_kategori_sparepart).trigger('change');
 
                     // Set selected suppliers
                     const selectedSuppliers = response.data.suppliers.map(supplier => supplier.id);

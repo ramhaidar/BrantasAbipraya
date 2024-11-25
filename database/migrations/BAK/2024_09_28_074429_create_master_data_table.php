@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create ( 'master_data', function (Blueprint $table)
         {
             $table->id ();
-            $table->string ( 'id_supplier' );
+            $table->string ( 'id_master_data_supplier' );
             $table->string ( 'sparepart' );
             $table->string ( 'part_number' );
             $table->integer ( 'buffer_stock' )->nullable ();

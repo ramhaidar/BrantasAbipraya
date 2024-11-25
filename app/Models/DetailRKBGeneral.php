@@ -4,8 +4,11 @@ namespace App\Models;
 
 use App\Models\MasterDataAlat;
 use App\Models\KategoriSparepart;
+use App\Models\LinkAlatDetailRKB;
 use App\Models\MasterDataSparepart;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -19,33 +22,34 @@ class DetailRKBGeneral extends Model
         'quantity_requested',
         'quantity_approved',
         'satuan',
-        'id_alat',
-        'id_kategori_sparepart',
-        'id_sparepart',
+        'id_kategori_sparepart_sparepart',
+        'id_master_data_sparepart',
     ];
 
-    protected $casts = [ 
-        'id'                    => 'integer',
-        'quantity_requested'    => 'integer',
-        'quantity_approved'     => 'integer',
-        'satuan'                => 'string',
-        'id_alat'               => 'integer',
-        'id_kategori_sparepart' => 'integer',
-        'id_sparepart'          => 'integer',
-    ];
-
-    public function masterDataAlat () : BelongsTo
+    protected function casts () : array
     {
-        return $this->belongsTo ( MasterDataAlat::class, 'id_alat' );
+        return [ 
+            'id'                 => 'integer',
+            'quantity_requested' => 'integer',
+            'quantity_approved'  => 'integer',
+            'satuan'             => 'string',
+            'created_at'         => 'datetime',
+            'updated_at'         => 'datetime',
+        ];
     }
 
     public function kategoriSparepart () : BelongsTo
     {
-        return $this->belongsTo ( KategoriSparepart::class, 'id_kategori_sparepart' );
+        return $this->belongsTo ( KategoriSparepart::class, 'id_kategori_sparepart_sparepart' );
     }
 
     public function masterDataSparepart () : BelongsTo
     {
-        return $this->belongsTo ( MasterDataSparepart::class, 'id_sparepart' );
+        return $this->belongsTo ( MasterDataSparepart::class, 'id_master_data_sparepart' );
+    }
+
+    public function linkRkbDetails () : HasMany
+    {
+        return $this->hasMany ( LinkRkbDetail::class, 'id_detail_rkb_general' );
     }
 }

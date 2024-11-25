@@ -1,4 +1,24 @@
 @push('styles_3')
+    <style>
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1050;
+            /* Ensure it's above modal content */
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+    </style>
 @endpush
 
 <div class="fade modal" id="modalForEdit" data-bs-keyboard="false" aria-hidden="true" aria-labelledby="modalForEditLabel" tabindex="-1">
@@ -14,9 +34,13 @@
                 @method('PUT')
                 <div class="modal-body">
                     <div class="row g-3">
+                        <div class="col-12 hidden">
+                            <input id="id_rkb" name="id_rkb" type="hidden" value="{{ $rkb->id }}">
+                        </div>
+
                         <div class="col-12">
-                            <label class="form-label required" for="id_alat_edit">Alat</label>
-                            <select class="form-control" id="id_alat_edit" name="id_alat" required>
+                            <label class="form-label required" for="id_master_data_alat_edit">Alat</label>
+                            <select class="form-control" id="id_master_data_alat_edit" name="id_master_data_alat" required>
                                 <option value="">Pilih Alat</option>
                                 @foreach ($master_data_alat as $alat)
                                     <option value="{{ $alat->id }}">{{ $alat->kode_alat }} - {{ $alat->jenis_alat }}</option>
@@ -26,8 +50,8 @@
                         </div>
 
                         <div class="col-12">
-                            <label class="form-label required" for="id_kategori_sparepart_edit">Kategori Sparepart</label>
-                            <select class="form-control" id="id_kategori_sparepart_edit" name="id_kategori_sparepart" required>
+                            <label class="form-label required" for="id_kategori_sparepart_sparepart_edit">Kategori Sparepart</label>
+                            <select class="form-control" id="id_kategori_sparepart_sparepart_edit" name="id_kategori_sparepart_sparepart" required>
                                 <option value="">Pilih Kategori</option>
                                 @foreach ($kategori_sparepart as $kategori)
                                     <option value="{{ $kategori->id }}">{{ $kategori->kode }}: {{ $kategori->nama }}</option>
@@ -37,8 +61,8 @@
                         </div>
 
                         <div class="col-12">
-                            <label class="form-label required" for="id_sparepart_edit">Sparepart</label>
-                            <select class="form-control" id="id_sparepart_edit" name="id_sparepart" required>
+                            <label class="form-label required" for="id_master_data_sparepart_edit">Sparepart</label>
+                            <select class="form-control" id="id_master_data_sparepart_edit" name="id_master_data_sparepart" required>
                                 <option value="">Pilih Sparepart</option>
                             </select>
                             <div class="invalid-feedback">Sparepart diperlukan.</div>
@@ -84,7 +108,7 @@
             'use strict';
 
             // Initialize select2 for dropdowns
-            const $select2Elements = $('#id_alat_edit, #id_kategori_sparepart_edit, #id_sparepart_edit, #satuan_edit');
+            const $select2Elements = $('#id_master_data_alat_edit, #id_kategori_sparepart_sparepart_edit, #id_master_data_sparepart_edit, #satuan_edit');
             $select2Elements.select2({
                 placeholder: "Pilih",
                 allowClear: true,
@@ -93,15 +117,18 @@
             });
 
             // Bind change event to kategori_sparepart_edit using event delegation
-            $(document).on('change', '#id_kategori_sparepart_edit', function() {
+            $(document).on('change', '#id_kategori_sparepart_sparepart_edit', function() {
                 const kategoriId = $(this).val();
-                const $sparepartSelect = $('#id_sparepart_edit');
+                const $sparepartSelect = $('#id_master_data_sparepart_edit');
 
                 // console.log("Kategori Sparepart changed:", kategoriId);
 
                 // Clear the sparepart select and reset
                 $sparepartSelect.append(new Option('Pilih Sparepart', '', false, false));
                 // $sparepartSelect.val(null).trigger('change');
+
+                const $loadingOverlay = $('<div class="loading-overlay"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+                $('#modalForEdit').append($loadingOverlay);
 
                 if (kategoriId) {
                     $.ajax({
@@ -122,9 +149,13 @@
 
                             // Refresh the select2 dropdown
                             $sparepartSelect.trigger('change');
+
+                            $loadingOverlay.remove();
                         },
                         error: function() {
                             alert('Gagal memuat sparepart');
+
+                            $loadingOverlay.remove();
                         }
                     });
                 }
@@ -152,8 +183,8 @@
                     // console.log("Data fetched successfully:", response);
 
                     // Populate fields with data
-                    $('#id_alat_edit').val(response.data.id_alat).trigger('change');
-                    $('#id_kategori_sparepart_edit').val(response.data.id_kategori_sparepart).trigger('change');
+                    $('#id_master_data_alat_edit').val(response.data.id_master_data_alat).trigger('change');
+                    $('#id_kategori_sparepart_sparepart_edit').val(response.data.id_kategori_sparepart_sparepart).trigger('change');
 
                     $('#quantity_requested_edit').val(response.data.quantity_requested);
                     $('#satuan_edit').val(response.data.satuan).trigger('change');

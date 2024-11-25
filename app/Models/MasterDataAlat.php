@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use Database\Factories\MasterDataAlatFactory;
 use Illuminate\Database\Eloquent\Model;
+use Database\Factories\MasterDataAlatFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class MasterDataAlat extends Model
@@ -33,4 +34,20 @@ class MasterDataAlat extends Model
     {
         return MasterDataAlatFactory::new ();
     }
+
+    public function detailRkbGenerals () : HasMany
+    {
+        return $this->hasMany ( DetailRkbGeneral::class, 'id_master_data_alat' );
+    }
+
+    public function detailRkbUrgents () : HasMany
+    {
+        return $this->hasMany ( DetailRkbUrgent::class, 'id_master_data_alat' );
+    }
+
+    public function linkAlatDetailRkbs () : HasMany
+    {
+        return $this->hasMany ( LinkAlatDetailRKB::class, 'id_master_data_alat' );
+    }
+
 }

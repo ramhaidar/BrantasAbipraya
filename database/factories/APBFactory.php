@@ -14,10 +14,10 @@ class APBFactory extends Factory
         $faker = FakerFactory::create ( 'id_ID' );
 
         return [ 
-            'id_alat'  => Alat::inRandomOrder ()->first ()->id,
-            'quantity' => null,
-            'tanggal'  => $faker->date ( 'Y-m-d' ),
-            'id_saldo' => null,
+            'id_master_data_alat' => Alat::inRandomOrder ()->first ()->id,
+            'quantity'            => null,
+            'tanggal'             => $faker->date ( 'Y-m-d' ),
+            'id_saldo'            => null,
         ];
     }
 }

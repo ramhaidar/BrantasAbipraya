@@ -26,10 +26,10 @@ class MasterDataSparepartFactory extends Factory
     public function definition () : array
     {
         return [ 
-            'nama'        => $this->faker->randomElement ( self::$nama ),
-            'part_number' => $this->faker->randomElement ( self::$part_number ),
-            'merk'        => $this->faker->randomElement ( self::$merk ),
-            'id_kategori' => KategoriSparepart::query ()->inRandomOrder ()->value ( 'id' ),
+            'nama'                  => $this->faker->randomElement ( self::$nama ),
+            'part_number'           => $this->faker->randomElement ( self::$part_number ),
+            'merk'                  => $this->faker->randomElement ( self::$merk ),
+            'id_kategori_sparepart' => KategoriSparepart::query ()->inRandomOrder ()->value ( 'id' ),
         ];
     }
 }

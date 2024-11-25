@@ -19,25 +19,25 @@ class MasterDataSparepart extends Model
         'nama',
         'part_number',
         'merk',
-        'id_kategori',
+        'id_kategori_sparepart',
     ];
 
     protected $casts = [ 
-        'id'          => 'integer',
-        'nama'        => 'string',
-        'part_number' => 'string',
-        'merk'        => 'string',
-        'id_kategori' => 'integer',
+        'id'                    => 'integer',
+        'nama'                  => 'string',
+        'part_number'           => 'string',
+        'merk'                  => 'string',
+        'id_kategori_sparepart' => 'integer',
     ];
 
     public function kategori () : BelongsTo
     {
-        return $this->belongsTo ( KategoriSparepart::class, 'id_kategori' );
+        return $this->belongsTo ( KategoriSparepart::class, 'id_kategori_sparepart' );
     }
 
     public function suppliers () : BelongsToMany
     {
-        return $this->belongsToMany ( MasterDataSupplier::class, 'link_supplier_sparepart', 'id_sparepart', 'id_supplier' )
+        return $this->belongsToMany ( MasterDataSupplier::class, 'link_supplier_sparepart', 'id_master_data_sparepart', 'id_master_data_supplier' )
             ->withTimestamps ();
     }
 }

@@ -6,28 +6,24 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up () : void
     {
         Schema::create ( 'rkb', function (Blueprint $table)
         {
-            $table->id ();
-            $table->string ( 'nomor' );
+            $table->id (); // PK
+            $table->string ( 'nomor' ); // Nomor unik RKB
             $table->date ( 'periode' ); // Format mm-yyyy dapat diatur di aplikasi
 
-            $table->foreignId ( 'id_proyek' )->nullable ()->constrained ( 'proyek' )->nullOnDelete ();
+            $table->foreignId ( 'id_proyek' )->nullable ()
+                ->constrained ( 'proyek' )->nullOnDelete (); // Relasi ke tabel proyek
 
-            $table->boolean ( 'is_finalized' )->default ( false );
+            $table->boolean ( 'is_finalized' )->default ( false ); // Status finalisasi
+            $table->boolean ( 'is_approved' )->default ( false ); // Status persetujuan
 
-            $table->timestamps ();
+            $table->timestamps (); // Timestamp pencatatan
         } );
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down () : void
     {
         Schema::dropIfExists ( 'rkb' );

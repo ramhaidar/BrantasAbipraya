@@ -14,7 +14,7 @@ return new class extends Migration
             $table->date ( 'tanggal' );
             $table->bigInteger ( 'quantity' )->nullable ();
             $table->string ( 'dokumentasi' )->nullable ();
-            $table->foreignId ( 'id_alat' )->nullable ()->nullOnDelete ();
+            $table->foreignId ( 'id_master_data_alat' )->nullable ()->nullOnDelete ();
             $table->foreignId ( 'id_saldo' )->nullable ()->nullOnDelete ();
             $table->foreignId ( 'id_tujuan_proyek' )->nullable ()->nullOnDelete ();
             $table->timestamps ();

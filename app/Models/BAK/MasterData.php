@@ -12,7 +12,7 @@ class MasterData extends Model
     protected $table = 'master_data'; // Nama tabel baru
 
     protected $fillable = [ 
-        'id_supplier',
+        'id_master_data_supplier',
         'sparepart',
         'part_number',
         'buffer_stock',

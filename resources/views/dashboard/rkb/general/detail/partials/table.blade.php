@@ -20,7 +20,8 @@
                 <th class="text-center">Nama Alat</th>
                 <th class="text-center">Kategori Sparepart</th>
                 <th class="text-center">Sparepart</th>
-                <th class="text-center">Quantity</th>
+                <th class="text-center">Quantity Requested</th>
+                <th class="text-center">Quantity Approved</th>
                 <th class="text-center">Satuan</th>
                 <th class="text-center">Aksi</th>
             </tr>
@@ -61,22 +62,21 @@
                 order: [],
                 displayStart: lastPage * 10,
                 columnDefs: [{
-                    targets: 5, // Target column for actions
+                    targets: 6, // Target column for actions
                     className: 'text-center nowrap-column',
                     orderable: false,
                     searchable: false,
                     width: "1%",
                     render: function(data, type, row) {
-                        // Check if is_finalized is true
                         const disabled = row.is_finalized ? 'disabled' : '';
                         return `
-                        <button class="btn btn-warning mx-1 ubahBtn" ${disabled} onclick="fillFormEditDetailRKB(${row.id})" data-id="${row.id}">
-                            <i class="bi bi-pencil-square"></i>
-                        </button>
-                        <button class="btn btn-danger mx-1 deleteBtn" ${disabled} data-id="${row.id}">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    `;
+<button class="btn btn-warning mx-1 ubahBtn" ${disabled} onclick="fillFormEditDetailRKB(${row.id})" data-id="${row.id}">
+<i class="bi bi-pencil-square"></i>
+</button>
+<button class="btn btn-danger mx-1 deleteBtn" ${disabled} data-id="${row.id}">
+<i class="bi bi-trash"></i>
+</button>
+`;
                     }
                 }],
                 columns: [{
@@ -97,6 +97,11 @@
                     {
                         data: 'quantity_requested',
                         name: 'quantity_requested',
+                        className: 'text-center'
+                    },
+                    {
+                        data: 'quantity_approved',
+                        name: 'quantity_approved',
                         className: 'text-center'
                     },
                     {

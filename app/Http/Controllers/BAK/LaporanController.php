@@ -71,7 +71,7 @@ class LaporanController extends Controller
                 ->where ( 'id_proyek', $proyek->id );
         } )->with ( 'alat', 'saldo.atb' )->get ();
 
-        $dataPerKategoriAPB = $apbs->groupBy ( 'id_alat' );
+        $dataPerKategoriAPB = $apbs->groupBy ( 'id_master_data_alat' );
 
         $detailDataAPB = [];
         foreach ( $dataPerKategoriAPB as $APB_ID => $apbGroup )
@@ -209,7 +209,7 @@ class LaporanController extends Controller
             ->get ();
 
         // Group APB data by equipment ID
-        $dataPerKategoriAPB = $apbs->groupBy ( 'id_alat' );
+        $dataPerKategoriAPB = $apbs->groupBy ( 'id_master_data_alat' );
 
         // Prepare detailed APB data
         $detailDataAPB = [];

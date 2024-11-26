@@ -229,11 +229,14 @@ END LIKE ?", [ "%{$search}%" ] );
             };
 
             return [ 
-                'id'      => $item->id,
-                'nomor'   => $item->nomor,
-                'proyek'  => $item->proyek->nama ?? '-',
-                'periode' => Carbon::parse ( $item->periode )->translatedFormat ( 'F Y' ),
-                'status'  => $status,
+                'id'           => $item->id,
+                'nomor'        => $item->nomor,
+                'proyek'       => $item->proyek->nama ?? '-',
+                'periode'      => Carbon::parse ( $item->periode )->translatedFormat ( 'F Y' ),
+                'status'       => $status,
+                'is_finalized' => $item->is_finalized,
+                'is_approved'  => $item->is_approved,
+                'is_evaluated' => $item->is_evaluated,
             ];
         } );
 

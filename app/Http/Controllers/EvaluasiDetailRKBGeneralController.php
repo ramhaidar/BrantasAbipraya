@@ -16,7 +16,7 @@ class EvaluasiDetailRKBGeneralController extends Controller
 {
     public function index ( $id )
     {
-        $rkb                   = RKB::with ( [ 'proyek', 'LinkRKBDetails' ] )->find ( $id );
+        $rkb                   = RKB::with ( [ 'proyek' ] )->find ( $id );
         $proyeks               = Proyek::orderByDesc ( 'updated_at' )->get ();
         $master_data_alat      = MasterDataAlat::all ();
         $master_data_sparepart = MasterDataSparepart::all ();
@@ -34,7 +34,7 @@ class EvaluasiDetailRKBGeneralController extends Controller
         ] );
     }
 
-    public function approve ( Request $request, $id_rkb )
+    public function evaluate ( Request $request, $id_rkb )
     {
         // Validasi input untuk memastikan semua data sesuai
         $request->validate ( [ 
@@ -59,6 +59,18 @@ class EvaluasiDetailRKBGeneralController extends Controller
             }
         }
 
+        $rkb               = RKB::find ( $id_rkb );
+        $rkb->is_evaluated = true;
+        $rkb->save ();
+
+        // Redirect dengan pesan sukses
+        return redirect ()
+            ->route ( 'evaluasi_rkb_general.detail.index', $id_rkb )
+            ->with ( 'success', 'RKB Berhasil di Evaluasi!' );
+    }
+
+    public function approve ( Request $request, $id_rkb )
+    {
         $rkb              = RKB::find ( $id_rkb );
         $rkb->is_approved = true;
         $rkb->save ();
@@ -66,107 +78,95 @@ class EvaluasiDetailRKBGeneralController extends Controller
         // Redirect dengan pesan sukses
         return redirect ()
             ->route ( 'evaluasi_rkb_general.detail.index', $id_rkb )
-            ->with ( 'success', 'RKB Approved successfully!' );
+            ->with ( 'success', 'RKB Berhasil di Approve!' );
     }
 
     public function getData ( Request $request, $id_rkb )
     {
-        // Base query with joins for related tables
+        // Base query dengan relasi dan alias untuk kolom relasi
         $query = DetailRKBGeneral::query ()
-            ->join ( 'link_rkb_detail', 'link_rkb_detail.id_detail_rkb_general', '=', 'detail_rkb_general.id' )
-            ->join ( 'rkb', 'link_rkb_detail.id_rkb', '=', 'rkb.id' ) // Join with RKB table
-            ->leftJoin ( 'master_data_alat', 'master_data_alat.id', '=', 'detail_rkb_general.id_master_data_alat' )
-            ->leftJoin ( 'kategori_sparepart', 'kategori_sparepart.id', '=', 'detail_rkb_general.id_kategori_sparepart_sparepart' )
-            ->leftJoin ( 'master_data_sparepart', 'master_data_sparepart.id', '=', 'detail_rkb_general.id_master_data_sparepart' )
-            ->select (
-                'detail_rkb_general.*',
-                'master_data_alat.jenis_alat as masterDataAlat',
-                \DB::raw ( "CONCAT(kategori_sparepart.kode, ': ', kategori_sparepart.nama) as kategoriSparepart" ),
-                'master_data_sparepart.nama as masterDataSparepart',
-                'rkb.is_finalized' // Include is_finalized
-            )
-            ->where ( 'link_rkb_detail.id_rkb', $id_rkb ); // Filter berdasarkan id_rkb
-
-        // Handle search input
-        if ( $search = $request->input ( 'search.value' ) )
-        {
-            $query->where ( function ($q) use ($search)
+            ->select ( [ 
+                'detail_rkb_general.*', // Kolom utama
+                'kategori_sparepart.nama as kategoriSparepartName', // Alias untuk kategori sparepart
+                'master_data_sparepart.nama as sparepartName',      // Alias untuk nama sparepart
+                'master_data_sparepart.part_number as partNumber',  // Alias untuk part number
+                'master_data_sparepart.merk as merk',               // Alias untuk merk
+            ] )
+            ->leftJoin ( 'kategori_sparepart', 'detail_rkb_general.id_kategori_sparepart_sparepart', '=', 'kategori_sparepart.id' )
+            ->leftJoin ( 'master_data_sparepart', 'detail_rkb_general.id_master_data_sparepart', '=', 'master_data_sparepart.id' )
+            ->whereHas ( 'linkRkbDetails.linkAlatDetailRkb.rkb', function ($q) use ($id_rkb)
             {
-                $q->where ( 'quantity_requested', 'like', "%{$search}%" )
-                    ->orWhere ( 'quantity_approved', 'like', "%{$search}%" )
-                    ->orWhere ( 'satuan', 'like', "%{$search}%" )
-                    ->orWhere ( 'master_data_alat.jenis_alat', 'like', "%{$search}%" )
-                    ->orWhere ( \DB::raw ( "CONCAT(kategori_sparepart.kode, ': ', kategori_sparepart.nama)" ), 'like', "%{$search}%" )
-                    ->orWhere ( 'master_data_sparepart.nama', 'like', "%{$search}%" )
-                    ->orWhere ( 'rkb.is_finalized', 'like', "%{$search}%" ); // Allow search on is_finalized
+                $q->where ( 'id', $id_rkb );
             } );
-        }
 
-        // Handle ordering
-        if ( $order = $request->input ( 'order' ) )
-        {
-            $columnIndex   = $order[ 0 ][ 'column' ];
-            $columnName    = $request->input ( 'columns' )[ $columnIndex ][ 'data' ];
-            $sortDirection = $order[ 0 ][ 'dir' ];
-
-            if ( $columnName === 'masterDataAlat' )
-            {
-                $query->orderBy ( 'master_data_alat.jenis_alat', $sortDirection );
-            }
-            elseif ( $columnName === 'kategoriSparepart' )
-            {
-                $query->orderBy ( 'kategori_sparepart.kode', $sortDirection )
-                    ->orderBy ( 'kategori_sparepart.nama', $sortDirection );
-            }
-            elseif ( $columnName === 'masterDataSparepart' )
-            {
-                $query->orderBy ( 'master_data_sparepart.nama', $sortDirection );
-            }
-            elseif ( $columnName === 'is_finalized' )
-            {
-                $query->orderBy ( 'rkb.is_finalized', $sortDirection );
-            }
-            elseif ( in_array ( $columnName, [ 'quantity_requested', 'quantity_approved', 'satuan' ] ) )
-            {
-                $query->orderBy ( $columnName, $sortDirection );
-            }
-        }
-        else
-        {
-            $query->orderBy ( 'detail_rkb_general.updated_at', 'desc' );
-        }
-
-        // Calculate pagination parameters
+        // Pagination parameters
         $draw   = $request->input ( 'draw' );
         $start  = $request->input ( 'start', 0 );
         $length = $request->input ( 'length', 10 );
 
-        $totalRecords = DetailRKBGeneral::join ( 'link_rkb_detail', 'link_rkb_detail.id_detail_rkb_general', '=', 'detail_rkb_general.id' )
-            ->where ( 'link_rkb_detail.id_rkb', $id_rkb )
-            ->count ();
+        // Sorting berdasarkan index kolom
+        if ( $order = $request->input ( 'order' ) )
+        {
+            $columnIndex   = $order[ 0 ][ 'column' ];
+            $sortDirection = $order[ 0 ][ 'dir' ];
 
-        $filteredRecords = $query->count ();
+            switch ($columnIndex)
+            {
+                case 4: // Part Number
+                    $query->orderBy ( 'partNumber', $sortDirection );
+                    break;
 
-        // Fetch the data with pagination
-        $data = $query->skip ( $start )->take ( $length )->get ()->map ( function ($item)
+                default:
+                    $query->orderBy ( 'detail_rkb_general.created_at', 'desc' ); // Default sorting
+                    break;
+            }
+        }
+
+        // Filter pencarian
+        if ( $search = $request->input ( 'search.value' ) )
+        {
+            $query->where ( function ($q) use ($search)
+            {
+                $q->where ( 'detail_rkb_general.quantity_requested', 'LIKE', "%$search%" )
+                    ->orWhere ( 'detail_rkb_general.quantity_approved', 'LIKE', "%$search%" )
+                    ->orWhere ( 'detail_rkb_general.satuan', 'LIKE', "%$search%" )
+                    ->orWhere ( 'kategori_sparepart.nama', 'LIKE', "%$search%" )
+                    ->orWhere ( 'master_data_sparepart.nama', 'LIKE', "%$search%" )
+                    ->orWhere ( 'master_data_sparepart.part_number', 'LIKE', "%$search%" )
+                    ->orWhere ( 'master_data_sparepart.merk', 'LIKE', "%$search%" );
+            } );
+        }
+
+        // Total records
+        $totalRecords = $query->count ();
+
+        // Ambil data dengan paginasi
+        $data = $query->skip ( $start )->take ( $length )->get ();
+
+        // Format data untuk DataTable
+        $formattedData = $data->map ( function ($item)
         {
             return [ 
                 'id'                  => $item->id,
-                'masterDataAlat'      => $item->masterDataAlat ?? '-',
-                'kategoriSparepart'   => $item->kategoriSparepart ?? '-',
-                'masterDataSparepart' => $item->masterDataSparepart ?? '-',
+                'masterDataAlat'      => optional ( optional ( $item->linkRkbDetails->first () )->linkAlatDetailRkb->masterDataAlat )->jenis_alat ?? '-',
+                'kodeAlat'            => optional ( optional ( $item->linkRkbDetails->first () )->linkAlatDetailRkb->masterDataAlat )->kode_alat ?? '-',
+                'kategoriSparepart'   => $item->kategoriSparepartName ?? '-',
+                'masterDataSparepart' => $item->sparepartName ?? '-',
+                'partNumber'          => $item->partNumber ?? '-', // Menggunakan alias partNumber
+                'merk'                => $item->merk ?? '-',
                 'quantity_requested'  => $item->quantity_requested,
                 'quantity_approved'   => $item->quantity_approved,
+                'quantity_in_stock'   => $item->quantity_in_stock ?? 0,
                 'satuan'              => $item->satuan,
-                'is_finalized'        => $item->is_finalized, // Convert to human-readable format
             ];
         } );
 
         return response ()->json ( [ 
             'draw'            => $draw,
             'recordsTotal'    => $totalRecords,
-            'recordsFiltered' => $filteredRecords,
-            'data'            => $data,
+            'recordsFiltered' => $totalRecords,
+            'data'            => $formattedData->values (),
         ] );
     }
+
 }

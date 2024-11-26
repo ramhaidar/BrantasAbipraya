@@ -13,11 +13,17 @@
                             <p class="fw-medium">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}</p>
                         </div>
                         <div class="d-flex justify-content-end gap-2">
-                            <!-- Button to trigger the modal -->
-                            <button class="btn btn-success btn-sm approveBtn" id="approveRkbButton" data-bs-toggle="modal" data-bs-target="#modalForApprove" {{ $rkb->is_approved ? 'disabled' : '' }}>
+                            <!-- Tombol Evaluasi -->
+                            <button class="btn btn-success btn-sm" id="evaluateBtnButton" data-bs-toggle="modal" data-bs-target="#modalForEvaluate" data-action="{{ route('evaluasi_rkb_general.detail.evaluate', $rkb->id) }}" data-message="Apakah Anda yakin ingin menyimpan hasil Evaluasi RKB ini?" {{ $rkb->is_evaluated ? 'disabled' : '' }}>
+                                <i class="fa fa-check"></i> <span class="ms-2">Simpan Evaluasi RKB</span>
+                            </button>
+
+                            <!-- Tombol Approve -->
+                            <button class="btn btn-primary btn-sm" id="approveBtnButton" data-bs-toggle="modal" data-bs-target="#modalForApprove" data-action="{{ route('evaluasi_rkb_general.detail.approve', $rkb->id) }}" data-message="Apakah Anda yakin ingin Approve RKB ini?" {{ !$rkb->is_evaluated ? 'disabled' : '' }} {{ $rkb->is_approved ? 'disabled' : '' }}>
                                 <i class="fa fa-check"></i> <span class="ms-2">Approve RKB</span>
                             </button>
                         </div>
+
                     </div>
 
                     @include('dashboard.evaluasi.general.detail.partials.table')
@@ -37,6 +43,9 @@
 
         <!-- Modal for Finalization Data -->
         @include('dashboard.evaluasi.general.detail.partials.modal-approve')
+
+        <!-- Modal for Evaluation Data -->
+        @include('dashboard.evaluasi.general.detail.partials.modal-evaluate')
     @endsection
 
     @push('scripts_2')

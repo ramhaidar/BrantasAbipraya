@@ -18,6 +18,7 @@ return new class extends Migration
                 ->constrained ( 'proyek' )->nullOnDelete (); // Relasi ke tabel proyek
 
             $table->boolean ( 'is_finalized' )->default ( false ); // Status finalisasi
+            $table->boolean ( 'is_evaluated' )->default ( false ); // Status evaluasi
             $table->boolean ( 'is_approved' )->default ( false ); // Status persetujuan
 
             $table->timestamps (); // Timestamp pencatatan

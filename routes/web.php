@@ -784,5 +784,10 @@ Route::middleware ( 'auth' )
                 [ EvaluasiDetailRKBGeneralController::class, 'approve' ]
             )->name ( 'approve' );
 
+            Route::post (
+                '/evaluate/{id}',
+                [ EvaluasiDetailRKBGeneralController::class, 'evaluate' ]
+            )->name ( 'evaluate' );
+
         } );
     } );

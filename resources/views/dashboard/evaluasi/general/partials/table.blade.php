@@ -16,7 +16,6 @@
             padding: 20px;
             color: #999;
             display: none;
-            /* Awalnya disembunyikan */
             font-size: 1.2em;
             animation: fadeIn 0.5s ease-in-out;
         }
@@ -52,20 +51,16 @@
 
 @push('scripts_3')
     <script>
-        // Perbaikan JavaScript untuk DataTable dengan tabel RKB
         $(document).ready(function() {
-            // Unique key for localStorage specific to this page
-            const lastPageKey = 'lastPage_rkb';
+            const lastPageKey = 'lastPage_evaluasi_rkb';
+            const lastPage = localStorage.getItem(lastPageKey) ? parseInt(localStorage.getItem(lastPageKey)) : 0;
 
-            // Retrieve the last page number from localStorage, if available
-            var lastPage = localStorage.getItem(lastPageKey) ? parseInt(localStorage.getItem(lastPageKey)) : 0;
-
-            var table = $('#table-data').DataTable({
+            $('#table-data').DataTable({
                 processing: true,
-                responsive: true,
                 serverSide: true,
+                responsive: true,
                 ajax: {
-                    url: "{{ route('rkb_general.getData') }}",
+                    url: "{{ route('evaluasi_rkb_general.getData') }}",
                     type: "GET"
                 },
                 language: {
@@ -81,7 +76,7 @@
                 ],
                 ordering: true,
                 order: [],
-                displayStart: lastPage * 10, // Start from the last saved page
+                displayStart: lastPage * 10,
                 columns: [{
                         data: 'nomor',
                         name: 'nomor',
@@ -97,52 +92,47 @@
                         name: 'periode',
                         className: 'text-center'
                     },
-                    { // Kolom "Status"
-                        data: null,
+                    {
+                        data: 'status',
                         name: 'status',
                         className: 'text-center',
                         render: function(data, type, row) {
-                            if (!row.is_finalized && row.is_approved === false) {
-                                return `<span class="badge bg-primary w-100">Pengajuan</span>`;
-                            } else if (row.is_finalized && row.is_approved === false) {
-                                return `<span class="badge bg-warning w-100">Evaluasi</span>`;
-                            } else if (row.is_finalized && row.is_approved === true) {
-                                return `<span class="badge bg-success w-100">Disetujui</span>`;
+                            if (row.status === 'Pengajuan') {
+                                return `<span class="badge bg-primary">${row.status}</span>`;
+                            } else if (row.status === 'Evaluasi') {
+                                return `<span class="badge bg-warning">${row.status}</span>`;
+                            } else if (row.status === 'Disetujui') {
+                                return `<span class="badge bg-success">${row.status}</span>`;
                             } else {
-                                return `<span class="badge bg-secondary w-100">Tidak Diketahui</span>`;
+                                return `<span class="badge bg-secondary">${row.status}</span>`;
                             }
                         }
                     },
                     {
-                        data: 'aksi',
-                        name: 'aksi',
-                        className: 'text-center nowrap-column',
-                        orderable: false,
-                        searchable: false,
-                        width: "1%",
+                        data: 'evaluasi',
+                        name: 'evaluasi',
+                        className: 'text-center',
                         render: function(data, type, row) {
-                            const disabled = !row.is_finalized || row.is_approved ? 'disabled' : '';
+                            // Button will be disabled if the status ''
+                            const disabled = row.status === 'Pengajuan' ? 'disabled' : '';
+                            const icon = row.status === 'Evaluasi' ? 'fa-stamp' : 'fa-eye';
                             return `
-                <button class="btn btn-primary mx-1 detailBtn" ${disabled} data-id="${row.id}" onclick="redirectToEvalution(${row.id})">
-                    <i class="fa-solid fa-stamp"></i>
-                </button>
-            `;
+        <button class="btn btn-primary mx-1 detailBtn" ${disabled} data-id="${row.id}" onclick="redirectToEvaluation(${row.id})">
+            <i class="fa-solid ${icon}"></i>
+        </button>
+    `;
                         }
                     }
                 ]
-
-            });
-
-            // Save the current page number to localStorage each time the page changes
-            table.on('page', function() {
-                var currentPage = table.page();
+            }).on('page', function() {
+                const currentPage = $('#table-data').DataTable().page();
                 localStorage.setItem(lastPageKey, currentPage);
             });
         });
 
-        // Function to redirect to detail page
-        function redirectToEvalution(id) {
-            const detailUrl = "{{ route('evaluasi_rkb_general.detail.index', ':id') }}".replace(':id', id); // Construct the URL dynamically
+
+        function redirectToEvaluation(id) {
+            const detailUrl = "{{ route('evaluasi_rkb_general.detail.index', ':id') }}".replace(':id', id);
             window.location.href = detailUrl;
         }
     </script>

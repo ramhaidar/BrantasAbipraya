@@ -18,8 +18,11 @@
         <thead class="table-primary">
             <tr>
                 <th class="text-center">Nama Alat</th>
+                <th class="text-center">Kode Alat</th>
                 <th class="text-center">Kategori Sparepart</th>
                 <th class="text-center">Sparepart</th>
+                <th class="text-center">Part Number</th>
+                <th class="text-center">Merk</th>
                 <th class="text-center">Quantity Requested</th>
                 <th class="text-center">Quantity Approved</th>
                 <th class="text-center">Satuan</th>
@@ -62,7 +65,7 @@
                 order: [],
                 displayStart: lastPage * 10,
                 columnDefs: [{
-                    targets: 6, // Target column for actions
+                    targets: 9, // Target column for actions
                     className: 'text-center nowrap-column',
                     orderable: false,
                     searchable: false,
@@ -80,8 +83,13 @@
                     }
                 }],
                 columns: [{
-                        data: 'masterDataAlat',
-                        name: 'masterDataAlat',
+                        data: 'namaAlat',
+                        name: 'namaAlat',
+                        className: 'text-center'
+                    },
+                    {
+                        data: 'kodeAlat',
+                        name: 'kodeAlat',
                         className: 'text-center'
                     },
                     {
@@ -92,6 +100,16 @@
                     {
                         data: 'masterDataSparepart',
                         name: 'masterDataSparepart',
+                        className: 'text-center'
+                    },
+                    {
+                        data: 'partNumber',
+                        name: 'partNumber',
+                        className: 'text-center'
+                    },
+                    {
+                        data: 'merk',
+                        name: 'merk',
                         className: 'text-center'
                     },
                     {

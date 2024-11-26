@@ -261,37 +261,43 @@ class DetailRKBGeneralController extends Controller
 
     public function getData ( Request $request, $id_rkb )
     {
-        // Query data dengan relasi
-        $query = DetailRKBGeneral::with ( [ 
-            'masterDataSparepart:id,nama',
-            'kategoriSparepart:id,kode,nama',
-            'linkRkbDetails.linkAlatDetailRkb.masterDataAlat:id,jenis_alat' // Load relasi alat
-        ] )
-            ->whereHas ( 'linkRkbDetails.linkAlatDetailRkb.rkb', function ($q) use ($id_rkb)
-            {
-                $q->where ( 'id_rkb', $id_rkb );
-            } );
+        // Query dengan join untuk mempermudah sorting kolom terkait relasi
+        $query = DetailRKBGeneral::query ()
+            ->select ( [ 
+                'detail_rkb_general.id',
+                'detail_rkb_general.quantity_requested',
+                'detail_rkb_general.quantity_approved',
+                'detail_rkb_general.satuan',
+                'master_data_alat.jenis_alat as namaAlat', // "Nama Alat" diambil dari jenis_alat
+                'master_data_alat.kode_alat as kodeAlat',
+                'kategori_sparepart.kode as kodeKategoriSparepart',
+                'kategori_sparepart.nama as namaKategoriSparepart',
+                'master_data_sparepart.nama as sparepart',
+                'master_data_sparepart.part_number',
+                'master_data_sparepart.merk',
+            ] )
+            ->join ( 'link_rkb_detail', 'detail_rkb_general.id', '=', 'link_rkb_detail.id_detail_rkb_general' )
+            ->join ( 'link_alat_detail_rkb', 'link_rkb_detail.id_link_alat_detail_rkb', '=', 'link_alat_detail_rkb.id' )
+            ->join ( 'master_data_alat', 'link_alat_detail_rkb.id_master_data_alat', '=', 'master_data_alat.id' )
+            ->leftJoin ( 'kategori_sparepart', 'detail_rkb_general.id_kategori_sparepart_sparepart', '=', 'kategori_sparepart.id' )
+            ->leftJoin ( 'master_data_sparepart', 'detail_rkb_general.id_master_data_sparepart', '=', 'master_data_sparepart.id' )
+            ->where ( 'link_alat_detail_rkb.id_rkb', $id_rkb );
 
         // Filter pencarian
         if ( $search = $request->input ( 'search.value' ) )
         {
             $query->where ( function ($q) use ($search)
             {
-                $q->where ( 'quantity_requested', 'like', "%{$search}%" )
-                    ->orWhere ( 'quantity_approved', 'like', "%{$search}%" )
-                    ->orWhere ( 'satuan', 'like', "%{$search}%" )
-                    ->orWhereHas ( 'kategoriSparepart', function ($q) use ($search)
-                    {
-                        $q->whereRaw ( "CONCAT(kode, ' ', nama) LIKE ?", [ "%{$search}%" ] );
-                    } )
-                    ->orWhereHas ( 'masterDataSparepart', function ($q) use ($search)
-                    {
-                        $q->where ( 'nama', 'like', "%{$search}%" );
-                    } )
-                    ->orWhereHas ( 'linkRkbDetails.linkAlatDetailRkb.masterDataAlat', function ($q) use ($search)
-                    {
-                        $q->where ( 'jenis_alat', 'like', "%{$search}%" );
-                    } );
+                $q->where ( 'master_data_alat.jenis_alat', 'like', "%{$search}%" )
+                    ->orWhere ( 'master_data_alat.kode_alat', 'like', "%{$search}%" )
+                    ->orWhere ( 'kategori_sparepart.kode', 'like', "%{$search}%" )
+                    ->orWhere ( 'kategori_sparepart.nama', 'like', "%{$search}%" )
+                    ->orWhere ( 'master_data_sparepart.nama', 'like', "%{$search}%" )
+                    ->orWhere ( 'master_data_sparepart.part_number', 'like', "%{$search}%" )
+                    ->orWhere ( 'master_data_sparepart.merk', 'like', "%{$search}%" )
+                    ->orWhere ( 'detail_rkb_general.satuan', 'like', "%{$search}%" )
+                    ->orWhere ( 'detail_rkb_general.quantity_requested', 'like', "%{$search}%" )
+                    ->orWhere ( 'detail_rkb_general.quantity_approved', 'like', "%{$search}%" );
             } );
         }
 
@@ -304,8 +310,11 @@ class DetailRKBGeneralController extends Controller
 
             switch ($columnName)
             {
-                case 'masterDataAlat':
+                case 'namaAlat':
                     $query->orderBy ( 'master_data_alat.jenis_alat', $sortDirection );
+                    break;
+                case 'kodeAlat':
+                    $query->orderBy ( 'master_data_alat.kode_alat', $sortDirection );
                     break;
                 case 'kategoriSparepart':
                     $query->orderBy ( 'kategori_sparepart.kode', $sortDirection )
@@ -314,6 +323,12 @@ class DetailRKBGeneralController extends Controller
                 case 'masterDataSparepart':
                     $query->orderBy ( 'master_data_sparepart.nama', $sortDirection );
                     break;
+                case 'partNumber':
+                    $query->orderBy ( 'master_data_sparepart.part_number', $sortDirection );
+                    break;
+                case 'merk':
+                    $query->orderBy ( 'master_data_sparepart.merk', $sortDirection );
+                    break;
                 default:
                     $query->orderBy ( $columnName, $sortDirection );
                     break;
@@ -321,7 +336,7 @@ class DetailRKBGeneralController extends Controller
         }
         else
         {
-            $query->orderBy ( 'updated_at', 'desc' );
+            $query->orderBy ( 'detail_rkb_general.updated_at', 'desc' );
         }
 
         // Pagination
@@ -340,15 +355,16 @@ class DetailRKBGeneralController extends Controller
         {
             return [ 
                 'id'                  => $item->id,
-                'masterDataAlat'      => $item->linkRkbDetails->first ()->linkAlatDetailRkb->masterDataAlat->jenis_alat ?? '-',
-                'kategoriSparepart'   => $item->kategoriSparepart
-                    ? "{$item->kategoriSparepart->kode}: {$item->kategoriSparepart->nama}"
-                    : '-',
-                'masterDataSparepart' => $item->masterDataSparepart->nama ?? '-',
+                'namaAlat'            => $item->namaAlat,
+                'kodeAlat'            => $item->kodeAlat,
+                'kategoriSparepart'   => "{$item->kodeKategoriSparepart}: {$item->namaKategoriSparepart}",
+                'masterDataSparepart' => $item->sparepart,
+                'partNumber'          => $item->part_number,
+                'merk'                => $item->merk,
                 'quantity_requested'  => $item->quantity_requested,
                 'quantity_approved'   => $item->quantity_approved ?? '-',
                 'satuan'              => $item->satuan,
-                'aksi'                => '',
+                'aksi'                => '', // Actions rendered on the frontend
             ];
         } );
 
@@ -359,5 +375,6 @@ class DetailRKBGeneralController extends Controller
             'data'            => $data,
         ] );
     }
+
 
 }

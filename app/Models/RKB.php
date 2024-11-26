@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class RKB extends Model
 {
@@ -19,6 +18,7 @@ class RKB extends Model
         'periode',
         'id_proyek',
         'is_finalized',
+        'is_evaluated',
         'is_approved',
     ];
 
@@ -29,6 +29,7 @@ class RKB extends Model
             'nomor'        => 'string',
             'periode'      => 'date',
             'is_finalized' => 'boolean',
+            'is_evaluated' => 'boolean',
             'is_approved'  => 'boolean',
             'created_at'   => 'datetime',
             'updated_at'   => 'datetime',

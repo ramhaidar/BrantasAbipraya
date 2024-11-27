@@ -21,6 +21,15 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal for Adding Data -->
+    @include('dashboard.rkb.urgent.partials.modal-add')
+
+    <!-- Modal for Deleting Data -->
+    @include('dashboard.rkb.urgent.partials.modal-delete')
+
+    <!-- Modal for Editing Data -->
+    @include('dashboard.rkb.urgent.partials.modal-edit')
 @endsection
 
 @push('scripts_2')

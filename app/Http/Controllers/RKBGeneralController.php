@@ -85,9 +85,9 @@ class RKBGeneralController extends Controller
     {
         // Validasi data request
         $validatedData = $request->validate ( [ 
-            'nomor'   => 'required|string|max:255',
-            'periode' => [ 'required', 'regex:/^\d{4}-(0[1-9]|1[0-2])$/' ],
-            'proyek'  => 'required|integer|exists:proyek,id',
+            'nomor'   => [ 'required', 'string', 'max:255', 'unique:rkb,nomor' ],
+            'periode' => [ 'required', 'regex:/^\d{4}-(0[1-9]|1[0-2])$/' ], // Validasi periode dalam format YYYY-MM
+            'proyek'  => [ 'required', 'integer', 'exists:proyek,id' ], // Validasi proyek ID
         ] );
 
         // Tambahkan hari default (26) agar sesuai dengan tipe DATE di database
@@ -97,11 +97,14 @@ class RKBGeneralController extends Controller
         $validatedData[ 'id_proyek' ] = $validatedData[ 'proyek' ];
         unset ( $validatedData[ 'proyek' ] ); // Hapus field 'proyek' karena tidak ada di tabel
 
+        // Set default tipe ke 'General'
+        $validatedData[ 'tipe' ] = 'General';
+
         // Simpan data ke tabel RKB
         RKB::create ( $validatedData );
 
         // Redirect dengan pesan sukses
-        return redirect ()->route ( 'rkb_general.index' )->with ( 'success', 'RKB successfully created' );
+        return redirect ()->route ( 'rkb_general.index' )->with ( 'success', 'RKB General successfully created' );
     }
 
     public function update ( Request $request, $id )
@@ -118,9 +121,9 @@ class RKBGeneralController extends Controller
 
         // Validate the request
         $validatedData = $request->validate ( [ 
-            'nomor'     => 'sometimes|required|string|max:255',
-            'periode'   => 'sometimes|required|date',
-            'id_proyek' => 'sometimes|required|integer|exists:proyek,id',
+            'nomor'     => [ 'sometimes', 'required', 'string', 'max:255', 'unique:rkb,nomor' ],
+            'periode'   => [ 'sometimes', 'required', 'date' ],
+            'id_proyek' => [ 'sometimes', 'required', 'integer', 'exists:proyek,id' ],
         ] );
 
         // Update the RKB record
@@ -160,7 +163,8 @@ class RKBGeneralController extends Controller
 
     public function getData ( Request $request )
     {
-        $query = RKB::with ( 'proyek' )->select ( 'rkb.*' );
+        // Filter hanya tipe "General"
+        $query = RKB::with ( 'proyek' )->where ( 'tipe', 'General' );
 
         // Filter pencarian
         if ( $search = $request->input ( 'search.value' ) )
@@ -174,15 +178,14 @@ class RKBGeneralController extends Controller
                     } )
                     ->orWhere ( 'periode', 'like', "%{$search}%" )
                     ->orWhereRaw ( "CASE 
-WHEN is_finalized = 1 AND is_approved = 1 THEN 'Disetujui'
-WHEN is_finalized = 0 THEN 'Pengajuan'
-ELSE 'Evaluasi' 
-END LIKE ?", [ "%{$search}%" ] );
+                        WHEN is_finalized = 1 AND is_approved = 1 THEN 'Disetujui'
+                        WHEN is_finalized = 0 THEN 'Pengajuan'
+                        ELSE 'Evaluasi' 
+                    END LIKE ?", [ "%{$search}%" ] );
             } );
         }
 
         // Sorting
-// Sorting
         if ( $order = $request->input ( 'order' ) )
         {
             $columnIndex   = $order[ 0 ][ 'column' ];
@@ -204,13 +207,12 @@ END LIKE ?", [ "%{$search}%" ] );
             $query->orderBy ( 'updated_at', 'desc' );
         }
 
-
         // Pagination
         $draw   = $request->input ( 'draw' );
         $start  = $request->input ( 'start', 0 );
         $length = $request->input ( 'length', 10 );
 
-        $totalRecords    = RKB::count ();
+        $totalRecords    = RKB::where ( 'tipe', 'General' )->count (); // Hanya hitung yang tipe General
         $filteredRecords = $query->count ();
 
         $rkbData = $query->skip ( $start )->take ( $length )->get ();
@@ -247,4 +249,6 @@ END LIKE ?", [ "%{$search}%" ] );
             'data'            => $data,
         ] );
     }
+
+
 }

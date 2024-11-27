@@ -17,6 +17,7 @@ class LinkAlatDetailRKB extends Model
     protected $table = 'link_alat_detail_rkb';
 
     protected $fillable = [ 
+        'nama_mekanik',
         'id_rkb',
         'id_master_data_alat',
         'id_timeline_rkb_urgent',
@@ -25,9 +26,13 @@ class LinkAlatDetailRKB extends Model
     protected function casts () : array
     {
         return [ 
-            'id'         => 'integer',
-            'created_at' => 'datetime',
-            'updated_at' => 'datetime',
+            'id'                     => 'integer',
+            'nama_mekanik'           => 'string',
+            'id_rkb'                 => 'integer',
+            'id_master_data_alat'    => 'integer',
+            'id_timeline_rkb_urgent' => 'integer',
+            'created_at'             => 'datetime',
+            'updated_at'             => 'datetime',
         ];
     }
 

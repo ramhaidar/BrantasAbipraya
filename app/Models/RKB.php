@@ -16,6 +16,7 @@ class RKB extends Model
     protected $fillable = [ 
         'nomor',
         'periode',
+        'tipe',
         'id_proyek',
         'is_finalized',
         'is_evaluated',
@@ -28,6 +29,7 @@ class RKB extends Model
             'id'           => 'integer',
             'nomor'        => 'string',
             'periode'      => 'date',
+            'tipe'         => 'string',
             'is_finalized' => 'boolean',
             'is_evaluated' => 'boolean',
             'is_approved'  => 'boolean',

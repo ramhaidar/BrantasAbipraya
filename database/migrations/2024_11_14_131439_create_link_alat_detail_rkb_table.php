@@ -12,6 +12,8 @@ return new class extends Migration
         {
             $table->id (); // PK
 
+            $table->string ( 'nama_mekanik' )->nullable (); // Nama mekanik terkait' );
+
             $table->foreignId ( 'id_rkb' )->nullable ()
                 ->constrained ( 'rkb' )
                 ->nullOnDelete (); // Relasi ke RKB

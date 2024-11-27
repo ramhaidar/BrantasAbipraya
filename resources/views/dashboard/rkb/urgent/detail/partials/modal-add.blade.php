@@ -29,7 +29,7 @@
                     <button class="btn-close" data-bs-dismiss="modal" type="button" aria-label="Close"></button>
             </div>
             <hr class="p-0 m-0 border border-secondary-subtle border-2 opacity-50">
-            <form class="needs-validation" id="detailrkbgeneralForm" novalidate method="POST" action="{{ route('rkb_general.detail.store') }}">
+            <form class="needs-validation" id="detailrkburgentForm" novalidate method="POST" action="{{ route('rkb_urgent.detail.store') }}">
                 @csrf
                 <div class="modal-body">
                     <div class="row g-3">
@@ -45,6 +45,13 @@
                                 @endforeach
                             </select>
                             <div class="invalid-feedback">Alat diperlukan.</div>
+                        </div>
+
+                        {{-- New Field for Nama Mekanik --}}
+                        <div class="col-12">
+                            <label class="form-label required" for="nama_mekanik">Nama Mekanik</label>
+                            <input class="form-control" id="nama_mekanik" name="nama_mekanik" type="text" placeholder="Nama Mekanik" required>
+                            <div class="invalid-feedback">Nama Mekanik diperlukan.</div>
                         </div>
 
                         <div class="col-12">
@@ -69,7 +76,7 @@
                             <div class="invalid-feedback">Sparepart diperlukan.</div>
                         </div>
 
-                        <!-- New Fields for Detail RKB General -->
+                        <!-- New Fields for Detail RKB Urgent -->
                         <div class="col-12">
                             <label class="form-label required" for="quantity_requested">Quantity</label>
                             <input class="form-control" id="quantity_requested" name="quantity_requested" type="number" min="1" placeholder="Quantity" required>
@@ -110,7 +117,7 @@
         $(document).ready(function() {
             'use strict';
 
-            const $form = $('#detailrkbgeneralForm');
+            const $form = $('#detailrkburgentForm');
 
             $form.on('submit', function(event) {
                 if (!$form[0].checkValidity()) {

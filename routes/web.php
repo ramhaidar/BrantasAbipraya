@@ -12,6 +12,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\RKBUrgentController;
 use App\Http\Controllers\RKBGeneralController;
 use App\Http\Controllers\MasterDataAlatController;
+use App\Http\Controllers\DetailRKBUrgentController;
 use App\Http\Controllers\DetailRKBGeneralController;
 use App\Http\Controllers\EvaluasiRKBGeneralController;
 use App\Http\Controllers\MasterDataSupplierController;
@@ -480,6 +481,12 @@ Route::prefix ( 'pagination' )->middleware ( 'auth' )->group ( function ()
         [ RKBUrgentController::class, 'getData' ]
     )
         ->name ( 'rkb_urgent.getData' );
+
+    Route::get (
+        '/rkb-urgent/detail/{id_rkb}',
+        [ DetailRKBUrgentController::class, 'getData' ]
+    )
+        ->name ( 'detail_rkb_urgent.getData' );
 } );
 
 // Rute Proyek [ProyekController]
@@ -690,32 +697,69 @@ Route::middleware ( 'auth' )
 // Rute RKB Urgent [RKBUrgentController]
 Route::middleware ( 'auth' )
     ->prefix ( 'rkb-urgent' )
+    ->as ( 'rkb_urgent.' )
     ->group ( function ()
     {
         Route::get (
             '/',
             [ RKBUrgentController::class, 'index' ]
-        )->name ( 'rkb_urgent.index' );
+        )->name ( 'index' );
 
         Route::get (
-            '{id}',
+            '/{id}',
             [ RKBUrgentController::class, 'show' ]
-        )->name ( 'rkb_urgent.show' );
+        )->name ( 'show' );
 
         Route::post (
             '/',
             [ RKBUrgentController::class, 'store' ]
-        )->name ( 'rkb_urgent.store' );
+        )->name ( 'store' );
 
         Route::put (
-            '{id}',
+            '/{id}',
             [ RKBUrgentController::class, 'update' ]
-        )->name ( 'rkb_urgent.update' );
+        )->name ( 'update' );
 
         Route::delete (
-            '{id}',
+            '/{id}',
             [ RKBUrgentController::class, 'destroy' ]
-        )->name ( 'rkb_urgent.destroy' );
+        )->name ( 'destroy' );
+
+        Route::post (
+            '/finalize/{id}',
+            [ RKBUrgentController::class, 'finalize' ]
+        )->name ( 'finalize' );
+
+        // Rute Detail RKB Urgent [DetailRKBUrgentController]
+        Route::prefix ( 'detail' )
+            ->as ( 'detail.' )
+            ->group ( function ()
+        {
+            Route::get (
+                '/{id}',
+                [ DetailRKBUrgentController::class, 'index' ]
+            )->name ( 'index' );
+
+            Route::get (
+                '/show/{id}',
+                [ DetailRKBUrgentController::class, 'show' ]
+            )->name ( 'show' );
+
+            Route::post (
+                '/',
+                [ DetailRKBUrgentController::class, 'store' ]
+            )->name ( 'store' );
+
+            Route::put (
+                '/{id}',
+                [ DetailRKBUrgentController::class, 'update' ]
+            )->name ( 'update' );
+
+            Route::delete (
+                '/{id}',
+                [ DetailRKBUrgentController::class, 'destroy' ]
+            )->name ( 'destroy' );
+        } );
     } );
 
 // Rute Evaluasi RKB General [EvaluasiRKBGeneralController]

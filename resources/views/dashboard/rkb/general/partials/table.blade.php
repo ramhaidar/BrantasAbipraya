@@ -10,26 +10,6 @@
             padding: 4px 8px;
             vertical-align: middle;
         }
-
-        #no-data-message {
-            text-align: center;
-            padding: 20px;
-            color: #999;
-            display: none;
-            /* Awalnya disembunyikan */
-            font-size: 1.2em;
-            animation: fadeIn 0.5s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
     </style>
 @endpush
 

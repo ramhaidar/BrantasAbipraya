@@ -148,17 +148,27 @@ class RKBGeneralController extends Controller
 
     public function finalize ( $id )
     {
-        $rkb = RKB::find ( $id );
-
-        if ( ! $rkb )
+        // check first if the RKB have link_alat_detail_rkb or not
+        $rkb = RKB::findOrFail ( $id );
+        if ( isset ( $rkb->link_alat_detail_rkb ) )
         {
-            return redirect ()->route ( 'rkb_general.index' )->with ( 'error', 'RKB not found' );
+            if ( $rkb->link_alat_detail_rkb->count () > 0 )
+            {
+
+                $rkb = RKB::find ( $id );
+
+                if ( ! $rkb )
+                {
+                    return redirect ()->route ( 'rkb_general.index' )->with ( 'error', 'RKB not found' );
+                }
+
+                $rkb->is_finalized = true;
+                $rkb->save ();
+
+                return redirect ()->route ( 'rkb_general.index' )->with ( 'success', 'RKB successfully finalized' );
+            }
         }
-
-        $rkb->is_finalized = true;
-        $rkb->save ();
-
-        return redirect ()->route ( 'rkb_general.index' )->with ( 'success', 'RKB successfully finalized' );
+        return redirect ()->back ()->with ( 'error', 'Anda belum mengisi data detail RKB' );
     }
 
     public function getData ( Request $request )

@@ -22,6 +22,12 @@ class DetailRKBUrgentController extends Controller
         $master_data_alat      = MasterDataAlat::all ();
         $master_data_sparepart = MasterDataSparepart::all ();
         $kategori_sparepart    = KategoriSparepart::all ();
+        $data                  = RKB::where ( "tipe", "Urgent" )->with (
+            "linkAlatDetailRkbs.rkb",
+            "linkAlatDetailRkbs.masterDataAlat",
+            "linkAlatDetailRkbs.timelineRkbUrgent",
+            "linkAlatDetailRkbs.linkRkbDetails"
+        )->get ();
 
         return view ( 'dashboard.rkb.urgent.detail.detail', [ 
             'rkb'                   => $rkb,
@@ -29,6 +35,7 @@ class DetailRKBUrgentController extends Controller
             'master_data_alat'      => $master_data_alat,
             'master_data_sparepart' => $master_data_sparepart,
             'kategori_sparepart'    => $kategori_sparepart,
+            'data'                  => $data,
 
             'headerPage'            => "RKB Urgent",
             'page'                  => 'Detail RKB Urgent',
@@ -42,6 +49,7 @@ class DetailRKBUrgentController extends Controller
         $validatedData = $request->validate ( [ 
             'quantity_requested'              => 'required|integer|min:1',
             'satuan'                          => 'required|string|max:50',
+            'nama_mekanik'                    => 'required|string|max:50',
             'id_master_data_alat'             => 'required|integer|exists:master_data_alat,id',
             'id_kategori_sparepart_sparepart' => 'required|integer|exists:kategori_sparepart,id',
             'id_master_data_sparepart'        => 'required|integer|exists:master_data_sparepart,id',
@@ -54,6 +62,7 @@ class DetailRKBUrgentController extends Controller
             $detailRKBUrgent = DetailRkbUrgent::create ( [ 
                 'quantity_requested'              => $validatedData[ 'quantity_requested' ],
                 'satuan'                          => $validatedData[ 'satuan' ],
+                'nama_mekanik'                    => $validatedData[ 'nama_mekanik' ],
                 'id_kategori_sparepart_sparepart' => $validatedData[ 'id_kategori_sparepart_sparepart' ],
                 'id_master_data_sparepart'        => $validatedData[ 'id_master_data_sparepart' ],
             ] );

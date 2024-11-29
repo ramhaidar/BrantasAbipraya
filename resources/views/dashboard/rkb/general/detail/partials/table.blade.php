@@ -56,15 +56,20 @@
                         next: '<i class="bi bi-caret-right"></i>'
                     }
                 },
-                pageLength: 10,
+                pageLength: 100,
                 lengthMenu: [
-                    [10, 25, 50],
-                    [10, 25, 50]
+                    [100],
+                    [100]
                 ],
                 ordering: true,
-                order: [],
+                order: [
+                    [0, 'asc']
+                ],
                 displayStart: lastPage * 10,
                 columnDefs: [{
+                    targets: '_all', // Disable sorting for all columns
+                    orderable: false,
+                }, {
                     targets: 9, // Target column for actions
                     className: 'text-center nowrap-column',
                     orderable: false,

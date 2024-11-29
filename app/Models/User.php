@@ -46,23 +46,20 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
-    protected function casts () : array
-    {
-        return [ 
-            'id'             => 'integer',
-            'name'           => 'string',
-            'username'       => 'string',
-            'sex'            => 'string',
-            'path_profile'   => 'string',
-            'role'           => 'string',
-            'phone'          => 'string',
-            'email'          => 'string',
-            'password'       => 'hashed',
-            'remember_token' => 'string',
-            'created_at'     => 'datetime',
-            'updated_at'     => 'datetime',
-        ];
-    }
+    protected $casts = [ 
+        'id'             => 'integer',
+        'name'           => 'string',
+        'username'       => 'string',
+        'sex'            => 'string',
+        'path_profile'   => 'string',
+        'role'           => 'string',
+        'phone'          => 'string',
+        'email'          => 'string',
+        'password'       => 'hashed',
+        'remember_token' => 'string',
+        'created_at'     => 'datetime',
+        'updated_at'     => 'datetime',
+    ];
 
 
     public function userProyek ()

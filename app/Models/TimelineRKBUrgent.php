@@ -24,20 +24,17 @@ class TimelineRKBUrgent extends Model
         'id_master_data_sparepart',
     ];
 
-    protected function casts () : array
-    {
-        return [ 
-            'id'                    => 'integer',
-            'nama_rencana'          => 'string',
-            'tanggal_awal_rencana'  => 'date',
-            'tanggal_akhir_rencana' => 'date',
-            'tanggal_awal_actual'   => 'date',
-            'tanggal_akhir_actual'  => 'date',
-            'is_done'               => 'boolean',
-            'created_at'            => 'datetime',
-            'updated_at'            => 'datetime',
-        ];
-    }
+    protected $casts = [ 
+        'id'                    => 'integer',
+        'nama_rencana'          => 'string',
+        'tanggal_awal_rencana'  => 'date',
+        'tanggal_akhir_rencana' => 'date',
+        'tanggal_awal_actual'   => 'date',
+        'tanggal_akhir_actual'  => 'date',
+        'is_done'               => 'boolean',
+        'created_at'            => 'datetime',
+        'updated_at'            => 'datetime',
+    ];
 
     public function kategoriSparepart () : BelongsTo
     {
@@ -51,7 +48,6 @@ class TimelineRKBUrgent extends Model
 
     public function linkAlatDetailRkbs () : HasMany
     {
-        return $this->hasMany ( LinkAlatDetailRkb::class, 'id_timeline_rkb_urgent' );
+        return $this->hasMany ( LinkAlatDetailRKB::class, 'id_timeline_rkb_urgent' );
     }
-
 }

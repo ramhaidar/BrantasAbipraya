@@ -23,22 +23,19 @@ class LinkAlatDetailRKB extends Model
         'id_timeline_rkb_urgent',
     ];
 
-    protected function casts () : array
-    {
-        return [ 
-            'id'                     => 'integer',
-            'nama_mekanik'           => 'string',
-            'id_rkb'                 => 'integer',
-            'id_master_data_alat'    => 'integer',
-            'id_timeline_rkb_urgent' => 'integer',
-            'created_at'             => 'datetime',
-            'updated_at'             => 'datetime',
-        ];
-    }
+    protected $casts = [ 
+        'id'                     => 'integer',
+        'nama_mekanik'           => 'string',
+        'id_rkb'                 => 'integer',
+        'id_master_data_alat'    => 'integer',
+        'id_timeline_rkb_urgent' => 'integer',
+        'created_at'             => 'datetime',
+        'updated_at'             => 'datetime',
+    ];
 
     public function rkb () : BelongsTo
     {
-        return $this->belongsTo ( Rkb::class, 'id_rkb' );
+        return $this->belongsTo ( RKB::class, 'id_rkb' );
     }
 
     public function masterDataAlat () : BelongsTo
@@ -48,7 +45,7 @@ class LinkAlatDetailRKB extends Model
 
     public function timelineRkbUrgent () : BelongsTo
     {
-        return $this->belongsTo ( TimelineRkbUrgent::class, 'id_timeline_rkb_urgent' );
+        return $this->belongsTo ( TimelineRKBUrgent::class, 'id_timeline_rkb_urgent' );
     }
 
     public function linkRkbDetails () : HasMany

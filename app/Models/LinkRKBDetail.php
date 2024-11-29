@@ -17,14 +17,11 @@ class LinkRKBDetail extends Model
         'id_detail_rkb_urgent',
     ];
 
-    protected function casts () : array
-    {
-        return [ 
-            'id'         => 'integer',
-            'created_at' => 'datetime',
-            'updated_at' => 'datetime',
-        ];
-    }
+    protected $casts = [ 
+        'id'         => 'integer',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
 
     public function linkAlatDetailRkb () : BelongsTo
     {

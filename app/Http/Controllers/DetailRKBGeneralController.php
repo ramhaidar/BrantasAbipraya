@@ -275,9 +275,13 @@ class DetailRKBGeneralController extends Controller
                 'master_data_sparepart.nama as sparepart',
                 'master_data_sparepart.part_number',
                 'master_data_sparepart.merk',
+                'rkb.is_finalized',
+                'rkb.is_evaluated',
+                'rkb.is_approved',
             ] )
             ->join ( 'link_rkb_detail', 'detail_rkb_general.id', '=', 'link_rkb_detail.id_detail_rkb_general' )
             ->join ( 'link_alat_detail_rkb', 'link_rkb_detail.id_link_alat_detail_rkb', '=', 'link_alat_detail_rkb.id' )
+            ->join ( 'rkb', 'link_alat_detail_rkb.id_rkb', '=', 'rkb.id' ) // Join ke tabel RKB
             ->join ( 'master_data_alat', 'link_alat_detail_rkb.id_master_data_alat', '=', 'master_data_alat.id' )
             ->leftJoin ( 'kategori_sparepart', 'detail_rkb_general.id_kategori_sparepart_sparepart', '=', 'kategori_sparepart.id' )
             ->leftJoin ( 'master_data_sparepart', 'detail_rkb_general.id_master_data_sparepart', '=', 'master_data_sparepart.id' )
@@ -364,6 +368,9 @@ class DetailRKBGeneralController extends Controller
                 'quantity_requested'  => $item->quantity_requested,
                 'quantity_approved'   => $item->quantity_approved ?? '-',
                 'satuan'              => $item->satuan,
+                'is_finalized'        => $item->is_finalized ? 'Yes' : 'No',
+                'is_evaluated'        => $item->is_evaluated ? 'Yes' : 'No',
+                'is_approved'         => $item->is_approved ? 'Yes' : 'No',
                 'aksi'                => '', // Actions rendered on the frontend
             ];
         } );
@@ -375,6 +382,7 @@ class DetailRKBGeneralController extends Controller
             'data'            => $data,
         ] );
     }
+
 
 
 }

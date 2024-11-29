@@ -24,7 +24,7 @@ class EvaluasiRKBGeneralController extends Controller
 
     public function getData ( Request $request )
     {
-        $query = RKB::with ( 'proyek' )->select ( 'rkb.*' );
+        $query = RKB::with ( 'proyek' )->where ( 'tipe', 'General' )->select ( 'rkb.*' );
 
         // Filter pencarian
         if ( $search = $request->input ( 'search.value' ) )

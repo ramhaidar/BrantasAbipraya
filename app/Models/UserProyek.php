@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\User;
 use App\Models\Proyek;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class UserProyek extends Model
@@ -20,15 +21,21 @@ class UserProyek extends Model
         'id_proyek',
     ];
 
+    protected $casts = [ 
+        'id_user'   => 'integer',
+        'id_proyek' => 'integer',
+    ];
+
     // Tentukan relasi ke model User dan Proyek
-    public function user ()
+    public function user () : BelongsTo
     {
         return $this->belongsTo ( User::class, 'id_user' );
     }
 
-    public function proyek ()
+    public function proyek () : BelongsTo
     {
         return $this->belongsTo ( Proyek::class, 'id_proyek' );
     }
+
 }
 

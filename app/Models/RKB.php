@@ -23,20 +23,17 @@ class RKB extends Model
         'is_approved',
     ];
 
-    protected function casts () : array
-    {
-        return [ 
-            'id'           => 'integer',
-            'nomor'        => 'string',
-            'periode'      => 'date',
-            'tipe'         => 'string',
-            'is_finalized' => 'boolean',
-            'is_evaluated' => 'boolean',
-            'is_approved'  => 'boolean',
-            'created_at'   => 'datetime',
-            'updated_at'   => 'datetime',
-        ];
-    }
+    protected $casts = [ 
+        'id'           => 'integer',
+        'nomor'        => 'string',
+        'periode'      => 'date',
+        'tipe'         => 'string',
+        'is_finalized' => 'boolean',
+        'is_evaluated' => 'boolean',
+        'is_approved'  => 'boolean',
+        'created_at'   => 'datetime',
+        'updated_at'   => 'datetime',
+    ];
 
     public function proyek () : BelongsTo
     {

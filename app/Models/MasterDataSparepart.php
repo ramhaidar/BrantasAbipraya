@@ -37,7 +37,12 @@ class MasterDataSparepart extends Model
 
     public function suppliers () : BelongsToMany
     {
-        return $this->belongsToMany ( MasterDataSupplier::class, 'link_supplier_sparepart', 'id_master_data_sparepart', 'id_master_data_supplier' )
-            ->withTimestamps ();
+        return $this->belongsToMany (
+            MasterDataSupplier::class,
+            'link_supplier_sparepart',
+            'id_master_data_sparepart',
+            'id_master_data_supplier'
+        )->withTimestamps ();
     }
+
 }

@@ -87,7 +87,8 @@ class EvaluasiDetailRKBGeneralController extends Controller
         $query = DetailRKBGeneral::query ()
             ->select ( [ 
                 'detail_rkb_general.*', // Kolom utama
-                'kategori_sparepart.nama as kategoriSparepartName', // Alias untuk kategori sparepart
+                'kategori_sparepart.kode as kategoriSparepartCode', // Alias untuk kode kategori sparepart
+                'kategori_sparepart.nama as kategoriSparepartName', // Alias untuk nama kategori sparepart
                 'master_data_sparepart.nama as sparepartName',      // Alias untuk nama sparepart
                 'master_data_sparepart.part_number as partNumber',  // Alias untuk part number
                 'master_data_sparepart.merk as merk',               // Alias untuk merk
@@ -130,6 +131,7 @@ class EvaluasiDetailRKBGeneralController extends Controller
                 $q->where ( 'detail_rkb_general.quantity_requested', 'LIKE', "%$search%" )
                     ->orWhere ( 'detail_rkb_general.quantity_approved', 'LIKE', "%$search%" )
                     ->orWhere ( 'detail_rkb_general.satuan', 'LIKE', "%$search%" )
+                    ->orWhere ( 'kategori_sparepart.kode', 'LIKE', "%$search%" )
                     ->orWhere ( 'kategori_sparepart.nama', 'LIKE', "%$search%" )
                     ->orWhere ( 'master_data_sparepart.nama', 'LIKE', "%$search%" )
                     ->orWhere ( 'master_data_sparepart.part_number', 'LIKE', "%$search%" )
@@ -150,7 +152,7 @@ class EvaluasiDetailRKBGeneralController extends Controller
                 'id'                  => $item->id,
                 'masterDataAlat'      => optional ( optional ( $item->linkRkbDetails->first () )->linkAlatDetailRkb->masterDataAlat )->jenis_alat ?? '-',
                 'kodeAlat'            => optional ( optional ( $item->linkRkbDetails->first () )->linkAlatDetailRkb->masterDataAlat )->kode_alat ?? '-',
-                'kategoriSparepart'   => $item->kategoriSparepartName ?? '-',
+                'kategoriSparepart'   => ( $item->kategoriSparepartCode ? "{$item->kategoriSparepartCode}: " : '' ) . ( $item->kategoriSparepartName ?? '-' ), // Format Kode: Kategori
                 'masterDataSparepart' => $item->sparepartName ?? '-',
                 'partNumber'          => $item->partNumber ?? '-', // Menggunakan alias partNumber
                 'merk'                => $item->merk ?? '-',
@@ -168,5 +170,6 @@ class EvaluasiDetailRKBGeneralController extends Controller
             'data'            => $formattedData->values (),
         ] );
     }
+
 
 }

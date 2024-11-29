@@ -20,18 +20,15 @@ class KategoriSparepart extends Model
         'sub_jenis',
     ];
 
-    protected function casts () : array
-    {
-        return [ 
-            'id'         => 'integer',
-            'kode'       => 'string',
-            'nama'       => 'string',
-            'jenis'      => 'string',
-            'sub_jenis'  => 'string',
-            'created_at' => 'datetime',
-            'updated_at' => 'datetime',
-        ];
-    }
+    protected $casts = [ 
+        'id'         => 'integer',
+        'kode'       => 'string',
+        'nama'       => 'string',
+        'jenis'      => 'string',
+        'sub_jenis'  => 'string',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
 
     public function spareparts () : HasMany
     {

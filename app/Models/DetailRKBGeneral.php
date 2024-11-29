@@ -26,17 +26,14 @@ class DetailRKBGeneral extends Model
         'id_master_data_sparepart',
     ];
 
-    protected function casts () : array
-    {
-        return [ 
-            'id'                 => 'integer',
-            'quantity_requested' => 'integer',
-            'quantity_approved'  => 'integer',
-            'satuan'             => 'string',
-            'created_at'         => 'datetime',
-            'updated_at'         => 'datetime',
-        ];
-    }
+    protected $casts = [ 
+        'id'                 => 'integer',
+        'quantity_requested' => 'integer',
+        'quantity_approved'  => 'integer',
+        'satuan'             => 'string',
+        'created_at'         => 'datetime',
+        'updated_at'         => 'datetime',
+    ];
 
     public function kategoriSparepart () : BelongsTo
     {

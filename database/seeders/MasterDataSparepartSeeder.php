@@ -22,7 +22,7 @@ class MasterDataSparepartSeeder extends Seeder
         MasterDataSparepart::create ( [ 
             'nama'                  => 'Filter Oli C-1007',
             'part_number'           => 'C-1007',
-            'merk'                  => 'Caterpillar',
+            'merk'                  => 'Sakura',
             'id_kategori_sparepart' => KategoriSparepart::where ( 'kode', 'B11' )->value ( 'id' ),
         ] );
 
@@ -49,7 +49,7 @@ class MasterDataSparepartSeeder extends Seeder
 
         MasterDataSparepart::create ( [ 
             'nama'                  => 'Kampas Rem Depan',
-            'part_number'           => 'Kampas-Rem-Depan',
+            'part_number'           => 'Honda',
             'merk'                  => 'TRW',
             'id_kategori_sparepart' => KategoriSparepart::where ( 'kode', 'A9' )->value ( 'id' ),
         ] );

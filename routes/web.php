@@ -835,3 +835,8 @@ Route::middleware ( 'auth' )
 
         } );
     } );
+
+Route::get (
+    '/detail-rkb-urgent/{id}/dokumentasi',
+    [ DetailRkbUrgentController::class, 'getDokumentasi' ]
+);

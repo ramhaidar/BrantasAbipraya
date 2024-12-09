@@ -9,7 +9,7 @@
                     <button class="btn-close" data-bs-dismiss="modal" type="button" aria-label="Close"></button>
             </div>
             <hr class="p-0 m-0 border border-secondary-subtle border-2 opacity-50">
-            <form class="needs-validation" id="supplierForm" novalidate method="POST" action="{{ route('master_data_supplier.store') }}">
+            <form class="needs-validation" id="supplierForm" style="overflow-y: auto" novalidate method="POST" action="{{ route('master_data_supplier.store') }}">
                 @csrf
                 <div class="modal-body">
                     <div class="row g-3">

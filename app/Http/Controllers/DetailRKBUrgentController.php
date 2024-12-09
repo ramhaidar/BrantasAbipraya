@@ -12,6 +12,7 @@ use App\Models\KategoriSparepart;
 use App\Models\LinkAlatDetailRKB;
 use App\Models\MasterDataSparepart;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Storage;
 
 class DetailRKBUrgentController extends Controller
 {
@@ -45,27 +46,55 @@ class DetailRKBUrgentController extends Controller
     // Store a new DetailRKBUrgent
     public function store ( Request $request )
     {
-        // Validasi input
         $validatedData = $request->validate ( [ 
             'quantity_requested'              => 'required|integer|min:1',
             'satuan'                          => 'required|string|max:50',
             'nama_mekanik'                    => 'required|string|max:50',
+            'kronologi'                       => 'required|string|max:1000',
             'id_master_data_alat'             => 'required|integer|exists:master_data_alat,id',
             'id_kategori_sparepart_sparepart' => 'required|integer|exists:kategori_sparepart,id',
             'id_master_data_sparepart'        => 'required|integer|exists:master_data_sparepart,id',
-            'id_rkb'                          => 'required|integer|exists:rkb,id', // Pastikan RKB terkait
+            'id_rkb'                          => 'required|integer|exists:rkb,id',
+            'dokumentasi.*'                   => 'required|file|mimes:jpeg,png,jpg,gif|max:2048',
         ] );
 
         try
         {
-            // Buat entri baru di DetailRKBUrgent
+            // Ambil nomor RKB
+            $rkbNumber = RKB::findOrFail ( $validatedData[ 'id_rkb' ] )->nomor;
+
+            // Buat entri baru di DetailRKBUrgent (tanpa dokumentasi untuk sementara)
             $detailRKBUrgent = DetailRkbUrgent::create ( [ 
                 'quantity_requested'              => $validatedData[ 'quantity_requested' ],
                 'satuan'                          => $validatedData[ 'satuan' ],
                 'nama_mekanik'                    => $validatedData[ 'nama_mekanik' ],
+                'kronologi'                       => $validatedData[ 'kronologi' ],
+                'dokumentasi'                     => null, // Akan diisi nanti
                 'id_kategori_sparepart_sparepart' => $validatedData[ 'id_kategori_sparepart_sparepart' ],
                 'id_master_data_sparepart'        => $validatedData[ 'id_master_data_sparepart' ],
             ] );
+
+            // Tentukan folder berdasarkan nomor RKB dan ID DetailRKBUrgent
+            $folderPath = "uploads/dokumentasi/{$rkbNumber}/{$detailRKBUrgent->id}/";
+
+            // Tangani unggahan file dokumentasi
+            if ( $request->hasFile ( 'dokumentasi' ) )
+            {
+                foreach ( $request->file ( 'dokumentasi' ) as $file )
+                {
+                    // Format nama file
+                    $originalName = pathinfo ( $file->getClientOriginalName (), PATHINFO_FILENAME );
+                    $extension    = $file->getClientOriginalExtension ();
+                    $timestamp    = date ( 'Y-m-d--H-i-s' );
+                    $fileName     = "{$originalName}---{$timestamp}.{$extension}";
+
+                    // Simpan file ke folder
+                    $file->storeAs ( $folderPath, $fileName, 'public' );
+                }
+            }
+
+            // Update path folder dokumentasi di DetailRKBUrgent
+            $detailRKBUrgent->update ( [ 'dokumentasi' => $folderPath ] );
 
             // Cari atau buat LinkAlatDetailRkb
             $linkAlatDetailRKB = LinkAlatDetailRkb::firstOrCreate (
@@ -79,12 +108,10 @@ class DetailRKBUrgentController extends Controller
             );
 
             // Buat LinkRkbDetail baru
-            $linkAlatDetailRKB = LinkRkbDetail::create (
-                [ 
-                    'id_detail_rkb_urgent'    => $detailRKBUrgent->id,
-                    'id_link_alat_detail_rkb' => $linkAlatDetailRKB->id,
-                ]
-            );
+            LinkRkbDetail::create ( [ 
+                'id_detail_rkb_urgent'    => $detailRKBUrgent->id,
+                'id_link_alat_detail_rkb' => $linkAlatDetailRKB->id,
+            ] );
 
             return redirect ()->back ()->with ( 'success', 'Detail RKB Urgent created and linked successfully!' );
         }
@@ -96,7 +123,6 @@ class DetailRKBUrgentController extends Controller
             ] );
         }
     }
-
 
     // Return the data in json for a specific DetailRKBUrgent
     public function show ( $id )
@@ -385,5 +411,26 @@ class DetailRKBUrgentController extends Controller
         ] );
     }
 
+    public function getDokumentasi ( $id )
+    {
+        $detailRkbUrgent = DetailRkbUrgent::findOrFail ( $id );
+
+        // Assuming dokumentasi contains the folder path
+        $folderPath = $detailRkbUrgent->dokumentasi;
+
+        // Get all files from the folder
+        $files = Storage::disk ( 'public' )->files ( $folderPath );
+
+        // Prepare data for response
+        $data = array_map ( function ($file)
+        {
+            return [ 
+                'name' => basename ( $file ),
+                'url'  => Storage::url ( $file ),
+            ];
+        }, $files );
+
+        return response ()->json ( [ 'dokumentasi' => $data ] );
+    }
 
 }

@@ -11,7 +11,6 @@
             justify-content: center;
             align-items: center;
             z-index: 1050;
-            /* Ensure it's above modal content */
         }
 
         .spinner-border {
@@ -21,19 +20,19 @@
     </style>
 @endpush
 
-<div class="fade modal" id="modalForAdd" aria-hidden="true" aria-labelledby="staticBackdropLabel" tabindex="-1">
+<!-- Modal Add -->
+<div class="modal fade" id="modalForAdd" aria-hidden="true" aria-labelledby="modalForAddLabel" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content rounded-4">
-            <div class="pt-3 px-3 m-0 d-flex w-100 justify-content-between">
-                <h5 class="modal-title w-100 pb-2" id="modalForAddLabel">Tambah Rencana Kebutuhan Barang</h1>
-                    <button class="btn-close" data-bs-dismiss="modal" type="button" aria-label="Close"></button>
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalForAddLabel">Tambah Rencana Kebutuhan Barang</h5>
+                <button class="btn-close" data-bs-dismiss="modal" type="button" aria-label="Close"></button>
             </div>
             <hr class="p-0 m-0 border border-secondary-subtle border-2 opacity-50">
-            <form class="needs-validation" id="detailrkburgentForm" novalidate method="POST" action="{{ route('rkb_urgent.detail.store') }}">
+            <form class="needs-validation" id="detailrkburgentForm" style="overflow-y: auto" novalidate method="POST" action="{{ route('rkb_urgent.detail.store') }}" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body">
                     <div class="row g-3">
-                        {{-- Hidden ID RKB Input --}}
                         <input id="id_rkb" name="id_rkb" type="hidden" value="{{ $rkb->id }}">
 
                         <div class="col-12">
@@ -47,11 +46,25 @@
                             <div class="invalid-feedback">Alat diperlukan.</div>
                         </div>
 
-                        {{-- New Field for Nama Mekanik --}}
                         <div class="col-12">
                             <label class="form-label required" for="nama_mekanik">Nama Mekanik</label>
                             <input class="form-control" id="nama_mekanik" name="nama_mekanik" type="text" placeholder="Nama Mekanik" required>
                             <div class="invalid-feedback">Nama Mekanik diperlukan.</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label required" for="kronologi">Kronologi</label>
+                            <textarea class="form-control" id="kronologi" name="kronologi" rows="3" placeholder="Kronologi" required></textarea>
+                            <div class="invalid-feedback">Kronologi diperlukan.</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label required" for="dokumentasi">Dokumentasi</label>
+                            <input class="form-control" id="dokumentasiInput" name="dokumentasi[]" type="file" accept="image/*" multiple required>
+                            <div class="invalid-feedback" id="dokumentasi-invalid-feedback">
+                                Dokumentasi diperlukan.
+                            </div>
+                            <div class="mt-3 d-flex flex-wrap gap-2" id="dokumentasiPreview"></div>
                         </div>
 
                         <div class="col-12">
@@ -76,7 +89,6 @@
                             <div class="invalid-feedback">Sparepart diperlukan.</div>
                         </div>
 
-                        <!-- New Fields for Detail RKB Urgent -->
                         <div class="col-12">
                             <label class="form-label required" for="quantity_requested">Quantity</label>
                             <input class="form-control" id="quantity_requested" name="quantity_requested" type="number" min="1" placeholder="Quantity" required>
@@ -124,6 +136,7 @@
                     event.preventDefault();
                     event.stopPropagation();
                 }
+
                 $form.addClass('was-validated');
             });
 
@@ -212,6 +225,136 @@
                 $select2Elements.each(function() {
                     $(this).val(null).trigger('change');
                 });
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            'use strict';
+
+            const dokumentasiInput = document.getElementById('dokumentasiInput');
+            const dokumentasiPreview = document.getElementById('dokumentasiPreview');
+            const invalidFeedback = document.getElementById('dokumentasi-invalid-feedback');
+            const largeImagePreviewForAdd = document.getElementById('largeImagePreviewForAdd');
+            const imagePreviewTitleForAdd = document.getElementById('imagePreviewTitleForAdd');
+            const imagePreviewModalforAdd = new bootstrap.Modal(document.getElementById('imagePreviewModalforAdd'));
+
+            // Clear the preview area
+            const clearPreview = () => {
+                dokumentasiPreview.innerHTML = '';
+            };
+
+            // Validate the file input
+            const validateFiles = () => {
+                if (dokumentasiInput.files.length === 0) {
+                    dokumentasiInput.classList.add('is-invalid');
+                    invalidFeedback.style.display = 'block';
+                } else {
+                    dokumentasiInput.classList.remove('is-invalid');
+                    invalidFeedback.style.display = 'none';
+                }
+            };
+
+            // Handle file input change
+            dokumentasiInput.addEventListener('change', function() {
+                clearPreview(); // Clear existing previews
+
+                const files = Array.from(dokumentasiInput.files);
+                const maxFileSize = 2 * 1024 * 1024; // 2 MB
+
+                files.forEach((file) => {
+                    if (!file.type.startsWith('image/')) {
+                        alert(`File "${file.name}" is not an image.`);
+                        return;
+                    }
+
+                    if (file.size > maxFileSize) {
+                        alert(`File "${file.name}" exceeds the 2 MB size limit.`);
+                        return;
+                    }
+
+                    // Create preview for each valid image
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.alt = file.name;
+                        img.style.width = '100px';
+                        img.style.height = '100px';
+                        img.style.objectFit = 'cover';
+                        img.style.border = '1px solid #ccc';
+                        img.style.borderRadius = '4px';
+                        img.title = file.name;
+                        img.classList.add('preview-image');
+
+                        // Add click event to open large preview modal
+                        img.addEventListener('click', function() {
+                            largeImagePreviewForAdd.src = e.target.result;
+                            imagePreviewTitleForAdd.textContent = file.name;
+                            $('#modalForAdd').modal('hide'); // Hide #modalForAdd
+                            imagePreviewModalforAdd.show();
+                        });
+
+                        // Create a remove button
+                        const removeButton = document.createElement('button');
+                        removeButton.type = 'button';
+                        removeButton.textContent = 'Remove';
+                        removeButton.classList.add('btn', 'btn-sm', 'btn-danger', 'mt-2');
+                        removeButton.onclick = () => {
+                            img.remove();
+                            removeButton.remove();
+                            const remainingFiles = Array.from(dokumentasiInput.files).filter((f) => f !== file);
+                            const dataTransfer = new DataTransfer();
+                            remainingFiles.forEach((f) => dataTransfer.items.add(f));
+                            dokumentasiInput.files = dataTransfer.files;
+                            validateFiles();
+                        };
+
+                        const previewContainer = document.createElement('div');
+                        previewContainer.classList.add('d-flex', 'flex-column', 'align-items-center', 'me-2');
+                        previewContainer.appendChild(img);
+                        previewContainer.appendChild(removeButton);
+
+                        dokumentasiPreview.appendChild(previewContainer);
+                    };
+                    reader.readAsDataURL(file);
+                });
+
+                validateFiles();
+            });
+
+            // Validate on form submission
+            const form = document.getElementById('detailrkburgentForm');
+            form.addEventListener('submit', function(event) {
+                validateFiles();
+                if (!form.checkValidity() || dokumentasiInput.files.length === 0) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            });
+
+            // Event listener for image thumbnail clicks
+            dokumentasiPreview.addEventListener('click', function(event) {
+                const target = event.target;
+
+                if (target.tagName === 'IMG' && target.classList.contains('preview-image')) {
+                    // Set the large image preview source
+                    largeImagePreviewForAdd.src = target.src;
+
+                    // Set the modal title with the image file name
+                    imagePreviewTitleForAdd.textContent = target.title;
+
+                    // Hide #modalForAdd using jQuery
+                    $('#modalForAdd').modal('hide');
+                }
+            });
+
+            // Event listener for when the preview modal is closed
+            document.getElementById('imagePreviewModalforAdd').addEventListener('hidden.bs.modal', function() {
+                // Reopen #modalForAdd using jQuery
+                $('#modalForAdd').modal('show');
             });
         });
     </script>

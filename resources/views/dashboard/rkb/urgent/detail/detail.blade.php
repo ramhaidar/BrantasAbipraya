@@ -42,6 +42,7 @@
         @include('dashboard.rkb.urgent.detail.partials.modal-finalization')
     @endsection
 
-    @push('scripts_2')
-    @endpush
 @endif
+
+@push('scripts_2')
+@endpush

@@ -9,7 +9,7 @@
                     <button class="btn-close" data-bs-dismiss="modal" type="button" aria-label="Close"></button>
             </div>
             <hr class="p-0 m-0 border border-secondary-subtle border-2 opacity-50">
-            <form class="needs-validation" id="editRKBForm" novalidate method="POST">
+            <form class="needs-validation" id="editRKBForm" style="overflow-y: auto" novalidate method="POST">
                 @csrf
                 @method('PUT')
                 <div class="modal-body">

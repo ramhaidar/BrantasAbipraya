@@ -191,12 +191,9 @@ td {
 
 
 /* Center the modal dialog with a fit-content max-width */
-.modal-dialog {
+/* .modal-dialog {
     max-width: fit-content;
-    /* min-width: 35dvw;
-    margin-left: auto;
-    margin-right: auto; */
-}
+} */
 
 /* .modal-body {
     text-align: center;

@@ -20,21 +20,6 @@
     </style>
 @endpush
 
-<!-- Modal for Mini Preview -->
-<div class="modal fade" id="dokumentasiPreviewModal" aria-hidden="true" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="dokumentasiPreviewTitle">Dokumentasi Preview</h5>
-                <button class="btn-close" data-bs-dismiss="modal" type="button" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="d-flex flex-wrap gap-3" id="dokumentasiPreviewContainer"></div>
-            </div>
-        </div>
-    </div>
-</div>
-
 @include('dashboard.rkb.urgent.detail.partials.modal-preview')
 
 <div class="ibox-body ms-0 ps-0 table-responsive" style="overflow-x: hidden">
@@ -49,6 +34,8 @@
                 <th class="text-center">Merk</th>
                 <th class="text-center">Nama Mekanik</th>
                 <th class="text-center">Dokumentasi</th>
+                <th class="text-center">Timeline</th>
+                <th class="text-center">Lampiran</th>
                 <th class="text-center">Quantity Requested</th>
                 <th class="text-center">Quantity Approved</th>
                 <th class="text-center">Satuan</th>
@@ -56,9 +43,22 @@
             </tr>
         </thead>
         <tbody>
+            @php
+                $alatRowCount = []; // Untuk menyimpan jumlah baris per kode_alat
+                $processedAlat = []; // Untuk melacak kode alat yang sudah diproses
+            @endphp
+
             @foreach ($data as $item)
                 @foreach ($item->linkAlatDetailRkbs as $item2)
                     @foreach ($item2->linkRkbDetails as $item3)
+                        @php
+                            // Hitung jumlah baris untuk setiap kode alat
+                            $kodeAlat = $item2->masterDataAlat->kode_alat;
+                            if (!isset($alatRowCount[$kodeAlat])) {
+                                $alatRowCount[$kodeAlat] = collect($item2->linkRkbDetails)->count();
+                            }
+                        @endphp
+
                         <tr>
                             <td class="text-center">{{ $item2->masterDataAlat->jenis_alat }}</td>
                             <td class="text-center">{{ $item2->masterDataAlat->kode_alat }}</td>
@@ -68,18 +68,38 @@
                             <td class="text-center">{{ $item3->detailRkbUrgent->masterDataSparepart->merk }}</td>
                             <td class="text-center">{{ $item3->detailRkbUrgent->nama_mekanik }}</td>
                             <td class="text-center">
-                                <button class="btn btn-primary" onclick="showDokumentasi({{ $item3->detailRkbUrgent->id }})">
+                                <button class="btn btn-primary" data-id="{{ $item3->detailRkbUrgent->id }}" onclick="showDokumentasi({{ $item3->detailRkbUrgent->id }})">
                                     <i class="bi bi-file-earmark-text"></i>
                                 </button>
                             </td>
+
+                            @if (!in_array($kodeAlat, $processedAlat))
+                                <!-- Jika belum diproses -->
+                                <td class="text-center" rowspan="{{ $alatRowCount[$kodeAlat] }}">
+                                    <a class="btn btn-primary" href="{{ route('rkb_urgent.detail.timeline.index', ['id' => $item2->id]) }}">
+                                        <i class="bi bi-hourglass-split"></i>
+                                    </a>
+                                </td>
+
+                                <td class="text-center" rowspan="{{ $alatRowCount[$kodeAlat] }}">
+                                    <a class="btn btn-primary" href="#">
+                                        <i class="bi bi-paperclip"></i>
+                                    </a>
+                                </td>
+
+                                @php
+                                    $processedAlat[] = $kodeAlat; // Tandai kode alat sebagai sudah diproses
+                                @endphp
+                            @else
+                                <td style="display: none;"></td> <!-- Placeholder untuk konsistensi kolom Timeline -->
+                                <td style="display: none;"></td> <!-- Placeholder untuk konsistensi kolom Lampiran -->
+                            @endif
+
                             <td class="text-center">{{ $item3->detailRkbUrgent->quantity_requested }}</td>
                             <td class="text-center">{{ $item3->detailRkbUrgent->quantity_approved ?? '-' }}</td>
                             <td class="text-center">{{ $item3->detailRkbUrgent->satuan }}</td>
                             <td class="text-center">
-                                <button class="btn btn-warning mx-1 ubahBtn" onclick="fillFormEditDetailRKB({{ $item3->detailRkbUrgent->id }})">
-                                    <i class="bi bi-pencil-square"></i>
-                                </button>
-                                <button class="btn btn-danger mx-1 deleteBtn" onclick="deleteDetailRKB({{ $item3->detailRkbUrgent->id }})">
+                                <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item3->detailRkbUrgent->id }}">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </td>
@@ -88,11 +108,16 @@
                 @endforeach
             @endforeach
         </tbody>
-    </table>    
+    </table>
+
 </div>
 
 @push('scripts_3')
     <script>
+        var table = $('#table-data').DataTable({
+            ordering: false,
+        });
+
         document.addEventListener('DOMContentLoaded', function() {
             'use strict';
 
@@ -101,13 +126,19 @@
             const dokumentasiPreviewModal = new bootstrap.Modal(document.getElementById('dokumentasiPreviewModal'));
             const imagePreviewModalforShow = new bootstrap.Modal(document.getElementById('imagePreviewModalforShow'));
 
+            // Laravel route name for dokumentasi
+            const dokumentasiRoute = @json(route('rkb_urgent.detail.dokumentasi', ['id' => ':id']));
+
             // Fetch and display dokumentasi in modal
             window.showDokumentasi = function(id) {
                 // Clear previous previews
                 dokumentasiPreviewContainer.innerHTML = '';
 
+                // Replace ':id' with the actual id
+                const fetchUrl = dokumentasiRoute.replace(':id', id);
+
                 // Fetch dokumentasi data
-                fetch(`/detail-rkb-urgent/${id}/dokumentasi`)
+                fetch(fetchUrl)
                     .then(response => response.json())
                     .then(data => {
                         if (data.dokumentasi && data.dokumentasi.length > 0) {
@@ -120,6 +151,8 @@
 
                                 // Add click event to open large preview
                                 img.addEventListener('click', () => {
+                                    $('#dokumentasiPreviewModal').modal('hide');
+
                                     largeImagePreviewForShow.src = file.url;
                                     document.getElementById('imagePreviewTitleForShow').textContent = file.name;
                                     imagePreviewModalforShow.show();
@@ -128,7 +161,7 @@
                                 dokumentasiPreviewContainer.appendChild(img);
                             });
                         } else {
-                            dokumentasiPreviewContainer.innerHTML = '<p class="text-muted text-center">No dokumentasi available</p>';
+                            dokumentasiPreviewContainer.innerHTML = '<p class="text-muted text-center">Tidak ada Dokumentasi</p>';
                         }
 
                         // Show dokumentasi preview modal
@@ -140,6 +173,12 @@
                         dokumentasiPreviewModal.show();
                     });
             };
+
+            // Event listener for when the preview modal is closed
+            document.getElementById('imagePreviewModalforShow').addEventListener('hidden.bs.modal', function() {
+                // Reopen #modalForAdd using jQuery
+                $('#dokumentasiPreviewModal').modal('show');
+            });
         });
     </script>
 @endpush

@@ -18,9 +18,12 @@ class LinkRKBDetail extends Model
     ];
 
     protected $casts = [ 
-        'id'         => 'integer',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
+        'id'                      => 'integer',
+        'id_link_alat_detail_rkb' => 'integer',
+        'id_detail_rkb_general'   => 'integer',
+        'id_detail_rkb_urgent'    => 'integer',
+        'created_at'              => 'datetime',
+        'updated_at'              => 'datetime',
     ];
 
     public function linkAlatDetailRkb () : BelongsTo

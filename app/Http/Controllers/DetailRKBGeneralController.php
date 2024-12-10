@@ -58,35 +58,45 @@ class DetailRKBGeneralController extends Controller
                 'id_master_data_sparepart'        => $validatedData[ 'id_master_data_sparepart' ],
             ] );
 
-            // Cari atau buat LinkAlatDetailRkb
-            $linkAlatDetailRKB = LinkAlatDetailRkb::firstOrCreate (
+            // Pastikan LinkRkbDetail ada
+            $linkRkbDetail = LinkRkbDetail::firstOrCreate (
                 [ 
-                    'id_rkb'              => $validatedData[ 'id_rkb' ],
-                    'id_master_data_alat' => $validatedData[ 'id_master_data_alat' ],
+                    'id' => $validatedData[ 'id_rkb' ]
                 ],
                 [ 
-                    'id_timeline_rkb_urgent' => null, // Default null, bisa diupdate nanti
+                    'id_detail_rkb_general'   => null,
+                    'id_link_alat_detail_rkb' => null
                 ]
             );
 
-            // Buat LinkRkbDetail baru
-            $linkAlatDetailRKB = LinkRkbDetail::create (
+            // Buat atau cari LinkAlatDetailRkb
+            $linkAlatDetailRKB = LinkAlatDetailRkb::firstOrCreate (
                 [ 
-                    'id_detail_rkb_general'   => $detailRKBGeneral->id,
-                    'id_link_alat_detail_rkb' => $linkAlatDetailRKB->id,
-                ]
+                    'id_rkb'              => $linkRkbDetail->id,
+                    'id_master_data_alat' => $validatedData[ 'id_master_data_alat' ],
+                ],
+                [ 
+                    'nama_mekanik' => null
+                ] // Nilai default jika tidak ditemukan
             );
+
+            // Buat entri LinkRkbDetail baru
+            LinkRkbDetail::create ( [ 
+                'id_detail_rkb_general'   => $detailRKBGeneral->id,
+                'id_link_alat_detail_rkb' => $linkAlatDetailRKB->id,
+            ] );
 
             return redirect ()->back ()->with ( 'success', 'Detail RKB General created and linked successfully!' );
         }
         catch ( \Exception $e )
         {
-            // Tangani kesalahan dan kembalikan pesan kesalahan ke pengguna
+            // Tangani kesalahan
             return redirect ()->back ()->withErrors ( [ 
                 'error' => 'Failed to create Detail RKB General: ' . $e->getMessage (),
             ] );
         }
     }
+
 
 
     // Return the data in json for a specific DetailRKBGeneral
@@ -164,9 +174,6 @@ class DetailRKBGeneralController extends Controller
                 [ 
                     'id_rkb'              => $validatedData[ 'id_rkb' ],
                     'id_master_data_alat' => $validatedData[ 'id_master_data_alat' ],
-                ],
-                [ 
-                    'id_timeline_rkb_urgent' => null, // Default null
                 ]
             );
 
@@ -368,9 +375,9 @@ class DetailRKBGeneralController extends Controller
                 'quantity_requested'  => $item->quantity_requested,
                 'quantity_approved'   => $item->quantity_approved ?? '-',
                 'satuan'              => $item->satuan,
-                'is_finalized'        => $item->is_finalized ? 'Yes' : 'No',
-                'is_evaluated'        => $item->is_evaluated ? 'Yes' : 'No',
-                'is_approved'         => $item->is_approved ? 'Yes' : 'No',
+                'is_finalized'        => $item->is_finalized ? 1 : 0,
+                'is_evaluated'        => $item->is_evaluated ? 1 : 0,
+                'is_approved'         => $item->is_approved ? 1 : 0,
                 'aksi'                => '', // Actions rendered on the frontend
             ];
         } );

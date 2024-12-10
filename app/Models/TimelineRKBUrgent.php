@@ -20,8 +20,7 @@ class TimelineRKBUrgent extends Model
         'tanggal_awal_actual',
         'tanggal_akhir_actual',
         'is_done',
-        'id_kategori_sparepart_sparepart',
-        'id_master_data_sparepart',
+        'id_link_alat_detail_rkb',
     ];
 
     protected $casts = [ 
@@ -46,8 +45,8 @@ class TimelineRKBUrgent extends Model
         return $this->belongsTo ( MasterDataSparepart::class, 'id_master_data_sparepart' );
     }
 
-    public function linkAlatDetailRkbs () : HasMany
+    public function linkAlatDetailRkb () : BelongsTo
     {
-        return $this->hasMany ( LinkAlatDetailRKB::class, 'id_timeline_rkb_urgent' );
+        return $this->belongsTo ( LinkAlatDetailRKB::class, 'id_link_alat_detail_rkb' );
     }
 }

@@ -150,9 +150,9 @@ class RKBGeneralController extends Controller
     {
         // check first if the RKB have link_alat_detail_rkb or not
         $rkb = RKB::findOrFail ( $id );
-        if ( isset ( $rkb->link_alat_detail_rkb ) )
+        if ( isset ( $rkb->linkAlatDetailRkbs ) )
         {
-            if ( $rkb->link_alat_detail_rkb->count () > 0 )
+            if ( $rkb->linkAlatDetailRkbs->count () > 0 )
             {
 
                 $rkb = RKB::find ( $id );

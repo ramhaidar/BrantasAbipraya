@@ -26,9 +26,15 @@ class DetailRKBUrgentController extends Controller
         $data                  = RKB::where ( "tipe", "Urgent" )->with (
             "linkAlatDetailRkbs.rkb",
             "linkAlatDetailRkbs.masterDataAlat",
-            "linkAlatDetailRkbs.timelineRkbUrgent",
+            // "linkAlatDetailRkbs.timelineRkbUrgent",
             "linkAlatDetailRkbs.linkRkbDetails"
         )->get ();
+        // sort linkAlatDetailRkbs berdasarkan id dari master_data_alat
+        $data = $data->map ( function ($item)
+        {
+            $item->linkAlatDetailRkbs = $item->linkAlatDetailRkbs->sortBy ( 'id_master_data_alat' );
+            return $item;
+        } );
 
         return view ( 'dashboard.rkb.urgent.detail.detail', [ 
             'rkb'                   => $rkb,
@@ -61,7 +67,8 @@ class DetailRKBUrgentController extends Controller
         try
         {
             // Ambil nomor RKB
-            $rkbNumber = RKB::findOrFail ( $validatedData[ 'id_rkb' ] )->nomor;
+            $rkb       = RKB::findOrFail ( $validatedData[ 'id_rkb' ] );
+            $rkbNumber = $rkb->nomor;
 
             // Buat entri baru di DetailRKBUrgent (tanpa dokumentasi untuk sementara)
             $detailRKBUrgent = DetailRkbUrgent::create ( [ 
@@ -85,7 +92,7 @@ class DetailRKBUrgentController extends Controller
                     // Format nama file
                     $originalName = pathinfo ( $file->getClientOriginalName (), PATHINFO_FILENAME );
                     $extension    = $file->getClientOriginalExtension ();
-                    $timestamp    = date ( 'Y-m-d--H-i-s' );
+                    $timestamp    = now ()->format ( 'Y-m-d--H-i-s' );
                     $fileName     = "{$originalName}---{$timestamp}.{$extension}";
 
                     // Simpan file ke folder
@@ -103,7 +110,7 @@ class DetailRKBUrgentController extends Controller
                     'id_master_data_alat' => $validatedData[ 'id_master_data_alat' ],
                 ],
                 [ 
-                    'id_timeline_rkb_urgent' => null, // Default null, bisa diupdate nanti
+                    'nama_mekanik' => $validatedData[ 'nama_mekanik' ], // Atur nilai default
                 ]
             );
 
@@ -117,12 +124,18 @@ class DetailRKBUrgentController extends Controller
         }
         catch ( \Exception $e )
         {
-            // Tangani kesalahan dan kembalikan pesan kesalahan ke pengguna
+            // Tangani kesalahan dan log error
+            \Log::error ( 'Failed to create Detail RKB Urgent: ' . $e->getMessage (), [ 
+                'request_data'   => $request->all (),
+                'validated_data' => $validatedData,
+            ] );
+
             return redirect ()->back ()->withErrors ( [ 
                 'error' => 'Failed to create Detail RKB Urgent: ' . $e->getMessage (),
             ] );
         }
     }
+
 
     // Return the data in json for a specific DetailRKBUrgent
     public function show ( $id )
@@ -199,9 +212,6 @@ class DetailRKBUrgentController extends Controller
                 [ 
                     'id_rkb'              => $validatedData[ 'id_rkb' ],
                     'id_master_data_alat' => $validatedData[ 'id_master_data_alat' ],
-                ],
-                [ 
-                    'id_timeline_rkb_urgent' => null, // Default null
                 ]
             );
 

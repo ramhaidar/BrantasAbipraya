@@ -14,6 +14,7 @@ use App\Http\Controllers\RKBGeneralController;
 use App\Http\Controllers\MasterDataAlatController;
 use App\Http\Controllers\DetailRKBUrgentController;
 use App\Http\Controllers\DetailRKBGeneralController;
+use App\Http\Controllers\TimelineRKBUrgentController;
 use App\Http\Controllers\EvaluasiRKBGeneralController;
 use App\Http\Controllers\MasterDataSupplierController;
 use App\Http\Controllers\MasterDataSparepartController;
@@ -759,6 +760,42 @@ Route::middleware ( 'auth' )
                 '/{id}',
                 [ DetailRKBUrgentController::class, 'destroy' ]
             )->name ( 'destroy' );
+
+            Route::get (
+                '/{id}/dokumentasi',
+                [ DetailRKBUrgentController::class, 'getDokumentasi' ]
+            )->name ( 'dokumentasi' );
+
+            // Rute Timeline RKB Urgent [TimelineRKBUrgentController]
+            Route::prefix ( 'timeline' )
+                ->as ( 'timeline.' )
+                ->group ( function ()
+            {
+                Route::get (
+                    '/{id}',
+                    [ TimelineRKBUrgentController::class, 'index' ]
+                )->name ( 'index' );
+
+                Route::post (
+                    '/',
+                    [ TimelineRKBUrgentController::class, 'store' ]
+                )->name ( 'store' );
+
+                Route::get (
+                    '/show/{id}',
+                    [ TimelineRKBUrgentController::class, 'show' ]
+                )->name ( 'show' );
+
+                Route::put (
+                    '/{id}',
+                    [ TimelineRKBUrgentController::class, 'update' ]
+                )->name ( 'update' );
+
+                Route::delete (
+                    '/{id}',
+                    [ TimelineRKBUrgentController::class, 'destroy' ]
+                )->name ( 'destroy' );
+            } );
         } );
     } );
 
@@ -835,8 +872,3 @@ Route::middleware ( 'auth' )
 
         } );
     } );
-
-Route::get (
-    '/detail-rkb-urgent/{id}/dokumentasi',
-    [ DetailRkbUrgentController::class, 'getDokumentasi' ]
-);

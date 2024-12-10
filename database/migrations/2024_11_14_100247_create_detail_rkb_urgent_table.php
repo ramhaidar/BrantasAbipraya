@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string ( 'satuan' )->nullable (); // Satuan barang
             $table->string ( 'kronologi' )->nullable (); // Penjelasan urgensi
             $table->string ( 'nama_mekanik' )->nullable (); // Nama mekanik terkait
-            $table->string ( 'dokumentasi' )->nullable (); // Dokumentasi file (path)
+            $table->string ( 'dokumentasi' )->nullable ();
 
             $table->foreignId ( 'id_kategori_sparepart_sparepart' )->nullable ()
                 ->constrained ( 'kategori_sparepart' )->nullOnDelete (); // Kategori sparepart

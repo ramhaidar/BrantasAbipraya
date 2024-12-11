@@ -65,7 +65,7 @@ class DetailRKBGeneralController extends Controller
         // Buat atau cari LinkAlatDetailRkb
         $linkAlatDetailRKB = LinkAlatDetailRkb::firstOrCreate (
             [ 
-                'id_rkb'              => $linkRkbDetail->id, // Use the newly created LinkRkbDetail id
+                'id_rkb'              => $validatedData[ 'id_rkb' ], // Use the newly created LinkRkbDetail id
                 'id_master_data_alat' => $validatedData[ 'id_master_data_alat' ],
             ],
             [ 

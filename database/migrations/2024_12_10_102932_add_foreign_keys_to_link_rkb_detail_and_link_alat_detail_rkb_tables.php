@@ -26,7 +26,7 @@ return new class extends Migration
         Schema::table ( 'link_alat_detail_rkb', function (Blueprint $table)
         {
             $table->foreign ( 'id_rkb' )
-                ->references ( 'id' )->on ( 'link_rkb_detail' )
+                ->references ( 'id' )->on ( 'rkb' )
                 ->nullOnDelete ();
 
             $table->foreign ( 'id_master_data_alat' )

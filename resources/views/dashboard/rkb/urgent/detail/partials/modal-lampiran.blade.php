@@ -19,7 +19,7 @@
 
                         <div class="col-12 mt-3" id="pdfPreviewContainer" style="display: none;">
                             <label class="form-label">Pratinjau PDF:</label>
-                            <canvas id="pdfPreviewCanvas" style="border: 1px solid #ccc; width: 100%;"></canvas>
+                            <div id="pdfPreview" style="border: 1px solid #ccc; width: 100%; height: 500px;"></div>
                         </div>
                     </div>
                 </div>
@@ -33,64 +33,75 @@
     </div>
 </div>
 
-@push('scripts')
-    <!-- Include PDF.js Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.14.305/pdf.min.js"></script>
+@push('scripts_3')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.0/pdfobject.min.js" integrity="sha512-Nr6NV16pWOefJbWJiT8SrmZwOomToo/84CNd0MN6DxhP5yk8UAoPUjNuBj9KyRYVpESUb14RTef7FKxLVA4WGQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            'use strict';
+        $(document).ready(function() {
+            //console.log("jQuery is ready!");
 
-            const lampiranInput = document.getElementById('lampiranInput');
-            const pdfPreviewContainer = document.getElementById('pdfPreviewContainer');
-            const pdfPreviewCanvas = document.getElementById('pdfPreviewCanvas');
+            const lampiranInput = $('#lampiranInput');
+            const pdfPreviewContainer = $('#pdfPreviewContainer');
+            const pdfPreview = $('#pdfPreview');
+            const resetButton = $('#lampiranForm button[type="reset"]'); // Select reset button
 
-            // Function to preview PDF using PDF.js
-            const previewPDF = (file) => {
-                const fileReader = new FileReader();
+            //console.log(lampiranInput);
 
-                fileReader.onload = function(e) {
-                    const pdfData = e.target.result;
+            lampiranInput.on('change', function() {
+                //console.log("File input changed.");
+                const file = this.files[0];
 
-                    // Using PDF.js to load and render PDF
-                    const loadingTask = pdfjsLib.getDocument({
-                        data: pdfData
-                    });
-
-                    loadingTask.promise.then(function(pdf) {
-                        pdf.getPage(1).then(function(page) {
-                            const scale = 1.5;
-                            const viewport = page.getViewport({
-                                scale: scale
-                            });
-
-                            const context = pdfPreviewCanvas.getContext('2d');
-                            pdfPreviewCanvas.width = viewport.width;
-                            pdfPreviewCanvas.height = viewport.height;
-
-                            const renderContext = {
-                                canvasContext: context,
-                                viewport: viewport
-                            };
-                            page.render(renderContext);
-
-                            pdfPreviewContainer.style.display = 'block';
-                        });
-                    }, function(reason) {
-                        console.error('Error loading PDF:', reason);
-                    });
-                };
-
-                fileReader.readAsArrayBuffer(file);
-            };
-
-            lampiranInput.addEventListener('change', function() {
-                const file = lampiranInput.files[0];
                 if (file && file.type === 'application/pdf') {
-                    previewPDF(file);
+                    //console.log("PDF file selected:", file.name);
+
+                    // Revoke any previously created object URL to prevent memory leaks
+                    const previousUrl = pdfPreview.data('fileUrl');
+                    if (previousUrl) {
+                        URL.revokeObjectURL(previousUrl);
+                    }
+
+                    const fileURL = URL.createObjectURL(file); // Create an object URL for the file
+                    pdfPreview.data('fileUrl', fileURL); // Save the object URL for later cleanup
+
+                    // Embed the PDF using PDFObject
+                    const options = {
+                        width: "100%",
+                        height: "500px"
+                    };
+                    const embedded = PDFObject.embed(fileURL, '#pdfPreview', options);
+
+                    // Show or hide the preview container based on embedding result
+                    if (embedded) {
+                        //console.log('PDF successfully embedded.');
+                        pdfPreviewContainer.show();
+                    } else {
+                        console.error('PDF embedding failed.');
+                        alert('Gagal menampilkan pratinjau PDF. Silakan coba lagi.');
+                        pdfPreviewContainer.hide();
+                    }
                 } else {
                     alert('Silakan unggah file PDF yang valid.');
-                    lampiranInput.value = ''; // Reset the input
-                    pdfPreviewContainer.style.display = 'none';
+                    lampiranInput.val(''); // Reset the input
+                    pdfPreviewContainer.hide();
+                }
+            });
+
+            // Reset button functionality
+            resetButton.on('click', function() {
+                //console.log("Reset button clicked.");
+                lampiranInput.val(''); // Clear the file input
+                pdfPreviewContainer.hide(); // Hide the preview container
+                const previousUrl = pdfPreview.data('fileUrl');
+                if (previousUrl) {
+                    URL.revokeObjectURL(previousUrl); // Clean up object URL
+                    pdfPreview.removeData('fileUrl'); // Remove stored data
+                }
+            });
+
+            // Hide preview if no file is selected
+            lampiranInput.on('input', function() {
+                if (!this.value) {
+                    //console.log("Input cleared, hiding preview.");
+                    pdfPreviewContainer.hide();
                 }
             });
         });

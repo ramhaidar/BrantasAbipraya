@@ -48,54 +48,39 @@ class DetailRKBGeneralController extends Controller
             'id_rkb'                          => 'required|integer|exists:rkb,id', // Pastikan RKB terkait
         ] );
 
-        try
-        {
-            // Buat entri baru di DetailRKBGeneral
-            $detailRKBGeneral = DetailRkbGeneral::create ( [ 
-                'quantity_requested'              => $validatedData[ 'quantity_requested' ],
-                'satuan'                          => $validatedData[ 'satuan' ],
-                'id_kategori_sparepart_sparepart' => $validatedData[ 'id_kategori_sparepart_sparepart' ],
-                'id_master_data_sparepart'        => $validatedData[ 'id_master_data_sparepart' ],
-            ] );
+        // Buat entri baru di DetailRKBGeneral
+        $detailRKBGeneral = DetailRkbGeneral::create ( [ 
+            'quantity_requested'              => $validatedData[ 'quantity_requested' ],
+            'satuan'                          => $validatedData[ 'satuan' ],
+            'id_kategori_sparepart_sparepart' => $validatedData[ 'id_kategori_sparepart_sparepart' ],
+            'id_master_data_sparepart'        => $validatedData[ 'id_master_data_sparepart' ],
+        ] );
 
-            // Pastikan LinkRkbDetail ada
-            $linkRkbDetail = LinkRkbDetail::firstOrCreate (
-                [ 
-                    'id' => $validatedData[ 'id_rkb' ]
-                ],
-                [ 
-                    'id_detail_rkb_general'   => null,
-                    'id_link_alat_detail_rkb' => null
-                ]
-            );
+        // Buat entri LinkRkbDetail baru terlebih dahulu
+        $linkRkbDetail = LinkRkbDetail::create ( [ 
+            'id_detail_rkb_general'   => $detailRKBGeneral->id,
+            'id_link_alat_detail_rkb' => null, // Temporarily null
+        ] );
 
-            // Buat atau cari LinkAlatDetailRkb
-            $linkAlatDetailRKB = LinkAlatDetailRkb::firstOrCreate (
-                [ 
-                    'id_rkb'              => $linkRkbDetail->id,
-                    'id_master_data_alat' => $validatedData[ 'id_master_data_alat' ],
-                ],
-                [ 
-                    'nama_mekanik' => null
-                ] // Nilai default jika tidak ditemukan
-            );
+        // Buat atau cari LinkAlatDetailRkb
+        $linkAlatDetailRKB = LinkAlatDetailRkb::firstOrCreate (
+            [ 
+                'id_rkb'              => $linkRkbDetail->id, // Use the newly created LinkRkbDetail id
+                'id_master_data_alat' => $validatedData[ 'id_master_data_alat' ],
+            ],
+            [ 
+                'nama_mekanik' => null
+            ] // Nilai default jika tidak ditemukan
+        );
 
-            // Buat entri LinkRkbDetail baru
-            LinkRkbDetail::create ( [ 
-                'id_detail_rkb_general'   => $detailRKBGeneral->id,
-                'id_link_alat_detail_rkb' => $linkAlatDetailRKB->id,
-            ] );
+        // Update the LinkRkbDetail with the correct link_alat_detail_rkb ID
+        $linkRkbDetail->update ( [ 
+            'id_link_alat_detail_rkb' => $linkAlatDetailRKB->id,
+        ] );
 
-            return redirect ()->back ()->with ( 'success', 'Detail RKB General created and linked successfully!' );
-        }
-        catch ( \Exception $e )
-        {
-            // Tangani kesalahan
-            return redirect ()->back ()->withErrors ( [ 
-                'error' => 'Failed to create Detail RKB General: ' . $e->getMessage (),
-            ] );
-        }
+        return redirect ()->back ()->with ( 'success', 'Detail RKB General created and linked successfully!' );
     }
+
 
 
 

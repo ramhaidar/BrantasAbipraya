@@ -28,13 +28,12 @@ class DetailRKBUrgentController extends Controller
             "linkAlatDetailRkbs.masterDataAlat",
             // "linkAlatDetailRkbs.timelineRkbUrgent",
             "linkAlatDetailRkbs.linkRkbDetails"
-        )->get ();
+        )->findOrFail ( $id );
+
         // sort linkAlatDetailRkbs berdasarkan id dari master_data_alat
-        $data = $data->map ( function ($item)
-        {
-            $item->linkAlatDetailRkbs = $item->linkAlatDetailRkbs->sortBy ( 'id_master_data_alat' );
-            return $item;
-        } );
+        $data->linkAlatDetailRkbs = $data->linkAlatDetailRkbs->sortBy ( 'id_master_data_alat' );
+
+        // dd ( $data->toArray () );
 
         return view ( 'dashboard.rkb.urgent.detail.detail', [ 
             'rkb'                   => $rkb,

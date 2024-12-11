@@ -48,68 +48,65 @@
                 $processedAlat = []; // Untuk melacak kode alat yang sudah diproses
             @endphp
 
-            @foreach ($data as $item)
-                @foreach ($item->linkAlatDetailRkbs as $item2)
-                    @foreach ($item2->linkRkbDetails as $item3)
-                        @php
-                            // Hitung jumlah baris untuk setiap kode alat
-                            $kodeAlat = $item2->masterDataAlat->kode_alat;
-                            if (!isset($alatRowCount[$kodeAlat])) {
-                                $alatRowCount[$kodeAlat] = collect($item2->linkRkbDetails)->count();
-                            }
-                        @endphp
+            @foreach ($data->linkAlatDetailRkbs as $item2)
+                @foreach ($item2->linkRkbDetails as $item3)
+                    @php
+                        // Hitung jumlah baris untuk setiap kode alat
+                        $kodeAlat = $item2->masterDataAlat->kode_alat;
+                        if (!isset($alatRowCount[$kodeAlat])) {
+                            $alatRowCount[$kodeAlat] = collect($item2->linkRkbDetails)->count();
+                        }
+                    @endphp
 
-                        <tr>
-                            <td class="text-center">{{ $item2->masterDataAlat->jenis_alat }}</td>
-                            <td class="text-center">{{ $item2->masterDataAlat->kode_alat }}</td>
-                            <td class="text-center">{{ $item3->detailRkbUrgent->kategoriSparepart->kode }}: {{ $item3->detailRkbUrgent->kategoriSparepart->nama }}</td>
-                            <td class="text-center">{{ $item3->detailRkbUrgent->masterDataSparepart->nama }}</td>
-                            <td class="text-center">{{ $item3->detailRkbUrgent->masterDataSparepart->part_number }}</td>
-                            <td class="text-center">{{ $item3->detailRkbUrgent->masterDataSparepart->merk }}</td>
-                            <td class="text-center">{{ $item3->detailRkbUrgent->nama_mekanik }}</td>
-                            <td class="text-center">
-                                <button class="btn btn-primary" data-id="{{ $item3->detailRkbUrgent->id }}" onclick="showDokumentasi({{ $item3->detailRkbUrgent->id }})">
-                                    <i class="bi bi-file-earmark-text"></i>
-                                </button>
+                    <tr>
+                        <td class="text-center">{{ $item2->masterDataAlat->jenis_alat }}</td>
+                        <td class="text-center">{{ $item2->masterDataAlat->kode_alat }}</td>
+                        <td class="text-center">{{ $item3->detailRkbUrgent->kategoriSparepart->kode }}: {{ $item3->detailRkbUrgent->kategoriSparepart->nama }}</td>
+                        <td class="text-center">{{ $item3->detailRkbUrgent->masterDataSparepart->nama }}</td>
+                        <td class="text-center">{{ $item3->detailRkbUrgent->masterDataSparepart->part_number }}</td>
+                        <td class="text-center">{{ $item3->detailRkbUrgent->masterDataSparepart->merk }}</td>
+                        <td class="text-center">{{ $item3->detailRkbUrgent->nama_mekanik }}</td>
+                        <td class="text-center">
+                            <button class="btn btn-primary" data-id="{{ $item3->detailRkbUrgent->id }}" onclick="showDokumentasi({{ $item3->detailRkbUrgent->id }})">
+                                <i class="bi bi-file-earmark-text"></i>
+                            </button>
+                        </td>
+
+                        @if (!in_array($kodeAlat, $processedAlat))
+                            <!-- Jika belum diproses -->
+                            <td class="text-center" rowspan="{{ $alatRowCount[$kodeAlat] }}">
+                                <a class="btn btn-primary" href="{{ route('rkb_urgent.detail.timeline.index', ['id' => $item2->id]) }}">
+                                    <i class="bi bi-hourglass-split"></i>
+                                </a>
                             </td>
 
-                            @if (!in_array($kodeAlat, $processedAlat))
-                                <!-- Jika belum diproses -->
-                                <td class="text-center" rowspan="{{ $alatRowCount[$kodeAlat] }}">
-                                    <a class="btn btn-primary" href="{{ route('rkb_urgent.detail.timeline.index', ['id' => $item2->id]) }}">
-                                        <i class="bi bi-hourglass-split"></i>
-                                    </a>
-                                </td>
-
-                                <td class="text-center" rowspan="{{ $alatRowCount[$kodeAlat] }}">
-                                    <a class="btn btn-primary" href="#">
-                                        <i class="bi bi-paperclip"></i>
-                                    </a>
-                                </td>
-
-                                @php
-                                    $processedAlat[] = $kodeAlat; // Tandai kode alat sebagai sudah diproses
-                                @endphp
-                            @else
-                                <td style="display: none;"></td> <!-- Placeholder untuk konsistensi kolom Timeline -->
-                                <td style="display: none;"></td> <!-- Placeholder untuk konsistensi kolom Lampiran -->
-                            @endif
-
-                            <td class="text-center">{{ $item3->detailRkbUrgent->quantity_requested }}</td>
-                            <td class="text-center">{{ $item3->detailRkbUrgent->quantity_approved ?? '-' }}</td>
-                            <td class="text-center">{{ $item3->detailRkbUrgent->satuan }}</td>
-                            <td class="text-center">
-                                <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item3->detailRkbUrgent->id }}">
-                                    <i class="bi bi-trash"></i>
-                                </button>
+                            <td class="text-center" rowspan="{{ $alatRowCount[$kodeAlat] }}">
+                                <a class="btn btn-primary" href="#">
+                                    <i class="bi bi-paperclip"></i>
+                                </a>
                             </td>
-                        </tr>
-                    @endforeach
+
+                            @php
+                                $processedAlat[] = $kodeAlat; // Tandai kode alat sebagai sudah diproses
+                            @endphp
+                        @else
+                            <td style="display: none;"></td> <!-- Placeholder untuk konsistensi kolom Timeline -->
+                            <td style="display: none;"></td> <!-- Placeholder untuk konsistensi kolom Lampiran -->
+                        @endif
+
+                        <td class="text-center">{{ $item3->detailRkbUrgent->quantity_requested }}</td>
+                        <td class="text-center">{{ $item3->detailRkbUrgent->quantity_approved ?? '-' }}</td>
+                        <td class="text-center">{{ $item3->detailRkbUrgent->satuan }}</td>
+                        <td class="text-center">
+                            <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item3->detailRkbUrgent->id }}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
                 @endforeach
             @endforeach
         </tbody>
     </table>
-
 </div>
 
 @push('scripts_3')

@@ -15,12 +15,7 @@ return new class extends Migration
         {
             $table->id ();
 
-            $table->string ( 'dokumentasi' )->nullable ();
-
-            $table->foreignId ( 'id_link_alat_detail_rkb' )
-                ->nullable ()
-                ->constrained ( 'link_alat_detail_rkb' )
-                ->cascadeOnDelete ();
+            $table->string ( 'file_path' )->nullable ();
 
             $table->timestamps ();
         } );

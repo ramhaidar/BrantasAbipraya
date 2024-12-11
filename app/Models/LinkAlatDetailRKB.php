@@ -6,6 +6,7 @@ use App\Models\MasterDataAlat;
 use App\Models\DetailRKBUrgent;
 use App\Models\DetailRKBGeneral;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -20,17 +21,18 @@ class LinkAlatDetailRKB extends Model
         'nama_mekanik',
         'id_rkb',
         'id_master_data_alat',
+        'id_lampiran_rkb_urgent',
     ];
 
     protected $casts = [ 
-        'id'                  => 'integer',
-        'nama_mekanik'        => 'string',
-        'id_rkb'              => 'integer',
-        'id_master_data_alat' => 'integer',
-        'created_at'          => 'datetime',
-        'updated_at'          => 'datetime',
+        'id'                     => 'integer',
+        'nama_mekanik'           => 'string',
+        'id_rkb'                 => 'integer',
+        'id_master_data_alat'    => 'integer',
+        'id_lampiran_rkb_urgent' => 'integer',
+        'created_at'             => 'datetime',
+        'updated_at'             => 'datetime',
     ];
-
 
     public function rkb () : BelongsTo
     {
@@ -52,8 +54,8 @@ class LinkAlatDetailRKB extends Model
         return $this->hasMany ( TimelineRKBUrgent::class, 'id_link_alat_detail_rkb' );
     }
 
-    public function lampiranRkbUrgents () : HasMany
+    public function lampiranRkbUrgents () : HasOne
     {
-        return $this->hasMany ( LampiranRKBUrgent::class, 'id_link_alat_detail_rkb' );
+        return $this->hasOne ( LampiranRKBUrgent::class, 'id_lampiran_rkb_urgent' );
     }
 }

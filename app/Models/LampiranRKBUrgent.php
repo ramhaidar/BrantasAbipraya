@@ -13,16 +13,14 @@ class LampiranRKBUrgent extends Model
     protected $table = 'lampiran_rkb_urgent';
 
     protected $fillable = [ 
-        'dokumentasi',
-        'id_link_alat_detail_rkb',
+        'file_path',
     ];
 
     protected $casts = [ 
-        'id'                      => 'integer',
-        'dokumentasi'             => 'string',
-        'id_link_alat_detail_rkb' => 'integer',
-        'created_at'              => 'datetime',
-        'updated_at'              => 'datetime',
+        'id'         => 'integer',
+        'file_path'  => 'string',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     public function linkAlatDetailRKB () : BelongsTo

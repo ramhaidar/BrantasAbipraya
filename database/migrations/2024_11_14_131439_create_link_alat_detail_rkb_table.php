@@ -15,6 +15,7 @@ return new class extends Migration
 
             $table->unsignedBigInteger ( 'id_rkb' )->nullable ();
             $table->unsignedBigInteger ( 'id_master_data_alat' )->nullable ();
+            $table->unsignedBigInteger ( 'id_lampiran_rkb_urgent' )->nullable ();
 
             $table->timestamps ();
         } );

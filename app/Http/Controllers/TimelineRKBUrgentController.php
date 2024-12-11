@@ -15,15 +15,27 @@ class TimelineRKBUrgentController extends Controller
     {
         $rkb     = Proyek::find ( $id );
         $proyeks = Proyek::orderByDesc ( 'updated_at' )->get ();
-        $data    = LinkAlatDetailRKB::find ( $id )->with ( [ 
+        $data    = LinkAlatDetailRKB::with ( [ 
             'rkb',
             'masterDataAlat',
             'timelineRkbUrgents',
             'linkRkbDetails'
-        ] )->first ();
+        ] )->find ( $id );
+
+        // dd ( $data );
+
+        // $data = TimelineRKBUrgent::find ( $id )->with ( [ 
+//     'kategoriSparepart',
+//     'masterDataSparepart',
+//     'linkAlatDetailRkb',
+// ] )->get ();
+
+        // Filter $data that have 
 
         // sort $data by timeline_rkb_urgent id
-        $data->timelineRkbUrgents = $data->timelineRkbUrgents->sortBy ( 'id' );
+// $data = $data->sortBy ( 'id' );
+
+        // dd ( $data );
 
         return view ( 'dashboard.rkb.urgent.detail.timeline.timeline', [ 
             'rkb'        => $rkb,
@@ -118,4 +130,23 @@ class TimelineRKBUrgentController extends Controller
         }
     }
 
+    public function destroy ( $id )
+    {
+        try
+        {
+            // Temukan data berdasarkan ID
+            $timeline = TimelineRKBUrgent::findOrFail ( $id );
+
+            // Hapus data dari database
+            $timeline->delete ();
+
+            // Redirect dengan pesan sukses
+            return redirect ()->back ()->with ( 'success', 'Data pekerjaan berhasil dihapus.' );
+        }
+        catch ( \Exception $e )
+        {
+            // Redirect dengan pesan error jika terjadi masalah
+            return redirect ()->back ()->with ( 'error', 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage () );
+        }
+    }
 }

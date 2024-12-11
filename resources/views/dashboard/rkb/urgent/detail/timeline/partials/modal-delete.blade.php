@@ -57,7 +57,7 @@
                 const form = document.getElementById('deleteForm');
 
                 // Gunakan route() untuk membuat URL dinamis
-                form.action = `{{ route('rkb_urgent.detail.destroy', ['id' => ':id']) }}`.replace(':id', id);
+                form.action = `{{ route('rkb_urgent.detail.timeline.destroy', ['id' => ':id']) }}`.replace(':id', id);
 
                 form.submit(); // Kirim form
             }

@@ -23,15 +23,22 @@ class DetailRKBUrgentController extends Controller
         $master_data_alat      = MasterDataAlat::all ();
         $master_data_sparepart = MasterDataSparepart::all ();
         $kategori_sparepart    = KategoriSparepart::all ();
-        $data                  = RKB::where ( "tipe", "Urgent" )->with (
-            "linkAlatDetailRkbs.rkb",
-            "linkAlatDetailRkbs.masterDataAlat",
-            // "linkAlatDetailRkbs.timelineRkbUrgent",
-            "linkAlatDetailRkbs.linkRkbDetails"
-        )->findOrFail ( $id );
+        $data                  = RKB::where ( "tipe", "Urgent" )
+            ->with ( [ 
+                "linkAlatDetailRkbs" => function ($query)
+                {
+                    $query->orderBy ( 'id_master_data_alat' );
+                },
+                "linkAlatDetailRkbs.rkb",
+                "linkAlatDetailRkbs.masterDataAlat",
+                // "linkAlatDetailRkbs.timelineRkbUrgent",
+                "linkAlatDetailRkbs.linkRkbDetails",
+                "linkAlatDetailRkbs.lampiranRkbUrgent"
+            ] )
+            ->findOrFail ( $id );
 
         // sort linkAlatDetailRkbs berdasarkan id dari master_data_alat
-        $data->linkAlatDetailRkbs = $data->linkAlatDetailRkbs->sortBy ( 'id_master_data_alat' );
+        // $data->linkAlatDetailRkbs = $data->linkAlatDetailRkbs->sortBy ( 'id_master_data_alat' );
 
         // dd ( $data->toArray () );
 
@@ -92,7 +99,7 @@ class DetailRKBUrgentController extends Controller
                     $originalName = pathinfo ( $file->getClientOriginalName (), PATHINFO_FILENAME );
                     $extension    = $file->getClientOriginalExtension ();
                     $timestamp    = now ()->format ( 'Y-m-d--H-i-s' );
-                    $fileName     = "{$originalName}---{$timestamp}.{$extension}";
+                    $fileName     = "{$originalName}___{$timestamp}.{$extension}";
 
                     // Simpan file ke folder
                     $file->storeAs ( $folderPath, $fileName, 'public' );

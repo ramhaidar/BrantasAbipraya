@@ -32,6 +32,10 @@ return new class extends Migration
             $table->foreign ( 'id_master_data_alat' )
                 ->references ( 'id' )->on ( 'master_data_alat' )
                 ->nullOnDelete ();
+
+            $table->foreign ( 'id_lampiran_rkb_urgent' )
+                ->references ( 'id' )->on ( 'lampiran_rkb_urgent' )
+                ->nullOnDelete ();
         } );
     }
 

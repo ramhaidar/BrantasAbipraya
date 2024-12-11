@@ -88,13 +88,15 @@
                         className: 'text-center',
                         render: function(data, type, row) {
                             if (row.status === 'Pengajuan') {
-                                return `<span class="badge bg-primary">${row.status}</span>`;
+                                return `<span class="badge bg-primary w-100">${row.status}</span>`;
                             } else if (row.status === 'Evaluasi') {
-                                return `<span class="badge bg-warning">${row.status}</span>`;
+                                return `<span class="badge bg-warning w-100">${row.status}</span>`;
                             } else if (row.status === 'Disetujui') {
-                                return `<span class="badge bg-success">${row.status}</span>`;
+                                return `<span class="badge bg-success w-100">${row.status}</span>`;
+                            } else if (row.status === 'Menunggu Approval') {
+                                return `<span class="badge bg-secondary w-100">${row.status}</span>`;
                             } else {
-                                return `<span class="badge bg-secondary">${row.status}</span>`;
+                                return `<span class="badge bg-dark w-100">${row.status}</span>`;
                             }
                         }
                     },

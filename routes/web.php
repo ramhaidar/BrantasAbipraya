@@ -735,93 +735,93 @@ Route::middleware ( 'auth' )
         Route::prefix ( 'detail' )
             ->as ( 'detail.' )
             ->group ( function ()
-        {
-            Route::get (
-                '/{id}',
-                [ DetailRKBUrgentController::class, 'index' ]
-            )->name ( 'index' );
-
-            Route::get (
-                '/show/{id}',
-                [ DetailRKBUrgentController::class, 'show' ]
-            )->name ( 'show' );
-
-            Route::post (
-                '/',
-                [ DetailRKBUrgentController::class, 'store' ]
-            )->name ( 'store' );
-
-            Route::put (
-                '/{id}',
-                [ DetailRKBUrgentController::class, 'update' ]
-            )->name ( 'update' );
-
-            Route::delete (
-                '/{id}',
-                [ DetailRKBUrgentController::class, 'destroy' ]
-            )->name ( 'destroy' );
-
-            Route::get (
-                '/{id}/dokumentasi',
-                [ DetailRKBUrgentController::class, 'getDokumentasi' ]
-            )->name ( 'dokumentasi' );
-
-            // Rute Timeline RKB Urgent [TimelineRKBUrgentController]
-            Route::prefix ( 'timeline' )
-                ->as ( 'timeline.' )
-                ->group ( function ()
             {
                 Route::get (
                     '/{id}',
-                    [ TimelineRKBUrgentController::class, 'index' ]
+                    [ DetailRKBUrgentController::class, 'index' ]
                 )->name ( 'index' );
-
-                Route::post (
-                    '/',
-                    [ TimelineRKBUrgentController::class, 'store' ]
-                )->name ( 'store' );
 
                 Route::get (
                     '/show/{id}',
-                    [ TimelineRKBUrgentController::class, 'show' ]
+                    [ DetailRKBUrgentController::class, 'show' ]
                 )->name ( 'show' );
+
+                Route::post (
+                    '/',
+                    [ DetailRKBUrgentController::class, 'store' ]
+                )->name ( 'store' );
 
                 Route::put (
                     '/{id}',
-                    [ TimelineRKBUrgentController::class, 'update' ]
+                    [ DetailRKBUrgentController::class, 'update' ]
                 )->name ( 'update' );
 
                 Route::delete (
                     '/{id}',
-                    [ TimelineRKBUrgentController::class, 'destroy' ]
+                    [ DetailRKBUrgentController::class, 'destroy' ]
                 )->name ( 'destroy' );
+
+                Route::get (
+                    '/{id}/dokumentasi',
+                    [ DetailRKBUrgentController::class, 'getDokumentasi' ]
+                )->name ( 'dokumentasi' );
+
+                // Rute Timeline RKB Urgent [TimelineRKBUrgentController]
+                Route::prefix ( 'timeline' )
+                    ->as ( 'timeline.' )
+                    ->group ( function ()
+                    {
+                        Route::get (
+                            '/{id}',
+                            [ TimelineRKBUrgentController::class, 'index' ]
+                        )->name ( 'index' );
+
+                        Route::post (
+                            '/',
+                            [ TimelineRKBUrgentController::class, 'store' ]
+                        )->name ( 'store' );
+
+                        Route::get (
+                            '/show/{id}',
+                            [ TimelineRKBUrgentController::class, 'show' ]
+                        )->name ( 'show' );
+
+                        Route::put (
+                            '/{id}',
+                            [ TimelineRKBUrgentController::class, 'update' ]
+                        )->name ( 'update' );
+
+                        Route::delete (
+                            '/{id}',
+                            [ TimelineRKBUrgentController::class, 'destroy' ]
+                        )->name ( 'destroy' );
+                    } );
+
+                Route::prefix ( 'lampiran' )
+                    ->as ( 'lampiran.' )
+                    ->group ( function ()
+                    {
+                        Route::post (
+                            '/',
+                            [ LampiranRKBUrgentController::class, 'store' ]
+                        )->name ( 'store' );
+
+                        Route::get (
+                            '/show/{id}',
+                            [ LampiranRKBUrgentController::class, 'show' ]
+                        )->name ( 'show' );
+
+                        Route::put (
+                            '/{id}',
+                            [ LampiranRKBUrgentController::class, 'update' ]
+                        )->name ( 'update' );
+
+                        Route::delete (
+                            '/{id}',
+                            [ LampiranRKBUrgentController::class, 'destroy' ]
+                        )->name ( 'destroy' );
+                    } );
             } );
-
-            Route::prefix ( 'lampiran' )
-                ->as ( 'lampiran.' )
-                ->group ( function ()
-                {
-                    Route::post (
-                        '/',
-                        [ LampiranRKBUrgentController::class, 'store' ]
-                    )->name ( 'store' );
-
-                    Route::get (
-                        '/show/{id}',
-                        [ LampiranRKBUrgentController::class, 'show' ]
-                    )->name ( 'show' );
-
-                    Route::put (
-                        '/{id}',
-                        [ LampiranRKBUrgentController::class, 'update' ]
-                    )->name ( 'update' );
-
-                    Route::delete (
-                        '/{id}',
-                        [ LampiranRKBUrgentController::class, 'destroy' ]
-                    )->name ( 'destroy' );
-                } );
-        } );
     } );
 
 // Rute Evaluasi RKB General [EvaluasiRKBGeneralController]

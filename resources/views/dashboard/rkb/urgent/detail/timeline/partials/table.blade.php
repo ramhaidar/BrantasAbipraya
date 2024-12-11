@@ -65,7 +65,7 @@
                     <td class="text-center">{{ $diffInDaysActual ? $diffInDaysActual . ' Hari' : '-' }}</td>
                     <td class="text-center">{{ $item->tanggal_awal_actual ? \Illuminate\Support\Carbon::parse($item->tanggal_awal_actual)->format('Y-m-d') : '' }}</td>
                     <td class="text-center">{{ $item->tanggal_akhir_actual ? \Illuminate\Support\Carbon::parse($item->tanggal_akhir_actual)->format('Y-m-d') : '' }}</td>
-                    <td class="text-center">{{ $item->is_done ? 'Sudah Selesai' : 'Belum Selesai' }}</td>
+                    <td class="text-center"><span class="badge {{ $item->is_done ? 'bg-success' : 'bg-warning' }} w-100">{{ $item->is_done ? 'Sudah Selesai' : 'Belum Selesai' }}</span></td>
                     <td class="text-center">
                         <button class="btn btn-warning mx-1 editBtn" data-id="{{ $item->id }}">
                             <i class="bi bi-pencil-square"></i>

@@ -54,8 +54,9 @@ class LinkAlatDetailRKB extends Model
         return $this->hasMany ( TimelineRKBUrgent::class, 'id_link_alat_detail_rkb' );
     }
 
-    public function lampiranRkbUrgents () : HasOne
+    public function lampiranRkbUrgent () : HasOne
     {
-        return $this->hasOne ( LampiranRKBUrgent::class, 'id_lampiran_rkb_urgent' );
+        return $this->hasOne ( LampiranRKBUrgent::class, 'id', 'id_lampiran_rkb_urgent' );
     }
+
 }

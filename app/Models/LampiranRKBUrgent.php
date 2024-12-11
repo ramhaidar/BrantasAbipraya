@@ -23,8 +23,9 @@ class LampiranRKBUrgent extends Model
         'updated_at' => 'datetime',
     ];
 
-    public function linkAlatDetailRKB () : BelongsTo
+    public function linkAlatDetailRkb () : BelongsTo
     {
-        return $this->belongsTo ( LinkAlatDetailRKB::class, 'id_link_alat_detail_rkb' );
+        return $this->belongsTo ( LinkAlatDetailRKB::class, 'id', 'id_lampiran_rkb_urgent' );
     }
+
 }

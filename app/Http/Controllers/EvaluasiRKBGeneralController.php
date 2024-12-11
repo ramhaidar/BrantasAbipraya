@@ -42,6 +42,7 @@ class EvaluasiRKBGeneralController extends Controller
                     WHEN is_finalized = 1 AND is_approved = 1 THEN 'Disetujui'
                     WHEN is_finalized = 0 THEN 'Pengajuan'
                     WHEN is_finalized = 1 AND is_approved = 0 THEN 'Evaluasi'
+                    WHEN is_finalized = 1 AND is_evaluated = 1 AND is_approved = 0 THEN 'Menunggu Approval'
                     ELSE 'Tidak Diketahui'
                   END LIKE ?",
                         [ "%{$search}%" ]
@@ -85,13 +86,16 @@ class EvaluasiRKBGeneralController extends Controller
         $data = $rkbData->map ( function ($item)
         {
             $isFinalized = $item->is_finalized ?? false;
+            $isEvaluated = $item->is_evaluated ?? false;
             $isApproved = $item->is_approved ?? false;
 
             $status = match ( true )
             {
-                $isFinalized && $isApproved => 'Disetujui',
-                ! $isFinalized => 'Pengajuan',
-                $isFinalized && ! $isApproved => 'Evaluasi',
+                $isFinalized && $isEvaluated && $isApproved => 'Disetujui',
+                ! $isFinalized && ! $isEvaluated && ! $isApproved => 'Pengajuan',
+                $isFinalized && $isEvaluated && ! $isApproved => 'Menunggu Approval',
+                $isFinalized && ! $isEvaluated && ! $isApproved => 'Evaluasi',
+
                 default => 'Tidak Diketahui',
             };
 

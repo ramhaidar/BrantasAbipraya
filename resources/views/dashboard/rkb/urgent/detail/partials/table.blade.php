@@ -83,7 +83,7 @@
                             </td>
 
                             <td class="text-center" rowspan="{{ $alatRowCount[$kodeAlat] }}">
-                                <button class="btn btn-primary lampiranBtn" data-bs-toggle="modal" data-bs-target="#modalForLampiran" data-id="{{ $item2->id }}" title="Unggah Lampiran" aria-label="Unggah Lampiran">
+                                <button class="btn {{ $item2->lampiranRkbUrgent ? 'btn-warning' : 'btn-primary' }} lampiranBtn" data-bs-toggle="modal" data-bs-target="{{ $item2->lampiranRkbUrgent ? '#modalForLampiranExist' : '#modalForLampiranNew' }}" data-id-linkalatdetail="{{ $item2->id }}" data-id-lampiran="{{ $item2->lampiranRkbUrgent ? $item2->lampiranRkbUrgent->id : null }}" title="Unggah Lampiran" aria-label="Unggah Lampiran">
                                     <i class="bi bi-paperclip"></i>
                                 </button>
                             </td>

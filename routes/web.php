@@ -3,6 +3,7 @@ use App\Http\Middleware\CheckRole;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\APBController;
 use App\Http\Controllers\ATBController;
+use App\Http\Controllers\SPBController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SaldoController;
 use App\Http\Controllers\ProyekController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\RKBGeneralController;
 use App\Http\Controllers\MasterDataAlatController;
 use App\Http\Controllers\DetailRKBUrgentController;
 use App\Http\Controllers\DetailRKBGeneralController;
+use App\Http\Controllers\LampiranRKBUrgentController;
 use App\Http\Controllers\TimelineRKBUrgentController;
 use App\Http\Controllers\EvaluasiRKBGeneralController;
 use App\Http\Controllers\MasterDataSupplierController;
@@ -693,8 +695,6 @@ Route::middleware ( 'auth' )
         } );
     } );
 
-
-
 // Rute RKB Urgent [RKBUrgentController]
 Route::middleware ( 'auth' )
     ->prefix ( 'rkb-urgent' )
@@ -796,6 +796,31 @@ Route::middleware ( 'auth' )
                     [ TimelineRKBUrgentController::class, 'destroy' ]
                 )->name ( 'destroy' );
             } );
+
+            Route::prefix ( 'lampiran' )
+                ->as ( 'lampiran.' )
+                ->group ( function ()
+                {
+                    Route::post (
+                        '/',
+                        [ LampiranRKBUrgentController::class, 'store' ]
+                    )->name ( 'store' );
+
+                    Route::get (
+                        '/show/{id}',
+                        [ LampiranRKBUrgentController::class, 'show' ]
+                    )->name ( 'show' );
+
+                    Route::put (
+                        '/{id}',
+                        [ LampiranRKBUrgentController::class, 'update' ]
+                    )->name ( 'update' );
+
+                    Route::delete (
+                        '/{id}',
+                        [ LampiranRKBUrgentController::class, 'destroy' ]
+                    )->name ( 'destroy' );
+                } );
         } );
     } );
 
@@ -871,4 +896,36 @@ Route::middleware ( 'auth' )
             )->name ( 'evaluate' );
 
         } );
+    } );
+
+// Rute SPB (Surat Pemesanan Barang) [SPBController]
+Route::middleware ( 'auth' )
+    ->prefix ( 'spb' )
+    ->as ( 'spb.' )
+    ->group ( function ()
+    {
+        Route::get (
+            '/',
+            [ SPBController::class, 'index' ]
+        )->name ( 'index' );
+
+        Route::get (
+            '/{id}',
+            [ SPBController::class, 'show' ]
+        )->name ( 'show' );
+
+        Route::post (
+            '/',
+            [ SPBController::class, 'store' ]
+        )->name ( 'store' );
+
+        Route::put (
+            '/{id}',
+            [ SPBController::class, 'update' ]
+        )->name ( 'update' );
+
+        Route::delete (
+            '/{id}',
+            [ SPBController::class, 'destroy' ]
+        )->name ( 'destroy' );
     } );

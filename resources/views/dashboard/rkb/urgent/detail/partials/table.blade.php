@@ -22,6 +22,8 @@
 
 @include('dashboard.rkb.urgent.detail.partials.modal-preview')
 
+@include('dashboard.rkb.urgent.detail.partials.modal-lampiran')
+
 <div class="ibox-body ms-0 ps-0 table-responsive" style="overflow-x: hidden">
     <table class="m-0 table table-bordered table-striped" id="table-data">
         <thead class="table-primary">
@@ -81,9 +83,9 @@
                             </td>
 
                             <td class="text-center" rowspan="{{ $alatRowCount[$kodeAlat] }}">
-                                <a class="btn btn-primary" href="#">
+                                <button class="btn btn-primary lampiranBtn" data-bs-toggle="modal" data-bs-target="#modalForLampiran" data-id="{{ $item2->id }}" title="Unggah Lampiran" aria-label="Unggah Lampiran">
                                     <i class="bi bi-paperclip"></i>
-                                </a>
+                                </button>
                             </td>
 
                             @php

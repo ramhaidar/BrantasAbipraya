@@ -240,6 +240,16 @@
                                     </ul>
                                 </li>
 
+                                <!-- SPB Menu -->
+                                <li class="nav-item">
+                                    <a class="nav-link {{ str_contains($page, 'Data SPB') ? 'active' : '' }}" href="{{ route('spb.index') }}" style="{{ str_contains($headerPage, 'SPB') ? 'background-color: #483D8B; color: #ffffff;' : '' }}">
+                                        <i class="bi me-2 nav-icon bi-people-fill"></i>
+                                        <p class="truncate-text">
+                                            <span class="text-content">SPB</span>
+                                        </p>
+                                    </a>
+                                </li>
+
                                 <li class="nav-header mt-2">LIST PROYEK: {{ $proyeks->count() }}</li>
 
                                 <!-- Dynamic Project Menus -->

@@ -11,7 +11,7 @@
                 @csrf
                 <div class="modal-body">
                     <div class="row g-3">
-                        <input class="form-control" id="linkAlatDetailRKBIdNew" name="id_link_alat_detail_rkb" type="hiddenx" value="#">
+                        <input class="form-control" id="linkAlatDetailRKBIdNew" name="id_link_alat_detail_rkb" type="hidden" value="#">
 
                         <div class="col-12">
                             <label class="form-label required" for="lampiranInputNew">Unggah PDF</label>
@@ -44,12 +44,13 @@
                 <button class="btn-close" data-bs-dismiss="modal" type="button" aria-label="Close"></button>
             </div>
             <hr class="p-0 m-0 border border-secondary-subtle border-2 opacity-50">
-            <form class="needs-validation" id="lampiranFormExist" method="PUT" action="{{ route('rkb_urgent.detail.lampiran.update', ['id' => '__dataId__']) }}" enctype="multipart/form-data">
+            <form class="needs-validation" id="lampiranFormExist" method="POST" action="{{ route('rkb_urgent.detail.lampiran.update', ['id' => '__dataId__']) }}" enctype="multipart/form-data">
                 @csrf
+                @method('PUT')
                 <div class="modal-body">
                     <div class="row g-3">
-                        <input class="form-control" id="linkAlatDetailRKBIdExist" name="id_link_alat_detail_rkb" type="hiddenx" value="#">
-                        <input class="form-control" id="lampiranRKBUrgent" name="id_lampiran" type="hiddenx" value="#">
+                        <input class="form-control" id="linkAlatDetailRKBIdExist" name="id_link_alat_detail_rkb" type="hidden" value="#">
+                        <input class="form-control" id="lampiranRKBUrgent" name="id_lampiran" type="hidden" value="#">
 
                         <div class="col-12">
                             <label class="form-label required" for="lampiranInputExist">Unggah PDF</label>
@@ -207,6 +208,9 @@
                     const button = $(event.relatedTarget); // Button that triggered the modal
                     const dataIdLampiran = button.data('id-lampiran'); // Extract data-id-lampiran
                     const dataIdLinkAlatDetail = button.data('id-linkalatdetail'); // Extract data-id-linkalatdetail
+
+                    const updateUrl = `{{ route('rkb_urgent.detail.lampiran.update', ['id' => '__dataId__']) }}`.replace('__dataId__', dataIdLampiran);
+                    $('#lampiranFormExist').attr('action', updateUrl);
 
                     modal.find('input[name="id_lampiran"]').val(dataIdLampiran); // Set id_lampiran
                     modal.find('input[name="id_link_alat_detail_rkb"]').val(dataIdLinkAlatDetail); // Set id_link_alat_detail_rkb

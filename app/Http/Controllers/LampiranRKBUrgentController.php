@@ -108,4 +108,70 @@ class LampiranRKBUrgentController extends Controller
         return redirect ()->back ()->with ( 'success', 'Lampiran dan folder berhasil dihapus.' );
     }
 
+    public function update ( Request $request, $id )
+    {
+        $validatedData = $request->validate ( [ 
+            'lampiran' => 'required|file|mimes:pdf|max:2048', // Maksimal 2MB
+        ] );
+
+        try
+        {
+            // Find the existing lampiran
+            $lampiran = LampiranRKBUrgent::findOrFail ( $id );
+
+            // dd ( $lampiran );
+            // Find the associated LinkAlatDetailRKB
+            $linkAlatDetailRKB = $lampiran->linkAlatDetailRkb;
+
+            // Find the associated RKB to get RKB number for folder path
+            $rkb       = RKB::findOrFail ( $linkAlatDetailRKB->id_rkb );
+            $rkbNumber = $rkb->nomor;
+
+            // Handle file upload
+            if ( $request->hasFile ( 'lampiran' ) )
+            {
+                $file = $request->file ( 'lampiran' );
+
+                // Delete the existing file
+                $oldFilePath = storage_path ( 'app/public/' . $lampiran->file_path );
+                if ( file_exists ( $oldFilePath ) )
+                {
+                    unlink ( $oldFilePath );
+                }
+
+                // Format new file name
+                $originalName = pathinfo ( $file->getClientOriginalName (), PATHINFO_FILENAME );
+                $extension    = $file->getClientOriginalExtension ();
+                $timestamp    = now ()->format ( 'Y-m-d--H-i-s' );
+                $fileName     = "{$originalName}___{$timestamp}.{$extension}";
+
+                // Determine storage folder based on RKB number
+                $folderPath = "lampiran_rkb_urgent/{$rkbNumber}";
+
+                // Store the new file
+                $newFilePath = $file->storeAs ( $folderPath, $fileName, 'public' );
+
+                // Update the lampiran record with the new file path
+                $lampiran->update ( [ 
+                    'file_path' => $newFilePath
+                ] );
+
+                return redirect ()->back ()->with ( 'success', 'Lampiran berhasil diperbarui.' );
+            }
+
+            return redirect ()->back ()->with ( 'error', 'File lampiran tidak valid.' );
+        }
+        catch ( \Exception $e )
+        {
+            // Log the error
+            \Log::error ( 'Gagal memperbarui lampiran RKB: ' . $e->getMessage (), [ 
+                'request_data' => $request->all (),
+            ] );
+
+            return redirect ()->back ()->withErrors ( [ 
+                'error' => 'Terjadi kesalahan saat memperbarui lampiran: ' . $e->getMessage (),
+            ] );
+        }
+    }
+
 }

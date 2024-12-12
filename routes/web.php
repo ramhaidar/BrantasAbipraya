@@ -490,6 +490,18 @@ Route::prefix ( 'pagination' )->middleware ( 'auth' )->group ( function ()
         [ DetailRKBUrgentController::class, 'getData' ]
     )
         ->name ( 'detail_rkb_urgent.getData' );
+
+    Route::get (
+        '/spb/data',
+        [ SPBController::class, 'getData' ]
+    )
+        ->name ( 'spb.getData' );
+
+    // Route::get (
+    //     '/spb/detail/{id_rkb}',
+    //     [ DetailSPBController::class, 'getData' ]
+    // )
+    //     ->name ( 'detail_spb.getData' );
 } );
 
 // Rute Proyek [ProyekController]

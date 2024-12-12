@@ -11,9 +11,9 @@
                     <div class="ibox-title ps-2">
                         <p class="fw-medium">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}</p>
                     </div>
-                    <a class="btn btn-primary btn-sm" id="button-for-modal-add" data-bs-toggle="modal" data-bs-target="#modalForAdd">
+                    {{-- <a class="btn btn-primary btn-sm" id="button-for-modal-add" data-bs-toggle="modal" data-bs-target="#modalForAdd">
                         <i class="fa fa-plus"></i> <span class="ms-2">Tambah Data</span>
-                    </a>
+                    </a> --}}
                 </div>
 
                 @include('dashboard.spb.partials.table')

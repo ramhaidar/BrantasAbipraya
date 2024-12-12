@@ -20,9 +20,7 @@
                 <th class="text-center">No RKB</th>
                 <th class="text-center">Proyek</th>
                 <th class="text-center">Periode</th>
-                <th class="text-center">Status</th>
-                <th class="text-center">Ubah Detail</th>
-                <th class="text-center">Aksi</th>
+                <th class="text-center">Detail SPB</th>
             </tr>
         </thead>
         <tbody>
@@ -34,13 +32,61 @@
 @push('scripts_3')
     <script>
         $(document).ready(function() {
-            var table = $('#table-data').DataTable({
-                // pageLength: 0,
-                paginate: false,
-                // lengthMenu: [
-                //     [100],
-                //     [100]
-                // ],
+            const lastPageKey = 'lastPage_evaluasi_rkb';
+            const lastPage = localStorage.getItem(lastPageKey) ? parseInt(localStorage.getItem(lastPageKey)) : 0;
+
+            $('#table-data').DataTable({
+                processing: true,
+                serverSide: true,
+                responsive: true,
+                ajax: {
+                    url: "{{ route('spb.getData') }}",
+                    type: "GET"
+                },
+                language: {
+                    paginate: {
+                        previous: '<i class="bi bi-caret-left"></i>',
+                        next: '<i class="bi bi-caret-right"></i>'
+                    }
+                },
+                pageLength: 10,
+                lengthMenu: [
+                    [10, 25, 50],
+                    [10, 25, 50]
+                ],
+                ordering: true,
+                order: [],
+                displayStart: lastPage * 10,
+                columns: [{
+                        data: 'nomor',
+                        name: 'nomor',
+                        className: 'text-center'
+                    },
+                    {
+                        data: 'proyek',
+                        name: 'proyek',
+                        className: 'text-center'
+                    },
+                    {
+                        data: 'periode',
+                        name: 'periode',
+                        className: 'text-center'
+                    },
+                    {
+                        data: 'detail',
+                        name: 'detail',
+                        className: 'text-center',
+                        render: function(data, type, row) {
+                            return `
+                            <button class="btn btn-primary mx-1 detailBtn" data-id="${row.id}" onclick="redirectToEvaluation(${row.id})">
+            <i class="fa-solid fa-eye"></i>
+        </button>`;
+                        }
+                    }
+                ]
+            }).on('page', function() {
+                const currentPage = $('#table-data').DataTable().page();
+                localStorage.setItem(lastPageKey, currentPage);
             });
         });
     </script>

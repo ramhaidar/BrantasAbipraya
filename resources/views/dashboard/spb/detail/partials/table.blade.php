@@ -146,15 +146,35 @@
 
             $(document).on('blur', 'input[name^="harga"]', function() {
                 // Ketika user keluar dari inputan, ubah ke format Rupiah
-                var row = $(this).closest('tr');
-                var harga = unformatRupiah($(this).val());
-                var quantity = parseFloat(row.find('td:nth-child(6)').text()) || 0;
-                var jumlahHarga = harga * quantity;
+                var hargaInput = $(this);
+                var harga = unformatRupiah(hargaInput.val());
 
-                // Format "Harga" dan "Jumlah Harga" dalam Rupiah
-                $(this).val(formatRupiah(harga)); // Format harga saat blur
+                // Temukan baris induk (baris yang memiliki rowspan)
+                var row = hargaInput.closest('tr');
+
+                // Ambil semua baris dalam grup yang memiliki rowspan
+                var groupRows = [];
+                var startRow = row.index(); // Indeks baris awal
+                var rowSpan = parseInt(row.find('td:nth-child(7)').attr('rowspan')) || 1; // Ambil rowspan (kolom Satuan)
+                for (var i = 0; i < rowSpan; i++) {
+                    groupRows.push($('#table-data tbody tr').eq(startRow + i)); // Tambahkan baris ke grup
+                }
+
+                // Hitung total quantity dan jumlah harga
+                var totalQuantity = 0;
+                groupRows.forEach(function(groupRow) {
+                    var quantity = parseFloat(groupRow.find('td:nth-child(6)').text()) || 0; // Kolom Quantity
+                    totalQuantity += quantity;
+                });
+
+                // Hitung jumlah harga total
+                var jumlahHarga = harga * totalQuantity;
+
+                // Update nilai harga dan jumlah harga
+                hargaInput.val(formatRupiah(harga)); // Format harga
                 row.find('td:nth-child(9) input').val(formatRupiah(jumlahHarga)); // Format jumlah harga
             });
+
         });
     </script>
 @endpush

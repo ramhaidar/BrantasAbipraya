@@ -103,6 +103,24 @@
                     @endforeach
                 @endforeach
             </tbody>
+            <tfoot class="table-primary">
+                <tr>
+                    <th style="text-align: left;" colspan="7">Jumlah</th>
+                    <th id="totalHarga" style="text-align: center;">Rp 0</th>
+                    <th id="totalJumlahHarga" style="text-align: center;">Rp 0</th>
+                    <th></th>
+                </tr>
+                <tr>
+                    <th style="text-align: left;" colspan="8">PPN 11%</th>
+                    <th id="ppn11" style="text-align: center;">Rp 0</th>
+                    <th></th>
+                </tr>
+                <tr>
+                    <th style="text-align: left;" colspan="8">Grand Total</th>
+                    <th id="grandTotal" style="text-align: center;">Rp 0</th>
+                    <th></th>
+                </tr>
+            </tfoot>
 
         </table>
     </form>
@@ -116,12 +134,6 @@
                 ordering: false,
                 order: [],
                 searching: false,
-            });
-
-            // Inisialisasi Select2 untuk dropdown supplier
-            $('.supplier-select').select2({
-                placeholder: "Pilih Supplier",
-                width: '100%',
             });
 
             // Fungsi untuk format Rupiah
@@ -138,43 +150,65 @@
                 return parseInt(rupiah.replace(/[^\d]/g, '')) || 0;
             }
 
-            $(document).on('focus', 'input[name^="harga"]', function() {
-                // Ketika user fokus pada inputan, ubah kembali ke format angka
-                var value = $(this).val();
-                $(this).val(unformatRupiah(value));
-            });
+            // Fungsi untuk update total footer
+            function updateTotalFooter() {
+                let totalHarga = 0;
+                let totalJumlahHarga = 0;
 
+                // Iterasi melalui setiap input harga
+                $('input[name^="harga"]').each(function() {
+                    const harga = unformatRupiah($(this).val()); // Harga satuan
+                    const jumlahHarga = unformatRupiah($(this).closest('tr').find('td:nth-child(9) input').val()); // Jumlah Harga
+                    totalHarga += harga;
+                    totalJumlahHarga += jumlahHarga;
+                });
+
+                // Hitung PPN 11% dan Grand Total
+                const ppn11 = totalJumlahHarga * 0.11;
+                const grandTotal = totalJumlahHarga + ppn11;
+
+                // Update nilai di footer
+                $('#totalHarga').text(formatRupiah(totalHarga));
+                $('#totalJumlahHarga').text(formatRupiah(totalJumlahHarga));
+                $('#ppn11').text(formatRupiah(ppn11));
+                $('#grandTotal').text(formatRupiah(grandTotal));
+            }
+
+            // Event: Ketika harga berubah
             $(document).on('blur', 'input[name^="harga"]', function() {
-                // Ketika user keluar dari inputan, ubah ke format Rupiah
-                var hargaInput = $(this);
-                var harga = unformatRupiah(hargaInput.val());
+                const hargaInput = $(this);
+                const harga = unformatRupiah(hargaInput.val());
 
-                // Temukan baris induk (baris yang memiliki rowspan)
-                var row = hargaInput.closest('tr');
+                // Temukan baris induk
+                const row = hargaInput.closest('tr');
 
-                // Ambil semua baris dalam grup yang memiliki rowspan
-                var groupRows = [];
-                var startRow = row.index(); // Indeks baris awal
-                var rowSpan = parseInt(row.find('td:nth-child(7)').attr('rowspan')) || 1; // Ambil rowspan (kolom Satuan)
-                for (var i = 0; i < rowSpan; i++) {
+                // Hitung total quantity untuk grup tersebut
+                let totalQuantity = 0;
+                const groupRows = [];
+                const startRow = row.index(); // Indeks baris awal
+                const rowSpan = parseInt(row.find('td:nth-child(7)').attr('rowspan')) || 1; // Ambil rowspan
+                for (let i = 0; i < rowSpan; i++) {
                     groupRows.push($('#table-data tbody tr').eq(startRow + i)); // Tambahkan baris ke grup
                 }
 
-                // Hitung total quantity dan jumlah harga
-                var totalQuantity = 0;
                 groupRows.forEach(function(groupRow) {
-                    var quantity = parseFloat(groupRow.find('td:nth-child(6)').text()) || 0; // Kolom Quantity
+                    const quantity = parseFloat(groupRow.find('td:nth-child(6)').text()) || 0; // Kolom Quantity
                     totalQuantity += quantity;
                 });
 
                 // Hitung jumlah harga total
-                var jumlahHarga = harga * totalQuantity;
+                const jumlahHarga = harga * totalQuantity;
 
                 // Update nilai harga dan jumlah harga
                 hargaInput.val(formatRupiah(harga)); // Format harga
                 row.find('td:nth-child(9) input').val(formatRupiah(jumlahHarga)); // Format jumlah harga
+
+                // Update total footer
+                updateTotalFooter();
             });
 
+            // Hitung total saat halaman selesai dimuat
+            updateTotalFooter();
         });
     </script>
 @endpush

@@ -10,7 +10,7 @@
                 <div class="ibox">
                     <div class="ibox-head pe-0 ps-0">
                         <div class="ibox-title ps-2">
-                            <p class="fw-medium">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}</p>
+                            <p class="fw-medium">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }} - {{ $rkb->nomor }}</p>
                         </div>
                         <div class="d-flex justify-content-end gap-2">
                             <!-- Button to trigger the modal -->

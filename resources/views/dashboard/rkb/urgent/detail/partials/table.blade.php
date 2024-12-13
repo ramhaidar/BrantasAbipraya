@@ -69,7 +69,7 @@
                         <td class="text-center">{{ $item3->detailRkbUrgent->masterDataSparepart->merk }}</td>
                         <td class="text-center">{{ $item3->detailRkbUrgent->nama_mekanik }}</td>
                         <td class="text-center">
-                            <button class="btn btn-primary" data-id="{{ $item3->detailRkbUrgent->id }}" onclick="showDokumentasi({{ $item3->detailRkbUrgent->id }})">
+                            <button class="btn {{ $item3->detailRkbUrgent->dokumentasi ? 'btn-warning' : 'btn-primary' }}"" data-id="{{ $item3->detailRkbUrgent->id }}" onclick="showDokumentasi({{ $item3->detailRkbUrgent->id }})">
                                 <i class="bi bi-file-earmark-text"></i>
                             </button>
                         </td>
@@ -77,7 +77,8 @@
                         @if (!in_array($kodeAlat, $processedAlat))
                             <!-- Jika belum diproses -->
                             <td class="text-center" rowspan="{{ $alatRowCount[$kodeAlat] }}">
-                                <a class="btn btn-primary" href="{{ route('rkb_urgent.detail.timeline.index', ['id' => $item2->id]) }}">
+
+                                <a class="btn {{ $item2->timelineRkbUrgents->count() > 0 ? 'btn-warning' : 'btn-primary' }}" href="{{ route('rkb_urgent.detail.timeline.index', ['id' => $item2->id]) }}">
                                     <i class="bi bi-hourglass-split"></i>
                                 </a>
                             </td>
@@ -100,7 +101,7 @@
                         <td class="text-center">{{ $item3->detailRkbUrgent->quantity_approved ?? '-' }}</td>
                         <td class="text-center">{{ $item3->detailRkbUrgent->satuan }}</td>
                         <td class="text-center">
-                            <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item3->detailRkbUrgent->id }}">
+                            <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item3->detailRkbUrgent->id }}" {{ $data->is_finalized ? 'disabled' : '' }}>
                                 <i class="bi bi-trash"></i>
                             </button>
                         </td>
@@ -114,6 +115,7 @@
 @push('scripts_3')
     <script>
         var table = $('#table-data').DataTable({
+            paginate: false,
             ordering: false,
         });
 

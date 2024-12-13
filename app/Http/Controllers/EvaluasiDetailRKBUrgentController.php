@@ -1,0 +1,210 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\RKB;
+use App\Models\Proyek;
+use Illuminate\Http\Request;
+use App\Models\MasterDataAlat;
+use App\Models\DetailRKBUrgent;
+use App\Models\KategoriSparepart;
+use Illuminate\Support\Facades\DB;
+use App\Models\MasterDataSparepart;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Storage;
+
+class EvaluasiDetailRKBUrgentController extends Controller
+{
+    public function index ( $id )
+    {
+        $rkb                   = RKB::with ( [ 'proyek' ] )->find ( $id );
+        $proyeks               = Proyek::orderByDesc ( 'updated_at' )->get ();
+        $master_data_alat      = MasterDataAlat::all ();
+        $master_data_sparepart = MasterDataSparepart::all ();
+        $kategori_sparepart    = KategoriSparepart::all ();
+        $data                  = RKB::where ( "tipe", "Urgent" )
+            ->with ( [ 
+                "linkAlatDetailRkbs" => function ($query)
+                {
+                    $query->orderBy ( 'id_master_data_alat' );
+                },
+                "linkAlatDetailRkbs.rkb",
+                "linkAlatDetailRkbs.masterDataAlat",
+                // "linkAlatDetailRkbs.timelineRkbUrgent",
+                "linkAlatDetailRkbs.linkRkbDetails",
+                "linkAlatDetailRkbs.lampiranRkbUrgent"
+            ] )
+            ->findOrFail ( $id );
+
+        return view ( 'dashboard.evaluasi.urgent.detail.detail', [ 
+            'rkb'                   => $rkb,
+            'proyeks'               => $proyeks,
+            'master_data_alat'      => $master_data_alat,
+            'master_data_sparepart' => $master_data_sparepart,
+            'kategori_sparepart'    => $kategori_sparepart,
+            'data'                  => $data,
+
+            'headerPage'            => "Evaluasi Urgent",
+            'page'                  => 'Detail Evaluasi Urgent',
+        ] );
+    }
+
+    public function evaluate ( Request $request, $id_rkb )
+    {
+        // Validasi input untuk memastikan semua data sesuai
+        $request->validate ( [ 
+            'quantity_approved'   => 'required|array',
+            'quantity_approved.*' => 'required|integer|min:0',
+        ] );
+
+        // Ambil data dari input
+        $quantityApproved = $request->input ( 'quantity_approved' );
+
+        // Loop untuk mengupdate setiap baris berdasarkan ID
+        foreach ( $quantityApproved as $id => $quantity )
+        {
+            $updated = DetailRKBUrgent::where ( 'id', $id )->update ( [ 'quantity_approved' => $quantity ] );
+
+            // Debug jika update gagal
+            if ( ! $updated )
+            {
+                return redirect ()
+                    ->back ()
+                    ->with ( 'error', "Gagal mengupdate data untuk ID {$id}" );
+            }
+        }
+
+        $rkb               = RKB::find ( $id_rkb );
+        $rkb->is_evaluated = true;
+        $rkb->save ();
+
+        // Redirect dengan pesan sukses
+        return redirect ()
+            ->route ( 'evaluasi_rkb_urgent.detail.index', $id_rkb )
+            ->with ( 'success', 'RKB Berhasil di Evaluasi!' );
+    }
+
+    public function approve ( Request $request, $id_rkb )
+    {
+        $rkb              = RKB::find ( $id_rkb );
+        $rkb->is_approved = true;
+        $rkb->save ();
+
+        // Redirect dengan pesan sukses
+        return redirect ()
+            ->route ( 'evaluasi_rkb_urgent.detail.index', $id_rkb )
+            ->with ( 'success', 'RKB Berhasil di Approve!' );
+    }
+
+    public function getData ( Request $request, $id_rkb )
+    {
+        // Base query dengan relasi dan alias untuk kolom relasi
+        $query = DetailRKBUrgent::query ()
+            ->select ( [ 
+                'detail_rkb_urgent.*', // Kolom utama
+                'kategori_sparepart.kode as kategoriSparepartCode', // Alias untuk kode kategori sparepart
+                'kategori_sparepart.nama as kategoriSparepartName', // Alias untuk nama kategori sparepart
+                'master_data_sparepart.nama as sparepartName',      // Alias untuk nama sparepart
+                'master_data_sparepart.part_number as partNumber',  // Alias untuk part number
+                'master_data_sparepart.merk as merk',               // Alias untuk merk
+            ] )
+            ->leftJoin ( 'kategori_sparepart', 'detail_rkb_urgent.id_kategori_sparepart_sparepart', '=', 'kategori_sparepart.id' )
+            ->leftJoin ( 'master_data_sparepart', 'detail_rkb_urgent.id_master_data_sparepart', '=', 'master_data_sparepart.id' )
+            ->whereHas ( 'linkRkbDetails.linkAlatDetailRkb.rkb', function ($q) use ($id_rkb)
+            {
+                $q->where ( 'id', $id_rkb );
+            } );
+
+        // Pagination parameters
+        $draw   = $request->input ( 'draw' );
+        $start  = $request->input ( 'start', 0 );
+        $length = $request->input ( 'length', 10 );
+
+        // Sorting berdasarkan index kolom
+        if ( $order = $request->input ( 'order' ) )
+        {
+            $columnIndex   = $order[ 0 ][ 'column' ];
+            $sortDirection = $order[ 0 ][ 'dir' ];
+
+            switch ($columnIndex)
+            {
+                case 4: // Part Number
+                    $query->orderBy ( 'partNumber', $sortDirection );
+                    break;
+
+                default:
+                    $query->orderBy ( 'detail_rkb_urgent.created_at', 'desc' ); // Default sorting
+                    break;
+            }
+        }
+
+        // Filter pencarian
+        if ( $search = $request->input ( 'search.value' ) )
+        {
+            $query->where ( function ($q) use ($search)
+            {
+                $q->where ( 'detail_rkb_urgent.quantity_requested', 'LIKE', "%$search%" )
+                    ->orWhere ( 'detail_rkb_urgent.quantity_approved', 'LIKE', "%$search%" )
+                    ->orWhere ( 'detail_rkb_urgent.satuan', 'LIKE', "%$search%" )
+                    ->orWhere ( 'kategori_sparepart.kode', 'LIKE', "%$search%" )
+                    ->orWhere ( 'kategori_sparepart.nama', 'LIKE', "%$search%" )
+                    ->orWhere ( 'master_data_sparepart.nama', 'LIKE', "%$search%" )
+                    ->orWhere ( 'master_data_sparepart.part_number', 'LIKE', "%$search%" )
+                    ->orWhere ( 'master_data_sparepart.merk', 'LIKE', "%$search%" );
+            } );
+        }
+
+        // Total records
+        $totalRecords = $query->count ();
+
+        // Ambil data dengan paginasi
+        $data = $query->skip ( $start )->take ( $length )->get ();
+
+        // Format data untuk DataTable
+        $formattedData = $data->map ( function ($item)
+        {
+            return [ 
+                'id'                  => $item->id,
+                'masterDataAlat'      => optional ( optional ( $item->linkRkbDetails->first () )->linkAlatDetailRkb->masterDataAlat )->jenis_alat ?? '-',
+                'kodeAlat'            => optional ( optional ( $item->linkRkbDetails->first () )->linkAlatDetailRkb->masterDataAlat )->kode_alat ?? '-',
+                'kategoriSparepart'   => ( $item->kategoriSparepartCode ? "{$item->kategoriSparepartCode}: " : '' ) . ( $item->kategoriSparepartName ?? '-' ), // Format Kode: Kategori
+                'masterDataSparepart' => $item->sparepartName ?? '-',
+                'partNumber'          => $item->partNumber ?? '-', // Menggunakan alias partNumber
+                'merk'                => $item->merk ?? '-',
+                'quantity_requested'  => $item->quantity_requested,
+                'quantity_approved'   => $item->quantity_approved,
+                'quantity_in_stock'   => $item->quantity_in_stock ?? 0,
+                'satuan'              => $item->satuan,
+            ];
+        } );
+
+        return response ()->json ( [ 
+            'draw'            => $draw,
+            'recordsTotal'    => $totalRecords,
+            'recordsFiltered' => $totalRecords,
+            'data'            => $formattedData->values (),
+        ] );
+    }
+
+    public function getDokumentasi ( $id )
+    {
+        $detailRkbUrgent = DetailRkbUrgent::findOrFail ( $id );
+
+        // Assuming dokumentasi contains the folder path
+        $folderPath = $detailRkbUrgent->dokumentasi;
+
+        // Get all files from the folder
+        $files = Storage::disk ( 'public' )->files ( $folderPath );
+
+        // Prepare data for response
+        $data = array_map ( function ($file)
+        {
+            return [ 
+                'name' => basename ( $file ),
+                'url'  => Storage::url ( $file ),
+            ];
+        }, $files );
+
+        return response ()->json ( [ 'dokumentasi' => $data ] );
+    }
+}

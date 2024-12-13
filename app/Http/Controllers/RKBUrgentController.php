@@ -145,26 +145,42 @@ class RKBUrgentController extends Controller
 
     public function finalize ( $id )
     {
-        $rkb = RKB::find ( $id );
+        // Ambil RKB beserta relasi-relasi yang diperlukan
+        $rkb = RKB::with (
+            'linkAlatDetailRkbs.timelineRkbUrgents',
+            'linkAlatDetailRkbs.lampiranRkbUrgent'
+        )->findOrFail ( $id );
 
-        if ( isset ( $rkb->link_alat_detail_rkb ) )
+        // Validasi jika RKB tidak memiliki linkAlatDetailRkbs
+        if ( ! isset ( $rkb->linkAlatDetailRkbs ) || $rkb->linkAlatDetailRkbs->isEmpty () )
         {
-            if ( $rkb->link_alat_detail_rkb->count () > 0 )
+            return redirect ()->back ()->with ( 'error', 'Anda belum mengisi Data Detail RKB.' );
+        }
+
+        // Iterasi setiap linkAlatDetailRkbs untuk memastikan semua data terisi
+        foreach ( $rkb->linkAlatDetailRkbs as $detail )
+        {
+            // Cek jika timelineRkbUrgents tidak diisi
+            if ( ! isset ( $detail->timelineRkbUrgents ) || $detail->timelineRkbUrgents->isEmpty () )
             {
+                return redirect ()->back ()->with ( 'error', "Detail RKB dengan Kode Alat {$detail->masterDataAlat->kode_alat} belum memiliki Data Timeline RKB." );
+            }
 
-                if ( ! $rkb )
-                {
-                    return redirect ()->route ( 'rkb_urgent.index' )->with ( 'error', 'RKB not found' );
-                }
-
-                $rkb->is_finalized = true;
-                $rkb->save ();
-
-                return redirect ()->route ( 'rkb_urgent.index' )->with ( 'success', 'RKB successfully finalized' );
+            // Cek jika lampiranRkbUrgent tidak diisi
+            if ( ! isset ( $detail->lampiranRkbUrgent ) )
+            {
+                return redirect ()->back ()->with ( 'error', "Detail RKB dengan Kode Alat {$detail->masterDataAlat->kode_alat} belum memiliki Data Lampiran RKB." );
             }
         }
-        return redirect ()->back ()->with ( 'error', 'Anda belum mengisi data detail RKB' );
+
+        // Jika semua validasi lolos, finalisasi RKB
+        $rkb->is_finalized = true;
+        $rkb->save ();
+
+        return redirect ()->route ( 'rkb_urgent.index' )->with ( 'success', 'RKB berhasil difinalisasi.' );
     }
+
+
 
     public function getData ( Request $request )
     {

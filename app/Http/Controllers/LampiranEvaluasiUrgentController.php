@@ -8,7 +8,7 @@ use App\Models\LampiranRKBUrgent;
 use App\Models\LinkAlatDetailRKB;
 use App\Http\Controllers\Controller;
 
-class LampiranRKBUrgentController extends Controller
+class LampiranEvaluasiUrgentController extends Controller
 {
     public function store ( Request $request )
     {
@@ -62,11 +62,6 @@ class LampiranRKBUrgentController extends Controller
         }
         catch ( \Exception $e )
         {
-            // Tangani kesalahan dan log error
-            \Log::error ( 'Gagal menyimpan lampiran RKB: ' . $e->getMessage (), [ 
-                'request_data' => $request->all (),
-            ] );
-
             return redirect ()->back ()->withErrors ( [ 
                 'error' => 'Terjadi kesalahan saat menyimpan lampiran: ' . $e->getMessage (),
             ] );
@@ -123,11 +118,6 @@ class LampiranRKBUrgentController extends Controller
         }
         catch ( \Exception $e )
         {
-            // Log error
-            \Log::error ( 'Gagal menghapus lampiran RKB: ' . $e->getMessage (), [ 
-                'lampiran_id' => $id,
-            ] );
-
             return redirect ()->back ()->withErrors ( [ 
                 'error' => 'Terjadi kesalahan saat menghapus lampiran: ' . $e->getMessage (),
             ] );
@@ -190,15 +180,9 @@ class LampiranRKBUrgentController extends Controller
         }
         catch ( \Exception $e )
         {
-            // Log the error
-            \Log::error ( 'Gagal memperbarui lampiran RKB: ' . $e->getMessage (), [ 
-                'request_data' => $request->all (),
-            ] );
-
             return redirect ()->back ()->withErrors ( [ 
                 'error' => 'Terjadi kesalahan saat memperbarui lampiran: ' . $e->getMessage (),
             ] );
         }
     }
-
 }

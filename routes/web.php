@@ -15,11 +15,15 @@ use App\Http\Controllers\RKBGeneralController;
 use App\Http\Controllers\MasterDataAlatController;
 use App\Http\Controllers\DetailRKBUrgentController;
 use App\Http\Controllers\DetailRKBGeneralController;
+use App\Http\Controllers\EvaluasiRKBUrgentController;
 use App\Http\Controllers\LampiranRKBUrgentController;
 use App\Http\Controllers\TimelineRKBUrgentController;
 use App\Http\Controllers\EvaluasiRKBGeneralController;
 use App\Http\Controllers\MasterDataSupplierController;
 use App\Http\Controllers\MasterDataSparepartController;
+use App\Http\Controllers\LampiranEvaluasiUrgentController;
+use App\Http\Controllers\TimelineEvaluasiUrgentController;
+use App\Http\Controllers\EvaluasiDetailRKBUrgentController;
 use App\Http\Controllers\EvaluasiDetailRKBGeneralController;
 
 Route::get ( '/test', function ()
@@ -492,16 +496,22 @@ Route::prefix ( 'pagination' )->middleware ( 'auth' )->group ( function ()
         ->name ( 'detail_rkb_urgent.getData' );
 
     Route::get (
+        '/evaluasi-rkb-urgent/data',
+        [ EvaluasiRKBUrgentController::class, 'getData' ]
+    )
+        ->name ( 'evaluasi_rkb_urgent.getData' );
+
+    Route::get (
+        '/evaluasi-rkb-urgent/detail/{id_rkb}',
+        [ EvaluasiDetailRKBUrgentController::class, 'getData' ]
+    )
+        ->name ( 'evaluasi_detail_rkb_urgent.getData' );
+
+    Route::get (
         '/spb/data',
         [ SPBController::class, 'getData' ]
     )
         ->name ( 'spb.getData' );
-
-    // Route::get (
-    //     '/spb/detail/{id_rkb}',
-    //     [ DetailSPBController::class, 'getData' ]
-    // )
-    //     ->name ( 'detail_spb.getData' );
 } );
 
 // Rute Proyek [ProyekController]
@@ -747,93 +757,94 @@ Route::middleware ( 'auth' )
         Route::prefix ( 'detail' )
             ->as ( 'detail.' )
             ->group ( function ()
+        {
+            Route::get (
+                '/{id}',
+                [ DetailRKBUrgentController::class, 'index' ]
+            )->name ( 'index' );
+
+            Route::get (
+                '/show/{id}',
+                [ DetailRKBUrgentController::class, 'show' ]
+            )->name ( 'show' );
+
+            Route::post (
+                '/',
+                [ DetailRKBUrgentController::class, 'store' ]
+            )->name ( 'store' );
+
+            Route::put (
+                '/{id}',
+                [ DetailRKBUrgentController::class, 'update' ]
+            )->name ( 'update' );
+
+            Route::delete (
+                '/{id}',
+                [ DetailRKBUrgentController::class, 'destroy' ]
+            )->name ( 'destroy' );
+
+            Route::get (
+                '/{id}/dokumentasi',
+                [ DetailRKBUrgentController::class, 'getDokumentasi' ]
+            )->name ( 'dokumentasi' );
+
+            // Rute Timeline RKB Urgent [TimelineRKBUrgentController]
+            Route::prefix ( 'timeline' )
+                ->as ( 'timeline.' )
+                ->group ( function ()
             {
                 Route::get (
                     '/{id}',
-                    [ DetailRKBUrgentController::class, 'index' ]
+                    [ TimelineRKBUrgentController::class, 'index' ]
                 )->name ( 'index' );
-
-                Route::get (
-                    '/show/{id}',
-                    [ DetailRKBUrgentController::class, 'show' ]
-                )->name ( 'show' );
 
                 Route::post (
                     '/',
-                    [ DetailRKBUrgentController::class, 'store' ]
+                    [ TimelineRKBUrgentController::class, 'store' ]
                 )->name ( 'store' );
+
+                Route::get (
+                    '/show/{id}',
+                    [ TimelineRKBUrgentController::class, 'show' ]
+                )->name ( 'show' );
 
                 Route::put (
                     '/{id}',
-                    [ DetailRKBUrgentController::class, 'update' ]
+                    [ TimelineRKBUrgentController::class, 'update' ]
                 )->name ( 'update' );
 
                 Route::delete (
                     '/{id}',
-                    [ DetailRKBUrgentController::class, 'destroy' ]
+                    [ TimelineRKBUrgentController::class, 'destroy' ]
                 )->name ( 'destroy' );
+            } );
+
+            // Rute Lampiran RKB Urgent [LampiranRKBUrgentController]
+            Route::prefix ( 'lampiran' )
+                ->as ( 'lampiran.' )
+                ->group ( function ()
+            {
+                Route::post (
+                    '/',
+                    [ LampiranRKBUrgentController::class, 'store' ]
+                )->name ( 'store' );
 
                 Route::get (
-                    '/{id}/dokumentasi',
-                    [ DetailRKBUrgentController::class, 'getDokumentasi' ]
-                )->name ( 'dokumentasi' );
+                    '/show/{id}',
+                    [ LampiranRKBUrgentController::class, 'show' ]
+                )->name ( 'show' );
 
-                // Rute Timeline RKB Urgent [TimelineRKBUrgentController]
-                Route::prefix ( 'timeline' )
-                    ->as ( 'timeline.' )
-                    ->group ( function ()
-                    {
-                        Route::get (
-                            '/{id}',
-                            [ TimelineRKBUrgentController::class, 'index' ]
-                        )->name ( 'index' );
+                Route::put (
+                    '/{id}',
+                    [ LampiranRKBUrgentController::class, 'update' ]
+                )->name ( 'update' );
 
-                        Route::post (
-                            '/',
-                            [ TimelineRKBUrgentController::class, 'store' ]
-                        )->name ( 'store' );
-
-                        Route::get (
-                            '/show/{id}',
-                            [ TimelineRKBUrgentController::class, 'show' ]
-                        )->name ( 'show' );
-
-                        Route::put (
-                            '/{id}',
-                            [ TimelineRKBUrgentController::class, 'update' ]
-                        )->name ( 'update' );
-
-                        Route::delete (
-                            '/{id}',
-                            [ TimelineRKBUrgentController::class, 'destroy' ]
-                        )->name ( 'destroy' );
-                    } );
-
-                Route::prefix ( 'lampiran' )
-                    ->as ( 'lampiran.' )
-                    ->group ( function ()
-                    {
-                        Route::post (
-                            '/',
-                            [ LampiranRKBUrgentController::class, 'store' ]
-                        )->name ( 'store' );
-
-                        Route::get (
-                            '/show/{id}',
-                            [ LampiranRKBUrgentController::class, 'show' ]
-                        )->name ( 'show' );
-
-                        Route::put (
-                            '/{id}',
-                            [ LampiranRKBUrgentController::class, 'update' ]
-                        )->name ( 'update' );
-
-                        Route::delete (
-                            '/{id}',
-                            [ LampiranRKBUrgentController::class, 'destroy' ]
-                        )->name ( 'destroy' );
-                    } );
+                Route::delete (
+                    '/{id}',
+                    [ LampiranRKBUrgentController::class, 'destroy' ]
+                )->name ( 'destroy' );
             } );
+        } );
     } );
 
 // Rute Evaluasi RKB General [EvaluasiRKBGeneralController]
@@ -907,6 +918,142 @@ Route::middleware ( 'auth' )
                 [ EvaluasiDetailRKBGeneralController::class, 'evaluate' ]
             )->name ( 'evaluate' );
 
+        } );
+    } );
+
+// Rute Evaluasi RKB Urgent [EvaluasiRKBUrgentController]
+Route::middleware ( 'auth' )
+    ->prefix ( 'evaluasi-rkb-urgent' )
+    ->as ( 'evaluasi_rkb_urgent.' )
+    ->group ( function ()
+    {
+        Route::get (
+            '/',
+            [ EvaluasiRKBUrgentController::class, 'index' ]
+        )->name ( 'index' );
+
+        Route::get (
+            '/{id}',
+            [ EvaluasiRKBUrgentController::class, 'show' ]
+        )->name ( 'show' );
+
+        Route::post (
+            '/',
+            [ EvaluasiRKBUrgentController::class, 'store' ]
+        )->name ( 'store' );
+
+        Route::put (
+            '/{id}',
+            [ EvaluasiRKBUrgentController::class, 'update' ]
+        )->name ( 'update' );
+
+        Route::delete (
+            '/{id}',
+            [ EvaluasiRKBUrgentController::class, 'destroy' ]
+        )->name ( 'destroy' );
+
+        // Rute Detail RKB Urgent [DetailRKBUrgentController]
+        Route::prefix ( 'detail' )
+            ->as ( 'detail.' )
+            ->group ( function ()
+        {
+            Route::get (
+                '/{id}',
+                [ EvaluasiDetailRKBUrgentController::class, 'index' ]
+            )->name ( 'index' );
+
+            Route::get (
+                '/show/{id}',
+                [ EvaluasiDetailRKBUrgentController::class, 'show' ]
+            )->name ( 'show' );
+
+            Route::post (
+                '/',
+                [ EvaluasiDetailRKBUrgentController::class, 'store' ]
+            )->name ( 'store' );
+
+            Route::put (
+                '/{id}',
+                [ EvaluasiDetailRKBUrgentController::class, 'update' ]
+            )->name ( 'update' );
+
+            Route::delete (
+                '/{id}',
+                [ EvaluasiDetailRKBUrgentController::class, 'destroy' ]
+            )->name ( 'destroy' );
+
+            Route::post (
+                '/approve/{id}',
+                [ EvaluasiDetailRKBUrgentController::class, 'approve' ]
+            )->name ( 'approve' );
+
+            Route::post (
+                '/evaluate/{id}',
+                [ EvaluasiDetailRKBUrgentController::class, 'evaluate' ]
+            )->name ( 'evaluate' );
+
+            Route::get (
+                '/{id}/dokumentasi',
+                [ EvaluasiDetailRKBUrgentController::class, 'getDokumentasi' ]
+            )->name ( 'dokumentasi' );
+
+
+            // Rute Timeline Evaluasi Urgent [TimelineEvaluasiUrgentController]
+            Route::prefix ( 'timeline' )
+                ->as ( 'timeline.' )
+                ->group ( function ()
+            {
+                Route::get (
+                    '/{id}',
+                    [ TimelineEvaluasiUrgentController::class, 'index' ]
+                )->name ( 'index' );
+
+                Route::post (
+                    '/',
+                    [ TimelineEvaluasiUrgentController::class, 'store' ]
+                )->name ( 'store' );
+
+                Route::get (
+                    '/show/{id}',
+                    [ TimelineEvaluasiUrgentController::class, 'show' ]
+                )->name ( 'show' );
+
+                Route::put (
+                    '/{id}',
+                    [ TimelineEvaluasiUrgentController::class, 'update' ]
+                )->name ( 'update' );
+
+                Route::delete (
+                    '/{id}',
+                    [ TimelineEvaluasiUrgentController::class, 'destroy' ]
+                )->name ( 'destroy' );
+            } );
+
+            // Rute Lampiran Evaluasi Urgent [LampiranEvaluasiUrgentController]
+            Route::prefix ( 'lampiran' )
+                ->as ( 'lampiran.' )
+                ->group ( function ()
+            {
+                Route::post (
+                    '/',
+                    [ LampiranEvaluasiUrgentController::class, 'store' ]
+                )->name ( 'store' );
+
+                Route::get (
+                    '/show/{id}',
+                    [ LampiranEvaluasiUrgentController::class, 'show' ]
+                )->name ( 'show' );
+
+                Route::put (
+                    '/{id}',
+                    [ LampiranEvaluasiUrgentController::class, 'update' ]
+                )->name ( 'update' );
+
+                Route::delete (
+                    '/{id}',
+                    [ LampiranEvaluasiUrgentController::class, 'destroy' ]
+                )->name ( 'destroy' );
+            } );
         } );
     } );
 

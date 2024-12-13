@@ -3,31 +3,28 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
-use App\Models\Proyek;
 use App\Models\RKB;
+use App\Models\Proyek;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
-class SPBController extends Controller
+class EvaluasiRKBUrgentController extends Controller
 {
-    // Index for SPB
     public function index ()
     {
-        $proyeks = Proyek::with ( "users" )->orderByDesc ( "updated_at" )->get ();
-        // $rkbs    = RKB::where ( 'is_approved', true )->get ();
+        $proyeks = Proyek::orderByDesc ( 'updated_at' )->get ();
 
-        return view ( 'dashboard.spb.spb', [ 
+        return view ( 'dashboard.evaluasi.urgent.evaluasi_urgent', [ 
             'proyeks'    => $proyeks,
-            // 'rkbs'       => $rkbs,
 
-            'headerPage' => "SPB",
-            'page'       => 'Data SPB',
+            'headerPage' => "Evaluasi Urgent",
+            'page'       => 'Data Evaluasi Urgent',
         ] );
     }
 
     public function getData ( Request $request )
     {
-        $query = RKB::with ( 'proyek' )->where ( 'is_approved', true )->select ( 'rkb.*' );
+        $query = RKB::with ( 'proyek' )->where ( 'tipe', 'Urgent' )->select ( 'rkb.*' );
 
         // Filter pencarian
         if ( $search = $request->input ( 'search.value' ) )
@@ -39,7 +36,17 @@ class SPBController extends Controller
                     {
                         $q->where ( 'nama', 'like', "%{$search}%" );
                     } )
-                    ->orWhere ( 'periode', 'like', "%{$search}%" );
+                    ->orWhere ( 'periode', 'like', "%{$search}%" )
+                    ->orWhereRaw (
+                        "CASE 
+                    WHEN is_finalized = 1 AND is_approved = 1 THEN 'Disetujui'
+                    WHEN is_finalized = 0 THEN 'Pengajuan'
+                    WHEN is_finalized = 1 AND is_approved = 0 THEN 'Evaluasi'
+                    WHEN is_finalized = 1 AND is_evaluated = 1 AND is_approved = 0 THEN 'Menunggu Approval'
+                    ELSE 'Tidak Diketahui'
+                  END LIKE ?",
+                        [ "%{$search}%" ]
+                    );
             } );
         }
 
@@ -70,7 +77,7 @@ class SPBController extends Controller
         $start  = $request->input ( 'start', 0 );
         $length = $request->input ( 'length', 10 );
 
-        $totalRecords    = RKB::where ( 'is_approved', true )->count (); // Total hanya untuk data "Disetujui"
+        $totalRecords    = RKB::count ();
         $filteredRecords = $query->count ();
 
         $rkbData = $query->skip ( $start )->take ( $length )->get ();
@@ -78,11 +85,26 @@ class SPBController extends Controller
         // Mapping data
         $data = $rkbData->map ( function ($item)
         {
+            $isFinalized = $item->is_finalized ?? false;
+            $isEvaluated = $item->is_evaluated ?? false;
+            $isApproved = $item->is_approved ?? false;
+
+            $status = match ( true )
+            {
+                $isFinalized && $isEvaluated && $isApproved => 'Disetujui',
+                ! $isFinalized && ! $isEvaluated && ! $isApproved => 'Pengajuan',
+                $isFinalized && $isEvaluated && ! $isApproved => 'Menunggu Approval',
+                $isFinalized && ! $isEvaluated && ! $isApproved => 'Evaluasi',
+
+                default => 'Tidak Diketahui',
+            };
+
             return [ 
                 'id'      => $item->id,
                 'nomor'   => $item->nomor,
                 'proyek'  => $item->proyek->nama ?? '-',
                 'periode' => Carbon::parse ( $item->periode )->translatedFormat ( 'F Y' ),
+                'status'  => $status,
             ];
         } );
 
@@ -93,7 +115,4 @@ class SPBController extends Controller
             'data'            => $data,
         ] );
     }
-
-
-
 }

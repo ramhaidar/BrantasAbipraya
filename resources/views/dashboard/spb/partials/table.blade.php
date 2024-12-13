@@ -77,10 +77,11 @@
                         name: 'detail',
                         className: 'text-center',
                         render: function(data, type, row) {
+                            var url = '{{ route('spb.detail.index', ':id') }}'.replace(':id', row.id);
                             return `
-                            <button class="btn btn-primary mx-1 detailBtn" data-id="${row.id}" onclick="redirectToEvaluation(${row.id})">
+                            <a class="btn btn-primary mx-1 detailBtn" data-id="${row.id}" href="${url}">
             <i class="fa-solid fa-eye"></i>
-        </button>`;
+        </a>`;
                         }
                     }
                 ]

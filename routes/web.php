@@ -10,6 +10,7 @@ use App\Http\Controllers\ProyekController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DetailSPBController;
 use App\Http\Controllers\RKBUrgentController;
 use App\Http\Controllers\RKBGeneralController;
 use App\Http\Controllers\MasterDataAlatController;
@@ -1087,4 +1088,40 @@ Route::middleware ( 'auth' )
             '/{id}',
             [ SPBController::class, 'destroy' ]
         )->name ( 'destroy' );
+
+        // Rute Detail SPB [DetailSPBController]
+        Route::prefix ( 'detail' )
+            ->as ( 'detail.' )
+            ->group ( function ()
+        {
+            Route::get (
+                '/{id}',
+                [ DetailSPBController::class, 'index' ]
+            )->name ( 'index' );
+
+            Route::get (
+                '/show/{id}',
+                [ DetailSPBController::class, 'show' ]
+            )->name ( 'show' );
+
+            Route::post (
+                '/',
+                [ DetailSPBController::class, 'store' ]
+            )->name ( 'store' );
+
+            Route::put (
+                '/{id}',
+                [ DetailSPBController::class, 'update' ]
+            )->name ( 'update' );
+
+            Route::delete (
+                '/{id}',
+                [ DetailSPBController::class, 'destroy' ]
+            )->name ( 'destroy' );
+
+            Route::post (
+                '/approve/{id}',
+                [ DetailSPBController::class, 'approve' ]
+            )->name ( 'approve' );
+        } );
     } );

@@ -9,14 +9,14 @@
             <div class="ibox">
                 <div class="ibox-head pe-0 ps-0">
                     <div class="ibox-title ps-2">
-                        <p class="fw-medium">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}</p>
+                        <p class="fw-medium">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }} - {{ $rkb->nomor }}</p>
                     </div>
                     <a class="btn btn-primary btn-sm" id="button-for-modal-add" data-bs-toggle="modal" data-bs-target="#modalForAdd">
                         <i class="fa fa-plus"></i> <span class="ms-2">Tambah Data</span>
                     </a>
                 </div>
 
-                @include('dashboard.spb.partials.table')
+                @include('dashboard.spb.detail.partials.table')
 
             </div>
         </div>

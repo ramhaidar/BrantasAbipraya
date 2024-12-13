@@ -11,8 +11,8 @@
                     <div class="ibox-title ps-2">
                         <p class="fw-medium">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }} - {{ $rkb->nomor }}</p>
                     </div>
-                    <a class="btn btn-primary btn-sm" id="button-for-modal-add" data-bs-toggle="modal" data-bs-target="#modalForAdd">
-                        <i class="fa fa-plus"></i> <span class="ms-2">Tambah Data</span>
+                    <a class="btn btn-success btn-sm" id="button-for-modal-add" data-bs-toggle="modal" data-bs-target="#modalForAdd">
+                        <i class="fa fa-check"></i> <span class="ms-2">Finalisasi SPB</span>
                     </a>
                 </div>
 

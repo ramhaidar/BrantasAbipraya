@@ -42,6 +42,7 @@
                     <th class="text-center">Lampiran</th>
                     <th class="text-center">Quantity Requested</th>
                     <th class="text-center">Quantity Approved</th>
+                    <th class="text-center">Quantity in Stock</th>
                     <th class="text-center">Satuan</th>
                 </tr>
             </thead>
@@ -64,13 +65,17 @@
                         <tr>
                             <td class="text-center">{{ $item2->masterDataAlat->jenis_alat }}</td>
                             <td class="text-center">{{ $item2->masterDataAlat->kode_alat }}</td>
-                            <td class="text-center">{{ $item3->detailRkbUrgent->kategoriSparepart->kode }}: {{ $item3->detailRkbUrgent->kategoriSparepart->nama }}</td>
+                            <td class="text-center">{{ $item3->detailRkbUrgent->kategoriSparepart->kode }}:
+                                {{ $item3->detailRkbUrgent->kategoriSparepart->nama }}</td>
                             <td class="text-center">{{ $item3->detailRkbUrgent->masterDataSparepart->nama }}</td>
                             <td class="text-center">{{ $item3->detailRkbUrgent->masterDataSparepart->part_number }}</td>
                             <td class="text-center">{{ $item3->detailRkbUrgent->masterDataSparepart->merk }}</td>
                             <td class="text-center">{{ $item3->detailRkbUrgent->nama_mekanik }}</td>
                             <td class="text-center">
-                                <button class="btn {{ $item3->detailRkbUrgent->dokumentasi ? 'btn-warning' : 'btn-primary' }}"" data-id="{{ $item3->detailRkbUrgent->id }}" onclick="showDokumentasi({{ $item3->detailRkbUrgent->id }})">
+                                <button
+                                    class="btn {{ $item3->detailRkbUrgent->dokumentasi ? 'btn-warning' : 'btn-primary' }}""
+                                    data-id="{{ $item3->detailRkbUrgent->id }}"
+                                    onclick="showDokumentasi({{ $item3->detailRkbUrgent->id }})">
                                     <i class="bi bi-file-earmark-text"></i>
                                 </button>
                             </td>
@@ -79,13 +84,20 @@
                                 <!-- Jika belum diproses -->
                                 <td class="text-center" rowspan="{{ $alatRowCount[$kodeAlat] }}">
 
-                                    <a class="btn {{ $item2->timelineRkbUrgents->count() > 0 ? 'btn-warning' : 'btn-primary' }}" href="{{ route('evaluasi_rkb_urgent.detail.timeline.index', ['id' => $item2->id]) }}">
+                                    <a class="btn {{ $item2->timelineRkbUrgents->count() > 0 ? 'btn-warning' : 'btn-primary' }}"
+                                        href="{{ route('evaluasi_rkb_urgent.detail.timeline.index', ['id' => $item2->id]) }}">
                                         <i class="bi bi-hourglass-split"></i>
                                     </a>
                                 </td>
 
                                 <td class="text-center" rowspan="{{ $alatRowCount[$kodeAlat] }}">
-                                    <button class="btn {{ $item2->lampiranRkbUrgent ? 'btn-warning' : 'btn-primary' }} lampiranBtn" data-bs-toggle="modal" data-bs-target="{{ $item2->lampiranRkbUrgent ? '#modalForLampiranExist' : '#modalForLampiranNew' }}" data-id-linkalatdetail="{{ $item2->id }}" data-id-lampiran="{{ $item2->lampiranRkbUrgent ? $item2->lampiranRkbUrgent->id : null }}" title="Unggah Lampiran" aria-label="Unggah Lampiran">
+                                    <button
+                                        class="btn {{ $item2->lampiranRkbUrgent ? 'btn-warning' : 'btn-primary' }} lampiranBtn"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="{{ $item2->lampiranRkbUrgent ? '#modalForLampiranExist' : '#modalForLampiranNew' }}"
+                                        data-id-linkalatdetail="{{ $item2->id }}"
+                                        data-id-lampiran="{{ $item2->lampiranRkbUrgent ? $item2->lampiranRkbUrgent->id : null }}"
+                                        title="Unggah Lampiran" aria-label="Unggah Lampiran">
                                         <i class="bi bi-paperclip"></i>
                                     </button>
                                 </td>
@@ -100,8 +112,25 @@
 
                             <td class="text-center">{{ $item3->detailRkbUrgent->quantity_requested }}</td>
                             <td class="text-center">
-                                <input class="form-control text-center {{ $item3->detailRkbUrgent->quantity_approved ? 'bg-success-subtle' : 'bg-warning-subtle' }}" name="quantity_approved[{{ $item3->detailRkbUrgent->id }}]" type="number" value="{{ $item3->detailRkbUrgent->quantity_requested }}" min="0" />
+                                @php
+                                    $backgroundColor = '';
+                                    if ($data->is_approved) {
+                                        $backgroundColor = 'bg-primary-subtle';
+                                    } else {
+                                        $backgroundColor =
+                                            $item3->detailRkbUrgent->quantity_approved !== null
+                                                ? 'bg-success-subtle'
+                                                : 'bg-warning-subtle';
+                                    }
+
+                                    $disabled = $data->is_approved || $data->is_evaluated ? 'disabled' : '';
+                                @endphp
+                                <input class="form-control text-center {{ $backgroundColor }}"
+                                    name="quantity_approved[{{ $item3->detailRkbUrgent->id }}]" type="number"
+                                    value="{{ $item3->detailRkbUrgent->quantity_approved ?? $item3->detailRkbUrgent->quantity_requested }}"
+                                    min="0" {{ $disabled }} />
                             </td>
+                            <td class="text-center">{{ random_int(1, 15) }}</td>
                             <td class="text-center">{{ $item3->detailRkbUrgent->satuan }}</td>
                         </tr>
                     @endforeach
@@ -127,7 +156,8 @@
             const dokumentasiPreviewContainer = document.getElementById('dokumentasiPreviewContainer');
             const largeImagePreviewForShow = document.getElementById('largeImagePreviewForShow');
             const dokumentasiPreviewModal = new bootstrap.Modal(document.getElementById('dokumentasiPreviewModal'));
-            const imagePreviewModalforShow = new bootstrap.Modal(document.getElementById('imagePreviewModalforShow'));
+            const imagePreviewModalforShow = new bootstrap.Modal(document.getElementById(
+                'imagePreviewModalforShow'));
 
             // Laravel route name for dokumentasi
             const dokumentasiRoute = @json(route('evaluasi_rkb_urgent.detail.dokumentasi', ['id' => ':id']));
@@ -157,14 +187,16 @@
                                     $('#dokumentasiPreviewModal').modal('hide');
 
                                     largeImagePreviewForShow.src = file.url;
-                                    document.getElementById('imagePreviewTitleForShow').textContent = file.name;
+                                    document.getElementById('imagePreviewTitleForShow')
+                                        .textContent = file.name;
                                     imagePreviewModalforShow.show();
                                 });
 
                                 dokumentasiPreviewContainer.appendChild(img);
                             });
                         } else {
-                            dokumentasiPreviewContainer.innerHTML = '<p class="text-muted text-center">Tidak ada Dokumentasi</p>';
+                            dokumentasiPreviewContainer.innerHTML =
+                                '<p class="text-muted text-center">Tidak ada Dokumentasi</p>';
                         }
 
                         // Show dokumentasi preview modal
@@ -172,7 +204,8 @@
                     })
                     .catch(error => {
                         console.error('Error fetching dokumentasi:', error);
-                        dokumentasiPreviewContainer.innerHTML = '<p class="text-danger text-center">Failed to load dokumentasi</p>';
+                        dokumentasiPreviewContainer.innerHTML =
+                            '<p class="text-danger text-center">Failed to load dokumentasi</p>';
                         dokumentasiPreviewModal.show();
                     });
             };

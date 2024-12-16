@@ -230,7 +230,7 @@
                                         </li>
                                         <!-- Level 2 Item: Evaluasi Urgent -->
                                         <li class="nav-item">
-                                            <a class="nav-link level-1 {{ str_contains($page, 'Evaluasi Urgent') ? 'active' : '' }}" href="{{ route('evaluasi_rkb_urgent.index') }}" style="{{ str_contains($page, 'Evaluasi Urgent') ? 'background-color: #66CDAA; color: #ffffff;' : '' }}">
+                                            <a class="nav-link level-1 {{ str_contains($page, 'Timeline Detail RKB Urgent') || str_contains($page, 'Evaluasi Urgent') ? 'active' : '' }}" href="{{ route('evaluasi_rkb_urgent.index') }}" style="{{ str_contains($page, 'Timeline Detail RKB Urgent') || str_contains($page, 'Evaluasi Urgent') ? 'background-color: #66CDAA; color: #ffffff;' : '' }}">
                                                 <i class="bi me-2 nav-icon fs-5 bi-alarm-fill"></i> <!-- Icon for urgent -->
                                                 <p class="truncate-text">
                                                     <span class="text-content">Urgent</span>

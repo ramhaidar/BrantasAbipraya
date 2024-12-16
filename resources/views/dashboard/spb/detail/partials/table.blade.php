@@ -14,6 +14,49 @@
 @endpush
 
 <div class="ibox-body ms-0 ps-0 table-responsive">
+    <table class="m-0 table table-striped" id="table-data2">
+        @foreach ($rkb->linkAlatDetailRkbs as $linkAlatDetailRkb)
+            <thead class="table-primary">
+                {{-- {{ $rkb }} --}}
+
+                <tr>
+                    <th class="text-center" colspan="6">
+                        {{ $linkAlatDetailRkb->masterDataAlat->jenis_alat }}
+                    </th>
+                    <th class="text-center">
+                        {{ $linkAlatDetailRkb->masterDataAlat->kode_alat }}
+                    </th>
+                    <th class="text-center pt-2" style="width: 1%;">
+                        <button class="btn btn-primary btn-sm me-2" id="button-for-modal-add" data-bs-toggle="modal"
+                            data-bs-target="#modalForAdd" data-id="{{ $linkAlatDetailRkb->id }}">
+                            <i class="fa fa-plus"></i>
+                        </button>
+                    </th>
+                </tr>
+
+                <tr>
+                    <th class="text-center fw-medium">Sparepart</th>
+                    <th class="text-center fw-medium">Part Number</th>
+                    <th class="text-center fw-medium">Merk</th>
+                    <th class="text-center fw-medium">Quantity</th>
+                    <th class="text-center fw-medium">Satuan</th>
+                    <th class="text-center fw-medium">Harga</th>
+                    <th class="text-center fw-medium">Jumlah Harga</th>
+                    <th class="text-center fw-medium">Supplier</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+                @foreach ($linkAlatDetailRkb->linkRkbDetails as $detail)
+                    <tr>
+                        <td class="text-center">{{ $detail }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        @endforeach
+    </table>
+
     <form action="#" method="POST">
         @csrf
         <table class="m-0 table table-bordered table-striped" id="table-data">
@@ -37,11 +80,13 @@
                     $sparepartGroups = [];
                     foreach ($rkb->linkAlatDetailRkbs as $detail1) {
                         foreach ($detail1->linkRkbDetails as $detail2) {
-                            $sparepartName = $detail2->detailRkbUrgent->masterDataSparepart->nama ?? $detail2->detailRkbGeneral->masterDataSparepart->nama;
+                            $sparepartName =
+                                $detail2->detailRkbUrgent->masterDataSparepart->nama ??
+                                $detail2->detailRkbGeneral->masterDataSparepart->nama;
                             $satuan = $detail2->detailRkbUrgent->satuan ?? $detail2->detailRkbGeneral->satuan;
 
                             // Kunci grup berdasarkan nama sparepart dan satuan
-                            $groupKey = $sparepartName . '_' . $satuan;
+                            $groupKey = $sparepartName;
 
                             if (!isset($sparepartGroups[$groupKey])) {
                                 $sparepartGroups[$groupKey] = [];
@@ -79,13 +124,19 @@
                                     {{ $data['detail']->detailRkbUrgent->satuan ?? $data['detail']->detailRkbGeneral->satuan }}
                                 </td>
                                 <td class="text-center" rowspan="{{ $rowCount }}">
-                                    <input class="form-control text-center bg-warning-subtle h-100 d-flex align-items-center justify-content-center" name="harga[{{ $data['detail']->id }}]" type="text" value="Rp 0" maxlength="-1" required>
+                                    <input
+                                        class="form-control text-center bg-warning-subtle h-100 d-flex align-items-center justify-content-center"
+                                        name="harga[{{ $data['detail']->id }}]" type="text" value="Rp 0"
+                                        maxlength="-1" required>
                                 </td>
                                 <td class="text-center" rowspan="{{ $rowCount }}">
-                                    <input class="form-control text-center h-100 d-flex align-items-center justify-content-center" type="text" value="Rp 0" readonly>
+                                    <input
+                                        class="form-control text-center h-100 d-flex align-items-center justify-content-center"
+                                        type="text" value="Rp 0" readonly>
                                 </td>
                                 <td class="text-center" rowspan="{{ $rowCount }}">
-                                    <select class="form-select supplier-select" name="supplier[{{ $data['detail']->id }}]">
+                                    <select class="form-select supplier-select"
+                                        name="supplier[{{ $data['detail']->id }}]">
                                         <option value="" disabled selected>Pilih Supplier</option>
                                         @foreach ($supplier as $item)
                                             <option value="{{ $item->id }}">{{ $item->nama }}</option>
@@ -136,6 +187,19 @@
                 searching: false,
             });
 
+            var table = $('#table-data2').DataTable({
+                paginate: false,
+                ordering: false,
+                order: [],
+                searching: false,
+            });
+
+            $('.supplier-select').select2({
+                placeholder: 'Pilih Supplier',
+                width: '100%',
+                allowClear: true
+            });
+
             // Fungsi untuk format Rupiah
             function formatRupiah(angka) {
                 return new Intl.NumberFormat('id-ID', {
@@ -158,7 +222,8 @@
                 // Iterasi melalui setiap input harga
                 $('input[name^="harga"]').each(function() {
                     const harga = unformatRupiah($(this).val()); // Harga satuan
-                    const jumlahHarga = unformatRupiah($(this).closest('tr').find('td:nth-child(9) input').val()); // Jumlah Harga
+                    const jumlahHarga = unformatRupiah($(this).closest('tr').find('td:nth-child(9) input')
+                        .val()); // Jumlah Harga
                     totalHarga += harga;
                     totalJumlahHarga += jumlahHarga;
                 });
@@ -192,7 +257,8 @@
                 }
 
                 groupRows.forEach(function(groupRow) {
-                    const quantity = parseFloat(groupRow.find('td:nth-child(6)').text()) || 0; // Kolom Quantity
+                    const quantity = parseFloat(groupRow.find('td:nth-child(6)').text()) ||
+                        0; // Kolom Quantity
                     totalQuantity += quantity;
                 });
 

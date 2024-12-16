@@ -12,7 +12,7 @@ class MasterDataSupplierSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run ()
+    public function run()
     {
         // $companies = [ 
         //     "CV Cahaya Berkah Sentosa",
@@ -62,43 +62,69 @@ class MasterDataSupplierSeeder extends Seeder
         //     MasterDataSupplier::factory ()->create ( [ 'nama' => $company ] );
         // }
 
-        $real_companies = [ 
+        $real_companies = [
             "77 JAYA",
             "FAJRI JAYA MOTOR",
             "ALFIAN MOTOR",
             "AGUNG MAKMUR MOTOR",
         ];
 
-        foreach ( $real_companies as $company )
-        {
+        foreach ($real_companies as $company) {
             // Menggunakan factory untuk setiap nama perusahaan
-            MasterDataSupplier::factory ()->create ( [ 'nama' => $company ] );
+            MasterDataSupplier::factory()->create(['nama' => $company]);
         }
 
-        LinkSupplierSparepart::create ( [ 
-            'id_master_data_supplier'  => 1,
+        LinkSupplierSparepart::create([
+            'id_master_data_supplier' => 1,
             'id_master_data_sparepart' => 1,
-        ] );
+        ]);
 
-        LinkSupplierSparepart::create ( [ 
-            'id_master_data_supplier'  => 2,
+        LinkSupplierSparepart::create([
+            'id_master_data_supplier' => 2,
             'id_master_data_sparepart' => 2,
-        ] );
+        ]);
 
-        LinkSupplierSparepart::create ( [ 
-            'id_master_data_supplier'  => 2,
+        LinkSupplierSparepart::create([
+            'id_master_data_supplier' => 2,
             'id_master_data_sparepart' => 3,
-        ] );
+        ]);
 
-        LinkSupplierSparepart::create ( [ 
-            'id_master_data_supplier'  => 3,
+        LinkSupplierSparepart::create([
+            'id_master_data_supplier' => 3,
             'id_master_data_sparepart' => 4,
-        ] );
+        ]);
 
-        LinkSupplierSparepart::create ( [ 
-            'id_master_data_supplier'  => 4,
+        LinkSupplierSparepart::create([
+            'id_master_data_supplier' => 4,
             'id_master_data_sparepart' => 5,
-        ] );
+        ]);
+
+        // ==============================
+
+        LinkSupplierSparepart::create([
+            'id_master_data_supplier' => 2,
+            'id_master_data_sparepart' => 6,
+        ]);
+
+        LinkSupplierSparepart::create([
+            'id_master_data_supplier' => 1,
+            'id_master_data_sparepart' => 7,
+        ]);
+
+        LinkSupplierSparepart::create([
+            'id_master_data_supplier' => 1,
+            'id_master_data_sparepart' => 8,
+        ]);
+
+        LinkSupplierSparepart::create([
+            'id_master_data_supplier' => 4,
+            'id_master_data_sparepart' => 9,
+        ]);
+
+        LinkSupplierSparepart::create([
+            'id_master_data_supplier' => 3,
+            'id_master_data_sparepart' => 10,
+        ]);
 
     }
 }

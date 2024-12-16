@@ -9,10 +9,12 @@
             <div class="ibox">
                 <div class="ibox-head pe-0 ps-0">
                     <div class="ibox-title ps-2">
-                        <p class="fw-medium">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }} - {{ $rkb->nomor }}</p>
+                        <p class="fw-medium">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }} -
+                            {{ $rkb->nomor }}</p>
                     </div>
-                    <a class="btn btn-success btn-sm" id="button-for-modal-add" data-bs-toggle="modal" data-bs-target="#modalForAdd">
-                        <i class="fa fa-check"></i> <span class="ms-2">Finalisasi SPB</span>
+                    <a class="btn btn-success btn-sm" id="button-for-modal-add" data-bs-toggle="modal"
+                        data-bs-target="#modalForAdd">
+                        <i class="fa fa-save"></i> <span class="ms-2">Simpan Data SPB</span>
                     </a>
                 </div>
 
@@ -23,7 +25,7 @@
     </div>
 
     <!-- Modal for Adding Data -->
-    {{-- @include('dashboard.rkb.urgent.partials.modal-add') --}}
+    @include('dashboard.spb.detail.partials.modal-add')
 
     <!-- Modal for Deleting Data -->
     {{-- @include('dashboard.rkb.urgent.partials.modal-delete') --}}

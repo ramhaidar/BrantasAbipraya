@@ -29,7 +29,8 @@
                     <button class="btn-close" data-bs-dismiss="modal" type="button" aria-label="Close"></button>
             </div>
             <hr class="p-0 m-0 border border-secondary-subtle border-2 opacity-50">
-            <form class="needs-validation" id="detailrkbgeneralForm" style="overflow-y: auto" novalidate method="POST" action="{{ route('rkb_general.detail.store') }}">
+            <form class="needs-validation" id="detailrkbgeneralForm" style="overflow-y: auto" novalidate method="POST"
+                action="{{ route('rkb_general.detail.store') }}">
                 @csrf
                 <div class="modal-body">
                     <div class="row g-3">
@@ -41,18 +42,22 @@
                             <select class="form-control" id="id_master_data_alat" name="id_master_data_alat" required>
                                 <option value="">Pilih Alat</option>
                                 @foreach ($master_data_alat as $alat)
-                                    <option value="{{ $alat->id }}">{{ $alat->kode_alat }} - {{ $alat->jenis_alat }}</option>
+                                    <option value="{{ $alat->id }}">{{ $alat->kode_alat }} - {{ $alat->jenis_alat }}
+                                    </option>
                                 @endforeach
                             </select>
                             <div class="invalid-feedback">Alat diperlukan.</div>
                         </div>
 
                         <div class="col-12">
-                            <label class="form-label required" for="id_kategori_sparepart_sparepart">Kategori Sparepart</label>
-                            <select class="form-control" id="id_kategori_sparepart_sparepart" name="id_kategori_sparepart_sparepart" required>
+                            <label class="form-label required" for="id_kategori_sparepart_sparepart">Kategori
+                                Sparepart</label>
+                            <select class="form-control" id="id_kategori_sparepart_sparepart"
+                                name="id_kategori_sparepart_sparepart" required>
                                 <option value="">Pilih Kategori</option>
                                 @foreach ($kategori_sparepart as $kategori)
-                                    <option value="{{ $kategori->id }}">{{ $kategori->kode }}: {{ $kategori->nama }}</option>
+                                    <option value="{{ $kategori->id }}">{{ $kategori->kode }}: {{ $kategori->nama }}
+                                    </option>
                                 @endforeach
                             </select>
                             <div class="invalid-feedback">Kategori diperlukan.</div>
@@ -60,10 +65,12 @@
 
                         <div class="col-12">
                             <label class="form-label required" for="id_master_data_sparepart">Sparepart</label>
-                            <select class="form-control" id="id_master_data_sparepart" name="id_master_data_sparepart" required>
+                            <select class="form-control" id="id_master_data_sparepart" name="id_master_data_sparepart"
+                                required>
                                 <option value="">Pilih Sparepart</option>
                                 @foreach ($master_data_sparepart as $sparepart)
-                                    <option value="{{ $sparepart->id }}">{{ $sparepart->nama }} - {{ $sparepart->part_number }} - {{ $sparepart->merk }}</option>
+                                    <option value="{{ $sparepart->id }}">{{ $sparepart->nama }} -
+                                        {{ $sparepart->part_number }} - {{ $sparepart->merk }}</option>
                                 @endforeach
                             </select>
                             <div class="invalid-feedback">Sparepart diperlukan.</div>
@@ -72,7 +79,8 @@
                         <!-- New Fields for Detail RKB General -->
                         <div class="col-12">
                             <label class="form-label required" for="quantity_requested">Quantity</label>
-                            <input class="form-control" id="quantity_requested" name="quantity_requested" type="number" min="1" placeholder="Quantity" required>
+                            <input class="form-control" id="quantity_requested" name="quantity_requested" type="number"
+                                min="1" placeholder="Quantity" required>
                             <div class="invalid-feedback">Quantity diperlukan.</div>
                         </div>
 
@@ -121,7 +129,8 @@
             });
 
             // Initialize select2 for dropdowns
-            const $select2Elements = $('#id_master_data_alat, #id_kategori_sparepart_sparepart, #id_master_data_sparepart, #satuan');
+            const $select2Elements = $(
+                '#id_master_data_alat, #id_kategori_sparepart_sparepart, #id_master_data_sparepart, #satuan');
             $select2Elements.select2({
                 placeholder: "Pilih",
                 allowClear: true,
@@ -151,7 +160,9 @@
                 $sparepartSelect.empty().trigger('change');
 
                 // Show loading spinner
-                const $loadingOverlay = $('<div class="loading-overlay"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+                const $loadingOverlay = $(
+                    '<div class="loading-overlay"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>'
+                );
                 $('#modalForAdd').append($loadingOverlay);
 
                 // Disable sparepart dropdown
@@ -163,7 +174,8 @@
                         type: 'GET',
                         success: function(data) {
                             // Add a placeholder option
-                            $sparepartSelect.append(new Option('Pilih Sparepart', '', true, true));
+                            $sparepartSelect.append(new Option('Pilih Sparepart', '', true,
+                                true));
 
                             // Populate the select with new data
                             $.each(data, function(index, sparepart) {

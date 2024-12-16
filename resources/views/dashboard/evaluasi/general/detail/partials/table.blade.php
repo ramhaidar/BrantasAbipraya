@@ -80,13 +80,15 @@
                         targets: 7, // Quantity Approved
                         className: 'text-center nowrap-column',
                         render: function(data, type, row) {
+                            // console.log(row);
                             let backgroundColor;
 
                             // Determine background color based on conditions
                             if (row.is_approved) {
                                 backgroundColor = 'bg-primary-subtle';
                             } else {
-                                backgroundColor = row.quantity_approved !== null ? 'bg-success-subtle' : 'bg-warning-subtle';
+                                backgroundColor = row.quantity_approved !== null ?
+                                    'bg-success-subtle' : 'bg-warning-subtle';
                             }
 
                             // the input will be disabled if is_approved is true or is_evaluated is true
@@ -106,8 +108,10 @@ min="0" />
                         className: 'text-center nowrap-column',
                         render: function(data, type, row) {
                             // Generate random stock value if not provided
-                            if (row.quantity_in_stock === null || row.quantity_in_stock === undefined || row.quantity_in_stock === 0) {
-                                const randomStock = Math.floor(Math.random() * (25 - 1 + 1)) + 1; // Random between 1 and 500
+                            if (row.quantity_in_stock === null || row.quantity_in_stock ===
+                                undefined || row.quantity_in_stock === 0) {
+                                const randomStock = Math.floor(Math.random() * (25 - 1 + 1)) +
+                                    1; // Random between 1 and 500
                                 return randomStock; // Use random value if stock is null or 0
                             }
                             return row.quantity_in_stock; // Use actual stock if available
@@ -168,7 +172,7 @@ min="0" />
                 searching: false, // Disable global search
                 drawCallback: function(settings) {
                     // Merge rows with jQuery
-                    mergeStockColumn();
+                    // mergeStockColumn();
                 },
 
             });
@@ -189,7 +193,8 @@ min="0" />
                     const $row = $(this);
                     const sparepart = $row.find('td:eq(4)').text().trim(); // Ambil teks kolom Sparepart
                     const stockCell = $row.find('td:eq(8)'); // Cell untuk Quantity in Stock
-                    const stock = parseInt(stockCell.text().trim(), 10) || 0; // Ambil nilai Quantity in Stock
+                    const stock = parseInt(stockCell.text().trim(), 10) ||
+                        0; // Ambil nilai Quantity in Stock
 
                     if (sparepart === previousSparepart) {
                         // Tambahkan nilai stok

@@ -72,14 +72,22 @@ class EvaluasiDetailRKBGeneralController extends Controller
 
     public function approve ( Request $request, $id_rkb )
     {
-        $rkb              = RKB::find ( $id_rkb );
+        $rkb = RKB::find ( $id_rkb );
+
+        // Update all DetailRKBGeneral records for this RKB
+        DetailRKBGeneral::whereHas ( 'linkRkbDetails.linkAlatDetailRkb.rkb', function ($query) use ($id_rkb)
+        {
+            $query->where ( 'id', $id_rkb );
+        } )->update ( [ 
+                    'quantity_remainder' => \DB::raw ( 'quantity_approved' )
+                ] );
+
         $rkb->is_approved = true;
         $rkb->save ();
 
-        // Redirect dengan pesan sukses
         return redirect ()
-            ->route ( "evaluasi_rkb_general.detail.index", $id_rkb )
-            ->with ( "success", "RKB Berhasil di Approve!" );
+            ->route ( 'evaluasi_rkb_general.detail.index', $id_rkb )
+            ->with ( 'success', 'RKB Berhasil di Approve!' );
     }
 
     public function getData ( Request $request, $id_rkb )

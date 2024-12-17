@@ -12,7 +12,7 @@ class MasterDataSupplierSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run()
+    public function run ()
     {
         // $companies = [ 
         //     "CV Cahaya Berkah Sentosa",
@@ -62,69 +62,109 @@ class MasterDataSupplierSeeder extends Seeder
         //     MasterDataSupplier::factory ()->create ( [ 'nama' => $company ] );
         // }
 
-        $real_companies = [
+        $real_companies = [ 
             "77 JAYA",
             "FAJRI JAYA MOTOR",
             "ALFIAN MOTOR",
             "AGUNG MAKMUR MOTOR",
+
+            "SUMBER JAYA TEKNIK",
+            "PRIMA PARTS INDONESIA",
+            "MEGA MOTOR SPAREPART"
         ];
 
-        foreach ($real_companies as $company) {
+        foreach ( $real_companies as $company )
+        {
             // Menggunakan factory untuk setiap nama perusahaan
-            MasterDataSupplier::factory()->create(['nama' => $company]);
+            MasterDataSupplier::factory ()->create ( [ 'nama' => $company ] );
         }
 
-        LinkSupplierSparepart::create([
-            'id_master_data_supplier' => 1,
+        LinkSupplierSparepart::create ( [ 
+            'id_master_data_supplier'  => 1,
             'id_master_data_sparepart' => 1,
-        ]);
+        ] );
 
-        LinkSupplierSparepart::create([
-            'id_master_data_supplier' => 2,
+        LinkSupplierSparepart::create ( [ 
+            'id_master_data_supplier'  => 2,
             'id_master_data_sparepart' => 2,
-        ]);
+        ] );
 
-        LinkSupplierSparepart::create([
-            'id_master_data_supplier' => 2,
+        LinkSupplierSparepart::create ( [ 
+            'id_master_data_supplier'  => 2,
             'id_master_data_sparepart' => 3,
-        ]);
+        ] );
 
-        LinkSupplierSparepart::create([
-            'id_master_data_supplier' => 3,
+        LinkSupplierSparepart::create ( [ 
+            'id_master_data_supplier'  => 3,
             'id_master_data_sparepart' => 4,
-        ]);
+        ] );
 
-        LinkSupplierSparepart::create([
-            'id_master_data_supplier' => 4,
+        LinkSupplierSparepart::create ( [ 
+            'id_master_data_supplier'  => 4,
             'id_master_data_sparepart' => 5,
-        ]);
+        ] );
 
         // ==============================
 
-        LinkSupplierSparepart::create([
-            'id_master_data_supplier' => 2,
+        LinkSupplierSparepart::create ( [ 
+            'id_master_data_supplier'  => 2,
             'id_master_data_sparepart' => 6,
-        ]);
+        ] );
 
-        LinkSupplierSparepart::create([
-            'id_master_data_supplier' => 1,
+        LinkSupplierSparepart::create ( [ 
+            'id_master_data_supplier'  => 1,
             'id_master_data_sparepart' => 7,
-        ]);
+        ] );
 
-        LinkSupplierSparepart::create([
-            'id_master_data_supplier' => 1,
+        LinkSupplierSparepart::create ( [ 
+            'id_master_data_supplier'  => 1,
             'id_master_data_sparepart' => 8,
-        ]);
+        ] );
 
-        LinkSupplierSparepart::create([
-            'id_master_data_supplier' => 4,
+        LinkSupplierSparepart::create ( [ 
+            'id_master_data_supplier'  => 4,
             'id_master_data_sparepart' => 9,
-        ]);
+        ] );
 
-        LinkSupplierSparepart::create([
-            'id_master_data_supplier' => 3,
+        LinkSupplierSparepart::create ( [ 
+            'id_master_data_supplier'  => 3,
             'id_master_data_sparepart' => 10,
-        ]);
+        ] );
+
+        // Ensure all parts (1-35) have at least one supplier
+        for ( $i = 1; $i <= 35; $i++ )
+        {
+            // Check if part already has a supplier
+            $existingLink = LinkSupplierSparepart::where ( 'id_master_data_sparepart', $i )->first ();
+
+            if ( ! $existingLink )
+            {
+                // If no supplier exists, assign one randomly
+                LinkSupplierSparepart::create ( [ 
+                    'id_master_data_supplier'  => rand ( 1, 7 ),
+                    'id_master_data_sparepart' => $i,
+                ] );
+            }
+
+            // Add additional suppliers randomly (30% chance for each part)
+            if ( rand ( 1, 100 ) <= 30 )
+            {
+                $existingSuppliers = LinkSupplierSparepart::where ( 'id_master_data_sparepart', $i )
+                    ->pluck ( 'id_master_data_supplier' )
+                    ->toArray ();
+
+                $newSupplier = rand ( 1, 7 );
+                while ( in_array ( $newSupplier, $existingSuppliers ) )
+                {
+                    $newSupplier = rand ( 1, 7 );
+                }
+
+                LinkSupplierSparepart::create ( [ 
+                    'id_master_data_supplier'  => $newSupplier,
+                    'id_master_data_sparepart' => $i,
+                ] );
+            }
+        }
 
     }
 }

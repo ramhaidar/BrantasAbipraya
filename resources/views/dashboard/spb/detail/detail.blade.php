@@ -12,10 +12,17 @@
                         <p class="fw-medium">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }} -
                             {{ $rkb->nomor }}</p>
                     </div>
-                    <a class="btn btn-success btn-sm" id="button-for-modal-add" data-bs-toggle="modal"
-                        data-bs-target="#modalForAdd">
-                        <i class="fa fa-save"></i> <span class="ms-2">Simpan Data SPB</span>
-                    </a>
+                    <div class="ms-auto d-flex gap-2 pe-2">
+                        <button class="btn btn-warning btn-sm" id="riwayat-spb-button" data-bs-toggle="modal"
+                            data-bs-target="#modalRiwayatSPB">
+                            <i class="fa fa-save"></i> <span class="ms-2">Riwayat Pembuatan SPB</span>
+                        </button>
+
+                        <button class="btn btn-success btn-sm" id="save-spb-button" data-bs-toggle="modal"
+                            data-bs-target="#modalForSaveSPB" {{ $totalItems === 0 ? 'disabled' : '' }}>
+                            <i class="fa fa-add"></i> <span class="ms-2">Buat SPB</span>
+                        </button>
+                    </div>
                 </div>
 
                 @include('dashboard.spb.detail.partials.table')
@@ -24,8 +31,11 @@
         </div>
     </div>
 
-    <!-- Modal for Adding Data -->
-    @include('dashboard.spb.detail.partials.modal-add')
+    <!-- Modal for Save Data -->
+    @include('dashboard.spb.detail.partials.modal-save')
+
+    <!-- Modal for Riwayat Data -->
+    @include('dashboard.spb.detail.partials.modal-riwayat')
 
     <!-- Modal for Deleting Data -->
     {{-- @include('dashboard.rkb.urgent.partials.modal-delete') --}}

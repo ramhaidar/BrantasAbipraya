@@ -7,177 +7,211 @@
 
         #table-data td,
         #table-data th {
-            /* padding: 4px 8px; */
             vertical-align: middle;
+        }
+
+        /* Add these styles */
+        #table-data th:nth-child(9),
+        #table-data th:nth-child(10),
+        #table-data td:nth-child(9),
+        #table-data td:nth-child(10) {
+            min-width: 10dvw;
+            width: 10dvw;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
         }
     </style>
 @endpush
 
-<div class="ibox-body ms-0 ps-0 table-responsive">
-    <table class="m-0 table table-striped" id="table-data2">
-        @foreach ($rkb->linkAlatDetailRkbs as $linkAlatDetailRkb)
-            <thead class="table-primary">
-                {{-- {{ $rkb }} --}}
-
-                <tr>
-                    <th class="text-center" colspan="6">
-                        {{ $linkAlatDetailRkb->masterDataAlat->jenis_alat }}
-                    </th>
-                    <th class="text-center">
-                        {{ $linkAlatDetailRkb->masterDataAlat->kode_alat }}
-                    </th>
-                    <th class="text-center pt-2" style="width: 1%;">
-                        <button class="btn btn-primary btn-sm me-2" id="button-for-modal-add" data-bs-toggle="modal"
-                            data-bs-target="#modalForAdd" data-id="{{ $linkAlatDetailRkb->id }}">
-                            <i class="fa fa-plus"></i>
-                        </button>
-                    </th>
-                </tr>
-
-                <tr>
-                    <th class="text-center fw-medium">Sparepart</th>
-                    <th class="text-center fw-medium">Part Number</th>
-                    <th class="text-center fw-medium">Merk</th>
-                    <th class="text-center fw-medium">Quantity</th>
-                    <th class="text-center fw-medium">Satuan</th>
-                    <th class="text-center fw-medium">Harga</th>
-                    <th class="text-center fw-medium">Jumlah Harga</th>
-                    <th class="text-center fw-medium">Supplier</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-                @foreach ($linkAlatDetailRkb->linkRkbDetails as $detail)
-                    <tr>
-                        <td class="text-center">{{ $detail }}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        @endforeach
-    </table>
-
-    <form action="#" method="POST">
+<div class="ibox-body ms-0 ps-0">
+    <form action="{{ route('spb.detail.store') }}" method="POST" id="detailSpbForm" enctype="multipart/form-data">
         @csrf
-        <table class="m-0 table table-bordered table-striped" id="table-data">
-            <thead class="table-primary">
-                <tr>
-                    <th class="text-center">Nama Alat</th>
-                    <th class="text-center">Kode Alat</th>
-                    <th class="text-center">Sparepart</th>
-                    <th class="text-center">Part Number</th>
-                    <th class="text-center">Merk</th>
-                    <th class="text-center">Quantity</th>
-                    <th class="text-center">Satuan</th>
-                    <th class="text-center">Harga</th>
-                    <th class="text-center">Jumlah Harga</th>
-                    <th class="text-center">Supplier</th>
-                </tr>
-            </thead>
+        <input type="hidden" name="id_rkb" value="{{ $rkb->id }}">
 
-            <tbody>
-                @php
-                    $sparepartGroups = [];
-                    foreach ($rkb->linkAlatDetailRkbs as $detail1) {
-                        foreach ($detail1->linkRkbDetails as $detail2) {
-                            $sparepartName =
-                                $detail2->detailRkbUrgent->masterDataSparepart->nama ??
-                                $detail2->detailRkbGeneral->masterDataSparepart->nama;
-                            $satuan = $detail2->detailRkbUrgent->satuan ?? $detail2->detailRkbGeneral->satuan;
+        @php
+            $sparepartGroups = [];
+            $totalItems = 0;
+            foreach ($rkb->linkAlatDetailRkbs as $detail1) {
+                foreach ($detail1->linkRkbDetails as $detail2) {
+                    $remainder =
+                        $detail2->detailRkbUrgent?->quantity_remainder ??
+                        ($detail2->detailRkbGeneral?->quantity_remainder ?? 0);
 
-                            // Kunci grup berdasarkan nama sparepart dan satuan
-                            $groupKey = $sparepartName;
-
-                            if (!isset($sparepartGroups[$groupKey])) {
-                                $sparepartGroups[$groupKey] = [];
-                            }
-
-                            $sparepartGroups[$groupKey][] = [
-                                'alat' => $detail1->masterDataAlat,
-                                'detail' => $detail2,
-                                'satuan' => $satuan,
-                            ];
-                        }
+                    if ($remainder <= 0) {
+                        continue;
                     }
-                @endphp
+                    $totalItems++;
 
-                @foreach ($sparepartGroups as $sparepartName => $group)
-                    @php
-                        $rowCount = count($group);
-                    @endphp
-                    @foreach ($group as $index => $data)
-                        <tr>
-                            <td class="text-center">{{ $data['alat']->jenis_alat }}</td>
-                            <td class="text-center">{{ $data['alat']->kode_alat }}</td>
-                            <td class="text-center">{{ $sparepartName }}</td>
-                            <td class="text-center">
-                                {{ $data['detail']->detailRkbUrgent->masterDataSparepart->part_number ?? $data['detail']->detailRkbGeneral->masterDataSparepart->part_number }}
-                            </td>
-                            <td class="text-center">
-                                {{ $data['detail']->detailRkbUrgent->masterDataSparepart->merk ?? $data['detail']->detailRkbGeneral->masterDataSparepart->merk }}
-                            </td>
-                            <td class="text-center">
-                                {{ $data['detail']->detailRkbUrgent->quantity_approved ?? $data['detail']->detailRkbGeneral->quantity_approved }}
-                            </td>
-                            @if ($index === 0)
-                                <td class="text-center" rowspan="{{ $rowCount }}">
-                                    {{ $data['detail']->detailRkbUrgent->satuan ?? $data['detail']->detailRkbGeneral->satuan }}
+                    $sparepartName =
+                        $detail2->detailRkbUrgent->masterDataSparepart->nama ??
+                        $detail2->detailRkbGeneral->masterDataSparepart->nama;
+                    $satuan = $detail2->detailRkbUrgent->satuan ?? $detail2->detailRkbGeneral->satuan;
+                    $kategori =
+                        $detail2->detailRkbUrgent->kategoriSparepart->nama ??
+                        $detail2->detailRkbGeneral->kategoriSparepart->nama;
+
+                    $groupKey = $sparepartName;
+
+                    if (!isset($sparepartGroups[$groupKey])) {
+                        $sparepartGroups[$groupKey] = [];
+                    }
+
+                    $sparepartGroups[$groupKey][] = [
+                        'alat' => $detail1->masterDataAlat,
+                        'detail' => $detail2,
+                        'satuan' => $satuan,
+                        'kategori' => $kategori,
+                        'alat_detail_id' => $detail1->id,
+                    ];
+                }
+            }
+        @endphp
+
+        <div class="row mb-3 ps-3">
+            <div class="col-md-4">
+                <label class="form-label">Pilih Supplier</label>
+                <select class="form-select supplier-select-main" name="supplier_main" id="supplier_main"
+                    {{ $totalItems === 0 ? 'disabled' : '' }}>
+                    <option value="" disabled selected>Pilih Supplier</option>
+                    @foreach ($supplier as $item)
+                        <option value="{{ $item->id }}">{{ $item->nama }}</option>
+                    @endforeach
+                </select>
+                @if ($totalItems === 0)
+                    <small class="text-danger">Tidak ada item yang tersedia untuk pembuatan SPB</small>
+                @endif
+            </div>
+        </div>
+
+        <div class="table-responsive pe-3">
+            <table class="table table-bordered table-striped" id="table-data">
+                <thead class="table-primary">
+                    <tr>
+                        <th class="text-center">Nama Alat</th>
+                        <th class="text-center">Kode Alat</th>
+                        <th class="text-center">Kategori</th>
+                        <th class="text-center">Sparepart Requested</th>
+                        <th class="text-center">Sparepart PO</th>
+                        <th class="text-center">Quantity Sisa</th>
+                        <th class="text-center">Quantity PO</th>
+                        <th class="text-center">Satuan</th>
+                        <th class="text-center">Harga</th>
+                        <th class="text-center">Jumlah Harga</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach ($sparepartGroups as $sparepartName => $group)
+                        @foreach ($group as $index => $data)
+                            <tr>
+                                <td class="text-center">{{ $data['alat']->jenis_alat }}</td>
+                                <td class="text-center">{{ $data['alat']->kode_alat }}</td>
+                                <td class="text-center">{{ $data['kategori'] }}</td>
+                                <td class="text-center">
+                                    @php
+                                        $sparepart =
+                                            $data['detail']->detailRkbUrgent?->masterDataSparepart ??
+                                            $data['detail']->detailRkbGeneral?->masterDataSparepart;
+                                    @endphp
+                                    {{ $sparepartName }} - {{ $sparepart->part_number ?? '-' }} -
+                                    {{ $sparepart->merk ?? '-' }}
                                 </td>
-                                <td class="text-center" rowspan="{{ $rowCount }}">
-                                    <input
-                                        class="form-control text-center bg-warning-subtle h-100 d-flex align-items-center justify-content-center"
-                                        name="harga[{{ $data['detail']->id }}]" type="text" value="Rp 0"
-                                        maxlength="-1" required>
-                                </td>
-                                <td class="text-center" rowspan="{{ $rowCount }}">
-                                    <input
-                                        class="form-control text-center h-100 d-flex align-items-center justify-content-center"
-                                        type="text" value="Rp 0" readonly>
-                                </td>
-                                <td class="text-center" rowspan="{{ $rowCount }}">
-                                    <select class="form-select supplier-select"
-                                        name="supplier[{{ $data['detail']->id }}]">
-                                        <option value="" disabled selected>Pilih Supplier</option>
-                                        @foreach ($supplier as $item)
-                                            <option value="{{ $item->id }}">{{ $item->nama }}</option>
-                                        @endforeach
+                                <td class="text-center">
+                                    @php
+                                        $kategoriId = $data['detail']->detailRkbUrgent
+                                            ? $data['detail']->detailRkbUrgent->id_kategori_sparepart_sparepart
+                                            : $data['detail']->detailRkbGeneral->id_kategori_sparepart_sparepart;
+                                    @endphp
+                                    <select class="form-select sparepart-select"
+                                        name="sparepart[{{ $data['detail']->id }}]"
+                                        id="sparepart-{{ $data['detail']->id }}" data-kategori="{{ $kategoriId }}"
+                                        required disabled>
+                                        <option value="" selected disabled>Pilih Sparepart</option>
                                     </select>
                                 </td>
-                            @else
-                                <!-- Tambahkan kolom dummy untuk mengisi tempat kolom rowspan -->
-                                <td style="display: none;"></td>
-                                <td style="display: none;"></td>
-                                <td style="display: none;"></td>
-                                <td style="display: none;"></td>
-                            @endif
-                        </tr>
+                                <td class="text-center">
+                                    {{ $data['detail']->detailRkbUrgent->quantity_remainder ?? $data['detail']->detailRkbGeneral->quantity_remainder }}
+                                </td>
+                                <td class="text-center">
+                                    <input type="number" class="form-control text-center"
+                                        name="qty[{{ $data['detail']->id }}]" id="qty-{{ $data['detail']->id }}"
+                                        min="0"
+                                        max="{{ $data['detail']->detailRkbUrgent->quantity_remainder ?? $data['detail']->detailRkbGeneral->quantity_remainder }}"
+                                        value="0" required disabled> <!-- Add disabled here -->
+                                </td>
+                                <td class="text-center">
+                                    {{ $data['detail']->detailRkbUrgent->satuan ?? $data['detail']->detailRkbGeneral->satuan }}
+                                    <input type="hidden" name="satuan[{{ $data['detail']->id }}]"
+                                        value="{{ $data['detail']->detailRkbUrgent->satuan ?? $data['detail']->detailRkbGeneral->satuan }}">
+                                </td>
+                                <td class="text-center">
+                                    <input
+                                        class="form-control text-center h-100 d-flex align-items-center justify-content-center"
+                                        name="harga[{{ $data['detail']->id }}]" type="text" value="Rp 0"
+                                        maxlength="-1" required disabled>
+                                </td>
+                                <td class="text-center">
+                                    <input
+                                        class="form-control text-center bg-secondary h-100 d-flex align-items-center justify-content-center"
+                                        type="text" value="Rp 0" readonly>
+                                </td>
+                                <input type="hidden" name="alat_detail_id[{{ $data['detail']->id }}]"
+                                    value="{{ $data['alat_detail_id'] }}">
+                            </tr>
+                        @endforeach
                     @endforeach
-                @endforeach
-            </tbody>
-            <tfoot class="table-primary">
-                <tr>
-                    <th style="text-align: left;" colspan="7">Jumlah</th>
-                    <th id="totalHarga" style="text-align: center;">Rp 0</th>
-                    <th id="totalJumlahHarga" style="text-align: center;">Rp 0</th>
-                    <th></th>
-                </tr>
-                <tr>
-                    <th style="text-align: left;" colspan="8">PPN 11%</th>
-                    <th id="ppn11" style="text-align: center;">Rp 0</th>
-                    <th></th>
-                </tr>
-                <tr>
-                    <th style="text-align: left;" colspan="8">Grand Total</th>
-                    <th id="grandTotal" style="text-align: center;">Rp 0</th>
-                    <th></th>
-                </tr>
-            </tfoot>
+                </tbody>
+                <tfoot class="table-primary">
+                    <tr>
+                        <th class="ps-4" style="text-align: left;" colspan="8">Jumlah</th>
+                        <th id="totalHarga" style="text-align: center;">Rp 0</th>
+                        <th id="totalJumlahHarga" style="text-align: center;">Rp 0</th>
+                        {{-- <th></th> --}}
+                    </tr>
+                    <tr>
+                        <th class="ps-4" style="text-align: left;" colspan="9">PPN 11%</th>
+                        <th id="ppn11" style="text-align: center;">Rp 0</th>
+                        {{-- <th></th> --}}
+                    </tr>
+                    <tr>
+                        <th class="ps-4" style="text-align: left;" colspan="9">Grand Total</th>
+                        <th id="grandTotal" style="text-align: center;">Rp 0</th>
+                        {{-- <th></th> --}}
+                    </tr>
+                </tfoot>
 
-        </table>
+            </table>
     </form>
 </div>
 
 @push('scripts_3')
+    <script>
+        $(document).ready(function() {
+            $('#supplier_main').select2({
+                placeholder: 'Pilih Supplier',
+                width: '100%',
+                allowClear: true
+            });
+
+            $('.sparepart-select').select2({
+                placeholder: 'Pilih Supplier',
+                width: '100%',
+                allowClear: true
+            });
+        });
+    </script>
+
     <script>
         $(document).ready(function() {
             var table = $('#table-data').DataTable({
@@ -187,20 +221,6 @@
                 searching: false,
             });
 
-            var table = $('#table-data2').DataTable({
-                paginate: false,
-                ordering: false,
-                order: [],
-                searching: false,
-            });
-
-            $('.supplier-select').select2({
-                placeholder: 'Pilih Supplier',
-                width: '100%',
-                allowClear: true
-            });
-
-            // Fungsi untuk format Rupiah
             function formatRupiah(angka) {
                 return new Intl.NumberFormat('id-ID', {
                     style: 'currency',
@@ -209,72 +229,159 @@
                 }).format(angka);
             }
 
-            // Fungsi untuk menghapus format Rupiah menjadi angka biasa
             function unformatRupiah(rupiah) {
                 return parseInt(rupiah.replace(/[^\d]/g, '')) || 0;
             }
 
-            // Fungsi untuk update total footer
+            function updateJumlahHarga(row) {
+                const harga = unformatRupiah(row.find('input[name^="harga"]').val());
+                const quantity = parseFloat(row.find('input[name^="qty"]').val()) || 0;
+                const jumlahHarga = harga * quantity;
+                row.find('td:nth-child(10) input').val(formatRupiah(jumlahHarga));
+                updateTotalFooter();
+            }
+
             function updateTotalFooter() {
                 let totalHarga = 0;
                 let totalJumlahHarga = 0;
 
-                // Iterasi melalui setiap input harga
                 $('input[name^="harga"]').each(function() {
-                    const harga = unformatRupiah($(this).val()); // Harga satuan
-                    const jumlahHarga = unformatRupiah($(this).closest('tr').find('td:nth-child(9) input')
-                        .val()); // Jumlah Harga
+                    const row = $(this).closest('tr');
+                    const harga = unformatRupiah($(this).val());
+                    const quantity = parseFloat(row.find('input[name^="qty"]').val()) || 0;
+                    const jumlahHarga = harga * quantity;
+
                     totalHarga += harga;
                     totalJumlahHarga += jumlahHarga;
                 });
 
-                // Hitung PPN 11% dan Grand Total
                 const ppn11 = totalJumlahHarga * 0.11;
                 const grandTotal = totalJumlahHarga + ppn11;
 
-                // Update nilai di footer
                 $('#totalHarga').text(formatRupiah(totalHarga));
                 $('#totalJumlahHarga').text(formatRupiah(totalJumlahHarga));
                 $('#ppn11').text(formatRupiah(ppn11));
                 $('#grandTotal').text(formatRupiah(grandTotal));
             }
 
-            // Event: Ketika harga berubah
+            // Event handler for harga input
             $(document).on('blur', 'input[name^="harga"]', function() {
-                const hargaInput = $(this);
-                const harga = unformatRupiah(hargaInput.val());
-
-                // Temukan baris induk
-                const row = hargaInput.closest('tr');
-
-                // Hitung total quantity untuk grup tersebut
-                let totalQuantity = 0;
-                const groupRows = [];
-                const startRow = row.index(); // Indeks baris awal
-                const rowSpan = parseInt(row.find('td:nth-child(7)').attr('rowspan')) || 1; // Ambil rowspan
-                for (let i = 0; i < rowSpan; i++) {
-                    groupRows.push($('#table-data tbody tr').eq(startRow + i)); // Tambahkan baris ke grup
-                }
-
-                groupRows.forEach(function(groupRow) {
-                    const quantity = parseFloat(groupRow.find('td:nth-child(6)').text()) ||
-                        0; // Kolom Quantity
-                    totalQuantity += quantity;
-                });
-
-                // Hitung jumlah harga total
-                const jumlahHarga = harga * totalQuantity;
-
-                // Update nilai harga dan jumlah harga
-                hargaInput.val(formatRupiah(harga)); // Format harga
-                row.find('td:nth-child(9) input').val(formatRupiah(jumlahHarga)); // Format jumlah harga
-
-                // Update total footer
-                updateTotalFooter();
+                const row = $(this).closest('tr');
+                const harga = unformatRupiah($(this).val());
+                $(this).val(formatRupiah(harga));
+                updateJumlahHarga(row);
             });
 
-            // Hitung total saat halaman selesai dimuat
+            // Event handler for quantity input
+            $(document).on('input', 'input[name^="qty"]', function() {
+                const row = $(this).closest('tr');
+                const max = parseInt($(this).attr('max'));
+                let val = parseInt($(this).val()) || 0;
+
+                if (val > max) {
+                    alert('Quantity PO tidak boleh melebihi Quantity Sisa');
+                    $(this).val(max);
+                    val = max;
+                }
+
+                if (val < 0) {
+                    $(this).val(0);
+                    val = 0;
+                }
+
+                updateJumlahHarga(row);
+            });
+
+            // Add event handler for sparepart select change
+            $(document).on('change', '.sparepart-select', function() {
+                const row = $(this).closest('tr');
+                const qtyInput = row.find('input[name^="qty"]');
+                const hargaInput = row.find('input[name^="harga"]');
+
+                if ($(this).val()) {
+                    qtyInput.prop('disabled', false);
+                    hargaInput.prop('disabled', false);
+                } else {
+                    qtyInput.prop('disabled', true).val(0);
+                    hargaInput.prop('disabled', true).val('Rp 0');
+                    updateJumlahHarga(row);
+                }
+            });
+
+            // Initialize sparepart selects with Select2
+            $('.sparepart-select').select2({
+                placeholder: 'Pilih Sparepart',
+                width: '100%',
+                allowClear: true
+            });
+
             updateTotalFooter();
+        });
+    </script>
+
+    <script>
+        $('.supplier-select-main').on('change', function() {
+            let supplierId = $(this).val();
+
+            if (!supplierId) {
+                // Clear semua sparepart dropdown jika tidak ada supplier dipilih
+                $('.sparepart-select').each(function() {
+                    $(this).empty().append('<option value="" selected disabled>Pilih Sparepart</option>');
+                    $(this).prop('disabled', true).trigger('change');
+                });
+                return;
+            }
+
+            // Enable sparepart dropdowns
+            $('.sparepart-select').prop('disabled', false);
+
+            // Add loading overlay to body instead of table 
+            $('body').append(`
+<div class="loading-overlay">
+<div class="spinner-border text-primary" role="status">
+<span class="visually-hidden">Loading...</span>
+</div>
+</div>
+`);
+
+            // Fetch spareparts dari supplier yang dipilih
+            $.ajax({
+                url: "{{ route('spb.detail.getSparepart', ':supplierId') }}".replace(':supplierId',
+                    supplierId),
+                type: 'GET',
+                success: function(response) {
+                    // Loop setiap dropdown sparepart
+                    $('.sparepart-select').each(function() {
+                        let $select = $(this);
+                        let kategoriId = $select.data('kategori');
+
+                        $select.empty().append(
+                            '<option value="" selected disabled>Pilih Sparepart</option>');
+
+                        // Filter sparepart berdasarkan kategori
+                        let filteredSpareparts = response.spareparts.filter(function(
+                            sparepart) {
+                            return sparepart.id_kategori_sparepart == kategoriId;
+                        });
+
+                        // Tambahkan opsi yang sudah difilter
+                        filteredSpareparts.forEach(function(sparepart) {
+                            $select.append(new Option(
+                                `${sparepart.nama} - ${sparepart.merk}`,
+                                sparepart.id
+                            ));
+                        });
+
+                        $select.trigger('change');
+                    });
+                },
+                error: function() {
+                    alert('Gagal memuat data sparepart');
+                },
+                complete: function() {
+                    $('.loading-overlay').remove();
+                }
+            });
         });
     </script>
 @endpush

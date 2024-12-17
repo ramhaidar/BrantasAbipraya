@@ -13,6 +13,7 @@ return new class extends Migration
             $table->id (); // PK
             $table->bigInteger ( 'quantity_requested' )->nullable (); // Jumlah diminta
             $table->bigInteger ( 'quantity_approved' )->nullable (); // Jumlah disetujui
+            $table->bigInteger ( 'quantity_remainder' )->nullable (); // Jumlah sisa PO
             $table->string ( 'satuan' )->nullable (); // Satuan barang
 
             $table->foreignId ( 'id_kategori_sparepart_sparepart' )->nullable ()

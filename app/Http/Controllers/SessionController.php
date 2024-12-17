@@ -34,8 +34,7 @@ class SessionController extends Controller
         {
             $request->session ()->regenerate ();
 
-            return redirect ()
-                ->intended ( 'dashboard' )
+            return redirect ( 'dashboard' )
                 ->with ( 'success', 'Welcome ' . Auth::user ()->name );
         }
 

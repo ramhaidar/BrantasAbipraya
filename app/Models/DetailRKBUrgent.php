@@ -19,6 +19,7 @@ class DetailRKBUrgent extends Model
     protected $fillable = [ 
         'quantity_requested',
         'quantity_approved',
+        'quantity_remainder',
         'satuan',
         'kronologi',
         'nama_mekanik',
@@ -31,6 +32,7 @@ class DetailRKBUrgent extends Model
         'id'                 => 'integer',
         'quantity_requested' => 'integer',
         'quantity_approved'  => 'integer',
+        'quantity_remainder' => 'integer',
         'satuan'             => 'string',
         'kronologi'          => 'string',
         'nama_mekanik'       => 'string',

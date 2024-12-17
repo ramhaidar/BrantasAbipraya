@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class RKB extends Model
@@ -45,5 +46,20 @@ class RKB extends Model
     public function linkAlatDetailRkbs () : HasMany
     {
         return $this->hasMany ( LinkAlatDetailRkb::class, 'id_rkb' );
+    }
+
+    public function spbs () : BelongsToMany
+    {
+        return $this->belongsToMany (
+            SPB::class,
+            'link_rkb_spb',
+            'id_rkb',
+            'id_spb'
+        )->withTimestamps ();
+    }
+
+    public function linkRkbSpbs () : HasMany
+    {
+        return $this->hasMany ( LinkRKBSPB::class, 'id_rkb' );
     }
 }

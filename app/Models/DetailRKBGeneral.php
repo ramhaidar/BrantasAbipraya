@@ -21,6 +21,7 @@ class DetailRKBGeneral extends Model
     protected $fillable = [ 
         'quantity_requested',
         'quantity_approved',
+        'quantity_remainder',
         'satuan',
         'id_kategori_sparepart_sparepart',
         'id_master_data_sparepart',
@@ -30,6 +31,7 @@ class DetailRKBGeneral extends Model
         'id'                 => 'integer',
         'quantity_requested' => 'integer',
         'quantity_approved'  => 'integer',
+        'quantity_remainder' => 'integer',
         'satuan'             => 'string',
         'created_at'         => 'datetime',
         'updated_at'         => 'datetime',

@@ -6,6 +6,7 @@ use App\Models\RKB;
 use App\Models\LinkAlatDetailRKB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class LinkRKBDetail extends Model
 {
@@ -39,6 +40,16 @@ class LinkRKBDetail extends Model
     public function detailRkbUrgent () : BelongsTo
     {
         return $this->belongsTo ( DetailRkbUrgent::class, 'id_detail_rkb_urgent' );
+    }
+
+    public function linkRkbDetailSpbs () : BelongsToMany
+    {
+        return $this->belongsToMany (
+            DetailSPB::class,
+            'link_spb_detail_spb',
+            'id_link_rkb_detail',
+            'id_detail_spb'
+        );
     }
 
 }

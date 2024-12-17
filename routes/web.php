@@ -1,1103 +1,1155 @@
 <?php
-use App\Http\Controllers\APBController;
-use App\Http\Controllers\ATBController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\DetailRKBGeneralController;
-use App\Http\Controllers\DetailRKBUrgentController;
-use App\Http\Controllers\DetailSPBController;
-use App\Http\Controllers\EvaluasiDetailRKBGeneralController;
-use App\Http\Controllers\EvaluasiDetailRKBUrgentController;
-use App\Http\Controllers\EvaluasiRKBGeneralController;
-use App\Http\Controllers\EvaluasiRKBUrgentController;
-use App\Http\Controllers\LampiranEvaluasiUrgentController;
-use App\Http\Controllers\LampiranRKBUrgentController;
-use App\Http\Controllers\LaporanController;
-use App\Http\Controllers\MasterDataAlatController;
-use App\Http\Controllers\MasterDataSparepartController;
-use App\Http\Controllers\MasterDataSupplierController;
-use App\Http\Controllers\ProyekController;
-use App\Http\Controllers\RKBGeneralController;
-use App\Http\Controllers\RKBUrgentController;
-use App\Http\Controllers\SaldoController;
-use App\Http\Controllers\SessionController;
-use App\Http\Controllers\SPBController;
-use App\Http\Controllers\TimelineEvaluasiUrgentController;
-use App\Http\Controllers\TimelineRKBUrgentController;
-use App\Http\Controllers\UserController;
 use App\Http\Middleware\CheckRole;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\APBController;
+use App\Http\Controllers\ATBController;
+use App\Http\Controllers\SPBController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\SaldoController;
+use App\Http\Controllers\ProyekController;
+use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\SessionController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DetailSPBController;
+use App\Http\Controllers\RKBUrgentController;
+use App\Http\Controllers\RiwayatSPBController;
+use App\Http\Controllers\RKBGeneralController;
+use App\Http\Controllers\MasterDataAlatController;
+use App\Http\Controllers\DetailRKBUrgentController;
+use App\Http\Controllers\DetailRKBGeneralController;
+use App\Http\Controllers\EvaluasiRKBUrgentController;
+use App\Http\Controllers\LampiranRKBUrgentController;
+use App\Http\Controllers\TimelineRKBUrgentController;
+use App\Http\Controllers\EvaluasiRKBGeneralController;
+use App\Http\Controllers\MasterDataSupplierController;
+use App\Http\Controllers\MasterDataSparepartController;
+use App\Http\Controllers\LampiranEvaluasiUrgentController;
+use App\Http\Controllers\TimelineEvaluasiUrgentController;
+use App\Http\Controllers\EvaluasiDetailRKBUrgentController;
+use App\Http\Controllers\EvaluasiDetailRKBGeneralController;
 
-Route::get('/test', function () {
-    return view('test');
-});
+Route::get ( '/test', function ()
+{
+    return view ( 'test' );
+} );
 
 // Rute untuk Halaman Landing (HomePage)
-Route::get('/', function () {
-    return view('/prelogin');
-})
-    ->middleware('guest');
+Route::get ( '/', function ()
+{
+    return view ( '/prelogin' );
+} )
+    ->middleware ( 'guest' );
 
 // Rute Login [SessionController]
-Route::middleware('guest')->group(function () {
-    Route::get('/login', [SessionController::class, 'index'])
-        ->name('login');
-    Route::post('/login', [SessionController::class, 'login'])->
-        name('login.post');
-});
+Route::middleware ( 'guest' )->group ( function ()
+{
+    Route::get ( '/login', [ SessionController::class, 'index' ] )
+        ->name ( 'login' );
+    Route::post ( '/login', [ SessionController::class, 'login' ] )->
+        name ( 'login.post' );
+} );
 
 // Rute Logout [SessionController]
-Route::middleware([CheckRole::class . ':Admin,Pegawai,Boss'])->group(function () {
-    Route::post('/logout', [SessionController::class, 'logout'])
-        ->name('logout.post');
+Route::middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )->group ( function ()
+{
+    Route::post ( '/logout', [ SessionController::class, 'logout' ] )
+        ->name ( 'logout.post' );
 
-    Route::get('/logout', [SessionController::class, 'logout'])
-        ->name('logout.post');
-});
+    Route::get ( '/logout', [ SessionController::class, 'logout' ] )
+        ->name ( 'logout.post' );
+} );
 
 // Rute Dashboard [DashboardController]
-Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->middleware([
+Route::get ( '/dashboard', [ DashboardController::class, 'index' ] )
+    ->middleware ( [ 
         CheckRole::class . ':Admin,Pegawai,Boss',
-    ])
-    ->name('dashboard');
+    ] )
+    ->name ( 'dashboard' );
 
 // Rute Users [UserController]
-Route::prefix('users')->middleware([CheckRole::class . ':Admin,Pegawai,Boss'])->group(function () {
-    Route::get('/', [UserController::class, 'index'])
-        ->name('users');
-    Route::get('/{user}', [UserController::class, 'showByID'])
-        ->name('api.showUserByID');
-    Route::post('/edit/{user}', [UserController::class, 'update'])
-        ->name('user.post.update');
-    Route::post('/add', [UserController::class, 'store'])
-        ->name('user.post.store');
-    Route::delete('/delete/{user}', [UserController::class, 'destroy'])
-        ->name('user.delete.destroy');
-});
+Route::prefix ( 'users' )->middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )->group ( function ()
+{
+    Route::get ( '/', [ UserController::class, 'index' ] )
+        ->name ( 'users' );
+    Route::get ( '/{user}', [ UserController::class, 'showByID' ] )
+        ->name ( 'api.showUserByID' );
+    Route::post ( '/edit/{user}', [ UserController::class, 'update' ] )
+        ->name ( 'user.post.update' );
+    Route::post ( '/add', [ UserController::class, 'store' ] )
+        ->name ( 'user.post.store' );
+    Route::delete ( '/delete/{user}', [ UserController::class, 'destroy' ] )
+        ->name ( 'user.delete.destroy' );
+} );
 
 // Rute ATB [ATBController]
-Route::prefix('atb')
-    ->middleware([CheckRole::class . ':Admin,Pegawai,Boss'])
-    ->group(function () {
+Route::prefix ( 'atb' )
+    ->middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )
+    ->group ( function ()
+    {
 
-        Route::get('/', [ATBController::class, 'index'])
-            ->name('atb');
+        Route::get ( '/', [ ATBController::class, 'index' ] )
+            ->name ( 'atb' );
 
         // Hutang Unit Alat Routes
-        Route::prefix('hutang_unit_alat')->group(function () {
-            Route::get('/', [ATBController::class, 'hutang_unit_alat'])
-                ->name('atb_hutang_unit_alat');
+        Route::prefix ( 'hutang_unit_alat' )->group ( function ()
+        {
+            Route::get ( '/', [ ATBController::class, 'hutang_unit_alat' ] )
+                ->name ( 'atb_hutang_unit_alat' );
 
-            Route::get('/add', [ATBController::class, 'data_baru_hutang_unit_alat'])
-                ->name('atb.new.hutang_unit_alat');
+            Route::get ( '/add', [ ATBController::class, 'data_baru_hutang_unit_alat' ] )
+                ->name ( 'atb.new.hutang_unit_alat' );
 
-            Route::get('/{atb}', [ATBController::class, 'showByID'])
-                ->name('atb.show.hutang_unit_alat_by_id');
+            Route::get ( '/{atb}', [ ATBController::class, 'showByID' ] )
+                ->name ( 'atb.show.hutang_unit_alat_by_id' );
 
-            Route::post('/edit/actions/{id}', [ATBController::class, 'update'])
-                ->name('atb.post.update.hutang_unit_alat');
+            Route::post ( '/edit/actions/{id}', [ ATBController::class, 'update' ] )
+                ->name ( 'atb.post.update.hutang_unit_alat' );
 
-            Route::delete('/actions/{id}', [ATBController::class, 'destroy'])
-                ->name('atb.delete.destroy.hutang_unit_alat');
-        });
+            Route::delete ( '/actions/{id}', [ ATBController::class, 'destroy' ] )
+                ->name ( 'atb.delete.destroy.hutang_unit_alat' );
+        } );
 
         // Panjar Unit Alat Routes
-        Route::prefix('panjar_unit_alat')->group(function () {
-            Route::get('/', [ATBController::class, 'panjar_unit_alat'])
-                ->name('atb_panjar_unit_alat');
+        Route::prefix ( 'panjar_unit_alat' )->group ( function ()
+        {
+            Route::get ( '/', [ ATBController::class, 'panjar_unit_alat' ] )
+                ->name ( 'atb_panjar_unit_alat' );
 
-            Route::get('/add', [ATBController::class, 'data_baru_panjar_unit_alat'])
-                ->name('atb.new.panjar_unit_alat');
+            Route::get ( '/add', [ ATBController::class, 'data_baru_panjar_unit_alat' ] )
+                ->name ( 'atb.new.panjar_unit_alat' );
 
-            Route::get('/{atb}', [ATBController::class, 'showByID'])
-                ->name('atb.show.panjar_unit_alat_by_id');
+            Route::get ( '/{atb}', [ ATBController::class, 'showByID' ] )
+                ->name ( 'atb.show.panjar_unit_alat_by_id' );
 
-            Route::post('/edit/actions/{id}', [ATBController::class, 'update'])
-                ->name('atb.post.update.panjar_unit_alat');
+            Route::post ( '/edit/actions/{id}', [ ATBController::class, 'update' ] )
+                ->name ( 'atb.post.update.panjar_unit_alat' );
 
-            Route::delete('/actions/{id}', [ATBController::class, 'destroy'])
-                ->name('atb.delete.destroy.panjar_unit_alat');
-        });
+            Route::delete ( '/actions/{id}', [ ATBController::class, 'destroy' ] )
+                ->name ( 'atb.delete.destroy.panjar_unit_alat' );
+        } );
 
         // Mutasi Proyek Routes
-        Route::prefix('mutasi_proyek')->group(function () {
-            Route::get('/', [ATBController::class, 'mutasi_proyek'])
-                ->name('atb_mutasi_proyek');
+        Route::prefix ( 'mutasi_proyek' )->group ( function ()
+        {
+            Route::get ( '/', [ ATBController::class, 'mutasi_proyek' ] )
+                ->name ( 'atb_mutasi_proyek' );
 
-            Route::get('/add', [ATBController::class, 'data_baru_mutasi_proyek'])
-                ->name('atb.new.mutasi_proyek');
+            Route::get ( '/add', [ ATBController::class, 'data_baru_mutasi_proyek' ] )
+                ->name ( 'atb.new.mutasi_proyek' );
 
-            Route::get('/{atb}', [ATBController::class, 'showByID'])
-                ->name('atb.show.mutasi_proyek_by_id');
+            Route::get ( '/{atb}', [ ATBController::class, 'showByID' ] )
+                ->name ( 'atb.show.mutasi_proyek_by_id' );
 
-            Route::post('/edit/actions/{id}', [ATBController::class, 'update'])
-                ->name('atb.post.update.mutasi_proyek');
+            Route::post ( '/edit/actions/{id}', [ ATBController::class, 'update' ] )
+                ->name ( 'atb.post.update.mutasi_proyek' );
 
-            Route::delete('/actions/{id}', [ATBController::class, 'destroy'])
-                ->name('atb.delete.destroy.mutasi_proyek');
-        });
+            Route::delete ( '/actions/{id}', [ ATBController::class, 'destroy' ] )
+                ->name ( 'atb.delete.destroy.mutasi_proyek' );
+        } );
 
         // Panjar Proyek Routes
-        Route::prefix('panjar_proyek')->group(function () {
-            Route::get('/', [ATBController::class, 'panjar_proyek'])
-                ->name('atb_panjar_proyek');
+        Route::prefix ( 'panjar_proyek' )->group ( function ()
+        {
+            Route::get ( '/', [ ATBController::class, 'panjar_proyek' ] )
+                ->name ( 'atb_panjar_proyek' );
 
-            Route::get('/add', [ATBController::class, 'data_baru_panjar_proyek'])
-                ->name('atb.new.panjar_proyek');
+            Route::get ( '/add', [ ATBController::class, 'data_baru_panjar_proyek' ] )
+                ->name ( 'atb.new.panjar_proyek' );
 
-            Route::get('/{atb}', [ATBController::class, 'showByID'])
-                ->name('atb.show.panjar_proyek_by_id');
+            Route::get ( '/{atb}', [ ATBController::class, 'showByID' ] )
+                ->name ( 'atb.show.panjar_proyek_by_id' );
 
-            Route::post('/edit/actions/{id}', [ATBController::class, 'update'])
-                ->name('atb.post.update.panjar_proyek');
+            Route::post ( '/edit/actions/{id}', [ ATBController::class, 'update' ] )
+                ->name ( 'atb.post.update.panjar_proyek' );
 
-            Route::delete('/actions/{id}', [ATBController::class, 'destroy'])
-                ->name('atb.delete.destroy.panjar_proyek');
-        });
+            Route::delete ( '/actions/{id}', [ ATBController::class, 'destroy' ] )
+                ->name ( 'atb.delete.destroy.panjar_proyek' );
+        } );
 
         // General ATB Routes
-        Route::get('/add', [ATBController::class, 'data_baru_atb'])
-            ->name('atb.new');
+        Route::get ( '/add', [ ATBController::class, 'data_baru_atb' ] )
+            ->name ( 'atb.new' );
 
-        Route::post('/store', [ATBController::class, 'store'])
-            ->name('atb.post.store');
+        Route::post ( '/store', [ ATBController::class, 'store' ] )
+            ->name ( 'atb.post.store' );
 
-        Route::post('/actions/{id}', [ATBController::class, 'update'])
-            ->name('atb.post.update');
+        Route::post ( '/actions/{id}', [ ATBController::class, 'update' ] )
+            ->name ( 'atb.post.update' );
 
-        Route::delete('/actions/{id}', [ATBController::class, 'destroy'])
-            ->name('atb.delete.destroy');
+        Route::delete ( '/actions/{id}', [ ATBController::class, 'destroy' ] )
+            ->name ( 'atb.delete.destroy' );
 
-        Route::get('/delatb/actions/{id}', [ATBController::class, 'destroy'])
-            ->name('atb.del.test');
+        Route::get ( '/delatb/actions/{id}', [ ATBController::class, 'destroy' ] )
+            ->name ( 'atb.del.test' );
 
-        Route::get('/export', [ATBController::class, 'export'])
-            ->name('atb.export');
+        Route::get ( '/export', [ ATBController::class, 'export' ] )
+            ->name ( 'atb.export' );
 
-        Route::post('/import', [ATBController::class, 'import'])
-            ->name('atb.import.post');
+        Route::post ( '/import', [ ATBController::class, 'import' ] )
+            ->name ( 'atb.import.post' );
 
-        Route::get('/import', [ATBController::class, 'showImportForm'])
-            ->name('atb.import');
-    });
+        Route::get ( '/import', [ ATBController::class, 'showImportForm' ] )
+            ->name ( 'atb.import' );
+    } );
 
 // Rute APB [APBController]
-Route::prefix('apb')
-    ->middleware([CheckRole::class . ':Admin,Pegawai,Boss'])
-    ->group(function () {
-        Route::get('/', [APBController::class, 'index'])
-            ->name('apb');
+Route::prefix ( 'apb' )
+    ->middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )
+    ->group ( function ()
+    {
+        Route::get ( '/', [ APBController::class, 'index' ] )
+            ->name ( 'apb' );
 
-        Route::get('/ex_panjar_unit_alat', [APBController::class, 'ex_panjar_unit_alat'])
-            ->name('apb_ex_panjar_unit_alat');
+        Route::get ( '/ex_panjar_unit_alat', [ APBController::class, 'ex_panjar_unit_alat' ] )
+            ->name ( 'apb_ex_panjar_unit_alat' );
 
-        Route::get('/ex_panjar_unit_alat/add', [APBController::class, 'data_baru_ex_panjar_unit_alat'])
-            ->name('data_baru_ex_panjar_unit_alat');
+        Route::get ( '/ex_panjar_unit_alat/add', [ APBController::class, 'data_baru_ex_panjar_unit_alat' ] )
+            ->name ( 'data_baru_ex_panjar_unit_alat' );
 
-        Route::get('/ex_panjar_unit_alat/{atb}', [APBController::class, 'showByID'])
-            ->name('apb.showAPBByID');
+        Route::get ( '/ex_panjar_unit_alat/{atb}', [ APBController::class, 'showByID' ] )
+            ->name ( 'apb.showAPBByID' );
 
-        Route::get('/ex_panjar_unit_alat/apb/{apb}', [APBController::class, 'getAPBbyID'])
-            ->name('apb.showAPBByID');
+        Route::get ( '/ex_panjar_unit_alat/apb/{apb}', [ APBController::class, 'getAPBbyID' ] )
+            ->name ( 'apb.showAPBByID' );
 
-        Route::post('/ex_panjar_unit_alat/edit/actions/{id}', [APBController::class, 'update'])
-            ->name('apb.post.update.ex_panjar_unit_alat');
+        Route::post ( '/ex_panjar_unit_alat/edit/actions/{id}', [ APBController::class, 'update' ] )
+            ->name ( 'apb.post.update.ex_panjar_unit_alat' );
 
-        Route::delete('/ex_panjar_unit_alat/actions/{id}', [APBController::class, 'destroy'])
-            ->name('apb.delete.destroy.ex_panjar_unit_alat');
+        Route::delete ( '/ex_panjar_unit_alat/actions/{id}', [ APBController::class, 'destroy' ] )
+            ->name ( 'apb.delete.destroy.ex_panjar_unit_alat' );
 
-        Route::get('/ex_panjar_proyek', [APBController::class, 'ex_panjar_proyek'])
-            ->name('apb_ex_panjar_proyek');
+        Route::get ( '/ex_panjar_proyek', [ APBController::class, 'ex_panjar_proyek' ] )
+            ->name ( 'apb_ex_panjar_proyek' );
 
-        Route::get('/ex_panjar_proyek/add', [APBController::class, 'data_baru_ex_panjar_proyek'])
-            ->name('data_baru_ex_panjar_proyek');
+        Route::get ( '/ex_panjar_proyek/add', [ APBController::class, 'data_baru_ex_panjar_proyek' ] )
+            ->name ( 'data_baru_ex_panjar_proyek' );
 
-        Route::get('/ex_panjar_proyek/{atb}', [APBController::class, 'showByID'])
-            ->name('apb.showAPBByID');
+        Route::get ( '/ex_panjar_proyek/{atb}', [ APBController::class, 'showByID' ] )
+            ->name ( 'apb.showAPBByID' );
 
-        Route::get('/ex_panjar_proyek/apb/{apb}', [APBController::class, 'getAPBbyID'])
-            ->name('apb.showAPBByID');
+        Route::get ( '/ex_panjar_proyek/apb/{apb}', [ APBController::class, 'getAPBbyID' ] )
+            ->name ( 'apb.showAPBByID' );
 
-        Route::post('/ex_panjar_proyek/edit/actions/{id}', [APBController::class, 'update'])
-            ->name('apb.post.update.ex_panjar_proyek');
+        Route::post ( '/ex_panjar_proyek/edit/actions/{id}', [ APBController::class, 'update' ] )
+            ->name ( 'apb.post.update.ex_panjar_proyek' );
 
-        Route::delete('/ex_panjar_proyek/actions/{id}', [APBController::class, 'destroy'])
-            ->name('apb.delete.destroy.ex_panjar_proyek');
+        Route::delete ( '/ex_panjar_proyek/actions/{id}', [ APBController::class, 'destroy' ] )
+            ->name ( 'apb.delete.destroy.ex_panjar_proyek' );
 
-        Route::get('/ex_unit_alat', [APBController::class, 'ex_unit_alat'])
-            ->name('apb_ex_unit_alat');
+        Route::get ( '/ex_unit_alat', [ APBController::class, 'ex_unit_alat' ] )
+            ->name ( 'apb_ex_unit_alat' );
 
-        Route::get('/ex_unit_alat/add', [APBController::class, 'data_baru_ex_unit_alat'])
-            ->name('data_baru_ex_unit_alat');
+        Route::get ( '/ex_unit_alat/add', [ APBController::class, 'data_baru_ex_unit_alat' ] )
+            ->name ( 'data_baru_ex_unit_alat' );
 
-        Route::get('/ex_unit_alat/{atb}', [APBController::class, 'showByID'])
-            ->name('apb.showAPBByID');
+        Route::get ( '/ex_unit_alat/{atb}', [ APBController::class, 'showByID' ] )
+            ->name ( 'apb.showAPBByID' );
 
-        Route::get('/ex_unit_alat/apb/{apb}', [APBController::class, 'getAPBbyID'])
-            ->name('apb.showAPBByID');
+        Route::get ( '/ex_unit_alat/apb/{apb}', [ APBController::class, 'getAPBbyID' ] )
+            ->name ( 'apb.showAPBByID' );
 
-        Route::post('/ex_unit_alat/edit/actions/{id}', [APBController::class, 'update'])
-            ->name('apb.post.update.ex_unit_alat');
+        Route::post ( '/ex_unit_alat/edit/actions/{id}', [ APBController::class, 'update' ] )
+            ->name ( 'apb.post.update.ex_unit_alat' );
 
-        Route::delete('/ex_unit_alat/actions/{id}', [APBController::class, 'destroy'])
-            ->name('apb.delete.destroy.ex_unit_alat');
+        Route::delete ( '/ex_unit_alat/actions/{id}', [ APBController::class, 'destroy' ] )
+            ->name ( 'apb.delete.destroy.ex_unit_alat' );
 
-        Route::get('/ex_mutasi_saldo', [APBController::class, 'ex_mutasi_saldo'])
-            ->name('apb_ex_mutasi_saldo');
+        Route::get ( '/ex_mutasi_saldo', [ APBController::class, 'ex_mutasi_saldo' ] )
+            ->name ( 'apb_ex_mutasi_saldo' );
 
-        Route::get('/ex_mutasi_saldo/add', [APBController::class, 'data_baru_ex_mutasi_saldo'])
-            ->name('data_baru_ex_mutasi_saldo');
+        Route::get ( '/ex_mutasi_saldo/add', [ APBController::class, 'data_baru_ex_mutasi_saldo' ] )
+            ->name ( 'data_baru_ex_mutasi_saldo' );
 
-        Route::get('/ex_mutasi_saldo/{atb}', [APBController::class, 'showByID'])
-            ->name('apb.showAPBByID');
+        Route::get ( '/ex_mutasi_saldo/{atb}', [ APBController::class, 'showByID' ] )
+            ->name ( 'apb.showAPBByID' );
 
-        Route::get('/ex_mutasi_saldo/apb/{apb}', [APBController::class, 'getAPBbyID'])
-            ->name('apb.showAPBByID');
+        Route::get ( '/ex_mutasi_saldo/apb/{apb}', [ APBController::class, 'getAPBbyID' ] )
+            ->name ( 'apb.showAPBByID' );
 
-        Route::post('/ex_mutasi_saldo/edit/actions/{id}', [APBController::class, 'update'])
-            ->name('apb.post.update.ex_mutasi_saldo');
+        Route::post ( '/ex_mutasi_saldo/edit/actions/{id}', [ APBController::class, 'update' ] )
+            ->name ( 'apb.post.update.ex_mutasi_saldo' );
 
-        Route::delete('/ex_mutasi_saldo/actions/{id}', [APBController::class, 'destroy'])
-            ->name('apb.delete.destroy.ex_mutasi_saldo');
+        Route::delete ( '/ex_mutasi_saldo/actions/{id}', [ APBController::class, 'destroy' ] )
+            ->name ( 'apb.delete.destroy.ex_mutasi_saldo' );
 
-        Route::get('/add', [APBController::class, 'data_baru_apb'])
-            ->name('data_baru_apb');
+        Route::get ( '/add', [ APBController::class, 'data_baru_apb' ] )
+            ->name ( 'data_baru_apb' );
 
-        Route::post('/store', [APBController::class, 'store'])
-            ->name('apb.post.store');
+        Route::post ( '/store', [ APBController::class, 'store' ] )
+            ->name ( 'apb.post.store' );
 
-        Route::get('/actions/{id}', [APBController::class, 'show'])
-            ->name('apb.show');
+        Route::get ( '/actions/{id}', [ APBController::class, 'show' ] )
+            ->name ( 'apb.show' );
 
-        Route::put('/actions/{id}', [APBController::class, 'update'])
-            ->name('apb.post.update');
+        Route::put ( '/actions/{id}', [ APBController::class, 'update' ] )
+            ->name ( 'apb.post.update' );
 
-        Route::delete('/actions/{id}', [APBController::class, 'destroy'])
-            ->name('apb.delete.destroy');
+        Route::delete ( '/actions/{id}', [ APBController::class, 'destroy' ] )
+            ->name ( 'apb.delete.destroy' );
 
-        Route::get('/delapb/actions/{id}', [APBController::class, 'destroy'])
-            ->name('apb.del.test');
-    });
+        Route::get ( '/delapb/actions/{id}', [ APBController::class, 'destroy' ] )
+            ->name ( 'apb.del.test' );
+    } );
 
 // Rute Saldo [SaldoController]
-Route::prefix('saldo')
-    ->middleware([CheckRole::class . ':Admin,Pegawai,Boss'])
-    ->group(function () {
-        Route::get('/', [SaldoController::class, 'index'])
-            ->name('saldo');
+Route::prefix ( 'saldo' )
+    ->middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )
+    ->group ( function ()
+    {
+        Route::get ( '/', [ SaldoController::class, 'index' ] )
+            ->name ( 'saldo' );
 
-        Route::get('/ex_panjar_unit_alat', [SaldoController::class, 'ex_panjar_unit_alat'])
-            ->name('saldo_ex_panjar_unit_alat');
+        Route::get ( '/ex_panjar_unit_alat', [ SaldoController::class, 'ex_panjar_unit_alat' ] )
+            ->name ( 'saldo_ex_panjar_unit_alat' );
 
-        Route::get('/ex_panjar_unit_alat/add', [SaldoController::class, 'data_baru_ex_panjar_unit_alat'])
-            ->name('saldo.new.ex_panjar_unit_alat');
+        Route::get ( '/ex_panjar_unit_alat/add', [ SaldoController::class, 'data_baru_ex_panjar_unit_alat' ] )
+            ->name ( 'saldo.new.ex_panjar_unit_alat' );
 
-        Route::get('/ex_panjar_unit_alat/{saldo}', [SaldoController::class, 'showByID'])
-            ->name('saldo.show.ex_panjar_unit_alat_by_id');
+        Route::get ( '/ex_panjar_unit_alat/{saldo}', [ SaldoController::class, 'showByID' ] )
+            ->name ( 'saldo.show.ex_panjar_unit_alat_by_id' );
 
-        Route::post('/ex_panjar_unit_alat/edit/actions/{id}', [SaldoController::class, 'update'])
-            ->name('saldo.post.update.ex_panjar_unit_alat');
+        Route::post ( '/ex_panjar_unit_alat/edit/actions/{id}', [ SaldoController::class, 'update' ] )
+            ->name ( 'saldo.post.update.ex_panjar_unit_alat' );
 
-        Route::delete('/ex_panjar_unit_alat/actions/{id}', [SaldoController::class, 'destroy'])
-            ->name('saldo.delete.destroy.ex_panjar_unit_alat');
+        Route::delete ( '/ex_panjar_unit_alat/actions/{id}', [ SaldoController::class, 'destroy' ] )
+            ->name ( 'saldo.delete.destroy.ex_panjar_unit_alat' );
 
-        Route::get('/ex_panjar_proyek', [SaldoController::class, 'ex_panjar_proyek'])
-            ->name('saldo_ex_panjar_proyek');
+        Route::get ( '/ex_panjar_proyek', [ SaldoController::class, 'ex_panjar_proyek' ] )
+            ->name ( 'saldo_ex_panjar_proyek' );
 
-        Route::get('/ex_panjar_proyek/add', [SaldoController::class, 'data_baru_ex_panjar_proyek'])
-            ->name('saldo.new.ex_panjar_proyek');
+        Route::get ( '/ex_panjar_proyek/add', [ SaldoController::class, 'data_baru_ex_panjar_proyek' ] )
+            ->name ( 'saldo.new.ex_panjar_proyek' );
 
-        Route::get('/ex_panjar_proyek/{saldo}', [SaldoController::class, 'showByID'])
-            ->name('saldo.show.ex_panjar_proyek_by_id');
+        Route::get ( '/ex_panjar_proyek/{saldo}', [ SaldoController::class, 'showByID' ] )
+            ->name ( 'saldo.show.ex_panjar_proyek_by_id' );
 
-        Route::post('/ex_panjar_proyek/edit/actions/{id}', [SaldoController::class, 'update'])
-            ->name('saldo.post.update.ex_panjar_proyek');
+        Route::post ( '/ex_panjar_proyek/edit/actions/{id}', [ SaldoController::class, 'update' ] )
+            ->name ( 'saldo.post.update.ex_panjar_proyek' );
 
-        Route::delete('/ex_panjar_proyek/actions/{id}', [SaldoController::class, 'destroy'])
-            ->name('saldo.delete.destroy.ex_panjar_proyek');
+        Route::delete ( '/ex_panjar_proyek/actions/{id}', [ SaldoController::class, 'destroy' ] )
+            ->name ( 'saldo.delete.destroy.ex_panjar_proyek' );
 
-        Route::get('/ex_unit_alat', [SaldoController::class, 'ex_unit_alat'])
-            ->name('saldo_ex_unit_alat');
+        Route::get ( '/ex_unit_alat', [ SaldoController::class, 'ex_unit_alat' ] )
+            ->name ( 'saldo_ex_unit_alat' );
 
-        Route::get('/ex_unit_alat/add', [SaldoController::class, 'data_baru_ex_unit_alat'])
-            ->name('saldo.new.ex_unit_alat');
+        Route::get ( '/ex_unit_alat/add', [ SaldoController::class, 'data_baru_ex_unit_alat' ] )
+            ->name ( 'saldo.new.ex_unit_alat' );
 
-        Route::get('/ex_unit_alat/{saldo}', [SaldoController::class, 'showByID'])
-            ->name('saldo.show.ex_unit_alat_by_id');
+        Route::get ( '/ex_unit_alat/{saldo}', [ SaldoController::class, 'showByID' ] )
+            ->name ( 'saldo.show.ex_unit_alat_by_id' );
 
-        Route::post('/ex_unit_alat/edit/actions/{id}', [SaldoController::class, 'update'])
-            ->name('saldo.post.update.ex_unit_alat');
+        Route::post ( '/ex_unit_alat/edit/actions/{id}', [ SaldoController::class, 'update' ] )
+            ->name ( 'saldo.post.update.ex_unit_alat' );
 
-        Route::delete('/ex_unit_alat/actions/{id}', [SaldoController::class, 'destroy'])
-            ->name('saldo.delete.destroy.ex_unit_alat');
+        Route::delete ( '/ex_unit_alat/actions/{id}', [ SaldoController::class, 'destroy' ] )
+            ->name ( 'saldo.delete.destroy.ex_unit_alat' );
 
-        Route::get('/ex_mutasi_saldo', [SaldoController::class, 'ex_mutasi_saldo'])
-            ->name('saldo_ex_mutasi_saldo');
+        Route::get ( '/ex_mutasi_saldo', [ SaldoController::class, 'ex_mutasi_saldo' ] )
+            ->name ( 'saldo_ex_mutasi_saldo' );
 
-        Route::get('/ex_mutasi_saldo/add', [SaldoController::class, 'data_baru_ex_mutasi_saldo'])
-            ->name('saldo.new.ex_mutasi_saldo');
+        Route::get ( '/ex_mutasi_saldo/add', [ SaldoController::class, 'data_baru_ex_mutasi_saldo' ] )
+            ->name ( 'saldo.new.ex_mutasi_saldo' );
 
-        Route::get('/ex_mutasi_saldo/{saldo}', [SaldoController::class, 'showByID'])
-            ->name('saldo.show.ex_mutasi_saldo_by_id');
+        Route::get ( '/ex_mutasi_saldo/{saldo}', [ SaldoController::class, 'showByID' ] )
+            ->name ( 'saldo.show.ex_mutasi_saldo_by_id' );
 
-        Route::post('/ex_mutasi_saldo/edit/actions/{id}', [SaldoController::class, 'update'])
-            ->name('saldo.post.update.ex_mutasi_saldo');
+        Route::post ( '/ex_mutasi_saldo/edit/actions/{id}', [ SaldoController::class, 'update' ] )
+            ->name ( 'saldo.post.update.ex_mutasi_saldo' );
 
-        Route::delete('/ex_mutasi_saldo/actions/{id}', [SaldoController::class, 'destroy'])
-            ->name('saldo.delete.destroy.ex_mutasi_saldo');
+        Route::delete ( '/ex_mutasi_saldo/actions/{id}', [ SaldoController::class, 'destroy' ] )
+            ->name ( 'saldo.delete.destroy.ex_mutasi_saldo' );
 
         // General Saldo Routes
-        Route::get('/add', [SaldoController::class, 'data_baru_saldo'])
-            ->name('saldo.new');
+        Route::get ( '/add', [ SaldoController::class, 'data_baru_saldo' ] )
+            ->name ( 'saldo.new' );
 
-        Route::post('/store', [SaldoController::class, 'store'])
-            ->name('saldo.store');
+        Route::post ( '/store', [ SaldoController::class, 'store' ] )
+            ->name ( 'saldo.store' );
 
-        Route::get('/actions/{id}', [SaldoController::class, 'show'])
-            ->name('saldo.show');
+        Route::get ( '/actions/{id}', [ SaldoController::class, 'show' ] )
+            ->name ( 'saldo.show' );
 
-        Route::put('/actions/{id}', [SaldoController::class, 'update'])
-            ->name('saldo.post.update');
+        Route::put ( '/actions/{id}', [ SaldoController::class, 'update' ] )
+            ->name ( 'saldo.post.update' );
 
-        Route::delete('/actions/{id}', [SaldoController::class, 'destroy'])
-            ->name('saldo.delete.destroy');
+        Route::delete ( '/actions/{id}', [ SaldoController::class, 'destroy' ] )
+            ->name ( 'saldo.delete.destroy' );
 
-        Route::get('/delsaldo/actions/{id}', [SaldoController::class, 'destroy'])
-            ->name('saldo.del.test');
+        Route::get ( '/delsaldo/actions/{id}', [ SaldoController::class, 'destroy' ] )
+            ->name ( 'saldo.del.test' );
 
-        Route::get('/export', [SaldoController::class, 'exportSaldo'])
-            ->name('saldo.export');
-    });
+        Route::get ( '/export', [ SaldoController::class, 'exportSaldo' ] )
+            ->name ( 'saldo.export' );
+    } );
 
-Route::get('/laporan/summary', [LaporanController::class, 'summary'])->middleware([
+Route::get ( '/laporan/summary', [ LaporanController::class, 'summary' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss',
-])
-    ->name('laporan.summary');
-Route::get('/laporan/lnpb', [LaporanController::class, 'LNPB'])->middleware([
+] )
+    ->name ( 'laporan.summary' );
+Route::get ( '/laporan/lnpb', [ LaporanController::class, 'LNPB' ] )->middleware ( [ 
     CheckRole::class . ':Admin,Pegawai,Boss',
-])
-    ->name('laporan.lnpb');
+] )
+    ->name ( 'laporan.lnpb' );
 
-Route::prefix('ajax')->group(function () {
-    Route::get('/atb/fetch-data', [ATBController::class, 'fetchData'])->name('atb.fetchData');
-});
+Route::prefix ( 'ajax' )->group ( function ()
+{
+    Route::get ( '/atb/fetch-data', [ ATBController::class, 'fetchData' ] )->name ( 'atb.fetchData' );
+} );
 
-Route::prefix('ajax')->group(function () {
-    Route::get('/apb/fetch-data', [APBController::class, 'fetchData'])->name('apb.fetchData');
-});
+Route::prefix ( 'ajax' )->group ( function ()
+{
+    Route::get ( '/apb/fetch-data', [ APBController::class, 'fetchData' ] )->name ( 'apb.fetchData' );
+} );
 
-Route::prefix('ajax')->group(function () {
-    Route::get('/saldo/fetch-data', [SaldoController::class, 'fetchData'])->name('saldo.fetchData');
-});
+Route::prefix ( 'ajax' )->group ( function ()
+{
+    Route::get ( '/saldo/fetch-data', [ SaldoController::class, 'fetchData' ] )->name ( 'saldo.fetchData' );
+} );
 
-Route::prefix('ajax')->group(function () {
-    Route::get('/summary/fetch-data', [LaporanController::class, 'fetchData'])->name('summary.fetchData');
-});
+Route::prefix ( 'ajax' )->group ( function ()
+{
+    Route::get ( '/summary/fetch-data', [ LaporanController::class, 'fetchData' ] )->name ( 'summary.fetchData' );
+} );
 
-Route::get('/dashboard/proyek/actions/{id}', [DashboardController::class, 'filterByProyek'])
-    ->middleware([
+Route::get ( '/dashboard/proyek/actions/{id}', [ DashboardController::class, 'filterByProyek' ] )
+    ->middleware ( [ 
         CheckRole::class . ':Admin,Pegawai,Boss',
-    ])
-    ->name('dashboard.filter');
+    ] )
+    ->name ( 'dashboard.filter' );
 
 // Route untuk mengakses dokumentasi [Security Purpose]
-Route::get(
+Route::get (
     '/dokumentasi/atb/{filename}',
-    [ATBController::class, 'showDokumentasi']
+    [ ATBController::class, 'showDokumentasi' ]
 )
-    ->name('atb.dokumentasi')
-    ->middleware('auth');
+    ->name ( 'atb.dokumentasi' )
+    ->middleware ( 'auth' );
 
-Route::get(
+Route::get (
     '/apb/dokumentasi/{filename}',
-    [APBController::class, 'showDokumentasi']
+    [ APBController::class, 'showDokumentasi' ]
 )
-    ->name('apb.dokumentasi')
-    ->middleware('auth');
+    ->name ( 'apb.dokumentasi' )
+    ->middleware ( 'auth' );
 
 // Rute Pagination Handler
-Route::prefix('pagination')->middleware('auth')->group(function () {
-    Route::get(
+Route::prefix ( 'pagination' )->middleware ( 'auth' )->group ( function ()
+{
+    Route::get (
         '/master-data-alat/data',
-        [MasterDataAlatController::class, 'getData']
+        [ MasterDataAlatController::class, 'getData' ]
     )
-        ->name('master-data.alat.getData');
-    Route::get(
+        ->name ( 'master-data.alat.getData' );
+    Route::get (
         '/master-data-sparepart/data',
-        [MasterDataSparepartController::class, 'getData']
+        [ MasterDataSparepartController::class, 'getData' ]
     )
-        ->name(
+        ->name (
             'master-data.sparepart.getData'
         );
-    Route::get(
+    Route::get (
         '/master-data-supplier/data',
-        [MasterDataSupplierController::class, 'getData']
+        [ MasterDataSupplierController::class, 'getData' ]
     )
-        ->name('master-data.supplier.getData');
+        ->name ( 'master-data.supplier.getData' );
 
-    Route::get(
+    Route::get (
         '/proyek/data',
-        [ProyekController::class, 'getData']
+        [ ProyekController::class, 'getData' ]
     )
-        ->name('proyek.getData');
+        ->name ( 'proyek.getData' );
 
-    Route::get(
+    Route::get (
         '/rkb-general/data',
-        [RKBGeneralController::class, 'getData']
+        [ RKBGeneralController::class, 'getData' ]
     )
-        ->name('rkb_general.getData');
+        ->name ( 'rkb_general.getData' );
 
-    Route::get(
+    Route::get (
         '/rkb-general/detail/{id_rkb}',
-        [DetailRKBGeneralController::class, 'getData']
+        [ DetailRKBGeneralController::class, 'getData' ]
     )
-        ->name('detail_rkb_general.getData');
+        ->name ( 'detail_rkb_general.getData' );
 
-    Route::get(
+    Route::get (
         '/evaluasi-rkb-general/data',
-        [EvaluasiRKBGeneralController::class, 'getData']
+        [ EvaluasiRKBGeneralController::class, 'getData' ]
     )
-        ->name('evaluasi_rkb_general.getData');
+        ->name ( 'evaluasi_rkb_general.getData' );
 
-    Route::get(
+    Route::get (
         '/evaluasi-rkb-general/detail/{id_rkb}',
-        [EvaluasiDetailRKBGeneralController::class, 'getData']
+        [ EvaluasiDetailRKBGeneralController::class, 'getData' ]
     )
-        ->name('evaluasi_detail_rkb_general.getData');
+        ->name ( 'evaluasi_detail_rkb_general.getData' );
 
-    Route::get(
+    Route::get (
         '/rkb-urgent/data',
-        [RKBUrgentController::class, 'getData']
+        [ RKBUrgentController::class, 'getData' ]
     )
-        ->name('rkb_urgent.getData');
+        ->name ( 'rkb_urgent.getData' );
 
-    Route::get(
+    Route::get (
         '/rkb-urgent/detail/{id_rkb}',
-        [DetailRKBUrgentController::class, 'getData']
+        [ DetailRKBUrgentController::class, 'getData' ]
     )
-        ->name('detail_rkb_urgent.getData');
+        ->name ( 'detail_rkb_urgent.getData' );
 
-    Route::get(
+    Route::get (
         '/evaluasi-rkb-urgent/data',
-        [EvaluasiRKBUrgentController::class, 'getData']
+        [ EvaluasiRKBUrgentController::class, 'getData' ]
     )
-        ->name('evaluasi_rkb_urgent.getData');
+        ->name ( 'evaluasi_rkb_urgent.getData' );
 
-    Route::get(
+    Route::get (
         '/evaluasi-rkb-urgent/detail/{id_rkb}',
-        [EvaluasiDetailRKBUrgentController::class, 'getData']
+        [ EvaluasiDetailRKBUrgentController::class, 'getData' ]
     )
-        ->name('evaluasi_detail_rkb_urgent.getData');
+        ->name ( 'evaluasi_detail_rkb_urgent.getData' );
 
-    Route::get(
+    Route::get (
         '/spb/data',
-        [SPBController::class, 'getData']
+        [ SPBController::class, 'getData' ]
     )
-        ->name('spb.getData');
-});
+        ->name ( 'spb.getData' );
+} );
 
 // Rute Proyek [ProyekController]
-Route::prefix('proyek')
-    ->middleware([CheckRole::class . ':Admin,Pegawai,Boss'])
-    ->group(function () {
-        Route::get(
+Route::prefix ( 'proyek' )
+    ->middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )
+    ->group ( function ()
+    {
+        Route::get (
             '/',
-            [ProyekController::class, 'index']
+            [ ProyekController::class, 'index' ]
         )
-            ->name('proyek.index');
+            ->name ( 'proyek.index' );
 
-        Route::get(
+        Route::get (
             '{id}',
-            [ProyekController::class, 'show']
+            [ ProyekController::class, 'show' ]
         )
-            ->name('proyek.show');
+            ->name ( 'proyek.show' );
 
-        Route::post(
+        Route::post (
             '/',
-            [ProyekController::class, 'store']
+            [ ProyekController::class, 'store' ]
         )
-            ->name('proyek.store');
+            ->name ( 'proyek.store' );
 
-        Route::put(
+        Route::put (
             '{id}',
-            [ProyekController::class, 'update']
+            [ ProyekController::class, 'update' ]
         )
-            ->name('proyek.update');
+            ->name ( 'proyek.update' );
 
-        Route::delete(
+        Route::delete (
             '{id}',
-            [ProyekController::class, 'destroy']
+            [ ProyekController::class, 'destroy' ]
         )
-            ->name('proyek.destroy');
-    });
+            ->name ( 'proyek.destroy' );
+    } );
 
 // Rute Master Data Alat [MasterDataAlatController]
-Route::middleware('auth')
-    ->prefix('master-data-alat')
-    ->group(function () {
-        Route::get(
+Route::middleware ( 'auth' )
+    ->prefix ( 'master-data-alat' )
+    ->group ( function ()
+    {
+        Route::get (
             '/',
-            [MasterDataAlatController::class, 'index']
-        )->name('master_data_alat.index');
+            [ MasterDataAlatController::class, 'index' ]
+        )->name ( 'master_data_alat.index' );
 
-        Route::get(
+        Route::get (
             '{id}',
-            [MasterDataAlatController::class, 'show']
-        )->name('master_data_alat.show');
+            [ MasterDataAlatController::class, 'show' ]
+        )->name ( 'master_data_alat.show' );
 
-        Route::post(
+        Route::post (
             '/',
-            [MasterDataAlatController::class, 'store']
-        )->name('master_data_alat.store');
+            [ MasterDataAlatController::class, 'store' ]
+        )->name ( 'master_data_alat.store' );
 
-        Route::put(
+        Route::put (
             '{id}',
-            [MasterDataAlatController::class, 'update']
-        )->name('master_data_alat.update');
+            [ MasterDataAlatController::class, 'update' ]
+        )->name ( 'master_data_alat.update' );
 
-        Route::delete(
+        Route::delete (
             '{id}',
-            [MasterDataAlatController::class, 'destroy']
-        )->name('master_data_alat.destroy');
-    });
+            [ MasterDataAlatController::class, 'destroy' ]
+        )->name ( 'master_data_alat.destroy' );
+    } );
 
 // Rute Master Data Sparepart [MasterDataSparepartController]
-Route::middleware('auth')
-    ->prefix('master-data-sparepart')
-    ->group(function () {
-        Route::get(
+Route::middleware ( 'auth' )
+    ->prefix ( 'master-data-sparepart' )
+    ->group ( function ()
+    {
+        Route::get (
             '/',
-            [MasterDataSparepartController::class, 'index']
-        )->name('master_data_sparepart.index');
+            [ MasterDataSparepartController::class, 'index' ]
+        )->name ( 'master_data_sparepart.index' );
 
-        Route::get(
+        Route::get (
             '{id}',
-            [MasterDataSparepartController::class, 'show']
-        )->name('master_data_sparepart.show');
+            [ MasterDataSparepartController::class, 'show' ]
+        )->name ( 'master_data_sparepart.show' );
 
-        Route::post(
+        Route::post (
             '/',
-            [MasterDataSparepartController::class, 'store']
-        )->name('master_data_sparepart.store');
+            [ MasterDataSparepartController::class, 'store' ]
+        )->name ( 'master_data_sparepart.store' );
 
-        Route::put(
+        Route::put (
             '{id}',
-            [MasterDataSparepartController::class, 'update']
-        )->name('master_data_sparepart.update');
+            [ MasterDataSparepartController::class, 'update' ]
+        )->name ( 'master_data_sparepart.update' );
 
-        Route::delete(
+        Route::delete (
             '{id}',
-            [MasterDataSparepartController::class, 'destroy']
-        )->name('master_data_sparepart.destroy');
-    });
+            [ MasterDataSparepartController::class, 'destroy' ]
+        )->name ( 'master_data_sparepart.destroy' );
+    } );
 
-Route::get(
+Route::get (
     '/spareparts-by-category/{id}',
-    [MasterDataSparepartController::class, 'getSparepartsByCategory']
-)->name('spareparts-by-category');
+    [ MasterDataSparepartController::class, 'getSparepartsByCategory' ]
+)->name ( 'spareparts-by-category' );
 
 // Rute Master Data Supplier [MasterDataSupplierController]
-Route::middleware('auth')
-    ->prefix('master-data-supplier')
-    ->group(function () {
-        Route::get(
+Route::middleware ( 'auth' )
+    ->prefix ( 'master-data-supplier' )
+    ->group ( function ()
+    {
+        Route::get (
             '/',
-            [MasterDataSupplierController::class, 'index']
-        )->name('master_data_supplier.index');
+            [ MasterDataSupplierController::class, 'index' ]
+        )->name ( 'master_data_supplier.index' );
 
-        Route::get(
+        Route::get (
             '{id}',
-            [MasterDataSupplierController::class, 'show']
-        )->name('master_data_supplier.show');
+            [ MasterDataSupplierController::class, 'show' ]
+        )->name ( 'master_data_supplier.show' );
 
-        Route::post(
+        Route::post (
             '/',
-            [MasterDataSupplierController::class, 'store']
-        )->name('master_data_supplier.store');
+            [ MasterDataSupplierController::class, 'store' ]
+        )->name ( 'master_data_supplier.store' );
 
-        Route::put(
+        Route::put (
             '{id}',
-            [MasterDataSupplierController::class, 'update']
-        )->name('master_data_supplier.update');
+            [ MasterDataSupplierController::class, 'update' ]
+        )->name ( 'master_data_supplier.update' );
 
-        Route::delete(
+        Route::delete (
             '{id}',
-            [MasterDataSupplierController::class, 'destroy']
-        )->name('master_data_supplier.destroy');
-    });
+            [ MasterDataSupplierController::class, 'destroy' ]
+        )->name ( 'master_data_supplier.destroy' );
+    } );
 
 // Rute RKB General [RKBGeneralController]
-Route::middleware('auth')
-    ->prefix('rkb-general')
-    ->as('rkb_general.')
-    ->group(function () {
-        Route::get(
+Route::middleware ( 'auth' )
+    ->prefix ( 'rkb-general' )
+    ->as ( 'rkb_general.' )
+    ->group ( function ()
+    {
+        Route::get (
             '/',
-            [RKBGeneralController::class, 'index']
-        )->name('index');
+            [ RKBGeneralController::class, 'index' ]
+        )->name ( 'index' );
 
-        Route::get(
+        Route::get (
             '/{id}',
-            [RKBGeneralController::class, 'show']
-        )->name('show');
+            [ RKBGeneralController::class, 'show' ]
+        )->name ( 'show' );
 
-        Route::post(
+        Route::post (
             '/',
-            [RKBGeneralController::class, 'store']
-        )->name('store');
+            [ RKBGeneralController::class, 'store' ]
+        )->name ( 'store' );
 
-        Route::put(
+        Route::put (
             '/{id}',
-            [RKBGeneralController::class, 'update']
-        )->name('update');
+            [ RKBGeneralController::class, 'update' ]
+        )->name ( 'update' );
 
-        Route::delete(
+        Route::delete (
             '/{id}',
-            [RKBGeneralController::class, 'destroy']
-        )->name('destroy');
+            [ RKBGeneralController::class, 'destroy' ]
+        )->name ( 'destroy' );
 
-        Route::post(
+        Route::post (
             '/finalize/{id}',
-            [RKBGeneralController::class, 'finalize']
-        )->name('finalize');
+            [ RKBGeneralController::class, 'finalize' ]
+        )->name ( 'finalize' );
 
         // Rute Detail RKB General [DetailRKBGeneralController]
-        Route::prefix('detail')
-            ->as('detail.')
-            ->group(function () {
-            Route::get(
+        Route::prefix ( 'detail' )
+            ->as ( 'detail.' )
+            ->group ( function ()
+        {
+            Route::get (
                 '/{id}',
-                [DetailRKBGeneralController::class, 'index']
-            )->name('index');
+                [ DetailRKBGeneralController::class, 'index' ]
+            )->name ( 'index' );
 
-            Route::get(
+            Route::get (
                 '/show/{id}',
-                [DetailRKBGeneralController::class, 'show']
-            )->name('show');
+                [ DetailRKBGeneralController::class, 'show' ]
+            )->name ( 'show' );
 
-            Route::post(
+            Route::post (
                 '/',
-                [DetailRKBGeneralController::class, 'store']
-            )->name('store');
+                [ DetailRKBGeneralController::class, 'store' ]
+            )->name ( 'store' );
 
-            Route::put(
+            Route::put (
                 '/{id}',
-                [DetailRKBGeneralController::class, 'update']
-            )->name('update');
+                [ DetailRKBGeneralController::class, 'update' ]
+            )->name ( 'update' );
 
-            Route::delete(
+            Route::delete (
                 '/{id}',
-                [DetailRKBGeneralController::class, 'destroy']
-            )->name('destroy');
-        });
-    });
+                [ DetailRKBGeneralController::class, 'destroy' ]
+            )->name ( 'destroy' );
+        } );
+    } );
 
 // Rute RKB Urgent [RKBUrgentController]
-Route::middleware('auth')
-    ->prefix('rkb-urgent')
-    ->as('rkb_urgent.')
-    ->group(function () {
-        Route::get(
+Route::middleware ( 'auth' )
+    ->prefix ( 'rkb-urgent' )
+    ->as ( 'rkb_urgent.' )
+    ->group ( function ()
+    {
+        Route::get (
             '/',
-            [RKBUrgentController::class, 'index']
-        )->name('index');
+            [ RKBUrgentController::class, 'index' ]
+        )->name ( 'index' );
 
-        Route::get(
+        Route::get (
             '/{id}',
-            [RKBUrgentController::class, 'show']
-        )->name('show');
+            [ RKBUrgentController::class, 'show' ]
+        )->name ( 'show' );
 
-        Route::post(
+        Route::post (
             '/',
-            [RKBUrgentController::class, 'store']
-        )->name('store');
+            [ RKBUrgentController::class, 'store' ]
+        )->name ( 'store' );
 
-        Route::put(
+        Route::put (
             '/{id}',
-            [RKBUrgentController::class, 'update']
-        )->name('update');
+            [ RKBUrgentController::class, 'update' ]
+        )->name ( 'update' );
 
-        Route::delete(
+        Route::delete (
             '/{id}',
-            [RKBUrgentController::class, 'destroy']
-        )->name('destroy');
+            [ RKBUrgentController::class, 'destroy' ]
+        )->name ( 'destroy' );
 
-        Route::post(
+        Route::post (
             '/finalize/{id}',
-            [RKBUrgentController::class, 'finalize']
-        )->name('finalize');
+            [ RKBUrgentController::class, 'finalize' ]
+        )->name ( 'finalize' );
 
         // Rute Detail RKB Urgent [DetailRKBUrgentController]
-        Route::prefix('detail')
-            ->as('detail.')
-            ->group(function () {
-            Route::get(
+        Route::prefix ( 'detail' )
+            ->as ( 'detail.' )
+            ->group ( function ()
+        {
+            Route::get (
                 '/{id}',
-                [DetailRKBUrgentController::class, 'index']
-            )->name('index');
+                [ DetailRKBUrgentController::class, 'index' ]
+            )->name ( 'index' );
 
-            Route::get(
+            Route::get (
                 '/show/{id}',
-                [DetailRKBUrgentController::class, 'show']
-            )->name('show');
+                [ DetailRKBUrgentController::class, 'show' ]
+            )->name ( 'show' );
 
-            Route::post(
+            Route::post (
                 '/',
-                [DetailRKBUrgentController::class, 'store']
-            )->name('store');
+                [ DetailRKBUrgentController::class, 'store' ]
+            )->name ( 'store' );
 
-            Route::put(
+            Route::put (
                 '/{id}',
-                [DetailRKBUrgentController::class, 'update']
-            )->name('update');
+                [ DetailRKBUrgentController::class, 'update' ]
+            )->name ( 'update' );
 
-            Route::delete(
+            Route::delete (
                 '/{id}',
-                [DetailRKBUrgentController::class, 'destroy']
-            )->name('destroy');
+                [ DetailRKBUrgentController::class, 'destroy' ]
+            )->name ( 'destroy' );
 
-            Route::get(
+            Route::get (
                 '/{id}/dokumentasi',
-                [DetailRKBUrgentController::class, 'getDokumentasi']
-            )->name('dokumentasi');
+                [ DetailRKBUrgentController::class, 'getDokumentasi' ]
+            )->name ( 'dokumentasi' );
 
             // Rute Timeline RKB Urgent [TimelineRKBUrgentController]
-            Route::prefix('timeline')
-                ->as('timeline.')
-                ->group(function () {
-                Route::get(
+            Route::prefix ( 'timeline' )
+                ->as ( 'timeline.' )
+                ->group ( function ()
+            {
+                Route::get (
                     '/{id}',
-                    [TimelineRKBUrgentController::class, 'index']
-                )->name('index');
+                    [ TimelineRKBUrgentController::class, 'index' ]
+                )->name ( 'index' );
 
-                Route::post(
+                Route::post (
                     '/',
-                    [TimelineRKBUrgentController::class, 'store']
-                )->name('store');
+                    [ TimelineRKBUrgentController::class, 'store' ]
+                )->name ( 'store' );
 
-                Route::get(
+                Route::get (
                     '/show/{id}',
-                    [TimelineRKBUrgentController::class, 'show']
-                )->name('show');
+                    [ TimelineRKBUrgentController::class, 'show' ]
+                )->name ( 'show' );
 
-                Route::put(
+                Route::put (
                     '/{id}',
-                    [TimelineRKBUrgentController::class, 'update']
-                )->name('update');
+                    [ TimelineRKBUrgentController::class, 'update' ]
+                )->name ( 'update' );
 
-                Route::delete(
+                Route::delete (
                     '/{id}',
-                    [TimelineRKBUrgentController::class, 'destroy']
-                )->name('destroy');
-            });
+                    [ TimelineRKBUrgentController::class, 'destroy' ]
+                )->name ( 'destroy' );
+            } );
 
             // Rute Lampiran RKB Urgent [LampiranRKBUrgentController]
-            Route::prefix('lampiran')
-                ->as('lampiran.')
-                ->group(function () {
-                Route::post(
+            Route::prefix ( 'lampiran' )
+                ->as ( 'lampiran.' )
+                ->group ( function ()
+            {
+                Route::post (
                     '/',
-                    [LampiranRKBUrgentController::class, 'store']
-                )->name('store');
+                    [ LampiranRKBUrgentController::class, 'store' ]
+                )->name ( 'store' );
 
-                Route::get(
+                Route::get (
                     '/show/{id}',
-                    [LampiranRKBUrgentController::class, 'show']
-                )->name('show');
+                    [ LampiranRKBUrgentController::class, 'show' ]
+                )->name ( 'show' );
 
-                Route::put(
+                Route::put (
                     '/{id}',
-                    [LampiranRKBUrgentController::class, 'update']
-                )->name('update');
+                    [ LampiranRKBUrgentController::class, 'update' ]
+                )->name ( 'update' );
 
-                Route::delete(
+                Route::delete (
                     '/{id}',
-                    [LampiranRKBUrgentController::class, 'destroy']
-                )->name('destroy');
-            });
-        });
-    });
+                    [ LampiranRKBUrgentController::class, 'destroy' ]
+                )->name ( 'destroy' );
+            } );
+        } );
+    } );
 
 // Rute Evaluasi RKB General [EvaluasiRKBGeneralController]
-Route::middleware('auth')
-    ->prefix('evaluasi-rkb-general')
-    ->as('evaluasi_rkb_general.')
-    ->group(function () {
-        Route::get(
+Route::middleware ( 'auth' )
+    ->prefix ( 'evaluasi-rkb-general' )
+    ->as ( 'evaluasi_rkb_general.' )
+    ->group ( function ()
+    {
+        Route::get (
             '/',
-            [EvaluasiRKBGeneralController::class, 'index']
-        )->name('index');
+            [ EvaluasiRKBGeneralController::class, 'index' ]
+        )->name ( 'index' );
 
-        Route::get(
+        Route::get (
             '/{id}',
-            [EvaluasiRKBGeneralController::class, 'show']
-        )->name('show');
+            [ EvaluasiRKBGeneralController::class, 'show' ]
+        )->name ( 'show' );
 
-        Route::post(
+        Route::post (
             '/',
-            [EvaluasiRKBGeneralController::class, 'store']
-        )->name('store');
+            [ EvaluasiRKBGeneralController::class, 'store' ]
+        )->name ( 'store' );
 
-        Route::put(
+        Route::put (
             '/{id}',
-            [EvaluasiRKBGeneralController::class, 'update']
-        )->name('update');
+            [ EvaluasiRKBGeneralController::class, 'update' ]
+        )->name ( 'update' );
 
-        Route::delete(
+        Route::delete (
             '/{id}',
-            [EvaluasiRKBGeneralController::class, 'destroy']
-        )->name('destroy');
+            [ EvaluasiRKBGeneralController::class, 'destroy' ]
+        )->name ( 'destroy' );
 
         // Rute Detail RKB General [DetailRKBGeneralController]
-        Route::prefix('detail')
-            ->as('detail.')
-            ->group(function () {
-            Route::get(
+        Route::prefix ( 'detail' )
+            ->as ( 'detail.' )
+            ->group ( function ()
+        {
+            Route::get (
                 '/{id}',
-                [EvaluasiDetailRKBGeneralController::class, 'index']
-            )->name('index');
+                [ EvaluasiDetailRKBGeneralController::class, 'index' ]
+            )->name ( 'index' );
 
-            Route::get(
+            Route::get (
                 '/show/{id}',
-                [EvaluasiDetailRKBGeneralController::class, 'show']
-            )->name('show');
+                [ EvaluasiDetailRKBGeneralController::class, 'show' ]
+            )->name ( 'show' );
 
-            Route::post(
+            Route::post (
                 '/',
-                [EvaluasiDetailRKBGeneralController::class, 'store']
-            )->name('store');
+                [ EvaluasiDetailRKBGeneralController::class, 'store' ]
+            )->name ( 'store' );
 
-            Route::put(
+            Route::put (
                 '/{id}',
-                [EvaluasiDetailRKBGeneralController::class, 'update']
-            )->name('update');
+                [ EvaluasiDetailRKBGeneralController::class, 'update' ]
+            )->name ( 'update' );
 
-            Route::delete(
+            Route::delete (
                 '/{id}',
-                [EvaluasiDetailRKBGeneralController::class, 'destroy']
-            )->name('destroy');
+                [ EvaluasiDetailRKBGeneralController::class, 'destroy' ]
+            )->name ( 'destroy' );
 
-            Route::post(
+            Route::post (
                 '/approve/{id}',
-                [EvaluasiDetailRKBGeneralController::class, 'approve']
-            )->name('approve');
+                [ EvaluasiDetailRKBGeneralController::class, 'approve' ]
+            )->name ( 'approve' );
 
-            Route::post(
+            Route::post (
                 '/evaluate/{id}',
-                [EvaluasiDetailRKBGeneralController::class, 'evaluate']
-            )->name('evaluate');
+                [ EvaluasiDetailRKBGeneralController::class, 'evaluate' ]
+            )->name ( 'evaluate' );
 
-        });
-    });
+        } );
+    } );
 
 // Rute Evaluasi RKB Urgent [EvaluasiRKBUrgentController]
-Route::middleware('auth')
-    ->prefix('evaluasi-rkb-urgent')
-    ->as('evaluasi_rkb_urgent.')
-    ->group(function () {
-        Route::get(
+Route::middleware ( 'auth' )
+    ->prefix ( 'evaluasi-rkb-urgent' )
+    ->as ( 'evaluasi_rkb_urgent.' )
+    ->group ( function ()
+    {
+        Route::get (
             '/',
-            [EvaluasiRKBUrgentController::class, 'index']
-        )->name('index');
+            [ EvaluasiRKBUrgentController::class, 'index' ]
+        )->name ( 'index' );
 
-        Route::get(
+        Route::get (
             '/{id}',
-            [EvaluasiRKBUrgentController::class, 'show']
-        )->name('show');
+            [ EvaluasiRKBUrgentController::class, 'show' ]
+        )->name ( 'show' );
 
-        Route::post(
+        Route::post (
             '/',
-            [EvaluasiRKBUrgentController::class, 'store']
-        )->name('store');
+            [ EvaluasiRKBUrgentController::class, 'store' ]
+        )->name ( 'store' );
 
-        Route::put(
+        Route::put (
             '/{id}',
-            [EvaluasiRKBUrgentController::class, 'update']
-        )->name('update');
+            [ EvaluasiRKBUrgentController::class, 'update' ]
+        )->name ( 'update' );
 
-        Route::delete(
+        Route::delete (
             '/{id}',
-            [EvaluasiRKBUrgentController::class, 'destroy']
-        )->name('destroy');
+            [ EvaluasiRKBUrgentController::class, 'destroy' ]
+        )->name ( 'destroy' );
 
         // Rute Detail RKB Urgent [DetailRKBUrgentController]
-        Route::prefix('detail')
-            ->as('detail.')
-            ->group(function () {
-            Route::get(
+        Route::prefix ( 'detail' )
+            ->as ( 'detail.' )
+            ->group ( function ()
+        {
+            Route::get (
                 '/{id}',
-                [EvaluasiDetailRKBUrgentController::class, 'index']
-            )->name('index');
+                [ EvaluasiDetailRKBUrgentController::class, 'index' ]
+            )->name ( 'index' );
 
-            Route::get(
+            Route::get (
                 '/show/{id}',
-                [EvaluasiDetailRKBUrgentController::class, 'show']
-            )->name('show');
+                [ EvaluasiDetailRKBUrgentController::class, 'show' ]
+            )->name ( 'show' );
 
-            Route::post(
+            Route::post (
                 '/',
-                [EvaluasiDetailRKBUrgentController::class, 'store']
-            )->name('store');
+                [ EvaluasiDetailRKBUrgentController::class, 'store' ]
+            )->name ( 'store' );
 
-            Route::put(
+            Route::put (
                 '/{id}',
-                [EvaluasiDetailRKBUrgentController::class, 'update']
-            )->name('update');
+                [ EvaluasiDetailRKBUrgentController::class, 'update' ]
+            )->name ( 'update' );
 
-            Route::delete(
+            Route::delete (
                 '/{id}',
-                [EvaluasiDetailRKBUrgentController::class, 'destroy']
-            )->name('destroy');
+                [ EvaluasiDetailRKBUrgentController::class, 'destroy' ]
+            )->name ( 'destroy' );
 
-            Route::post(
+            Route::post (
                 '/approve/{id}',
-                [EvaluasiDetailRKBUrgentController::class, 'approve']
-            )->name('approve');
+                [ EvaluasiDetailRKBUrgentController::class, 'approve' ]
+            )->name ( 'approve' );
 
-            Route::post(
+            Route::post (
                 '/evaluate/{id}',
-                [EvaluasiDetailRKBUrgentController::class, 'evaluate']
-            )->name('evaluate');
+                [ EvaluasiDetailRKBUrgentController::class, 'evaluate' ]
+            )->name ( 'evaluate' );
 
-            Route::get(
+            Route::get (
                 '/{id}/dokumentasi',
-                [EvaluasiDetailRKBUrgentController::class, 'getDokumentasi']
-            )->name('dokumentasi');
+                [ EvaluasiDetailRKBUrgentController::class, 'getDokumentasi' ]
+            )->name ( 'dokumentasi' );
 
             // Rute Timeline Evaluasi Urgent [TimelineEvaluasiUrgentController]
-            Route::prefix('timeline')
-                ->as('timeline.')
-                ->group(function () {
-                Route::get(
+            Route::prefix ( 'timeline' )
+                ->as ( 'timeline.' )
+                ->group ( function ()
+            {
+                Route::get (
                     '/{id}',
-                    [TimelineEvaluasiUrgentController::class, 'index']
-                )->name('index');
+                    [ TimelineEvaluasiUrgentController::class, 'index' ]
+                )->name ( 'index' );
 
-                Route::post(
+                Route::post (
                     '/',
-                    [TimelineEvaluasiUrgentController::class, 'store']
-                )->name('store');
+                    [ TimelineEvaluasiUrgentController::class, 'store' ]
+                )->name ( 'store' );
 
-                Route::get(
+                Route::get (
                     '/show/{id}',
-                    [TimelineEvaluasiUrgentController::class, 'show']
-                )->name('show');
+                    [ TimelineEvaluasiUrgentController::class, 'show' ]
+                )->name ( 'show' );
 
-                Route::put(
+                Route::put (
                     '/{id}',
-                    [TimelineEvaluasiUrgentController::class, 'update']
-                )->name('update');
+                    [ TimelineEvaluasiUrgentController::class, 'update' ]
+                )->name ( 'update' );
 
-                Route::delete(
+                Route::delete (
                     '/{id}',
-                    [TimelineEvaluasiUrgentController::class, 'destroy']
-                )->name('destroy');
-            });
+                    [ TimelineEvaluasiUrgentController::class, 'destroy' ]
+                )->name ( 'destroy' );
+            } );
 
             // Rute Lampiran Evaluasi Urgent [LampiranEvaluasiUrgentController]
-            Route::prefix('lampiran')
-                ->as('lampiran.')
-                ->group(function () {
-                Route::post(
+            Route::prefix ( 'lampiran' )
+                ->as ( 'lampiran.' )
+                ->group ( function ()
+            {
+                Route::post (
                     '/',
-                    [LampiranEvaluasiUrgentController::class, 'store']
-                )->name('store');
+                    [ LampiranEvaluasiUrgentController::class, 'store' ]
+                )->name ( 'store' );
 
-                Route::get(
+                Route::get (
                     '/show/{id}',
-                    [LampiranEvaluasiUrgentController::class, 'show']
-                )->name('show');
+                    [ LampiranEvaluasiUrgentController::class, 'show' ]
+                )->name ( 'show' );
 
-                Route::put(
+                Route::put (
                     '/{id}',
-                    [LampiranEvaluasiUrgentController::class, 'update']
-                )->name('update');
+                    [ LampiranEvaluasiUrgentController::class, 'update' ]
+                )->name ( 'update' );
 
-                Route::delete(
+                Route::delete (
                     '/{id}',
-                    [LampiranEvaluasiUrgentController::class, 'destroy']
-                )->name('destroy');
-            });
-        });
-    });
+                    [ LampiranEvaluasiUrgentController::class, 'destroy' ]
+                )->name ( 'destroy' );
+            } );
+        } );
+    } );
 
 // Rute SPB (Surat Pemesanan Barang) [SPBController]
-Route::middleware('auth')
-    ->prefix('spb')
-    ->as('spb.')
-    ->group(function () {
-        Route::get(
+Route::middleware ( 'auth' )
+    ->prefix ( 'spb' )
+    ->as ( 'spb.' )
+    ->group ( function ()
+    {
+        Route::get (
             '/',
-            [SPBController::class, 'index']
-        )->name('index');
+            [ SPBController::class, 'index' ]
+        )->name ( 'index' );
 
-        Route::get(
+        Route::get (
             '/{id}',
-            [SPBController::class, 'show']
-        )->name('show');
+            [ SPBController::class, 'show' ]
+        )->name ( 'show' );
 
-        Route::post(
+        Route::post (
             '/',
-            [SPBController::class, 'store']
-        )->name('store');
+            [ SPBController::class, 'store' ]
+        )->name ( 'store' );
 
-        Route::put(
+        Route::put (
             '/{id}',
-            [SPBController::class, 'update']
-        )->name('update');
+            [ SPBController::class, 'update' ]
+        )->name ( 'update' );
 
-        Route::delete(
+        Route::delete (
             '/{id}',
-            [SPBController::class, 'destroy']
-        )->name('destroy');
+            [ SPBController::class, 'destroy' ]
+        )->name ( 'destroy' );
 
         // Rute Detail SPB [DetailSPBController]
-        Route::prefix('detail')
-            ->as('detail.')
-            ->group(function () {
-            Route::get(
+        Route::prefix ( 'detail' )
+            ->as ( 'detail.' )
+            ->group ( function ()
+        {
+            Route::get (
                 '/{id}',
-                [DetailSPBController::class, 'index']
-            )->name('index');
+                [ DetailSPBController::class, 'index' ]
+            )->name ( 'index' );
 
-            Route::get(
+            Route::get (
                 '/show/{id}',
-                [DetailSPBController::class, 'show']
-            )->name('show');
+                [ DetailSPBController::class, 'show' ]
+            )->name ( 'show' );
 
-            Route::post(
+            Route::post (
                 '/',
-                [DetailSPBController::class, 'store']
-            )->name('store');
+                [ DetailSPBController::class, 'store' ]
+            )->name ( 'store' );
 
-            Route::put(
+            Route::put (
                 '/{id}',
-                [DetailSPBController::class, 'update']
-            )->name('update');
+                [ DetailSPBController::class, 'update' ]
+            )->name ( 'update' );
 
-            Route::delete(
+            Route::delete (
                 '/{id}',
-                [DetailSPBController::class, 'destroy']
-            )->name('destroy');
+                [ DetailSPBController::class, 'destroy' ]
+            )->name ( 'destroy' );
 
-            Route::post(
+            Route::post (
                 '/approve/{id}',
-                [DetailSPBController::class, 'approve']
-            )->name('approve');
+                [ DetailSPBController::class, 'approve' ]
+            )->name ( 'approve' );
 
-            Route::get(
-                '/getMerk/{idSupplier}',
-                [DetailSPBController::class, 'getMerk']
-            )->name('getMerk');
+            Route::get (
+                '/getSparepart/{idSupplier}',
+                [ DetailSPBController::class, 'getSparepart' ]
+            )->name ( 'getSparepart' );
 
-            Route::get(
-                '/getSupplier/{idMasterDataSparepart}',
-                [DetailSPBController::class, 'getSupplier']
-            )->name('getSupplier');
+            // Rute Riwayat SPB [RiwayatSPBController]
+            Route::prefix ( 'riwayat' )
+                ->as ( 'riwayat.' )
+                ->group ( function ()
+            {
+                Route::get (
+                    '/{id}',
+                    [ RiwayatSPBController::class, 'index' ]
+                )->name ( 'index' );
 
-            Route::get(
-                '/getSparepart/{idLinkAlatDetail}',
-                [DetailSPBController::class, 'getSparepart']
-            )->name('getSparepart');
-        });
-    });
+                Route::get (
+                    '/show/{id}',
+                    [ RiwayatSPBController::class, 'show' ]
+                )->name ( 'show' );
+
+                Route::post (
+                    '/',
+                    [ RiwayatSPBController::class, 'store' ]
+                )->name ( 'store' );
+
+                Route::delete (
+                    '/{id}',
+                    [ RiwayatSPBController::class, 'destroy' ]
+                )->name ( 'destroy' );
+            } );
+        } );
+    } );

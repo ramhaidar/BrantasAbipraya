@@ -11,14 +11,11 @@ return new class extends Migration
      */
     public function up () : void
     {
-        Schema::create ( 'detail_spb', function (Blueprint $table)
+        Schema::create ( 'link_spb_detail_spb', function (Blueprint $table)
         {
             $table->id ();
-            $table->bigInteger ( 'quantity' );
-            $table->string ( 'satuan' );
-            $table->bigInteger ( 'harga' );
-            $table->foreignId ( 'id_master_data_sparepart' )
-                ->constrained ( 'master_data_sparepart' )->cascadeOnDelete ();
+            $table->foreignId ( 'id_spb' )->constrained ( 'spb' )->cascadeOnDelete ();
+            $table->foreignId ( 'id_detail_spb' )->constrained ( 'detail_spb' )->cascadeOnDelete ();
             $table->timestamps ();
         } );
     }
@@ -28,6 +25,6 @@ return new class extends Migration
      */
     public function down () : void
     {
-        Schema::dropIfExists ( 'detail_spb' );
+        Schema::dropIfExists ( 'link_spb_detail_spb' );
     }
 };

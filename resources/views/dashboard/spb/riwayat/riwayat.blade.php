@@ -23,7 +23,7 @@
 
                         <!-- Tambahkan Tombol Export PDF di Ujung Kanan -->
                         <div class="ms-auto pe-2">
-                            <a class="btn btn-primary" href="{{ route('spb.detail.riwayat.export-pdf', ['id' => $spb->id]) }}">
+                            <a class="btn btn-primary" href="{{ route('spb.detail.riwayat.export-pdf', ['id' => $spb->id]) }}" target="_blank">
                                 <i class="fa fa-file-pdf"></i> <span class="ms-2">Export PDF</span>
                             </a>
                         </div>

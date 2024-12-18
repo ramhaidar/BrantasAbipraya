@@ -1150,6 +1150,10 @@ Route::middleware ( 'auth' )
                     '/{id}',
                     [ RiwayatSPBController::class, 'destroy' ]
                 )->name ( 'destroy' );
+                Route::get(
+                    '/{id}/export-pdf',
+                    [RiwayatSPBController::class, 'exportPDF']
+                )->name('export-pdf');
             } );
         } );
     } );

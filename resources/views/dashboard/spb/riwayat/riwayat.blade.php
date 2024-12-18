@@ -12,6 +12,12 @@
                         <p class="p-0 m-0 fw-medium">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}
                         </p>
                     </div>
+                    <!-- Tambahkan Tombol Export PDF di Ujung Kanan -->
+                    <div class="ms-auto pe-2">
+                        <a class="btn btn-danger" href="{{ route('spb.detail.riwayat.export-pdf', ['id' => $spb->id]) }}">
+                            Export PDF
+                        </a>
+                    </div>
                     {{-- <div class="ms-auto d-flex gap-2 pe-2">
                         <p class="text-end fw-medium">{{ $spb->nomor }}</p>
                     </div> --}}

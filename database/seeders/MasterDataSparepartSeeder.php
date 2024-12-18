@@ -21,35 +21,35 @@ class MasterDataSparepartSeeder extends Seeder
         // Menambahkan 5 data secara manual
         MasterDataSparepart::create ( [ 
             'nama'                  => 'Filter Oli C-1007',
-            'part_number'           => 'C-1007',
+            'part_number'           => 'SO-1007P', // Format Sakura Oil Filter
             'merk'                  => 'Sakura',
             'id_kategori_sparepart' => KategoriSparepart::where ( 'kode', 'B11' )->value ( 'id' ),
         ] );
 
         MasterDataSparepart::create ( [ 
             'nama'                  => 'Klakson Keong 24V',
-            'part_number'           => '24V-Klakson',
+            'part_number'           => '0 986 AH0 501', // Format Bosch part number
             'merk'                  => 'Bosch',
             'id_kategori_sparepart' => KategoriSparepart::where ( 'kode', 'C1' )->value ( 'id' ),
         ] );
 
         MasterDataSparepart::create ( [ 
             'nama'                  => 'Kipas Angin Dashboard Exca',
-            'part_number'           => 'Exca-Kipas-01',
+            'part_number'           => '11N6-90780', // Format Excavator part
             'merk'                  => 'Exca',
             'id_kategori_sparepart' => KategoriSparepart::where ( 'kode', 'C1' )->value ( 'id' ),
         ] );
 
         MasterDataSparepart::create ( [ 
             'nama'                  => 'Grease Top 1',
-            'part_number'           => 'Top-1-Grease',
+            'part_number'           => 'EP-2/10', // Format Grease specification
             'merk'                  => 'Top 1',
             'id_kategori_sparepart' => KategoriSparepart::where ( 'kode', 'B27' )->value ( 'id' ),
         ] );
 
         MasterDataSparepart::create ( [ 
             'nama'                  => 'Kampas Rem Depan',
-            'part_number'           => 'Honda',
+            'part_number'           => 'GDB3309', // Format TRW brake pad
             'merk'                  => 'TRW',
             'id_kategori_sparepart' => KategoriSparepart::where ( 'kode', 'A9' )->value ( 'id' ),
         ] );
@@ -59,66 +59,66 @@ class MasterDataSparepartSeeder extends Seeder
         // Menambahkan 5 data dengan merk yang berbeda
         MasterDataSparepart::create ( [ 
             'nama'                  => 'Filter Oli C-1007',
-            'part_number'           => 'C-1007',
+            'part_number'           => '15208-65F0A', // Format Denso/OEM style
             'merk'                  => 'Denso',
             'id_kategori_sparepart' => KategoriSparepart::where ( 'kode', 'B11' )->value ( 'id' ),
         ] );
 
         MasterDataSparepart::create ( [ 
             'nama'                  => 'Klakson Keong 24V',
-            'part_number'           => '24V-Klakson',
+            'part_number'           => '3PA 004 811-851', // Format Hella part number
             'merk'                  => 'Hella',
             'id_kategori_sparepart' => KategoriSparepart::where ( 'kode', 'C1' )->value ( 'id' ),
         ] );
 
         MasterDataSparepart::create ( [ 
             'nama'                  => 'Kipas Angin Dashboard Exca',
-            'part_number'           => 'Exca-Kipas-01',
+            'part_number'           => 'FN12V-60B', // Format Panasonic industrial fan
             'merk'                  => 'Panasonic',
             'id_kategori_sparepart' => KategoriSparepart::where ( 'kode', 'C1' )->value ( 'id' ),
         ] );
 
         MasterDataSparepart::create ( [ 
             'nama'                  => 'Grease Top 1',
-            'part_number'           => 'Top-1-Grease',
+            'part_number'           => 'GD5/180', // Format Shell Grease
             'merk'                  => 'Shell',
             'id_kategori_sparepart' => KategoriSparepart::where ( 'kode', 'B27' )->value ( 'id' ),
         ] );
 
         MasterDataSparepart::create ( [ 
             'nama'                  => 'Kampas Rem Depan',
-            'part_number'           => 'Honda',
+            'part_number'           => 'P85 012', // Format Brembo pad number
             'merk'                  => 'Brembo',
             'id_kategori_sparepart' => KategoriSparepart::where ( 'kode', 'A9' )->value ( 'id' ),
         ] );
 
         // Additional 25 spareparts
         $spareparts = [ 
-            [ 'nama' => 'Oil Filter Element', 'part_number' => 'OF-2345', 'merk' => 'Toyota', 'kode' => 'B11' ],
-            [ 'nama' => 'Air Filter', 'part_number' => 'AF-1122', 'merk' => 'Mann', 'kode' => 'B11' ],
-            [ 'nama' => 'Fuel Filter', 'part_number' => 'FF-3344', 'merk' => 'Bosch', 'kode' => 'B11' ],
-            [ 'nama' => 'Brake Pad Set', 'part_number' => 'BP-5566', 'merk' => 'Akebono', 'kode' => 'A9' ],
-            [ 'nama' => 'Timing Belt', 'part_number' => 'TB-7788', 'merk' => 'Gates', 'kode' => 'B27' ],
-            [ 'nama' => 'Spark Plug', 'part_number' => 'SP-9900', 'merk' => 'NGK', 'kode' => 'C1' ],
-            [ 'nama' => 'Water Pump', 'part_number' => 'WP-1234', 'merk' => 'Aisin', 'kode' => 'B27' ],
-            [ 'nama' => 'Alternator', 'part_number' => 'AL-5678', 'merk' => 'Denso', 'kode' => 'C1' ],
-            [ 'nama' => 'Starter Motor', 'part_number' => 'SM-9012', 'merk' => 'Bosch', 'kode' => 'C1' ],
-            [ 'nama' => 'Radiator', 'part_number' => 'RD-3456', 'merk' => 'Koyorad', 'kode' => 'B27' ],
-            [ 'nama' => 'Shock Absorber', 'part_number' => 'SA-7890', 'merk' => 'KYB', 'kode' => 'A9' ],
-            [ 'nama' => 'CV Joint', 'part_number' => 'CV-2345', 'merk' => 'NTN', 'kode' => 'A9' ],
-            [ 'nama' => 'Ball Joint', 'part_number' => 'BJ-6789', 'merk' => 'Moog', 'kode' => 'A9' ],
-            [ 'nama' => 'Tie Rod End', 'part_number' => 'TR-0123', 'merk' => 'CTR', 'kode' => 'A9' ],
-            [ 'nama' => 'Wheel Bearing', 'part_number' => 'WB-4567', 'merk' => 'SKF', 'kode' => 'A9' ],
-            [ 'nama' => 'Engine Mount', 'part_number' => 'EM-8901', 'merk' => 'Hutchinson', 'kode' => 'B27' ],
-            [ 'nama' => 'Clutch Kit', 'part_number' => 'CK-2345', 'merk' => 'Exedy', 'kode' => 'B27' ],
-            [ 'nama' => 'Battery', 'part_number' => 'BT-6789', 'merk' => 'GS Yuasa', 'kode' => 'C1' ],
-            [ 'nama' => 'Wiper Blade', 'part_number' => 'WB-0123', 'merk' => 'Denso', 'kode' => 'C1' ],
-            [ 'nama' => 'Thermostat', 'part_number' => 'TS-4567', 'merk' => 'Gates', 'kode' => 'B27' ],
-            [ 'nama' => 'Fan Belt', 'part_number' => 'FB-8901', 'merk' => 'Mitsuboshi', 'kode' => 'B27' ],
-            [ 'nama' => 'Power Steering Pump', 'part_number' => 'PS-2345', 'merk' => 'Maval', 'kode' => 'C1' ],
-            [ 'nama' => 'Fuel Pump', 'part_number' => 'FP-6789', 'merk' => 'Airtex', 'kode' => 'B11' ],
-            [ 'nama' => 'Oxygen Sensor', 'part_number' => 'OS-0123', 'merk' => 'Denso', 'kode' => 'C1' ],
-            [ 'nama' => 'Timing Chain Kit', 'part_number' => 'TC-4567', 'merk' => 'Iwis', 'kode' => 'B27' ],
+            [ 'nama' => 'Oil Filter Assembly PC200-8', 'part_number' => '600-211-5241', 'merk' => 'Komatsu', 'kode' => 'B11' ],
+            [ 'nama' => 'Air Cleaner Element HD785-7', 'part_number' => 'C-33-1399', 'merk' => 'Mann-Filter', 'kode' => 'B13' ],
+            [ 'nama' => 'Fuel Filter DX225LCA', 'part_number' => 'K1030487', 'merk' => 'Doosan', 'kode' => 'B12' ],
+            [ 'nama' => 'Brake Pad Set SK200-8', 'part_number' => 'KRA0440', 'merk' => 'Kobelco', 'kode' => 'A9' ],
+            [ 'nama' => 'Timing Belt 6D16T', 'part_number' => 'ME240538', 'merk' => 'Mitsubishi', 'kode' => 'A2' ],
+            [ 'nama' => 'Glow Plug 4D95L', 'part_number' => '894453-0180', 'merk' => 'Denso', 'kode' => 'A2' ],
+            [ 'nama' => 'Water Pump PC300-8', 'part_number' => '6745-61-1210', 'merk' => 'Komatsu', 'kode' => 'A2' ],
+            [ 'nama' => 'Alternator HD785-7', 'part_number' => '600-825-5550', 'merk' => 'Komatsu', 'kode' => 'A6' ],
+            [ 'nama' => 'Starter Motor CAT320D', 'part_number' => '228000-7802', 'merk' => 'Denso', 'kode' => 'A6' ],
+            [ 'nama' => 'Radiator Core SK200-8', 'part_number' => 'YN05P00035S004', 'merk' => 'Kobelco', 'kode' => 'A2' ],
+            [ 'nama' => 'Shock Absorber HD465-7', 'part_number' => '569-33-41214', 'merk' => 'Kayaba', 'kode' => 'A10' ],
+            [ 'nama' => 'CV Joint Assembly', 'part_number' => '42450-60171', 'merk' => 'Toyota', 'kode' => 'A4' ],
+            [ 'nama' => 'Ball Joint HD785-7', 'part_number' => '281-70-74272', 'merk' => 'Komatsu', 'kode' => 'A4' ],
+            [ 'nama' => 'Tie Rod End PC400-8', 'part_number' => '208-70-61250', 'merk' => 'Komatsu', 'kode' => 'A8' ],
+            [ 'nama' => 'Wheel Bearing Kit', 'part_number' => 'VKBA5314', 'merk' => 'SKF', 'kode' => 'A4' ],
+            [ 'nama' => 'Engine Mounting D85ESS-2', 'part_number' => '175-01-K1240', 'merk' => 'Komatsu', 'kode' => 'A2' ],
+            [ 'nama' => 'Clutch Kit HD785-7', 'part_number' => '159-12-11103', 'merk' => 'Komatsu', 'kode' => 'A3' ],
+            [ 'nama' => 'Battery N200', 'part_number' => 'NS200-MFH', 'merk' => 'GS Yuasa', 'kode' => 'A6' ],
+            [ 'nama' => 'Wiper Blade PC200-8', 'part_number' => '198-Z5-H5810', 'merk' => 'Komatsu', 'kode' => 'A1' ],
+            [ 'nama' => 'Thermostat 6D125', 'part_number' => '6151-61-1110', 'merk' => 'Komatsu', 'kode' => 'A2' ],
+            [ 'nama' => 'V-Belt Set PC400-8', 'part_number' => '6136-62-1810', 'merk' => 'Bando', 'kode' => 'A2' ],
+            [ 'nama' => 'Power Steering Pump D85ESS-2', 'part_number' => '705-12-44010', 'merk' => 'Komatsu', 'kode' => 'A8' ],
+            [ 'nama' => 'Electric Fuel Pump HD785-7', 'part_number' => '6003-81-6550', 'merk' => 'Komatsu', 'kode' => 'A2' ],
+            [ 'nama' => 'O2 Sensor Assembly', 'part_number' => '89467-60080', 'merk' => 'Denso', 'kode' => 'A2' ],
+            [ 'nama' => 'Timing Chain Kit 6D140', 'part_number' => '6212-K1-9901', 'merk' => 'Komatsu', 'kode' => 'A2' ],
         ];
 
         foreach ( $spareparts as $part )

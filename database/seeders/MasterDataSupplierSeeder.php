@@ -68,9 +68,12 @@ class MasterDataSupplierSeeder extends Seeder
             "ALFIAN MOTOR",
             "AGUNG MAKMUR MOTOR",
 
-            "SUMBER JAYA TEKNIK",
-            "PRIMA PARTS INDONESIA",
-            "MEGA MOTOR SPAREPART"
+            "PT. TRAKINDO UTAMA", // Dealer resmi Caterpillar di Indonesia
+            "PT. UNITED TRACTORS Tbk", // Dealer resmi Komatsu di Indonesia
+            "PT. HEXINDO ADIPERKASA Tbk", // Dealer resmi Hitachi di Indonesia
+            "PT. KOBEXINDO TRACTORS Tbk", // Dealer resmi Doosan di Indonesia
+            "CV. WIJAYA PARTS SOLUTION", // Supplier parts general
+            "PT. GAMMA DIESEL PARTS INDONESIA", // Spesialis parts diesel
         ];
 
         foreach ( $real_companies as $company )

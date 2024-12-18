@@ -160,8 +160,11 @@ class EvaluasiDetailRKBUrgentController extends Controller
         // Ambil data dengan paginasi
         $data = $query->skip ( $start )->take ( $length )->get ();
 
+        // Get the RKB to access its status flags
+        $rkb = RKB::findOrFail($id_rkb);
+
         // Format data untuk DataTable
-        $formattedData = $data->map ( function ($item)
+        $formattedData = $data->map ( function ($item) use ($rkb)
         {
             return [ 
                 'id'                  => $item->id,
@@ -175,6 +178,10 @@ class EvaluasiDetailRKBUrgentController extends Controller
                 'quantity_approved'   => $item->quantity_approved,
                 'quantity_in_stock'   => $item->quantity_in_stock ?? 0,
                 'satuan'              => $item->satuan,
+                // Add the status flags from RKB
+                'is_approved'         => $rkb->is_approved,
+                'is_finalized'        => $rkb->is_finalized, 
+                'is_evaluated'        => $rkb->is_evaluated
             ];
         } );
 

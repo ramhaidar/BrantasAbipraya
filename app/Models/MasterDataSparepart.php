@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class MasterDataSparepart extends Model
 {
@@ -43,6 +44,11 @@ class MasterDataSparepart extends Model
             'id_master_data_sparepart',
             'id_master_data_supplier'
         )->withTimestamps ();
+    }
+
+    public function detailSpbs(): HasMany
+    {
+        return $this->hasMany(DetailSPB::class, 'id_master_data_sparepart');
     }
 
 }

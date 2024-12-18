@@ -28,38 +28,35 @@ class RiwayatSPBController extends Controller
         ] );
     }
 
-    public function getRiwayatFromSPB ( $id )
-    {
-    }
-
     // Fungsi untuk mengekspor data SPB menjadi PDF
-    public function exportPDF($id)
+    public function exportPDF ( $id )
     {
-        $spb = SPB::with([
+        $spb = SPB::with ( [ 
             'linkSpbDetailSpb.detailSpb.sparepart',
             'linkRkbSpbs',
             'supplier',
-        ])->findOrFail($id);
+        ] )->findOrFail ( $id );
 
-        $totalHarga = 0;
+        $totalHarga       = 0;
         $totalJumlahHarga = 0;
 
-        foreach ($spb->linkSpbDetailSpb as $item) {
+        foreach ( $spb->linkSpbDetailSpb as $item )
+        {
             $totalHarga += $item->detailSpb->harga;
             $totalJumlahHarga += $item->detailSpb->quantity * $item->detailSpb->harga;
         }
 
-        $ppn = $totalJumlahHarga * 0.11;
+        $ppn        = $totalJumlahHarga * 0.11;
         $grandTotal = $totalJumlahHarga + $ppn;
 
-        $pdf = PDF::loadView('dashboard.spb.riwayat.export-pdf', compact(
+        $pdf = PDF::loadView ( 'dashboard.spb.riwayat.partials.export-pdf', compact (
             'spb',
             'totalHarga',
             'totalJumlahHarga',
             'ppn',
             'grandTotal'
-        ));
+        ) );
 
-        return $pdf->stream('surat_pemesanan_barang.pdf');
+        return $pdf->stream ( 'surat_pemesanan_barang.pdf' );
     }
 }

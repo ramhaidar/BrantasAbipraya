@@ -12,11 +12,21 @@
                         <p class="p-0 m-0 fw-medium">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}
                         </p>
                     </div>
-                    <!-- Tambahkan Tombol Export PDF di Ujung Kanan -->
-                    <div class="ms-auto pe-2">
-                        <a class="btn btn-danger" href="{{ route('spb.detail.riwayat.export-pdf', ['id' => $spb->id]) }}">
-                            Export PDF
-                        </a>
+
+                    <div class="ms-auto d-flex gap-2 pe-2">
+                        <!-- Tambahkan Tombol Modal Preview -->
+                        <div class="ms-auto pe-2">
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPreview">
+                                <i class="fa fa-eye"></i> <span class="ms-2">Preview</span>
+                            </button>
+                        </div>
+
+                        <!-- Tambahkan Tombol Export PDF di Ujung Kanan -->
+                        <div class="ms-auto pe-2">
+                            <a class="btn btn-primary" href="{{ route('spb.detail.riwayat.export-pdf', ['id' => $spb->id]) }}">
+                                <i class="fa fa-file-pdf"></i> <span class="ms-2">Export PDF</span>
+                            </a>
+                        </div>
                     </div>
                     {{-- <div class="ms-auto d-flex gap-2 pe-2">
                         <p class="text-end fw-medium">{{ $spb->nomor }}</p>
@@ -30,7 +40,7 @@
     </div>
 
     <!-- Modal for Adding Data -->
-    {{-- @include('dashboard.spb.detail.partials.modal-create') --}}
+    @include('dashboard.spb.riwayat.partials.modal-preview')
 
     <!-- Modal for Deleting Data -->
     {{-- @include('dashboard.rkb.urgent.partials.modal-delete') --}}

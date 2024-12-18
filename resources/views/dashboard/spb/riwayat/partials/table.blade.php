@@ -59,6 +59,7 @@
                 <tr>
                     <th class="text-center">NO</th>
                     <th class="text-center">JENIS BARANG</th>
+                    <th class="text-center">Merk</th>
                     <th class="text-center">SPESIFIKASI/TIPE/NO SERI</th>
                     <th class="text-center">Jumlah</th>
                     <th class="text-center">Sat</th>
@@ -72,6 +73,7 @@
                     <tr>
                         <td class="text-center">{{ $index + 1 }}</td>
                         <td class="text-center">{{ $item->detailSpb->sparepart->nama }}</td>
+                        <td class="text-center">{{ $item->detailSpb->sparepart->merk }}</td>
                         <td class="text-center">{{ $item->detailSpb->sparepart->part_number }}</td>
                         <td class="text-center">{{ $item->detailSpb->quantity }}</td>
                         <td class="text-center">{{ $item->detailSpb->satuan }}</td>
@@ -91,16 +93,16 @@
 
             <tfoot class="table-primary">
                 <tr>
-                    <th class="ps-4" style="text-align: left;" colspan="5">Jumlah</th>
+                    <th class="ps-4" style="text-align: left;" colspan="6">Jumlah</th>
                     <th style="text-align: center;">Rp {{ number_format($totalHarga, 0, ',', '.') }}</th>
                     <th style="text-align: center;">Rp {{ number_format($totalJumlahHarga, 0, ',', '.') }}</th>
                 </tr>
                 <tr>
-                    <th class="ps-4" style="text-align: left;" colspan="6">PPN 11%</th>
+                    <th class="ps-4" style="text-align: left;" colspan="7">PPN 11%</th>
                     <th style="text-align: center;">Rp {{ number_format($ppn, 0, ',', '.') }}</th>
                 </tr>
                 <tr>
-                    <th class="ps-4" style="text-align: left;" colspan="6">Grand Total</th>
+                    <th class="ps-4" style="text-align: left;" colspan="7">Grand Total</th>
                     <th style="text-align: center;">Rp {{ number_format($grandTotal, 0, ',', '.') }}</th>
                 </tr>
             </tfoot>

@@ -49,8 +49,9 @@ class DetailSPBController extends Controller
             'supplier'   => MasterDataSupplier::all (),
             'totalItems' => $totalItems,
             'riwayatSpb' => $riwayatSpb,
-            'headerPage' => "SPB",
-            'page'       => 'Detail SPB',
+
+            'headerPage' => "SPB Supplier",
+            'page'       => 'Detail SPB Supplier',
         ] );
     }
 
@@ -58,7 +59,7 @@ class DetailSPBController extends Controller
     {
         try
         {
-            $supplier = MasterDataSupplier::with ( 'spareparts' )->find ( $idSupplier );
+            $supplier = MasterDataSupplier::with ( 'masterDataSpareparts' )->find ( $idSupplier );
 
             return response ()->json ( $supplier );
         }
@@ -72,16 +73,20 @@ class DetailSPBController extends Controller
     {
         // Validate request
         $validated = $request->validate ( [ 
-            'id_rkb'        => 'required|exists:rkb,id',
-            'supplier_main' => 'required|exists:master_data_supplier,id',
-            'sparepart'     => 'required|array',
-            'sparepart.*'   => 'required|exists:master_data_sparepart,id',
-            'qty'           => 'required|array',
-            'qty.*'         => 'required|numeric|min:0',
-            'harga'         => 'required|array',
-            'harga.*'       => 'required|string',
-            'satuan'        => 'required|array',
-            'satuan.*'      => 'required|string',
+            'id_rkb'               => 'required|exists:rkb,id',
+            'supplier_main'        => 'required|exists:master_data_supplier,id',
+            'sparepart'            => 'required|array',
+            'sparepart.*'          => 'required|exists:master_data_sparepart,id',
+            'qty'                  => 'required|array',
+            'qty.*'                => 'required|numeric|min:0',
+            'harga'                => 'required|array',
+            'harga.*'              => 'required|string',
+            'satuan'               => 'required|array',
+            'satuan.*'             => 'required|string',
+            'alat_detail_id'       => 'required|array',
+            'alat_detail_id.*'     => 'required|exists:link_alat_detail_rkb,id',
+            'link_rkb_detail_id'   => 'required|array',
+            'link_rkb_detail_id.*' => 'required|exists:link_rkb_detail,id',
         ] );
 
         \DB::beginTransaction ();
@@ -102,13 +107,15 @@ class DetailSPBController extends Controller
             ] );
 
             // Loop through each sparepart item
-            foreach ( $validated[ 'sparepart' ] as $linkRkbDetailId => $sparepartId )
+            foreach ( $validated[ 'sparepart' ] as $index => $sparepartId )
             {
-                $qty    = $validated[ 'qty' ][ $linkRkbDetailId ];
-                $satuan = $validated[ 'satuan' ][ $linkRkbDetailId ];
+                $qty             = $validated[ 'qty' ][ $index ];
+                $satuan          = $validated[ 'satuan' ][ $index ];
+                $alatDetailId    = $validated[ 'alat_detail_id' ][ $index ];
+                $linkRkbDetailId = $validated[ 'link_rkb_detail_id' ][ $index ];
 
                 // Clean and extract numeric value from price string
-                $harga = preg_replace ( '/[^0-9]/', '', $validated[ 'harga' ][ $linkRkbDetailId ] );
+                $harga = preg_replace ( '/[^0-9]/', '', $validated[ 'harga' ][ $index ] );
 
                 // Skip if quantity is 0
                 if ( $qty <= 0 ) continue;
@@ -118,7 +125,9 @@ class DetailSPBController extends Controller
                     'quantity'                 => $qty,
                     'harga'                    => (int) $harga,
                     'satuan'                   => $satuan,
-                    'id_master_data_sparepart' => $sparepartId
+                    'id_master_data_sparepart' => $sparepartId,
+                    'id_master_data_alat'      => $alatDetailId,
+                    'id_link_rkb_detail'       => $linkRkbDetailId,
                 ] );
 
                 // Create LinkSPBDetailSPB
@@ -126,7 +135,7 @@ class DetailSPBController extends Controller
                     'id_detail_spb' => $detailSPB->id
                 ] );
 
-                // Update quantity remainder in RKB detail
+                // Update quantity remainder in RKB detail using the correct link_rkb_detail_id
                 $linkRKBDetail = LinkRKBDetail::findOrFail ( $linkRkbDetailId );
                 $rkb           = RKB::findOrFail ( $validated[ 'id_rkb' ] );
 
@@ -149,7 +158,6 @@ class DetailSPBController extends Controller
 
             \DB::commit ();
             return redirect ()->back ()->with ( 'success', 'SPB berhasil dibuat' );
-
         }
         catch ( \Exception $e )
         {

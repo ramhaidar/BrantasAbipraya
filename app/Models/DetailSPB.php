@@ -20,6 +20,8 @@ class DetailSPB extends Model
         'harga',
         'satuan',
         'id_master_data_sparepart',
+        'id_master_data_alat',
+        'id_link_rkb_detail',
     ];
 
     protected $casts = [ 
@@ -28,9 +30,11 @@ class DetailSPB extends Model
         'harga'                    => 'integer',
         'satuan'                   => 'string',
         'id_master_data_sparepart' => 'integer',
+        'id_master_data_alat'      => 'integer',
+        'id_link_rkb_detail'       => 'integer',
     ];
 
-    public function sparepart () : BelongsTo
+    public function masterDataSparepart () : BelongsTo
     {
         return $this->belongsTo ( MasterDataSparepart::class, 'id_master_data_sparepart' );
     }
@@ -38,5 +42,15 @@ class DetailSPB extends Model
     public function linkSpbDetailSpb () : HasMany
     {
         return $this->hasMany ( LinkSPBDetailSPB::class, 'id_detail_spb' );
+    }
+
+    public function masterDataAlat () : BelongsTo
+    {
+        return $this->belongsTo ( MasterDataAlat::class, 'id_master_data_alat' );
+    }
+
+    public function linkRkbDetail () : BelongsTo
+    {
+        return $this->belongsTo ( LinkRKBDetail::class, 'id_link_rkb_detail' );
     }
 }

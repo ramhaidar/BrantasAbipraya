@@ -71,6 +71,20 @@
                     return;
                 }
 
+                // Cek apakah harga sudah diisi untuk setiap item yang dipilih
+                let isPriceValid = true;
+                $('input[name^="harga"]').each(function() {
+                    if (!$(this).prop('disabled') && ($(this).val() === 'Rp 0' || $(this).val() === 'Rp0')) {
+                        isPriceValid = false;
+                        return false; // break the loop
+                    }
+                });
+
+                if (!isPriceValid) {
+                    alert('Pastikan harga sudah diisi untuk setiap item yang dipilih');
+                    return;
+                }
+
                 // Submit form jika semua validasi berhasil
                 form.submit();
                 $('#modalForSaveSPB').modal('hide');

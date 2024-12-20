@@ -88,7 +88,7 @@ class MasterDataSparepartController extends Controller
         $sparepart->save ();
 
         // Sinkronisasi suppliers menggunakan relasi many-to-many
-        $sparepart->suppliers ()->sync ( $request->input ( 'suppliers', [] ) );
+        $sparepart->masterDataSuppliers ()->sync ( $request->input ( 'suppliers', [] ) );
 
         return redirect ()->route ( 'master_data_sparepart.index' )
             ->with ( 'success', 'Data Master Sparepart berhasil ditambahkan' );
@@ -96,7 +96,7 @@ class MasterDataSparepartController extends Controller
 
     public function show ( $id )
     {
-        $sparepart = MasterDataSparepart::with ( 'suppliers', 'kategori' )->findOrFail ( $id );
+        $sparepart = MasterDataSparepart::with ( 'masterDataSuppliers', 'kategori' )->findOrFail ( $id );
 
         return response ()->json ( [ 
             'data' => [ 
@@ -111,7 +111,7 @@ class MasterDataSparepartController extends Controller
                     'jenis'     => $sparepart->kategori->jenis,
                     'sub_jenis' => $sparepart->kategori->sub_jenis,
                 ] : null,
-                'suppliers'             => $sparepart->suppliers->map ( function ($supplier)
+                'suppliers'             => $sparepart->masterDataSuppliers->map ( function ($supplier)
                 {
                     return [ 'id' => $supplier->id, 'nama' => $supplier->nama ];
                 } ),
@@ -141,7 +141,7 @@ class MasterDataSparepartController extends Controller
         $sparepart->save ();
 
         // Sync suppliers, even if empty
-        $sparepart->suppliers ()->sync ( $request->input ( 'suppliers', [] ) );
+        $sparepart->masterDataSuppliers ()->sync ( $request->input ( 'suppliers', [] ) );
 
         return redirect ()->route ( 'master_data_sparepart.index' )->with ( 'success', 'Master Data Sparepart berhasil diperbarui' );
     }
@@ -163,7 +163,7 @@ class MasterDataSparepartController extends Controller
 
     public function getData ( Request $request )
     {
-        $query = MasterDataSparepart::with ( [ 'kategori', 'suppliers' ] )->select ( 'master_data_sparepart.*' );
+        $query = MasterDataSparepart::with ( [ 'kategori', 'masterDataSuppliers' ] )->select ( 'master_data_sparepart.*' );
 
         // Apply search filters
         if ( $search = $request->input ( 'search.value' ) )
@@ -234,7 +234,7 @@ class MasterDataSparepartController extends Controller
             $item->nama_kategori      = $item->kategori->nama ?? '-';
             $item->jenis_kategori     = $item->kategori->jenis ?? '-';
             $item->sub_jenis_kategori = $item->kategori->sub_jenis ?? '-';
-            $item->detail             = $item->suppliers->pluck ( 'nama' )->implode ( ', ' ); // Supplier names
+            $item->detail             = $item->masterDataSuppliers->pluck ( 'nama' )->implode ( ', ' ); // Supplier names
             return $item;
         } );
 

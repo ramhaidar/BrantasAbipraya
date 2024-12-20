@@ -36,7 +36,7 @@ class MasterDataSparepart extends Model
         return $this->belongsTo ( KategoriSparepart::class, 'id_kategori_sparepart' );
     }
 
-    public function suppliers () : BelongsToMany
+    public function masterDataSuppliers () : BelongsToMany
     {
         return $this->belongsToMany (
             MasterDataSupplier::class,
@@ -46,9 +46,9 @@ class MasterDataSparepart extends Model
         )->withTimestamps ();
     }
 
-    public function detailSpbs(): HasMany
+    public function detailSpbs () : HasMany
     {
-        return $this->hasMany(DetailSPB::class, 'id_master_data_sparepart');
+        return $this->hasMany ( DetailSPB::class, 'id_master_data_sparepart' );
     }
 
 }

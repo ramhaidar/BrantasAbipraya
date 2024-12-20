@@ -18,7 +18,7 @@
 
                     <!-- List of Spareparts provided by the supplier -->
                     <div class="col-12">
-                        <label class="form-label" for="spareparts">Spareparts</label>
+                        <label class="form-label" for="master_data_spareparts">Spareparts</label>
                         <ul class="list-group" id="sparepartList">
                             <!-- Sparepart names will be appended here -->
                         </ul>
@@ -48,10 +48,10 @@
                     // Mengisi nilai input di modal detail dengan data supplier yang diterima
                     $('#modalForDetail #supplier_nama').val(response.data.nama);
 
-                    // Clear previous spareparts and add new list
+                    // Clear previous master_data_spareparts and add new list
                     $('#sparepartList').empty();
-                    if (response.data.spareparts && response.data.spareparts.length > 0) {
-                        response.data.spareparts.forEach(sparepart => {
+                    if (response.data.master_data_spareparts && response.data.master_data_spareparts.length > 0) {
+                        response.data.master_data_spareparts.forEach(sparepart => {
                             $('#sparepartList').append(`<li class="list-group-item">${sparepart.nama} — ${sparepart.part_number} — ${sparepart.merk}</li>`);
                         });
                     } else {

@@ -29,7 +29,7 @@ class SPB extends Model
         'id_master_data_supplier' => 'integer',
     ];
 
-    public function supplier () : BelongsTo
+    public function masterDataSupplier () : BelongsTo
     {
         return $this->belongsTo ( MasterDataSupplier::class, 'id_master_data_supplier' );
     }

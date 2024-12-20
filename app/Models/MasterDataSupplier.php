@@ -27,7 +27,7 @@ class MasterDataSupplier extends Model
         'contact_person' => 'string',
     ];
 
-    public function spareparts () : BelongsToMany
+    public function masterDataSpareparts () : BelongsToMany
     {
         return $this->belongsToMany ( MasterDataSparepart::class, 'link_supplier_sparepart', 'id_master_data_supplier', 'id_master_data_sparepart' )
             ->withTimestamps ();

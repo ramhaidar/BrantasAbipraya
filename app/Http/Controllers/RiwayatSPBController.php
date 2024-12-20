@@ -14,17 +14,17 @@ class RiwayatSPBController extends Controller
     {
         $proyeks = Proyek::with ( "users" )->orderByDesc ( "updated_at" )->get ();
         $spb     = SPB::with ( [ 
-            'linkSpbDetailSpb.detailSpb.sparepart',
+            'linkSpbDetailSpb.detailSpb.masterDataSparepart',
             'linkRkbSpbs',
-            'supplier',
+            'masterDataSupplier',
         ] )->findOrFail ( $id );
 
         return view ( 'dashboard.spb.riwayat.riwayat', [ 
             'proyeks'    => $proyeks,
             'spb'        => $spb,
 
-            'headerPage' => "SPB",
-            'page'       => 'Riwayat SPB',
+            'headerPage' => "SPB Supplier",
+            'page'       => 'Riwayat SPB Supplier',
         ] );
     }
 
@@ -32,9 +32,9 @@ class RiwayatSPBController extends Controller
     public function exportPDF ( $id )
     {
         $spb = SPB::with ( [ 
-            'linkSpbDetailSpb.detailSpb.sparepart',
+            'linkSpbDetailSpb.detailSpb.masterDataSparepart',
             'linkRkbSpbs',
-            'supplier',
+            'masterDataSupplier',
         ] )->findOrFail ( $id );
 
         $totalHarga       = 0;

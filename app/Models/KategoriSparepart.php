@@ -30,7 +30,7 @@ class KategoriSparepart extends Model
         'updated_at' => 'datetime',
     ];
 
-    public function spareparts () : HasMany
+    public function masterDataSpareparts () : HasMany
     {
         return $this->hasMany ( MasterDataSparepart::class, 'id_kategori_sparepart' );
     }

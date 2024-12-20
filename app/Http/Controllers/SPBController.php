@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
-use App\Models\Proyek;
 use App\Models\RKB;
+use App\Models\SPB;
+use App\Models\Proyek;
 use Illuminate\Http\Request;
+use App\Models\LinkRKBDetail;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 
 class SPBController extends Controller
@@ -20,8 +23,8 @@ class SPBController extends Controller
             'proyeks'    => $proyeks,
             // 'rkbs'       => $rkbs,
 
-            'headerPage' => "SPB",
-            'page'       => 'Data SPB',
+            'headerPage' => "SPB Supplier",
+            'page'       => 'Data SPB Supplier',
         ] );
     }
 
@@ -94,6 +97,59 @@ class SPBController extends Controller
         ] );
     }
 
+    protected function console ( $message )
+    {
+        $output = new \Symfony\Component\Console\Output\ConsoleOutput();
+        $output->writeln ( $message );
+    }
 
 
+    public function destroy ( $id )
+    {
+        // \DB::beginTransaction ();
+
+        try
+        {
+            // Get SPB with all necessary relationships
+            $spb = SPB::with ( [ 
+                'linkSpbDetailSpb.detailSpb',
+                'linkRkbSpbs.rkb.linkAlatDetailRkbs.linkRkbDetails.detailRkbUrgent',
+                'linkRkbSpbs.rkb.linkAlatDetailRkbs.linkRkbDetails.detailRkbGeneral'
+            ] )->findOrFail ( $id );
+
+            foreach ( $spb->linkSpbDetailSpb as $linkSpbDetailSpb )
+            {
+                $this->console ( "Link SPB Detail: " . $linkSpbDetailSpb );
+                $this->console ( "Detail SPB: " . $linkSpbDetailSpb->detailSpb );
+                $this->console ( "Link RKB Detail: " . $linkSpbDetailSpb->detailSpb->linkRkbDetail );
+                if ( isset ( $linkSpbDetailSpb->detailSpb->linkRkbDetail->detailRkbGeneral ) )
+                {
+                    $linkSpbDetailSpb->detailSpb->linkRkbDetail->detailRkbGeneral->increment ( "quantity_remainder", $linkSpbDetailSpb->detailSpb->quantity );
+                }
+
+                if ( isset ( $linkSpbDetailSpb->detailSpb->linkRkbDetail->detailRkbUrgent ) )
+                {
+                    $linkSpbDetailSpb->detailSpb->linkRkbDetail->detailRkbUrgent->increment ( "quantity_remainder", $linkSpbDetailSpb->detailSpb->quantity );
+                }
+
+                $linkSpbDetailSpb->detailSpb->delete ();
+            }
+
+            // Delete LinkSPBDetailSPB and LinkRkbSpbs
+            $spb->linkSpbDetailSpb ()->delete ();
+            $spb->linkRkbSpbs ()->delete ();
+
+            // Delete SPB
+            $spb->delete ();
+
+            \DB::commit ();
+            return redirect ()->back ()->with ( 'success', 'SPB berhasil dihapus' );
+
+        }
+        catch ( \Exception $e )
+        {
+            \DB::rollBack ();
+            return redirect ()->back ()->with ( 'error', 'Gagal menghapus SPB: ' . $e->getMessage () );
+        }
+    }
 }

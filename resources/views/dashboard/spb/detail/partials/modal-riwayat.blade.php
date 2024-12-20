@@ -21,17 +21,25 @@
                             @forelse ($riwayatSpb as $index => $item)
                                 <tr>
                                     <td class="text-center">{{ $item->nomor }}</td>
-                                    <td class="text-center">{{ $item->supplier->nama }}</td>
+                                    <td class="text-center">{{ $item->masterDataSupplier->nama }}</td>
                                     <td class="text-center" style="width: 1%">
-                                        <a href="{{ route('spb.detail.riwayat.index', $item->id) }}"
-                                            class="btn btn-sm btn-primary">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
+                                        <div>
+                                            <a class="btn btn-sm btn-primary me-2" href="{{ route('spb.detail.riwayat.index', $item->id) }}">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <form class="d-inline" action="{{ route('spb.destroy', $item->id) }}" method="POST">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button class="btn btn-sm btn-danger" type="submit">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="text-center py-4">
+                                    <td class="text-center py-4" colspan="6">
                                         <i class="bi bi-inbox fs-1 text-secondary d-block"></i>
                                         <p class="text-secondary mt-2 mb-0">Belum ada riwayat SPB</p>
                                     </td>

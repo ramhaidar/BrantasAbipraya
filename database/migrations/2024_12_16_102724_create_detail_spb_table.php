@@ -19,6 +19,10 @@ return new class extends Migration
             $table->bigInteger ( 'harga' );
             $table->foreignId ( 'id_master_data_sparepart' )
                 ->constrained ( 'master_data_sparepart' )->cascadeOnDelete ();
+            $table->foreignId ( 'id_master_data_alat' )
+                ->constrained ( 'master_data_alat' )->cascadeOnDelete ();
+            $table->foreignId ( 'id_link_rkb_detail' )
+                ->constrained ( 'link_rkb_detail' )->cascadeOnDelete ();
             $table->timestamps ();
         } );
     }

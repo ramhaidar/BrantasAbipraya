@@ -28,7 +28,7 @@ class MasterDataSupplierController extends Controller
 
     public function show ( $id )
     {
-        $supplier = MasterDataSupplier::with ( 'spareparts' )->findOrFail ( $id );
+        $supplier = MasterDataSupplier::with ( 'masterDataSpareparts' )->findOrFail ( $id );
 
         return response ()->json ( [ 
             'data' => $supplier,
@@ -56,7 +56,7 @@ class MasterDataSupplierController extends Controller
         // Lampirkan spareparts jika ada yang dipilih
         if ( ! empty ( $validatedData[ 'spareparts' ] ) )
         {
-            $supplier->spareparts ()->attach ( $validatedData[ 'spareparts' ] );
+            $supplier->masterDataSpareparts ()->attach ( $validatedData[ 'spareparts' ] );
         }
 
         // Redirect ke halaman indeks dengan pesan sukses
@@ -86,7 +86,7 @@ class MasterDataSupplierController extends Controller
         ] );
 
         // Sinkronisasi spareparts
-        $supplier->spareparts ()->sync ( $request->input ( 'spareparts', [] ) );
+        $supplier->masterDataSpareparts ()->sync ( $request->input ( 'spareparts', [] ) );
 
         // Redirect ke halaman indeks dengan pesan sukses
         return redirect ()->route ( 'master_data_supplier.index' )

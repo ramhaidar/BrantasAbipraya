@@ -77,9 +77,9 @@
             @foreach ($spb->linkSpbDetailSpb as $index => $item)
                 <tr>
                     <td>{{ $index + 1 }}</td>
-                    <td style="text-align: left">{{ $item->detailSpb->sparepart->nama }}</td>
-                    <td>{{ $item->detailSpb->sparepart->merk ?? '-' }}</td>
-                    <td>{{ $item->detailSpb->sparepart->part_number }}</td>
+                    <td style="text-align: left">{{ $item->detailSpb->masterDataSparepart->nama }}</td>
+                    <td>{{ $item->detailSpb->masterDataSparepart->merk ?? '-' }}</td>
+                    <td>{{ $item->detailSpb->masterDataSparepart->part_number }}</td>
                     <td>{{ $item->detailSpb->quantity }}</td>
                     <td>{{ $item->detailSpb->satuan }}</td>
                     <td>Rp {{ number_format($item->detailSpb->harga, 0, ',', '.') }}</td>
@@ -89,15 +89,15 @@
         </tbody>
         <tfoot>
             <tr>
-                <th colspan="7" style="text-align: left">Jumlah</th>
+                <th style="text-align: left" colspan="7">Jumlah</th>
                 <th>Rp {{ number_format($totalJumlahHarga, 0, ',', '.') }}</th>
             </tr>
             <tr>
-                <th colspan="7" style="text-align: left">PPN 11%</th>
+                <th style="text-align: left" colspan="7">PPN 11%</th>
                 <th>Rp {{ number_format($ppn, 0, ',', '.') }}</th>
             </tr>
             <tr>
-                <th colspan="7" style="text-align: left">Grand Total</th>
+                <th style="text-align: left" colspan="7">Grand Total</th>
                 <th>Rp {{ number_format($grandTotal, 0, ',', '.') }}</th>
             </tr>
         </tfoot>

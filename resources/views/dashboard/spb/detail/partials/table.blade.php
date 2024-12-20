@@ -35,31 +35,25 @@
 @endpush
 
 <div class="ibox-body ms-0 ps-0">
-    <form action="{{ route('spb.detail.store') }}" method="POST" id="detailSpbForm" enctype="multipart/form-data">
+    <form id="detailSpbForm" action="{{ route('spb.detail.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
-        <input type="hidden" name="id_rkb" value="{{ $rkb->id }}">
+        <input name="id_rkb" type="hidden" value="{{ $rkb->id }}">
 
         @php
             $sparepartGroups = [];
             $totalItems = 0;
             foreach ($rkb->linkAlatDetailRkbs as $detail1) {
                 foreach ($detail1->linkRkbDetails as $detail2) {
-                    $remainder =
-                        $detail2->detailRkbUrgent?->quantity_remainder ??
-                        ($detail2->detailRkbGeneral?->quantity_remainder ?? 0);
+                    $remainder = $detail2->detailRkbUrgent?->quantity_remainder ?? ($detail2->detailRkbGeneral?->quantity_remainder ?? 0);
 
                     if ($remainder <= 0) {
                         continue;
                     }
                     $totalItems++;
 
-                    $sparepartName =
-                        $detail2->detailRkbUrgent->masterDataSparepart->nama ??
-                        $detail2->detailRkbGeneral->masterDataSparepart->nama;
+                    $sparepartName = $detail2->detailRkbUrgent->masterDataSparepart->nama ?? $detail2->detailRkbGeneral->masterDataSparepart->nama;
                     $satuan = $detail2->detailRkbUrgent->satuan ?? $detail2->detailRkbGeneral->satuan;
-                    $kategori =
-                        $detail2->detailRkbUrgent->kategoriSparepart->nama ??
-                        $detail2->detailRkbGeneral->kategoriSparepart->nama;
+                    $kategori = $detail2->detailRkbUrgent->kategoriSparepart->nama ?? $detail2->detailRkbGeneral->kategoriSparepart->nama;
 
                     $groupKey = $sparepartName;
 
@@ -72,7 +66,7 @@
                         'detail' => $detail2,
                         'satuan' => $satuan,
                         'kategori' => $kategori,
-                        'alat_detail_id' => $detail1->id,
+                        'alat_detail_id' => $detail1->masterDataAlat->id,
                     ];
                 }
             }
@@ -81,8 +75,7 @@
         <div class="row mb-3 ps-3">
             <div class="col-md-4">
                 <label class="form-label">Pilih Supplier</label>
-                <select class="form-select supplier-select-main" name="supplier_main" id="supplier_main"
-                    {{ $totalItems === 0 ? 'disabled' : '' }}>
+                <select class="form-select supplier-select-main" id="supplier_main" name="supplier_main" {{ $totalItems === 0 ? 'disabled' : '' }}>
                     <option value="" disabled selected>Pilih Supplier</option>
                     @foreach ($supplier as $item)
                         <option value="{{ $item->id }}">{{ $item->nama }}</option>
@@ -120,23 +113,16 @@
                                 <td class="text-center">{{ $data['kategori'] }}</td>
                                 <td class="text-center">
                                     @php
-                                        $sparepart =
-                                            $data['detail']->detailRkbUrgent?->masterDataSparepart ??
-                                            $data['detail']->detailRkbGeneral?->masterDataSparepart;
+                                        $sparepart = $data['detail']->detailRkbUrgent?->masterDataSparepart ?? $data['detail']->detailRkbGeneral?->masterDataSparepart;
                                     @endphp
                                     {{ $sparepartName }} - {{ $sparepart->part_number ?? '-' }} -
                                     {{ $sparepart->merk ?? '-' }}
                                 </td>
                                 <td class="text-center">
                                     @php
-                                        $kategoriId = $data['detail']->detailRkbUrgent
-                                            ? $data['detail']->detailRkbUrgent->id_kategori_sparepart_sparepart
-                                            : $data['detail']->detailRkbGeneral->id_kategori_sparepart_sparepart;
+                                        $kategoriId = $data['detail']->detailRkbUrgent ? $data['detail']->detailRkbUrgent->id_kategori_sparepart_sparepart : $data['detail']->detailRkbGeneral->id_kategori_sparepart_sparepart;
                                     @endphp
-                                    <select class="form-select sparepart-select"
-                                        name="sparepart[{{ $data['detail']->id }}]"
-                                        id="sparepart-{{ $data['detail']->id }}" data-kategori="{{ $kategoriId }}"
-                                        required disabled>
+                                    <select class="form-select sparepart-select" id="sparepart-{{ $data['detail']->id }}" name="sparepart[{{ $data['detail']->id }}]" data-kategori="{{ $kategoriId }}" required disabled>
                                         <option value="" selected disabled>Pilih Sparepart</option>
                                     </select>
                                 </td>
@@ -144,30 +130,20 @@
                                     {{ $data['detail']->detailRkbUrgent->quantity_remainder ?? $data['detail']->detailRkbGeneral->quantity_remainder }}
                                 </td>
                                 <td class="text-center">
-                                    <input type="number" class="form-control text-center"
-                                        name="qty[{{ $data['detail']->id }}]" id="qty-{{ $data['detail']->id }}"
-                                        min="0"
-                                        max="{{ $data['detail']->detailRkbUrgent->quantity_remainder ?? $data['detail']->detailRkbGeneral->quantity_remainder }}"
-                                        value="0" required disabled> <!-- Add disabled here -->
+                                    <input class="form-control text-center" id="qty-{{ $data['detail']->id }}" name="qty[{{ $data['detail']->id }}]" type="number" value="0" min="0" max="{{ $data['detail']->detailRkbUrgent->quantity_remainder ?? $data['detail']->detailRkbGeneral->quantity_remainder }}" required disabled> <!-- Add disabled here -->
                                 </td>
                                 <td class="text-center">
                                     {{ $data['detail']->detailRkbUrgent->satuan ?? $data['detail']->detailRkbGeneral->satuan }}
-                                    <input type="hidden" name="satuan[{{ $data['detail']->id }}]"
-                                        value="{{ $data['detail']->detailRkbUrgent->satuan ?? $data['detail']->detailRkbGeneral->satuan }}">
+                                    <input name="satuan[{{ $data['detail']->id }}]" type="hidden" value="{{ $data['detail']->detailRkbUrgent->satuan ?? $data['detail']->detailRkbGeneral->satuan }}">
                                 </td>
                                 <td class="text-center">
-                                    <input
-                                        class="form-control text-center h-100 d-flex align-items-center justify-content-center"
-                                        name="harga[{{ $data['detail']->id }}]" type="text" value="Rp 0"
-                                        maxlength="-1" required disabled>
+                                    <input class="form-control text-center h-100 d-flex align-items-center justify-content-center" name="harga[{{ $data['detail']->id }}]" type="text" value="Rp 0" maxlength="-1" required disabled>
                                 </td>
                                 <td class="text-center">
-                                    <input
-                                        class="form-control text-center bg-secondary h-100 d-flex align-items-center justify-content-center"
-                                        type="text" value="Rp 0" readonly>
+                                    <input class="form-control text-center bg-secondary h-100 d-flex align-items-center justify-content-center" type="text" value="Rp 0" readonly>
                                 </td>
-                                <input type="hidden" name="alat_detail_id[{{ $data['detail']->id }}]"
-                                    value="{{ $data['alat_detail_id'] }}">
+                                <input name="alat_detail_id[{{ $data['detail']->id }}]" type="hidden" value="{{ $data['alat_detail_id'] }}">
+                                <input name="link_rkb_detail_id[{{ $data['detail']->id }}]" type="hidden" value="{{ $data['detail']->id }}">
                             </tr>
                         @endforeach
                     @endforeach
@@ -350,6 +326,7 @@
                     supplierId),
                 type: 'GET',
                 success: function(response) {
+                    // console.log(response);
                     // Loop setiap dropdown sparepart
                     $('.sparepart-select').each(function() {
                         let $select = $(this);
@@ -359,7 +336,7 @@
                             '<option value="" selected disabled>Pilih Sparepart</option>');
 
                         // Filter sparepart berdasarkan kategori
-                        let filteredSpareparts = response.spareparts.filter(function(
+                        let filteredSpareparts = response.master_data_spareparts.filter(function(
                             sparepart) {
                             return sparepart.id_kategori_sparepart == kategoriId;
                         });

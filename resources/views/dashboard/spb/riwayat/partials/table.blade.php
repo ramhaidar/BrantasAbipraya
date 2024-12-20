@@ -51,6 +51,14 @@
                 <span>{{ \Carbon\Carbon::parse($spb->tanggal)->isoFormat('DD MMMM YYYY') }}</span>
             </div>
         </div>
+        <div class="row g-2">
+            <div class="col-auto" style="width: 90px;">
+                <span class="fw-medium">Supplier:</span>
+            </div>
+            <div class="col">
+                <span>{{ $spb->masterDataSupplier->nama }}</span>
+            </div>
+        </div>
     </div>
 
     <div class="table-responsive">
@@ -72,9 +80,9 @@
                 @forelse ($spb->linkSpbDetailSpb as $index => $item)
                     <tr>
                         <td class="text-center">{{ $index + 1 }}</td>
-                        <td class="text-center">{{ $item->detailSpb->sparepart->nama }}</td>
-                        <td class="text-center">{{ $item->detailSpb->sparepart->merk }}</td>
-                        <td class="text-center">{{ $item->detailSpb->sparepart->part_number }}</td>
+                        <td class="text-center">{{ $item->detailSpb->masterDataSparepart->nama }}</td>
+                        <td class="text-center">{{ $item->detailSpb->masterDataSparepart->merk }}</td>
+                        <td class="text-center">{{ $item->detailSpb->masterDataSparepart->part_number }}</td>
                         <td class="text-center">{{ $item->detailSpb->quantity }}</td>
                         <td class="text-center">{{ $item->detailSpb->satuan }}</td>
                         <td class="text-center">Rp {{ number_format($item->detailSpb->harga, 0, ',', '.') }}</td>
@@ -83,7 +91,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="text-center py-4">
+                        <td class="text-center py-4" colspan="7">
                             <i class="bi bi-inbox fs-1 text-secondary d-block"></i>
                             <p class="text-secondary mt-2 mb-0">Belum ada detail SPB</p>
                         </td>

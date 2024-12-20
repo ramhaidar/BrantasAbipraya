@@ -22,12 +22,12 @@ class LinkSupplierSparepart extends Model
         'id_master_data_sparepart' => 'integer',
     ];
 
-    public function supplier () : BelongsTo
+    public function masterDataSupplier () : BelongsTo
     {
         return $this->belongsTo ( MasterDataSupplier::class, 'id_master_data_supplier' );
     }
 
-    public function sparepart () : BelongsTo
+    public function masterDataSparepart () : BelongsTo
     {
         return $this->belongsTo ( MasterDataSparepart::class, 'id_master_data_sparepart' );
     }

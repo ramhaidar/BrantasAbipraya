@@ -241,13 +241,34 @@
                                 </li>
 
                                 <!-- SPB Menu -->
-                                <li class="nav-item">
-                                    <a class="nav-link {{ str_contains($page, 'Data SPB') ? 'active' : '' }}" href="{{ route('spb.index') }}" style="{{ str_contains($headerPage, 'SPB') ? 'background-color: #483D8B; color: #ffffff;' : '' }}">
-                                        <i class="bi me-2 nav-icon bi-people-fill"></i>
+                                <li class="nav-item has-treeview {{ str_contains($headerPage, 'SPB') ? 'menu-open' : '' }}">
+                                    <a class="nav-link {{ str_contains($headerPage, 'SPB') ? 'active' : '' }}" href="#" style="{{ str_contains($headerPage, 'SPB') ? 'background-color: #483D8B; color: #ffffff;' : '' }}">
+                                        <i class="bi me-2 nav-icon fs-5 bi-file-earmark-text-fill"></i>
                                         <p class="truncate-text">
                                             <span class="text-content">SPB</span>
                                         </p>
+                                        <i class="right bi bi-caret-right-fill"></i>
                                     </a>
+                                    <ul class="nav nav-treeview">
+                                        <!-- Level 2 Item: SPB Supplier -->
+                                        <li class="nav-item">
+                                            <a class="nav-link level-1 {{ str_contains($page, 'Data SPB Supplier') ? 'active' : '' }}" href="{{ route('spb.index') }}" style="{{ str_contains($headerPage, 'SPB Supplier') ? 'background-color: #66CDAA; color: #ffffff;' : '' }}">
+                                                <i class="bi me-2 nav-icon fs-5 bi-shop"></i>
+                                                <p class="truncate-text">
+                                                    <span class="text-content">Supplier</span>
+                                                </p>
+                                            </a>
+                                        </li>
+                                        <!-- Level 2 Item: SPB Proyek -->
+                                        <li class="nav-item">
+                                            <a class="nav-link level-1 {{ str_contains($page, 'Data SPB Proyek') ? 'active' : '' }}" href="{{ route('spb.index') }}" style="{{ str_contains($headerPage, 'SPB Proyek') ? 'background-color: #66CDAA; color: #ffffff;' : '' }}">
+                                                <i class="bi me-2 nav-icon fs-5 bi-buildings"></i>
+                                                <p class="truncate-text">
+                                                    <span class="text-content">Proyek</span>
+                                                </p>
+                                            </a>
+                                        </li>
+                                    </ul>
                                 </li>
 
                                 <li class="nav-header mt-2">LIST PROYEK: {{ $proyeks->count() }}</li>

@@ -50,4 +50,9 @@ class MasterDataAlat extends Model
         return $this->hasMany ( LinkAlatDetailRKB::class, 'id_master_data_alat' );
     }
 
+    public function detailSpbs () : HasMany
+    {
+        return $this->hasMany ( DetailSPB::class, 'id_master_data_alat' );
+    }
+
 }

@@ -417,12 +417,12 @@ Route::prefix ( 'ajax' )->group ( function ()
     Route::get ( '/summary/fetch-data', [ LaporanController::class, 'fetchData' ] )->name ( 'summary.fetchData' );
 } );
 
-Route::get ( '/dashboard/proyek/actions/{id}', [ DashboardController::class, 'filterByProyek' ] )
-    ->where ( 'id', '[0-9]+' )
-    ->middleware ( [ 
-        CheckRole::class . ':Admin,Pegawai,Boss',
-    ] )
-    ->name ( 'dashboard.filter' );
+// Route::get ( '/dashboard/proyek/actions/{id}', [ DashboardController::class, 'filterByProyek' ] )
+//     ->where ( 'id', '[0-9]+' )
+//     ->middleware ( [ 
+//         CheckRole::class . ':Admin,Pegawai,Boss',
+//     ] )
+//     ->name ( 'dashboard.filter' );
 
 // Route untuk mengakses dokumentasi [Security Purpose]
 Route::get (

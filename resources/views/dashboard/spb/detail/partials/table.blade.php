@@ -53,7 +53,12 @@
 
                     $sparepartName = $detail2->detailRkbUrgent->masterDataSparepart->nama ?? $detail2->detailRkbGeneral->masterDataSparepart->nama;
                     $satuan = $detail2->detailRkbUrgent->satuan ?? $detail2->detailRkbGeneral->satuan;
-                    $kategori = $detail2->detailRkbUrgent->kategoriSparepart->nama ?? $detail2->detailRkbGeneral->kategoriSparepart->nama;
+                    if (isset($detail2->detailRkbGeneral->kategoriSparepart)) {
+                        $kategori = $detail2->detailRkbGeneral->kategoriSparepart->kode . ': ' . $detail2->detailRkbGeneral->kategoriSparepart->nama;
+                    }
+                    if (isset($detail2->detailRkbUrgent->kategoriSparepart)) {
+                        $kategori = $detail2->detailRkbUrgent->kategoriSparepart->kode . ': ' . $detail2->detailRkbUrgent->kategoriSparepart->nama;
+                    }
 
                     $groupKey = $sparepartName;
 

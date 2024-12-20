@@ -31,7 +31,7 @@ class MasterDataSparepart extends Model
         'id_kategori_sparepart' => 'integer',
     ];
 
-    public function kategori () : BelongsTo
+    public function kategoriSparepart () : BelongsTo
     {
         return $this->belongsTo ( KategoriSparepart::class, 'id_kategori_sparepart' );
     }

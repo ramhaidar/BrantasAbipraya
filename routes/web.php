@@ -12,10 +12,12 @@ use App\Http\Controllers\SessionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DetailSPBController;
 use App\Http\Controllers\RKBUrgentController;
+use App\Http\Controllers\SPBProyekController;
 use App\Http\Controllers\RiwayatSPBController;
 use App\Http\Controllers\RKBGeneralController;
 use App\Http\Controllers\MasterDataAlatController;
 use App\Http\Controllers\DetailRKBUrgentController;
+use App\Http\Controllers\DetailSPBProyekController;
 use App\Http\Controllers\DetailRKBGeneralController;
 use App\Http\Controllers\EvaluasiRKBUrgentController;
 use App\Http\Controllers\LampiranRKBUrgentController;
@@ -72,12 +74,15 @@ Route::prefix ( 'users' )->middleware ( [ CheckRole::class . ':Admin,Pegawai,Bos
     Route::get ( '/', [ UserController::class, 'index' ] )
         ->name ( 'users' );
     Route::get ( '/{user}', [ UserController::class, 'showByID' ] )
+        ->where ( 'user', '[0-9]+' )
         ->name ( 'api.showUserByID' );
     Route::post ( '/edit/{user}', [ UserController::class, 'update' ] )
+        ->where ( 'user', '[0-9]+' )
         ->name ( 'user.post.update' );
     Route::post ( '/add', [ UserController::class, 'store' ] )
         ->name ( 'user.post.store' );
     Route::delete ( '/delete/{user}', [ UserController::class, 'destroy' ] )
+        ->where ( 'user', '[0-9]+' )
         ->name ( 'user.delete.destroy' );
 } );
 
@@ -412,6 +417,7 @@ Route::prefix ( 'ajax' )->group ( function ()
 } );
 
 Route::get ( '/dashboard/proyek/actions/{id}', [ DashboardController::class, 'filterByProyek' ] )
+    ->where ( 'id', '[0-9]+' )
     ->middleware ( [ 
         CheckRole::class . ':Admin,Pegawai,Boss',
     ] )
@@ -512,6 +518,12 @@ Route::prefix ( 'pagination' )->middleware ( 'auth' )->group ( function ()
         [ SPBController::class, 'getData' ]
     )
         ->name ( 'spb.getData' );
+
+    Route::get (
+        '/spb/proyek/data',
+        [ SPBProyekController::class, 'getData' ]
+    )
+        ->name ( 'spb.proyek.getData' );
 } );
 
 // Rute Proyek [ProyekController]
@@ -529,6 +541,7 @@ Route::prefix ( 'proyek' )
             '{id}',
             [ ProyekController::class, 'show' ]
         )
+            ->where ( 'id', '[0-9]+' )
             ->name ( 'proyek.show' );
 
         Route::post (
@@ -541,12 +554,14 @@ Route::prefix ( 'proyek' )
             '{id}',
             [ ProyekController::class, 'update' ]
         )
+            ->where ( 'id', '[0-9]+' )
             ->name ( 'proyek.update' );
 
         Route::delete (
             '{id}',
             [ ProyekController::class, 'destroy' ]
         )
+            ->where ( 'id', '[0-9]+' )
             ->name ( 'proyek.destroy' );
     } );
 
@@ -563,7 +578,8 @@ Route::middleware ( 'auth' )
         Route::get (
             '{id}',
             [ MasterDataAlatController::class, 'show' ]
-        )->name ( 'master_data_alat.show' );
+        )->where ( 'id', '[0-9]+' )
+            ->name ( 'master_data_alat.show' );
 
         Route::post (
             '/',
@@ -573,12 +589,14 @@ Route::middleware ( 'auth' )
         Route::put (
             '{id}',
             [ MasterDataAlatController::class, 'update' ]
-        )->name ( 'master_data_alat.update' );
+        )->where ( 'id', '[0-9]+' )
+            ->name ( 'master_data_alat.update' );
 
         Route::delete (
             '{id}',
             [ MasterDataAlatController::class, 'destroy' ]
-        )->name ( 'master_data_alat.destroy' );
+        )->where ( 'id', '[0-9]+' )
+            ->name ( 'master_data_alat.destroy' );
     } );
 
 // Rute Master Data Sparepart [MasterDataSparepartController]
@@ -594,7 +612,8 @@ Route::middleware ( 'auth' )
         Route::get (
             '{id}',
             [ MasterDataSparepartController::class, 'show' ]
-        )->name ( 'master_data_sparepart.show' );
+        )->where ( 'id', '[0-9]+' )
+            ->name ( 'master_data_sparepart.show' );
 
         Route::post (
             '/',
@@ -604,18 +623,21 @@ Route::middleware ( 'auth' )
         Route::put (
             '{id}',
             [ MasterDataSparepartController::class, 'update' ]
-        )->name ( 'master_data_sparepart.update' );
+        )->where ( 'id', '[0-9]+' )
+            ->name ( 'master_data_sparepart.update' );
 
         Route::delete (
             '{id}',
             [ MasterDataSparepartController::class, 'destroy' ]
-        )->name ( 'master_data_sparepart.destroy' );
+        )->where ( 'id', '[0-9]+' )
+            ->name ( 'master_data_sparepart.destroy' );
     } );
 
 Route::get (
     '/spareparts-by-category/{id}',
     [ MasterDataSparepartController::class, 'getSparepartsByCategory' ]
-)->name ( 'spareparts-by-category' );
+)->where ( 'id', '[0-9]+' )
+    ->name ( 'spareparts-by-category' );
 
 // Rute Master Data Supplier [MasterDataSupplierController]
 Route::middleware ( 'auth' )
@@ -630,7 +652,8 @@ Route::middleware ( 'auth' )
         Route::get (
             '{id}',
             [ MasterDataSupplierController::class, 'show' ]
-        )->name ( 'master_data_supplier.show' );
+        )->where ( 'id', '[0-9]+' )
+            ->name ( 'master_data_supplier.show' );
 
         Route::post (
             '/',
@@ -640,12 +663,14 @@ Route::middleware ( 'auth' )
         Route::put (
             '{id}',
             [ MasterDataSupplierController::class, 'update' ]
-        )->name ( 'master_data_supplier.update' );
+        )->where ( 'id', '[0-9]+' )
+            ->name ( 'master_data_supplier.update' );
 
         Route::delete (
             '{id}',
             [ MasterDataSupplierController::class, 'destroy' ]
-        )->name ( 'master_data_supplier.destroy' );
+        )->where ( 'id', '[0-9]+' )
+            ->name ( 'master_data_supplier.destroy' );
     } );
 
 // Rute RKB General [RKBGeneralController]
@@ -662,7 +687,8 @@ Route::middleware ( 'auth' )
         Route::get (
             '/{id}',
             [ RKBGeneralController::class, 'show' ]
-        )->name ( 'show' );
+        )->where ( 'id', '[0-9]+' )
+            ->name ( 'show' );
 
         Route::post (
             '/',
@@ -672,17 +698,20 @@ Route::middleware ( 'auth' )
         Route::put (
             '/{id}',
             [ RKBGeneralController::class, 'update' ]
-        )->name ( 'update' );
+        )->where ( 'id', '[0-9]+' )
+            ->name ( 'update' );
 
         Route::delete (
             '/{id}',
             [ RKBGeneralController::class, 'destroy' ]
-        )->name ( 'destroy' );
+        )->where ( 'id', '[0-9]+' )
+            ->name ( 'destroy' );
 
         Route::post (
             '/finalize/{id}',
             [ RKBGeneralController::class, 'finalize' ]
-        )->name ( 'finalize' );
+        )->where ( 'id', '[0-9]+' )
+            ->name ( 'finalize' );
 
         // Rute Detail RKB General [DetailRKBGeneralController]
         Route::prefix ( 'detail' )
@@ -692,12 +721,14 @@ Route::middleware ( 'auth' )
             Route::get (
                 '/{id}',
                 [ DetailRKBGeneralController::class, 'index' ]
-            )->name ( 'index' );
+            )->where ( 'id', '[0-9]+' )
+                ->name ( 'index' );
 
             Route::get (
                 '/show/{id}',
                 [ DetailRKBGeneralController::class, 'show' ]
-            )->name ( 'show' );
+            )->where ( 'id', '[0-9]+' )
+                ->name ( 'show' );
 
             Route::post (
                 '/',
@@ -707,12 +738,14 @@ Route::middleware ( 'auth' )
             Route::put (
                 '/{id}',
                 [ DetailRKBGeneralController::class, 'update' ]
-            )->name ( 'update' );
+            )->where ( 'id', '[0-9]+' )
+                ->name ( 'update' );
 
             Route::delete (
                 '/{id}',
                 [ DetailRKBGeneralController::class, 'destroy' ]
-            )->name ( 'destroy' );
+            )->where ( 'id', '[0-9]+' )
+                ->name ( 'destroy' );
         } );
     } );
 
@@ -730,7 +763,8 @@ Route::middleware ( 'auth' )
         Route::get (
             '/{id}',
             [ RKBUrgentController::class, 'show' ]
-        )->name ( 'show' );
+        )->where ( 'id', '[0-9]+' )
+            ->name ( 'show' );
 
         Route::post (
             '/',
@@ -740,17 +774,20 @@ Route::middleware ( 'auth' )
         Route::put (
             '/{id}',
             [ RKBUrgentController::class, 'update' ]
-        )->name ( 'update' );
+        )->where ( 'id', '[0-9]+' )
+            ->name ( 'update' );
 
         Route::delete (
             '/{id}',
             [ RKBUrgentController::class, 'destroy' ]
-        )->name ( 'destroy' );
+        )->where ( 'id', '[0-9]+' )
+            ->name ( 'destroy' );
 
         Route::post (
             '/finalize/{id}',
             [ RKBUrgentController::class, 'finalize' ]
-        )->name ( 'finalize' );
+        )->where ( 'id', '[0-9]+' )
+            ->name ( 'finalize' );
 
         // Rute Detail RKB Urgent [DetailRKBUrgentController]
         Route::prefix ( 'detail' )
@@ -760,12 +797,14 @@ Route::middleware ( 'auth' )
             Route::get (
                 '/{id}',
                 [ DetailRKBUrgentController::class, 'index' ]
-            )->name ( 'index' );
+            )->where ( 'id', '[0-9]+' )
+                ->name ( 'index' );
 
             Route::get (
                 '/show/{id}',
                 [ DetailRKBUrgentController::class, 'show' ]
-            )->name ( 'show' );
+            )->where ( 'id', '[0-9]+' )
+                ->name ( 'show' );
 
             Route::post (
                 '/',
@@ -775,17 +814,20 @@ Route::middleware ( 'auth' )
             Route::put (
                 '/{id}',
                 [ DetailRKBUrgentController::class, 'update' ]
-            )->name ( 'update' );
+            )->where ( 'id', '[0-9]+' )
+                ->name ( 'update' );
 
             Route::delete (
                 '/{id}',
                 [ DetailRKBUrgentController::class, 'destroy' ]
-            )->name ( 'destroy' );
+            )->where ( 'id', '[0-9]+' )
+                ->name ( 'destroy' );
 
             Route::get (
                 '/{id}/dokumentasi',
                 [ DetailRKBUrgentController::class, 'getDokumentasi' ]
-            )->name ( 'dokumentasi' );
+            )->where ( 'id', '[0-9]+' )
+                ->name ( 'dokumentasi' );
 
             // Rute Timeline RKB Urgent [TimelineRKBUrgentController]
             Route::prefix ( 'timeline' )
@@ -795,7 +837,8 @@ Route::middleware ( 'auth' )
                 Route::get (
                     '/{id}',
                     [ TimelineRKBUrgentController::class, 'index' ]
-                )->name ( 'index' );
+                )->where ( 'id', '[0-9]+' )
+                    ->name ( 'index' );
 
                 Route::post (
                     '/',
@@ -805,17 +848,20 @@ Route::middleware ( 'auth' )
                 Route::get (
                     '/show/{id}',
                     [ TimelineRKBUrgentController::class, 'show' ]
-                )->name ( 'show' );
+                )->where ( 'id', '[0-9]+' )
+                    ->name ( 'show' );
 
                 Route::put (
                     '/{id}',
                     [ TimelineRKBUrgentController::class, 'update' ]
-                )->name ( 'update' );
+                )->where ( 'id', '[0-9]+' )
+                    ->name ( 'update' );
 
                 Route::delete (
                     '/{id}',
                     [ TimelineRKBUrgentController::class, 'destroy' ]
-                )->name ( 'destroy' );
+                )->where ( 'id', '[0-9]+' )
+                    ->name ( 'destroy' );
             } );
 
             // Rute Lampiran RKB Urgent [LampiranRKBUrgentController]
@@ -831,17 +877,20 @@ Route::middleware ( 'auth' )
                 Route::get (
                     '/show/{id}',
                     [ LampiranRKBUrgentController::class, 'show' ]
-                )->name ( 'show' );
+                )->where ( 'id', '[0-9]+' )
+                    ->name ( 'show' );
 
                 Route::put (
                     '/{id}',
                     [ LampiranRKBUrgentController::class, 'update' ]
-                )->name ( 'update' );
+                )->where ( 'id', '[0-9]+' )
+                    ->name ( 'update' );
 
                 Route::delete (
                     '/{id}',
                     [ LampiranRKBUrgentController::class, 'destroy' ]
-                )->name ( 'destroy' );
+                )->where ( 'id', '[0-9]+' )
+                    ->name ( 'destroy' );
             } );
         } );
     } );
@@ -860,7 +909,8 @@ Route::middleware ( 'auth' )
         Route::get (
             '/{id}',
             [ EvaluasiRKBGeneralController::class, 'show' ]
-        )->name ( 'show' );
+        )->where ( 'id', '[0-9]+' )
+            ->name ( 'show' );
 
         Route::post (
             '/',
@@ -870,12 +920,14 @@ Route::middleware ( 'auth' )
         Route::put (
             '/{id}',
             [ EvaluasiRKBGeneralController::class, 'update' ]
-        )->name ( 'update' );
+        )->where ( 'id', '[0-9]+' )
+            ->name ( 'update' );
 
         Route::delete (
             '/{id}',
             [ EvaluasiRKBGeneralController::class, 'destroy' ]
-        )->name ( 'destroy' );
+        )->where ( 'id', '[0-9]+' )
+            ->name ( 'destroy' );
 
         // Rute Detail RKB General [DetailRKBGeneralController]
         Route::prefix ( 'detail' )
@@ -885,12 +937,14 @@ Route::middleware ( 'auth' )
             Route::get (
                 '/{id}',
                 [ EvaluasiDetailRKBGeneralController::class, 'index' ]
-            )->name ( 'index' );
+            )->where ( 'id', '[0-9]+' )
+                ->name ( 'index' );
 
             Route::get (
                 '/show/{id}',
                 [ EvaluasiDetailRKBGeneralController::class, 'show' ]
-            )->name ( 'show' );
+            )->where ( 'id', '[0-9]+' )
+                ->name ( 'show' );
 
             Route::post (
                 '/',
@@ -900,22 +954,26 @@ Route::middleware ( 'auth' )
             Route::put (
                 '/{id}',
                 [ EvaluasiDetailRKBGeneralController::class, 'update' ]
-            )->name ( 'update' );
+            )->where ( 'id', '[0-9]+' )
+                ->name ( 'update' );
 
             Route::delete (
                 '/{id}',
                 [ EvaluasiDetailRKBGeneralController::class, 'destroy' ]
-            )->name ( 'destroy' );
+            )->where ( 'id', '[0-9]+' )
+                ->name ( 'destroy' );
 
             Route::post (
                 '/approve/{id}',
                 [ EvaluasiDetailRKBGeneralController::class, 'approve' ]
-            )->name ( 'approve' );
+            )->where ( 'id', '[0-9]+' )
+                ->name ( 'approve' );
 
             Route::post (
                 '/evaluate/{id}',
                 [ EvaluasiDetailRKBGeneralController::class, 'evaluate' ]
-            )->name ( 'evaluate' );
+            )->where ( 'id', '[0-9]+' )
+                ->name ( 'evaluate' );
 
         } );
     } );
@@ -934,7 +992,8 @@ Route::middleware ( 'auth' )
         Route::get (
             '/{id}',
             [ EvaluasiRKBUrgentController::class, 'show' ]
-        )->name ( 'show' );
+        )->where ( 'id', '[0-9]+' )
+            ->name ( 'show' );
 
         Route::post (
             '/',
@@ -944,12 +1003,14 @@ Route::middleware ( 'auth' )
         Route::put (
             '/{id}',
             [ EvaluasiRKBUrgentController::class, 'update' ]
-        )->name ( 'update' );
+        )->where ( 'id', '[0-9]+' )
+            ->name ( 'update' );
 
         Route::delete (
             '/{id}',
             [ EvaluasiRKBUrgentController::class, 'destroy' ]
-        )->name ( 'destroy' );
+        )->where ( 'id', '[0-9]+' )
+            ->name ( 'destroy' );
 
         // Rute Detail RKB Urgent [DetailRKBUrgentController]
         Route::prefix ( 'detail' )
@@ -959,12 +1020,14 @@ Route::middleware ( 'auth' )
             Route::get (
                 '/{id}',
                 [ EvaluasiDetailRKBUrgentController::class, 'index' ]
-            )->name ( 'index' );
+            )->where ( 'id', '[0-9]+' )
+                ->name ( 'index' );
 
             Route::get (
                 '/show/{id}',
                 [ EvaluasiDetailRKBUrgentController::class, 'show' ]
-            )->name ( 'show' );
+            )->where ( 'id', '[0-9]+' )
+                ->name ( 'show' );
 
             Route::post (
                 '/',
@@ -974,27 +1037,32 @@ Route::middleware ( 'auth' )
             Route::put (
                 '/{id}',
                 [ EvaluasiDetailRKBUrgentController::class, 'update' ]
-            )->name ( 'update' );
+            )->where ( 'id', '[0-9]+' )
+                ->name ( 'update' );
 
             Route::delete (
                 '/{id}',
                 [ EvaluasiDetailRKBUrgentController::class, 'destroy' ]
-            )->name ( 'destroy' );
+            )->where ( 'id', '[0-9]+' )
+                ->name ( 'destroy' );
 
             Route::post (
                 '/approve/{id}',
                 [ EvaluasiDetailRKBUrgentController::class, 'approve' ]
-            )->name ( 'approve' );
+            )->where ( 'id', '[0-9]+' )
+                ->name ( 'approve' );
 
             Route::post (
                 '/evaluate/{id}',
                 [ EvaluasiDetailRKBUrgentController::class, 'evaluate' ]
-            )->name ( 'evaluate' );
+            )->where ( 'id', '[0-9]+' )
+                ->name ( 'evaluate' );
 
             Route::get (
                 '/{id}/dokumentasi',
                 [ EvaluasiDetailRKBUrgentController::class, 'getDokumentasi' ]
-            )->name ( 'dokumentasi' );
+            )->where ( 'id', '[0-9]+' )
+                ->name ( 'dokumentasi' );
 
             // Rute Timeline Evaluasi Urgent [TimelineEvaluasiUrgentController]
             Route::prefix ( 'timeline' )
@@ -1004,7 +1072,8 @@ Route::middleware ( 'auth' )
                 Route::get (
                     '/{id}',
                     [ TimelineEvaluasiUrgentController::class, 'index' ]
-                )->name ( 'index' );
+                )->where ( 'id', '[0-9]+' )
+                    ->name ( 'index' );
 
                 Route::post (
                     '/',
@@ -1014,17 +1083,20 @@ Route::middleware ( 'auth' )
                 Route::get (
                     '/show/{id}',
                     [ TimelineEvaluasiUrgentController::class, 'show' ]
-                )->name ( 'show' );
+                )->where ( 'id', '[0-9]+' )
+                    ->name ( 'show' );
 
                 Route::put (
                     '/{id}',
                     [ TimelineEvaluasiUrgentController::class, 'update' ]
-                )->name ( 'update' );
+                )->where ( 'id', '[0-9]+' )
+                    ->name ( 'update' );
 
                 Route::delete (
                     '/{id}',
                     [ TimelineEvaluasiUrgentController::class, 'destroy' ]
-                )->name ( 'destroy' );
+                )->where ( 'id', '[0-9]+' )
+                    ->name ( 'destroy' );
             } );
 
             // Rute Lampiran Evaluasi Urgent [LampiranEvaluasiUrgentController]
@@ -1040,22 +1112,25 @@ Route::middleware ( 'auth' )
                 Route::get (
                     '/show/{id}',
                     [ LampiranEvaluasiUrgentController::class, 'show' ]
-                )->name ( 'show' );
+                )->where ( 'id', '[0-9]+' )
+                    ->name ( 'show' );
 
                 Route::put (
                     '/{id}',
                     [ LampiranEvaluasiUrgentController::class, 'update' ]
-                )->name ( 'update' );
+                )->where ( 'id', '[0-9]+' )
+                    ->name ( 'update' );
 
                 Route::delete (
                     '/{id}',
                     [ LampiranEvaluasiUrgentController::class, 'destroy' ]
-                )->name ( 'destroy' );
+                )->where ( 'id', '[0-9]+' )
+                    ->name ( 'destroy' );
             } );
         } );
     } );
 
-// Rute SPB (Surat Pemesanan Barang) [SPBController]
+// Rute SPB (Surat Pemesanan Barang) Supplier [SPBController]
 Route::middleware ( 'auth' )
     ->prefix ( 'spb' )
     ->as ( 'spb.' )
@@ -1069,7 +1144,8 @@ Route::middleware ( 'auth' )
         Route::get (
             '/{id}',
             [ SPBController::class, 'show' ]
-        )->name ( 'show' );
+        )->where ( 'id', '[0-9]+' )
+            ->name ( 'show' );
 
         Route::post (
             '/',
@@ -1079,12 +1155,81 @@ Route::middleware ( 'auth' )
         Route::put (
             '/{id}',
             [ SPBController::class, 'update' ]
-        )->name ( 'update' );
+        )->where ( 'id', '[0-9]+' )
+            ->name ( 'update' );
 
         Route::delete (
             '/{id}',
             [ SPBController::class, 'destroy' ]
-        )->name ( 'destroy' );
+        )->where ( 'id', '[0-9]+' )
+            ->name ( 'destroy' );
+
+        // Rute SPB Proyek [SPBProyekController]
+        Route::prefix ( 'proyek' )
+            ->as ( 'proyek.' )
+            ->group ( function ()
+        {
+            Route::get (
+                '/',
+                [ SPBProyekController::class, 'index' ]
+            )->name ( 'index' );
+
+            Route::get (
+                '/show/{id}',
+                [ SPBProyekController::class, 'show' ]
+            )->where ( 'id', '[0-9]+' )
+                ->name ( 'show' );
+
+            Route::post (
+                '/',
+                [ SPBProyekController::class, 'store' ]
+            )->name ( 'store' );
+
+            Route::delete (
+                '/{id}',
+                [ SPBProyekController::class, 'destroy' ]
+            )->where ( 'id', '[0-9]+' )
+                ->name ( 'destroy' );
+            Route::get (
+                '/{id}/export-pdf',
+                [ SPBProyekController::class, 'exportPDF' ]
+            )->where ( 'id', '[0-9]+' )
+                ->name ( 'export-pdf' );
+
+            Route::prefix ( 'detail' )
+                ->as ( 'detail.' )
+                ->group ( function ()
+                {
+                    Route::get (
+                        '/{id}',
+                        [ DetailSPBProyekController::class, 'index' ]
+                    )->where ( 'id', '[0-9]+' )
+                        ->name ( 'index' );
+
+                    Route::get (
+                        '/show/{id}',
+                        [ DetailSPBProyekController::class, 'show' ]
+                    )->where ( 'id', '[0-9]+' )
+                        ->name ( 'show' );
+
+                    Route::post (
+                        '/',
+                        [ DetailSPBProyekController::class, 'store' ]
+                    )->name ( 'store' );
+
+                    Route::put (
+                        '/{id}',
+                        [ DetailSPBProyekController::class, 'update' ]
+                    )->where ( 'id', '[0-9]+' )
+                        ->name ( 'update' );
+
+                    Route::delete (
+                        '/{id}',
+                        [ DetailSPBProyekController::class, 'destroy' ]
+                    )->where ( 'id', '[0-9]+' )
+                        ->name ( 'destroy' );
+                } );
+        } );
 
         // Rute Detail SPB [DetailSPBController]
         Route::prefix ( 'detail' )
@@ -1094,12 +1239,14 @@ Route::middleware ( 'auth' )
             Route::get (
                 '/{id}',
                 [ DetailSPBController::class, 'index' ]
-            )->name ( 'index' );
+            )->where ( 'id', '[0-9]+' )
+                ->name ( 'index' );
 
             Route::get (
                 '/show/{id}',
                 [ DetailSPBController::class, 'show' ]
-            )->name ( 'show' );
+            )->where ( 'id', '[0-9]+' )
+                ->name ( 'show' );
 
             Route::post (
                 '/',
@@ -1109,22 +1256,26 @@ Route::middleware ( 'auth' )
             Route::put (
                 '/{id}',
                 [ DetailSPBController::class, 'update' ]
-            )->name ( 'update' );
+            )->where ( 'id', '[0-9]+' )
+                ->name ( 'update' );
 
             Route::delete (
                 '/{id}',
                 [ DetailSPBController::class, 'destroy' ]
-            )->name ( 'destroy' );
+            )->where ( 'id', '[0-9]+' )
+                ->name ( 'destroy' );
 
             Route::post (
                 '/approve/{id}',
                 [ DetailSPBController::class, 'approve' ]
-            )->name ( 'approve' );
+            )->where ( 'id', '[0-9]+' )
+                ->name ( 'approve' );
 
             Route::get (
                 '/getSparepart/{idSupplier}',
                 [ DetailSPBController::class, 'getSparepart' ]
-            )->name ( 'getSparepart' );
+            )->where ( 'id', '[0-9]+' )
+                ->name ( 'getSparepart' );
 
             // Rute Riwayat SPB [RiwayatSPBController]
             Route::prefix ( 'riwayat' )
@@ -1134,12 +1285,14 @@ Route::middleware ( 'auth' )
                 Route::get (
                     '/{id}',
                     [ RiwayatSPBController::class, 'index' ]
-                )->name ( 'index' );
+                )->where ( 'id', '[0-9]+' )
+                    ->name ( 'index' );
 
                 Route::get (
                     '/show/{id}',
                     [ RiwayatSPBController::class, 'show' ]
-                )->name ( 'show' );
+                )->where ( 'id', '[0-9]+' )
+                    ->name ( 'show' );
 
                 Route::post (
                     '/',
@@ -1149,11 +1302,13 @@ Route::middleware ( 'auth' )
                 Route::delete (
                     '/{id}',
                     [ RiwayatSPBController::class, 'destroy' ]
-                )->name ( 'destroy' );
+                )->where ( 'id', '[0-9]+' )
+                    ->name ( 'destroy' );
                 Route::get (
                     '/{id}/export-pdf',
                     [ RiwayatSPBController::class, 'exportPDF' ]
-                )->name ( 'export-pdf' );
+                )->where ( 'id', '[0-9]+' )
+                    ->name ( 'export-pdf' );
             } );
         } );
     } );

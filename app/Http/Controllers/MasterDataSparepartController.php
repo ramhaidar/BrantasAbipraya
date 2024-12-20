@@ -104,12 +104,12 @@ class MasterDataSparepartController extends Controller
                 'nama'                  => $sparepart->nama,
                 'part_number'           => $sparepart->part_number,
                 'merk'                  => $sparepart->merk,
-                'id_kategori_sparepart' => optional ( $sparepart->kategori )->id, // Include ID kategori
-                'kategori'              => $sparepart->kategori ? [ 
-                    'nama'      => $sparepart->kategori->nama,
-                    'kode'      => $sparepart->kategori->kode,
-                    'jenis'     => $sparepart->kategori->jenis,
-                    'sub_jenis' => $sparepart->kategori->sub_jenis,
+                'id_kategori_sparepart' => optional ( $sparepart->kategoriSparepart )->id, // Include ID kategori
+                'kategori'              => $sparepart->kategoriSparepart ? [ 
+                    'nama'      => $sparepart->kategoriSparepart->nama,
+                    'kode'      => $sparepart->kategoriSparepart->kode,
+                    'jenis'     => $sparepart->kategoriSparepart->jenis,
+                    'sub_jenis' => $sparepart->kategoriSparepart->sub_jenis,
                 ] : null,
                 'suppliers'             => $sparepart->masterDataSuppliers->map ( function ($supplier)
                 {

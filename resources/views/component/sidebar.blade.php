@@ -261,7 +261,7 @@
                                         </li>
                                         <!-- Level 2 Item: SPB Proyek -->
                                         <li class="nav-item">
-                                            <a class="nav-link level-1 {{ str_contains($page, 'Data SPB Proyek') ? 'active' : '' }}" href="{{ route('spb.index') }}" style="{{ str_contains($headerPage, 'SPB Proyek') ? 'background-color: #66CDAA; color: #ffffff;' : '' }}">
+                                            <a class="nav-link level-1 {{ str_contains($page, 'Data SPB Proyek') ? 'active' : '' }}" href="{{ route('spb.proyek.index') }}" style="{{ str_contains($headerPage, 'SPB Proyek') ? 'background-color: #66CDAA; color: #ffffff;' : '' }}">
                                                 <i class="bi me-2 nav-icon fs-5 bi-buildings"></i>
                                                 <p class="truncate-text">
                                                     <span class="text-content">Proyek</span>

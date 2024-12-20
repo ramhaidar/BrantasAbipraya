@@ -51,9 +51,10 @@ class MasterDataAlatController extends Controller
                 ->orderBy ( 'updated_at', 'desc' )
                 ->paginate ( $request->input ( 'length', 10 ) );
         }
+
         return view ( 'dashboard.masterdata.alat.alat', [ 
             'proyeks'    => $proyeks,
-            'proyek'     => $proyeks,
+            // 'proyek'     => $proyeks,
             // 'alat'       => $alat,
 
             'headerPage' => "Master Data Alat",

@@ -8,6 +8,16 @@
             </div>
             <hr class="p-0 m-0 border border-secondary-subtle border-2 opacity-50">
             <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label" for="spb_addendum">Pilih SPB untuk Addendum (Opsional)</label>
+                    <select class="form-select" id="spb_addendum" name="spb_addendum">
+                        <option value="">Tidak Ada</option>
+                        @foreach ($spbAddendumEd as $spb)
+                            <option value="{{ $spb->id }}">{{ $spb->nomor }}</option>
+                        @endforeach
+                    </select>
+                    <input id="spb_addendum_input" name="spb_addendum_id" type="hidden" value="">
+                </div>
                 <p class="p-0 m-0">Apakah Anda yakin ingin menyimpan SPB dari Detail RKB Urgent ini?</p>
                 <p class="p-0 m-0">Pastikan semua data telah diisi dengan benar sebelum menyimpan SPB.</p>
             </div>
@@ -22,6 +32,17 @@
 @push('scripts_3')
     <script>
         $(document).ready(function() {
+            // Initialize select2
+            $('#spb_addendum').select2({
+                width: '100%',
+                placeholder: 'Pilih SPB Addendum',
+                dropdownParent: $('#modalForSaveSPB'),
+                allowClear: true
+            }).on('change', function() {
+                // Update hidden input when spb_addendum selection changes
+                $('#spb_addendum_input').val($(this).val());
+            });
+
             $(document).on('click', '.saveSPBBtn', function() {
                 const id = $(this).data('id');
                 showModalSaveSPB(id);
@@ -35,6 +56,12 @@
             $('#confirmSaveSPBButton').on('click', function() {
                 // Validasi form sebelum submit
                 const form = $('#detailSpbForm');
+
+                // Remove the old append code since we're using hidden input
+                // const spbAddendum = $('#spb_addendum').val();
+                // if (spbAddendum) {
+                //     form.append('<input type="hidden" name="spb_addendum_id" value="' + spbAddendum + '">');
+                // }
 
                 // Cek apakah supplier sudah dipilih
                 if (!$('#supplier_main').val()) {

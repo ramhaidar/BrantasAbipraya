@@ -106,10 +106,10 @@ class SPBController extends Controller
 
     public function destroy ( $id )
     {
-        // \DB::beginTransaction ();
-
         try
         {
+            \DB::beginTransaction ();
+
             // Get SPB with all necessary relationships
             $spb = SPB::with ( [ 
                 'linkSpbDetailSpb.detailSpb',
@@ -119,9 +119,6 @@ class SPBController extends Controller
 
             foreach ( $spb->linkSpbDetailSpb as $linkSpbDetailSpb )
             {
-                $this->console ( "Link SPB Detail: " . $linkSpbDetailSpb );
-                $this->console ( "Detail SPB: " . $linkSpbDetailSpb->detailSpb );
-                $this->console ( "Link RKB Detail: " . $linkSpbDetailSpb->detailSpb->linkRkbDetail );
                 if ( isset ( $linkSpbDetailSpb->detailSpb->linkRkbDetail->detailRkbGeneral ) )
                 {
                     $linkSpbDetailSpb->detailSpb->linkRkbDetail->detailRkbGeneral->increment ( "quantity_remainder", $linkSpbDetailSpb->detailSpb->quantity );
@@ -141,6 +138,46 @@ class SPBController extends Controller
 
             // Delete SPB
             $spb->delete ();
+
+            \DB::commit ();
+            return redirect ()->back ()->with ( 'success', 'SPB berhasil dihapus' );
+
+        }
+        catch ( \Exception $e )
+        {
+            \DB::rollBack ();
+            return redirect ()->back ()->with ( 'error', 'Gagal menghapus SPB: ' . $e->getMessage () );
+        }
+    }
+
+    public function addendum ( $id )
+    {
+        try
+        {
+            \DB::beginTransaction ();
+
+            // Get SPB with all necessary relationships
+            $spb = SPB::with ( [ 
+                'linkSpbDetailSpb.detailSpb',
+                'linkRkbSpbs.rkb.linkAlatDetailRkbs.linkRkbDetails.detailRkbUrgent',
+                'linkRkbSpbs.rkb.linkAlatDetailRkbs.linkRkbDetails.detailRkbGeneral'
+            ] )->findOrFail ( $id );
+
+            $spb->is_addendum = true;
+            $spb->save ();
+
+            foreach ( $spb->linkSpbDetailSpb as $linkSpbDetailSpb )
+            {
+                if ( isset ( $linkSpbDetailSpb->detailSpb->linkRkbDetail->detailRkbGeneral ) )
+                {
+                    $linkSpbDetailSpb->detailSpb->linkRkbDetail->detailRkbGeneral->increment ( "quantity_remainder", $linkSpbDetailSpb->detailSpb->quantity );
+                }
+
+                if ( isset ( $linkSpbDetailSpb->detailSpb->linkRkbDetail->detailRkbUrgent ) )
+                {
+                    $linkSpbDetailSpb->detailSpb->linkRkbDetail->detailRkbUrgent->increment ( "quantity_remainder", $linkSpbDetailSpb->detailSpb->quantity );
+                }
+            }
 
             \DB::commit ();
             return redirect ()->back ()->with ( 'success', 'SPB berhasil dihapus' );

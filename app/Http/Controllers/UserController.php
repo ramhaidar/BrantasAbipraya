@@ -17,7 +17,6 @@ class UserController extends Controller
                 'page'       => 'Data User',
                 "proyeks"    => Proyek::with ( "users" )->orderByDesc ( "updated_at" )->get (),
                 'users'      => User::orderByDesc ( 'updated_at' )->get (),
-                'proyek'     => Proyek::orderByDesc ( 'updated_at' )->get (),
             ]
         );
     }

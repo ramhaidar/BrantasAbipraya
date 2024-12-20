@@ -10,12 +10,12 @@ class ProyekController extends Controller
 {
     public function index ()
     {
-        $proyek = Proyek::get ()->all ();
+        // $proyek = Proyek::get ()->all ();
 
         return view ( "dashboard.proyek.proyek", [ 
             "headerPage" => "Proyek",
             "page"       => "Data Proyek",
-            "proyek"     => $proyek,
+            // "proyek"     => $proyek,
             "proyeks"    => Proyek::with ( "users" )->orderByDesc ( "updated_at" )->get (),
         ] );
     }

@@ -41,7 +41,7 @@
     <!-- DataTables 2.1.8 -->
     <link href="https://cdn.datatables.net/2.1.8/css/dataTables.bootstrap5.min.css" rel="stylesheet">
 
-    <link type="text/css" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" rel="stylesheet" />
+    {{-- <link type="text/css" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" rel="stylesheet" /> --}}
 
     <!-- Vite -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -159,7 +159,7 @@
         </script>
     @endif
 
-    <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
+    {{-- <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script> --}}
 
     @stack('scripts_1')
     @stack('scripts_2')

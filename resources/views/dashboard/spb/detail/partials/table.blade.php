@@ -38,6 +38,7 @@
     <form id="detailSpbForm" action="{{ route('spb.detail.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
         <input name="id_rkb" type="hidden" value="{{ $rkb->id }}">
+        <input id="spb_addendum_input" name="spb_addendum_id" type="hidden">
 
         @php
             $sparepartGroups = [];

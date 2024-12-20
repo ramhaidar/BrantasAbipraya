@@ -83,6 +83,7 @@
                         <th class="text-center">Kode Alat</th>
                         <th class="text-center">Kategori</th>
                         <th class="text-center">Sparepart PO</th>
+                        <th class="text-center">Merk</th>
                         <th class="text-center">Supplier</th>
                         <th class="text-center">Quantity PO</th>
                         <th class="text-center">Satuan</th>
@@ -99,6 +100,7 @@
                                 <td class="text-center">{{ $linkSpbDetailSpb->detailSPb->masterDataAlat->kode_alat }}</td>
                                 <td class="text-center">{{ $linkSpbDetailSpb->detailSPb->masterDataSparepart->kategoriSparepart->kode }}: {{ $linkSpbDetailSpb->detailSPb->masterDataSparepart->kategoriSparepart->nama }}</td>
                                 <td class="text-center">{{ $linkSpbDetailSpb->detailSPb->masterDataSparepart->nama }}</td>
+                                <td class="text-center">{{ $linkSpbDetailSpb->detailSPb->masterDataSparepart->merk }}</td>
                                 <td class="text-center">{{ $riwayatSpb->masterDataSupplier->nama }}</td>
                                 <td class="text-center">{{ $linkSpbDetailSpb->detailSPb->quantity }}</td>
                                 <td class="text-center">{{ $linkSpbDetailSpb->detailSPb->satuan }}</td>
@@ -111,18 +113,18 @@
 
                 <tfoot class="table-primary">
                     <tr>
-                        <th class="ps-4" style="text-align: left;" colspan="7">Jumlah</th>
+                        <th class="ps-4" style="text-align: left;" colspan="8">Jumlah</th>
                         <th id="totalHarga" style="text-align: center;">Rp 0</th>
                         <th id="totalJumlahHarga" style="text-align: center;">Rp 0</th>
                         {{-- <th></th> --}}
                     </tr>
                     <tr>
-                        <th class="ps-4" style="text-align: left;" colspan="8">PPN 11%</th>
+                        <th class="ps-4" style="text-align: left;" colspan="9">PPN 11%</th>
                         <th id="ppn11" style="text-align: center;">Rp 0</th>
                         {{-- <th></th> --}}
                     </tr>
                     <tr>
-                        <th class="ps-4" style="text-align: left;" colspan="8">Grand Total</th>
+                        <th class="ps-4" style="text-align: left;" colspan="9">Grand Total</th>
                         <th id="grandTotal" style="text-align: center;">Rp 0</th>
                         {{-- <th></th> --}}
                     </tr>
@@ -178,8 +180,8 @@
                 let totalJumlahHarga = 0;
 
                 $('#table-data tbody tr').each(function() {
-                    const harga = unformatRupiah($(this).find('td:nth-child(8)').text());
-                    const jumlahHarga = unformatRupiah($(this).find('td:nth-child(9)').text());
+                    const harga = unformatRupiah($(this).find('td:nth-child(9)').text());
+                    const jumlahHarga = unformatRupiah($(this).find('td:nth-child(10)').text());
 
                     totalHarga += harga;
                     totalJumlahHarga += jumlahHarga;

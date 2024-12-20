@@ -73,9 +73,6 @@
 <button class="btn btn-danger mx-1 deleteBtn" data-id="${row.id}">
 <i class="bi bi-trash"></i>
 </button>
-<button class="btn btn-warning mx-1 ubahBtn" data-id="${row.id}" onclick="fillFormEdit(${row.id})">
-<i class="bi bi-pencil-square"></i>
-</button>
 `;
                     }
                 }],

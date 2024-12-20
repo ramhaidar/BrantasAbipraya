@@ -18,6 +18,7 @@ class SPB extends Model
 
     protected $fillable = [ 
         'nomor',
+        'is_addendum',
         'tanggal',
         'id_master_data_supplier'
     ];
@@ -25,6 +26,7 @@ class SPB extends Model
     protected $casts = [ 
         'id'                      => 'integer',
         'nomor'                   => 'string',
+        'is_addendum'             => 'boolean',
         'tanggal'                 => 'date:d F Y',
         'id_master_data_supplier' => 'integer',
     ];

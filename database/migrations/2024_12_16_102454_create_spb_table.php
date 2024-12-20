@@ -12,6 +12,7 @@ return new class extends Migration
         {
             $table->id ();
             $table->string ( 'nomor' );
+            $table->boolean ( 'is_addendum' )->default ( false );
             $table->date ( 'tanggal' );
             $table->foreignId ( 'id_master_data_supplier' )
                 ->nullable ()

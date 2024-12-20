@@ -256,7 +256,7 @@
                         <div class="w-100 mb-3 rounded">
                             <label class="form-label w-100" for="proyek">Pilih Proyek</label>
                             <select class="form-control w-100" id="edit_proyek" name="proyek[]" style="width: 100%" multiple="multiple">
-                                @foreach ($proyek as $item)
+                                @foreach ($proyeks as $item)
                                     <option value="{{ $item->id }}">{{ $item->nama }}</option>
                                 @endforeach
                             </select>
@@ -323,7 +323,7 @@
                         <div class="w-100 mb-3 rounded">
                             <label class="form-label w-100" for="proyek">Pilih Proyek</label>
                             <select class="form-control w-100" id="add_proyek" name="proyek[]" style="width: 100%" multiple="multiple">
-                                @foreach ($proyek as $item)
+                                @foreach ($proyeks as $item)
                                     <option value="{{ $item->id }}">{{ $item->nama }}</option>
                                 @endforeach
                             </select>

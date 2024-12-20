@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string ( 'tipe_alat' ); // + tipe_alat: String
             $table->string ( 'serial_number' ); // + serial_number: String
 
+            $table->foreignId ( 'id_proyek_current' )->nullable ()->constrained ( 'proyek' )->nullOnDelete ();
+
             $table->timestamps (); // + timestamps()
         } );
     }

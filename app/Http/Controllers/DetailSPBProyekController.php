@@ -37,18 +37,19 @@ class DetailSPBProyekController extends Controller
         $riwayatSpbs = SPB::with (
             [ 'linkSpbDetailSpb.detailSpb' ]
         )
+            ->where ( 'is_addendum', false )
             ->whereIn ( 'id', $rkb->spbs ()->pluck ( 'id_spb' ) )
             ->get ();
 
         return view ( 'dashboard.spb.proyek.detail.detail', [ 
-            'proyeks'    => $proyeks,
-            'rkb'        => $rkb,
-            'supplier'   => MasterDataSupplier::all (),
-            'totalItems' => $totalItems,
+            'proyeks'     => $proyeks,
+            'rkb'         => $rkb,
+            'supplier'    => MasterDataSupplier::all (),
+            'totalItems'  => $totalItems,
             'riwayatSpbs' => $riwayatSpbs,
 
-            'headerPage' => "SPB Proyek",
-            'page'       => 'Detail SPB Proyek',
+            'headerPage'  => "SPB Proyek",
+            'page'        => 'Detail SPB Proyek',
         ] );
     }
 }

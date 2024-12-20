@@ -114,7 +114,7 @@
                                 <!-- Menu for Admin Role Only -->
                                 @if (Auth::user()->role == 'Admin')
                                     <li class="nav-item">
-                                        <a class="nav-link {{ str_contains($page, 'Data Proyek') ? 'active' : '' }}" href="{{ route('proyek.index') }}" style="{{ str_contains($headerPage, 'Proyek') ? 'background-color: #483D8B; color: #ffffff;' : '' }}">
+                                        <a class="nav-link {{ $page === 'Data Proyek' ? 'active' : '' }}" href="{{ route('proyek.index') }}" style="{{ $headerPage === 'Proyek' ? 'background-color: #483D8B; color: #ffffff;' : '' }}">
                                             <i class="bi me-2 nav-icon bi-kanban"></i>
                                             <p class="truncate-text">
                                                 <span class="text-content">Proyek</span>
@@ -144,7 +144,7 @@
 
                                         <!-- Level 2 Item: Data Alat -->
                                         <li class="nav-item">
-                                            <a class="nav-link level-1 {{ str_contains($page, 'Data Alat') ? 'active' : '' }}" href="{{ route('master_data_alat.index') }}" style="{{ str_contains($page, 'Data Alat') ? 'background-color: #66CDAA; color: #ffffff;' : '' }}">
+                                            <a class="nav-link level-1 {{ str_contains($headerPage, 'Master Data') && str_contains($page, 'Data Alat') ? 'active' : '' }}" href="{{ route('master_data_alat.index') }}" style="{{ str_contains($headerPage, 'Master Data') && str_contains($page, 'Data Alat') ? 'background-color: #66CDAA; color: #ffffff;' : '' }}">
                                                 <i class="bi me-2 nav-icon fs-5 bi-gear-wide-connected"></i>
                                                 <p class="truncate-text">
                                                     <span class="text-content">Alat</span>
@@ -275,9 +275,9 @@
 
                                 <!-- Dynamic Project Menus -->
                                 @foreach ($proyeks as $item)
-                                    <li class="nav-item proyek-item has-treeview {{ str_contains($headerPage, $item->nama) ? 'menu-open' : '' }}">
+                                    <li class="nav-item proyek-item has-treeview {{ isset($proyek) && str_contains($proyek->id, $item->id) ? 'menu-open' : '' }}">
                                         <!-- Level 1 -->
-                                        <a class="nav-link {{ str_contains($headerPage, $item->nama) ? 'active' : '' }}" href="#" style="{{ str_contains($headerPage, $item->nama) ? 'background-color: #483D8B; color: #ffffff;' : '' }}">
+                                        <a class="nav-link {{ isset($proyek) && str_contains($proyek->id, $item->id) ? 'active' : '' }}" href="#" style="{{ isset($proyek) && str_contains($proyek->id, $item->id) ? 'background-color: #483D8B; color: #ffffff;' : '' }}">
                                             <i class="bi me-2 nav-icon fs-5 bi-briefcase-fill"></i>
                                             <p class="truncate-text">
                                                 <span class="text-content">{{ $item->nama }}</span>
@@ -285,6 +285,14 @@
                                             <i class="right bi bi-caret-right-fill"></i>
                                         </a>
                                         <ul class="nav nav-treeview">
+
+                                            <!-- Alat Submenu (Level 2) -->
+                                            <li class="nav-item has-treeview {{ isset($proyek) && str_contains($page, 'Data Alat') && str_contains($headerPage, 'Data Alat') && str_contains($proyek->id, $item->id) ? 'menu-open' : '' }}">
+                                                <a class="ps-4 nav-link level-1 {{ isset($proyek) && str_contains($page, 'Data Alat') && str_contains($headerPage, 'Data Alat') && str_contains($proyek->id, $item->id) ? 'active' : '' }}" href="{{ route('alat.index', ['id_proyek' => $item->id]) }}" style="{{ isset($proyek) && str_contains($page, 'Data Alat') && str_contains($headerPage, 'Data Alat') && str_contains($proyek->id, $item->id) ? 'background-color: #66CDAA; color: #ffffff;' : '' }}">
+                                                    <i class="bi me-2 nav-icon fs-5 bi-wrench"></i>
+                                                    <p>Alat</p>
+                                                </a>
+                                            </li>
 
                                             <!-- ATB Submenu (Level 2) -->
                                             <li class="nav-item has-treeview {{ str_contains($page, 'ATB') && str_contains($headerPage, $item->nama) ? 'menu-open' : '' }}">

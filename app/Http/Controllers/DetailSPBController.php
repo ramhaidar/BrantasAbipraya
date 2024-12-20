@@ -43,15 +43,32 @@ class DetailSPBController extends Controller
             ->whereIn ( 'id', $rkb->spbs ()->pluck ( 'id_spb' ) )
             ->get ();
 
-        return view ( 'dashboard.spb.detail.detail', [ 
-            'proyeks'    => $proyeks,
-            'rkb'        => $rkb,
-            'supplier'   => MasterDataSupplier::all (),
-            'totalItems' => $totalItems,
-            'riwayatSpb' => $riwayatSpb,
+        $spbAddendumEd = SPB::whereIn ( 'id', $rkb->spbs ()->pluck ( 'id_spb' ) )
+            ->where ( 'is_addendum', true )
+            ->where ( function ($query)
+            {
+                $query->where ( 'nomor', 'not like', '%-1' )
+                    ->where ( 'nomor', 'not like', '%-2' )
+                    ->where ( 'nomor', 'not like', '%-3' )
+                    ->where ( 'nomor', 'not like', '%-4' )
+                    ->where ( 'nomor', 'not like', '%-5' )
+                    ->where ( 'nomor', 'not like', '%-6' )
+                    ->where ( 'nomor', 'not like', '%-7' )
+                    ->where ( 'nomor', 'not like', '%-8' )
+                    ->where ( 'nomor', 'not like', '%-9' );
+            } )
+            ->get ();  // Changed from first() to get()
 
-            'headerPage' => "SPB Supplier",
-            'page'       => 'Detail SPB Supplier',
+        return view ( 'dashboard.spb.detail.detail', [ 
+            'proyeks'       => $proyeks,
+            'rkb'           => $rkb,
+            'supplier'      => MasterDataSupplier::all (),
+            'totalItems'    => $totalItems,
+            'riwayatSpb'    => $riwayatSpb,
+            'spbAddendumEd' => $spbAddendumEd,
+
+            'headerPage'    => "SPB Supplier",
+            'page'          => 'Detail SPB Supplier',
         ] );
     }
 
@@ -87,18 +104,62 @@ class DetailSPBController extends Controller
             'alat_detail_id.*'     => 'required|exists:link_alat_detail_rkb,id',
             'link_rkb_detail_id'   => 'required|array',
             'link_rkb_detail_id.*' => 'required|exists:link_rkb_detail,id',
+
+            'spb_addendum_id'      => [ 'string', 'nullable' ],
         ] );
 
         \DB::beginTransaction ();
 
         try
         {
-            // Create new SPB
-            $spb = SPB::create ( [ 
-                'nomor'                   => 'SPB-' . now ()->format ( 'YmdHis' ),
-                'id_master_data_supplier' => $validated[ 'supplier_main' ],
-                'tanggal'                 => now (),
-            ] );
+            if ( $validated[ 'spb_addendum_id' ] == null )
+            {
+                // dd ( $validated[ 'spb_addendum_id' ] );
+
+                // Create new SPB
+                $spb = SPB::create ( [ 
+                    'nomor'                   => 'SPB-' . now ()->format ( 'YmdHis' ),
+                    'is_addendum'             => false,
+                    'id_master_data_supplier' => $validated[ 'supplier_main' ],
+                    'tanggal'                 => now (),
+                ] );
+
+                $message = "SPB berhasil dibuat";
+            }
+            else
+            {
+                $spb = SPB::findOrFail ( $validated[ 'spb_addendum_id' ] );
+
+                // Get base SPB number
+                $baseNumber = $spb->nomor;
+
+                // Find the highest increment for this base number
+                $highestIncrement = SPB::where ( 'nomor', 'LIKE', $baseNumber . '-%' )
+                    ->get ()
+                    ->map ( function ($item) use ($baseNumber)
+                    {
+                        if ( preg_match ( '/-(\d+)$/', $item->nomor, $matches ) )
+                        {
+                            return (int) $matches[ 1 ];
+                        }
+                        return 0;
+                    } )
+                    ->max ();
+
+                $nomorSPB = $baseNumber . '-' . ( $highestIncrement + 1 );
+
+                // Create new SPB
+                $spb = SPB::create ( [ 
+                    'nomor'                   => $nomorSPB,
+                    'is_addendum'             => false,
+                    'id_master_data_supplier' => $validated[ 'supplier_main' ],
+                    'tanggal'                 => now (),
+                ] );
+
+                $message = "SPB berhasil di Addendum";
+            }
+
+            // dd ( "TEST" );
 
             // Use the corrected relationship name
             $linkRKBSPB = $spb->linkRkbSpbs ()->create ( [ 
@@ -157,7 +218,7 @@ class DetailSPBController extends Controller
             }
 
             \DB::commit ();
-            return redirect ()->back ()->with ( 'success', 'SPB berhasil dibuat' );
+            return redirect ()->back ()->with ( 'success', $message );
         }
         catch ( \Exception $e )
         {

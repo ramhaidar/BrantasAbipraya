@@ -13,6 +13,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DetailSPBController;
 use App\Http\Controllers\RKBUrgentController;
 use App\Http\Controllers\SPBProyekController;
+use App\Http\Controllers\AlatProyekController;
 use App\Http\Controllers\RiwayatSPBController;
 use App\Http\Controllers\RKBGeneralController;
 use App\Http\Controllers\MasterDataAlatController;
@@ -1159,10 +1160,16 @@ Route::middleware ( 'auth' )
             ->name ( 'update' );
 
         Route::delete (
-            '/{id}',
+            '/destroy/{id}',
             [ SPBController::class, 'destroy' ]
         )->where ( 'id', '[0-9]+' )
             ->name ( 'destroy' );
+
+        Route::delete (
+            '/addendum/{id}',
+            [ SPBController::class, 'addendum' ]
+        )->where ( 'id', '[0-9]+' )
+            ->name ( 'addendum' );
 
         // Rute SPB Proyek [SPBProyekController]
         Route::prefix ( 'proyek' )
@@ -1311,4 +1318,41 @@ Route::middleware ( 'auth' )
                     ->name ( 'export-pdf' );
             } );
         } );
+    } );
+
+
+// Rute Alat Proyek [AlatProyekController]
+Route::middleware ( 'auth' )
+    ->prefix ( 'alat' )
+    ->as ( 'alat.' )
+    ->group ( function ()
+    {
+        Route::get (
+            '/',
+            [ AlatProyekController::class, 'index' ]
+        )->where ( 'id_proyek', '[0-9]+' )
+            ->name ( 'index' );
+
+        Route::get (
+            '{id}',
+            [ AlatProyekController::class, 'show' ]
+        )->where ( 'id', '[0-9]+' )
+            ->name ( 'show' );
+
+        Route::post (
+            '/',
+            [ AlatProyekController::class, 'store' ]
+        )->name ( 'store' );
+
+        Route::put (
+            '{id}',
+            [ AlatProyekController::class, 'update' ]
+        )->where ( 'id', '[0-9]+' )
+            ->name ( 'update' );
+
+        Route::delete (
+            '{id}',
+            [ AlatProyekController::class, 'destroy' ]
+        )->where ( 'id', '[0-9]+' )
+            ->name ( 'destroy' );
     } );

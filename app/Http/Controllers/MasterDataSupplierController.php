@@ -17,7 +17,7 @@ class MasterDataSupplierController extends Controller
         $spareparts = \App\Models\MasterDataSparepart::all ();
 
         return view ( 'dashboard.masterdata.supplier.supplier', [ 
-            'proyek'     => $proyeks,
+            // 'proyek'     => $proyeks,
             'proyeks'    => $proyeks,
             'spareparts' => $spareparts,
 

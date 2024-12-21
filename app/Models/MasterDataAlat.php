@@ -19,15 +19,17 @@ class MasterDataAlat extends Model
         'merek_alat',
         'tipe_alat',
         'serial_number',
+        'id_proyek_current',
     ];
 
     protected $casts = [ 
-        'id'            => 'integer',
-        'jenis_alat'    => 'string',
-        'kode_alat'     => 'string',
-        'merek_alat'    => 'string',
-        'tipe_alat'     => 'string',
-        'serial_number' => 'string',
+        'id'                => 'integer',
+        'jenis_alat'        => 'string',
+        'kode_alat'         => 'string',
+        'merek_alat'        => 'string',
+        'tipe_alat'         => 'string',
+        'serial_number'     => 'string',
+        'id_proyek_current' => 'integer',
     ];
 
     protected static function newFactory ()
@@ -53,6 +55,23 @@ class MasterDataAlat extends Model
     public function detailSpbs () : HasMany
     {
         return $this->hasMany ( DetailSPB::class, 'id_master_data_alat' );
+    }
+
+    public function proyekCurrent()
+    {
+        return $this->belongsTo(Proyek::class, 'id_proyek_current');
+    }
+
+    public function alatProyek()
+    {
+        return $this->hasMany(AlatProyek::class, 'id_alat');
+    }
+
+    public function proyeks()
+    {
+        return $this->belongsToMany(Proyek::class, 'alat_proyek', 'id_alat', 'id_proyek')
+            ->withPivot('assigned_at', 'removed_at')
+            ->withTimestamps();
     }
 
 }

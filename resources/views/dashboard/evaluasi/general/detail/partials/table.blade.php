@@ -112,9 +112,11 @@ min="0" />
                                 undefined || row.quantity_in_stock === 0) {
                                 const randomStock = Math.floor(Math.random() * (25 - 1 + 1)) +
                                     1; // Random between 1 and 500
-                                return randomStock; // Use random value if stock is null or 0
+                                // return randomStock; // Use random value if stock is null or 0
+                                return 0; // Use random value if stock is null or 0
                             }
-                            return row.quantity_in_stock; // Use actual stock if available
+                            // return row.quantity_in_stock; // Use actual stock if available
+                            return 0; // Use actual stock if available
                         }
                     }
                 ],

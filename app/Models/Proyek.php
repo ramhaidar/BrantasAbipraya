@@ -64,4 +64,16 @@ class Proyek extends Model
             $query->select ( 'id_saldo' )->from ( 'atb' )->where ( 'id_proyek', $this->id );
         } )->get ();
     }
+
+    public function masterDataAlats ()
+    {
+        return $this->belongsToMany ( MasterDataAlat::class, 'alat_proyek', 'id_proyek', 'id_alat' )
+            ->withPivot ( 'assigned_at', 'removed_at' )
+            ->withTimestamps ();
+    }
+
+    public function currentAlats ()
+    {
+        return $this->hasMany ( MasterDataAlat::class, 'id_proyek_current' );
+    }
 }

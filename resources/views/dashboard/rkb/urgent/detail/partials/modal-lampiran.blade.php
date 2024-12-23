@@ -52,11 +52,13 @@
                         <input class="form-control" id="linkAlatDetailRKBIdExist" name="id_link_alat_detail_rkb" type="hidden" value="#">
                         <input class="form-control" id="lampiranRKBUrgent" name="id_lampiran" type="hidden" value="#">
 
-                        <div class="col-12">
-                            <label class="form-label required" for="lampiranInputExist">Unggah PDF</label>
-                            <input class="form-control" id="lampiranInputExist" name="lampiran" type="file" accept="application/pdf" required>
-                            <div class="invalid-feedback">File PDF diperlukan.</div>
-                        </div>
+                        @if (!$rkb->is_approved)
+                            <div class="col-12">
+                                <label class="form-label required" for="lampiranInputExist">Unggah PDF</label>
+                                <input class="form-control" id="lampiranInputExist" name="lampiran" type="file" accept="application/pdf" required>
+                                <div class="invalid-feedback">File PDF diperlukan.</div>
+                            </div>
+                        @endif
 
                         <div class="col-12 mt-3" id="pdfPreviewContainerExist" style="display: none;">
                             <label class="form-label">Pratinjau PDF:</label>
@@ -66,8 +68,10 @@
                 </div>
 
                 <div class="modal-footer d-flex w-100 justify-content-end">
-                    <button class="btn btn-danger me-2 w-25" type="button">Hapus</button>
-                    <button class="btn btn-success w-25" type="submit">Ubah</button>
+                    @if (!$rkb->is_approved)
+                        <button class="btn btn-danger me-2 w-25" type="button">Hapus</button>
+                        <button class="btn btn-success w-25" type="submit">Ubah</button>
+                    @endif
                 </div>
             </form>
 

@@ -22,7 +22,6 @@ class RKB extends Model
         'is_finalized',
         'is_evaluated',
         'is_approved',
-        'harga',
     ];
 
     protected $casts = [ 
@@ -35,7 +34,6 @@ class RKB extends Model
         'is_approved'  => 'boolean',
         'created_at'   => 'datetime',
         'updated_at'   => 'datetime',
-        'harga'        => 'integer',
     ];
 
     public function proyek () : BelongsTo

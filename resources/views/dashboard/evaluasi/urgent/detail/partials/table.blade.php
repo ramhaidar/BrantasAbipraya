@@ -24,9 +24,9 @@
 
 @include('dashboard.evaluasi.urgent.detail.partials.modal-lampiran')
 
-<form id="approveRkbForm" method="POST" action="{{ route('evaluasi_rkb_urgent.detail.approve', ['id' => $data->id]) }}">
-    @csrf
-    <div class="ibox-body ms-0 ps-0 table-responsive" style="overflow-x: hidden">
+<div class="ibox-body ms-0 ps-0 table-responsive" style="overflow-x: hidden">
+    <form id="approveRkbForm" method="POST" action="{{ route('evaluasi_rkb_urgent.detail.approve', ['id' => $data->id]) }}">
+        @csrf
         <table class="m-0 table table-bordered table-striped" id="table-data">
             <thead class="table-primary">
                 <tr>
@@ -48,14 +48,13 @@
             </thead>
             <tbody>
                 @php
-                    $alatRowCount = []; // Untuk menyimpan jumlah baris per kode_alat
-                    $processedAlat = []; // Untuk melacak kode alat yang sudah diproses
+                    $alatRowCount = [];
+                    $processedAlat = [];
                 @endphp
 
                 @foreach ($data->linkAlatDetailRkbs as $item2)
                     @foreach ($item2->linkRkbDetails as $item3)
                         @php
-                            // Hitung jumlah baris untuk setiap kode alat
                             $kodeAlat = $item2->masterDataAlat->kode_alat;
                             if (!isset($alatRowCount[$kodeAlat])) {
                                 $alatRowCount[$kodeAlat] = collect($item2->linkRkbDetails)->count();
@@ -72,42 +71,30 @@
                             <td class="text-center">{{ $item3->detailRkbUrgent->masterDataSparepart->merk }}</td>
                             <td class="text-center">{{ $item3->detailRkbUrgent->nama_mekanik }}</td>
                             <td class="text-center">
-                                <button
-                                    class="btn {{ $item3->detailRkbUrgent->dokumentasi ? 'btn-warning' : 'btn-primary' }}""
-                                    data-id="{{ $item3->detailRkbUrgent->id }}"
-                                    onclick="showDokumentasi({{ $item3->detailRkbUrgent->id }})">
+                                <button class="btn {{ $item3->detailRkbUrgent->dokumentasi ? 'btn-warning' : 'btn-primary' }}" data-id="{{ $item3->detailRkbUrgent->id }}" type="button" onclick="event.preventDefault(); event.stopPropagation(); showDokumentasi({{ $item3->detailRkbUrgent->id }});">
                                     <i class="bi bi-file-earmark-text"></i>
                                 </button>
                             </td>
 
                             @if (!in_array($kodeAlat, $processedAlat))
-                                <!-- Jika belum diproses -->
                                 <td class="text-center" rowspan="{{ $alatRowCount[$kodeAlat] }}">
-
-                                    <a class="btn {{ $item2->timelineRkbUrgents->count() > 0 ? 'btn-warning' : 'btn-primary' }}"
-                                        href="{{ route('evaluasi_rkb_urgent.detail.timeline.index', ['id' => $item2->id]) }}">
+                                    <a class="btn {{ $item2->timelineRkbUrgents->count() > 0 ? 'btn-warning' : 'btn-primary' }}" href="{{ route('evaluasi_rkb_urgent.detail.timeline.index', ['id' => $item2->id]) }}" onclick="event.stopPropagation();">
                                         <i class="bi bi-hourglass-split"></i>
                                     </a>
                                 </td>
 
                                 <td class="text-center" rowspan="{{ $alatRowCount[$kodeAlat] }}">
-                                    <button
-                                        class="btn {{ $item2->lampiranRkbUrgent ? 'btn-warning' : 'btn-primary' }} lampiranBtn"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="{{ $item2->lampiranRkbUrgent ? '#modalForLampiranExist' : '#modalForLampiranNew' }}"
-                                        data-id-linkalatdetail="{{ $item2->id }}"
-                                        data-id-lampiran="{{ $item2->lampiranRkbUrgent ? $item2->lampiranRkbUrgent->id : null }}"
-                                        title="Unggah Lampiran" aria-label="Unggah Lampiran">
+                                    <button class="btn {{ $item2->lampiranRkbUrgent ? 'btn-warning' : 'btn-primary' }} lampiranBtn" data-bs-toggle="modal" data-bs-target="{{ $item2->lampiranRkbUrgent ? '#modalForLampiranExist' : '#modalForLampiranNew' }}" data-id-linkalatdetail="{{ $item2->id }}" data-id-lampiran="{{ $item2->lampiranRkbUrgent ? $item2->lampiranRkbUrgent->id : null }}" type="button" onclick="event.stopPropagation();">
                                         <i class="bi bi-paperclip"></i>
                                     </button>
                                 </td>
 
                                 @php
-                                    $processedAlat[] = $kodeAlat; // Tandai kode alat sebagai sudah diproses
+                                    $processedAlat[] = $kodeAlat;
                                 @endphp
                             @else
-                                <td style="display: none;"></td> <!-- Placeholder untuk konsistensi kolom Timeline -->
-                                <td style="display: none;"></td> <!-- Placeholder untuk konsistensi kolom Lampiran -->
+                                <td style="display: none;"></td>
+                                <td style="display: none;"></td>
                             @endif
 
                             <td class="text-center">{{ $item3->detailRkbUrgent->quantity_requested }}</td>
@@ -117,18 +104,12 @@
                                     if ($data->is_approved) {
                                         $backgroundColor = 'bg-primary-subtle';
                                     } else {
-                                        $backgroundColor =
-                                            $item3->detailRkbUrgent->quantity_approved !== null
-                                                ? 'bg-success-subtle'
-                                                : 'bg-warning-subtle';
+                                        $backgroundColor = $item3->detailRkbUrgent->quantity_approved !== null ? 'bg-success-subtle' : 'bg-warning-subtle';
                                     }
 
                                     $disabled = $data->is_approved || $data->is_evaluated ? 'disabled' : '';
                                 @endphp
-                                <input class="form-control text-center {{ $backgroundColor }}"
-                                    name="quantity_approved[{{ $item3->detailRkbUrgent->id }}]" type="number"
-                                    value="{{ $item3->detailRkbUrgent->quantity_approved ?? $item3->detailRkbUrgent->quantity_requested }}"
-                                    min="0" {{ $disabled }} />
+                                <input class="form-control text-center {{ $backgroundColor }}" name="quantity_approved[{{ $item3->detailRkbUrgent->id }}]" type="number" value="{{ $item3->detailRkbUrgent->quantity_approved ?? $item3->detailRkbUrgent->quantity_requested }}" min="0" {{ $disabled }} />
                             </td>
                             <td class="text-center">{{ random_int(1, 15) }}</td>
                             <td class="text-center">{{ $item3->detailRkbUrgent->satuan }}</td>
@@ -137,11 +118,8 @@
                 @endforeach
             </tbody>
         </table>
-    </div>
-
-    <!-- Hidden submit button -->
-    <button class="btn btn-success btn-sm approveBtn" id="hiddenApproveRkbButton" type="submit" hidden></button>
-</form>
+    </form>
+</div>
 
 @push('scripts_3')
     <script>
@@ -159,18 +137,13 @@
             const imagePreviewModalforShow = new bootstrap.Modal(document.getElementById(
                 'imagePreviewModalforShow'));
 
-            // Laravel route name for dokumentasi
             const dokumentasiRoute = @json(route('evaluasi_rkb_urgent.detail.dokumentasi', ['id' => ':id']));
 
-            // Fetch and display dokumentasi in modal
             window.showDokumentasi = function(id) {
-                // Clear previous previews
                 dokumentasiPreviewContainer.innerHTML = '';
 
-                // Replace ':id' with the actual id
                 const fetchUrl = dokumentasiRoute.replace(':id', id);
 
-                // Fetch dokumentasi data
                 fetch(fetchUrl)
                     .then(response => response.json())
                     .then(data => {
@@ -182,7 +155,6 @@
                                 img.title = file.name;
                                 img.classList.add('img-thumbnail');
 
-                                // Add click event to open large preview
                                 img.addEventListener('click', () => {
                                     $('#dokumentasiPreviewModal').modal('hide');
 
@@ -199,7 +171,6 @@
                                 '<p class="text-muted text-center">Tidak ada Dokumentasi</p>';
                         }
 
-                        // Show dokumentasi preview modal
                         dokumentasiPreviewModal.show();
                     })
                     .catch(error => {
@@ -210,10 +181,16 @@
                     });
             };
 
-            // Event listener for when the preview modal is closed
             document.getElementById('imagePreviewModalforShow').addEventListener('hidden.bs.modal', function() {
-                // Reopen #modalForAdd using jQuery
                 $('#dokumentasiPreviewModal').modal('show');
+            });
+
+            // Prevent form submission when clicking dokumentasi button
+            $(document).on('click', '[data-id]', function(e) {
+                if ($(this).closest('td').hasClass('text-center')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
             });
         });
     </script>

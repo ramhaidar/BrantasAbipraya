@@ -86,6 +86,7 @@ class SPBController extends Controller
                 'nomor'   => $item->nomor,
                 'proyek'  => $item->proyek->nama ?? '-',
                 'periode' => Carbon::parse ( $item->periode )->translatedFormat ( 'F Y' ),
+                'tipe'    => ucfirst ( $item->tipe ),
             ];
         } );
 

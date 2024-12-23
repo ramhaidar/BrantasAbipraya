@@ -20,6 +20,7 @@
                 <th class="text-center">No RKB</th>
                 <th class="text-center">Proyek</th>
                 <th class="text-center">Periode</th>
+                <th class="text-center">Tipe</th>
                 <th class="text-center">Detail SPB</th>
             </tr>
         </thead>
@@ -70,6 +71,11 @@
                     {
                         data: 'periode',
                         name: 'periode',
+                        className: 'text-center'
+                    },
+                    {
+                        data: 'tipe',
+                        name: 'tipe',
                         className: 'text-center'
                     },
                     {

@@ -24,8 +24,6 @@ return new class extends Migration
             $table->boolean ( 'is_evaluated' )->default ( false ); // Status evaluasi
             $table->boolean ( 'is_approved' )->default ( false ); // Status persetujuan
 
-            $table->integer ( 'harga' )->nullable (); // Harga sebelum pajak
-
             $table->foreignId ( 'id_proyek' )->nullable ()
                 ->constrained ( 'proyek' )->nullOnDelete (); // Relasi ke tabel proyek
 

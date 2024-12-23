@@ -22,22 +22,29 @@
 @push('scripts_3')
     <script>
         $(document).ready(function() {
-            // Simpan referensi form utama
-            const form = $('#approveRkbForm');
-
-            // Tombol Evaluasi
+            // Event handler untuk tombol evaluasi
             $('#evaluateBtnButton').on('click', function() {
                 const action = $(this).data('action');
-                const message = $(this).data('message');
+                const form = $('#approveRkbForm'); // Get form reference
 
-                // Atur action dan pesan di modal
-                form.attr('action', action);
-                $('#evaluateMessage').text(message);
+                if (form.length) { // Check if form exists
+                    form.attr('action', action);
+                } else {
+                    console.error('Form #approveRkbForm not found');
+                }
+            });
 
-                // Atur tombol konfirmasi evaluasi
-                $('#confirmEvaluateButton').on('click', function() {
-                    form.submit(); // Submit form untuk evaluasi
-                });
+            // Event handler untuk tombol konfirmasi di modal
+            $('#confirmEvaluateButton').on('click', function() {
+                const form = $('#approveRkbForm'); // Get form reference again
+
+                if (form.length) { // Check if form exists
+                    $('#modalForEvaluate').modal('hide');
+                    form.submit();
+                } else {
+                    console.error('Form #approveRkbForm not found');
+                    $('#modalForEvaluate').modal('hide');
+                }
             });
         });
     </script>

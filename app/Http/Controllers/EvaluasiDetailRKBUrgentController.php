@@ -86,7 +86,16 @@ class EvaluasiDetailRKBUrgentController extends Controller
 
     public function approve ( Request $request, $id_rkb )
     {
-        $rkb              = RKB::find ( $id_rkb );
+        $rkb = RKB::find ( $id_rkb );
+
+        // Update all DetailRKBUrgent records for this RKB
+        DetailRKBUrgent::whereHas ( 'linkRkbDetails.linkAlatDetailRkb.rkb', function ($query) use ($id_rkb)
+        {
+            $query->where ( 'id', $id_rkb );
+        } )->update ( [ 
+                    'quantity_remainder' => \DB::raw ( 'quantity_approved' )
+                ] );
+
         $rkb->is_approved = true;
         $rkb->save ();
 
@@ -161,7 +170,7 @@ class EvaluasiDetailRKBUrgentController extends Controller
         $data = $query->skip ( $start )->take ( $length )->get ();
 
         // Get the RKB to access its status flags
-        $rkb = RKB::findOrFail($id_rkb);
+        $rkb = RKB::findOrFail ( $id_rkb );
 
         // Format data untuk DataTable
         $formattedData = $data->map ( function ($item) use ($rkb)
@@ -180,7 +189,7 @@ class EvaluasiDetailRKBUrgentController extends Controller
                 'satuan'              => $item->satuan,
                 // Add the status flags from RKB
                 'is_approved'         => $rkb->is_approved,
-                'is_finalized'        => $rkb->is_finalized, 
+                'is_finalized'        => $rkb->is_finalized,
                 'is_evaluated'        => $rkb->is_evaluated
             ];
         } );

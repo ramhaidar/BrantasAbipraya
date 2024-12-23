@@ -57,21 +57,21 @@ class MasterDataAlat extends Model
         return $this->hasMany ( DetailSPB::class, 'id_master_data_alat' );
     }
 
-    public function proyekCurrent()
+    public function proyekCurrent ()
     {
-        return $this->belongsTo(Proyek::class, 'id_proyek_current');
+        return $this->belongsTo ( Proyek::class, 'id_proyek_current' );
     }
 
-    public function alatProyek()
+    public function alatProyek ()
     {
-        return $this->hasMany(AlatProyek::class, 'id_alat');
+        return $this->hasMany ( AlatProyek::class, 'id_master_data_alat' );
     }
 
-    public function proyeks()
+    public function proyeks ()
     {
-        return $this->belongsToMany(Proyek::class, 'alat_proyek', 'id_alat', 'id_proyek')
-            ->withPivot('assigned_at', 'removed_at')
-            ->withTimestamps();
+        return $this->belongsToMany ( Proyek::class, 'alat_proyek', 'id_alat', 'id_proyek' )
+            ->withPivot ( 'assigned_at', 'removed_at' )
+            ->withTimestamps ();
     }
 
 }

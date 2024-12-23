@@ -26,9 +26,9 @@ class AlatProyek extends Model
         'id_proyek'           => 'integer',
     ];
 
-    public function alat ()
+    public function masterDataAlat ()
     {
-        return $this->belongsTo ( MasterDataAlat::class, 'id_alat' );
+        return $this->belongsTo ( MasterDataAlat::class, 'id_master_data_alat' );
     }
 
     public function proyek ()

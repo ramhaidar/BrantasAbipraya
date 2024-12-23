@@ -16,20 +16,20 @@
                     </a>
                 </div>
 
-                @include('dashboard.masterdata.alat.partials.table')
+                @include('dashboard.alat.partials.table')
 
             </div>
         </div>
     </div>
 
     <!-- Modal for Adding Data -->
-    @include('dashboard.masterdata.alat.partials.modal-add')
+    @include('dashboard.alat.partials.modal-add')
 
     <!-- Modal for Editing Data -->
     {{-- @include('dashboard.masterdata.alat.partials.modal-edit') --}}
 
     <!-- Modal for Delete Confirmation -->
-    @include('dashboard.masterdata.alat.partials.modal-delete')
+    {{-- @include('dashboard.masterdata.alat.partials.modal-delete') --}}
 @endsection
 
 @push('scripts_2')

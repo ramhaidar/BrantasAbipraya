@@ -114,8 +114,6 @@ class DetailSPBController extends Controller
         {
             if ( $validated[ 'spb_addendum_id' ] == null )
             {
-                // dd ( $validated[ 'spb_addendum_id' ] );
-
                 // Create new SPB
                 $spb = SPB::create ( [ 
                     'nomor'                   => 'SPB-' . now ()->format ( 'YmdHis' ),
@@ -128,10 +126,10 @@ class DetailSPBController extends Controller
             }
             else
             {
-                $spb = SPB::findOrFail ( $validated[ 'spb_addendum_id' ] );
+                $originalSpb = SPB::findOrFail ( $validated[ 'spb_addendum_id' ] );
 
                 // Get base SPB number
-                $baseNumber = $spb->nomor;
+                $baseNumber = $originalSpb->nomor;
 
                 // Find the highest increment for this base number
                 $highestIncrement = SPB::where ( 'nomor', 'LIKE', $baseNumber . '-%' )
@@ -151,15 +149,14 @@ class DetailSPBController extends Controller
                 // Create new SPB
                 $spb = SPB::create ( [ 
                     'nomor'                   => $nomorSPB,
-                    'is_addendum'             => false,
+                    'is_addendum'             => true,
                     'id_master_data_supplier' => $validated[ 'supplier_main' ],
                     'tanggal'                 => now (),
+                    'id_spb_original'         => $originalSpb->id,
                 ] );
 
                 $message = "SPB berhasil di Addendum";
             }
-
-            // dd ( "TEST" );
 
             // Use the corrected relationship name
             $linkRKBSPB = $spb->linkRkbSpbs ()->create ( [ 

@@ -37,7 +37,7 @@
                                             <form class="d-inline" action="{{ route('spb.destroy', $item->id) }}" method="POST">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button class="btn btn-sm btn-danger" type="submit">
+                                                <button class="btn btn-sm btn-danger" type="submit" {{ $item->is_addendum == true && !isset($item->id_spb_original) ? 'disabled' : '' }}>
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </form>

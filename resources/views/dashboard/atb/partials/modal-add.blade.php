@@ -1,6 +1,22 @@
 @push('styles_3')
     <style>
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1050;
+        }
 
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
     </style>
 @endpush
 
@@ -50,15 +66,17 @@
                             <label class="form-label required" for="id_spb">Pilih SPB</label>
                             <select class="form-control" id="id_spb" name="id_spb">
                                 <option value="">Pilih SPB</option>
-
+                                @foreach ($spbs as $spb)
+                                    <option value="{{ $spb->id }}">{{ $spb->nomor }}</option>
+                                @endforeach
                             </select>
                         </div>
 
                         <div class="col-12">
                             <label class="form-label required" for="id_detail_spb">Pilih Item</label>
-                            <select class="form-control" id="id_detail_spb" name="id_detail_spb">
-                                <option value="">Pilih Item</option>
-
+                            <select class="form-control" id="id_detail_spb" name="id_detail_spb" disabled>
+                                <option value="">Pilih SPB Terlebih Dahulu</option>
+                                <!-- Options will be populated dynamically -->
                             </select>
                         </div>
 
@@ -88,8 +106,7 @@
 
 @push('scripts_3')
     <script>
-        (() => {
-            'use strict'
+        $(document).ready(function() {
 
             // Initialize Select2 with options
             $('#id_master_data_alat').select2({
@@ -102,6 +119,14 @@
             // Initialize Select2 for #pilihan-kode1
             $('#pilihan-kode1').select2({
                 placeholder: "Pilih Kode",
+                allowClear: true,
+                dropdownParent: $('#modalForAdd'),
+                width: '100%'
+            });
+
+            // Initialize Select2 for #id_spb
+            $('#id_spb').select2({
+                placeholder: "Pilih SPB",
                 allowClear: true,
                 dropdownParent: $('#modalForAdd'),
                 width: '100%'
@@ -122,29 +147,92 @@
                 $.datepicker.setDefaults($.datepicker.regional['id']);
             });
 
+            // Initialize Select2 for #id_detail_spb
+            $('#id_detail_spb').select2({
+                placeholder: "Pilih SPB Terlebih Dahulu",
+                allowClear: true,
+                dropdownParent: $('#modalForAdd'),
+                width: '100%'
+            });
+
             // Fetch all forms we want to apply validation to
             const form = document.querySelector('#alatForm');
 
-            // Apply Bootstrap validation on form submit
-            form.addEventListener('submit', (event) => {
-                if (!form.checkValidity()) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
-                form.classList.add('was-validated');
-            });
-
-            // Apply validation on blur (out of focus) for each input in the form
-            form.querySelectorAll('input, select').forEach((input) => {
-                input.addEventListener('blur', () => {
-                    if (!input.checkValidity()) {
-                        input.classList.add('is-invalid');
-                    } else {
-                        input.classList.remove('is-invalid');
-                        input.classList.add('is-valid');
+            if (form) {
+                // Apply Bootstrap validation on form submit
+                form.addEventListener('submit', (event) => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
                     }
+                    form.classList.add('was-validated');
                 });
+
+                // Apply validation on blur (out of focus) for each input in the form
+                form.querySelectorAll('input, select').forEach((input) => {
+                    input.addEventListener('blur', () => {
+                        if (!input.checkValidity()) {
+                            input.classList.add('is-invalid');
+                        } else {
+                            input.classList.remove('is-invalid');
+                            input.classList.add('is-valid');
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+
+    <script>
+        $(document).ready(function() {
+
+            // Fetch detail items when SPB is selected
+            $('#id_spb').on('change', function() {
+                var spbId = $(this).val();
+                var detailSpbSelect = $('#id_detail_spb');
+                detailSpbSelect.prop('disabled', true); // Disable the select element
+                detailSpbSelect.empty().append('<option value="">Pilih Item</option>'); // Clear existing options
+
+                // Show loading spinner
+                const $loadingOverlay = $(
+                    '<div class="loading-overlay"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>'
+                );
+                $('#modalForAdd').append($loadingOverlay);
+
+                if (spbId) {
+                    $.ajax({
+                        url: '/atb/getlinkSpbDetailSpbs/' + spbId,
+                        type: 'GET',
+                        success: function(response) {
+                            // Remove loading spinner
+                            $loadingOverlay.remove();
+
+                            detailSpbSelect.empty();
+                            detailSpbSelect.append('<option value="">Pilih Item</option>');
+                            response.forEach(function(item) {
+                                detailSpbSelect.append('<option value="' + item.id + '">' + item.master_data_sparepart.nama + ' - ' + item.master_data_sparepart.merk + ' - ' + item.master_data_sparepart.part_number + '</option>');
+                            });
+                            detailSpbSelect.prop('disabled', false); // Enable the select element
+                            detailSpbSelect.select2({
+                                placeholder: "Pilih Item",
+                                allowClear: true,
+                                dropdownParent: $('#modalForAdd'),
+                                width: '100%'
+                            });
+                        },
+                        error: function() {
+                            // Handle error
+                            detailSpbSelect.empty().append('<option value="">Pilih Item</option>');
+                            detailSpbSelect.prop('disabled', false); // Enable the select element
+                            $loadingOverlay.remove();
+                        }
+                    });
+                } else {
+                    detailSpbSelect.empty().append('<option value="">Pilih SPB Terlebih Dahulu</option>');
+                    detailSpbSelect.prop('disabled', true); // Disable the select element
+                    $loadingOverlay.remove();
+                }
             });
-        })()
+        });
     </script>
 @endpush

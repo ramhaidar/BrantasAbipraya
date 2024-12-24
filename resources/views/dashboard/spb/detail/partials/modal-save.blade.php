@@ -83,18 +83,22 @@
                     return;
                 }
 
-                // Cek apakah semua quantity yang diisi valid
+                // Check if all quantities are valid
                 let isQuantityValid = true;
+
                 $('input[name^="qty"]').each(function() {
-                    if (!$(this).prop('disabled') && ($(this).val() <= 0 || $(this).val() > $(this)
-                            .attr('max'))) {
+                    const value = parseFloat($(this).val());
+                    const max = parseFloat($(this).attr('max'));
+
+                    if (!$(this).prop('disabled') && (value <= 0 || value > max)) {
                         isQuantityValid = false;
-                        return false; // break the loop
+                        return false; // Exit loop early
                     }
                 });
 
+
                 if (!isQuantityValid) {
-                    alert('Pastikan quantity yang diisi valid dan tidak melebihi batas maksimum');
+                    alert('Pastikan quantity yang diisi valid dan tidak melebihi batas maksimum!');
                     return;
                 }
 

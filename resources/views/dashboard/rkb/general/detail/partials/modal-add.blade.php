@@ -29,8 +29,7 @@
                     <button class="btn-close" data-bs-dismiss="modal" type="button" aria-label="Close"></button>
             </div>
             <hr class="p-0 m-0 border border-secondary-subtle border-2 opacity-50">
-            <form class="needs-validation" id="detailrkbgeneralForm" style="overflow-y: auto" novalidate method="POST"
-                action="{{ route('rkb_general.detail.store') }}">
+            <form class="needs-validation" id="detailrkbgeneralForm" style="overflow-y: auto" novalidate method="POST" action="{{ route('rkb_general.detail.store') }}">
                 @csrf
                 <div class="modal-body">
                     <div class="row g-3">
@@ -52,8 +51,7 @@
                         <div class="col-12">
                             <label class="form-label required" for="id_kategori_sparepart_sparepart">Kategori
                                 Sparepart</label>
-                            <select class="form-control" id="id_kategori_sparepart_sparepart"
-                                name="id_kategori_sparepart_sparepart" required>
+                            <select class="form-control" id="id_kategori_sparepart_sparepart" name="id_kategori_sparepart_sparepart" required>
                                 <option value="">Pilih Kategori</option>
                                 @foreach ($kategori_sparepart as $kategori)
                                     <option value="{{ $kategori->id }}">{{ $kategori->kode }}: {{ $kategori->nama }}
@@ -65,8 +63,7 @@
 
                         <div class="col-12">
                             <label class="form-label required" for="id_master_data_sparepart">Sparepart</label>
-                            <select class="form-control" id="id_master_data_sparepart" name="id_master_data_sparepart"
-                                required>
+                            <select class="form-control" id="id_master_data_sparepart" name="id_master_data_sparepart" required>
                                 <option value="">Pilih Sparepart</option>
                                 @foreach ($master_data_sparepart as $sparepart)
                                     <option value="{{ $sparepart->id }}">{{ $sparepart->nama }} -
@@ -79,8 +76,7 @@
                         <!-- New Fields for Detail RKB General -->
                         <div class="col-12">
                             <label class="form-label required" for="quantity_requested">Quantity</label>
-                            <input class="form-control" id="quantity_requested" name="quantity_requested" type="number"
-                                min="1" placeholder="Quantity" required>
+                            <input class="form-control" id="quantity_requested" name="quantity_requested" type="number" min="1" placeholder="Quantity" required>
                             <div class="invalid-feedback">Quantity diperlukan.</div>
                         </div>
 

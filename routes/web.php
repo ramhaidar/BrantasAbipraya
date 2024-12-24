@@ -88,114 +88,119 @@ Route::prefix ( 'users' )->middleware ( [ CheckRole::class . ':Admin,Pegawai,Bos
 } );
 
 // Rute ATB [ATBController]
-Route::prefix ( 'atb' )
-    ->middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )
+Route::middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )
+    ->prefix ( 'atb' )
+    ->as ( 'atb.' )
     ->group ( function ()
     {
 
         Route::get ( '/', [ ATBController::class, 'index' ] )
             ->name ( 'atb' );
 
+        Route::get ( '/getlinkSpbDetailSpbs/{id}', [ ATBController::class, 'getlinkSpbDetailSpbs' ] )
+            ->name ( 'getlinkSpbDetailSpbs' );
+
         // Hutang Unit Alat Routes
-        Route::prefix ( 'hutang_unit_alat' )->group ( function ()
+        Route::prefix ( 'hutang_unit_alat' )
+            ->group ( function ()
         {
             Route::get ( '/', [ ATBController::class, 'hutang_unit_alat' ] )
-                ->name ( 'atb_hutang_unit_alat' );
+                ->name ( 'hutang_unit_alat' );
 
             Route::get ( '/add', [ ATBController::class, 'data_baru_hutang_unit_alat' ] )
-                ->name ( 'atb.new.hutang_unit_alat' );
+                ->name ( 'new.hutang_unit_alat' );
 
             Route::get ( '/{atb}', [ ATBController::class, 'showByID' ] )
-                ->name ( 'atb.show.hutang_unit_alat_by_id' );
+                ->name ( 'show.hutang_unit_alat_by_id' );
 
             Route::post ( '/edit/actions/{id}', [ ATBController::class, 'update' ] )
-                ->name ( 'atb.post.update.hutang_unit_alat' );
+                ->name ( 'post.update.hutang_unit_alat' );
 
             Route::delete ( '/actions/{id}', [ ATBController::class, 'destroy' ] )
-                ->name ( 'atb.delete.destroy.hutang_unit_alat' );
+                ->name ( 'delete.destroy.hutang_unit_alat' );
         } );
 
         // Panjar Unit Alat Routes
         Route::prefix ( 'panjar_unit_alat' )->group ( function ()
         {
             Route::get ( '/', [ ATBController::class, 'panjar_unit_alat' ] )
-                ->name ( 'atb_panjar_unit_alat' );
+                ->name ( 'panjar_unit_alat' );
 
             Route::get ( '/add', [ ATBController::class, 'data_baru_panjar_unit_alat' ] )
-                ->name ( 'atb.new.panjar_unit_alat' );
+                ->name ( 'new.panjar_unit_alat' );
 
             Route::get ( '/{atb}', [ ATBController::class, 'showByID' ] )
-                ->name ( 'atb.show.panjar_unit_alat_by_id' );
+                ->name ( 'show.panjar_unit_alat_by_id' );
 
             Route::post ( '/edit/actions/{id}', [ ATBController::class, 'update' ] )
-                ->name ( 'atb.post.update.panjar_unit_alat' );
+                ->name ( 'post.update.panjar_unit_alat' );
 
             Route::delete ( '/actions/{id}', [ ATBController::class, 'destroy' ] )
-                ->name ( 'atb.delete.destroy.panjar_unit_alat' );
+                ->name ( 'delete.destroy.panjar_unit_alat' );
         } );
 
         // Mutasi Proyek Routes
         Route::prefix ( 'mutasi_proyek' )->group ( function ()
         {
             Route::get ( '/', [ ATBController::class, 'mutasi_proyek' ] )
-                ->name ( 'atb_mutasi_proyek' );
+                ->name ( 'mutasi_proyek' );
 
             Route::get ( '/add', [ ATBController::class, 'data_baru_mutasi_proyek' ] )
-                ->name ( 'atb.new.mutasi_proyek' );
+                ->name ( 'new.mutasi_proyek' );
 
             Route::get ( '/{atb}', [ ATBController::class, 'showByID' ] )
-                ->name ( 'atb.show.mutasi_proyek_by_id' );
+                ->name ( 'show.mutasi_proyek_by_id' );
 
             Route::post ( '/edit/actions/{id}', [ ATBController::class, 'update' ] )
-                ->name ( 'atb.post.update.mutasi_proyek' );
+                ->name ( 'post.update.mutasi_proyek' );
 
             Route::delete ( '/actions/{id}', [ ATBController::class, 'destroy' ] )
-                ->name ( 'atb.delete.destroy.mutasi_proyek' );
+                ->name ( 'delete.destroy.mutasi_proyek' );
         } );
 
         // Panjar Proyek Routes
         Route::prefix ( 'panjar_proyek' )->group ( function ()
         {
             Route::get ( '/', [ ATBController::class, 'panjar_proyek' ] )
-                ->name ( 'atb_panjar_proyek' );
+                ->name ( 'panjar_proyek' );
 
             Route::get ( '/add', [ ATBController::class, 'data_baru_panjar_proyek' ] )
-                ->name ( 'atb.new.panjar_proyek' );
+                ->name ( 'new.panjar_proyek' );
 
             Route::get ( '/{atb}', [ ATBController::class, 'showByID' ] )
-                ->name ( 'atb.show.panjar_proyek_by_id' );
+                ->name ( 'show.panjar_proyek_by_id' );
 
             Route::post ( '/edit/actions/{id}', [ ATBController::class, 'update' ] )
-                ->name ( 'atb.post.update.panjar_proyek' );
+                ->name ( 'post.update.panjar_proyek' );
 
             Route::delete ( '/actions/{id}', [ ATBController::class, 'destroy' ] )
-                ->name ( 'atb.delete.destroy.panjar_proyek' );
+                ->name ( 'delete.destroy.panjar_proyek' );
         } );
 
         // General ATB Routes
         Route::get ( '/add', [ ATBController::class, 'data_baru_atb' ] )
-            ->name ( 'atb.new' );
+            ->name ( 'new' );
 
         Route::post ( '/store', [ ATBController::class, 'store' ] )
-            ->name ( 'atb.post.store' );
+            ->name ( 'post.store' );
 
         Route::post ( '/actions/{id}', [ ATBController::class, 'update' ] )
-            ->name ( 'atb.post.update' );
+            ->name ( 'post.update' );
 
         Route::delete ( '/actions/{id}', [ ATBController::class, 'destroy' ] )
-            ->name ( 'atb.delete.destroy' );
+            ->name ( 'delete.destroy' );
 
         Route::get ( '/delatb/actions/{id}', [ ATBController::class, 'destroy' ] )
-            ->name ( 'atb.del.test' );
+            ->name ( 'del.test' );
 
         Route::get ( '/export', [ ATBController::class, 'export' ] )
-            ->name ( 'atb.export' );
+            ->name ( 'export' );
 
         Route::post ( '/import', [ ATBController::class, 'import' ] )
-            ->name ( 'atb.import.post' );
+            ->name ( 'import.post' );
 
         Route::get ( '/import', [ ATBController::class, 'showImportForm' ] )
-            ->name ( 'atb.import' );
+            ->name ( 'import' );
     } );
 
 // Rute APB [APBController]

@@ -18,12 +18,33 @@ return new class extends Migration
                 ->nullable ()
                 ->constrained ( 'master_data_supplier' )
                 ->nullOnDelete ();
+            $table->foreignId ( 'id_spb_original' )
+                ->nullable ()
+                ->constrained ( 'spb' )
+                ->nullOnDelete ();
             $table->timestamps ();
         } );
+
+        // Add cascading deletes for related tables
+        // Schema::table('link_spb_detail_spb', function (Blueprint $table) {
+        //     $table->foreignId('id_spb')->constrained('spb')->cascadeOnDelete();
+        // });
+
+        // Schema::table('detail_spb', function (Blueprint $table) {
+        //     $table->foreignId('id_spb')->constrained('spb')->cascadeOnDelete();
+        // });
     }
 
     public function down () : void
     {
+        // Schema::table('link_spb_detail_spb', function (Blueprint $table) {
+        //     $table->dropForeign(['id_spb']);
+        // });
+
+        // Schema::table('detail_spb', function (Blueprint $table) {
+        //     $table->dropForeign(['id_spb']);
+        // });
+
         Schema::dropIfExists ( 'spb' );
     }
 };

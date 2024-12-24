@@ -43,7 +43,7 @@ class RiwayatSPBController extends Controller
         foreach ( $spb->linkSpbDetailSpb as $item )
         {
             $totalHarga += $item->detailSpb->harga;
-            $totalJumlahHarga += $item->detailSpb->quantity * $item->detailSpb->harga;
+            $totalJumlahHarga += $item->detailSpb->quantity_po_po * $item->detailSpb->harga;
         }
 
         $ppn        = $totalJumlahHarga * 0.11;

@@ -18,7 +18,7 @@
 
     foreach ($spb->linkSpbDetailSpb as $item) {
         $totalHarga += $item->detailSpb->harga;
-        $totalJumlahHarga += $item->detailSpb->quantity * $item->detailSpb->harga;
+        $totalJumlahHarga += $item->detailSpb->quantity_po * $item->detailSpb->harga;
     }
 
     $ppn = $totalJumlahHarga * 0.11;
@@ -83,11 +83,11 @@
                         <td class="text-center">{{ $item->detailSpb->masterDataSparepart->nama }}</td>
                         <td class="text-center">{{ $item->detailSpb->masterDataSparepart->merk }}</td>
                         <td class="text-center">{{ $item->detailSpb->masterDataSparepart->part_number }}</td>
-                        <td class="text-center">{{ $item->detailSpb->quantity }}</td>
+                        <td class="text-center">{{ $item->detailSpb->quantity_po }}</td>
                         <td class="text-center">{{ $item->detailSpb->satuan }}</td>
                         <td class="text-center">Rp {{ number_format($item->detailSpb->harga, 0, ',', '.') }}</td>
                         <td class="text-center">Rp
-                            {{ number_format($item->detailSpb->quantity * $item->detailSpb->harga, 0, ',', '.') }}</td>
+                            {{ number_format($item->detailSpb->quantity_po * $item->detailSpb->harga, 0, ',', '.') }}</td>
                     </tr>
                 @empty
                     <tr>

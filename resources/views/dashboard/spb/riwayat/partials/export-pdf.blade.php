@@ -80,10 +80,10 @@
                     <td style="text-align: left">{{ $item->detailSpb->masterDataSparepart->nama }}</td>
                     <td>{{ $item->detailSpb->masterDataSparepart->merk ?? '-' }}</td>
                     <td>{{ $item->detailSpb->masterDataSparepart->part_number }}</td>
-                    <td>{{ $item->detailSpb->quantity }}</td>
+                    <td>{{ $item->detailSpb->quantity_po }}</td>
                     <td>{{ $item->detailSpb->satuan }}</td>
                     <td>Rp {{ number_format($item->detailSpb->harga, 0, ',', '.') }}</td>
-                    <td>Rp {{ number_format($item->detailSpb->quantity * $item->detailSpb->harga, 0, ',', '.') }}</td>
+                    <td>Rp {{ number_format($item->detailSpb->quantity_po * $item->detailSpb->harga, 0, ',', '.') }}</td>
                 </tr>
             @endforeach
         </tbody>

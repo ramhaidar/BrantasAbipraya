@@ -180,7 +180,7 @@ class DetailSPBController extends Controller
 
                 // Create DetailSPB with cleaned price and satuan
                 $detailSPB = DetailSPB::create ( [ 
-                    'quantity'                 => $qty,
+                    'quantity_po'              => $qty,
                     'harga'                    => (int) $harga,
                     'satuan'                   => $satuan,
                     'id_master_data_sparepart' => $sparepartId,

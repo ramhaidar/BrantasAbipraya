@@ -16,7 +16,8 @@ class DetailSPB extends Model
     protected $table = 'detail_spb';
 
     protected $fillable = [ 
-        'quantity',
+        'quantity_po',
+        'quantity_diterima',
         'harga',
         'satuan',
         'id_master_data_sparepart',
@@ -26,7 +27,8 @@ class DetailSPB extends Model
 
     protected $casts = [ 
         'id'                       => 'integer',
-        'quantity'                 => 'integer',
+        'quantity_po'              => 'integer',
+        'quantity_diterima'        => 'integer',
         'harga'                    => 'integer',
         'satuan'                   => 'string',
         'id_master_data_sparepart' => 'integer',

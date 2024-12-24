@@ -102,10 +102,10 @@
                                 <td class="text-center">{{ $linkSpbDetailSpb->detailSPb->masterDataSparepart->nama }}</td>
                                 <td class="text-center">{{ $linkSpbDetailSpb->detailSPb->masterDataSparepart->merk }}</td>
                                 <td class="text-center">{{ $riwayatSpb->masterDataSupplier->nama }}</td>
-                                <td class="text-center">{{ $linkSpbDetailSpb->detailSPb->quantity }}</td>
+                                <td class="text-center">{{ $linkSpbDetailSpb->detailSpb->quantity_po }}</td>
                                 <td class="text-center">{{ $linkSpbDetailSpb->detailSPb->satuan }}</td>
                                 <td class="text-center">Rp {{ number_format($linkSpbDetailSpb->detailSPb->harga, 0, ',', '.') }}</td>
-                                <td class="text-center">Rp {{ number_format($linkSpbDetailSpb->detailSPb->harga * $linkSpbDetailSpb->detailSPb->quantity, 0, ',', '.') }}</td>
+                                <td class="text-center">Rp {{ number_format($linkSpbDetailSpb->detailSPb->harga * $linkSpbDetailSpb->detailSpb->quantity_po, 0, ',', '.') }}</td>
                             </tr>
                         @endforeach
                     @endforeach

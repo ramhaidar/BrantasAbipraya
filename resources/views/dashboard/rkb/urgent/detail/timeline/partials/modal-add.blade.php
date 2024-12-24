@@ -24,13 +24,13 @@
 
                         <div class="col-md-6">
                             <label class="form-label required" for="tanggal_awal_rencana">Tanggal Awal Rencana</label>
-                            <input class="form-control datepicker" id="tanggal_awal_rencana" name="tanggal_awal_rencana" type="text" required>
+                            <input class="form-control datepicker" id="tanggal_awal_rencana" name="tanggal_awal_rencana" type="text" autocomplete="off" required>
                             <div class="invalid-feedback">Tanggal Awal Rencana diperlukan.</div>
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label required" for="tanggal_akhir_rencana">Tanggal Akhir Rencana</label>
-                            <input class="form-control datepicker" id="tanggal_akhir_rencana" name="tanggal_akhir_rencana" type="text" required>
+                            <input class="form-control datepicker" id="tanggal_akhir_rencana" name="tanggal_akhir_rencana" type="text" autocomplete="off" required>
                             <div class="invalid-feedback">Tanggal Akhir Rencana diperlukan.</div>
                         </div>
                     </div>

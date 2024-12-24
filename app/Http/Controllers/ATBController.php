@@ -1,25 +1,11 @@
 <?php
 namespace App\Http\Controllers;
 
-use Carbon\Carbon;
-use App\Models\ATB;
 use App\Models\RKB;
 use App\Models\SPB;
-use App\Models\User;
-use App\Models\Saldo;
 use App\Models\Proyek;
-use App\Models\Komponen;
-use App\Models\DetailSPB;
-use App\Exports\ATBExport;
-use App\Imports\ATBImport;
-use App\Models\FirstGroup;
-use App\Models\MasterData;
-use App\Models\SecondGroup;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use Maatwebsite\Excel\Facades\Excel;
-use Illuminate\Support\Facades\Storage;
 
 class ATBController extends Controller
 {
@@ -59,6 +45,12 @@ class ATBController extends Controller
         );
     }
 
+    protected function console ( $message )
+    {
+        $output = new \Symfony\Component\Console\Output\ConsoleOutput();
+        $output->writeln ( $message );
+    }
+
     private function showAtbPage ( $tipe, $pageTitle, $id_proyek )
     {
         $proyek = Proyek::with ( "users" )->find ( $id_proyek );
@@ -77,32 +69,25 @@ class ATBController extends Controller
             $spbs = $spbs->merge ( $rkb->spbs );
         }
 
-        $spbs = $spbs->unique ( 'id' );
+        $filteredSpbs = collect ();
 
-        // Group SPBs by their base number (without the dash and following digits)
-        $groupedSpbs = $spbs->groupBy ( function ($spb)
+        foreach ( $spbs as $index => $spb )
         {
-            return preg_replace ( '/-\d+$/', '', $spb->nomor_spb );
-        } );
-
-        // Get the SPB with the largest number for each group
-        $filteredSpbs = $groupedSpbs->map ( function ($group)
-        {
-            return $group->sortByDesc ( function ($spb)
+            if ( $spb->is_addendum == false && ! isset ( $spb->id_spb_original ) )
             {
-                return intval ( preg_replace ( '/^.*-/', '', $spb->nomor_spb ) );
-            } )->first ();
-        } );
+                $filteredSpbs->push ( $spb );
+            }
 
-        // Merge the filtered SPBs back into the original collection
-        $spbs = $spbs->merge ( $filteredSpbs )->unique ( 'id' );
-
-        dd ( $groupedSpbs );
+            if ( $spb->is_addendum == true && isset ( $spb->id_spb_original ) )
+            {
+                $filteredSpbs->push ( $spb );
+            }
+        }
 
         return view ( "dashboard.atb.atb", [ 
             "proyek"     => $proyek,
             "proyeks"    => $proyeks,
-            "spbs"       => $spbs,
+            "spbs"       => $filteredSpbs,
             "headerPage" => $proyek->nama_proyek,
             "page"       => $pageTitle,
         ] );
@@ -119,6 +104,8 @@ class ATBController extends Controller
             $DetailSPB[] = $item->detailSpb;
         }
 
-        return response ()->json ( $DetailSPB );
+        $html = view('dashboard.atb.partials.spb-details-table', ['spbDetails' => $DetailSPB])->render();
+
+        return response()->json(['html' => $html]);
     }
 }

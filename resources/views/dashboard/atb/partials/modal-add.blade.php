@@ -1,7 +1,7 @@
 @push('styles_3')
     <style>
         .loading-overlay {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
@@ -10,7 +10,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 1050;
+            z-index: 9999;
         }
 
         .spinner-border {
@@ -21,7 +21,7 @@
 @endpush
 
 <div class="fade modal" id="modalForAdd" aria-hidden="true" aria-labelledby="staticBackdropLabel" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg modal-dialog-centered">
         <div class="modal-content rounded-4">
             <div class="pt-3 px-3 m-0 d-flex w-100 justify-content-between">
                 <h5 class="modal-title w-100 pb-2" id="modalForAddLabel">Tambah Data ATB</h1>
@@ -29,7 +29,7 @@
             </div>
             <hr class="p-0 m-0 border border-secondary-subtle border-2 opacity-50">
 
-            <form class="w-100 align-items-center flex-column gap-0" id="addDataForm" method="POST" action="{{ route('atb.post.store') }}" enctype="multipart/form-data">
+            <form class="w-100 align-items-center flex-column gap-0 overflow-auto" id="addDataForm" method="POST" action="{{ route('atb.post.store') }}" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body">
                     <div class="row g-3">
@@ -46,19 +46,11 @@
                             </div>
                         </div>
 
-                        {{-- @if ($page == 'Data ATB Mutasi Proyek')
-                            <div class="">
-                                <label class="form-label" for="asal_proyek">Asal Proyek</label>
-                                <input class="form-control" id="asal_proyek_display" value="{{ $proyek->nama_proyek }}" readonly>
-                                <input id="asal_proyek" name="asal_proyek" type="hidden" value="{{ $proyek->id }}">
-                            </div>
-                        @endif --}}
-
                         <input class="form-control" id="id_proyek" name="id_proyek" value="{{ $proyek->id }}" hidden required>
 
                         <div class="col-12">
                             <label class="form-label required" for="tanggal">Tanggal Masuk Sparepart</label>
-                            <input class="form-control datepicker" id="tanggal" name="tanggal" type="text" placeholder="Tanggal Masuk Sparepart" required>
+                            <input class="form-control datepicker" id="tanggal" name="tanggal" type="text" value="{{ \Carbon\Carbon::today()->format('Y-m-d') }}" autocomplete="off" placeholder="Tanggal Masuk Sparepart" required>
                             <div class="invalid-feedback">Tanggal Masuk Sparepart diperlukan.</div>
                         </div>
 
@@ -73,32 +65,24 @@
                         </div>
 
                         <div class="col-12">
-                            <label class="form-label required" for="id_detail_spb">Pilih Item</label>
-                            <select class="form-control" id="id_detail_spb" name="id_detail_spb" disabled>
-                                <option value="">Pilih SPB Terlebih Dahulu</option>
-                                <!-- Options will be populated dynamically -->
-                            </select>
+                            <label class="form-label required" for="dokumentasi">Upload Surat Tanda Terima</label>
+                            <input class="form-control" id="dokumentasi" name="dokumentasi" type="file" required accept="image/jpeg,image/jpg,image/png,image.heic,image.heif">
+                            <div class="invalid-feedback">Surat Tanda Terima diperlukan.</div>
                         </div>
 
-                        <div class="col-12">
-                            <label class="form-label required" for="quantity">Quantity</label>
-                            <input class="form-control" id="quantity" name="quantity" type="number" value="1" min="1" placeholder="Quantity" required>
-                            <div class="invalid-feedback">Quantity diperlukan.</div>
+                        <!-- Include the partials table for selected SPB details -->
+                        <div class="col-12" id="tableContainer">
+                            <!-- Table will be populated dynamically -->
                         </div>
 
-                        <div class="col-12">
-                            <label class="form-label required" for="dokumentasi">Upload Dokumentasi</label>
-                            <input class="form-control" id="dokumentasi" name="dokumentasi" type="file" required accept="image/jpeg,image/jpg,image/png,image/heic,image/heif">
-                            <div class="invalid-feedback">Dokumentasi diperlukan.</div>
-                        </div>
-
-                        <div class="modal-footer d-flex w-100 justify-content-end">
-                            <button class="btn btn-secondary me-2 w-25" type="reset">Reset</button>
-                            <button class="btn btn-success w-25" id="add-sparepart" type="submit">Tambah Data</button>
-                        </div>
                     </div>
                 </div>
             </form>
+
+            <div class="modal-footer d-flex w-100 justify-content-end">
+                <button class="btn btn-secondary me-2 w-25" id="resetButton" type="button">Reset</button>
+                <button class="btn btn-success w-25" id="add-sparepart" type="submit">Tambah Data</button>
+            </div>
 
         </div>
     </div>
@@ -147,14 +131,6 @@
                 $.datepicker.setDefaults($.datepicker.regional['id']);
             });
 
-            // Initialize Select2 for #id_detail_spb
-            $('#id_detail_spb').select2({
-                placeholder: "Pilih SPB Terlebih Dahulu",
-                allowClear: true,
-                dropdownParent: $('#modalForAdd'),
-                width: '100%'
-            });
-
             // Fetch all forms we want to apply validation to
             const form = document.querySelector('#alatForm');
 
@@ -180,57 +156,48 @@
                     });
                 });
             }
-        });
-    </script>
 
-    <script>
-        $(document).ready(function() {
-
-            // Fetch detail items when SPB is selected
+            // Fetch data when SPB is selected
             $('#id_spb').on('change', function() {
-                var spbId = $(this).val();
-                var detailSpbSelect = $('#id_detail_spb');
-                detailSpbSelect.prop('disabled', true); // Disable the select element
-                detailSpbSelect.empty().append('<option value="">Pilih Item</option>'); // Clear existing options
+                const selectedValue = $(this).val();
+                const tableContainer = $('#tableContainer');
+                const loadingOverlay = $('<div class="loading-overlay"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
 
-                // Show loading spinner
-                const $loadingOverlay = $(
-                    '<div class="loading-overlay"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>'
-                );
-                $('#modalForAdd').append($loadingOverlay);
-
-                if (spbId) {
+                if (selectedValue) {
+                    $('body').append(loadingOverlay);
                     $.ajax({
-                        url: '/atb/getlinkSpbDetailSpbs/' + spbId,
+                        url: `/atb/getlinkSpbDetailSpbs/${selectedValue}`,
                         type: 'GET',
                         success: function(response) {
-                            // Remove loading spinner
-                            $loadingOverlay.remove();
-
-                            detailSpbSelect.empty();
-                            detailSpbSelect.append('<option value="">Pilih Item</option>');
-                            response.forEach(function(item) {
-                                detailSpbSelect.append('<option value="' + item.id + '">' + item.master_data_sparepart.nama + ' - ' + item.master_data_sparepart.merk + ' - ' + item.master_data_sparepart.part_number + '</option>');
-                            });
-                            detailSpbSelect.prop('disabled', false); // Enable the select element
-                            detailSpbSelect.select2({
-                                placeholder: "Pilih Item",
-                                allowClear: true,
-                                dropdownParent: $('#modalForAdd'),
-                                width: '100%'
-                            });
+                            tableContainer.html(response.html);
                         },
-                        error: function() {
-                            // Handle error
-                            detailSpbSelect.empty().append('<option value="">Pilih Item</option>');
-                            detailSpbSelect.prop('disabled', false); // Enable the select element
-                            $loadingOverlay.remove();
+                        error: function(error) {
+                            console.error('Error fetching data:', error);
+                            tableContainer.html('<p>Failed to load data. Please try again.</p>');
+                        },
+                        complete: function() {
+                            loadingOverlay.remove();
                         }
                     });
                 } else {
-                    detailSpbSelect.empty().append('<option value="">Pilih SPB Terlebih Dahulu</option>');
-                    detailSpbSelect.prop('disabled', true); // Disable the select element
-                    $loadingOverlay.remove();
+                    tableContainer.empty();
+                }
+            });
+
+            // Reset form and clear table on reset button click
+            $('#resetButton').on('click', function() {
+                $('#addDataForm')[0].reset();
+                $('#tableContainer').empty();
+                $('#id_spb').val(null).trigger('change');
+            });
+
+            // Alert and set value to max if quantity_diterima exceeds max
+            $(document).on('blur', '.quantity-input', function() {
+                const max = $(this).attr('max');
+                const value = $(this).val();
+                if (parseInt(value) > parseInt(max)) {
+                    alert('Quantity diterima tidak boleh melebihi Quantity PO.');
+                    $(this).val(max);
                 }
             });
         });

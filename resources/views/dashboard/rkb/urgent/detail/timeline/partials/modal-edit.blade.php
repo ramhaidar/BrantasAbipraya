@@ -43,25 +43,25 @@
 
                         <div class="col-md-6">
                             <label class="form-label required" for="tanggal_awal_rencana_edit">Tanggal Awal Rencana</label>
-                            <input class="form-control datepicker" id="tanggal_awal_rencana_edit" name="tanggal_awal_rencana" type="text" required>
+                            <input class="form-control datepicker" id="tanggal_awal_rencana_edit" name="tanggal_awal_rencana" type="text" autocomplete="off" required>
                             <div class="invalid-feedback">Tanggal Awal Rencana diperlukan.</div>
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label required" for="tanggal_akhir_rencana_edit">Tanggal Akhir Rencana</label>
-                            <input class="form-control datepicker" id="tanggal_akhir_rencana_edit" name="tanggal_akhir_rencana" type="text" required>
+                            <input class="form-control datepicker" id="tanggal_akhir_rencana_edit" name="tanggal_akhir_rencana" type="text" autocomplete="off" required>
                             <div class="invalid-feedback">Tanggal Akhir Rencana diperlukan.</div>
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label" for="tanggal_awal_actual_edit">Tanggal Awal Actual</label>
-                            <input class="form-control datepicker" id="tanggal_awal_actual_edit" name="tanggal_awal_actual" type="text">
+                            <input class="form-control datepicker" id="tanggal_awal_actual_edit" name="tanggal_awal_actual" type="text" autocomplete="off">
                             <div class="invalid-feedback">Tanggal Awal Actual diperlukan.</div>
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label" for="tanggal_akhir_actual_edit">Tanggal Akhir Actual</label>
-                            <input class="form-control datepicker" id="tanggal_akhir_actual_edit" name="tanggal_akhir_actual" type="text">
+                            <input class="form-control datepicker" id="tanggal_akhir_actual_edit" name="tanggal_akhir_actual" type="text" autocomplete="off">
                             <div class="invalid-feedback">Tanggal Akhir Actual diperlukan.</div>
                         </div>
 

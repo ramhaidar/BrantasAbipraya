@@ -122,12 +122,12 @@ class SPBController extends Controller
             {
                 if ( isset ( $linkSpbDetailSpb->detailSpb->linkRkbDetail->detailRkbGeneral ) )
                 {
-                    $linkSpbDetailSpb->detailSpb->linkRkbDetail->detailRkbGeneral->increment ( "quantity_remainder", $linkSpbDetailSpb->detailSpb->quantity );
+                    $linkSpbDetailSpb->detailSpb->linkRkbDetail->detailRkbGeneral->increment ( "quantity_remainder", $linkSpbDetailSpb->detailSpb->quantity_po );
                 }
 
                 if ( isset ( $linkSpbDetailSpb->detailSpb->linkRkbDetail->detailRkbUrgent ) )
                 {
-                    $linkSpbDetailSpb->detailSpb->linkRkbDetail->detailRkbUrgent->increment ( "quantity_remainder", $linkSpbDetailSpb->detailSpb->quantity );
+                    $linkSpbDetailSpb->detailSpb->linkRkbDetail->detailRkbUrgent->increment ( "quantity_remainder", $linkSpbDetailSpb->detailSpb->quantity_po );
                 }
 
                 $linkSpbDetailSpb->detailSpb->delete ();
@@ -171,12 +171,12 @@ class SPBController extends Controller
             {
                 if ( isset ( $linkSpbDetailSpb->detailSpb->linkRkbDetail->detailRkbGeneral ) )
                 {
-                    $linkSpbDetailSpb->detailSpb->linkRkbDetail->detailRkbGeneral->increment ( "quantity_remainder", $linkSpbDetailSpb->detailSpb->quantity );
+                    $linkSpbDetailSpb->detailSpb->linkRkbDetail->detailRkbGeneral->increment ( "quantity_remainder", $linkSpbDetailSpb->detailSpb->quantity_po );
                 }
 
                 if ( isset ( $linkSpbDetailSpb->detailSpb->linkRkbDetail->detailRkbUrgent ) )
                 {
-                    $linkSpbDetailSpb->detailSpb->linkRkbDetail->detailRkbUrgent->increment ( "quantity_remainder", $linkSpbDetailSpb->detailSpb->quantity );
+                    $linkSpbDetailSpb->detailSpb->linkRkbDetail->detailRkbUrgent->increment ( "quantity_remainder", $linkSpbDetailSpb->detailSpb->quantity_po );
                 }
             }
 

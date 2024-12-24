@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create ( 'detail_spb', function (Blueprint $table)
         {
             $table->id ();
-            $table->bigInteger ( 'quantity' );
+            $table->bigInteger ( 'quantity_po' );
+            $table->bigInteger ( 'quantity_diterima' )->default ( 0 );
             $table->string ( 'satuan' );
             $table->bigInteger ( 'harga' );
             $table->foreignId ( 'id_master_data_sparepart' )

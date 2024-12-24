@@ -19,7 +19,10 @@ class DetailRKBGeneralController extends Controller
     {
         $rkb                   = RKB::with ( [ 'proyek' ] )->find ( $id );
         $proyeks               = Proyek::orderByDesc ( 'updated_at' )->get ();
-        $master_data_alat      = MasterDataAlat::all ();
+        $master_data_alat      = MasterDataAlat::whereHas ( 'alatProyek', function ($query) use ($rkb)
+        {
+            $query->where ( 'id_proyek', $rkb->id_proyek );
+        } )->get ();
         $master_data_sparepart = MasterDataSparepart::all ();
         $kategori_sparepart    = KategoriSparepart::all ();
 
@@ -29,7 +32,6 @@ class DetailRKBGeneralController extends Controller
             'master_data_alat'      => $master_data_alat,
             'master_data_sparepart' => $master_data_sparepart,
             'kategori_sparepart'    => $kategori_sparepart,
-
             'headerPage'            => "RKB General",
             'page'                  => 'Detail RKB General',
         ] );

@@ -69,6 +69,11 @@
                             <div class="invalid-feedback">Surat Tanda Terima diperlukan.</div>
                         </div>
 
+                        <div class="col-12 mt-3" id="pdfPreviewContainer" style="display: none;">
+                            <label class="form-label">Pratinjau PDF:</label>
+                            <div id="pdfPreview" style="border: 1px solid #ccc; width: 100%; height: 500px;"></div>
+                        </div>
+
                         <!-- Include the partials table for selected SPB details -->
                         <div class="col-12" id="tableContainer">
                             <!-- Table will be populated dynamically -->
@@ -88,9 +93,10 @@
 </div>
 
 @push('scripts_3')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.0/pdfobject.min.js" integrity="sha512-Nr6NV16pWOefJbWJiT8SrmZwOomToo/84CNd0MN6DxhP5yk8UAoPUjNuBj9KyRYVpESUb14RTef7FKxLVA4WGQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
     <script>
         $(document).ready(function() {
-
             // Initialize Select2 with options
             $('#id_master_data_alat').select2({
                 placeholder: "Pilih",
@@ -116,22 +122,27 @@
             }).on("select2:select select2:unselect", function() {
                 validateSelect2();
             });
+        });
+    </script>
 
+    <script>
+        $(document).ready(function() {
             // Initialize datepicker for #tanggal
-            $(document).ready(function() {
-                var dateFormat = 'yy-mm-dd';
-                var options = {
-                    dateFormat: dateFormat,
-                    changeMonth: true,
-                    changeYear: true,
-                    regional: 'id'
-                };
+            var dateFormat = 'yy-mm-dd';
+            var options = {
+                dateFormat: dateFormat,
+                changeMonth: true,
+                changeYear: true,
+                regional: 'id'
+            };
 
-                $('#tanggal').datepicker(options);
+            $('#tanggal').datepicker(options);
+            $.datepicker.setDefaults($.datepicker.regional['id']);
+        });
+    </script>
 
-                $.datepicker.setDefaults($.datepicker.regional['id']);
-            });
-
+    <script>
+        $(document).ready(function() {
             // Fetch all forms we want to apply validation to
             const form = document.querySelector('#alatForm');
 
@@ -157,7 +168,11 @@
                     });
                 });
             }
+        });
+    </script>
 
+    <script>
+        $(document).ready(function() {
             // Fetch data when SPB is selected
             $('#id_spb').on('change', function() {
                 const selectedValue = $(this).val();
@@ -184,31 +199,39 @@
                     tableContainer.empty();
                 }
             });
+        });
+    </script>
 
+    <script>
+        $(document).ready(function() {
             // Reset form and clear table on reset button click
             $('#resetButton').on('click', function() {
                 $('#addDataForm')[0].reset();
                 $('#tableContainer').empty();
                 $('#id_spb').val(null).trigger('change');
             });
+        });
+    </script>
 
-            function validateSelect2() {
-                let isValid = true;
+    <script>
+        function validateSelect2() {
+            let isValid = true;
 
-                // Validate SPB
-                const spb = $('#id_spb');
-                if (spb.val() === "" || spb.val() === null) {
-                    spb.next('.select2').find('.select2-selection').addClass('is-invalid');
-                    spb.closest('.form-group').find('.invalid-feedback').show();
-                    isValid = false;
-                } else {
-                    spb.next('.select2').find('.select2-selection').removeClass('is-invalid');
-                    spb.closest('.form-group').find('.invalid-feedback').hide();
-                }
-
-                return isValid;
+            // Validate SPB
+            const spb = $('#id_spb');
+            if (spb.val() === "" || spb.val() === null) {
+                spb.next('.select2').find('.select2-selection').addClass('is-invalid');
+                spb.closest('.form-group').find('.invalid-feedback').show();
+                isValid = false;
+            } else {
+                spb.next('.select2').find('.select2-selection').removeClass('is-invalid');
+                spb.closest('.form-group').find('.invalid-feedback').hide();
             }
 
+            return isValid;
+        }
+
+        $(document).ready(function() {
             $('#submitButton').on('click', function() {
                 if ($('#addDataForm')[0].checkValidity() && validateSelect2()) {
                     $('#addDataForm').submit();
@@ -225,7 +248,11 @@
                     $(this).next('.select2-container').find('.select2-selection').removeClass('is-valid').addClass('is-invalid');
                 }
             });
+        });
+    </script>
 
+    <script>
+        $(document).ready(function() {
             // Alert and set value to max if quantity_diterima exceeds max
             $(document).on('blur', '.quantity-input', function() {
                 const max = $(this).attr('max');
@@ -233,6 +260,63 @@
                 if (parseInt(value) > parseInt(max)) {
                     alert('Quantity diterima tidak boleh melebihi Quantity PO.');
                     $(this).val(max);
+                }
+            });
+        });
+    </script>
+
+    <script>
+        $(document).ready(function() {
+            const suratTandaTerimaInput = $('#surat_tanda_terima');
+            const pdfPreviewContainer = $('#pdfPreviewContainer');
+            const pdfPreview = $('#pdfPreview');
+            const resetButton = $('#resetButton');
+
+            suratTandaTerimaInput.on('change', function() {
+                const file = this.files[0];
+
+                if (file && file.type === 'application/pdf') {
+                    const previousUrl = pdfPreview.data('fileUrl');
+                    if (previousUrl) {
+                        URL.revokeObjectURL(previousUrl);
+                    }
+
+                    const fileURL = URL.createObjectURL(file);
+                    pdfPreview.data('fileUrl', fileURL);
+
+                    const options = {
+                        width: "100%",
+                        height: "500px"
+                    };
+                    const embedded = PDFObject.embed(fileURL, '#pdfPreview', options);
+
+                    if (embedded) {
+                        pdfPreviewContainer.show();
+                    } else {
+                        console.error('PDF embedding failed.');
+                        alert('Gagal menampilkan pratinjau PDF. Silakan coba lagi.');
+                        pdfPreviewContainer.hide();
+                    }
+                } else {
+                    alert('Silakan unggah file PDF yang valid.');
+                    suratTandaTerimaInput.val('');
+                    pdfPreviewContainer.hide();
+                }
+            });
+
+            resetButton.on('click', function() {
+                suratTandaTerimaInput.val('');
+                pdfPreviewContainer.hide();
+                const previousUrl = pdfPreview.data('fileUrl');
+                if (previousUrl) {
+                    URL.revokeObjectURL(previousUrl);
+                    pdfPreview.removeData('fileUrl');
+                }
+            });
+
+            suratTandaTerimaInput.on('input', function() {
+                if (!this.value) {
+                    pdfPreviewContainer.hide();
                 }
             });
         });

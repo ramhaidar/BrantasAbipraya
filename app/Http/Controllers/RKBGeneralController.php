@@ -10,6 +10,7 @@ use App\Models\MasterDataAlat;
 use App\Models\KategoriSparepart;
 use App\Models\MasterDataSparepart;
 use App\Http\Controllers\Controller;
+use Illuminate\Validation\Rule;
 
 class RKBGeneralController extends Controller
 {
@@ -121,7 +122,7 @@ class RKBGeneralController extends Controller
 
         // Validate the request
         $validatedData = $request->validate ( [ 
-            'nomor'     => [ 'sometimes', 'required', 'string', 'max:255', 'unique:rkb,nomor' ],
+            'nomor'     => [ 'sometimes', 'required', 'string', 'max:255', Rule::unique ( 'rkb', 'nomor' )->ignore ( $rkb->id ) ],
             'periode'   => [ 'sometimes', 'required', 'date' ],
             'id_proyek' => [ 'sometimes', 'required', 'integer', 'exists:proyek,id' ],
         ] );

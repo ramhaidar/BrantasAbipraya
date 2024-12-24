@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use App\Models\RKB;
 use App\Models\Proyek;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use App\Http\Controllers\Controller;
 
 class RKBUrgentController extends Controller
@@ -118,7 +119,7 @@ class RKBUrgentController extends Controller
 
         // Validate the request
         $validatedData = $request->validate ( [ 
-            'nomor'     => [ 'sometimes', 'required', 'string', 'max:255', 'unique:rkb,nomor' ],
+            'nomor'     => [ 'sometimes', 'required', 'string', 'max:255', Rule::unique ( 'rkb', 'nomor' )->ignore ( $rkb->id ) ],
             'periode'   => [ 'sometimes', 'required', 'date' ],
             'id_proyek' => [ 'sometimes', 'required', 'integer', 'exists:proyek,id' ],
         ] );

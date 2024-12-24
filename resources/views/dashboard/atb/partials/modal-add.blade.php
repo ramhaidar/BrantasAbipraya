@@ -28,12 +28,10 @@
                     <button class="btn-close" data-bs-dismiss="modal" type="button" aria-label="Close"></button>
             </div>
             <hr class="p-0 m-0 border border-secondary-subtle border-2 opacity-50">
-
             <form class="w-100 align-items-center flex-column gap-0 overflow-auto" id="addDataForm" method="POST" action="{{ route('atb.post.store') }}" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body">
                     <div class="row g-3">
-
                         <div class="p-0 m-0" hidden>
                             <label class="form-label" for="tipe">Tipe ATB</label>
                             <div class="input-group">
@@ -56,17 +54,18 @@
 
                         <div class="col-12">
                             <label class="form-label required" for="id_spb">Pilih SPB</label>
-                            <select class="form-control" id="id_spb" name="id_spb">
+                            <select class="form-control" id="id_spb" name="id_spb" required>
                                 <option value="">Pilih SPB</option>
                                 @foreach ($spbs as $spb)
                                     <option value="{{ $spb->id }}">{{ $spb->nomor }}</option>
                                 @endforeach
                             </select>
+                            <div class="invalid-feedback">SPB diperlukan.</div>
                         </div>
 
                         <div class="col-12">
-                            <label class="form-label required" for="dokumentasi">Upload Surat Tanda Terima</label>
-                            <input class="form-control" id="dokumentasi" name="dokumentasi" type="file" required accept="image/jpeg,image/jpg,image/png,image.heic,image.heif">
+                            <label class="form-label required" for="surat_tanda_terima">Upload Surat Tanda Terima</label>
+                            <input class="form-control" id="surat_tanda_terima" name="surat_tanda_terima" type="file" required accept="application/pdf">
                             <div class="invalid-feedback">Surat Tanda Terima diperlukan.</div>
                         </div>
 
@@ -81,7 +80,7 @@
 
             <div class="modal-footer d-flex w-100 justify-content-end">
                 <button class="btn btn-secondary me-2 w-25" id="resetButton" type="button">Reset</button>
-                <button class="btn btn-success w-25" id="add-sparepart" type="submit">Tambah Data</button>
+                <button class="btn btn-success w-25" id="submitButton" type="button">Tambah Data</button>
             </div>
 
         </div>
@@ -114,6 +113,8 @@
                 allowClear: true,
                 dropdownParent: $('#modalForAdd'),
                 width: '100%'
+            }).on("select2:select select2:unselect", function() {
+                validateSelect2();
             });
 
             // Initialize datepicker for #tanggal
@@ -189,6 +190,40 @@
                 $('#addDataForm')[0].reset();
                 $('#tableContainer').empty();
                 $('#id_spb').val(null).trigger('change');
+            });
+
+            function validateSelect2() {
+                let isValid = true;
+
+                // Validate SPB
+                const spb = $('#id_spb');
+                if (spb.val() === "" || spb.val() === null) {
+                    spb.next('.select2').find('.select2-selection').addClass('is-invalid');
+                    spb.closest('.form-group').find('.invalid-feedback').show();
+                    isValid = false;
+                } else {
+                    spb.next('.select2').find('.select2-selection').removeClass('is-invalid');
+                    spb.closest('.form-group').find('.invalid-feedback').hide();
+                }
+
+                return isValid;
+            }
+
+            $('#submitButton').on('click', function() {
+                if ($('#addDataForm')[0].checkValidity() && validateSelect2()) {
+                    $('#addDataForm').submit();
+                } else {
+                    $('#addDataForm').addClass('was-validated');
+                }
+            });
+
+            // Remove validation classes on change
+            $('#id_spb').on('change', function() {
+                if ($(this).val() !== '') {
+                    $(this).next('.select2-container').find('.select2-selection').removeClass('is-invalid').addClass('is-valid');
+                } else {
+                    $(this).next('.select2-container').find('.select2-selection').removeClass('is-valid').addClass('is-invalid');
+                }
             });
 
             // Alert and set value to max if quantity_diterima exceeds max

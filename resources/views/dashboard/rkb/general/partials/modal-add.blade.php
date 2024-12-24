@@ -50,32 +50,28 @@
 
 @push('scripts_3')
     <script>
-        (() => {
-            'use strict'
-
+        $(document).ready(function() {
             // Fetch the form for validation
-            const form = document.querySelector('#rkbgeneralForm');
+            const form = $('#rkbgeneralForm');
 
             // Apply Bootstrap validation on form submit
-            form.addEventListener('submit', (event) => {
+            form.on('submit', function(event) {
                 // Check if inputs are valid
-                if (!form.checkValidity() || !validateSelect2()) {
+                if (!form[0].checkValidity() || !validateSelect2()) {
                     event.preventDefault();
                     event.stopPropagation();
                 }
-                form.classList.add('was-validated');
+                form.addClass('was-validated');
             });
 
             // Apply validation on blur (out of focus) for each input in the form
-            form.querySelectorAll('input').forEach((input) => {
-                input.addEventListener('blur', () => {
-                    if (!input.checkValidity()) {
-                        input.classList.add('is-invalid');
-                    } else {
-                        input.classList.remove('is-invalid');
-                        input.classList.add('is-valid');
-                    }
-                });
+            form.find('input').on('blur', function() {
+                const input = $(this);
+                if (!input[0].checkValidity()) {
+                    input.addClass('is-invalid');
+                } else {
+                    input.removeClass('is-invalid').addClass('is-valid');
+                }
             });
 
             // Initialize Select2 for Proyek
@@ -105,16 +101,16 @@
             }
 
             // Handle form reset to reset Select2 fields
-            form.addEventListener('reset', () => {
-                setTimeout(() => {
-                    $('#proyeks').val('').trigger('change'); // Reset proyeks
-                    form.classList.remove('was-validated'); // Remove validation styles
+            form.on('reset', function() {
+                setTimeout(function() {
+                    $('#proyek').val('').trigger('change'); // Reset proyeks
+                    form.removeClass('was-validated'); // Remove validation styles
                 }, 0); // Ensure this runs after the form reset
             });
 
             // Set default value for Periode
-            document.addEventListener('DOMContentLoaded', () => {
-                const periodeInput = document.getElementById('periode');
+            $(document).ready(function() {
+                const periodeInput = $('#periode');
 
                 // Get the current year and month
                 const now = new Date();
@@ -122,12 +118,12 @@
                 const month = String(now.getMonth() + 1).padStart(2, '0'); // Add leading zero to month if needed
 
                 // Set the default value to current year and month
-                periodeInput.value = `${year}-${month}`;
+                periodeInput.val(`${year}-${month}`);
             });
 
-            document.getElementById('periode').addEventListener('click', function() {
+            $('#periode').on('click', function() {
                 this.showPicker();
-            })
-        })();
+            });
+        });
     </script>
 @endpush

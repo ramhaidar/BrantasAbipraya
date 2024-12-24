@@ -41,7 +41,7 @@ class LampiranRKBUrgentController extends Controller
                 $fileName     = "{$originalName}___{$timestamp}.{$extension}";
 
                 // Tentukan folder penyimpanan berdasarkan nomor RKB dan kode alat
-                $folderPath = "lampiran_rkb_urgent/{$rkbNumber}/{$kode_alat}";
+                $folderPath = "uploads/rkb_urgent/{$rkbNumber}/lampiran/{$kode_alat}";
 
                 // Simpan file ke storage dengan struktur folder
                 $filePath = $file->storeAs ( $folderPath, $fileName, 'public' );
@@ -101,7 +101,7 @@ class LampiranRKBUrgentController extends Controller
 
             // Path file dan folder
             $filePath   = storage_path ( 'app/public/' . $lampiran->file_path );
-            $folderPath = storage_path ( 'app/public/lampiran_rkb_urgent/' . $kode_alat . '/' . $rkbNumber );
+            $folderPath = "uploads/rkb_urgent/{$rkbNumber}/lampiran/{$kode_alat}";
 
             // Hapus file
             if ( file_exists ( $filePath ) )
@@ -110,9 +110,9 @@ class LampiranRKBUrgentController extends Controller
             }
 
             // Hapus folder jika kosong
-            if ( is_dir ( $folderPath ) && count ( scandir ( $folderPath ) ) == 2 )
+            if ( is_dir ( storage_path ( 'app/public/' . $folderPath ) ) && count ( scandir ( storage_path ( 'app/public/' . $folderPath ) ) ) == 2 )
             { // Folder kosong hanya memiliki '.' dan '..'
-                rmdir ( $folderPath );
+                rmdir ( storage_path ( 'app/public/' . $folderPath ) );
             }
 
             // Update relasi dan hapus lampiran
@@ -145,8 +145,7 @@ class LampiranRKBUrgentController extends Controller
             // Find the existing lampiran
             $lampiran = LampiranRKBUrgent::findOrFail ( $id );
 
-            // dd ( $lampiran );
-// Find the associated LinkAlatDetailRKB
+            // Find the associated LinkAlatDetailRKB
             $linkAlatDetailRKB = $lampiran->linkAlatDetailRkb;
 
             // Find the associated RKB to get RKB number for folder path
@@ -173,7 +172,7 @@ class LampiranRKBUrgentController extends Controller
 
                 $kode_alat = $linkAlatDetailRKB->masterDataAlat->kode_alat;
                 // Determine storage folder based on RKB number
-                $folderPath = "lampiran_rkb_urgent/{$rkbNumber}/{$kode_alat}";
+                $folderPath = "uploads/rkb_urgent/{$rkbNumber}/lampiran/{$kode_alat}";
 
                 // Store the new file
                 $newFilePath = $file->storeAs ( $folderPath, $fileName, 'public' );

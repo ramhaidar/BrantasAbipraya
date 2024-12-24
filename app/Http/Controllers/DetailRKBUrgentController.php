@@ -88,7 +88,7 @@ class DetailRKBUrgentController extends Controller
             ] );
 
             // Tentukan folder berdasarkan nomor RKB dan ID DetailRKBUrgent
-            $folderPath = "uploads/dokumentasi/{$rkbNumber}/{$detailRKBUrgent->id}/";
+            $folderPath = "uploads/rkb_urgent/{$rkbNumber}/dokumentasi/{$detailRKBUrgent->id}/";
 
             // Tangani unggahan file dokumentasi
             if ( $request->hasFile ( 'dokumentasi' ) )
@@ -265,47 +265,59 @@ class DetailRKBUrgentController extends Controller
     public function destroy ( $id )
     {
         // Cari data DetailRKBUrgent
-        $detailRKBUrgent = DetailRKBUrgent::find ( $id );
+        $detailRKBUrgent = DetailRKBUrgent::with ( 'linkRkbDetails.linkAlatDetailRkb.rkb' )->find ( $id );
 
         if ( ! $detailRKBUrgent )
         {
             return redirect ()->back ()->with ( 'error', 'Detail RKB Urgent not found!' );
         }
 
-        try
+        $rkb = $detailRKBUrgent->linkRkbDetails[ 0 ]->linkAlatDetailRKB->rkb;
+
+        if ( $rkb )
         {
-            // Dapatkan semua LinkRKBDetail terkait dengan DetailRKBUrgent ini
-            $linkRkbDetails = LinkRKBDetail::where ( 'id_detail_rkb_urgent', $id )->get ();
+            $rkbNumber  = $rkb->nomor;
+            $folderPath = 'uploads/rkb_urgent/' . $rkbNumber;
+            // Check if the folder exists before attempting to delete
+            if ( Storage::disk ( 'public' )->exists ( $folderPath ) )
+            {
+                Storage::disk ( 'public' )->deleteDirectory ( $folderPath );
+            }
+        }
+
+        // Dapatkan semua LinkRKBDetail terkait dengan DetailRKBUrgent ini
+        $linkRkbDetails = LinkRKBDetail::where ( 'id_detail_rkb_urgent', $id )->get ();
+
+        // Hapus LinkRKBDetail
+        foreach ( $linkRkbDetails as $linkRkbDetail )
+        {
+            $linkAlatDetailRkbId = $linkRkbDetail->id_link_alat_detail_rkb;
 
             // Hapus LinkRKBDetail
-            foreach ( $linkRkbDetails as $linkRkbDetail )
+            $linkRkbDetail->delete ();
+
+            // Cek apakah masih ada LinkRKBDetail yang menggunakan link_alat_detail_rkb ini
+            $remainingLinks = LinkRKBDetail::where ( 'id_link_alat_detail_rkb', $linkAlatDetailRkbId )->exists ();
+
+            // Jika tidak ada lagi, hapus link_alat_detail_rkb
+            if ( ! $remainingLinks )
             {
-                $linkAlatDetailRkbId = $linkRkbDetail->id_link_alat_detail_rkb;
-
-                // Hapus LinkRKBDetail
-                $linkRkbDetail->delete ();
-
-                // Cek apakah masih ada LinkRKBDetail yang menggunakan link_alat_detail_rkb ini
-                $remainingLinks = LinkRKBDetail::where ( 'id_link_alat_detail_rkb', $linkAlatDetailRkbId )->exists ();
-
-                // Jika tidak ada lagi, hapus link_alat_detail_rkb
-                if ( ! $remainingLinks )
-                {
-                    LinkAlatDetailRKB::where ( 'id', $linkAlatDetailRkbId )->delete ();
-                }
+                LinkAlatDetailRKB::find ( $linkAlatDetailRkbId )->lampiranRkbUrgent->delete ();
+                LinkAlatDetailRKB::where ( 'id', $linkAlatDetailRkbId )->delete ();
             }
-
-            // Hapus DetailRKBUrgent
-            $detailRKBUrgent->delete ();
-
-            return redirect ()->back ()->with ( 'success', 'Detail RKB Urgent and its links deleted successfully!' );
         }
-        catch ( \Exception $e )
+
+        // Hapus LampiranRKBUrgent terkait
+        if ( $detailRKBUrgent->lampiranRkbUrgent )
         {
-            return redirect ()->back ()->withErrors ( [ 
-                'error' => 'Failed to delete Detail RKB Urgent: ' . $e->getMessage (),
-            ] );
+            $detailRKBUrgent->lampiranRkbUrgent->delete ();
         }
+
+        // Hapus DetailRKBUrgent
+        $detailRKBUrgent->delete ();
+
+        return redirect ()->back ()->with ( 'success', 'Detail RKB Urgent and its links deleted successfully!' );
+
     }
 
 

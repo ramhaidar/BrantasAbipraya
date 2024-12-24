@@ -21,7 +21,7 @@
 @endpush
 
 <div class="fade modal" id="modalForAdd" aria-hidden="true" aria-labelledby="staticBackdropLabel" tabindex="-1">
-    <div class="modal-dialog modal-dialog-scrollable modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-scrollable modal-xl modal-dialog-centered">
         <div class="modal-content rounded-4">
             <div class="pt-3 px-3 m-0 d-flex w-100 justify-content-between">
                 <h5 class="modal-title w-100 pb-2" id="modalForAddLabel">Tambah Data ATB</h1>
@@ -186,6 +186,13 @@
                         type: 'GET',
                         success: function(response) {
                             tableContainer.html(response.html);
+                            $('#table-data-modal-add').DataTable({
+                                paginate: false,
+                                ordering: false,
+                                info: false,
+                                searching: false,
+                                responsive: true,
+                            });
                         },
                         error: function(error) {
                             console.error('Error fetching data:', error);

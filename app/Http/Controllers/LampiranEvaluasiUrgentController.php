@@ -41,7 +41,7 @@ class LampiranEvaluasiUrgentController extends Controller
                 $fileName     = "{$originalName}___{$timestamp}.{$extension}";
 
                 // Tentukan folder penyimpanan berdasarkan nomor RKB dan kode alat
-                $folderPath = "lampiran_rkb_urgent/{$rkbNumber}/{$kode_alat}";
+                $folderPath = "uploads/rkb_urgent/{$rkbNumber}/{$kode_alat}";
 
                 // Simpan file ke storage dengan struktur folder
                 $filePath = $file->storeAs ( $folderPath, $fileName, 'public' );
@@ -163,7 +163,7 @@ class LampiranEvaluasiUrgentController extends Controller
 
                 $kode_alat = $linkAlatDetailRKB->masterDataAlat->kode_alat;
                 // Determine storage folder based on RKB number
-                $folderPath = "lampiran_rkb_urgent/{$rkbNumber}/{$kode_alat}";
+                $folderPath = "uploads/rkb_urgent/{$rkbNumber}/{$kode_alat}";
 
                 // Store the new file
                 $newFilePath = $file->storeAs ( $folderPath, $fileName, 'public' );

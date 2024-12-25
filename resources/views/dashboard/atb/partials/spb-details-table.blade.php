@@ -13,7 +13,7 @@
 
 <div class="col-12 table-responsive" id="spb-details-table">
     <label class="form-label">Detail SPB</label>
-    <table class="m-0 table table-bordered table-striped" id="table-data-modal-add">
+    <table class="table table-bordered table-striped" id="table-data-modal-add">
         <thead class="table-primary">
             <tr>
                 <th class="text-center">Nama Sparepart</th>

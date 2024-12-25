@@ -187,11 +187,12 @@
                         success: function(response) {
                             tableContainer.html(response.html);
                             $('#table-data-modal-add').DataTable({
-                                paginate: false,
+                                paging: false,
                                 ordering: false,
                                 info: false,
                                 searching: false,
                                 responsive: true,
+                                dom: '<"top"fl>t<"bottom"ip>',
                             });
                         },
                         error: function(error) {

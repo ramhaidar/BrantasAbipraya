@@ -72,7 +72,7 @@
                         'detail' => $detail2,
                         'satuan' => $satuan,
                         'kategori' => $kategori,
-                        'alat_detail_id' => $detail1->masterDataAlat->id,
+                        'alat_detail_id' => $detail1->id,
                     ];
                 }
             }

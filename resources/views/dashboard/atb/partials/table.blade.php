@@ -23,9 +23,7 @@
                 <th class="text-center">Supplier</th>
                 <th class="text-center">Sparepart</th>
                 <th class="text-center">Part Number</th>
-                <th class="text-center">Merk</th>
                 <th class="text-center">Quantity</th>
-                <th class="text-center">Quantity PO</th>
                 <th class="text-center">Satuan</th>
                 <th class="text-center">Harga</th>
                 <th class="text-center">Net</th>
@@ -35,6 +33,30 @@
             </tr>
         </thead>
         <tbody>
+            @foreach ($atbs as $atb)
+                <tr>
+                    <td class="text-center">{{ $atb->spb->nomor }}</td>
+                    <td class="text-center">{{ $atb->tanggal }}</td>
+                    <td class="text-center">{{ $atb->id_master_data_sparepart }}</td>
+                    <td class="text-center">{{ $atb->masterDataSupplier->nama }}</td>
+                    <td class="text-center">{{ $atb->masterDataSparepart->nama }}</td>
+                    <td class="text-center">{{ $atb->masterDataSparepart->part_number }}</td>
+                    <td class="text-center">{{ $atb->quantity }}</td>
+                    <td class="text-center">{{ $atb->detailSpb->satuan }}</td>
+                    <td class="text-center">{{ $atb->harga }}</td>
+                    <td class="text-center">{{ $atb->quantity * $atb->harga }}</td>
+                    <td class="text-center">{{ $atb->quantity * $atb->harga * 0.11 }}</td>
+                    <td class="text-center">{{ $atb->quantity * $atb->harga * 1.11 }}</td>
+                    <td class="text-center">
+                        {{-- <button class="btn btn-warning mx-1 ubahBtn" data-id="${row.id}" onclick="fillFormEdit(${row.id})">
+                            <i class="bi bi-pencil-square"></i>
+                        </button> --}}
+                        <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $atb->id }}">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            @endforeach
         </tbody>
     </table>
 </div>

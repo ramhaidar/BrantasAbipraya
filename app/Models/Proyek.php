@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\UserProyek;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Proyek extends Model
 {
@@ -42,12 +43,12 @@ class Proyek extends Model
         return $this->hasMany ( Alat::class, 'id_proyek' );
     }
 
-    public function atbs ()
+    public function atbs () : HasMany
     {
         return $this->hasMany ( ATB::class, 'id_proyek' );
     }
 
-    public function asalAtbs ()
+    public function asalAtbs () : HasMany
     {
         return $this->hasMany ( ATB::class, 'id_asal_proyek' );
     }

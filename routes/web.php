@@ -188,7 +188,7 @@ Route::middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )
             ->name ( 'post.update' );
 
         Route::delete ( '/actions/{id}', [ ATBController::class, 'destroy' ] )
-            ->name ( 'delete.destroy' );
+            ->name ( 'destroy' );
 
         Route::get ( '/delatb/actions/{id}', [ ATBController::class, 'destroy' ] )
             ->name ( 'del.test' );

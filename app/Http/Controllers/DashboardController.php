@@ -102,7 +102,7 @@ class DashboardController extends Controller
         //     $totalSemuaAlat        = Alat::where ( 'id_user', $user->id )->count ();
         // }
 
-        $proyeks = Proyek::with ( "users" )->orderByDesc ( "updated_at" )->get ();
+        $proyeks = Proyek::with ( "users" )->orderBy ( "updated_at", "asc" )->get ();
 
         return view ( 'dashboard', [ 
             'headerPage'             => 'Dashboard',

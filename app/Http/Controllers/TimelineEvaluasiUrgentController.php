@@ -13,7 +13,7 @@ class TimelineEvaluasiUrgentController extends Controller
     public function index($id)
     {
         $rkb = Proyek::find($id);
-        $proyeks = Proyek::orderByDesc('updated_at')->get();
+        $proyeks = Proyek::orderBy('updated_at', 'asc')->get();
         $data = LinkAlatDetailRKB::with([
             'rkb',
             'masterDataAlat',

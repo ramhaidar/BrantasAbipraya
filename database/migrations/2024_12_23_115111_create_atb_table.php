@@ -14,23 +14,21 @@ return new class extends Migration
         Schema::create ( 'atb', function (Blueprint $table)
         {
             $table->id ();
-            $table->enum ( 'tipe', [ 
-                'hutang_unit_alat',
-                'mutasi_proyek',
-                'panjar_unit_alat',
-                'panjar_proyek'
-            ] );
+            $table->string ( 'tipe' );
+            $table->string ( 'dokumentasi_foto' ); // Folder path sesuai dengan diagram
+            $table->string ( 'surat_tanda_terima' ); // File path sesuai dengan diagram
             $table->date ( 'tanggal' );
-            $table->string ( 'dokumentasi' );
             $table->bigInteger ( 'quantity' );
-            $table->string ( 'satuan' );
             $table->bigInteger ( 'harga' );
-            $table->foreignId ( 'id_spb' )->nullable ()->unique ()->nullOnDelete ();
-            $table->foreignId ( 'id_saldo' )->nullable ()->unique ()->nullOnDelete ();
-            $table->foreignId ( 'id_proyek' )->nullable ()->nullOnDelete ();
-            $table->foreignId ( 'id_master_data_alat' )->nullable ()->nullOnDelete ();
-            $table->foreignId ( 'id_asal_proyek' )->nullable ()->nullOnDelete ();
             $table->timestamps ();
+
+            // Foreign keys sesuai dengan diagram
+            $table->foreignId ( 'id_proyek' )->nullable ()->constrained ( 'proyek' )->nullOnDelete ();
+            $table->foreignId ( 'id_asal_proyek' )->nullable ()->constrained ( 'proyek' )->nullOnDelete ();
+            $table->foreignId ( 'id_spb' )->nullable ()->constrained ( 'spb' )->nullOnDelete ();
+            $table->foreignId ( 'id_detail_spb' )->nullable ()->constrained ( 'detail_spb' )->nullOnDelete ();
+            $table->foreignId ( 'id_master_data_sparepart' )->nullable ()->constrained ( 'master_data_sparepart' )->nullOnDelete ();
+            $table->foreignId ( 'id_master_data_supplier' )->nullable ()->constrained ( 'master_data_supplier' )->nullOnDelete ();
         } );
     }
 

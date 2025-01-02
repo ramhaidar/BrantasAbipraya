@@ -59,6 +59,11 @@ class SPB extends Model
         return $this->hasOne ( SPB::class, 'id_spb_original' );
     }
 
+    public function atbs () : HasMany
+    {
+        return $this->hasMany ( ATB::class, 'id_spb' );
+    }
+
     protected static function boot ()
     {
         parent::boot ();

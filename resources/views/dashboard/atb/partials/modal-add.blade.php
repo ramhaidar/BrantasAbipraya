@@ -266,7 +266,7 @@
                 const max = $(this).attr('max');
                 const value = $(this).val();
                 if (parseInt(value) > parseInt(max)) {
-                    alert('Quantity diterima tidak boleh melebihi Quantity PO.');
+                    alert('Quantity diterima tidak boleh melebihi Quantity Belum Diterima.');
                     $(this).val(max);
                 }
             });
@@ -325,6 +325,80 @@
             suratTandaTerimaInput.on('input', function() {
                 if (!this.value) {
                     pdfPreviewContainer.hide();
+                }
+            });
+        });
+    </script>
+
+    <script>
+        function validateForm() {
+            let isValid = true;
+            const form = $('#addDataForm');
+
+            // Reset previous validation states
+            $('.is-invalid').removeClass('is-invalid');
+
+            // Validate date field
+            const tanggal = $('#tanggal');
+            if (!tanggal.val()) {
+                tanggal.addClass('is-invalid');
+                isValid = false;
+            }
+
+            // Validate SPB select
+            const spb = $('#id_spb');
+            if (!spb.val()) {
+                spb.next('.select2-container').find('.select2-selection').addClass('is-invalid');
+                isValid = false;
+            }
+
+            // Validate file upload
+            const suratTandaTerima = $('#surat_tanda_terima');
+            if (!suratTandaTerima[0].files.length) {
+                suratTandaTerima.addClass('is-invalid');
+                isValid = false;
+            }
+
+            // Check if any required fields are empty
+            form.find('[required]').each(function() {
+                if (!$(this).val()) {
+                    $(this).addClass('is-invalid');
+                    isValid = false;
+                }
+            });
+
+            if (!isValid) {
+                // Show error message
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Mohon lengkapi semua field yang wajib diisi',
+                    icon: 'error',
+                    confirmButtonText: 'Ok'
+                });
+            }
+
+            return isValid;
+        }
+
+        $(document).ready(function() {
+            // Replace the existing submit button click handler
+            $('#submitButton').on('click', function() {
+                if (validateForm()) {
+                    $('#addDataForm').submit();
+                }
+            });
+
+            // Add validation on input change
+            $('input, select').on('change', function() {
+                if ($(this).val()) {
+                    $(this).removeClass('is-invalid');
+                }
+            });
+
+            // Add validation for Select2 fields
+            $('#id_spb').on('change', function() {
+                if ($(this).val()) {
+                    $(this).next('.select2-container').find('.select2-selection').removeClass('is-invalid');
                 }
             });
         });

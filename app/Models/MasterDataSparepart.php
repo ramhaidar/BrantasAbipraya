@@ -51,4 +51,8 @@ class MasterDataSparepart extends Model
         return $this->hasMany ( DetailSPB::class, 'id_master_data_sparepart' );
     }
 
+    public function atbs () : HasMany
+    {
+        return $this->hasMany ( ATB::class, 'id_master_data_sparepart' );
+    }
 }

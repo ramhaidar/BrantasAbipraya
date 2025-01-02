@@ -14,7 +14,7 @@ class SPBProyekController extends Controller
 
     public function index ()
     {
-        $proyeks = Proyek::with ( "users" )->orderByDesc ( "updated_at" )->get ();
+        $proyeks = Proyek::with ( "users" )->orderBy ( "updated_at" )->get ();
         // $rkbs    = RKB::where ( 'is_approved', true )->get ();
 
         return view ( 'dashboard.spb.proyek.proyek', [ 

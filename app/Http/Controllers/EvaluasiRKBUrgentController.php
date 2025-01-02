@@ -12,7 +12,7 @@ class EvaluasiRKBUrgentController extends Controller
 {
     public function index ()
     {
-        $proyeks = Proyek::orderByDesc ( 'updated_at' )->get ();
+        $proyeks = Proyek::orderBy ( 'updated_at', 'asc' )->get ();
 
         return view ( 'dashboard.evaluasi.urgent.evaluasi_urgent', [ 
             'proyeks'    => $proyeks,

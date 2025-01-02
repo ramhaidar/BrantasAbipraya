@@ -17,7 +17,7 @@ class DetailSPB extends Model
 
     protected $fillable = [ 
         'quantity_po',
-        'quantity_diterima',
+        'quantity_belum_diterima', // Updated from quantity_diterima
         'harga',
         'satuan',
         'id_master_data_sparepart',
@@ -28,13 +28,26 @@ class DetailSPB extends Model
     protected $casts = [ 
         'id'                       => 'integer',
         'quantity_po'              => 'integer',
-        'quantity_diterima'        => 'integer',
+        'quantity_belum_diterima'  => 'integer',
         'harga'                    => 'integer',
         'satuan'                   => 'string',
         'id_master_data_sparepart' => 'integer',
         'id_master_data_alat'      => 'integer',
         'id_link_rkb_detail'       => 'integer',
     ];
+
+    protected static function boot ()
+    {
+        parent::boot ();
+
+        static::creating ( function ($model)
+        {
+            if ( ! isset ( $model->quantity_belum_diterima ) )
+            {
+                $model->quantity_belum_diterima = $model->quantity_po;
+            }
+        } );
+    }
 
     public function masterDataSparepart () : BelongsTo
     {
@@ -54,5 +67,17 @@ class DetailSPB extends Model
     public function linkRkbDetail () : BelongsTo
     {
         return $this->belongsTo ( LinkRKBDetail::class, 'id_link_rkb_detail' );
+    }
+
+    public function reduceQuantityBelumDiterima ( $quantity )
+    {
+        $this->quantity_belum_diterima = max ( 0, $this->quantity_belum_diterima - $quantity );
+        $this->save ();
+    }
+
+    public function increaseQuantityBelumDiterima ( $quantity )
+    {
+        $this->quantity_belum_diterima = min ( $this->quantity_po, $this->quantity_belum_diterima + $quantity );
+        $this->save ();
     }
 }

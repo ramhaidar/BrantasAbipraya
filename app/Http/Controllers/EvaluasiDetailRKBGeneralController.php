@@ -78,9 +78,10 @@ class EvaluasiDetailRKBGeneralController extends Controller
         DetailRKBGeneral::whereHas ( 'linkRkbDetails.linkAlatDetailRkb.rkb', function ($query) use ($id_rkb)
         {
             $query->where ( 'id', $id_rkb );
-        } )->update ( [ 
-                    'quantity_remainder' => \DB::raw ( 'quantity_approved' )
-                ] );
+        } )->each ( function ($detail)
+        {
+            $detail->incrementQuantityRemainder ( $detail->quantity_approved );
+        } );
 
         $rkb->is_approved = true;
         $rkb->save ();

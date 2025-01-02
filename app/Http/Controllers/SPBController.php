@@ -16,7 +16,7 @@ class SPBController extends Controller
     // Index for SPB
     public function index ()
     {
-        $proyeks = Proyek::with ( "users" )->orderByDesc ( "updated_at" )->get ();
+        $proyeks = Proyek::with ( "users" )->orderBy ( "updated_at" )->get ();
         // $rkbs    = RKB::where ( 'is_approved', true )->get ();
 
         return view ( 'dashboard.spb.spb', [ 
@@ -122,12 +122,12 @@ class SPBController extends Controller
             {
                 if ( isset ( $linkSpbDetailSpb->detailSpb->linkRkbDetail->detailRkbGeneral ) )
                 {
-                    $linkSpbDetailSpb->detailSpb->linkRkbDetail->detailRkbGeneral->increment ( "quantity_remainder", $linkSpbDetailSpb->detailSpb->quantity_po );
+                    $linkSpbDetailSpb->detailSpb->linkRkbDetail->detailRkbGeneral->incrementQuantityRemainder ( $linkSpbDetailSpb->detailSpb->quantity_po );
                 }
 
                 if ( isset ( $linkSpbDetailSpb->detailSpb->linkRkbDetail->detailRkbUrgent ) )
                 {
-                    $linkSpbDetailSpb->detailSpb->linkRkbDetail->detailRkbUrgent->increment ( "quantity_remainder", $linkSpbDetailSpb->detailSpb->quantity_po );
+                    $linkSpbDetailSpb->detailSpb->linkRkbDetail->detailRkbUrgent->incrementQuantityRemainder ( $linkSpbDetailSpb->detailSpb->quantity_po );
                 }
 
                 $linkSpbDetailSpb->detailSpb->delete ();
@@ -171,12 +171,12 @@ class SPBController extends Controller
             {
                 if ( isset ( $linkSpbDetailSpb->detailSpb->linkRkbDetail->detailRkbGeneral ) )
                 {
-                    $linkSpbDetailSpb->detailSpb->linkRkbDetail->detailRkbGeneral->increment ( "quantity_remainder", $linkSpbDetailSpb->detailSpb->quantity_po );
+                    $linkSpbDetailSpb->detailSpb->linkRkbDetail->detailRkbGeneral->incrementQuantityRemainder ( $linkSpbDetailSpb->detailSpb->quantity_po );
                 }
 
                 if ( isset ( $linkSpbDetailSpb->detailSpb->linkRkbDetail->detailRkbUrgent ) )
                 {
-                    $linkSpbDetailSpb->detailSpb->linkRkbDetail->detailRkbUrgent->increment ( "quantity_remainder", $linkSpbDetailSpb->detailSpb->quantity_po );
+                    $linkSpbDetailSpb->detailSpb->linkRkbDetail->detailRkbUrgent->incrementQuantityRemainder ( $linkSpbDetailSpb->detailSpb->quantity_po );
                 }
             }
 

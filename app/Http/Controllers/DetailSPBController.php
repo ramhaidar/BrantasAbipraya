@@ -211,7 +211,7 @@ class DetailSPBController extends Controller
                     throw new \Exception( "Quantity tidak valid untuk sparepart yang dipilih" );
                 }
 
-                $detail->decrement ( 'quantity_remainder', $qty );
+                $detail->decrementQuantityRemainder ( $qty );
             }
 
             \DB::commit ();

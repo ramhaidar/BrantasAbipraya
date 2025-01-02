@@ -29,7 +29,7 @@
     {{-- @include('dashboard.masterdata.alat.partials.modal-edit') --}}
 
     <!-- Modal for Delete Confirmation -->
-    {{-- @include('dashboard.masterdata.alat.partials.modal-delete') --}}
+    @include('dashboard.atb.partials.modal-delete')
 @endsection
 
 @push('scripts_2')

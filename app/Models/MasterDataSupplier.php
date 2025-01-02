@@ -37,4 +37,9 @@ class MasterDataSupplier extends Model
     {
         return $this->hasMany ( SPB::class, 'id_master_data_supplier' );
     }
+
+    public function atbs () : HasMany
+    {
+        return $this->hasMany ( ATB::class, 'id_master_data_supplier' );
+    }
 }

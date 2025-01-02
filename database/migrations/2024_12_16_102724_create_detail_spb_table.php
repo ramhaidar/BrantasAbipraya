@@ -15,7 +15,7 @@ return new class extends Migration
         {
             $table->id ();
             $table->bigInteger ( 'quantity_po' );
-            $table->bigInteger ( 'quantity_diterima' )->default ( 0 );
+            $table->bigInteger ( 'quantity_belum_diterima' )->default ( 0 );
             $table->string ( 'satuan' );
             $table->bigInteger ( 'harga' );
             $table->foreignId ( 'id_master_data_sparepart' )

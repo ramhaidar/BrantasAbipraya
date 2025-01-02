@@ -13,7 +13,7 @@ class DetailSPBProyekController extends Controller
 {
     public function index ( $id )
     {
-        $proyeks = Proyek::with ( "users" )->latest ( "updated_at" )->get ();
+        $proyeks = Proyek::with ( "users" )->orderBy ( "updated_at", "asc" )->get ();
         $rkb     = RKB::with ( [ 
             "linkAlatDetailRkbs.masterDataAlat",
             "linkAlatDetailRkbs.linkRkbDetails.detailRkbGeneral.kategoriSparepart",

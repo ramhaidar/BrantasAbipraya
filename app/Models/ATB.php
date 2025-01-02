@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class ATB extends Model
@@ -13,55 +14,62 @@ class ATB extends Model
 
     protected $fillable = [ 
         'tipe',
+        'dokumentasi_foto',
+        'surat_tanda_terima',
         'tanggal',
-        'dokumentasi',
         'quantity',
-        'satuan',
         'harga',
-        'id_spb',
-        'id_saldo',
         'id_proyek',
-        'id_master_data_alat',
         'id_asal_proyek',
+        'id_spb',
+        'id_detail_spb',
+        'id_master_data_sparepart',
+        'id_master_data_supplier',
     ];
 
     protected $casts = [ 
-        'id'                  => 'integer',
-        'tipe'                => 'string',
-        'tanggal'             => 'date',
-        'dokumentasi'         => 'string',
-        'quantity'            => 'integer',
-        'satuan'              => 'string',
-        'harga'               => 'integer',
-        'id_spb'              => 'integer',
-        'id_saldo'            => 'integer',
-        'id_proyek'           => 'integer',
-        'id_master_data_alat' => 'integer',
-        'id_asal_proyek'      => 'integer',
+        'id'                       => 'integer',
+        'tipe'                     => 'string',
+        'dokumentasi_foto'         => 'string', // Changed from json to string
+        'surat_tanda_terima'       => 'string',
+        'tanggal'                  => 'date',
+        'quantity'                 => 'integer',
+        'harga'                    => 'integer',
+        'id_proyek'                => 'integer',
+        'id_asal_proyek'           => 'integer',
+        'id_spb'                   => 'integer',
+        'id_detail_spb'            => 'integer',
+        'id_master_data_sparepart' => 'integer',
+        'id_master_data_supplier'  => 'integer',
     ];
 
-    public function spb ()
-    {
-        return $this->belongsTo ( SPB::class, 'id_spb' );
-    }
-
-    public function saldo ()
-    {
-        return $this->belongsTo ( Saldo::class, 'id_saldo' );
-    }
-
-    public function proyek ()
+    public function proyek () : BelongsTo
     {
         return $this->belongsTo ( Proyek::class, 'id_proyek' );
     }
 
-    public function masterDataAlat ()
-    {
-        return $this->belongsTo ( MasterDataAlat::class, 'id_master_data_alat' );
-    }
-
-    public function asalProyek ()
+    public function asalProyek () : BelongsTo
     {
         return $this->belongsTo ( Proyek::class, 'id_asal_proyek' );
+    }
+
+    public function spb () : BelongsTo
+    {
+        return $this->belongsTo ( SPB::class, 'id_spb' );
+    }
+
+    public function detailSpb () : BelongsTo
+    {
+        return $this->belongsTo ( DetailSPB::class, 'id_detail_spb' );
+    }
+
+    public function masterDataSparepart () : BelongsTo
+    {
+        return $this->belongsTo ( MasterDataSparepart::class, 'id_master_data_sparepart' );
+    }
+
+    public function masterDataSupplier () : BelongsTo
+    {
+        return $this->belongsTo ( MasterDataSupplier::class, 'id_master_data_supplier' );
     }
 }

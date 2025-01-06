@@ -291,24 +291,34 @@ class ATBController extends Controller
         {
             DB::beginTransaction ();
 
-            $atb = ATB::findOrFail ( $id );
+            $atb      = ATB::findOrFail ( $id );
+            $nomorSpb = $atb->spb->nomor;
 
-            // Delete associated files
-            if ( $atb->dokumentasi_foto )
+            // Find all ATB records with the same Nomor SPB
+            $atbs = ATB::whereHas ( 'spb', function ($query) use ($nomorSpb)
             {
-                Storage::disk ( 'public' )->deleteDirectory ( $atb->dokumentasi_foto );
-            }
-            if ( $atb->surat_tanda_terima )
+                $query->where ( 'nomor', $nomorSpb );
+            } )->get ();
+
+            foreach ( $atbs as $atb )
             {
-                Storage::disk ( 'public' )->delete ( $atb->surat_tanda_terima );
+                // Delete associated files
+                if ( $atb->dokumentasi_foto )
+                {
+                    Storage::disk ( 'public' )->deleteDirectory ( $atb->dokumentasi_foto );
+                }
+                if ( $atb->surat_tanda_terima )
+                {
+                    Storage::disk ( 'public' )->delete ( $atb->surat_tanda_terima );
+                }
+
+                // Restore quantity_belum_diterima for the corresponding DetailSPB
+                $detailSpb = DetailSPB::find ( $atb->id_detail_spb );
+                $detailSpb->increaseQuantityBelumDiterima ( $atb->quantity );
+
+                // Delete the ATB record
+                $atb->delete ();
             }
-
-            // Restore quantity_belum_diterima for the corresponding DetailSPB
-            $detailSpb = DetailSPB::find ( $atb->id_detail_spb );
-            $detailSpb->increaseQuantityBelumDiterima ( $atb->quantity );
-
-            // Delete the ATB record
-            $atb->delete ();
 
             DB::commit ();
 

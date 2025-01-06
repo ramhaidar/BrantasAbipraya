@@ -35,7 +35,7 @@
         <tbody>
             @foreach ($atbs as $atb)
                 <tr>
-                    <td class="text-center">{{ $atb->spb->nomor }}</td>
+                    <td class="text-center spb-number" data-spb="{{ $atb->spb->nomor }}" data-id="{{ $atb->id }}">{{ $atb->spb->nomor }}</td>
                     <td class="text-center">{{ $atb->tanggal }}</td>
                     <td class="text-center">{{ $atb->id_master_data_sparepart }}</td>
                     <td class="text-center">{{ $atb->masterDataSupplier->nama }}</td>
@@ -47,10 +47,7 @@
                     <td class="text-center">{{ $atb->quantity * $atb->harga }}</td>
                     <td class="text-center">{{ $atb->quantity * $atb->harga * 0.11 }}</td>
                     <td class="text-center">{{ $atb->quantity * $atb->harga * 1.11 }}</td>
-                    <td class="text-center">
-                        {{-- <button class="btn btn-warning mx-1 ubahBtn" data-id="${row.id}" onclick="fillFormEdit(${row.id})">
-                            <i class="bi bi-pencil-square"></i>
-                        </button> --}}
+                    <td class="text-center action-cell">
                         <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $atb->id }}">
                             <i class="bi bi-trash"></i>
                         </button>
@@ -68,6 +65,32 @@
                 paginate: false,
                 ordering: false,
             });
+
+            // Merge cells and handle action buttons
+            var spbNumbers = {};
+            $('#table-data tbody tr').each(function() {
+                var spbNumber = $(this).find('.spb-number').data('spb');
+                var id = $(this).find('.spb-number').data('id');
+
+                if (spbNumbers[spbNumber]) {
+                    spbNumbers[spbNumber].ids.push(id);
+                    $(this).find('.spb-number').remove();
+                    $(this).find('.action-cell').remove();
+                } else {
+                    spbNumbers[spbNumber] = {
+                        ids: [id],
+                        row: $(this),
+                        actionCell: $(this).find('.action-cell')
+                    };
+                }
+            });
+
+            $.each(spbNumbers, function(spbNumber, data) {
+                data.row.find('.spb-number').attr('rowspan', data.ids.length);
+                data.actionCell.attr('rowspan', data.ids.length);
+                data.row.find('.action-cell button').data('ids', data.ids.join(','));
+            });
+
         });
     </script>
 @endpush

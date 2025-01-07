@@ -10,16 +10,17 @@ return new class extends Migration
     {
         Schema::create ( 'master_data_sparepart', function (Blueprint $table)
         {
-            $table->id (); // PK | id: Integer
-            $table->string ( 'nama' ); // + nama: String
-            $table->string ( 'part_number' ); // + part_number: String
-            $table->string ( 'merk' ); // + merk: String
+            $table->id ();
+            $table->string ( 'nama' );
+            $table->string ( 'part_number' )
+                ->unique ();
+            $table->string ( 'merk' );
             $table->foreignId ( 'id_kategori_sparepart' )
-                ->nullable () // Kolom harus nullable
+                ->nullable ()
                 ->constrained ( 'kategori_sparepart' )
-                ->nullOnDelete (); // Foreign key dengan ON DELETE SET NULL
+                ->nullOnDelete ();
 
-            $table->timestamps (); // + timestamps()
+            $table->timestamps ();
         } );
     }
 

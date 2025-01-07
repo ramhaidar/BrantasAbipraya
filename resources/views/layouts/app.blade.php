@@ -159,13 +159,29 @@
         </script>
     @endif
 
-    {{-- <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script> --}}
+    <!-- Button and Anchor Click Cooldown Script -->
+    <script>
+        $(document).ready(function() {
+            $('button, a').on('click', function(event) {
+                var $element = $(this);
+
+                if ($element.data('cooldown')) {
+                    event.preventDefault();
+                    return false;
+                }
+
+                $element.data('cooldown', true);
+
+                setTimeout(function() {
+                    $element.removeData('cooldown');
+                }, 1000);
+            });
+        });
+    </script>
 
     @stack('scripts_1')
     @stack('scripts_2')
     @stack('scripts_3')
-
-    {{-- <script src="{{ asset('js/dashboard_content.js') }}"></script> --}}
 </body>
 
 </html>

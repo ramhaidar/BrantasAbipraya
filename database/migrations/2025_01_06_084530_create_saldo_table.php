@@ -20,11 +20,22 @@ return new class extends Migration
             $table->timestamps ();
 
             // Foreign keys
-            $table->foreignId ( 'id_proyek' )->constrained ( 'proyek' )->onDelete ( 'cascade' );
-            $table->foreignId ( 'id_asal_proyek' )->constrained ( 'proyek' )->onDelete ( 'cascade' );
-            $table->foreignId ( 'id_spb' )->constrained ( 'spb' )->onDelete ( 'cascade' );
-            $table->foreignId ( 'id_master_data_sparepart' )->constrained ( 'master_data_sparepart' )->onDelete ( 'cascade' );
-            $table->foreignId ( 'id_master_data_supplier' )->constrained ( 'master_data_supplier' )->onDelete ( 'cascade' );
+            $table->foreignId ( 'id_proyek' )
+                ->constrained ( 'proyek' )
+                ->onDelete ( 'cascade' );
+            $table->foreignId ( 'id_asal_proyek' )
+                ->constrained ( 'proyek' )
+                ->onDelete ( 'cascade' );
+            $table->foreignId ( 'id_spb' )
+                ->constrained ( 'spb' )
+                ->onDelete ( 'cascade' );
+            $table->foreignId ( 'id_master_data_sparepart' )
+                ->unique ()
+                ->constrained ( 'master_data_sparepart' )
+                ->onDelete ( 'cascade' );
+            $table->foreignId ( 'id_master_data_supplier' )
+                ->constrained ( 'master_data_supplier' )
+                ->onDelete ( 'cascade' );
         } );
 
     }

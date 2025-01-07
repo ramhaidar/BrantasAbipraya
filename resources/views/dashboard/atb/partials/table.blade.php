@@ -13,6 +13,13 @@
     </style>
 @endpush
 
+@php
+    function formatRupiah($number)
+    {
+        return 'Rp ' . number_format($number, 0, ',', '.');
+    }
+@endphp
+
 <div class="ibox-body ms-0 ps-0 table-responsive">
     <table class="m-0 table table-bordered table-striped" id="table-data">
         <thead class="table-primary">
@@ -38,17 +45,17 @@
             @foreach ($atbs as $atb)
                 <tr>
                     <td class="text-center spb-number" data-spb="{{ $atb->spb->nomor }}" data-id="{{ $atb->id }}" data-stt="{{ $atb->surat_tanda_terima }}">{{ $atb->spb->nomor }}</td>
-                    <td class="text-center">{{ $atb->tanggal }}</td>
-                    <td class="text-center">{{ $atb->id_master_data_sparepart }}</td>
+                    <td class="text-center">{{ \Carbon\Carbon::parse($atb->tanggal)->translatedFormat('l, d F Y') }}</td>
+                    <td class="text-center">{{ $atb->masterDataSparepart->kategoriSparepart->kode }}: {{ $atb->masterDataSparepart->kategoriSparepart->nama }}</td>
                     <td class="text-center">{{ $atb->masterDataSupplier->nama }}</td>
                     <td class="text-center">{{ $atb->masterDataSparepart->nama }}</td>
                     <td class="text-center">{{ $atb->masterDataSparepart->part_number }}</td>
                     <td class="text-center">{{ $atb->quantity }}</td>
                     <td class="text-center">{{ $atb->detailSpb->satuan }}</td>
-                    <td class="text-center">{{ $atb->harga }}</td>
-                    <td class="text-center">{{ number_format($atb->quantity * $atb->harga, 0, ',', '.') }}</td>
-                    <td class="text-center">{{ number_format($atb->quantity * $atb->harga * 0.11, 0, ',', '.') }}</td>
-                    <td class="text-center">{{ number_format($atb->quantity * $atb->harga * 1.11, 0, ',', '.') }}</td>
+                    <td class="text-center">{{ formatRupiah($atb->harga) }}</td>
+                    <td class="text-center">{{ formatRupiah($atb->quantity * $atb->harga) }}</td>
+                    <td class="text-center">{{ formatRupiah($atb->quantity * $atb->harga * 0.11) }}</td>
+                    <td class="text-center">{{ formatRupiah($atb->quantity * $atb->harga * 1.11) }}</td>
                     <td class="text-center doc-cell" data-id="{{ $atb->id }}">
                         @php
                             $storagePath = storage_path('app/public/' . $atb->dokumentasi_foto);

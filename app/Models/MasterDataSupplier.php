@@ -42,4 +42,21 @@ class MasterDataSupplier extends Model
     {
         return $this->hasMany ( ATB::class, 'id_master_data_supplier' );
     }
+
+    public function saldo () : HasMany
+    {
+        return $this->hasMany ( Saldo::class, 'id_master_data_supplier' );
+    }
+
+    protected static function boot ()
+    {
+        parent::boot ();
+
+        static::deleting ( function ($supplier)
+        {
+            // Add saldo deletion along with other deletions
+            $supplier->saldo ()->delete ();
+            // ...existing deletion code...
+        } );
+    }
 }

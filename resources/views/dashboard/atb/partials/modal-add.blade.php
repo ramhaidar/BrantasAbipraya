@@ -185,6 +185,8 @@
                         url: `/atb/getlinkSpbDetailSpbs/${selectedValue}`,
                         type: 'GET',
                         success: function(response) {
+                            // console.log('Data fetched:', response);
+
                             tableContainer.html(response.html);
                             $('#table-data-modal-add').DataTable({
                                 paging: false,

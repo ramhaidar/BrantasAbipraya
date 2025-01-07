@@ -55,4 +55,20 @@ class MasterDataSparepart extends Model
     {
         return $this->hasMany ( ATB::class, 'id_master_data_sparepart' );
     }
+
+    public function saldo(): HasMany 
+    {
+        return $this->hasMany(Saldo::class, 'id_master_data_sparepart');
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function($sparepart) {
+            // Add saldo deletion to existing deletions
+            $sparepart->saldo()->delete();
+            // ...existing deletion code...
+        });
+    }
 }

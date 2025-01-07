@@ -64,6 +64,11 @@ class SPB extends Model
         return $this->hasMany ( ATB::class, 'id_spb' );
     }
 
+    public function saldo () : HasMany
+    {
+        return $this->hasMany ( Saldo::class, 'id_spb' );
+    }
+
     protected static function boot ()
     {
         parent::boot ();
@@ -72,6 +77,7 @@ class SPB extends Model
         {
             $spb->linkSpbDetailSpb ()->delete ();
             $spb->linkRkbSpbs ()->delete ();
+            $spb->saldo ()->delete (); // Add deletion of related saldo records
         } );
     }
 }

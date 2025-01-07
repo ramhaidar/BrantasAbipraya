@@ -201,6 +201,14 @@ Route::middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )
 
         Route::get ( '/import', [ ATBController::class, 'showImportForm' ] )
             ->name ( 'import' );
+
+        Route::get ( '/stt/{id}', [ ATBController::class, 'getStt' ] )
+            ->where ( 'id', '[0-9]+' )
+            ->name ( 'stt' );
+
+        Route::get ( '/dokumentasi/{id}', [ ATBController::class, 'getDokumentasi' ] )
+            ->where ( 'id', '[0-9]+' )
+            ->name ( 'dokumentasi' );
     } );
 
 // Rute APB [APBController]
@@ -430,12 +438,12 @@ Route::prefix ( 'ajax' )->group ( function ()
 //     ->name ( 'dashboard.filter' );
 
 // Route untuk mengakses dokumentasi [Security Purpose]
-Route::get (
-    '/dokumentasi/atb/{filename}',
-    [ ATBController::class, 'showDokumentasi' ]
-)
-    ->name ( 'atb.dokumentasi' )
-    ->middleware ( 'auth' );
+// Route::get (
+//     '/dokumentasi/atb/{filename}',
+//     [ ATBController::class, 'showDokumentasi' ]
+// )
+//     ->name ( 'atb.dokumentasi' )
+//     ->middleware ( 'auth' );
 
 Route::get (
     '/apb/dokumentasi/{filename}',

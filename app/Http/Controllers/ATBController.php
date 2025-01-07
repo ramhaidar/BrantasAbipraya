@@ -291,14 +291,11 @@ class ATBController extends Controller
         {
             DB::beginTransaction ();
 
-            $atb      = ATB::findOrFail ( $id );
-            $nomorSpb = $atb->spb->nomor;
+            $atb              = ATB::findOrFail ( $id );
+            $suratTandaTerima = $atb->surat_tanda_terima;
 
-            // Find all ATB records with the same Nomor SPB
-            $atbs = ATB::whereHas ( 'spb', function ($query) use ($nomorSpb)
-            {
-                $query->where ( 'nomor', $nomorSpb );
-            } )->get ();
+            // Find all ATB records with the same Surat Tanda Terima
+            $atbs = ATB::where ( 'surat_tanda_terima', $suratTandaTerima )->get ();
 
             foreach ( $atbs as $atb )
             {
@@ -307,10 +304,6 @@ class ATBController extends Controller
                 {
                     Storage::disk ( 'public' )->deleteDirectory ( $atb->dokumentasi_foto );
                 }
-                if ( $atb->surat_tanda_terima )
-                {
-                    Storage::disk ( 'public' )->delete ( $atb->surat_tanda_terima );
-                }
 
                 // Restore quantity_belum_diterima for the corresponding DetailSPB
                 $detailSpb = DetailSPB::find ( $atb->id_detail_spb );
@@ -318,6 +311,12 @@ class ATBController extends Controller
 
                 // Delete the ATB record
                 $atb->delete ();
+            }
+
+            // Delete the shared surat_tanda_terima file
+            if ( $suratTandaTerima )
+            {
+                Storage::disk ( 'public' )->delete ( $suratTandaTerima );
             }
 
             DB::commit ();
@@ -329,5 +328,61 @@ class ATBController extends Controller
             DB::rollBack ();
             return back ()->withErrors ( [ 'error' => 'Gagal menghapus data ATB: ' . $e->getMessage () ] );
         }
+    }
+
+    public function getStt ( $id )
+    {
+        try
+        {
+            $atb = ATB::findOrFail ( $id );
+
+            // Check if STT exists
+            if ( ! $atb->surat_tanda_terima || ! file_exists ( storage_path ( 'app/public/' . $atb->surat_tanda_terima ) ) )
+            {
+                return response ()->json ( [ 
+                    'success' => false,
+                    'message' => 'STT tidak ditemukan'
+                ], 404 );
+            }
+
+            // Return PDF URL
+            return response ()->json ( [ 
+                'success' => true,
+                'pdf_url' => asset ( 'storage/' . $atb->surat_tanda_terima )
+            ] );
+        }
+        catch ( \Exception $e )
+        {
+            return response ()->json ( [ 
+                'success' => false,
+                'message' => 'Error fetching STT: ' . $e->getMessage ()
+            ], 500 );
+        }
+    }
+
+    public function getDokumentasi ( $id )
+    {
+        $atb         = ATB::findOrFail ( $id );
+        $dokumentasi = [];
+
+        // Update the path to check the storage path instead of public path
+        $storagePath = storage_path ( 'app/public/' . $atb->dokumentasi_foto );
+
+        if ( $atb->dokumentasi_foto && is_dir ( $storagePath ) )
+        {
+            // Get all image files from directory
+            $files = glob ( $storagePath . '/*.{jpg,jpeg,png}', GLOB_BRACE );
+
+            foreach ( $files as $file )
+            {
+                // Convert full system path to relative public path
+                $relativePath  = 'storage/' . $atb->dokumentasi_foto . '/' . basename ( $file );
+                $dokumentasi[] = $relativePath;
+            }
+        }
+
+        return response ()->json ( [ 
+            'dokumentasi' => $dokumentasi
+        ] );
     }
 }

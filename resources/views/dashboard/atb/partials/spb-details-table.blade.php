@@ -27,6 +27,7 @@
         <tbody>
             @foreach ($spbDetails as $detail)
                 @if ($detail->quantity_belum_diterima > 0)
+                    @php $validIndex = $loop->index; @endphp
                     <tr>
                         <td class="text-center">{{ $detail->MasterDataSparepart->nama }}</td>
                         <td class="text-center">{{ $detail->MasterDataSparepart->merk }}</td>

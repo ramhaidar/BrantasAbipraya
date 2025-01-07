@@ -23,11 +23,17 @@ class Saldo extends Model
     ];
 
     protected $casts = [ 
-        'id'         => 'integer',
-        'quantity'   => 'integer',
-        'harga'      => 'integer',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
+        'id'                       => 'integer',
+        'tipe'                     => 'string',
+        'quantity'                 => 'integer',
+        'harga'                    => 'integer',
+        'id_proyek'                => 'integer',
+        'id_asal_proyek'           => 'integer',
+        'id_spb'                   => 'integer',
+        'id_master_data_sparepart' => 'integer',
+        'id_master_data_supplier'  => 'integer',
+        'created_at'               => 'datetime',
+        'updated_at'               => 'datetime',
     ];
 
     public function proyek ()

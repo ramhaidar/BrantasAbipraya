@@ -24,6 +24,7 @@ return new class extends Migration
                 ->constrained ( 'proyek' )
                 ->onDelete ( 'cascade' );
             $table->foreignId ( 'id_asal_proyek' )
+                ->nullable ()
                 ->constrained ( 'proyek' )
                 ->onDelete ( 'cascade' );
             $table->foreignId ( 'id_spb' )

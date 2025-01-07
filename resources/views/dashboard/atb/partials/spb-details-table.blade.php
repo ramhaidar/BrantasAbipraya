@@ -38,13 +38,13 @@
                             <input name="id_master_data_sparepart[]" type="hidden" value="{{ $detail->id_master_data_sparepart }}">
                             <input name="id_master_data_supplier[]" type="hidden" value="{{ $detail->linkSpbDetailSpb[0]->spb->masterDataSupplier->id }}">
                             <input name="harga[]" type="hidden" value="{{ $detail->harga }}">
-                            <input class="form-control text-center quantity-input" name="quantity[]" type="number" value="0" min="0" max="{{ $detail->quantity_belum_diterima }}" required>
+                            <input class="form-control text-center quantity-input" name="quantity[]" type="number" value="0" required>
                         </td>
                         <td class="text-center">
                             <button class="btn btn-primary" id="upload-btn-{{ $detail->id }}" type="button" onclick="document.getElementById('documentation_photos_{{ $detail->id }}').click()">
                                 <i class="bi bi-upload"></i>
                             </button>
-                            <input class="form-control d-none" id="documentation_photos_{{ $detail->id }}" name="documentation_photos[{{ $validIndex }}][]" type="file" accept="image/*" multiple required onchange="updateButtonClass({{ $detail->id }})">
+                            <input class="form-control d-none documentation-photos" id="documentation_photos_{{ $detail->id }}" name="documentation_photos[{{ $validIndex }}][]" type="file" accept="image/*" multiple onchange="updateButtonClass({{ $detail->id }})">
                         </td>
                     </tr>
                 @endif

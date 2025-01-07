@@ -1,6 +1,6 @@
 <!-- Modal for STT -->
 <div class="fade modal" id="modalForSTT" aria-hidden="true" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content rounded-4">
             <div class="pt-3 px-3 m-0 d-flex w-100 justify-content-between">
                 <h5 class="modal-title w-100 pb-2" id="modalForSTTLabel">Surat Tanda Terima</h5>

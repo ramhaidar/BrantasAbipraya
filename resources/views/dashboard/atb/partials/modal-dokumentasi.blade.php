@@ -1,6 +1,6 @@
 <!-- Modal for Documentation -->
 <div class="modal fade" id="dokumentasiModal" aria-labelledby="dokumentasiModalLabel" aria-hidden="true" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="dokumentasiModalLabel">Dokumentasi</h5>

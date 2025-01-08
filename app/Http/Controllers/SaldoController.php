@@ -110,4 +110,18 @@ class SaldoController extends Controller
             throw $e;
         }
     }
+
+    public function decrementQuantity($id, $amount)
+    {
+        $saldo = Saldo::findOrFail($id);
+        
+        if ($saldo->quantity < $amount) {
+            throw new \Exception('Stok tidak mencukupi');
+        }
+
+        $saldo->quantity -= $amount;
+        $saldo->save();
+
+        return $saldo;
+    }
 }

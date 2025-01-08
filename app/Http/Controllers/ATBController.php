@@ -277,8 +277,6 @@ class ATBController extends Controller
                         'satuan'                   => $request->satuan[ $index ] // New column
                     ] );
 
-                    $this->console ( "TEST" );
-
                     // Create corresponding Saldo record
                     $saldoController->store ( [ 
                         'tipe'                     => $request->tipe,

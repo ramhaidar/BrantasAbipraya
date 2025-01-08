@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AlatProyek;
 use App\Models\APB;
 use App\Models\RKB;
 use App\Models\Proyek;
+use App\Models\Alat;
+use App\Models\Saldo;
 use Illuminate\Http\Request;
+use App\Models\MasterDataSparepart;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
 
 class APBController extends Controller
 {
@@ -53,6 +58,18 @@ class APBController extends Controller
 
         $proyek = Proyek::with ( "users" )->find ( $id_proyek );
 
+        // Get alat data for this project
+        $alats = AlatProyek::where ( 'id_proyek', $id_proyek )->get ();
+
+        // Replace the spareparts query with this
+        $spareparts = Saldo::where ( 'quantity', '>', 0 )
+            ->with ( [ 'masterDataSparepart', 'atb' ] )
+            ->whereHas ( 'atb' )
+            ->get ()
+            ->sortBy ( 'atb.tanggal' );
+
+        // dd ( $spareparts );
+
         $proyeks = Proyek::with ( "users" )
             ->orderBy ( "updated_at", "asc" )
             ->orderBy ( "id", "asc" )
@@ -97,7 +114,8 @@ class APBController extends Controller
         $apbs = APB::with ( [ 
             'masterDataSparepart',
             'masterDataSupplier',
-            'proyek'
+            'proyek',
+            'alatProyek'
         ] )
             ->where ( 'id_proyek', $id_proyek )
             ->where ( 'tipe', $tipe )
@@ -105,11 +123,75 @@ class APBController extends Controller
 
         return view ( "dashboard.apb.apb", [ 
             "proyek"     => $proyek,
+            "alats"      => $alats,
+            "spareparts" => $spareparts,
             "proyeks"    => $proyeks,
             "spbs"       => $filteredSpbs,
             "headerPage" => $proyek->nama,
             "page"       => $pageTitle,
             "apbs"       => $apbs,
         ] );
+    }
+
+    public function store ( Request $request )
+    {
+        // Validate request
+        $validated = $request->validate ( [ 
+            'tanggal'                  => 'required|date',
+            'id_proyek'                => 'required|exists:proyek,id',
+            'id_alat'                  => 'required|exists:alat_proyek,id',
+            'id_master_data_sparepart' => 'required|exists:master_data_sparepart,id',
+            'quantity'                 => 'required|integer|min:1',
+            'tipe'                     => 'required|string',
+            'root_cause'               => 'required|string|in:pemeliharaan,repair,rusak,tambah,tersumbat',
+            'mekanik'                  => 'required|string|max:255'
+        ] );
+
+        try
+        {
+            // Start transaction
+            DB::beginTransaction ();
+
+            // Find the saldo with available quantity
+            $saldo = Saldo::where ( 'id_master_data_sparepart', $request->id_master_data_sparepart )
+                ->where ( 'quantity', '>', 0 )
+                ->orderBy ( 'id', 'asc' )
+                ->firstOrFail ();
+
+            // Check if requested quantity is available
+            if ( $saldo->quantity < $request->quantity )
+            {
+                throw new \Exception( 'Stok sparepart tidak mencukupi.' );
+            }
+
+            // Create APB record
+            $apb = APB::create ( [ 
+                'tanggal'                  => $request->tanggal,
+                'tipe'                     => $request->tipe,
+                'root_cause'               => $request->root_cause,
+                'mekanik'                  => $request->mekanik,
+                'quantity'                 => $request->quantity,
+                'id_saldo'                 => $saldo->id,
+                'id_proyek'                => $request->id_proyek,
+                'id_master_data_sparepart' => $request->id_master_data_sparepart,
+                'id_master_data_supplier'  => $saldo->id_master_data_supplier,
+                'id_alat_proyek'           => $request->id_alat
+            ] );
+
+            // Call SaldoController to decrement quantity
+            app ( SaldoController::class)->decrementQuantity ( $saldo->id, $request->quantity );
+
+            DB::commit ();
+
+            return redirect ()->back ()
+                ->with ( 'success', 'Data APB berhasil ditambahkan.' );
+
+        }
+        catch ( \Exception $e )
+        {
+            DB::rollBack ();
+            return redirect ()->back ()
+                ->with ( 'error', 'Gagal menambahkan data APB: ' . $e->getMessage () );
+        }
     }
 }

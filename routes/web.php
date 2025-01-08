@@ -212,102 +212,127 @@ Route::middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )
     } );
 
 // Rute APB [APBController]
-Route::prefix ( 'apb' )
-    ->middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )
+Route::middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )
+    ->prefix ( 'apb' )
+    ->as ( 'apb.' )
     ->group ( function ()
     {
+
         Route::get ( '/', [ APBController::class, 'index' ] )
             ->name ( 'apb' );
 
-        Route::get ( '/ex_panjar_unit_alat', [ APBController::class, 'ex_panjar_unit_alat' ] )
-            ->name ( 'apb_ex_panjar_unit_alat' );
+        Route::get ( '/getlinkSpbDetailSpbs/{id}', [ APBController::class, 'getlinkSpbDetailSpbs' ] )
+            ->name ( 'getlinkSpbDetailSpbs' );
 
-        Route::get ( '/ex_panjar_unit_alat/add', [ APBController::class, 'data_baru_ex_panjar_unit_alat' ] )
-            ->name ( 'data_baru_ex_panjar_unit_alat' );
+        // Hutang Unit Alat Routes
+        Route::prefix ( 'hutang_unit_alat' )
+            ->group ( function ()
+        {
+            Route::get ( '/', [ APBController::class, 'hutang_unit_alat' ] )
+                ->name ( 'hutang_unit_alat' );
 
-        Route::get ( '/ex_panjar_unit_alat/{atb}', [ APBController::class, 'showByID' ] )
-            ->name ( 'apb.showAPBByID' );
+            Route::get ( '/add', [ APBController::class, 'data_baru_hutang_unit_alat' ] )
+                ->name ( 'new.hutang_unit_alat' );
 
-        Route::get ( '/ex_panjar_unit_alat/apb/{apb}', [ APBController::class, 'getAPBbyID' ] )
-            ->name ( 'apb.showAPBByID' );
+            Route::get ( '/{apb}', [ APBController::class, 'showByID' ] )
+                ->name ( 'show.hutang_unit_alat_by_id' );
 
-        Route::post ( '/ex_panjar_unit_alat/edit/actions/{id}', [ APBController::class, 'update' ] )
-            ->name ( 'apb.post.update.ex_panjar_unit_alat' );
+            Route::post ( '/edit/actions/{id}', [ APBController::class, 'update' ] )
+                ->name ( 'post.update.hutang_unit_alat' );
 
-        Route::delete ( '/ex_panjar_unit_alat/actions/{id}', [ APBController::class, 'destroy' ] )
-            ->name ( 'apb.delete.destroy.ex_panjar_unit_alat' );
+            Route::delete ( '/actions/{id}', [ APBController::class, 'destroy' ] )
+                ->name ( 'delete.destroy.hutang_unit_alat' );
+        } );
 
-        Route::get ( '/ex_panjar_proyek', [ APBController::class, 'ex_panjar_proyek' ] )
-            ->name ( 'apb_ex_panjar_proyek' );
+        // Panjar Unit Alat Routes 
+        Route::prefix ( 'panjar_unit_alat' )->group ( function ()
+        {
+            Route::get ( '/', [ APBController::class, 'panjar_unit_alat' ] )
+                ->name ( 'panjar_unit_alat' );
 
-        Route::get ( '/ex_panjar_proyek/add', [ APBController::class, 'data_baru_ex_panjar_proyek' ] )
-            ->name ( 'data_baru_ex_panjar_proyek' );
+            Route::get ( '/add', [ APBController::class, 'data_baru_panjar_unit_alat' ] )
+                ->name ( 'new.panjar_unit_alat' );
 
-        Route::get ( '/ex_panjar_proyek/{atb}', [ APBController::class, 'showByID' ] )
-            ->name ( 'apb.showAPBByID' );
+            Route::get ( '/{apb}', [ APBController::class, 'showByID' ] )
+                ->name ( 'show.panjar_unit_alat_by_id' );
 
-        Route::get ( '/ex_panjar_proyek/apb/{apb}', [ APBController::class, 'getAPBbyID' ] )
-            ->name ( 'apb.showAPBByID' );
+            Route::post ( '/edit/actions/{id}', [ APBController::class, 'update' ] )
+                ->name ( 'post.update.panjar_unit_alat' );
 
-        Route::post ( '/ex_panjar_proyek/edit/actions/{id}', [ APBController::class, 'update' ] )
-            ->name ( 'apb.post.update.ex_panjar_proyek' );
+            Route::delete ( '/actions/{id}', [ APBController::class, 'destroy' ] )
+                ->name ( 'delete.destroy.panjar_unit_alat' );
+        } );
 
-        Route::delete ( '/ex_panjar_proyek/actions/{id}', [ APBController::class, 'destroy' ] )
-            ->name ( 'apb.delete.destroy.ex_panjar_proyek' );
+        // Mutasi Proyek Routes
+        Route::prefix ( 'mutasi_proyek' )->group ( function ()
+        {
+            Route::get ( '/', [ APBController::class, 'mutasi_proyek' ] )
+                ->name ( 'mutasi_proyek' );
 
-        Route::get ( '/ex_unit_alat', [ APBController::class, 'ex_unit_alat' ] )
-            ->name ( 'apb_ex_unit_alat' );
+            Route::get ( '/add', [ APBController::class, 'data_baru_mutasi_proyek' ] )
+                ->name ( 'new.mutasi_proyek' );
 
-        Route::get ( '/ex_unit_alat/add', [ APBController::class, 'data_baru_ex_unit_alat' ] )
-            ->name ( 'data_baru_ex_unit_alat' );
+            Route::get ( '/{apb}', [ APBController::class, 'showByID' ] )
+                ->name ( 'show.mutasi_proyek_by_id' );
 
-        Route::get ( '/ex_unit_alat/{atb}', [ APBController::class, 'showByID' ] )
-            ->name ( 'apb.showAPBByID' );
+            Route::post ( '/edit/actions/{id}', [ APBController::class, 'update' ] )
+                ->name ( 'post.update.mutasi_proyek' );
 
-        Route::get ( '/ex_unit_alat/apb/{apb}', [ APBController::class, 'getAPBbyID' ] )
-            ->name ( 'apb.showAPBByID' );
+            Route::delete ( '/actions/{id}', [ APBController::class, 'destroy' ] )
+                ->name ( 'delete.destroy.mutasi_proyek' );
+        } );
 
-        Route::post ( '/ex_unit_alat/edit/actions/{id}', [ APBController::class, 'update' ] )
-            ->name ( 'apb.post.update.ex_unit_alat' );
+        // Panjar Proyek Routes
+        Route::prefix ( 'panjar_proyek' )->group ( function ()
+        {
+            Route::get ( '/', [ APBController::class, 'panjar_proyek' ] )
+                ->name ( 'panjar_proyek' );
 
-        Route::delete ( '/ex_unit_alat/actions/{id}', [ APBController::class, 'destroy' ] )
-            ->name ( 'apb.delete.destroy.ex_unit_alat' );
+            Route::get ( '/add', [ APBController::class, 'data_baru_panjar_proyek' ] )
+                ->name ( 'new.panjar_proyek' );
 
-        Route::get ( '/ex_mutasi_saldo', [ APBController::class, 'ex_mutasi_saldo' ] )
-            ->name ( 'apb_ex_mutasi_saldo' );
+            Route::get ( '/{apb}', [ APBController::class, 'showByID' ] )
+                ->name ( 'show.panjar_proyek_by_id' );
 
-        Route::get ( '/ex_mutasi_saldo/add', [ APBController::class, 'data_baru_ex_mutasi_saldo' ] )
-            ->name ( 'data_baru_ex_mutasi_saldo' );
+            Route::post ( '/edit/actions/{id}', [ APBController::class, 'update' ] )
+                ->name ( 'post.update.panjar_proyek' );
 
-        Route::get ( '/ex_mutasi_saldo/{atb}', [ APBController::class, 'showByID' ] )
-            ->name ( 'apb.showAPBByID' );
+            Route::delete ( '/actions/{id}', [ APBController::class, 'destroy' ] )
+                ->name ( 'delete.destroy.panjar_proyek' );
+        } );
 
-        Route::get ( '/ex_mutasi_saldo/apb/{apb}', [ APBController::class, 'getAPBbyID' ] )
-            ->name ( 'apb.showAPBByID' );
-
-        Route::post ( '/ex_mutasi_saldo/edit/actions/{id}', [ APBController::class, 'update' ] )
-            ->name ( 'apb.post.update.ex_mutasi_saldo' );
-
-        Route::delete ( '/ex_mutasi_saldo/actions/{id}', [ APBController::class, 'destroy' ] )
-            ->name ( 'apb.delete.destroy.ex_mutasi_saldo' );
-
+        // General APB Routes
         Route::get ( '/add', [ APBController::class, 'data_baru_apb' ] )
-            ->name ( 'data_baru_apb' );
+            ->name ( 'new' );
 
         Route::post ( '/store', [ APBController::class, 'store' ] )
-            ->name ( 'apb.post.store' );
+            ->name ( 'post.store' );
 
-        Route::get ( '/actions/{id}', [ APBController::class, 'show' ] )
-            ->name ( 'apb.show' );
-
-        Route::put ( '/actions/{id}', [ APBController::class, 'update' ] )
-            ->name ( 'apb.post.update' );
+        Route::post ( '/actions/{id}', [ APBController::class, 'update' ] )
+            ->name ( 'post.update' );
 
         Route::delete ( '/actions/{id}', [ APBController::class, 'destroy' ] )
-            ->name ( 'apb.delete.destroy' );
+            ->name ( 'destroy' );
 
         Route::get ( '/delapb/actions/{id}', [ APBController::class, 'destroy' ] )
-            ->name ( 'apb.del.test' );
+            ->name ( 'del.test' );
+
+        Route::get ( '/export', [ APBController::class, 'export' ] )
+            ->name ( 'export' );
+
+        Route::post ( '/import', [ APBController::class, 'import' ] )
+            ->name ( 'import.post' );
+
+        Route::get ( '/import', [ APBController::class, 'showImportForm' ] )
+            ->name ( 'import' );
+
+        Route::get ( '/stt/{id}', [ APBController::class, 'getStt' ] )
+            ->where ( 'id', '[0-9]+' )
+            ->name ( 'stt' );
+
+        Route::get ( '/dokumentasi/{id}', [ APBController::class, 'getDokumentasi' ] )
+            ->where ( 'id', '[0-9]+' )
+            ->name ( 'dokumentasi' );
     } );
 
 // Rute Saldo [SaldoController]

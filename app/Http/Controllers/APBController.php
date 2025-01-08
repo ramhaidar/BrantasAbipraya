@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ATB;
+use App\Models\APB;
 use App\Models\RKB;
 use App\Models\Proyek;
 use Illuminate\Http\Request;
@@ -14,7 +14,7 @@ class APBController extends Controller
     {
         return $this->showApbPage (
             "Hutang Unit Alat",
-            "Data ATB Hutang Unit Alat",
+            "Data APB EX Unit Alat",
             $request->id_proyek
         );
     }
@@ -23,7 +23,7 @@ class APBController extends Controller
     {
         return $this->showApbPage (
             "Panjar Unit Alat",
-            "Data ATB Panjar Unit Alat",
+            "Data APB Ex Panjar Unit Alat",
             $request->id_proyek
         );
     }
@@ -32,7 +32,7 @@ class APBController extends Controller
     {
         return $this->showApbPage (
             "Mutasi Proyek",
-            "Data ATB Mutasi Proyek",
+            "Data APB EX Mutasi Proyek",
             $request->id_proyek
         );
     }
@@ -41,7 +41,7 @@ class APBController extends Controller
     {
         return $this->showApbPage (
             "Panjar Proyek",
-            "Data ATB Panjar Proyek",
+            "Data APB EX Panjar Proyek",
             $request->id_proyek
         );
     }
@@ -94,8 +94,11 @@ class APBController extends Controller
             }
         }
 
-        // Ambil data ATB dari database dengan relasi
-        $atbs = ATB::with ( [ 'spb', 'masterDataSparepart' ] )
+        $apbs = APB::with ( [ 
+            'masterDataSparepart',
+            'masterDataSupplier',
+            'proyek'
+        ] )
             ->where ( 'id_proyek', $id_proyek )
             ->where ( 'tipe', $tipe )
             ->get ();
@@ -106,7 +109,7 @@ class APBController extends Controller
             "spbs"       => $filteredSpbs,
             "headerPage" => $proyek->nama,
             "page"       => $pageTitle,
-            "atbs"       => $atbs, // Kirim data ATB ke view
+            "apbs"       => $apbs,
         ] );
     }
 }

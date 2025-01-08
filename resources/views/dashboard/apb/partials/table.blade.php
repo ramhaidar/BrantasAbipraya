@@ -29,31 +29,29 @@
     <table class="m-0 table table-bordered table-striped" id="table-data">
         <thead class="table-primary">
             <tr>
-                <th class="text-center">Nomor SPB</th>
                 <th class="text-center">Tanggal</th>
-                <th class="text-center">Kode</th>
-                <th class="text-center">Supplier</th>
+                <th class="text-center">Tipe</th>
+                <th class="text-center">Root Cause</th>
+                <th class="text-center">Mekanik</th>
                 <th class="text-center">Sparepart</th>
                 <th class="text-center">Part Number</th>
+                <th class="text-center">Supplier</th>
                 <th class="text-center">Quantity</th>
                 <th class="text-center">Satuan</th>
-                <th class="text-center">Harga</th>
-                <th class="text-center">Net</th>
             </tr>
         </thead>
         <tbody>
-            @foreach ($saldos as $saldo)
+            @foreach ($apbs as $apb)
                 <tr>
-                    <td class="text-center">{{ $saldo->spb->nomor ?? '-' }}</td>
-                    <td class="text-center">{{ formatTanggal($saldo->created_at) }}</td>
-                    <td class="text-center">{{ $saldo->masterDataSparepart->kategoriSparepart->kode }}: {{ $saldo->masterDataSparepart->kategoriSparepart->nama }}</td>
-                    <td class="text-center">{{ $saldo->masterDataSupplier->nama ?? '-' }}</td>
-                    <td class="text-center">{{ $saldo->masterDataSparepart->nama ?? '-' }}</td>
-                    <td class="text-center">{{ $saldo->masterDataSparepart->part_number ?? '-' }}</td>
-                    <td class="text-center">{{ $saldo->quantity }}</td>
-                    <td class="text-center">{{ $saldo->satuan ?? '-' }}</td>
-                    <td class="text-center">{{ formatRupiah($saldo->harga) }}</td>
-                    <td class="text-center">{{ formatRupiah($saldo->quantity * $saldo->harga) }}</td>
+                    <td class="text-center">{{ formatTanggal($apb->tanggal) }}</td>
+                    <td class="text-center">{{ ucwords(str_replace('-', ' ', $apb->tipe)) }}</td>
+                    <td class="text-center">{{ $apb->root_cause ?? '-' }}</td>
+                    <td class="text-center">{{ $apb->mekanik ?? '-' }}</td>
+                    <td class="text-center">{{ $apb->masterDataSparepart->nama ?? '-' }}</td>
+                    <td class="text-center">{{ $apb->masterDataSparepart->part_number ?? '-' }}</td>
+                    <td class="text-center">{{ $apb->masterDataSupplier->nama ?? '-' }}</td>
+                    <td class="text-center">{{ $apb->quantity }}</td>
+                    <td class="text-center">{{ $apb->masterDataSparepart->satuan ?? '-' }}</td>
                 </tr>
             @endforeach
         </tbody>

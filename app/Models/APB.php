@@ -10,7 +10,7 @@ class APB extends Model
 {
     use HasFactory;
 
-    protected $table = 'atb';
+    protected $table = 'apb';
 
     protected $fillable = [ 
         'tipe',

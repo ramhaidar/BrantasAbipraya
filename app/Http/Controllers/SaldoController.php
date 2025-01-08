@@ -62,7 +62,7 @@ class SaldoController extends Controller
             "proyek"     => $proyek,
             "proyeks"    => $proyeks,
             "saldos"     => $saldos,
-            "headerPage" => $proyek->nama_proyek,
+            "headerPage" => $proyek->nama,
             "page"       => $pageTitle,
         ] );
     }

@@ -23,9 +23,10 @@ return new class extends Migration
             // Foreign keys
             $table->foreignId ( 'id_atb' )
                 ->unique ()
-                ->constrained ( 'proyek' )
+                ->constrained ( 'atb' )
                 ->onDelete ( 'cascade' );
             $table->foreignId ( 'id_proyek' )
+                ->nullable ()
                 ->constrained ( 'proyek' )
                 ->onDelete ( 'cascade' );
             $table->foreignId ( 'id_asal_proyek' )

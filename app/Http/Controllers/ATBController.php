@@ -51,12 +51,6 @@ class ATBController extends Controller
         );
     }
 
-    protected function console ( $message )
-    {
-        $output = new \Symfony\Component\Console\Output\ConsoleOutput();
-        $output->writeln ( $message );
-    }
-
     private function showAtbPage ( $tipe, $pageTitle, $id_proyek )
     {
         // Ubah nilai $tipe menjadi huruf kecil dan ganti spasi dengan tanda hubung
@@ -115,7 +109,7 @@ class ATBController extends Controller
             "proyek"     => $proyek,
             "proyeks"    => $proyeks,
             "spbs"       => $filteredSpbs,
-            "headerPage" => $proyek->nama_proyek,
+            "headerPage" => $proyek->nama,
             "page"       => $pageTitle,
             "atbs"       => $atbs, // Kirim data ATB ke view
         ] );

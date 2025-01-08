@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class MasterDataSparepart extends Model
 {
@@ -56,19 +57,25 @@ class MasterDataSparepart extends Model
         return $this->hasMany ( ATB::class, 'id_master_data_sparepart' );
     }
 
-    public function saldo(): HasMany 
+    public function saldos () : HasMany
     {
-        return $this->hasMany(Saldo::class, 'id_master_data_sparepart');
+        return $this->hasMany ( Saldo::class, 'id_master_data_sparepart' );
     }
 
-    protected static function boot()
+    public function apbs () : HasMany
     {
-        parent::boot();
+        return $this->hasMany ( APB::class, 'id_master_data_sparepart' );
+    }
 
-        static::deleting(function($sparepart) {
+    protected static function boot ()
+    {
+        parent::boot ();
+
+        static::deleting ( function ($sparepart)
+        {
             // Add saldo deletion to existing deletions
-            $sparepart->saldo()->delete();
+            $sparepart->saldo ()->delete ();
             // ...existing deletion code...
-        });
+        } );
     }
 }

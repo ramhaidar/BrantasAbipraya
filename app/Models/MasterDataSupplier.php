@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class MasterDataSupplier extends Model
 {
@@ -43,9 +44,14 @@ class MasterDataSupplier extends Model
         return $this->hasMany ( ATB::class, 'id_master_data_supplier' );
     }
 
-    public function saldo () : HasMany
+    public function saldos () : HasMany
     {
         return $this->hasMany ( Saldo::class, 'id_master_data_supplier' );
+    }
+
+    public function apbs () : HasMany
+    {
+        return $this->hasMany ( APB::class, 'id_master_data_supplier' );
     }
 
     protected static function boot ()

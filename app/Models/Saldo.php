@@ -69,4 +69,9 @@ class Saldo extends Model
     {
         return $this->belongsTo ( ATB::class, 'id_atb' );
     }
+
+    public function apb ()
+    {
+        return $this->hasOne ( APB::class, 'id_saldo' );
+    }
 }

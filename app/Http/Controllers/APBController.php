@@ -100,7 +100,7 @@ class APBController extends Controller
             ->where ( 'tipe', $tipe )
             ->get ();
 
-        return view ( "dashboard.atb.atb", [ 
+        return view ( "dashboard.apb.apb", [ 
             "proyek"     => $proyek,
             "proyeks"    => $proyeks,
             "spbs"       => $filteredSpbs,

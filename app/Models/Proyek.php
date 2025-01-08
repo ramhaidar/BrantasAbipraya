@@ -58,12 +58,9 @@ class Proyek extends Model
         return $this->hasMany ( APB::class, 'id_tujuan_proyek' );
     }
 
-    public function apbs ()
+    public function apbs () : HasMany
     {
-        return APB::whereIn ( 'id_saldo', function ($query)
-        {
-            $query->select ( 'id_saldo' )->from ( 'atb' )->where ( 'id_proyek', $this->id );
-        } )->get ();
+        return $this->hasMany ( APB::class, 'id_proyek' );
     }
 
     public function masterDataAlats ()
@@ -78,7 +75,7 @@ class Proyek extends Model
         return $this->hasMany ( MasterDataAlat::class, 'id_proyek_current' );
     }
 
-    public function saldo () : HasMany
+    public function saldos () : HasMany
     {
         return $this->hasMany ( Saldo::class, 'id_proyek' );
     }

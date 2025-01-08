@@ -348,15 +348,15 @@
                                                         </a>
                                                     </li>
                                                     <li class="nav-item">
-                                                        <a class="ps-5 nav-link level-2 {{ str_contains($page, 'Data APB EX Panjar Unit Alat') && str_contains($headerPage, $item->nama) ? 'active' : '' }}" href="{{ route('apb.panjar_unit_alat', ['id_proyek' => $item->id]) }}" style="{{ str_contains($page, 'Data APB EX Panjar Unit Alat') && str_contains($headerPage, $item->nama) ? 'background-color: #D3D3D3; color: #000000;' : '' }}">
-                                                            <i class="bi me-2 nav-icon fs-5 bi-currency-dollar"></i>
-                                                            <p>EX Panjar Unit Alat</p>
-                                                        </a>
-                                                    </li>
-                                                    <li class="nav-item">
                                                         <a class="ps-5 nav-link level-2 {{ str_contains($page, 'Data APB EX Mutasi Saldo') && str_contains($headerPage, $item->nama) ? 'active' : '' }}" href="{{ route('apb.mutasi_proyek', ['id_proyek' => $item->id]) }}" style="{{ str_contains($page, 'Data APB EX Mutasi Saldo') && str_contains($headerPage, $item->nama) ? 'background-color: #D3D3D3; color: #000000;' : '' }}">
                                                             <i class="bi me-2 nav-icon fs-5 bi-arrow-left-right"></i>
                                                             <p>EX Mutasi Saldo</p>
+                                                        </a>
+                                                    </li>
+                                                    <li class="nav-item">
+                                                        <a class="ps-5 nav-link level-2 {{ str_contains($page, 'Data APB EX Panjar Unit Alat') && str_contains($headerPage, $item->nama) ? 'active' : '' }}" href="{{ route('apb.panjar_unit_alat', ['id_proyek' => $item->id]) }}" style="{{ str_contains($page, 'Data APB EX Panjar Unit Alat') && str_contains($headerPage, $item->nama) ? 'background-color: #D3D3D3; color: #000000;' : '' }}">
+                                                            <i class="bi me-2 nav-icon fs-5 bi-currency-dollar"></i>
+                                                            <p>EX Panjar Unit Alat</p>
                                                         </a>
                                                     </li>
                                                     <li class="nav-item">
@@ -449,268 +449,197 @@
 
     <script>
         $(document).ready(function() {
+
             function toProperCase(text) {
                 return text.replace(/\w\S*/g, function(word) {
                     return word.charAt(0).toUpperCase() + word.substr(1).toLowerCase();
                 });
             }
 
-            const truncateLength = 13;
+            function initializeTooltip() {
+                const truncateLength = 13;
 
-            $(".truncate-text .text-content").each(function() {
-                let text = $(this).text().trim();
-                if (text.length > truncateLength) {
-                    const truncatedText = text.substring(0, truncateLength) + '...';
-                    $(this).text(truncatedText);
-                    $(this).attr('data-bs-toggle', 'tooltip');
-                    $(this).attr('title', text);
-                } else {
-                    $(this).text(text);
-                }
-            });
+                $(".truncate-text .text-content").each(function() {
+                    let text = $(this).text().trim();
+                    if (text.length > truncateLength) {
+                        const truncatedText = text.substring(0, truncateLength) + '...';
+                        $(this).text(truncatedText);
+                        $(this).attr('data-bs-toggle', 'tooltip');
+                        $(this).attr('title', text);
+                    } else {
+                        $(this).text(text);
+                    }
+                });
 
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
-            });
-        });
-
-        const eventNavLink = target => {
-            const elTarget = document.querySelector(target);
-            elTarget.style.display = elTarget.style.display == 'none' ? 'block' : 'none';
-
-            const navLink = elTarget.closest('.nav-item');
-            if (!navLink.classList.contains('menu-is-opening')) {
-                navLink.classList.add('menu-is-opening', 'menu-open');
-            } else {
-                navLink.classList.remove('menu-is-opening', 'menu-open');
+                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl);
+                });
             }
-        };
 
-        window.addEventListener('load', () => {
-            const documentWidth = document.documentElement.clientWidth;
-
-            if (documentWidth < 768) {
-                document.querySelector('body').classList.add('sidebar-collapse');
-            } else {
-                // document.querySelector('body').classList.remove('sidebar-collapse');
+            function handleNavLinkClick() {
+                $('.nav-link').on('click', function(event) {
+                    let $nextElement = $(this).next('.nav-treeview');
+                    if ($nextElement.length) {
+                        event.preventDefault();
+                        $nextElement.toggle();
+                        $(this).parent().toggleClass('menu-open');
+                        event.stopPropagation();
+                    }
+                });
             }
-        });
 
-        window.addEventListener('resize', () => {
-            const documentWidth = document.documentElement.clientWidth;
-            if (documentWidth < 768) {
-                document.querySelector('body').classList.add('sidebar-collapse');
-            } else {
-                // document.querySelector('body').classList.remove('sidebar-collapse');
+            function handleSidebarBehavior() {
+                const sidebar = document.querySelector('.main-sidebar');
+
+                sidebar.addEventListener('mouseenter', function() {
+                    toggleUserPanelText(false);
+                    toggleSearchInput(false);
+                });
+
+                sidebar.addEventListener('mouseleave', function() {
+                    toggleUserPanelText($('body').hasClass('sidebar-collapse'));
+                    toggleSearchInput($('body').hasClass('sidebar-collapse'));
+                });
             }
-        });
-
-        $(document).ready(function() {
-            $('.nav-link').on('click', function(event) {
-                let $nextElement = $(this).next('.nav-treeview');
-                if ($nextElement.length) {
-                    event.preventDefault();
-                    $nextElement.toggle();
-                    $(this).parent().toggleClass('menu-open');
-                    event.stopPropagation();
-                }
-            });
-        });
-
-        $(document).ready(function() {
 
             function toggleUserPanelText(isCollapsed) {
                 const userPanel = document.querySelector('.collapse-user-panel .user-info-text');
-                const caretIcons = document.querySelectorAll('.nav-link .bi-caret-right-fill'); // Select all caret icons
+                const caretIcons = document.querySelectorAll('.nav-link .bi-caret-right-fill');
 
                 if (isCollapsed) {
                     userPanel.style.display = 'none';
                     userPanel.style.opacity = '0';
                     userPanel.style.visibility = 'hidden';
-
-                    // Hide all caret icons
                     caretIcons.forEach(icon => icon.style.display = 'none');
-
-                    // Remove padding classes when sidebar is collapsed
                     $('.nav-link.level-1').removeClass('ps-4');
                     $('.nav-link.level-2').removeClass('ps-5');
                 } else {
                     userPanel.style.display = 'block';
                     userPanel.style.opacity = '1';
                     userPanel.style.visibility = 'visible';
-
-                    // Show all caret icons
                     caretIcons.forEach(icon => icon.style.display = 'inline');
-
-                    // Add padding classes based on level
-                    $('.nav-link.level-1').addClass('ps-4'); // Level 1 padding
-                    $('.nav-link.level-2').addClass('ps-5'); // Level 2 padding
+                    $('.nav-link.level-1').addClass('ps-4');
+                    $('.nav-link.level-2').addClass('ps-5');
                 }
             }
 
-            // Listen for sidebar collapse and expand events
-            $(document).on('collapsed.lte.pushmenu', function() {
-                toggleUserPanelText(true);
-            });
+            function handleSidebarToggle() {
+                $(document).on('collapsed.lte.pushmenu', function() {
+                    toggleUserPanelText(true);
+                    toggleSearchInput(true);
+                });
 
-            $(document).on('shown.lte.pushmenu', function() {
-                toggleUserPanelText(false);
-            });
-
-            // Initial check on page load
-            toggleUserPanelText($('body').hasClass('sidebar-collapse'));
-
-            // Sidebar mouseover and mouseout behavior
-            const sidebar = document.querySelector('.main-sidebar');
-
-            sidebar.addEventListener('mouseenter', function() {
-                const userPanel = document.querySelector('.collapse-user-panel .user-info-text');
-                const caretIcons = document.querySelectorAll('.nav-link .bi-caret-right-fill');
-
-                userPanel.style.display = 'block';
-                userPanel.style.opacity = '1';
-                userPanel.style.visibility = 'visible';
-
-                // Show all caret icons on hover
-                caretIcons.forEach(icon => icon.style.display = 'inline');
-
-                // Temporarily add padding classes on hover when sidebar is collapsed
-                if ($('body').hasClass('sidebar-collapse')) {
-                    $('.nav-link.level-1').addClass('ps-4'); // Level 1 padding
-                    $('.nav-link.level-2').addClass('ps-5'); // Level 2 padding
-                }
-            });
-
-            sidebar.addEventListener('mouseleave', function() {
-                // Check if sidebar is collapsed and adjust classes accordingly
-                if ($('body').hasClass('sidebar-collapse')) {
-                    toggleUserPanelText(true); // Hide user panel and caret icons
-                    $('.nav-link.level-1').removeClass('ps-4'); // Remove padding for collapsed state
-                    $('.nav-link.level-2').removeClass('ps-5'); // Remove padding for collapsed state
-                } else {
+                $(document).on('shown.lte.pushmenu', function() {
                     toggleUserPanelText(false);
-                }
-            });
-        });
+                    toggleSearchInput(false);
+                });
 
-        $(document).ready(function() {
-            // Fungsi untuk menampilkan atau menyembunyikan input pencarian
+                toggleUserPanelText($('body').hasClass('sidebar-collapse'));
+                toggleSearchInput($('body').hasClass('sidebar-collapse'));
+            }
+
             function toggleSearchInput(isCollapsed) {
                 const searchInput = $('.input-group .form-control');
                 const searchButton = $('.input-group .btn-sidebar');
 
                 if (isCollapsed) {
-                    searchInput.hide(); // Sembunyikan input pencarian
+                    searchInput.hide();
                     searchButton.addClass('w-100');
                 } else {
-                    searchInput.show(); // Tampilkan input pencarian
+                    searchInput.show();
                     searchButton.removeClass('w-100');
                 }
             }
 
-            // Panggil toggleSearchInput berdasarkan kondisi sidebar saat halaman dimuat
-            toggleSearchInput($('body').hasClass('sidebar-collapse'));
+            function handleSearchInput() {
+                $('#searchProyek').on('keyup', function() {
+                    var searchText = $(this).val().toLowerCase();
 
-            // Deteksi perubahan sidebar collapse dan expand
-            $(document).on('collapsed.lte.pushmenu', function() {
-                toggleSearchInput(true); // Sembunyikan input saat sidebar collapse
-            });
+                    $('.proyek-item').each(function() {
+                        var proyekTitle = $(this).find('.text-content').attr('data-bs-original-title') || '';
+                        proyekTitle = proyekTitle.toLowerCase();
 
-            $(document).on('shown.lte.pushmenu', function() {
-                toggleSearchInput(false); // Tampilkan input saat sidebar expand
-            });
+                        if (proyekTitle.indexOf(searchText) !== -1) {
+                            $(this).show();
+                        } else {
+                            $(this).hide();
+                        }
+                    });
 
-            // Tampilkan input pencarian saat mouseover sidebar dalam kondisi collapse
-            const sidebar = document.querySelector('.main-sidebar');
-            sidebar.addEventListener('mouseenter', function() {
-                if ($('body').hasClass('sidebar-collapse')) {
-                    toggleSearchInput(false); // Tampilkan input pencarian saat hover
-                }
-            });
+                    toggleSearchIcon();
+                });
 
-            sidebar.addEventListener('mouseleave', function() {
-                if ($('body').hasClass('sidebar-collapse')) {
-                    toggleSearchInput(true); // Sembunyikan kembali input pencarian saat mouse keluar
-                }
-            });
-        });
+                $('.btn.btn-sidebar').on('click', function() {
+                    var searchButtonIcon = $(this).find('i');
 
+                    if (searchButtonIcon.hasClass('fa-times')) {
+                        $('#searchProyek').val('');
+                        $('.proyek-item').show();
+                        toggleSearchIcon();
+                    }
+                });
 
-        $(document).ready(function() {
+                toggleSearchIcon();
+            }
+
             function toggleSearchIcon() {
                 var searchText = $('#searchProyek').val().trim();
                 var searchButton = $('.btn.btn-sidebar i');
 
                 if (searchText.length > 0) {
-
                     searchButton.removeClass('fa-search').addClass('fa-times');
                     $('.sidebar-search-open').addClass('has-text');
                 } else {
-
                     searchButton.removeClass('fa-times').addClass('fa-search');
                     $('.sidebar-search-open').removeClass('has-text');
                 }
             }
 
-            $('#searchProyek').on('keyup', function() {
-                var searchText = $(this).val().toLowerCase();
-
-                $('.proyek-item').each(function() {
-
-                    var proyekTitle = $(this).find('.text-content').attr(
-                        'data-bs-original-title') || '';
-                    proyekTitle = proyekTitle.toLowerCase();
-
-                    if (proyekTitle.indexOf(searchText) !== -1) {
-                        $(this).show();
-                    } else {
-                        $(this).hide();
-                    }
-                });
-
-                toggleSearchIcon();
-            });
-
-            $('.btn.btn-sidebar').on('click', function() {
-                var searchButtonIcon = $(this).find('i');
-
-                if (searchButtonIcon.hasClass('fa-times')) {
-
-                    $('#searchProyek').val('');
-                    $('.proyek-item').show();
-                    toggleSearchIcon();
-                }
-            });
-
-            toggleSearchIcon();
-        });
-    </script>
-
-    <script>
-        $(document).ready(function() {
-            // Auto-scroll to the active element
             function scrollToActiveElement() {
-                // Select the active element within the sidebar
                 const activeElement = $('.sidebar .nav-link.active').last();
-
-                // Calculate half of the dynamic view height (dvh)
                 const halfDvh = window.innerHeight / 2;
 
-                // Check if there is an active element to scroll to
                 if (activeElement.length) {
-                    // Scroll the sidebar to bring the active element into view
                     $('.sidebar .os-viewport').animate({
                         scrollTop: activeElement.offset().top - $('.sidebar .os-viewport').offset().top + $('.sidebar .os-viewport').scrollTop() - halfDvh
                     }, 200);
                 }
             }
 
-            // Call the scroll function on page load
-            scrollToActiveElement();
+            function handleScrollToActiveElement() {
+                scrollToActiveElement();
+                $(document).on('shown.lte.pushmenu', scrollToActiveElement);
+            }
 
-            // Optionally, also call it when toggling between collapsed and expanded views
-            $(document).on('shown.lte.pushmenu', scrollToActiveElement);
+            function handleWindowResize() {
+                window.addEventListener('resize', function() {
+                    const documentWidth = document.documentElement.clientWidth;
+                    if (documentWidth < 768) {
+                        document.querySelector('body').classList.add('sidebar-collapse');
+                    } else {
+                        // document.querySelector('body').classList.remove('sidebar-collapse');
+                    }
+                });
+
+                window.addEventListener('load', function() {
+                    const documentWidth = document.documentElement.clientWidth;
+                    if (documentWidth < 768) {
+                        document.querySelector('body').classList.add('sidebar-collapse');
+                    } else {
+                        // document.querySelector('body').classList.remove('sidebar-collapse');
+                    }
+                });
+            }
+
+            // Initialize functions
+            initializeTooltip();
+            handleNavLinkClick();
+            handleSidebarBehavior();
+            handleSidebarToggle();
+            handleSearchInput();
+            handleScrollToActiveElement();
+            handleWindowResize();
         });
     </script>
 

@@ -23,7 +23,7 @@
     </div>
 
     <!-- Modal for Adding Data -->
-    {{-- @include('dashboard.atb.partials.modal-add') --}}
+    @include('dashboard.apb.partials.modal-add')
 
     <!-- Modal for STT -->
     {{-- @include('dashboard.atb.partials.modal-stt') --}}

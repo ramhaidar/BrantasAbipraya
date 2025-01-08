@@ -1,0 +1,219 @@
+@push('styles_3')
+    <style>
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+    </style>
+@endpush
+
+<div class="fade modal" id="modalForAdd" aria-hidden="true" aria-labelledby="staticBackdropLabel" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable modal-xl modal-dialog-centered">
+        <div class="modal-content rounded-4">
+            <div class="pt-3 px-3 m-0 d-flex w-100 justify-content-between">
+                <h5 class="modal-title w-100 pb-2" id="modalForAddLabel">Tambah Data APB</h1>
+                    <button class="btn-close" data-bs-dismiss="modal" type="button" aria-label="Close"></button>
+            </div>
+            <hr class="p-0 m-0 border border-secondary-subtle border-2 opacity-50">
+            <form class="w-100 align-items-center flex-column gap-0 overflow-auto" id="addDataForm" method="POST" action="{{ route('apb.post.store') }}" enctype="multipart/form-data" novalidate>
+                @csrf
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <input class="form-control" id="id_proyek" name="id_proyek" value="{{ $proyek->id }}" hidden required>
+
+                        <div class="col-12" hidden>
+                            <label class="form-label" for="tipe">Tipe ATB</label>
+                            <select class="form-control" id="pilihan-proyek1" name="tipe">
+                                <option value="hutang-unit-alat" {{ $page == 'Data ATB Hutang Unit Alat' ? 'selected' : '' }}>Hutang Unit Alat</option>
+                                <option value="panjar-unit-alat" {{ $page == 'Data ATB Panjar Unit Alat' ? 'selected' : '' }}>Panjar Unit Alat</option>
+                                <option value="mutasi-proyek" {{ $page == 'Data ATB Mutasi Proyek' ? 'selected' : '' }}>Mutasi Proyek</option>
+                                <option value="panjar-proyek" {{ $page == 'Data ATB Panjar Proyek' ? 'selected' : '' }}>Panjar Proyek</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label required" for="tanggal">Tanggal</label>
+                            <input class="form-control datepicker" id="tanggal" name="tanggal" type="text" value="{{ \Carbon\Carbon::today()->format('Y-m-d') }}" autocomplete="off" required>
+                            <div class="invalid-feedback">Tanggal diperlukan.</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label required" for="root_cause">Root Cause</label>
+                            <select class="form-control" id="root_cause" name="root_cause" required>
+                                <option value="">Pilih Root Cause</option>
+                                <option value="pemeliharaan">Pemeliharaan</option>
+                                <option value="repair">Repair</option>
+                                <option value="rusak">Rusak</option>
+                                <option value="tambah">Tambah</option>
+                                <option value="tersumbat">Tersumbat</option>
+                            </select>
+                            <div class="invalid-feedback">Root Cause diperlukan.</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label required" for="mekanik">Mekanik</label>
+                            <input class="form-control" id="mekanik" name="mekanik" type="text" required>
+                            <div class="invalid-feedback">Mekanik diperlukan.</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label required" for="id_alat">Pilih Alat</label>
+                            <select class="form-control" id="id_alat" name="id_alat" required>
+                                <option value="">Pilih Alat</option>
+                                @foreach ($alats as $alat)
+                                    <option value="{{ $alat->id }}">{{ $alat->MasterDataAlat->jenis_alat }} - {{ $alat->MasterDataAlat->kode_alat }} - {{ $alat->MasterDataAlat->merek_alat }} - {{ $alat->MasterDataAlat->tipe_alat }} - {{ $alat->MasterDataAlat->serial_number }}</option>
+                                @endforeach
+                            </select>
+                            <div class="invalid-feedback">Alat diperlukan.</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label required" for="id_master_data_sparepart">Pilih Sparepart</label>
+                            <select class="form-control" id="id_master_data_sparepart" name="id_master_data_sparepart" required>
+                                <option value="">Pilih Sparepart</option>
+                                @foreach ($spareparts as $saldo)
+                                    <option value="{{ $saldo->id_master_data_sparepart }}">
+                                        {{ $saldo->masterDataSparepart->nama }} -
+                                        {{ $saldo->masterDataSparepart->merk }} -
+                                        {{ $saldo->masterDataSparepart->part_number }}
+                                        (Stok: {{ $saldo->quantity }})
+                                        [Masuk: {{ \Carbon\Carbon::parse($saldo->atb->tanggal)->format('d/m/Y') }}]
+                                    </option>
+                                @endforeach
+                            </select>
+                            <div class="invalid-feedback">Sparepart diperlukan.</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label required" for="quantity">Quantity</label>
+                            <input class="form-control" id="quantity" name="quantity" type="number" min="1" max="1" required>
+                            <div class="invalid-feedback">Quantity diperlukan dan tidak boleh melebihi stok yang tersedia.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer d-flex w-100 justify-content-end">
+                    <button class="btn btn-secondary me-2 w-25" id="resetButton" type="button">Reset</button>
+                    <button class="btn btn-success w-25" id="submitButton" type="submit">Tambah Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@push('scripts_3')
+    <script>
+        $(document).ready(function() {
+            // Initialize root_cause select
+            $('#root_cause').select2({
+                placeholder: "Pilih Root Cause",
+                allowClear: true,
+                dropdownParent: $('#modalForAdd'),
+                width: '100%'
+            });
+
+            // Initialize alat select
+            $('#id_alat').select2({
+                placeholder: "Pilih Alat",
+                allowClear: true,
+                dropdownParent: $('#modalForAdd'),
+                width: '100%'
+            });
+
+            // Initialize sparepart select
+            $('#id_master_data_sparepart').select2({
+                placeholder: "Pilih Sparepart",
+                allowClear: true,
+                dropdownParent: $('#modalForAdd'),
+                width: '100%'
+            });
+
+            // Add validation classes on change for Select2 elements
+            ['#id_alat', '#id_master_data_sparepart', '#root_cause'].forEach(function(selector) {
+                $(selector).on('change', function() {
+                    if ($(this).val()) {
+                        $(this).next('.select2-container').find('.select2-selection').removeClass('is-invalid').addClass('is-valid');
+                    } else {
+                        $(this).next('.select2-container').find('.select2-selection').removeClass('is-valid').addClass('is-invalid');
+                    }
+                });
+            });
+
+            // Handle sparepart selection change
+            $('#id_master_data_sparepart').on('change', function() {
+                const selectedOption = $(this).find('option:selected');
+                let maxQuantity = 0;
+
+                if (selectedOption.length) {
+                    // Extract quantity from the option text using regex
+                    const stockMatch = selectedOption.text().match(/\(Stok: (\d+)\)/);
+                    if (stockMatch && stockMatch[1]) {
+                        maxQuantity = parseInt(stockMatch[1]);
+                    }
+                }
+
+                // Update quantity input constraints
+                const quantityInput = $('#quantity');
+                quantityInput.attr('max', maxQuantity);
+                quantityInput.val(''); // Reset value when sparepart changes
+
+                // Update validation message
+                quantityInput.attr('title', `Quantity harus antara 1 dan ${maxQuantity}`);
+            });
+
+            // Add quantity validation on input
+            $('#quantity').on('input', function() {
+                const max = parseInt($(this).attr('max'));
+                const value = parseInt($(this).val());
+
+                if (value > max) {
+                    $(this).val(max);
+                    alert('Quantity tidak boleh melebihi stok yang tersedia (' + max + ')');
+                }
+            });
+
+            // Form submission handler
+            $('#addDataForm').on('submit', function(e) {
+                e.preventDefault();
+                let isValid = true;
+
+                // Validate all required fields
+                $(this).find('[required]').each(function() {
+                    if (!$(this).val()) {
+                        $(this).addClass('is-invalid');
+                        isValid = false;
+                    } else {
+                        $(this).removeClass('is-invalid');
+                    }
+                });
+
+                // Check quantity validation
+                const quantityInput = $('#quantity');
+                const max = parseInt(quantityInput.attr('max'));
+                const value = parseInt(quantityInput.val());
+
+                if (value > max || value < 1 || !value) {
+                    quantityInput.addClass('is-invalid');
+                    isValid = false;
+                }
+
+                if (isValid) {
+                    this.submit();
+                }
+            });
+        });
+    </script>
+@endpush

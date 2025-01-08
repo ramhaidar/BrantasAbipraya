@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class AlatProyek extends Model
@@ -26,13 +28,18 @@ class AlatProyek extends Model
         'id_proyek'           => 'integer',
     ];
 
-    public function masterDataAlat ()
+    public function masterDataAlat () : BelongsTo
     {
         return $this->belongsTo ( MasterDataAlat::class, 'id_master_data_alat' );
     }
 
-    public function proyek ()
+    public function proyek () : BelongsTo
     {
         return $this->belongsTo ( Proyek::class, 'id_proyek' );
+    }
+
+    public function apbs () : HasMany
+    {
+        return $this->hasMany ( APB::class, 'id_alat_proyek' );
     }
 }

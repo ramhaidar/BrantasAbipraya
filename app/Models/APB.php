@@ -21,7 +21,8 @@ class APB extends Model
         'id_saldo',
         'id_proyek',
         'id_master_data_sparepart',
-        'id_master_data_supplier'
+        'id_master_data_supplier',
+        'id_alat_proyek'
     ];
 
     protected $casts = [ 
@@ -35,6 +36,7 @@ class APB extends Model
         'id_proyek'                => 'integer',
         'id_master_data_sparepart' => 'integer',
         'id_master_data_supplier'  => 'integer',
+        'id_alat_proyek'           => 'integer'
     ];
 
     public function saldo () : BelongsTo

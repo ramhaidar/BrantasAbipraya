@@ -311,94 +311,127 @@ Route::prefix ( 'apb' )
     } );
 
 // Rute Saldo [SaldoController]
-Route::prefix ( 'saldo' )
-    ->middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )
+Route::middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )
+    ->prefix ( 'saldo' )
+    ->as ( 'saldo.' )
     ->group ( function ()
     {
+
         Route::get ( '/', [ SaldoController::class, 'index' ] )
-            ->name ( 'saldo' );
+            ->name ( 'index' );
 
-        Route::get ( '/ex_panjar_unit_alat', [ SaldoController::class, 'ex_panjar_unit_alat' ] )
-            ->name ( 'saldo_ex_panjar_unit_alat' );
+        Route::get ( '/getlinkSpbDetailSpbs/{id}', [ SaldoController::class, 'getlinkSpbDetailSpbs' ] )
+            ->name ( 'getlinkSpbDetailSpbs' );
 
-        Route::get ( '/ex_panjar_unit_alat/add', [ SaldoController::class, 'data_baru_ex_panjar_unit_alat' ] )
-            ->name ( 'saldo.new.ex_panjar_unit_alat' );
+        // Hutang Unit Alat Routes
+        Route::prefix ( 'hutang_unit_alat' )
+            ->group ( function ()
+        {
+            Route::get ( '/', [ SaldoController::class, 'hutang_unit_alat' ] )
+                ->name ( 'hutang_unit_alat' );
 
-        Route::get ( '/ex_panjar_unit_alat/{saldo}', [ SaldoController::class, 'showByID' ] )
-            ->name ( 'saldo.show.ex_panjar_unit_alat_by_id' );
+            Route::get ( '/add', [ SaldoController::class, 'data_baru_hutang_unit_alat' ] )
+                ->name ( 'new.hutang_unit_alat' );
 
-        Route::post ( '/ex_panjar_unit_alat/edit/actions/{id}', [ SaldoController::class, 'update' ] )
-            ->name ( 'saldo.post.update.ex_panjar_unit_alat' );
+            Route::get ( '/{saldo}', [ SaldoController::class, 'showByID' ] )
+                ->name ( 'show.hutang_unit_alat_by_id' );
 
-        Route::delete ( '/ex_panjar_unit_alat/actions/{id}', [ SaldoController::class, 'destroy' ] )
-            ->name ( 'saldo.delete.destroy.ex_panjar_unit_alat' );
+            Route::post ( '/edit/actions/{id}', [ SaldoController::class, 'update' ] )
+                ->name ( 'post.update.hutang_unit_alat' );
 
-        Route::get ( '/ex_panjar_proyek', [ SaldoController::class, 'ex_panjar_proyek' ] )
-            ->name ( 'saldo_ex_panjar_proyek' );
+            Route::delete ( '/actions/{id}', [ SaldoController::class, 'destroy' ] )
+                ->name ( 'delete.destroy.hutang_unit_alat' );
+        } );
 
-        Route::get ( '/ex_panjar_proyek/add', [ SaldoController::class, 'data_baru_ex_panjar_proyek' ] )
-            ->name ( 'saldo.new.ex_panjar_proyek' );
+        // Panjar Unit Alat Routes
+        Route::prefix ( 'panjar_unit_alat' )->group ( function ()
+        {
+            Route::get ( '/', [ SaldoController::class, 'panjar_unit_alat' ] )
+                ->name ( 'panjar_unit_alat' );
 
-        Route::get ( '/ex_panjar_proyek/{saldo}', [ SaldoController::class, 'showByID' ] )
-            ->name ( 'saldo.show.ex_panjar_proyek_by_id' );
+            Route::get ( '/add', [ SaldoController::class, 'data_baru_panjar_unit_alat' ] )
+                ->name ( 'new.panjar_unit_alat' );
 
-        Route::post ( '/ex_panjar_proyek/edit/actions/{id}', [ SaldoController::class, 'update' ] )
-            ->name ( 'saldo.post.update.ex_panjar_proyek' );
+            Route::get ( '/{saldo}', [ SaldoController::class, 'showByID' ] )
+                ->name ( 'show.panjar_unit_alat_by_id' );
 
-        Route::delete ( '/ex_panjar_proyek/actions/{id}', [ SaldoController::class, 'destroy' ] )
-            ->name ( 'saldo.delete.destroy.ex_panjar_proyek' );
+            Route::post ( '/edit/actions/{id}', [ SaldoController::class, 'update' ] )
+                ->name ( 'post.update.panjar_unit_alat' );
 
-        Route::get ( '/ex_unit_alat', [ SaldoController::class, 'ex_unit_alat' ] )
-            ->name ( 'saldo_ex_unit_alat' );
+            Route::delete ( '/actions/{id}', [ SaldoController::class, 'destroy' ] )
+                ->name ( 'delete.destroy.panjar_unit_alat' );
+        } );
 
-        Route::get ( '/ex_unit_alat/add', [ SaldoController::class, 'data_baru_ex_unit_alat' ] )
-            ->name ( 'saldo.new.ex_unit_alat' );
+        // Mutasi Proyek Routes
+        Route::prefix ( 'mutasi_proyek' )->group ( function ()
+        {
+            Route::get ( '/', [ SaldoController::class, 'mutasi_proyek' ] )
+                ->name ( 'mutasi_proyek' );
 
-        Route::get ( '/ex_unit_alat/{saldo}', [ SaldoController::class, 'showByID' ] )
-            ->name ( 'saldo.show.ex_unit_alat_by_id' );
+            Route::get ( '/add', [ SaldoController::class, 'data_baru_mutasi_proyek' ] )
+                ->name ( 'new.mutasi_proyek' );
 
-        Route::post ( '/ex_unit_alat/edit/actions/{id}', [ SaldoController::class, 'update' ] )
-            ->name ( 'saldo.post.update.ex_unit_alat' );
+            Route::get ( '/{saldo}', [ SaldoController::class, 'showByID' ] )
+                ->name ( 'show.mutasi_proyek_by_id' );
 
-        Route::delete ( '/ex_unit_alat/actions/{id}', [ SaldoController::class, 'destroy' ] )
-            ->name ( 'saldo.delete.destroy.ex_unit_alat' );
+            Route::post ( '/edit/actions/{id}', [ SaldoController::class, 'update' ] )
+                ->name ( 'post.update.mutasi_proyek' );
 
-        Route::get ( '/ex_mutasi_saldo', [ SaldoController::class, 'ex_mutasi_saldo' ] )
-            ->name ( 'saldo_ex_mutasi_saldo' );
+            Route::delete ( '/actions/{id}', [ SaldoController::class, 'destroy' ] )
+                ->name ( 'delete.destroy.mutasi_proyek' );
+        } );
 
-        Route::get ( '/ex_mutasi_saldo/add', [ SaldoController::class, 'data_baru_ex_mutasi_saldo' ] )
-            ->name ( 'saldo.new.ex_mutasi_saldo' );
+        // Panjar Proyek Routes
+        Route::prefix ( 'panjar_proyek' )->group ( function ()
+        {
+            Route::get ( '/', [ SaldoController::class, 'panjar_proyek' ] )
+                ->name ( 'panjar_proyek' );
 
-        Route::get ( '/ex_mutasi_saldo/{saldo}', [ SaldoController::class, 'showByID' ] )
-            ->name ( 'saldo.show.ex_mutasi_saldo_by_id' );
+            Route::get ( '/add', [ SaldoController::class, 'data_baru_panjar_proyek' ] )
+                ->name ( 'new.panjar_proyek' );
 
-        Route::post ( '/ex_mutasi_saldo/edit/actions/{id}', [ SaldoController::class, 'update' ] )
-            ->name ( 'saldo.post.update.ex_mutasi_saldo' );
+            Route::get ( '/{saldo}', [ SaldoController::class, 'showByID' ] )
+                ->name ( 'show.panjar_proyek_by_id' );
 
-        Route::delete ( '/ex_mutasi_saldo/actions/{id}', [ SaldoController::class, 'destroy' ] )
-            ->name ( 'saldo.delete.destroy.ex_mutasi_saldo' );
+            Route::post ( '/edit/actions/{id}', [ SaldoController::class, 'update' ] )
+                ->name ( 'post.update.panjar_proyek' );
+
+            Route::delete ( '/actions/{id}', [ SaldoController::class, 'destroy' ] )
+                ->name ( 'delete.destroy.panjar_proyek' );
+        } );
 
         // General Saldo Routes
         Route::get ( '/add', [ SaldoController::class, 'data_baru_saldo' ] )
-            ->name ( 'saldo.new' );
+            ->name ( 'new' );
 
         Route::post ( '/store', [ SaldoController::class, 'store' ] )
-            ->name ( 'saldo.store' );
+            ->name ( 'post.store' );
 
-        Route::get ( '/actions/{id}', [ SaldoController::class, 'show' ] )
-            ->name ( 'saldo.show' );
-
-        Route::put ( '/actions/{id}', [ SaldoController::class, 'update' ] )
-            ->name ( 'saldo.post.update' );
+        Route::post ( '/actions/{id}', [ SaldoController::class, 'update' ] )
+            ->name ( 'post.update' );
 
         Route::delete ( '/actions/{id}', [ SaldoController::class, 'destroy' ] )
-            ->name ( 'saldo.delete.destroy' );
+            ->name ( 'destroy' );
 
         Route::get ( '/delsaldo/actions/{id}', [ SaldoController::class, 'destroy' ] )
-            ->name ( 'saldo.del.test' );
+            ->name ( 'del.test' );
 
-        Route::get ( '/export', [ SaldoController::class, 'exportSaldo' ] )
-            ->name ( 'saldo.export' );
+        Route::get ( '/export', [ SaldoController::class, 'export' ] )
+            ->name ( 'export' );
+
+        Route::post ( '/import', [ SaldoController::class, 'import' ] )
+            ->name ( 'import.post' );
+
+        Route::get ( '/import', [ SaldoController::class, 'showImportForm' ] )
+            ->name ( 'import' );
+
+        Route::get ( '/stt/{id}', [ SaldoController::class, 'getStt' ] )
+            ->where ( 'id', '[0-9]+' )
+            ->name ( 'stt' );
+
+        Route::get ( '/dokumentasi/{id}', [ SaldoController::class, 'getDokumentasi' ] )
+            ->where ( 'id', '[0-9]+' )
+            ->name ( 'dokumentasi' );
     } );
 
 Route::get ( '/laporan/summary', [ LaporanController::class, 'summary' ] )->middleware ( [ 

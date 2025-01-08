@@ -15,11 +15,16 @@ return new class extends Migration
         {
             $table->id (); // Primary Key (id)
             $table->string ( 'tipe' );
+            $table->string ( 'satuan' );
             $table->bigInteger ( 'quantity' );
             $table->bigInteger ( 'harga' );
             $table->timestamps ();
 
             // Foreign keys
+            $table->foreignId ( 'id_atb' )
+                ->unique ()
+                ->constrained ( 'proyek' )
+                ->onDelete ( 'cascade' );
             $table->foreignId ( 'id_proyek' )
                 ->constrained ( 'proyek' )
                 ->onDelete ( 'cascade' );
@@ -31,7 +36,6 @@ return new class extends Migration
                 ->constrained ( 'spb' )
                 ->onDelete ( 'cascade' );
             $table->foreignId ( 'id_master_data_sparepart' )
-                ->unique ()
                 ->constrained ( 'master_data_sparepart' )
                 ->onDelete ( 'cascade' );
             $table->foreignId ( 'id_master_data_supplier' )

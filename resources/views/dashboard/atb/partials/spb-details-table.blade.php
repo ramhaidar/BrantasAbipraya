@@ -28,25 +28,30 @@
             @foreach ($spbDetails as $detail)
                 @if ($detail->quantity_belum_diterima > 0)
                     @php $validIndex = $loop->index; @endphp
-                    <tr>
-                        <td class="text-center">{{ $detail->MasterDataSparepart->nama }}</td>
-                        <td class="text-center">{{ $detail->MasterDataSparepart->merk }}</td>
-                        <td class="text-center">{{ $detail->MasterDataSparepart->part_number }}</td>
-                        <td class="text-center">{{ $detail->quantity_belum_diterima }}</td>
-                        <td class="text-center">
-                            <input name="id_detail_spb[]" type="hidden" value="{{ $detail->id }}">
-                            <input name="id_master_data_sparepart[]" type="hidden" value="{{ $detail->id_master_data_sparepart }}">
-                            <input name="id_master_data_supplier[]" type="hidden" value="{{ $detail->linkSpbDetailSpb[0]->spb->masterDataSupplier->id }}">
-                            <input name="harga[]" type="hidden" value="{{ $detail->harga }}">
-                            <input class="form-control text-center quantity-input" name="quantity[]" type="number" value="0" required>
-                        </td>
-                        <td class="text-center">
-                            <button class="btn btn-primary" id="upload-btn-{{ $detail->id }}" type="button" onclick="document.getElementById('documentation_photos_{{ $detail->id }}').click()">
-                                <i class="bi bi-upload"></i>
-                            </button>
-                            <input class="form-control d-none documentation-photos" id="documentation_photos_{{ $detail->id }}" name="documentation_photos[{{ $validIndex }}][]" type="file" accept="image/*" multiple onchange="updateButtonClass({{ $detail->id }})">
-                        </td>
-                    </tr>
+                    @foreach ($detail->linkSpbDetailSpb as $linkSpbDetailSpb)
+                        <tr>
+                            <td class="text-center">{{ $detail->MasterDataSparepart->nama }}</td>
+                            <td class="text-center">{{ $detail->MasterDataSparepart->merk }}</td>
+                            <td class="text-center">{{ $detail->MasterDataSparepart->part_number }}</td>
+                            <td class="text-center">{{ $detail->quantity_belum_diterima }}</td>
+                            <td class="text-center">
+                                <input name="id_detail_spb[]" type="hidden" value="{{ $detail->id }}">
+                                <input name="id_master_data_sparepart[]" type="hidden" value="{{ $detail->id_master_data_sparepart }}">
+                                <input name="id_master_data_supplier[]" type="hidden" value="{{ $detail->linkSpbDetailSpb[0]->spb->masterDataSupplier->id }}">
+                                <input name="harga[]" type="hidden" value="{{ $detail->harga }}">
+                                <input class="form-control text-center quantity-input" name="quantity[]" type="number" value="0" required>
+                            </td>
+
+                            <input class="form-control text-center" name="satuan[]" type="text" value="{{ $linkSpbDetailSpb->detailSpb->satuan }}" hidden required>
+
+                            <td class="text-center">
+                                <button class="btn btn-primary" id="upload-btn-{{ $detail->id }}" type="button" onclick="document.getElementById('documentation_photos_{{ $detail->id }}').click()">
+                                    <i class="bi bi-upload"></i>
+                                </button>
+                                <input class="form-control d-none documentation-photos" id="documentation_photos_{{ $detail->id }}" name="documentation_photos[{{ $validIndex }}][]" type="file" accept="image/*" multiple onchange="updateButtonClass({{ $detail->id }})">
+                            </td>
+                        </tr>
+                    @endforeach
                 @endif
             @endforeach
         </tbody>

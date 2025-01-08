@@ -340,19 +340,6 @@
             // Reset previous validation states
             $('.is-invalid').removeClass('is-invalid');
 
-            // Check items with quantity > 0
-            $('.quantity-input').each(function() {
-                const qty = parseInt($(this).val()) || 0;
-                const row = $(this).closest('tr');
-                const fotoInput = row.find('input[type="file"]');
-                
-                if (qty > 0 && (!fotoInput.length || !fotoInput[0].files.length)) {
-                    fotoInput.addClass('is-invalid');
-                    isValid = false;
-                }
-            });
-
-            // Existing validation code...
             // Validate date field
             const tanggal = $('#tanggal');
             if (!tanggal.val()) {
@@ -386,7 +373,7 @@
                 // Show error message
                 Swal.fire({
                     title: 'Error!',
-                    text: 'Mohon lengkapi semua field yang wajib diisi. Foto dokumentasi wajib diisi untuk setiap item yang diterima.',
+                    text: 'Mohon lengkapi semua field yang wajib diisi',
                     icon: 'error',
                     confirmButtonText: 'Ok'
                 });
@@ -416,21 +403,6 @@
                     $(this).next('.select2-container').find('.select2-selection').removeClass('is-invalid');
                 }
             });
-        });
-    </script>
-
-    <script>
-        $(document).on('change', '.quantity-input', function() {
-            const qty = parseInt($(this).val()) || 0;
-            const row = $(this).closest('tr');
-            const fotoInput = row.find('input[type="file"]');
-            
-            if (qty > 0) {
-                fotoInput.prop('required', true);
-            } else {
-                fotoInput.prop('required', false);
-                fotoInput.removeClass('is-invalid');
-            }
         });
     </script>
 @endpush

@@ -72,4 +72,9 @@ class ATB extends Model
     {
         return $this->belongsTo ( MasterDataSupplier::class, 'id_master_data_supplier' );
     }
+
+    public function saldo ()
+    {
+        return $this->hasOne ( Saldo::class, 'id_atb' );
+    }
 }

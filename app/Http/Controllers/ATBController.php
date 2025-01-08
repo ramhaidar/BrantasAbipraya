@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\ATB;
 use App\Models\RKB;
 use App\Models\SPB;
+use App\Models\Saldo;
 use App\Models\Proyek;
 use App\Models\DetailSPB;
 use Illuminate\Http\Request;
@@ -58,6 +59,9 @@ class ATBController extends Controller
 
     private function showAtbPage ( $tipe, $pageTitle, $id_proyek )
     {
+        // Ubah nilai $tipe menjadi huruf kecil dan ganti spasi dengan tanda hubung
+        $tipe = strtolower ( str_replace ( ' ', '-', $tipe ) );
+
         $proyek = Proyek::with ( "users" )->find ( $id_proyek );
 
         $proyeks = Proyek::with ( "users" )
@@ -100,9 +104,6 @@ class ATBController extends Controller
                 }
             }
         }
-
-        // Ubah nilai $tipe menjadi huruf kecil dan ganti spasi dengan tanda hubung
-        $tipe = strtolower ( str_replace ( ' ', '-', $tipe ) );
 
         // Ambil data ATB dari database dengan relasi
         $atbs = ATB::with ( [ 'spb', 'masterDataSparepart' ] )
@@ -165,6 +166,8 @@ class ATBController extends Controller
                 'documentation_photos.*.*'   => 'file|image|mimes:jpeg,png,jpg|max:2048',
                 'id_master_data_supplier'    => 'required|array',
                 'id_master_data_supplier.*'  => 'required|exists:master_data_supplier,id',
+                'satuan'                     => 'required|array', // New validation rule
+                'satuan.*'                   => 'required|string' // New validation rule
             ] );
 
             // Create base storage paths
@@ -277,6 +280,7 @@ class ATBController extends Controller
                         'id_detail_spb'            => $id_detail_spb,
                         'id_master_data_sparepart' => $request->id_master_data_sparepart[ $index ],
                         'id_master_data_supplier'  => $request->id_master_data_supplier[ $index ],
+                        'satuan'                   => $request->satuan[ $index ] // New column
                     ] );
 
                     $this->console ( "TEST" );
@@ -291,6 +295,8 @@ class ATBController extends Controller
                         'id_spb'                   => $request->id_spb,
                         'id_master_data_sparepart' => $request->id_master_data_sparepart[ $index ],
                         'id_master_data_supplier'  => $request->id_master_data_supplier[ $index ],
+                        'id_atb'                   => $atb->id, // New column
+                        'satuan'                   => $request->satuan[ $index ] // New column
                     ] );
 
                     $processedItems++;
@@ -329,6 +335,8 @@ class ATBController extends Controller
             // Find all ATB records with the same Surat Tanda Terima
             $atbs = ATB::where ( 'surat_tanda_terima', $suratTandaTerima )->get ();
 
+            $saldoController = new SaldoController();
+
             foreach ( $atbs as $atb )
             {
                 // Delete associated files
@@ -340,6 +348,13 @@ class ATBController extends Controller
                 // Restore quantity_belum_diterima for the corresponding DetailSPB
                 $detailSpb = DetailSPB::find ( $atb->id_detail_spb );
                 $detailSpb->increaseQuantityBelumDiterima ( $atb->quantity );
+
+                // Delete the associated Saldo record
+                $saldo = Saldo::where ( 'id_atb', $atb->id )->first ();
+                if ( $saldo )
+                {
+                    $saldoController->destroy ( $saldo->id );
+                }
 
                 // Delete the ATB record
                 $atb->delete ();

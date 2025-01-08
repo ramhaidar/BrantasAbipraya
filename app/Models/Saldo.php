@@ -13,8 +13,10 @@ class Saldo extends Model
 
     protected $fillable = [ 
         'tipe',
+        'satuan',
         'quantity',
         'harga',
+        'id_atb',
         'id_proyek',
         'id_asal_proyek',
         'id_spb',
@@ -25,8 +27,10 @@ class Saldo extends Model
     protected $casts = [ 
         'id'                       => 'integer',
         'tipe'                     => 'string',
+        'satuan'                   => 'string',
         'quantity'                 => 'integer',
         'harga'                    => 'integer',
+        'id_atb'                   => 'integer',
         'id_proyek'                => 'integer',
         'id_asal_proyek'           => 'integer',
         'id_spb'                   => 'integer',
@@ -59,5 +63,10 @@ class Saldo extends Model
     public function masterDataSupplier ()
     {
         return $this->belongsTo ( MasterDataSupplier::class, 'id_master_data_supplier' );
+    }
+
+    public function atb ()
+    {
+        return $this->belongsTo ( ATB::class, 'id_atb' );
     }
 }

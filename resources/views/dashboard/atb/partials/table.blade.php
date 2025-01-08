@@ -36,9 +36,9 @@
                 <th class="text-center">Net</th>
                 <th class="text-center">PPN</th>
                 <th class="text-center">Bruto</th>
-                <th class="text-center">Dokumentasi</th> <!-- New column -->
-                <th class="text-center">Aksi</th>
                 <th class="text-center">STT</th>
+                <th class="text-center">Dokumentasi</th>
+                <th class="text-center">Aksi</th>
             </tr>
         </thead>
         <tbody>
@@ -56,6 +56,11 @@
                     <td class="text-center">{{ formatRupiah($atb->quantity * $atb->harga) }}</td>
                     <td class="text-center">{{ formatRupiah($atb->quantity * $atb->harga * 0.11) }}</td>
                     <td class="text-center">{{ formatRupiah($atb->quantity * $atb->harga * 1.11) }}</td>
+                    <td class="text-center stt-cell">
+                        <button class="btn btn-primary mx-1 sttBtn" onclick="showSTTModal('{{ $atb->id }}')">
+                            <i class="bi bi-file-earmark-pdf"></i>
+                        </button>
+                    </td>
                     <td class="text-center doc-cell" data-id="{{ $atb->id }}">
                         @php
                             $storagePath = storage_path('app/public/' . $atb->dokumentasi_foto);
@@ -72,11 +77,6 @@
                     <td class="text-center action-cell">
                         <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $atb->id }}">
                             <i class="bi bi-trash"></i>
-                        </button>
-                    </td>
-                    <td class="text-center stt-cell">
-                        <button class="btn btn-primary mx-1 sttBtn" onclick="showSTTModal('{{ $atb->id }}')">
-                            <i class="bi bi-file-earmark-pdf"></i>
                         </button>
                     </td>
                 </tr>

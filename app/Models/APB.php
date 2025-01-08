@@ -58,4 +58,9 @@ class APB extends Model
     {
         return $this->belongsTo ( MasterDataSupplier::class, 'id_master_data_supplier' );
     }
+
+    public function alatProyek () : BelongsTo
+    {
+        return $this->belongsTo ( AlatProyek::class, 'id_alat_proyek' );
+    }
 }

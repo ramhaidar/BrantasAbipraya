@@ -29,7 +29,6 @@
     <table class="m-0 table table-bordered table-striped" id="table-data">
         <thead class="table-primary">
             <tr>
-                <th class="text-center">Nomor SPB</th>
                 <th class="text-center">Tanggal</th>
                 <th class="text-center">Kode</th>
                 <th class="text-center">Supplier</th>
@@ -45,7 +44,6 @@
         <tbody>
             @foreach ($saldos as $saldo)
                 <tr>
-                    <td class="text-center">{{ $saldo->spb->nomor ?? '-' }}</td>
                     <td class="text-center">{{ formatTanggal($saldo->created_at) }}</td>
                     <td class="text-center">{{ $saldo->masterDataSparepart->kategoriSparepart->kode }}: {{ $saldo->masterDataSparepart->kategoriSparepart->nama }}</td>
                     <td class="text-center">{{ $saldo->masterDataSupplier->nama ?? '-' }}</td>

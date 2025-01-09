@@ -117,6 +117,18 @@
 @push('scripts_3')
     <script>
         $(document).ready(function() {
+            // Initialize datepicker for #tanggal
+            var dateFormat = 'yy-mm-dd';
+            var options = {
+                dateFormat: dateFormat,
+                changeMonth: true,
+                changeYear: true,
+                regional: 'id'
+            };
+
+            $('#tanggal').datepicker(options);
+            $.datepicker.setDefaults($.datepicker.regional['id']);
+
             // Initialize root_cause select
             $('#root_cause').select2({
                 placeholder: "Pilih Root Cause",

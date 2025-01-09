@@ -345,7 +345,7 @@
                 const qty = parseInt($(this).val()) || 0;
                 const row = $(this).closest('tr');
                 const fotoInput = row.find('input[type="file"]');
-                
+
                 if (qty > 0 && (!fotoInput.length || !fotoInput[0].files.length)) {
                     fotoInput.addClass('is-invalid');
                     isValid = false;
@@ -424,7 +424,7 @@
             const qty = parseInt($(this).val()) || 0;
             const row = $(this).closest('tr');
             const fotoInput = row.find('input[type="file"]');
-            
+
             if (qty > 0) {
                 fotoInput.prop('required', true);
             } else {

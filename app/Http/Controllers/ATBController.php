@@ -136,6 +136,7 @@ class ATBController extends Controller
 
     public function store ( Request $request )
     {
+        // dd ( $request->all () );
         try
         {
             DB::beginTransaction ();
@@ -199,8 +200,11 @@ class ATBController extends Controller
                 // Skip validation for documentation photos if quantity is 0
                 if ( $requestedQuantity > 0 )
                 {
-                    // Validate documentation photos only if quantity > 0
-                    if ( ! isset ( $request->file ( 'documentation_photos' )[ $index ] ) )
+                    // Check for documentation photos with both current index and index+1
+                    $hasPhotos = isset ( $request->file ( 'documentation_photos' )[ $index ] ) ||
+                        isset ( $request->file ( 'documentation_photos' )[ $index + 1 ] );
+
+                    if ( ! $hasPhotos )
                     {
                         $skippedReasons[] = "Index $index: Missing photos for non-zero quantity";
                         continue;
@@ -221,8 +225,7 @@ class ATBController extends Controller
                     if (
                         ! isset ( $request->id_master_data_sparepart[ $index ] ) ||
                         ! isset ( $request->harga[ $index ] ) ||
-                        ! isset ( $request->id_master_data_supplier[ $index ] ) ||
-                        ! isset ( $request->file ( 'documentation_photos' )[ $index ] )
+                        ! isset ( $request->id_master_data_supplier[ $index ] )
                     )
                     {
                         if ( ! isset ( $request->id_master_data_sparepart[ $index ] ) )
@@ -248,14 +251,21 @@ class ATBController extends Controller
                     $docPath = $baseStoragePath . '/dokumentasi_' . uniqid ();
                     Storage::disk ( 'public' )->makeDirectory ( $docPath );
 
-                    // Store documentation photos
-                    foreach ( $request->file ( 'documentation_photos' )[ $index ] as $photo )
+                    // Try to get photos from either current index or index+1
+                    $photos = $request->file ( 'documentation_photos' )[ $index ] ??
+                        $request->file ( 'documentation_photos' )[ $index + 1 ] ??
+                        null;
+
+                    if ( $photos )
                     {
-                        $photoName      = pathinfo ( $photo->getClientOriginalName (), PATHINFO_FILENAME );
-                        $photoExt       = $photo->getClientOriginalExtension ();
-                        $photoTimestamp = now ()->format ( 'Y-m-d--H-i-s' );
-                        $fileName       = "{$photoName}___{$photoTimestamp}.{$photoExt}";
-                        $photo->storeAs ( $docPath, $fileName, 'public' );
+                        foreach ( $photos as $photo )
+                        {
+                            $photoName      = pathinfo ( $photo->getClientOriginalName (), PATHINFO_FILENAME );
+                            $photoExt       = $photo->getClientOriginalExtension ();
+                            $photoTimestamp = now ()->format ( 'Y-m-d--H-i-s' );
+                            $fileName       = "{$photoName}___{$photoTimestamp}.{$photoExt}";
+                            $photo->storeAs ( $docPath, $fileName, 'public' );
+                        }
                     }
 
                     // Update quantity_belum_diterima

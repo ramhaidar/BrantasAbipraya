@@ -34,6 +34,7 @@
                 <th class="text-center">Kode</th>
                 <th class="text-center">Supplier</th>
                 <th class="text-center">Sparepart</th>
+                <th class="text-center">Merk</th>
                 <th class="text-center">Part Number</th>
                 <th class="text-center">Quantity</th>
                 <th class="text-center">Satuan</th>
@@ -49,6 +50,7 @@
                     <td class="text-center">{{ $saldo->masterDataSparepart->kategoriSparepart->kode }}: {{ $saldo->masterDataSparepart->kategoriSparepart->nama }}</td>
                     <td class="text-center">{{ $saldo->masterDataSupplier->nama ?? '-' }}</td>
                     <td class="text-center">{{ $saldo->masterDataSparepart->nama ?? '-' }}</td>
+                    <td class="text-center">{{ $saldo->masterDataSparepart->merk ?? '-' }}</td>
                     <td class="text-center">{{ $saldo->masterDataSparepart->part_number ?? '-' }}</td>
                     <td class="text-center">{{ $saldo->quantity }}</td>
                     <td class="text-center">{{ $saldo->satuan ?? '-' }}</td>

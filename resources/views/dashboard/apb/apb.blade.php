@@ -29,7 +29,7 @@
     {{-- @include('dashboard.atb.partials.modal-stt') --}}
 
     <!-- Modal for Delete -->
-    {{-- @include('dashboard.atb.partials.modal-delete') --}}
+    @include('dashboard.apb.partials.modal-delete')
 
     <!-- Modal for Dokumentasi is already included in table partial -->
 @endsection

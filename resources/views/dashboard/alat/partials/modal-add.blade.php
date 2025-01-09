@@ -16,10 +16,9 @@
                 @csrf
                 <div class="modal-body">
                     <div class="row g-3">
-                        <div class="col-12">
-                            <label class="form-label required" for="id_master_data_alat">Pilih Alat</label>
-                            <select class="form-control" id="id_master_data_alat" name="id_master_data_alat" required>
-                                <option value="" disabled selected>Pilih Alat</option>
+                        <div class="col-12 w-100">
+                            <label class="form-label w-100 required" for="id_master_data_alat">Pilih Alat</label>
+                            <select class="form-control w-100" id="id_master_data_alat" name="id_master_data_alat[]" multiple="multiple" required>
                                 @foreach ($AlatAvailable as $alat)
                                     <option value="{{ $alat->id }}">{{ $alat->jenis_alat }} - {{ $alat->kode_alat }}</option>
                                 @endforeach
@@ -32,7 +31,7 @@
                 <input id="id_proyek" name="id_proyek" type="hidden" value="{{ $proyek->id }}">
 
                 <div class="modal-footer d-flex w-100 justify-content-end">
-                    <button class="btn btn-secondary me-2 w-25" type="reset">Reset</button>
+                    <button class="btn btn-secondary me-2 w-25" id="reset-alat-form" type="reset">Reset</button>
                     <button class="btn btn-primary w-25" id="add-alat" type="submit">Simpan</button>
                 </div>
             </form>
@@ -47,10 +46,16 @@
 
             // Initialize Select2 with options
             $('#id_master_data_alat').select2({
-                placeholder: "Pilih",
+                placeholder: "Pilih Alat",
                 allowClear: true,
+                closeOnSelect: false,
+                minimumResultsForSearch: 0,
                 dropdownParent: $('#modalForAdd'),
                 width: '100%'
+            }).on("select2:select", function(e) {
+                $(this).select2('open');
+            }).on("select2:unselect", function(e) {
+                $(this).select2('open');
             });
 
             // Fetch all forms we want to apply validation to
@@ -74,6 +79,15 @@
                         input.classList.remove('is-invalid');
                         input.classList.add('is-valid');
                     }
+                });
+            });
+
+            // Handle form reset
+            document.getElementById('reset-alat-form').addEventListener('click', () => {
+                $('#id_master_data_alat').val(null).trigger('change');
+                form.classList.remove('was-validated');
+                form.querySelectorAll('.is-valid, .is-invalid').forEach((input) => {
+                    input.classList.remove('is-valid', 'is-invalid');
                 });
             });
         })()

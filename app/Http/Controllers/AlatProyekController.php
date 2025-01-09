@@ -27,7 +27,10 @@ class AlatProyekController extends Controller
             ->orderBy ( "id", "asc" )
             ->get ();
 
-        $AlatAssigned = AlatProyek::with ( "masterDataAlat" )->where ( 'id_proyek', $proyek->id )->get ();
+        $AlatAssigned = AlatProyek::with ( "masterDataAlat" )
+            ->where ( 'id_proyek', $proyek->id )
+            ->orderBy ( 'updated_at', 'desc' )
+            ->get ();
 
         $AlatAvailable = MasterDataAlat::whereDoesntHave ( 'alatProyek', function ($query)
         {
@@ -48,13 +51,19 @@ class AlatProyekController extends Controller
     public function store ( Request $request )
     {
         $validatedData = $request->validate ( [ 
-            'id_master_data_alat' => 'required|exists:master_data_alat,id',
-            'id_proyek'           => 'required|exists:proyek,id',
+            'id_master_data_alat'   => 'required|array',
+            'id_master_data_alat.*' => 'exists:master_data_alat,id',
+            'id_proyek'             => 'required|exists:proyek,id',
         ] );
 
-        $validatedData[ 'assigned_at' ] = now ();
-
-        AlatProyek::create ( $validatedData );
+        foreach ( $validatedData[ 'id_master_data_alat' ] as $alatId )
+        {
+            AlatProyek::create ( [ 
+                'id_master_data_alat' => $alatId,
+                'id_proyek'           => $validatedData[ 'id_proyek' ],
+                'assigned_at'         => now (),
+            ] );
+        }
 
         return redirect ()->back ()->with ( 'success', 'Alat berhasil ditambahkan ke proyek' );
     }

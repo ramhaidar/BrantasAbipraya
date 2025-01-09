@@ -178,8 +178,8 @@ class APBController extends Controller
                 'id_alat_proyek'           => $request->id_alat
             ] );
 
-            // Call SaldoController to decrement quantity
-            app ( SaldoController::class)->decrementQuantity ( $saldo->id, $request->quantity );
+            // Decrement quantity
+            $saldo->decrementQuantity ( $request->quantity );
 
             DB::commit ();
 
@@ -192,6 +192,33 @@ class APBController extends Controller
             DB::rollBack ();
             return redirect ()->back ()
                 ->with ( 'error', 'Gagal menambahkan data APB: ' . $e->getMessage () );
+        }
+    }
+
+    public function destroy ( $id )
+    {
+        try
+        {
+            // Start transaction
+            DB::beginTransaction ();
+
+            // Find the APB record
+            $apb = APB::findOrFail ( $id );
+
+            // Increment the quantity back to the saldo
+            $apb->saldo->incrementQuantity ( $apb->quantity );
+
+            // Delete the APB record
+            $apb->delete ();
+
+            DB::commit ();
+
+            return redirect ()->back ()->with ( 'success', 'Data APB berhasil dihapus.' );
+        }
+        catch ( \Exception $e )
+        {
+            DB::rollBack ();
+            return redirect ()->back ()->with ( 'error', 'Gagal menghapus data APB: ' . $e->getMessage () );
         }
     }
 }

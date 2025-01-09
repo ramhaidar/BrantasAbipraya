@@ -33,6 +33,7 @@
                 <th class="text-center">Kode</th>
                 <th class="text-center">Supplier</th>
                 <th class="text-center">Sparepart</th>
+                <th class="text-center">Merk</th>
                 <th class="text-center">Part Number</th>
                 <th class="text-center">Quantity</th>
                 <th class="text-center">Satuan</th>
@@ -40,6 +41,7 @@
                 <th class="text-center">Net</th>
                 <th class="text-center">Root Cause</th>
                 <th class="text-center">Mekanik</th>
+                <th class="text-center">Aksi</th>
             </tr>
         </thead>
         <tbody>
@@ -49,6 +51,7 @@
                     <td class="text-center">{{ $apb->masterDataSparepart->kategoriSparepart->kode }}: {{ $apb->masterDataSparepart->kategoriSparepart->nama }}</td>
                     <td class="text-center">{{ $apb->masterDataSupplier->nama ?? '-' }}</td>
                     <td class="text-center">{{ $apb->masterDataSparepart->nama ?? '-' }}</td>
+                    <td class="text-center">{{ $apb->masterDataSparepart->merk ?? '-' }}</td>
                     <td class="text-center">{{ $apb->masterDataSparepart->part_number ?? '-' }}</td>
                     <td class="text-center">{{ $apb->quantity }}</td>
                     <td class="text-center">{{ $apb->masterDataSparepart->satuan ?? '-' }}</td>
@@ -56,6 +59,11 @@
                     <td class="text-center">{{ formatRupiah(($apb->saldo->harga ?? 0) * $apb->quantity) }}</td>
                     <td class="text-center">{{ ucfirst($apb->root_cause) ?? '-' }}</td>
                     <td class="text-center">{{ $apb->mekanik ?? '-' }}</td>
+                    <td class="text-center">
+                        <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $apb->id }}">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
                 </tr>
             @endforeach
         </tbody>

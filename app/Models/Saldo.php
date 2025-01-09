@@ -74,4 +74,33 @@ class Saldo extends Model
     {
         return $this->hasOne ( APB::class, 'id_saldo' );
     }
+
+    public function incrementQuantity ( $amount )
+    {
+        $this->quantity += $amount;
+        $this->save ();
+
+        return $this;
+    }
+
+    public function decrementQuantity ( $amount )
+    {
+        if ( $this->quantity < $amount )
+        {
+            throw new \Exception( 'Stok tidak mencukupi' );
+        }
+
+        $this->quantity = max ( 0, $this->quantity - $amount );
+        $this->save ();
+
+        return $this;
+    }
+
+    public function reduceQuantity ( $amount )
+    {
+        $this->quantity = max ( 0, $this->quantity - $amount );
+        $this->save ();
+
+        return $this;
+    }
 }

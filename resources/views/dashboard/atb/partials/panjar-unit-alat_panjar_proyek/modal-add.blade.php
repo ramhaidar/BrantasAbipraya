@@ -146,8 +146,20 @@
                                 $.each(data, function(key, sparepart) {
                                     sparepartSelect.append('<option value="' + sparepart.id + '">' + sparepart.nama + ' - ' + sparepart.merk + ' - ' + sparepart.part_number + '</option>');
                                 });
+                                sparepartSelect.select2({
+                                    placeholder: "Pilih Sparepart",
+                                    allowClear: true,
+                                    dropdownParent: $('#modalForAdd'),
+                                    width: '100%'
+                                }).prop('disabled', false);
                             } else {
                                 sparepartSelect.append('<option value="">Tidak ada sparepart tersedia</option>');
+                                sparepartSelect.select2({
+                                    placeholder: "Tidak ada sparepart tersedia",
+                                    allowClear: true,
+                                    dropdownParent: $('#modalForAdd'),
+                                    width: '100%'
+                                }).prop('disabled', true);
                             }
                             sparepartSelect.val(null).trigger('change');
                         },

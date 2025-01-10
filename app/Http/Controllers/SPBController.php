@@ -181,13 +181,13 @@ class SPBController extends Controller
             }
 
             \DB::commit ();
-            return redirect ()->back ()->with ( 'success', 'SPB berhasil dihapus' );
+            return redirect ()->back ()->with ( 'success', 'SPB berhasil di Addendum' );
 
         }
         catch ( \Exception $e )
         {
             \DB::rollBack ();
-            return redirect ()->back ()->with ( 'error', 'Gagal menghapus SPB: ' . $e->getMessage () );
+            return redirect ()->back ()->with ( 'error', 'Gagal melakukan Addendum SPB: ' . $e->getMessage () );
         }
     }
 }

@@ -149,7 +149,7 @@ class DetailSPBController extends Controller
                 // Create new SPB
                 $spb = SPB::create ( [ 
                     'nomor'                   => $nomorSPB,
-                    'is_addendum'             => true,
+                    'is_addendum'             => false,
                     'id_master_data_supplier' => $validated[ 'supplier_main' ],
                     'tanggal'                 => now (),
                     'id_spb_original'         => $originalSpb->id,

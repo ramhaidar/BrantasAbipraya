@@ -141,10 +141,14 @@
                         success: function(data) {
                             var sparepartSelect = $('#id_master_data_sparepart');
                             sparepartSelect.empty();
-                            sparepartSelect.append('<option value="">Pilih Sparepart</option>');
-                            $.each(data, function(key, sparepart) {
-                                sparepartSelect.append('<option value="' + sparepart.id + '">' + sparepart.nama + ' - ' + sparepart.merk + ' - ' + sparepart.part_number + '</option>');
-                            });
+                            if (data.length > 0) {
+                                sparepartSelect.append('<option value="">Pilih Sparepart</option>');
+                                $.each(data, function(key, sparepart) {
+                                    sparepartSelect.append('<option value="' + sparepart.id + '">' + sparepart.nama + ' - ' + sparepart.merk + ' - ' + sparepart.part_number + '</option>');
+                                });
+                            } else {
+                                sparepartSelect.append('<option value="">Tidak ada sparepart tersedia</option>');
+                            }
                             sparepartSelect.val(null).trigger('change');
                         },
                         complete: function() {

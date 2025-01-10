@@ -11,9 +11,11 @@
                     <div class="ibox-title ps-2">
                         <p class="fw-medium">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}</p>
                     </div>
-                    <a class="btn btn-primary btn-sm" id="button-for-modal-add" data-bs-toggle="modal" data-bs-target="#modalForAdd">
-                        <i class="fa fa-plus"></i> <span class="ms-2">Tambah Data ATB</span>
-                    </a>
+                    @if ($tipe !== 'mutasi-proyek')
+                        <a class="btn btn-primary btn-sm" id="button-for-modal-add" data-bs-toggle="modal" data-bs-target="#modalForAdd">
+                            <i class="fa fa-plus"></i> <span class="ms-2">Tambah Data ATB</span>
+                        </a>
+                    @endif
                 </div>
 
                 @include('dashboard.atb.partials.table')
@@ -23,7 +25,11 @@
     </div>
 
     <!-- Modal for Adding Data -->
-    @include('dashboard.atb.partials.modal-add')
+    @if ($tipe === 'hutang-unit-alat')
+        @include('dashboard.atb.partials.hutang-unit-alat.modal-add')
+    @elseif ($tipe === 'panjar-unit-alat' || $tipe === 'panjar-proyek')
+        @include('dashboard.atb.partials.panjar-unit-alat_panjar_proyek.modal-add')
+    @endif
 
     <!-- Modal for STT -->
     @include('dashboard.atb.partials.modal-stt')

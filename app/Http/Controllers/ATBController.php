@@ -9,9 +9,11 @@ use App\Models\Proyek;
 use App\Models\DetailSPB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\MasterDataSparepart;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\SaldoController;
+use App\Models\KategoriSparepart; // Add this line
 
 class ATBController extends Controller
 {
@@ -105,13 +107,29 @@ class ATBController extends Controller
             ->where ( 'tipe', $tipe )
             ->get ();
 
+        // Initialize $spareparts as null
+        $spareparts = null;
+
+        // If type is panjar, get spareparts data
+        if ( $tipe === 'panjar-unit-alat' || $tipe === 'panjar-proyek' )
+        {
+            $spareparts = MasterDataSparepart::with ( [ 'KategoriSparepart' ] )->orderBy ( 'updated_at', 'desc' )
+                ->get ();
+        }
+
+        // Get KategoriSparepart data
+        $kategoriSpareparts = KategoriSparepart::all ();
+
         return view ( "dashboard.atb.atb", [ 
-            "proyek"     => $proyek,
-            "proyeks"    => $proyeks,
-            "spbs"       => $filteredSpbs,
-            "headerPage" => $proyek->nama,
-            "page"       => $pageTitle,
-            "atbs"       => $atbs, // Kirim data ATB ke view
+            "proyek"             => $proyek,
+            "proyeks"            => $proyeks,
+            "spbs"               => $filteredSpbs,
+            "headerPage"         => $proyek->nama,
+            "page"               => $pageTitle,
+            "tipe"               => $tipe,
+            "atbs"               => $atbs,
+            "spareparts"         => $spareparts,
+            "kategoriSpareparts" => $kategoriSpareparts // Add this line
         ] );
     }
 

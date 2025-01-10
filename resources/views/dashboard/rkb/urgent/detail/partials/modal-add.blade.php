@@ -126,6 +126,14 @@
 
 @push('scripts_3')
     <script>
+        // Define clearPreview function globally
+        function clearPreview() {
+            const dokumentasiPreview = document.getElementById('dokumentasiPreview');
+            if (dokumentasiPreview) {
+                dokumentasiPreview.innerHTML = '';
+            }
+        }
+
         $(document).ready(function() {
             'use strict';
 
@@ -225,11 +233,10 @@
                 $select2Elements.each(function() {
                     $(this).val(null).trigger('change');
                 });
+                clearPreview(); // Add this line to clear the preview images
             });
         });
-    </script>
 
-    <script>
         document.addEventListener('DOMContentLoaded', function() {
             'use strict';
 
@@ -239,11 +246,6 @@
             const largeImagePreviewForAdd = document.getElementById('largeImagePreviewForAdd');
             const imagePreviewTitleForAdd = document.getElementById('imagePreviewTitleForAdd');
             const imagePreviewModalforAdd = new bootstrap.Modal(document.getElementById('imagePreviewModalforAdd'));
-
-            // Clear the preview area
-            const clearPreview = () => {
-                dokumentasiPreview.innerHTML = '';
-            };
 
             // Validate the file input
             const validateFiles = () => {

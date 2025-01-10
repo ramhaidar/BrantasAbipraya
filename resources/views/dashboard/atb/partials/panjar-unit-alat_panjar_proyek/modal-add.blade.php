@@ -17,8 +17,17 @@
             width: 3rem;
             height: 3rem;
         }
+
+        .img-thumbnail {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            cursor: pointer;
+        }
     </style>
 @endpush
+
+@include('dashboard.atb.partials.panjar-unit-alat_panjar_proyek.modal-preview')
 
 <div class="fade modal" id="modalForAdd" aria-hidden="true" aria-labelledby="staticBackdropLabel" tabindex="-1">
     <div class="modal-dialog modal-dialog-scrollable modal-xl modal-dialog-centered">
@@ -90,6 +99,15 @@
                             <div class="invalid-feedback">Harga diperlukan.</div>
                         </div>
 
+                        <div class="col-12">
+                            <label class="form-label required" for="dokumentasi">Dokumentasi</label>
+                            <input class="form-control" id="dokumentasiInput" name="dokumentasi[]" type="file" accept="image/*" multiple required>
+                            <div class="invalid-feedback" id="dokumentasi-invalid-feedback">
+                                Dokumentasi diperlukan.
+                            </div>
+                            <div class="mt-3 d-flex flex-wrap gap-2" id="dokumentasiPreview"></div>
+                        </div>
+
                     </div>
                 </div>
             </form>
@@ -107,6 +125,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.0/pdfobject.min.js" integrity="sha512-Nr6NV16pWOefJbWJiT8SrmZwOomToo/84CNd0MN6DxhP5yk8UAoPUjNuBj9KyRYVpESUb14RTef7FKxLVA4WGQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <script>
+        // Define clearPreview function globally
+        function clearPreview() {
+            const dokumentasiPreview = document.getElementById('dokumentasiPreview');
+            if (dokumentasiPreview) {
+                dokumentasiPreview.innerHTML = '';
+            }
+        }
+
         $(document).ready(function() {
             // Initialize kategori sparepart select
             $('#id_kategori_sparepart').select2({
@@ -190,6 +216,7 @@
                 $('#addDataForm')[0].reset();
                 $('#id_kategori_sparepart').val(null).trigger('change');
                 $('#id_master_data_sparepart').val(null).trigger('change');
+                clearPreview(); // Now this will work
             });
 
             // Validate form on submit button click
@@ -208,6 +235,124 @@
                 } else {
                     $(this).next('.select2-container').find('.select2-selection').removeClass('is-valid').addClass('is-invalid');
                 }
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            'use strict';
+
+            const dokumentasiInput = document.getElementById('dokumentasiInput');
+            const dokumentasiPreview = document.getElementById('dokumentasiPreview');
+            const invalidFeedback = document.getElementById('dokumentasi-invalid-feedback');
+            const largeImagePreviewForAdd = document.getElementById('largeImagePreviewForAdd');
+            const imagePreviewTitleForAdd = document.getElementById('imagePreviewTitleForAdd');
+            const imagePreviewModalforAdd = new bootstrap.Modal(document.getElementById('imagePreviewModalforAdd'));
+
+            // Validate the file input
+            const validateFiles = () => {
+                if (dokumentasiInput.files.length === 0) {
+                    dokumentasiInput.classList.add('is-invalid');
+                    invalidFeedback.style.display = 'block';
+                } else {
+                    dokumentasiInput.classList.remove('is-invalid');
+                    invalidFeedback.style.display = 'none';
+                }
+            };
+
+            // Handle file input change
+            dokumentasiInput.addEventListener('change', function() {
+                clearPreview(); // Clear existing previews
+
+                const files = Array.from(dokumentasiInput.files);
+                const maxFileSize = 2 * 1024 * 1024; // 2 MB
+
+                files.forEach((file) => {
+                    if (!file.type.startsWith('image/')) {
+                        alert(`File "${file.name}" is not an image.`);
+                        return;
+                    }
+
+                    if (file.size > maxFileSize) {
+                        alert(`File "${file.name}" exceeds the 2 MB size limit.`);
+                        return;
+                    }
+
+                    // Create preview for each valid image
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.alt = file.name;
+                        img.classList.add('img-thumbnail');
+                        img.title = file.name;
+
+                        // Add click event to open large preview modal
+                        img.addEventListener('click', function() {
+                            largeImagePreviewForAdd.src = e.target.result;
+                            imagePreviewTitleForAdd.textContent = file.name;
+                            $('#modalForAdd').modal('hide'); // Hide #modalForAdd
+                            imagePreviewModalforAdd.show();
+                        });
+
+                        // Create a remove button
+                        const removeButton = document.createElement('button');
+                        removeButton.type = 'button';
+                        removeButton.textContent = 'Remove';
+                        removeButton.classList.add('btn', 'btn-sm', 'btn-danger', 'mt-2');
+                        removeButton.onclick = () => {
+                            img.remove();
+                            removeButton.remove();
+                            const remainingFiles = Array.from(dokumentasiInput.files).filter((f) => f !== file);
+                            const dataTransfer = new DataTransfer();
+                            remainingFiles.forEach((f) => dataTransfer.items.add(f));
+                            dokumentasiInput.files = dataTransfer.files;
+                            validateFiles();
+                        };
+
+                        const previewContainer = document.createElement('div');
+                        previewContainer.classList.add('d-flex', 'flex-column', 'align-items-center', 'me-2');
+                        previewContainer.appendChild(img);
+                        previewContainer.appendChild(removeButton);
+
+                        dokumentasiPreview.appendChild(previewContainer);
+                    };
+                    reader.readAsDataURL(file);
+                });
+
+                validateFiles();
+            });
+
+            // Validate on form submission
+            const form = document.getElementById('addDataForm');
+            form.addEventListener('submit', function(event) {
+                validateFiles();
+                if (!form.checkValidity() || dokumentasiInput.files.length === 0) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            });
+
+            // Event listener for image thumbnail clicks
+            dokumentasiPreview.addEventListener('click', function(event) {
+                const target = event.target;
+
+                if (target.tagName === 'IMG' && target.classList.contains('img-thumbnail')) {
+                    // Set the large image preview source
+                    largeImagePreviewForAdd.src = target.src;
+
+                    // Set the modal title with the image file name
+                    imagePreviewTitleForAdd.textContent = target.title;
+
+                    // Hide #modalForAdd using jQuery
+                    $('#modalForAdd').modal('hide');
+                }
+            });
+
+            // Event listener for when the preview modal is closed
+            document.getElementById('imagePreviewModalforAdd').addEventListener('hidden.bs.modal', function() {
+                // Reopen #modalForAdd using jQuery
+                $('#modalForAdd').modal('show');
             });
         });
     </script>

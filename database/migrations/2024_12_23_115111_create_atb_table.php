@@ -16,7 +16,7 @@ return new class extends Migration
             $table->id ();
             $table->string ( 'tipe' );
             $table->string ( 'dokumentasi_foto' ); // Folder path sesuai dengan diagram
-            $table->string ( 'surat_tanda_terima' ); // File path sesuai dengan diagram
+            $table->string ( 'surat_tanda_terima' )->nullable (); // File path sesuai dengan diagram
             $table->date ( 'tanggal' );
             $table->bigInteger ( 'quantity' );
             $table->bigInteger ( 'harga' );

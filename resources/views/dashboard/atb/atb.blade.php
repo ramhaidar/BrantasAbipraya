@@ -18,7 +18,11 @@
                     @endif
                 </div>
 
-                @include('dashboard.atb.partials.table')
+                @if ($tipe === 'hutang-unit-alat')
+                    @include('dashboard.atb.partials.table')
+                @else
+                    @include('dashboard.atb.partials.panjar-unit-alat_panjar_proyek.table')
+                @endif
 
             </div>
         </div>

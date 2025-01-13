@@ -22,6 +22,7 @@
                 <th class="text-center">Merek Alat</th>
                 <th class="text-center">Tipe Alat</th>
                 <th class="text-center">Serial Number</th>
+                <th class="text-center">Aksi</th>
             </tr>
         </thead>
         <tbody>
@@ -32,6 +33,11 @@
                     <td class="text-center">{{ $alat->masterDataAlat->merek_alat }}</td>
                     <td class="text-center">{{ $alat->masterDataAlat->tipe_alat }}</td>
                     <td class="text-center">{{ $alat->masterDataAlat->serial_number }}</td>
+                    <td class="text-center">
+                        <button class="btn btn-danger btn-sm deleteBtn" data-id="{{ $alat->id }}" type="button">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
                 </tr>
             @endforeach
         </tbody>

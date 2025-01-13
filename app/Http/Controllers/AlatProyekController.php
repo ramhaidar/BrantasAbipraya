@@ -29,6 +29,7 @@ class AlatProyekController extends Controller
 
         $AlatAssigned = AlatProyek::with ( "masterDataAlat" )
             ->where ( 'id_proyek', $proyek->id )
+            ->whereNull ( 'removed_at' )
             ->orderBy ( 'updated_at', 'desc' )
             ->get ();
 
@@ -66,5 +67,17 @@ class AlatProyekController extends Controller
         }
 
         return redirect ()->back ()->with ( 'success', 'Alat berhasil ditambahkan ke proyek' );
+    }
+
+    public function destroy ( $id )
+    {
+        $alatProyek = AlatProyek::findOrFail ( $id );
+
+        // Set removed_at timestamp instead of deleting the record
+        $alatProyek->update ( [ 
+            'removed_at' => now ()
+        ] );
+
+        return redirect ()->back ()->with ( 'success', 'Alat berhasil dihapus dari proyek' );
     }
 }

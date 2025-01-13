@@ -161,6 +161,19 @@ class MasterDataSparepartController extends Controller
         return response ()->json ( $spareparts );
     }
 
+    public function getSparepartsBySupplierAndCategory ( $supplier_id, $kategori_id )
+    {
+        $spareparts = MasterDataSparepart::with ( 'masterDataSuppliers' )
+            ->whereHas ( 'masterDataSuppliers', function ($query) use ($supplier_id)
+            {
+                $query->where ( 'master_data_supplier.id', $supplier_id );
+            } )
+            ->where ( 'id_kategori_sparepart', $kategori_id )
+            ->get ();
+
+        return response ()->json ( $spareparts );
+    }
+
     public function getData ( Request $request )
     {
         // Start query with join

@@ -60,6 +60,17 @@
                         </div>
 
                         <div class="col-12 w-100">
+                            <label class="form-label w-100 required" for="id_supplier">Pilih Supplier</label>
+                            <select class="form-control w-100" id="id_supplier" name="id_supplier" required>
+                                <option value="">Pilih Supplier</option>
+                                @foreach ($suppliers as $supplier)
+                                    <option value="{{ $supplier->id }}">{{ $supplier->nama }}</option>
+                                @endforeach
+                            </select>
+                            <div class="invalid-feedback">Supplier diperlukan.</div>
+                        </div>
+
+                        <div class="col-12 w-100">
                             <label class="form-label w-100 required" for="id_kategori_sparepart">Pilih Kategori Sparepart</label>
                             <select class="form-control w-100" id="id_kategori_sparepart" name="id_kategori_sparepart" required>
                                 <option value="">Pilih Kategori Sparepart</option>
@@ -149,9 +160,26 @@
         }
 
         $(document).ready(function() {
-            // Initialize kategori sparepart select
+            // Add loading overlay to body
+            $('body').append('<div class="loading-overlay" style="display: none;"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+
+            // Initialize select2 components
             $('#id_kategori_sparepart').select2({
                 placeholder: "Pilih Kategori Sparepart",
+                allowClear: true,
+                dropdownParent: $('#modalForAdd'),
+                width: '100%'
+            });
+
+            $('#id_supplier').select2({
+                placeholder: "Pilih Supplier",
+                allowClear: true,
+                dropdownParent: $('#modalForAdd'),
+                width: '100%'
+            });
+
+            $('#satuan').select2({
+                placeholder: "Pilih Satuan",
                 allowClear: true,
                 dropdownParent: $('#modalForAdd'),
                 width: '100%'
@@ -165,61 +193,67 @@
                 width: '100%'
             }).prop('disabled', true);
 
-            // Initialize satuan select
-            $('#satuan').select2({
-                placeholder: "Pilih Satuan",
-                allowClear: true,
-                dropdownParent: $('#modalForAdd'),
-                width: '100%'
-            });
+            // Function to check if both supplier and category are selected
+            function checkDependencies() {
+                var supplierId = $('#id_supplier').val();
+                var kategoriId = $('#id_kategori_sparepart').val();
+                return supplierId && kategoriId;
+            }
 
-            // Add loading overlay to body
-            $('body').append('<div class="loading-overlay" style="display: none;"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+            // Function to load spareparts
+            function loadSpareparts() {
+                var supplierId = $('#id_supplier').val();
+                var kategoriId = $('#id_kategori_sparepart').val();
 
-            // Enable sparepart select when kategori is selected
-            $('#id_kategori_sparepart').on('change', function() {
-                var selectedKategori = $(this).val();
-                if (selectedKategori) {
-                    $('#id_master_data_sparepart').prop('disabled', false);
-                    // Show loading overlay
+                $('#id_master_data_sparepart').prop('disabled', true).val(null).trigger('change');
+
+                if (checkDependencies()) {
                     $('.loading-overlay').show();
-                    // Fetch spareparts based on selected kategori
                     $.ajax({
-                        url: '{{ route('spareparts-by-category', ':id') }}'.replace(':id', selectedKategori),
+                        url: '{{ route('spareparts-by-supplier-and-category', ['supplier_id' => ':supplier_id', 'kategori_id' => ':kategori_id']) }}'
+                            .replace(':supplier_id', supplierId)
+                            .replace(':kategori_id', kategoriId),
                         type: 'GET',
                         success: function(data) {
                             var sparepartSelect = $('#id_master_data_sparepart');
                             sparepartSelect.empty();
+
                             if (data.length > 0) {
                                 sparepartSelect.append('<option value="">Pilih Sparepart</option>');
                                 $.each(data, function(key, sparepart) {
-                                    sparepartSelect.append('<option value="' + sparepart.id + '">' + sparepart.nama + ' - ' + sparepart.merk + ' - ' + sparepart.part_number + '</option>');
+                                    sparepartSelect.append('<option value="' + sparepart.id + '">' +
+                                        sparepart.nama + ' - ' + sparepart.merk + ' - ' + sparepart.part_number +
+                                        '</option>');
                                 });
-                                sparepartSelect.select2({
-                                    placeholder: "Pilih Sparepart",
-                                    allowClear: true,
-                                    dropdownParent: $('#modalForAdd'),
-                                    width: '100%'
-                                }).prop('disabled', false);
+                                sparepartSelect.prop('disabled', false);
                             } else {
                                 sparepartSelect.append('<option value="">Tidak ada sparepart tersedia</option>');
-                                sparepartSelect.select2({
-                                    placeholder: "Tidak ada sparepart tersedia",
-                                    allowClear: true,
-                                    dropdownParent: $('#modalForAdd'),
-                                    width: '100%'
-                                }).prop('disabled', true);
                             }
                             sparepartSelect.val(null).trigger('change');
                         },
+                        error: function(xhr, status, error) {
+                            console.error('Error:', error);
+                            $('#id_master_data_sparepart')
+                                .empty()
+                                .append('<option value="">Error loading spareparts</option>');
+                        },
                         complete: function() {
-                            // Hide loading overlay
                             $('.loading-overlay').hide();
                         }
                     });
-                } else {
-                    $('#id_master_data_sparepart').prop('disabled', true).val(null).trigger('change');
                 }
+            }
+
+            // Event handlers for supplier and category changes
+            $('#id_supplier, #id_kategori_sparepart').on('change', function() {
+                loadSpareparts();
+            });
+
+            // Reset form handler
+            $('#resetButton').on('click', function() {
+                $('#addDataForm')[0].reset();
+                $('#id_supplier, #id_kategori_sparepart, #id_master_data_sparepart').val(null).trigger('change');
+                clearPreview();
             });
 
             // Initialize datepicker for #tanggal
@@ -233,14 +267,6 @@
 
             $('#tanggal').datepicker(options);
             $.datepicker.setDefaults($.datepicker.regional['id']);
-
-            // Reset form on reset button click
-            $('#resetButton').on('click', function() {
-                $('#addDataForm')[0].reset();
-                $('#id_kategori_sparepart').val(null).trigger('change');
-                $('#id_master_data_sparepart').val(null).trigger('change');
-                clearPreview(); // Now this will work
-            });
 
             // Validate form on submit button click
             $('#submitButton').on('click', function() {

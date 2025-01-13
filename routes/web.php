@@ -710,6 +710,15 @@ Route::get (
     [ MasterDataSparepartController::class, 'getSparepartsByCategory' ]
 )->where ( 'id', '[0-9]+' )
     ->name ( 'spareparts-by-category' );
+    
+Route::get (
+    '/spareparts-by-supplier-and-category/{supplier_id}/{kategori_id}',
+    [ MasterDataSparepartController::class, 'getSparepartsBySupplierAndCategory' ]
+)->where ( [ 
+            'supplier_id' => '[0-9]+',
+            'kategori_id' => '[0-9]+'
+        ] )
+    ->name ( 'spareparts-by-supplier-and-category' );
 
 // Rute Master Data Supplier [MasterDataSupplierController]
 Route::middleware ( 'auth' )

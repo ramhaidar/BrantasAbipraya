@@ -8,6 +8,7 @@ use App\Models\Saldo;
 use App\Models\Proyek;
 use App\Models\DetailSPB;
 use Illuminate\Http\Request;
+use App\Models\MasterDataSupplier;
 use Illuminate\Support\Facades\DB;
 use App\Models\MasterDataSparepart;
 use App\Http\Controllers\Controller;
@@ -120,6 +121,9 @@ class ATBController extends Controller
         // Get KategoriSparepart data
         $kategoriSpareparts = KategoriSparepart::all ();
 
+        // Get masterDataSupplier data
+        $masterDataSuppliers = MasterDataSupplier::all ();
+
         return view ( "dashboard.atb.atb", [ 
             "proyek"             => $proyek,
             "proyeks"            => $proyeks,
@@ -128,6 +132,7 @@ class ATBController extends Controller
             "page"               => $pageTitle,
             "tipe"               => $tipe,
             "atbs"               => $atbs,
+            "suppliers"          => $masterDataSuppliers,
             "spareparts"         => $spareparts,
             "kategoriSpareparts" => $kategoriSpareparts // Add this line
         ] );

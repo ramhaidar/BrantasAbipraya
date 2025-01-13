@@ -43,14 +43,12 @@
                     <div class="row g-3">
                         <div class="p-0 m-0" hidden>
                             <label class="form-label" for="tipe">Tipe ATB</label>
-                            <div class="input-group">
-                                <select class="form-control" id="pilihan-proyek1" name="tipe">
-                                    <option value="hutang-unit-alat" {{ $page == 'Data ATB Hutang Unit Alat' ? 'selected' : '' }}>Hutang Unit Alat</option>
-                                    <option value="panjar-unit-alat" {{ $page == 'Data ATB Panjar Unit Alat' ? 'selected' : '' }}>Panjar Unit Alat</option>
-                                    <option value="mutasi-proyek" {{ $page == 'Data ATB Mutasi Proyek' ? 'selected' : '' }}>Mutasi Proyek</option>
-                                    <option value="panjar-proyek" {{ $page == 'Data ATB Panjar Proyek' ? 'selected' : '' }}>Panjar Proyek</option>
-                                </select>
-                            </div>
+                            <select class="form-control" id="pilihan-proyek1" name="tipe">
+                                <option value="hutang-unit-alat" {{ $page == 'Data ATB Hutang Unit Alat' ? 'selected' : '' }}>Hutang Unit Alat</option>
+                                <option value="panjar-unit-alat" {{ $page == 'Data ATB Panjar Unit Alat' ? 'selected' : '' }}>Panjar Unit Alat</option>
+                                <option value="mutasi-proyek" {{ $page == 'Data ATB Mutasi Proyek' ? 'selected' : '' }}>Mutasi Proyek</option>
+                                <option value="panjar-proyek" {{ $page == 'Data ATB Panjar Proyek' ? 'selected' : '' }}>Panjar Proyek</option>
+                            </select>
                         </div>
 
                         <input class="form-control" id="id_proyek" name="id_proyek" value="{{ $proyek->id }}" hidden required>
@@ -94,7 +92,24 @@
                         </div>
 
                         <div class="col-12">
-                            <label class="form-label required" for="harga">Harga</label>
+                            <label class="form-label required" for="satuan">Satuan</label>
+                            <select class="form-control" id="satuan" name="satuan" required>
+                                <option value="">Pilih Satuan</option>
+                                <option value="BTL">BTL</option>
+                                <option value="LTR">LTR</option>
+                                <option value="PCS">PCS</option>
+                                <option value="KG">KG</option>
+                                <option value="PAIL">PAIL</option>
+                                <option value="DRUM">DRUM</option>
+                                <option value="SET">SET</option>
+                                <option value="PACK">PACK</option>
+                                <option value="BOX">BOX</option>
+                            </select>
+                            <div class="invalid-feedback">Satuan diperlukan.</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label required" for="harga">Harga (Rp.)</label>
                             <input class="form-control" id="harga" name="harga" type="number" min="0" placeholder="Harga" required>
                             <div class="invalid-feedback">Harga diperlukan.</div>
                         </div>
@@ -149,6 +164,14 @@
                 dropdownParent: $('#modalForAdd'),
                 width: '100%'
             }).prop('disabled', true);
+
+            // Initialize satuan select
+            $('#satuan').select2({
+                placeholder: "Pilih Satuan",
+                allowClear: true,
+                dropdownParent: $('#modalForAdd'),
+                width: '100%'
+            });
 
             // Add loading overlay to body
             $('body').append('<div class="loading-overlay" style="display: none;"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>');

@@ -34,12 +34,15 @@ return new class extends Migration
                 ->constrained ( 'proyek' )
                 ->onDelete ( 'cascade' );
             $table->foreignId ( 'id_spb' )
+                ->nullable ()
                 ->constrained ( 'spb' )
                 ->onDelete ( 'cascade' );
             $table->foreignId ( 'id_master_data_sparepart' )
+                ->nullable ()
                 ->constrained ( 'master_data_sparepart' )
                 ->onDelete ( 'cascade' );
             $table->foreignId ( 'id_master_data_supplier' )
+                ->nullable ()
                 ->constrained ( 'master_data_supplier' )
                 ->onDelete ( 'cascade' );
         } );

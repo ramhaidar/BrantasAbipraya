@@ -76,16 +76,32 @@ class SaldoController extends Controller
                 'quantity'                 => $data[ 'quantity' ],
                 'harga'                    => $data[ 'harga' ],
                 'id_proyek'                => $data[ 'id_proyek' ],
-                'id_spb'                   => $data[ 'id_spb' ],
                 'id_master_data_sparepart' => $data[ 'id_master_data_sparepart' ],
-                'id_master_data_supplier'  => $data[ 'id_master_data_supplier' ],
-                'id_atb'                   => $data[ 'id_atb' ], // New column
-                'satuan'                   => $data[ 'satuan' ]  // New column
             ];
 
-            if ( $data[ 'tipe' ] === 'mutasi-proyek' && isset ( $data[ 'id_asal_proyek' ] ) )
+            // Add fields based on type
+            if ( $data[ 'tipe' ] === 'hutang-unit-alat' )
             {
-                $saldoData[ 'id_asal_proyek' ] = $data[ 'id_asal_proyek' ];
+                $saldoData[ 'id_spb' ]                  = $data[ 'id_spb' ];
+                $saldoData[ 'id_master_data_supplier' ] = $data[ 'id_master_data_supplier' ];
+                $saldoData[ 'satuan' ]                  = $data[ 'satuan' ];
+            }
+            else if ( $data[ 'tipe' ] === 'mutasi-proyek' )
+            {
+                $saldoData[ 'id_spb' ]                  = $data[ 'id_spb' ];
+                $saldoData[ 'id_master_data_supplier' ] = $data[ 'id_master_data_supplier' ];
+                $saldoData[ 'id_asal_proyek' ]          = $data[ 'id_asal_proyek' ];
+                $saldoData[ 'satuan' ]                  = $data[ 'satuan' ];
+            }
+            else if ( $data[ 'tipe' ] === 'panjar-unit-alat' || $data[ 'tipe' ] === 'panjar-proyek' )
+            {
+                $saldoData[ 'satuan' ] = $data[ 'satuan' ];
+            }
+
+            // Add id_atb for all types
+            if ( isset ( $data[ 'id_atb' ] ) )
+            {
+                $saldoData[ 'id_atb' ] = $data[ 'id_atb' ];
             }
 
             Saldo::create ( $saldoData );

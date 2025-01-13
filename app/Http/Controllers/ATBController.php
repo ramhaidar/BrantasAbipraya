@@ -159,173 +159,238 @@ class ATBController extends Controller
         {
             DB::beginTransaction ();
 
-            // Update validation rule for quantity
-            $validated = $request->validate ( [ 
-                'tipe'                       => 'required|string',
-                'tanggal'                    => 'required|date',
-                'id_proyek'                  => 'required|exists:proyek,id',
-                'id_spb'                     => 'required|exists:spb,id',
-                'surat_tanda_terima'         => 'required|file|mimes:pdf|max:10240',
-                'quantity'                   => 'required|array',
-                'quantity.*'                 => 'required|integer|min:0', // Allow 0 quantity
-                'id_detail_spb'              => 'required|array',
-                'id_detail_spb.*'            => 'required|exists:detail_spb,id',
-                'id_master_data_sparepart'   => 'required|array',
-                'id_master_data_sparepart.*' => 'required|exists:master_data_sparepart,id',
-                'harga'                      => 'required|array',
-                'harga.*'                    => 'required|numeric|min:0',
-                'documentation_photos'       => 'array',
-                'documentation_photos.*'     => 'array',
-                'documentation_photos.*.*'   => 'file|image|mimes:jpeg,png,jpg|max:2048',
-                'id_master_data_supplier'    => 'required|array',
-                'id_master_data_supplier.*'  => 'required|exists:master_data_supplier,id',
-                'satuan'                     => 'required|array', // New validation rule
-                'satuan.*'                   => 'required|string' // New validation rule
-            ] );
-
-            // Create base storage paths
-            $folderName      = 'atb_' . date ( 'YmdHis' ) . '_' . uniqid ();
-            $baseStoragePath = 'uploads/atb/' . $folderName;
-            $suratPath       = $baseStoragePath . '/surat';
-            Storage::disk ( 'public' )->makeDirectory ( $suratPath );
-
-            // Handle surat_tanda_terima upload
-            $suratFile     = $request->file ( 'surat_tanda_terima' );
-            $originalName  = pathinfo ( $suratFile->getClientOriginalName (), PATHINFO_FILENAME );
-            $extension     = $suratFile->getClientOriginalExtension ();
-            $timestamp     = now ()->format ( 'Y-m-d--H-i-s' );
-            $suratFileName = "{$originalName}___{$timestamp}.{$extension}";
-            $suratFilePath = $suratFile->storeAs ( $suratPath, $suratFileName, 'public' );
-
-            $saldoController = new SaldoController();
-            $processedItems  = 0;
-            $skippedReasons  = [];
-
-            // Process each detail SPB item
-            foreach ( $request->id_detail_spb as $index => $id_detail_spb )
+            if ( $request->tipe === "hutang-unit-alat" )
             {
-                // Get the DetailSPB record
-                $detailSpb         = DetailSPB::find ( $id_detail_spb );
-                $requestedQuantity = intval ( $request->quantity[ $index ] );
 
-                // Skip if quantity is invalid or item has no remaining quantity
-                if ( $requestedQuantity < 0 )
+                // Update validation rule for quantity
+                $validated = $request->validate ( [ 
+                    'tipe'                       => 'required|string',
+                    'tanggal'                    => 'required|date',
+                    'id_proyek'                  => 'required|exists:proyek,id',
+                    'id_spb'                     => 'required|exists:spb,id',
+                    'surat_tanda_terima'         => 'required|file|mimes:pdf|max:10240',
+                    'quantity'                   => 'required|array',
+                    'quantity.*'                 => 'required|integer|min:0', // Allow 0 quantity
+                    'id_detail_spb'              => 'required|array',
+                    'id_detail_spb.*'            => 'required|exists:detail_spb,id',
+                    'id_master_data_sparepart'   => 'required|array',
+                    'id_master_data_sparepart.*' => 'required|exists:master_data_sparepart,id',
+                    'harga'                      => 'required|array',
+                    'harga.*'                    => 'required|numeric|min:0',
+                    'documentation_photos'       => 'array',
+                    'documentation_photos.*'     => 'array',
+                    'documentation_photos.*.*'   => 'file|image|mimes:jpeg,png,jpg|max:2048',
+                    'id_master_data_supplier'    => 'required|array',
+                    'id_master_data_supplier.*'  => 'required|exists:master_data_supplier,id',
+                    'satuan'                     => 'required|array', // New validation rule
+                    'satuan.*'                   => 'required|string' // New validation rule
+                ] );
+
+                // Create base storage paths
+                $folderName      = 'atb_' . date ( 'YmdHis' ) . '_' . uniqid ();
+                $baseStoragePath = 'uploads/atb/' . $folderName;
+                $suratPath       = $baseStoragePath . '/surat';
+                Storage::disk ( 'public' )->makeDirectory ( $suratPath );
+
+                // Handle surat_tanda_terima upload
+                $suratFile     = $request->file ( 'surat_tanda_terima' );
+                $originalName  = pathinfo ( $suratFile->getClientOriginalName (), PATHINFO_FILENAME );
+                $extension     = $suratFile->getClientOriginalExtension ();
+                $timestamp     = now ()->format ( 'Y-m-d--H-i-s' );
+                $suratFileName = "{$originalName}___{$timestamp}.{$extension}";
+                $suratFilePath = $suratFile->storeAs ( $suratPath, $suratFileName, 'public' );
+
+                $saldoController = new SaldoController();
+                $processedItems  = 0;
+                $skippedReasons  = [];
+
+                // Process each detail SPB item
+                foreach ( $request->id_detail_spb as $index => $id_detail_spb )
                 {
-                    $skippedReasons[] = "Index $index: Invalid quantity";
-                    continue;
-                }
+                    // Get the DetailSPB record
+                    $detailSpb         = DetailSPB::find ( $id_detail_spb );
+                    $requestedQuantity = intval ( $request->quantity[ $index ] );
 
-                // Skip validation for documentation photos if quantity is 0
-                if ( $requestedQuantity > 0 )
-                {
-                    // Check for documentation photos with both current index and index+1
-                    $hasPhotos = isset ( $request->file ( 'documentation_photos' )[ $index ] ) ||
-                        isset ( $request->file ( 'documentation_photos' )[ $index + 1 ] );
-
-                    if ( ! $hasPhotos )
+                    // Skip if quantity is invalid or item has no remaining quantity
+                    if ( $requestedQuantity < 0 )
                     {
-                        $skippedReasons[] = "Index $index: Missing photos for non-zero quantity";
-                        continue;
-                    }
-                }
-
-                // Only continue processing if quantity is greater than 0
-                if ( $requestedQuantity > 0 )
-                {
-                    // Validate remaining quantity
-                    if ( $detailSpb->quantity_belum_diterima <= 0 )
-                    {
-                        $skippedReasons[] = "Index $index: No remaining quantity";
-                        continue;
-                    }
-
-                    // Validate that we have all required data for this index
-                    if (
-                        ! isset ( $request->id_master_data_sparepart[ $index ] ) ||
-                        ! isset ( $request->harga[ $index ] ) ||
-                        ! isset ( $request->id_master_data_supplier[ $index ] )
-                    )
-                    {
-                        if ( ! isset ( $request->id_master_data_sparepart[ $index ] ) )
-                        {
-                            $skippedReasons[] = "Index $index: Missing sparepart data";
-                        }
-                        if ( ! isset ( $request->harga[ $index ] ) )
-                        {
-                            $skippedReasons[] = "Index $index: Missing harga";
-                        }
-                        if ( ! isset ( $request->id_master_data_supplier[ $index ] ) )
-                        {
-                            $skippedReasons[] = "Index $index: Missing supplier";
-                        }
-                        if ( ! isset ( $request->file ( 'documentation_photos' )[ $index ] ) )
-                        {
-                            $skippedReasons[] = "Index $index: Missing photos";
-                        }
+                        $skippedReasons[] = "Index $index: Invalid quantity";
                         continue;
                     }
 
-                    // Create documentation folder for this item
-                    $docPath = $baseStoragePath . '/dokumentasi_' . uniqid ();
-                    Storage::disk ( 'public' )->makeDirectory ( $docPath );
-
-                    // Try to get photos from either current index or index+1
-                    $photos = $request->file ( 'documentation_photos' )[ $index ] ??
-                        $request->file ( 'documentation_photos' )[ $index + 1 ] ??
-                        null;
-
-                    if ( $photos )
+                    // Skip validation for documentation photos if quantity is 0
+                    if ( $requestedQuantity > 0 )
                     {
-                        foreach ( $photos as $photo )
+                        // Check for documentation photos with both current index and index+1
+                        $hasPhotos = isset ( $request->file ( 'documentation_photos' )[ $index ] ) ||
+                            isset ( $request->file ( 'documentation_photos' )[ $index + 1 ] );
+
+                        if ( ! $hasPhotos )
                         {
-                            $photoName      = pathinfo ( $photo->getClientOriginalName (), PATHINFO_FILENAME );
-                            $photoExt       = $photo->getClientOriginalExtension ();
-                            $photoTimestamp = now ()->format ( 'Y-m-d--H-i-s' );
-                            $fileName       = "{$photoName}___{$photoTimestamp}.{$photoExt}";
-                            $photo->storeAs ( $docPath, $fileName, 'public' );
+                            $skippedReasons[] = "Index $index: Missing photos for non-zero quantity";
+                            continue;
                         }
                     }
 
-                    // Update quantity_belum_diterima
-                    $detailSpb->reduceQuantityBelumDiterima ( $requestedQuantity );
+                    // Only continue processing if quantity is greater than 0
+                    if ( $requestedQuantity > 0 )
+                    {
+                        // Validate remaining quantity
+                        if ( $detailSpb->quantity_belum_diterima <= 0 )
+                        {
+                            $skippedReasons[] = "Index $index: No remaining quantity";
+                            continue;
+                        }
 
-                    // Create ATB record
-                    $atb = ATB::create ( [ 
-                        'tipe'                     => $request->tipe,
-                        'dokumentasi_foto'         => $docPath,
-                        'surat_tanda_terima'       => $suratFilePath,
-                        'tanggal'                  => $request->tanggal,
-                        'quantity'                 => $requestedQuantity,
-                        'harga'                    => $request->harga[ $index ],
-                        'id_proyek'                => $request->id_proyek,
-                        'id_spb'                   => $request->id_spb,
-                        'id_detail_spb'            => $id_detail_spb,
-                        'id_master_data_sparepart' => $request->id_master_data_sparepart[ $index ],
-                        'id_master_data_supplier'  => $request->id_master_data_supplier[ $index ],
-                        'satuan'                   => $request->satuan[ $index ] // New column
-                    ] );
+                        // Validate that we have all required data for this index
+                        if (
+                            ! isset ( $request->id_master_data_sparepart[ $index ] ) ||
+                            ! isset ( $request->harga[ $index ] ) ||
+                            ! isset ( $request->id_master_data_supplier[ $index ] )
+                        )
+                        {
+                            if ( ! isset ( $request->id_master_data_sparepart[ $index ] ) )
+                            {
+                                $skippedReasons[] = "Index $index: Missing sparepart data";
+                            }
+                            if ( ! isset ( $request->harga[ $index ] ) )
+                            {
+                                $skippedReasons[] = "Index $index: Missing harga";
+                            }
+                            if ( ! isset ( $request->id_master_data_supplier[ $index ] ) )
+                            {
+                                $skippedReasons[] = "Index $index: Missing supplier";
+                            }
+                            if ( ! isset ( $request->file ( 'documentation_photos' )[ $index ] ) )
+                            {
+                                $skippedReasons[] = "Index $index: Missing photos";
+                            }
+                            continue;
+                        }
 
-                    // Create corresponding Saldo record
-                    $saldoController->store ( [ 
-                        'tipe'                     => $request->tipe,
-                        'quantity'                 => $requestedQuantity,
-                        'harga'                    => $request->harga[ $index ],
-                        'id_proyek'                => $request->id_proyek,
-                        'id_asal_proyek'           => null, // Add this line
-                        'id_spb'                   => $request->id_spb,
-                        'id_master_data_sparepart' => $request->id_master_data_sparepart[ $index ],
-                        'id_master_data_supplier'  => $request->id_master_data_supplier[ $index ],
-                        'id_atb'                   => $atb->id, // New column
-                        'satuan'                   => $request->satuan[ $index ] // New column
-                    ] );
+                        // Create documentation folder for this item
+                        $docPath = $baseStoragePath . '/dokumentasi_' . uniqid ();
+                        Storage::disk ( 'public' )->makeDirectory ( $docPath );
 
-                    $processedItems++;
+                        // Try to get photos from either current index or index+1
+                        $photos = $request->file ( 'documentation_photos' )[ $index ] ??
+                            $request->file ( 'documentation_photos' )[ $index + 1 ] ??
+                            null;
+
+                        if ( $photos )
+                        {
+                            foreach ( $photos as $photo )
+                            {
+                                $photoName      = pathinfo ( $photo->getClientOriginalName (), PATHINFO_FILENAME );
+                                $photoExt       = $photo->getClientOriginalExtension ();
+                                $photoTimestamp = now ()->format ( 'Y-m-d--H-i-s' );
+                                $fileName       = "{$photoName}___{$photoTimestamp}.{$photoExt}";
+                                $photo->storeAs ( $docPath, $fileName, 'public' );
+                            }
+                        }
+
+                        // Update quantity_belum_diterima
+                        $detailSpb->reduceQuantityBelumDiterima ( $requestedQuantity );
+
+                        // Create ATB record
+                        $atb = ATB::create ( [ 
+                            'tipe'                     => $request->tipe,
+                            'dokumentasi_foto'         => $docPath,
+                            'surat_tanda_terima'       => $suratFilePath,
+                            'tanggal'                  => $request->tanggal,
+                            'quantity'                 => $requestedQuantity,
+                            'harga'                    => $request->harga[ $index ],
+                            'id_proyek'                => $request->id_proyek,
+                            'id_spb'                   => $request->id_spb,
+                            'id_detail_spb'            => $id_detail_spb,
+                            'id_master_data_sparepart' => $request->id_master_data_sparepart[ $index ],
+                            'id_master_data_supplier'  => $request->id_master_data_supplier[ $index ],
+                            'satuan'                   => $request->satuan[ $index ] // New column
+                        ] );
+
+                        // Create corresponding Saldo record
+                        $saldoController->store ( [ 
+                            'tipe'                     => $request->tipe,
+                            'quantity'                 => $requestedQuantity,
+                            'harga'                    => $request->harga[ $index ],
+                            'id_proyek'                => $request->id_proyek,
+                            'id_asal_proyek'           => null, // Add this line
+                            'id_spb'                   => $request->id_spb,
+                            'id_master_data_sparepart' => $request->id_master_data_sparepart[ $index ],
+                            'id_master_data_supplier'  => $request->id_master_data_supplier[ $index ],
+                            'id_atb'                   => $atb->id, // New column
+                            'satuan'                   => $request->satuan[ $index ] // New column
+                        ] );
+
+                        $processedItems++;
+                    }
                 }
+
+                if ( $processedItems === 0 )
+                {
+                    throw new \Exception( 'Tidak ada item yang valid untuk diproses. Alasan: ' . implode ( ', ', $skippedReasons ) );
+                }
+
             }
 
-            if ( $processedItems === 0 )
+            if ( $request->tipe == "panjar-proyek" || $request->tipe === "panjar-unit-alat" )
             {
-                throw new \Exception( 'Tidak ada item yang valid untuk diproses. Alasan: ' . implode ( ', ', $skippedReasons ) );
+                $validated = $request->validate ( [ 
+                    'tipe'                     => 'required|string',
+                    'tanggal'                  => 'required|date',
+                    'id_proyek'                => 'required|exists:proyek,id',
+                    'id_kategori_sparepart'    => 'required|exists:kategori_sparepart,id',
+                    'id_master_data_sparepart' => 'required|exists:master_data_sparepart,id',
+                    'quantity'                 => 'required|integer|min:1',
+                    'harga'                    => 'required|numeric|min:0',
+                    'satuan'                   => 'required|string', // Add this line
+                    'dokumentasi'              => 'required|array',
+                    'dokumentasi.*'            => 'file|image|mimes:jpeg,png,jpg|max:2048'
+                ] );
+
+                // Create base storage paths
+                $folderName      = 'atb_' . date ( 'YmdHis' ) . '_' . uniqid ();
+                $baseStoragePath = 'uploads/atb/' . $folderName;
+                $docPath         = $baseStoragePath . '/dokumentasi';
+                Storage::disk ( 'public' )->makeDirectory ( $docPath );
+
+                // Handle dokumentasi upload
+                $photos = $request->file ( 'dokumentasi' );
+                foreach ( $photos as $photo )
+                {
+                    $photoName      = pathinfo ( $photo->getClientOriginalName (), PATHINFO_FILENAME );
+                    $photoExt       = $photo->getClientOriginalExtension ();
+                    $photoTimestamp = now ()->format ( 'Y-m-d--H-i-s' );
+                    $fileName       = "{$photoName}___{$photoTimestamp}.{$photoExt}";
+                    $photo->storeAs ( $docPath, $fileName, 'public' );
+                }
+
+                // Create ATB record
+                $atb = ATB::create ( [ 
+                    'tipe'                     => $request->tipe,
+                    'dokumentasi_foto'         => $docPath,
+                    'tanggal'                  => $request->tanggal,
+                    'quantity'                 => $request->quantity,
+                    'harga'                    => $request->harga,
+                    'satuan'                   => $request->satuan, // Add this line
+                    'id_proyek'                => $request->id_proyek,
+                    'id_master_data_sparepart' => $request->id_master_data_sparepart
+                ] );
+
+                // Create corresponding Saldo record
+                $saldoController = new SaldoController();
+                $saldoController->store ( [ 
+                    'tipe'                     => $request->tipe,
+                    'quantity'                 => $request->quantity,
+                    'harga'                    => $request->harga,
+                    'satuan'                   => $request->satuan, // Add this line
+                    'id_proyek'                => $request->id_proyek,
+                    'id_master_data_sparepart' => $request->id_master_data_sparepart,
+                    'id_atb'                   => $atb->id
+                ] );
+
+                // Remove or comment out this line as it's not needed
+                // dd ( $request->all () );
             }
 
             DB::commit ();
@@ -349,45 +414,71 @@ class ATBController extends Controller
         {
             DB::beginTransaction ();
 
-            $atb              = ATB::findOrFail ( $id );
-            $suratTandaTerima = $atb->surat_tanda_terima;
+            $atb = ATB::findOrFail ( $id );
 
-            // Find all ATB records with the same Surat Tanda Terima
-            $atbs = ATB::where ( 'surat_tanda_terima', $suratTandaTerima )->get ();
-
-            $saldoController = new SaldoController();
-
-            foreach ( $atbs as $atb )
+            if ( str_contains ( $atb->tipe, 'panjar' ) )
             {
+                // For panjar types, simply delete the ATB and associated records
+
                 // Delete associated files
                 if ( $atb->dokumentasi_foto )
                 {
                     Storage::disk ( 'public' )->deleteDirectory ( $atb->dokumentasi_foto );
                 }
 
-                // Restore quantity_belum_diterima for the corresponding DetailSPB
-                $detailSpb = DetailSPB::find ( $atb->id_detail_spb );
-                $detailSpb->increaseQuantityBelumDiterima ( $atb->quantity );
-
                 // Delete the associated Saldo record
                 $saldo = Saldo::where ( 'id_atb', $atb->id )->first ();
                 if ( $saldo )
                 {
+                    $saldoController = new SaldoController();
                     $saldoController->destroy ( $saldo->id );
                 }
 
                 // Delete the ATB record
                 $atb->delete ();
             }
-
-            // Delete the shared surat_tanda_terima file
-            if ( $suratTandaTerima )
+            else
             {
-                // Get the main ATB folder path by extracting the parent directory path
-                $mainFolderPath = dirname ( dirname ( $suratTandaTerima ) );
+                // For non-panjar types (existing logic for hutang)
+                $suratTandaTerima = $atb->surat_tanda_terima;
 
-                // Delete the entire ATB folder and all its contents
-                Storage::disk ( 'public' )->deleteDirectory ( $mainFolderPath );
+                // Find all ATB records with the same Surat Tanda Terima
+                $atbs = ATB::where ( 'surat_tanda_terima', $suratTandaTerima )->get ();
+
+                $saldoController = new SaldoController();
+
+                foreach ( $atbs as $atb )
+                {
+                    // Delete associated files
+                    if ( $atb->dokumentasi_foto )
+                    {
+                        Storage::disk ( 'public' )->deleteDirectory ( $atb->dokumentasi_foto );
+                    }
+
+                    // Restore quantity_belum_diterima for the corresponding DetailSPB
+                    $detailSpb = DetailSPB::find ( $atb->id_detail_spb );
+                    $detailSpb->increaseQuantityBelumDiterima ( $atb->quantity );
+
+                    // Delete the associated Saldo record
+                    $saldo = Saldo::where ( 'id_atb', $atb->id )->first ();
+                    if ( $saldo )
+                    {
+                        $saldoController->destroy ( $saldo->id );
+                    }
+
+                    // Delete the ATB record
+                    $atb->delete ();
+                }
+
+                // Delete the shared surat_tanda_terima file
+                if ( $suratTandaTerima )
+                {
+                    // Get the main ATB folder path by extracting the parent directory path
+                    $mainFolderPath = dirname ( dirname ( $suratTandaTerima ) );
+
+                    // Delete the entire ATB folder and all its contents
+                    Storage::disk ( 'public' )->deleteDirectory ( $mainFolderPath );
+                }
             }
 
             DB::commit ();

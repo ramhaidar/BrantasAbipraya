@@ -26,6 +26,7 @@
             <tr>
                 <th class="text-center">Tanggal</th>
                 <th class="text-center">Kode</th>
+                <th class="text-center">Supplier</th>
                 <th class="text-center">Sparepart</th>
                 <th class="text-center">Merk</th>
                 <th class="text-center">Part Number</th>
@@ -42,6 +43,7 @@
                 <tr>
                     <td class="text-center">{{ \Carbon\Carbon::parse($atb->tanggal)->translatedFormat('l, d F Y') }}</td>
                     <td class="text-center">{{ $atb->masterDataSparepart->kategoriSparepart->kode }}: {{ $atb->masterDataSparepart->kategoriSparepart->nama }}</td>
+                    <td class="text-center">{{ $atb->masterDataSupplier->nama ?? '-' }}</td>
                     <td class="text-center">{{ $atb->masterDataSparepart->nama }}</td>
                     <td class="text-center">{{ $atb->masterDataSparepart->merk }}</td>
                     <td class="text-center">{{ $atb->masterDataSparepart->part_number }}</td>

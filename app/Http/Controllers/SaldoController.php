@@ -77,21 +77,20 @@ class SaldoController extends Controller
                 'harga'                    => $data[ 'harga' ],
                 'id_proyek'                => $data[ 'id_proyek' ],
                 'id_master_data_sparepart' => $data[ 'id_master_data_sparepart' ],
+                'id_master_data_supplier'  => $data[ 'id_master_data_supplier' ]
             ];
 
             // Add fields based on type
             if ( $data[ 'tipe' ] === 'hutang-unit-alat' )
             {
-                $saldoData[ 'id_spb' ]                  = $data[ 'id_spb' ];
-                $saldoData[ 'id_master_data_supplier' ] = $data[ 'id_master_data_supplier' ];
-                $saldoData[ 'satuan' ]                  = $data[ 'satuan' ];
+                $saldoData[ 'id_spb' ] = $data[ 'id_spb' ];
+                $saldoData[ 'satuan' ] = $data[ 'satuan' ];
             }
             else if ( $data[ 'tipe' ] === 'mutasi-proyek' )
             {
-                $saldoData[ 'id_spb' ]                  = $data[ 'id_spb' ];
-                $saldoData[ 'id_master_data_supplier' ] = $data[ 'id_master_data_supplier' ];
-                $saldoData[ 'id_asal_proyek' ]          = $data[ 'id_asal_proyek' ];
-                $saldoData[ 'satuan' ]                  = $data[ 'satuan' ];
+                $saldoData[ 'id_spb' ]         = $data[ 'id_spb' ];
+                $saldoData[ 'id_asal_proyek' ] = $data[ 'id_asal_proyek' ];
+                $saldoData[ 'satuan' ]         = $data[ 'satuan' ];
             }
             else if ( $data[ 'tipe' ] === 'panjar-unit-alat' || $data[ 'tipe' ] === 'panjar-proyek' )
             {

@@ -60,8 +60,8 @@
                         </div>
 
                         <div class="col-12 w-100">
-                            <label class="form-label w-100 required" for="id_supplier">Pilih Supplier</label>
-                            <select class="form-control w-100" id="id_supplier" name="id_supplier" required>
+                            <label class="form-label w-100 required" for="id_master_data_supplier">Pilih Supplier</label>
+                            <select class="form-control w-100" id="id_master_data_supplier" name="id_master_data_supplier" required>
                                 <option value="">Pilih Supplier</option>
                                 @foreach ($suppliers as $supplier)
                                     <option value="{{ $supplier->id }}">{{ $supplier->nama }}</option>
@@ -171,7 +171,7 @@
                 width: '100%'
             });
 
-            $('#id_supplier').select2({
+            $('#id_master_data_supplier').select2({
                 placeholder: "Pilih Supplier",
                 allowClear: true,
                 dropdownParent: $('#modalForAdd'),
@@ -195,14 +195,14 @@
 
             // Function to check if both supplier and category are selected
             function checkDependencies() {
-                var supplierId = $('#id_supplier').val();
+                var supplierId = $('#id_master_data_supplier').val();
                 var kategoriId = $('#id_kategori_sparepart').val();
                 return supplierId && kategoriId;
             }
 
             // Function to load spareparts
             function loadSpareparts() {
-                var supplierId = $('#id_supplier').val();
+                var supplierId = $('#id_master_data_supplier').val();
                 var kategoriId = $('#id_kategori_sparepart').val();
 
                 $('#id_master_data_sparepart').prop('disabled', true).val(null).trigger('change');
@@ -245,14 +245,14 @@
             }
 
             // Event handlers for supplier and category changes
-            $('#id_supplier, #id_kategori_sparepart').on('change', function() {
+            $('#id_master_data_supplier, #id_kategori_sparepart').on('change', function() {
                 loadSpareparts();
             });
 
             // Reset form handler
             $('#resetButton').on('click', function() {
                 $('#addDataForm')[0].reset();
-                $('#id_supplier, #id_kategori_sparepart, #id_master_data_sparepart').val(null).trigger('change');
+                $('#id_master_data_supplier, #id_kategori_sparepart, #id_master_data_sparepart').val(null).trigger('change');
                 clearPreview();
             });
 

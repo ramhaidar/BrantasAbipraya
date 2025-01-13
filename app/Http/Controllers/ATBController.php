@@ -346,6 +346,7 @@ class ATBController extends Controller
                     'id_proyek'                => 'required|exists:proyek,id',
                     'id_kategori_sparepart'    => 'required|exists:kategori_sparepart,id',
                     'id_master_data_sparepart' => 'required|exists:master_data_sparepart,id',
+                    'id_master_data_supplier'  => 'required|exists:master_data_supplier,id', // Add this line
                     'quantity'                 => 'required|integer|min:1',
                     'harga'                    => 'required|numeric|min:0',
                     'satuan'                   => 'required|string', // Add this line
@@ -379,7 +380,8 @@ class ATBController extends Controller
                     'harga'                    => $request->harga,
                     'satuan'                   => $request->satuan, // Add this line
                     'id_proyek'                => $request->id_proyek,
-                    'id_master_data_sparepart' => $request->id_master_data_sparepart
+                    'id_master_data_sparepart' => $request->id_master_data_sparepart,
+                    'id_master_data_supplier'  => $request->id_master_data_supplier // Add this line
                 ] );
 
                 // Create corresponding Saldo record
@@ -391,6 +393,7 @@ class ATBController extends Controller
                     'satuan'                   => $request->satuan, // Add this line
                     'id_proyek'                => $request->id_proyek,
                     'id_master_data_sparepart' => $request->id_master_data_sparepart,
+                    'id_master_data_supplier'  => $request->id_master_data_supplier, // Add this line
                     'id_atb'                   => $atb->id
                 ] );
 

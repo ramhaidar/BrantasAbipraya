@@ -416,7 +416,7 @@ class ATBController extends Controller
 
             $atb = ATB::findOrFail ( $id );
 
-            if ( str_contains ( $atb->tipe, 'panjar' ) )
+            if ( $atb->tipe === 'panjar-proyek' || $atb->tipe === 'panjar-unit-alat' )
             {
                 // For panjar types, simply delete the ATB and associated records
 
@@ -437,7 +437,8 @@ class ATBController extends Controller
                 // Delete the ATB record
                 $atb->delete ();
             }
-            else
+
+            if ( $atb->tipe === 'hutang-unit-alat' )
             {
                 // For non-panjar types (existing logic for hutang)
                 $suratTandaTerima = $atb->surat_tanda_terima;

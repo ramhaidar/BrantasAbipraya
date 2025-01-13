@@ -28,7 +28,7 @@ class APBController extends Controller
     {
         return $this->showApbPage (
             "Panjar Unit Alat",
-            "Data APB Ex Panjar Unit Alat",
+            "Data APB EX Panjar Unit Alat",
             $request->id_proyek
         );
     }
@@ -61,10 +61,17 @@ class APBController extends Controller
         // Get alat data for this project
         $alats = AlatProyek::where ( 'id_proyek', $id_proyek )->get ();
 
-        // Replace the spareparts query with this
+        // Modified spareparts query to filter by type and project
         $spareparts = Saldo::where ( 'quantity', '>', 0 )
             ->with ( [ 'masterDataSparepart', 'atb' ] )
-            ->whereHas ( 'atb' )
+            ->whereHas ( 'atb', function ($query) use ($tipe)
+            {
+                $query->where ( 'tipe', $tipe );
+            } )
+            ->whereHas ( 'atb', function ($query) use ($id_proyek)
+            {
+                $query->where ( 'id_proyek', $id_proyek );
+            } )
             ->get ()
             ->sortBy ( 'atb.tanggal' );
 

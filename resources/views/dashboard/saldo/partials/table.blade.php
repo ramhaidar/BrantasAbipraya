@@ -44,7 +44,7 @@
         <tbody>
             @foreach ($saldos as $saldo)
                 <tr>
-                    <td class="text-center">{{ formatTanggal($saldo->created_at) }}</td>
+                    <td class="text-center">{{ formatTanggal($saldo->atb->tanggal) }}</td>
                     <td class="text-center">{{ $saldo->masterDataSparepart->kategoriSparepart->kode }}: {{ $saldo->masterDataSparepart->kategoriSparepart->nama }}</td>
                     <td class="text-center">{{ $saldo->masterDataSupplier->nama ?? '-' }}</td>
                     <td class="text-center">{{ $saldo->masterDataSparepart->nama ?? '-' }}</td>

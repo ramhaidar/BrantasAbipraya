@@ -56,7 +56,14 @@ class SaldoController extends Controller
             ->orderBy ( "id", "asc" )
             ->get ();
 
-        $saldos = Saldo::where ( 'id_proyek', $id_proyek )->where ( 'tipe', $tipe )->get ();
+        $saldos = Saldo::with ( 'atb' )
+            ->where ( 'saldo.id_proyek', $id_proyek )
+            ->where ( 'saldo.tipe', $tipe )
+            ->leftJoin ( 'atb', 'saldo.id_atb', '=', 'atb.id' )
+            ->orderBy ( 'atb.tanggal', 'desc' )
+            ->orderBy ( 'saldo.updated_at', 'asc' )
+            ->select ( 'saldo.*' )
+            ->get ();
 
         return view ( "dashboard.saldo.saldo", [ 
             "proyek"     => $proyek,

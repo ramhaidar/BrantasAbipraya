@@ -106,6 +106,8 @@ class ATBController extends Controller
         $atbs = ATB::with ( [ 'spb', 'masterDataSparepart' ] )
             ->where ( 'id_proyek', $id_proyek )
             ->where ( 'tipe', $tipe )
+            ->orderBy ( 'tanggal', 'desc' )
+            ->orderBy ( 'updated_at', 'desc' )
             ->get ();
 
         // Initialize $spareparts as null

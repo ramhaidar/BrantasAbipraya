@@ -138,6 +138,7 @@ class APBController extends Controller
             "spbs"       => $filteredSpbs,
             "headerPage" => $proyek->nama,
             "page"       => $pageTitle,
+            "tipe"       => $tipe,
             "apbs"       => $apbs,
         ] );
     }

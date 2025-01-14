@@ -11,9 +11,20 @@
                     <div class="ibox-title ps-2">
                         <p class="fw-medium">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}</p>
                     </div>
-                    <a class="btn btn-primary btn-sm" id="button-for-modal-add" data-bs-toggle="modal" data-bs-target="#modalForAdd">
-                        <i class="fa fa-plus"></i> <span class="ms-2">Tambah Data APB</span>
-                    </a>
+                    <div class="d-flex justify-content-end">
+                        @if ($tipe !== 'mutasi-proyek')
+                            <a class="btn btn-primary btn-sm me-2" id="button-for-modal-add" data-bs-toggle="modal" data-bs-target="#modalForAdd">
+                                <i class="fa fa-plus"></i> <span class="ms-2">Tambah Data APB</span>
+                            </a>
+                        @else
+                            <a class="btn btn-primary btn-sm me-2" id="button-for-modal-add" data-bs-toggle="modal" data-bs-target="#modalForAdd">
+                                <i class="fa fa-exchange"></i> <span class="ms-2">Mutasi Proyek</span>
+                            </a>
+                            <a class="btn btn-primary btn-sm" id="button-for-modal-add" data-bs-toggle="modal" data-bs-target="#modalForAdd">
+                                <i class="fa fa-wrench"></i> <span class="ms-2">Gunakan Sparepart</span>
+                            </a>
+                        @endif
+                    </div>
                 </div>
 
                 @include('dashboard.apb.partials.table')

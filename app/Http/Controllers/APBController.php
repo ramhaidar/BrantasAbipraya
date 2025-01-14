@@ -127,7 +127,7 @@ class APBController extends Controller
             ->where ( 'id_proyek', $id_proyek )
             ->where ( 'tipe', $tipe )
             ->orderBy ( 'tanggal', 'desc' )
-            ->orderBy ( 'updated_at', 'asc' )
+            ->orderBy ( 'updated_at', 'desc' )
             ->get ();
 
         return view ( "dashboard.apb.apb", [ 

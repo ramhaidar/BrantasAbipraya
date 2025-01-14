@@ -61,7 +61,7 @@ class SaldoController extends Controller
             ->where ( 'saldo.tipe', $tipe )
             ->leftJoin ( 'atb', 'saldo.id_atb', '=', 'atb.id' )
             ->orderBy ( 'atb.tanggal', 'desc' )
-            ->orderBy ( 'saldo.updated_at', 'asc' )
+            ->orderBy ( 'saldo.updated_at', 'desc' )
             ->select ( 'saldo.*' )
             ->get ();
 

@@ -147,14 +147,14 @@ class APBController extends Controller
     {
         // Validate request
         $validated = $request->validate ( [ 
-            'tanggal'                  => 'required|date',
-            'id_proyek'                => 'required|exists:proyek,id',
-            'id_alat'                  => 'required|exists:alat_proyek,id',
-            'id_master_data_sparepart' => 'required|exists:master_data_sparepart,id',
-            'quantity'                 => 'required|integer|min:1',
-            'tipe'                     => 'required|string',
+            'tanggal'   => 'required|date',
+            'id_proyek' => 'required|exists:proyek,id',
+            'id_alat'   => 'required|exists:alat_proyek,id',
+            'id_saldo'  => 'required|exists:saldo,id',
+            'quantity'  => 'required|integer|min:1',
+            'tipe'      => 'required|string',
             // Removed root_cause validation
-            'mekanik'                  => 'required|string|max:255'
+            'mekanik'   => 'required|string|max:255'
         ] );
 
         try
@@ -163,10 +163,9 @@ class APBController extends Controller
             DB::beginTransaction ();
 
             // Find the saldo with available quantity
-            $saldo = Saldo::where ( 'id_master_data_sparepart', $request->id_master_data_sparepart )
-                ->where ( 'quantity', '>', 0 )
-                ->orderBy ( 'id', 'asc' )
-                ->firstOrFail ();
+            $saldo = Saldo::find ( $request->id_saldo );
+
+            $masterDataSparepart = $saldo->masterDataSparepart;
 
             // Check if requested quantity is available
             if ( $saldo->quantity < $request->quantity )
@@ -183,7 +182,7 @@ class APBController extends Controller
                 'quantity'                 => $request->quantity,
                 'id_saldo'                 => $saldo->id,
                 'id_proyek'                => $request->id_proyek,
-                'id_master_data_sparepart' => $request->id_master_data_sparepart,
+                'id_master_data_sparepart' => $masterDataSparepart->id,
                 'id_master_data_supplier'  => $saldo->id_master_data_supplier,
                 'id_alat_proyek'           => $request->id_alat
             ] );

@@ -70,11 +70,11 @@
                         </div>
 
                         <div class="col-12">
-                            <label class="form-label required" for="id_master_data_sparepart">Pilih Sparepart</label>
-                            <select class="form-control" id="id_master_data_sparepart" name="id_master_data_sparepart" required>
+                            <label class="form-label required" for="id_saldo">Pilih Sparepart</label>
+                            <select class="form-control" id="id_saldo" name="id_saldo" required>
                                 <option value="">Pilih Sparepart</option>
                                 @foreach ($spareparts as $saldo)
-                                    <option value="{{ $saldo->id_master_data_sparepart }}">
+                                    <option value="{{ $saldo->id }}">
                                         {{ $saldo->masterDataSparepart->nama }} -
                                         {{ $saldo->masterDataSparepart->merk }} -
                                         {{ $saldo->masterDataSparepart->part_number }}
@@ -127,7 +127,7 @@
             });
 
             // Initialize sparepart select
-            $('#id_master_data_sparepart').select2({
+            $('#id_saldo').select2({
                 placeholder: "Pilih Sparepart",
                 allowClear: true,
                 dropdownParent: $('#modalForAdd'),
@@ -135,7 +135,7 @@
             });
 
             // Add validation classes on change for Select2 elements
-            ['#id_alat', '#id_master_data_sparepart'].forEach(function(selector) {
+            ['#id_alat', '#id_saldo'].forEach(function(selector) {
                 $(selector).on('change', function() {
                     if ($(this).val()) {
                         $(this).next('.select2-container').find('.select2-selection').removeClass('is-invalid').addClass('is-valid');
@@ -146,7 +146,7 @@
             });
 
             // Handle sparepart selection change
-            $('#id_master_data_sparepart').on('change', function() {
+            $('#id_saldo').on('change', function() {
                 const selectedOption = $(this).find('option:selected');
                 let maxQuantity = 0;
 

@@ -39,7 +39,7 @@
                 <th class="text-center">Satuan</th>
                 <th class="text-center">Harga</th>
                 <th class="text-center">Net</th>
-                <th class="text-center">Root Cause</th>
+                <!-- Removed root_cause column -->
                 <th class="text-center">Mekanik</th>
                 <th class="text-center">Aksi</th>
             </tr>
@@ -54,10 +54,10 @@
                     <td class="text-center">{{ $apb->masterDataSparepart->merk ?? '-' }}</td>
                     <td class="text-center">{{ $apb->masterDataSparepart->part_number ?? '-' }}</td>
                     <td class="text-center">{{ $apb->quantity }}</td>
-                    <td class="text-center">{{ $apb->masterDataSparepart->satuan ?? '-' }}</td>
+                    <td class="text-center">{{ $apb->saldo->satuan ?? '-' }}</td>
                     <td class="text-center">{{ formatRupiah($apb->saldo->harga ?? 0) }}</td>
                     <td class="text-center">{{ formatRupiah(($apb->saldo->harga ?? 0) * $apb->quantity) }}</td>
-                    <td class="text-center">{{ ucfirst($apb->root_cause) ?? '-' }}</td>
+                    <!-- Removed root_cause cell -->
                     <td class="text-center">{{ $apb->mekanik ?? '-' }}</td>
                     <td class="text-center">
                         <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $apb->id }}">

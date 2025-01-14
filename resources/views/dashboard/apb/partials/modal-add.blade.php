@@ -50,18 +50,7 @@
                             <div class="invalid-feedback">Tanggal diperlukan.</div>
                         </div>
 
-                        <div class="col-12">
-                            <label class="form-label required" for="root_cause">Root Cause</label>
-                            <select class="form-control" id="root_cause" name="root_cause" required>
-                                <option value="">Pilih Root Cause</option>
-                                <option value="pemeliharaan">Pemeliharaan</option>
-                                <option value="repair">Repair</option>
-                                <option value="rusak">Rusak</option>
-                                <option value="tambah">Tambah</option>
-                                <option value="tersumbat">Tersumbat</option>
-                            </select>
-                            <div class="invalid-feedback">Root Cause diperlukan.</div>
-                        </div>
+                        <!-- Removed root_cause select field -->
 
                         <div class="col-12">
                             <label class="form-label required" for="mekanik">Mekanik</label>
@@ -129,14 +118,6 @@
             $('#tanggal').datepicker(options);
             $.datepicker.setDefaults($.datepicker.regional['id']);
 
-            // Initialize root_cause select
-            $('#root_cause').select2({
-                placeholder: "Pilih Root Cause",
-                allowClear: true,
-                dropdownParent: $('#modalForAdd'),
-                width: '100%'
-            });
-
             // Initialize alat select
             $('#id_alat').select2({
                 placeholder: "Pilih Alat",
@@ -154,7 +135,7 @@
             });
 
             // Add validation classes on change for Select2 elements
-            ['#id_alat', '#id_master_data_sparepart', '#root_cause'].forEach(function(selector) {
+            ['#id_alat', '#id_master_data_sparepart'].forEach(function(selector) {
                 $(selector).on('change', function() {
                     if ($(this).val()) {
                         $(this).next('.select2-container').find('.select2-selection').removeClass('is-invalid').addClass('is-valid');

@@ -150,7 +150,7 @@ class APBController extends Controller
             'id_master_data_sparepart' => 'required|exists:master_data_sparepart,id',
             'quantity'                 => 'required|integer|min:1',
             'tipe'                     => 'required|string',
-            'root_cause'               => 'required|string|in:pemeliharaan,repair,rusak,tambah,tersumbat',
+            // Removed root_cause validation
             'mekanik'                  => 'required|string|max:255'
         ] );
 
@@ -175,7 +175,7 @@ class APBController extends Controller
             $apb = APB::create ( [ 
                 'tanggal'                  => $request->tanggal,
                 'tipe'                     => $request->tipe,
-                'root_cause'               => $request->root_cause,
+                // Removed root_cause
                 'mekanik'                  => $request->mekanik,
                 'quantity'                 => $request->quantity,
                 'id_saldo'                 => $saldo->id,

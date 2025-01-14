@@ -15,7 +15,6 @@ class APB extends Model
     protected $fillable = [ 
         'tipe',
         'tanggal',
-        'root_cause',
         'mekanik',
         'quantity',
         'id_saldo',
@@ -29,7 +28,6 @@ class APB extends Model
         'id'                       => 'integer',
         'tipe'                     => 'string',
         'tanggal'                  => 'date',
-        'root_cause'               => 'string',
         'mekanik'                  => 'string',
         'quantity'                 => 'integer',
         'id_saldo'                 => 'integer',

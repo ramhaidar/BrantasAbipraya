@@ -26,7 +26,6 @@ return new class extends Migration
             //         'tersumbat'
             //     ]
             // );
-            $table->string ( 'root_cause' );
             $table->string ( 'mekanik' );
             $table->integer ( 'quantity' );
             $table->timestamps ();

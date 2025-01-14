@@ -305,25 +305,25 @@
 
                                                     <!-- Level 3 Submenu Items under ATB -->
                                                     <li class="nav-item">
-                                                        <a class="ps-5 nav-link level-2 {{ str_contains($page, 'Hutang Unit Alat') && str_contains($headerPage, $item->nama) ? 'active' : '' }}" href="{{ route('atb.hutang_unit_alat', ['id_proyek' => $item->id]) }}" style="{{ str_contains($page, 'Hutang Unit Alat') && str_contains($headerPage, $item->nama) ? 'background-color: #D3D3D3; color: #000000;' : '' }}">
+                                                        <a class="ps-5 nav-link level-2 {{ str_contains($page, 'Data ATB Hutang Unit Alat') && str_contains($headerPage, $item->nama) ? 'active' : '' }}" href="{{ route('atb.hutang_unit_alat', ['id_proyek' => $item->id]) }}" style="{{ str_contains($page, 'Data ATB Hutang Unit Alat') && str_contains($headerPage, $item->nama) ? 'background-color: #D3D3D3; color: #000000;' : '' }}">
                                                             <i class="bi me-2 nav-icon fs-5 bi-tools"></i>
                                                             <p>Hutang Unit Alat</p>
                                                         </a>
                                                     </li>
                                                     <li class="nav-item">
-                                                        <a class="ps-5 nav-link level-2 {{ str_contains($page, 'Mutasi Proyek') && str_contains($headerPage, $item->nama) ? 'active' : '' }}" href="{{ route('atb.mutasi_proyek', ['id_proyek' => $item->id]) }}" style="{{ str_contains($page, 'Mutasi Proyek') && str_contains($headerPage, $item->nama) ? 'background-color: #D3D3D3; color: #000000;' : '' }}">
+                                                        <a class="ps-5 nav-link level-2 {{ str_contains($page, 'Data ATB Panjar Unit Alat') && str_contains($headerPage, $item->nama) ? 'active' : '' }}" href="{{ route('atb.panjar_unit_alat', ['id_proyek' => $item->id]) }}" style="{{ str_contains($page, 'Data ATB Panjar Unit Alat') && str_contains($headerPage, $item->nama) ? 'background-color: #D3D3D3; color: #000000;' : '' }}">
                                                             <i class="bi me-2 nav-icon fs-5 bi-currency-dollar"></i>
-                                                            <p>Mutasi Proyek</p>
-                                                        </a>
-                                                    </li>
-                                                    <li class="nav-item">
-                                                        <a class="ps-5 nav-link level-2 {{ str_contains($page, 'Panjar Unit Alat') && str_contains($headerPage, $item->nama) ? 'active' : '' }}" href="{{ route('atb.panjar_unit_alat', ['id_proyek' => $item->id]) }}" style="{{ str_contains($page, 'Panjar Unit Alat') && str_contains($headerPage, $item->nama) ? 'background-color: #D3D3D3; color: #000000;' : '' }}">
-                                                            <i class="bi me-2 nav-icon fs-5 bi-arrow-left-right"></i>
                                                             <p>Panjar Unit Alat</p>
                                                         </a>
                                                     </li>
                                                     <li class="nav-item">
-                                                        <a class="ps-5 nav-link level-2 {{ str_contains($page, 'Panjar Proyek') && str_contains($headerPage, $item->nama) ? 'active' : '' }}" href="{{ route('atb.panjar_proyek', ['id_proyek' => $item->id]) }}" style="{{ str_contains($page, 'Panjar Proyek') && str_contains($headerPage, $item->nama) ? 'background-color: #D3D3D3; color: #000000;' : '' }}">
+                                                        <a class="ps-5 nav-link level-2 {{ str_contains($page, 'Data ATB Mutasi Proyek') && str_contains($headerPage, $item->nama) ? 'active' : '' }}" href="{{ route('atb.mutasi_proyek', ['id_proyek' => $item->id]) }}" style="{{ str_contains($page, 'Data ATB Mutasi Proyek') && str_contains($headerPage, $item->nama) ? 'background-color: #D3D3D3; color: #000000;' : '' }}">
+                                                            <i class="bi me-2 nav-icon fs-5 bi-arrow-left-right"></i>
+                                                            <p>Mutasi Proyek</p>
+                                                        </a>
+                                                    </li>
+                                                    <li class="nav-item">
+                                                        <a class="ps-5 nav-link level-2 {{ str_contains($page, 'Data ATB Panjar Proyek') && str_contains($headerPage, $item->nama) ? 'active' : '' }}" href="{{ route('atb.panjar_proyek', ['id_proyek' => $item->id]) }}" style="{{ str_contains($page, 'Data ATB Panjar Proyek') && str_contains($headerPage, $item->nama) ? 'background-color: #D3D3D3; color: #000000;' : '' }}">
                                                             <i class="bi me-2 nav-icon fs-5 bi-cash-stack"></i>
                                                             <p>Panjar Proyek</p>
                                                         </a>
@@ -348,15 +348,15 @@
                                                         </a>
                                                     </li>
                                                     <li class="nav-item">
-                                                        <a class="ps-5 nav-link level-2 {{ str_contains($page, 'Data APB EX Mutasi Saldo') && str_contains($headerPage, $item->nama) ? 'active' : '' }}" href="{{ route('apb.mutasi_proyek', ['id_proyek' => $item->id]) }}" style="{{ str_contains($page, 'Data APB EX Mutasi Saldo') && str_contains($headerPage, $item->nama) ? 'background-color: #D3D3D3; color: #000000;' : '' }}">
-                                                            <i class="bi me-2 nav-icon fs-5 bi-arrow-left-right"></i>
-                                                            <p>EX Mutasi Saldo</p>
-                                                        </a>
-                                                    </li>
-                                                    <li class="nav-item">
                                                         <a class="ps-5 nav-link level-2 {{ str_contains($page, 'Data APB EX Panjar Unit Alat') && str_contains($headerPage, $item->nama) ? 'active' : '' }}" href="{{ route('apb.panjar_unit_alat', ['id_proyek' => $item->id]) }}" style="{{ str_contains($page, 'Data APB EX Panjar Unit Alat') && str_contains($headerPage, $item->nama) ? 'background-color: #D3D3D3; color: #000000;' : '' }}">
                                                             <i class="bi me-2 nav-icon fs-5 bi-currency-dollar"></i>
                                                             <p>EX Panjar Unit Alat</p>
+                                                        </a>
+                                                    </li>
+                                                    <li class="nav-item">
+                                                        <a class="ps-5 nav-link level-2 {{ str_contains($page, 'Data APB EX Mutasi Proyek') && str_contains($headerPage, $item->nama) ? 'active' : '' }}" href="{{ route('apb.mutasi_proyek', ['id_proyek' => $item->id]) }}" style="{{ str_contains($page, 'Data APB EX Mutasi Proyek') && str_contains($headerPage, $item->nama) ? 'background-color: #D3D3D3; color: #000000;' : '' }}">
+                                                            <i class="bi me-2 nav-icon fs-5 bi-arrow-left-right"></i>
+                                                            <p>EX Mutasi Proyek</p>
                                                         </a>
                                                     </li>
                                                     <li class="nav-item">
@@ -383,15 +383,15 @@
                                                         </a>
                                                     </li>
                                                     <li class="nav-item">
-                                                        <a class="ps-5 nav-link level-2 {{ str_contains($page, 'Data Saldo EX Mutasi Saldo') && str_contains($headerPage, $item->nama) ? 'active' : '' }}" href="{{ route('saldo.mutasi_proyek', ['id_proyek' => $item->id]) }}" style="{{ str_contains($page, 'Data Saldo EX Mutasi Saldo') && str_contains($headerPage, $item->nama) ? 'background-color: #D3D3D3; color: #000000;' : '' }}">
-                                                            <i class="bi me-2 nav-icon fs-5 bi-arrow-left-right"></i>
-                                                            <p>EX Mutasi Saldo</p>
-                                                        </a>
-                                                    </li>
-                                                    <li class="nav-item">
                                                         <a class="ps-5 nav-link level-2 {{ str_contains($page, 'Data Saldo EX Panjar Unit Alat') && str_contains($headerPage, $item->nama) ? 'active' : '' }}" href="{{ route('saldo.panjar_unit_alat', ['id_proyek' => $item->id]) }}" style="{{ str_contains($page, 'Data Saldo EX Panjar Unit Alat') && str_contains($headerPage, $item->nama) ? 'background-color: #D3D3D3; color: #000000;' : '' }}">
                                                             <i class="bi me-2 nav-icon fs-5 bi-currency-dollar"></i>
                                                             <p>EX Panjar Unit Alat</p>
+                                                        </a>
+                                                    </li>
+                                                    <li class="nav-item">
+                                                        <a class="ps-5 nav-link level-2 {{ str_contains($page, 'Data Saldo EX Mutasi Proyek') && str_contains($headerPage, $item->nama) ? 'active' : '' }}" href="{{ route('saldo.mutasi_proyek', ['id_proyek' => $item->id]) }}" style="{{ str_contains($page, 'Data Saldo EX Mutasi Proyek') && str_contains($headerPage, $item->nama) ? 'background-color: #D3D3D3; color: #000000;' : '' }}">
+                                                            <i class="bi me-2 nav-icon fs-5 bi-arrow-left-right"></i>
+                                                            <p>EX Mutasi Proyek</p>
                                                         </a>
                                                     </li>
                                                     <li class="nav-item">

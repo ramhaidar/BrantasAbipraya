@@ -197,7 +197,7 @@
                                 <th class="align-middle text-center">EX UNIT ALAT</th>
                                 <th class="align-middle text-center">EX PANJAR UNIT ALAT</th>
                                 <th class="align-middle text-center">EX PANJAR PROYEK</th>
-                                <th class="align-middle text-center">MUTASI SALDO EX</th>
+                                <th class="align-middle text-center">Mutasi Proyek EX</th>
                                 <th class="align-middle text-center">EX UNIT ALAT</th>
                                 <th class="align-middle text-center">EX PANJAR UNIT ALAT</th>
                                 <th class="align-middle text-center">EX PANJAR PROYEK</th>
@@ -726,7 +726,7 @@
                                                 $total_net_apb_tyre_panjar_unit_alat += $data['total_net'];
                                             } elseif ($data['tipe'] == 'Panjar Proyek') {
                                                 $total_net_apb_tyre_panjar_proyek += $data['total_net'];
-                                            } elseif ($data['tipe'] == 'Mutasi Saldo') {
+                                            } elseif ($data['tipe'] == 'Mutasi Proyek') {
                                                 $total_net_apb_tyre_mutasi_saldo += $data['total_net'];
                                             }
                                         }
@@ -738,7 +738,7 @@
 
                                     foreach ($detailDataSaldo as $data) {
                                         if ($data['kode'] == 'B3') {
-                                            if ($data['tipe'] == 'Hutang Unit Alat' || $data['tipe'] == 'Mutasi Saldo') {
+                                            if ($data['tipe'] == 'Hutang Unit Alat' || $data['tipe'] == 'Mutasi Proyek') {
                                                 $total_net_saldo_tyre_hutang_unit_alat += $data['total_net'];
                                             } elseif ($data['tipe'] == 'Panjar Unit Alat') {
                                                 $total_net_saldo_tyre_panjar_unit_alat += $data['total_net'];
@@ -812,7 +812,7 @@
                                                 $total_net_apb_workshop_ex_panjar_unit_alat += $data['total_net'];
                                             } elseif ($data['tipe'] == 'Panjar Proyek') {
                                                 $total_net_apb_workshop_ex_panjar_proyek += $data['total_net'];
-                                            } elseif ($data['tipe'] == 'Mutasi Saldo') {
+                                            } elseif ($data['tipe'] == 'Mutasi Proyek') {
                                                 $total_net_apb_workshop_ex_mutasi_saldo += $data['total_net'];
                                             }
                                         }
@@ -867,7 +867,7 @@
                                     $total_net_apb_ex_unit_alat = $subDataAPB->where('tipe', 'Hutang Unit Alat')->sum('total_net');
                                     $total_net_apb_ex_panjar_unit_alat = $subDataAPB->where('tipe', 'Panjar Unit Alat')->sum('total_net');
                                     $total_net_apb_ex_panjar_proyek = $subDataAPB->where('tipe', 'Panjar Proyek')->sum('total_net');
-                                    $total_net_apb_ex_mutasi_saldo = $subDataAPB->where('tipe', 'Mutasi Saldo')->sum('total_net');
+                                    $total_net_apb_ex_mutasi_saldo = $subDataAPB->where('tipe', 'Mutasi Proyek')->sum('total_net');
 
                                     $subDataSaldo = $detailDataSaldo->where('kode', $kode);
 

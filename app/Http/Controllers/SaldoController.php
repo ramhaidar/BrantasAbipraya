@@ -31,7 +31,7 @@ class SaldoController extends Controller
     {
         return $this->showSaldoPage (
             "Mutasi Proyek",
-            "Data Saldo EX Mutasi Saldo",
+            "Data Saldo EX Mutasi Proyek",
             $request->id_proyek
         );
     }

@@ -75,6 +75,19 @@ class APBController extends Controller
             ->get ()
             ->sortBy ( 'atb.tanggal' );
 
+        $sparepartsForMutasi = Saldo::where ( 'quantity', '>', 0 )
+            ->with ( [ 'masterDataSparepart', 'atb' ] )
+            ->whereHas ( 'atb', function ($query) use ($tipe, $id_proyek)
+            {
+                $query->where ( 'id_proyek', $id_proyek );
+                if ( $tipe !== 'mutasi-proyek' )
+                {
+                    $query->where ( 'tipe', $tipe );
+                }
+            } )
+            ->get ()
+            ->sortBy ( 'atb.tanggal' );
+
         // dd ( $spareparts );
 
         $proyeks = Proyek::with ( "users" )
@@ -131,15 +144,16 @@ class APBController extends Controller
             ->get ();
 
         return view ( "dashboard.apb.apb", [ 
-            "proyek"     => $proyek,
-            "alats"      => $alats,
-            "spareparts" => $spareparts,
-            "proyeks"    => $proyeks,
-            "spbs"       => $filteredSpbs,
-            "headerPage" => $proyek->nama,
-            "page"       => $pageTitle,
-            "tipe"       => $tipe,
-            "apbs"       => $apbs,
+            "proyek"              => $proyek,
+            "alats"               => $alats,
+            "spareparts"          => $spareparts,
+            "sparepartsForMutasi" => $sparepartsForMutasi,
+            "proyeks"             => $proyeks,
+            "spbs"                => $filteredSpbs,
+            "headerPage"          => $proyek->nama,
+            "page"                => $pageTitle,
+            "tipe"                => $tipe,
+            "apbs"                => $apbs,
         ] );
     }
 

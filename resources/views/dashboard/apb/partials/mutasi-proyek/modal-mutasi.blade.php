@@ -20,23 +20,23 @@
     </style>
 @endpush
 
-<div class="fade modal" id="modalForAdd" aria-hidden="true" aria-labelledby="staticBackdropLabel" tabindex="-1">
+<div class="fade modal" id="modalForMutasi" aria-hidden="true" aria-labelledby="staticBackdropLabel" tabindex="-1">
     <div class="modal-dialog modal-dialog-scrollable modal-xl modal-dialog-centered">
         <div class="modal-content rounded-4">
             <div class="pt-3 px-3 m-0 d-flex w-100 justify-content-between">
-                <h5 class="modal-title w-100 pb-2" id="modalForAddLabel">Tambah Data APB</h1>
+                <h5 class="modal-title w-100 pb-2" id="modalForMutasiLabel">Tambah Data APB</h1>
                     <button class="btn-close" data-bs-dismiss="modal" type="button" aria-label="Close"></button>
             </div>
             <hr class="p-0 m-0 border border-secondary-subtle border-2 opacity-50">
-            <form class="w-100 align-items-center flex-column gap-0 overflow-auto" id="addDataForm" method="POST" action="{{ route('apb.post.store') }}" enctype="multipart/form-data" novalidate>
+            <form class="w-100 align-items-center flex-column gap-0 overflow-auto" id="addDataFormMutasi" method="POST" action="{{ route('apb.post.mutasi') }}" enctype="multipart/form-data" novalidate>
                 @csrf
                 <div class="modal-body">
                     <div class="row g-3">
-                        <input class="form-control" id="id_proyek" name="id_proyek" value="{{ $proyek->id }}" hidden required>
+                        <input class="form-control" id="id_proyek_mutasi" name="id_proyek" value="{{ $proyek->id }}" hidden required>
 
                         <div class="col-12" hidden>
-                            <label class="form-label" for="tipe">Tipe ATB</label>
-                            <select class="form-control" id="pilihan-proyek1" name="tipe">
+                            <label class="form-label" for="tipe_mutasi">Tipe ATB</label>
+                            <select class="form-control" id="pilihan-proyek-mutasi" name="tipe">
                                 <option value="hutang-unit-alat" {{ $page == 'Data APB EX Hutang Unit Alat' ? 'selected' : '' }}>Hutang Unit Alat</option>
                                 <option value="panjar-unit-alat" {{ $page == 'Data APB EX Panjar Unit Alat' ? 'selected' : '' }}>Panjar Unit Alat</option>
                                 <option value="mutasi-proyek" {{ $page == 'Data APB EX Mutasi Proyek' ? 'selected' : '' }}>Mutasi Proyek</option>
@@ -45,39 +45,20 @@
                         </div>
 
                         <div class="col-12">
-                            <label class="form-label required" for="tanggal">Tanggal</label>
-                            <input class="form-control datepicker" id="tanggal" name="tanggal" type="text" value="{{ \Carbon\Carbon::today()->format('Y-m-d') }}" autocomplete="off" required>
+                            <label class="form-label required" for="tanggal_mutasi">Tanggal</label>
+                            <input class="form-control datepicker" id="tanggal_mutasi" name="tanggal" type="text" value="{{ \Carbon\Carbon::today()->format('Y-m-d') }}" autocomplete="off" required>
                             <div class="invalid-feedback">Tanggal diperlukan.</div>
                         </div>
 
-                        <!-- Removed root_cause select field -->
-
                         <div class="col-12">
-                            <label class="form-label required" for="mekanik">Mekanik</label>
-                            <input class="form-control" id="mekanik" name="mekanik" type="text" required>
-                            <div class="invalid-feedback">Mekanik diperlukan.</div>
-                        </div>
-
-                        <div class="col-12">
-                            <label class="form-label required" for="id_alat">Pilih Alat</label>
-                            <select class="form-control" id="id_alat" name="id_alat" required>
-                                <option value="">Pilih Alat</option>
-                                @foreach ($alats as $alat)
-                                    <option value="{{ $alat->id }}">{{ $alat->MasterDataAlat->jenis_alat }} - {{ $alat->MasterDataAlat->kode_alat }} - {{ $alat->MasterDataAlat->merek_alat }} - {{ $alat->MasterDataAlat->tipe_alat }} - {{ $alat->MasterDataAlat->serial_number }}</option>
-                                @endforeach
-                            </select>
-                            <div class="invalid-feedback">Alat diperlukan.</div>
-                        </div>
-
-                        <div class="col-12">
-                            <label class="form-label required" for="id_saldo">Pilih Sparepart</label>
-                            <select class="form-control" id="id_saldo" name="id_saldo" required>
+                            <label class="form-label required" for="id_saldo_mutasi">Pilih Sparepart</label>
+                            <select class="form-control" id="id_saldo_mutasi" name="id_saldo" required>
                                 <option value="">Pilih Sparepart</option>
-                                @foreach ($spareparts as $saldo)
+                                @foreach ($sparepartsForMutasi as $saldo)
                                     <option value="{{ $saldo->id }}">
                                         {{ $saldo->masterDataSparepart->nama }} -
                                         {{ $saldo->masterDataSparepart->merk }} -
-                                        {{ $saldo->masterDataSparepart->part_number }}
+                                        {{ $saldo->masterDataSparepart->part_number }} -
                                         (Stok: {{ $saldo->quantity }})
                                         [Masuk: {{ \Carbon\Carbon::parse($saldo->atb->tanggal)->format('d/m/Y') }}]
                                     </option>
@@ -87,9 +68,24 @@
                         </div>
 
                         <div class="col-12">
-                            <label class="form-label required" for="quantity">Quantity</label>
-                            <input class="form-control" id="quantity" name="quantity" type="number" min="1" max="1" disabled required>
+                            <label class="form-label required" for="quantity_mutasi">
+                                <span class="p-0 m-0">Quantity</span><span id="QuantityPlaceholder"></span>
+                            </label>
+                            <input class="form-control" id="quantity_mutasi" name="quantity" type="number" min="1" max="1" disabled required>
                             <div class="invalid-feedback">Quantity diperlukan dan tidak boleh melebihi stok yang tersedia.</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label required" for="tujuan_proyek">Tujuan Proyek</label>
+                            <select class="form-control" id="tujuan_proyek" name="tujuan_proyek" required>
+                                <option value="">Pilih Proyek Tujuan</option>
+                                @foreach ($proyeks as $p)
+                                    @if ($p->id != $proyek->id)
+                                        <option value="{{ $p->id }}">{{ $p->nama }}</option>
+                                    @endif
+                                @endforeach
+                            </select>
+                            <div class="invalid-feedback">Proyek tujuan diperlukan.</div>
                         </div>
                     </div>
                 </div>
@@ -115,27 +111,19 @@
                 regional: 'id'
             };
 
-            $('#tanggal').datepicker(options);
+            $('#tanggal_mutasi').datepicker(options);
             $.datepicker.setDefaults($.datepicker.regional['id']);
 
-            // Initialize alat select
-            $('#id_alat').select2({
-                placeholder: "Pilih Alat",
-                allowClear: true,
-                dropdownParent: $('#modalForAdd'),
-                width: '100%'
-            });
-
             // Initialize sparepart select
-            $('#id_saldo').select2({
-                placeholder: "Pilih Sparepart",
+            $('#id_saldo_mutasi, #tujuan_proyek').select2({
+                placeholder: "Pilih",
                 allowClear: true,
-                dropdownParent: $('#modalForAdd'),
+                dropdownParent: $('#modalForMutasi'),
                 width: '100%'
             });
 
             // Add validation classes on change for Select2 elements
-            ['#id_alat', '#id_saldo'].forEach(function(selector) {
+            ['#id_saldo_mutasi', '#tujuan_proyek'].forEach(function(selector) {
                 $(selector).on('change', function() {
                     if ($(this).val()) {
                         $(this).next('.select2-container').find('.select2-selection').removeClass('is-invalid').addClass('is-valid');
@@ -146,13 +134,15 @@
             });
 
             // Handle sparepart selection change
-            $('#id_saldo').on('change', function() {
+            $('#id_saldo_mutasi').on('change', function() {
                 const selectedOption = $(this).find('option:selected');
-                const quantityInput = $('#quantity');
-                
+                const quantityInput = $('#quantity_mutasi');
+                const quantityPlaceholder = $('#QuantityPlaceholder');
+
                 // Disable quantity input if no sparepart selected
                 if (!$(this).val()) {
                     quantityInput.prop('disabled', true).val('');
+                    quantityPlaceholder.text('');
                     return;
                 }
 
@@ -162,15 +152,20 @@
                     maxQuantity = parseInt(stockMatch[1]);
                 }
 
+                // Get satuan from data attribute
+                const satuan = @json($sparepartsForMutasi->pluck('satuan', 'id'));
+                const selectedSatuan = satuan[$(this).val()];
+                quantityPlaceholder.text(` (dalam ${selectedSatuan})`);
+
                 // Enable and update quantity input constraints
                 quantityInput.prop('disabled', false);
                 quantityInput.attr('max', maxQuantity);
                 quantityInput.val('');
-                quantityInput.attr('title', `Quantity harus antara 1 dan ${maxQuantity}`);
+                quantityInput.attr('title', `Quantity harus antara 1 dan ${maxQuantity} ${selectedSatuan}`);
             });
 
             // Add quantity validation on input
-            $('#quantity').on('input', function() {
+            $('#quantity_mutasi').on('input', function() {
                 const max = parseInt($(this).attr('max'));
                 const value = parseInt($(this).val());
 
@@ -181,7 +176,7 @@
             });
 
             // Form submission handler
-            $('#addDataForm').on('submit', function(e) {
+            $('#addDataFormMutasi').on('submit', function(e) {
                 e.preventDefault();
                 let isValid = true;
 
@@ -196,7 +191,7 @@
                 });
 
                 // Check quantity validation
-                const quantityInput = $('#quantity');
+                const quantityInput = $('#quantity_mutasi');
                 const max = parseInt(quantityInput.attr('max'));
                 const value = parseInt(quantityInput.val());
 

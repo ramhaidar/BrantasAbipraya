@@ -12,16 +12,16 @@
                         <p class="fw-medium">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}</p>
                     </div>
                     <div class="d-flex justify-content-end">
-                        @if ($tipe !== 'mutasi-proyek')
-                            <a class="btn btn-primary btn-sm me-2" id="button-for-modal-add" data-bs-toggle="modal" data-bs-target="#modalForAdd">
-                                <i class="fa fa-plus"></i> <span class="ms-2">Tambah Data APB</span>
-                            </a>
-                        @else
-                            <a class="btn btn-primary btn-sm me-2" id="button-for-modal-add" data-bs-toggle="modal" data-bs-target="#modalForAdd">
+                        @if ($tipe === 'mutasi-proyek')
+                            <a class="btn btn-success btn-sm me-2" id="button-for-modal-add" data-bs-toggle="modal" data-bs-target="#modalForMutasi">
                                 <i class="fa fa-exchange"></i> <span class="ms-2">Mutasi Proyek</span>
                             </a>
                             <a class="btn btn-primary btn-sm" id="button-for-modal-add" data-bs-toggle="modal" data-bs-target="#modalForAdd">
                                 <i class="fa fa-wrench"></i> <span class="ms-2">Gunakan Sparepart</span>
+                            </a>
+                        @else
+                            <a class="btn btn-primary btn-sm me-2" id="button-for-modal-add" data-bs-toggle="modal" data-bs-target="#modalForAdd">
+                                <i class="fa fa-plus"></i> <span class="ms-2">Tambah Data APB</span>
                             </a>
                         @endif
                     </div>
@@ -33,16 +33,19 @@
         </div>
     </div>
 
-    <!-- Modal for Adding Data -->
-    @include('dashboard.apb.partials.modal-add')
+    @if ($tipe === 'mutasi-proyek')
+        <!-- Modal for Adding Data -->
+        @include('dashboard.apb.partials.mutasi-proyek.modal-add')
 
-    <!-- Modal for STT -->
-    {{-- @include('dashboard.atb.partials.modal-stt') --}}
+        <!-- Modal for Mutasi Proyek -->
+        @include('dashboard.apb.partials.mutasi-proyek.modal-mutasi')
+    @else
+        <!-- Modal for Adding Data -->
+        @include('dashboard.apb.partials.modal-add')
+    @endif
 
     <!-- Modal for Delete -->
     @include('dashboard.apb.partials.modal-delete')
-
-    <!-- Modal for Dokumentasi is already included in table partial -->
 @endsection
 
 @push('scripts_2')

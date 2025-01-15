@@ -15,16 +15,16 @@ return new class extends Migration
         {
             $table->id ();
             $table->string ( 'tipe' );
-            $table->string ( 'dokumentasi_foto' ); // Folder path sesuai dengan diagram
+            $table->string ( 'dokumentasi_foto' )->nullable (); // Folder path sesuai dengan diagram
             $table->string ( 'surat_tanda_terima' )->nullable (); // File path sesuai dengan diagram
             $table->date ( 'tanggal' );
-            $table->bigInteger ( 'quantity' );
+            $table->bigInteger ( 'quantity' )->nullable ();
             $table->bigInteger ( 'harga' );
 
             // Foreign keys sesuai dengan diagram
             $table->foreignId ( 'id_proyek' )->nullable ()->constrained ( 'proyek' )->nullOnDelete ();
             $table->foreignId ( 'id_asal_proyek' )->nullable ()->constrained ( 'proyek' )->nullOnDelete ();
-            $table->foreignId ( 'id_apb_mutasi' )->nullable ()->constrained ( 'apb' )->nullOnDelete ();
+            $table->unsignedBigInteger ( 'id_apb_mutasi' )->nullable ();
             $table->foreignId ( 'id_spb' )->nullable ()->constrained ( 'spb' )->nullOnDelete ();
             $table->foreignId ( 'id_detail_spb' )->nullable ()->constrained ( 'detail_spb' )->nullOnDelete ();
             $table->foreignId ( 'id_master_data_sparepart' )->nullable ()->constrained ( 'master_data_sparepart' )->nullOnDelete ();

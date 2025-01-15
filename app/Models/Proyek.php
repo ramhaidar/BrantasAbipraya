@@ -40,7 +40,7 @@ class Proyek extends Model
 
     public function alat ()
     {
-        return $this->hasMany ( Alat::class, 'id_proyek' );
+        return $this->hasMany ( AlatProyek::class, 'id_proyek' );
     }
 
     public function atbs () : HasMany
@@ -68,11 +68,6 @@ class Proyek extends Model
         return $this->belongsToMany ( MasterDataAlat::class, 'alat_proyek', 'id_proyek', 'id_alat' )
             ->withPivot ( 'assigned_at', 'removed_at' )
             ->withTimestamps ();
-    }
-
-    public function currentAlats ()
-    {
-        return $this->hasMany ( MasterDataAlat::class, 'id_proyek_current' );
     }
 
     public function saldos () : HasMany

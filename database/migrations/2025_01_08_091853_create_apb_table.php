@@ -26,16 +26,16 @@ return new class extends Migration
             //         'tersumbat'
             //     ]
             // );
-            $table->string ( 'mekanik' );
+            $table->string ( 'mekanik' )->nullable ();
             $table->integer ( 'quantity' );
             $table->enum (
                 'status',
                 [ 
                     'pending',
                     'accepted',
-                    'refused',
+                    'rejected',
                 ]
-            );
+            )->nullable ()->default ( null );
 
             // Foreign keys sesuai dengan diagram
             $table->foreignId ( 'id_saldo' )
@@ -43,11 +43,20 @@ return new class extends Migration
                 ->constrained ( 'saldo' )
                 ->onDelete ( 'cascade' );
             $table->foreignId ( 'id_proyek' )->nullable ()->constrained ( 'proyek' )->nullOnDelete ();
+            $table->foreignId ( 'id_tujuan_proyek' )->nullable ()->constrained ( 'proyek' )->nullOnDelete ();
             $table->foreignId ( 'id_master_data_sparepart' )->nullable ()->constrained ( 'master_data_sparepart' )->nullOnDelete ();
             $table->foreignId ( 'id_master_data_supplier' )->nullable ()->constrained ( 'master_data_supplier' )->nullOnDelete ();
             $table->foreignId ( 'id_alat_proyek' )->nullable ()->constrained ( 'alat_proyek' )->nullOnDelete ();
 
             $table->timestamps ();
+        } );
+
+        Schema::table ( 'atb', function (Blueprint $table)
+        {
+            $table->foreign ( 'id_apb_mutasi' )
+                ->references ( 'id' )
+                ->on ( 'apb' )
+                ->nullOnDelete ();
         } );
     }
 

@@ -3,8 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class APB extends Model
@@ -21,6 +22,7 @@ class APB extends Model
         'status',
         'id_saldo',
         'id_proyek',
+        'id_tujuan_proyek', // Add this
         'id_master_data_sparepart',
         'id_master_data_supplier',
         'id_alat_proyek'
@@ -35,6 +37,7 @@ class APB extends Model
         'status'                   => 'string',
         'id_saldo'                 => 'integer',
         'id_proyek'                => 'integer',
+        'id_tujuan_proyek'         => 'integer', // Add this
         'id_master_data_sparepart' => 'integer',
         'id_master_data_supplier'  => 'integer',
         'id_alat_proyek'           => 'integer'
@@ -65,8 +68,13 @@ class APB extends Model
         return $this->belongsTo ( AlatProyek::class, 'id_alat_proyek' );
     }
 
-    public function atbMutasi () : HasMany
+    public function tujuanProyek () : BelongsTo
     {
-        return $this->hasMany ( ATB::class, 'id_apb_mutasi' );
+        return $this->belongsTo ( Proyek::class, 'id_tujuan_proyek' );
+    }
+
+    public function atbMutasi () : HasOne
+    {
+        return $this->hasOne ( ATB::class, 'id_apb_mutasi' );
     }
 }

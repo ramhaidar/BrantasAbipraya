@@ -156,6 +156,12 @@ Route::middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )
 
             Route::delete ( '/actions/{id}', [ ATBController::class, 'destroy' ] )
                 ->name ( 'delete.destroy.mutasi_proyek' );
+
+            Route::patch ( '/accept/{id}', [ ATBController::class, 'acceptMutasi' ] )
+                ->name ( 'mutasi.accept' );
+
+            Route::patch ( '/reject/{id}', [ ATBController::class, 'rejectMutasi' ] )
+                ->name ( 'mutasi.reject' );
         } );
 
         // Panjar Proyek Routes
@@ -308,7 +314,7 @@ Route::middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )
         Route::post ( '/store', [ APBController::class, 'store' ] )
             ->name ( 'post.store' );
 
-        Route::post ( '/mutasi', [ APBController::class, 'mutasi' ] )
+        Route::post ( '/mutasi_store', [ APBController::class, 'mutasi_store' ] )
             ->name ( 'post.mutasi' );
 
         Route::post ( '/actions/{id}', [ APBController::class, 'update' ] )
@@ -316,6 +322,9 @@ Route::middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )
 
         Route::delete ( '/actions/{id}', [ APBController::class, 'destroy' ] )
             ->name ( 'destroy' );
+
+        Route::delete ( '/mutasi_delete/{id}', [ APBController::class, 'mutasi_destroy' ] )
+            ->name ( 'destroy.mutasi' );
 
         Route::get ( '/delapb/actions/{id}', [ APBController::class, 'destroy' ] )
             ->name ( 'del.test' );

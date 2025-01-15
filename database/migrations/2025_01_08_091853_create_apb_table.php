@@ -28,7 +28,14 @@ return new class extends Migration
             // );
             $table->string ( 'mekanik' );
             $table->integer ( 'quantity' );
-            $table->timestamps ();
+            $table->enum (
+                'status',
+                [ 
+                    'pending',
+                    'accepted',
+                    'refused',
+                ]
+            );
 
             // Foreign keys sesuai dengan diagram
             $table->foreignId ( 'id_saldo' )
@@ -39,6 +46,8 @@ return new class extends Migration
             $table->foreignId ( 'id_master_data_sparepart' )->nullable ()->constrained ( 'master_data_sparepart' )->nullOnDelete ();
             $table->foreignId ( 'id_master_data_supplier' )->nullable ()->constrained ( 'master_data_supplier' )->nullOnDelete ();
             $table->foreignId ( 'id_alat_proyek' )->nullable ()->constrained ( 'alat_proyek' )->nullOnDelete ();
+
+            $table->timestamps ();
         } );
     }
 

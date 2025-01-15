@@ -308,6 +308,9 @@ Route::middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )
         Route::post ( '/store', [ APBController::class, 'store' ] )
             ->name ( 'post.store' );
 
+        Route::post ( '/mutasi', [ APBController::class, 'mutasi' ] )
+            ->name ( 'post.mutasi' );
+
         Route::post ( '/actions/{id}', [ APBController::class, 'update' ] )
             ->name ( 'post.update' );
 
@@ -710,7 +713,7 @@ Route::get (
     [ MasterDataSparepartController::class, 'getSparepartsByCategory' ]
 )->where ( 'id', '[0-9]+' )
     ->name ( 'spareparts-by-category' );
-    
+
 Route::get (
     '/spareparts-by-supplier-and-category/{supplier_id}/{kategori_id}',
     [ MasterDataSparepartController::class, 'getSparepartsBySupplierAndCategory' ]

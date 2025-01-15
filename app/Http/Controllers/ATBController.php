@@ -558,4 +558,143 @@ class ATBController extends Controller
             'dokumentasi' => $dokumentasi
         ] );
     }
+
+    public function acceptMutasi ( Request $request, $id )
+    {
+        try
+        {
+            // Validate the request
+            $validated = $request->validate ( [ 
+                'id_atb'        => 'required|exists:atb,id',
+                'quantity'      => 'required|integer|min:1',
+                'dokumentasi'   => 'required|array',
+                'dokumentasi.*' => 'required|file|image|mimes:jpeg,png,jpg|max:2048'
+            ] );
+
+            DB::beginTransaction ();
+
+            // Find the ATB record to update
+            $atb = ATB::with ( [ 'apbMutasi.saldo' ] )->findOrFail ( $request->id_atb );
+
+            if ( $atb->tipe !== 'mutasi-proyek' )
+            {
+                throw new \Exception( 'This operation is only valid for mutation type ATB' );
+            }
+
+            // Get the linked APB Mutasi and its Saldo
+            $apbMutasi = $atb->apbMutasi;
+            $saldo     = $apbMutasi->saldo;
+
+            if ( ! $saldo )
+            {
+                throw new \Exception( 'No saldo record found for this mutation' );
+            }
+
+            // Validate quantity against APB Mutasi quantity
+            if ( $request->quantity > $apbMutasi->quantity )
+            {
+                throw new \Exception( 'Quantity cannot exceed the mutated quantity' );
+            }
+
+            // Handle dokumentasi upload
+            $folderName      = 'atb_' . date ( 'YmdHis' ) . '_' . uniqid ();
+            $baseStoragePath = 'uploads/atb/' . $folderName;
+            $docPath         = $baseStoragePath . '/dokumentasi';
+            Storage::disk ( 'public' )->makeDirectory ( $docPath );
+
+            // Process and store documentation photos
+            if ( $request->hasFile ( 'dokumentasi' ) )
+            {
+                foreach ( $request->file ( 'dokumentasi' ) as $photo )
+                {
+                    $photoName      = pathinfo ( $photo->getClientOriginalName (), PATHINFO_FILENAME );
+                    $photoExt       = $photo->getClientOriginalExtension ();
+                    $photoTimestamp = now ()->format ( 'Y-m-d--H-i-s' );
+                    $fileName       = "{$photoName}___{$photoTimestamp}.{$photoExt}";
+                    $photo->storeAs ( $docPath, $fileName, 'public' );
+                }
+            }
+
+            // Delete old dokumentasi if exists
+            if ( $atb->dokumentasi_foto )
+            {
+                Storage::disk ( 'public' )->deleteDirectory ( $atb->dokumentasi_foto );
+            }
+
+            // Update the existing ATB record
+            $atb->update ( [ 
+                'quantity'         => $request->quantity,
+                'dokumentasi_foto' => $docPath
+            ] );
+
+            // Update or create Saldo record
+            $saldoController = new SaldoController();
+            $existingSaldo   = Saldo::where ( 'id_atb', $atb->id )->first ();
+
+            if ( $existingSaldo )
+            {
+                $existingSaldo->update ( [ 
+                    'quantity' => $request->quantity
+                ] );
+            }
+            else
+            {
+                $saldoController->store ( [ 
+                    'tipe'                     => 'mutasi-proyek',
+                    'quantity'                 => $request->quantity,
+                    'harga'                    => $atb->harga,
+                    'id_proyek'                => $atb->id_proyek,
+                    'id_asal_proyek'           => $atb->id_asal_proyek,
+                    'id_master_data_sparepart' => $atb->id_master_data_sparepart,
+                    'id_master_data_supplier'  => $atb->id_master_data_supplier,
+                    'id_atb'                   => $atb->id,
+                    'satuan'                   => $saldo->satuan
+                ] );
+            }
+
+            $atb->apbMutasi->update ( [ 'status' => 'accepted' ] );
+
+            $saldoAsal = Saldo::find ( $atb->apbMutasi->id_saldo );
+            $saldoAsal->decrementQuantity ( $request->quantity );
+
+            DB::commit ();
+            return back ()->with ( 'success', 'Mutasi ATB berhasil diterima.' );
+        }
+        catch ( \Exception $e )
+        {
+            DB::rollBack ();
+            // Clean up uploaded files if they exist
+            if ( isset ( $baseStoragePath ) )
+            {
+                Storage::disk ( 'public' )->deleteDirectory ( $baseStoragePath );
+            }
+            return back ()->withErrors ( [ 'error' => 'Gagal menerima mutasi ATB: ' . $e->getMessage () ] );
+        }
+    }
+
+    public function rejectMutasi ( $id )
+    {
+        try
+        {
+            // Find ATB first to validate it exists
+            $atb = ATB::findOrFail ( $id );
+
+            DB::beginTransaction ();
+
+            $atb->apbMutasi->update ( [ 'status' => 'rejected' ] );
+
+            DB::commit ();
+            return back ()->with ( 'success', 'Mutasi ATB berhasil ditolak.' );
+        }
+        catch ( \Exception $e )
+        {
+            DB::rollBack ();
+            // Clean up uploaded files if they exist
+            if ( isset ( $baseStoragePath ) )
+            {
+                Storage::disk ( 'public' )->deleteDirectory ( $baseStoragePath );
+            }
+            return back ()->withErrors ( [ 'error' => 'Gagal menolak mutasi ATB: ' . $e->getMessage () ] );
+        }
+    }
 }

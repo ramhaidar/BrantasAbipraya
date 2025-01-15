@@ -20,7 +20,9 @@
 
                 @if ($tipe === 'hutang-unit-alat')
                     @include('dashboard.atb.partials.table')
-                @else
+                @elseif ($tipe === 'mutasi-proyek')
+                    @include('dashboard.atb.partials.mutasi-proyek.table')
+                @elseif ($tipe === 'panjar-unit-alat' || $tipe === 'panjar-proyek')
                     @include('dashboard.atb.partials.panjar-unit-alat_panjar_proyek.table')
                 @endif
 
@@ -28,20 +30,28 @@
         </div>
     </div>
 
-    <!-- Modal for Adding Data -->
     @if ($tipe === 'hutang-unit-alat')
+        <!-- Modal for Adding Data -->
         @include('dashboard.atb.partials.hutang-unit-alat.modal-add')
     @elseif ($tipe === 'panjar-unit-alat' || $tipe === 'panjar-proyek')
+        <!-- Modal for Adding Data -->
         @include('dashboard.atb.partials.panjar-unit-alat_panjar_proyek.modal-add')
     @endif
 
-    <!-- Modal for STT -->
-    @include('dashboard.atb.partials.modal-stt')
+    @if ($tipe === 'hutang-unit-alat')
+        <!-- Modal for STT -->
+        @include('dashboard.atb.partials.modal-stt')
+    @endif
 
-    <!-- Modal for Delete -->
     @include('dashboard.atb.partials.modal-delete')
 
-    <!-- Modal for Dokumentasi is already included in table partial -->
+    @if ($tipe === 'mutasi-proyek')
+        <!-- Modal for Accept -->
+        @include('dashboard.atb.partials.mutasi-proyek.modal-accept')
+
+        <!-- Modal for Reject -->
+        @include('dashboard.atb.partials.mutasi-proyek.modal-reject')
+    @endif
 @endsection
 
 @push('scripts_2')

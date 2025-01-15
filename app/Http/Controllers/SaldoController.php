@@ -95,7 +95,6 @@ class SaldoController extends Controller
             }
             else if ( $data[ 'tipe' ] === 'mutasi-proyek' )
             {
-                $saldoData[ 'id_spb' ]         = $data[ 'id_spb' ];
                 $saldoData[ 'id_asal_proyek' ] = $data[ 'id_asal_proyek' ];
                 $saldoData[ 'satuan' ]         = $data[ 'satuan' ];
             }

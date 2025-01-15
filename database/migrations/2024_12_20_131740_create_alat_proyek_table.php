@@ -18,6 +18,7 @@ return new class extends Migration
             $table->timestamp ( 'removed_at' )->nullable ();
             $table->foreignId ( 'id_master_data_alat' )->constrained ( 'master_data_alat' )->cascadeOnDelete ();
             $table->foreignId ( 'id_proyek' )->constrained ( 'proyek' )->cascadeOnDelete ();
+
             $table->timestamps ();
         } );
     }

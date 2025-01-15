@@ -16,6 +16,7 @@ return new class extends Migration
             $table->id ();
             $table->foreignId ( 'id_spb' )->constrained ( 'spb' )->cascadeOnDelete ();
             $table->foreignId ( 'id_detail_spb' )->constrained ( 'detail_spb' )->cascadeOnDelete ();
+
             $table->timestamps ();
         } );
     }

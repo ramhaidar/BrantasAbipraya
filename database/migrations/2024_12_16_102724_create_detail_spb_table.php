@@ -24,6 +24,7 @@ return new class extends Migration
                 ->constrained ( 'master_data_alat' )->cascadeOnDelete ();
             $table->foreignId ( 'id_link_rkb_detail' )
                 ->constrained ( 'link_rkb_detail' )->cascadeOnDelete ();
+
             $table->timestamps ();
         } );
     }

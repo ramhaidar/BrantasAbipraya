@@ -22,6 +22,7 @@ return new class extends Migration
                 ->nullable ()
                 ->constrained ( 'spb' )
                 ->nullOnDelete ();
+
             $table->timestamps ();
         } );
 

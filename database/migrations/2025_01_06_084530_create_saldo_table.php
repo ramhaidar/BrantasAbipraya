@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string ( 'satuan' );
             $table->bigInteger ( 'quantity' );
             $table->bigInteger ( 'harga' );
-            $table->timestamps ();
 
             // Foreign keys
             $table->foreignId ( 'id_atb' )
@@ -45,6 +44,8 @@ return new class extends Migration
                 ->nullable ()
                 ->constrained ( 'master_data_supplier' )
                 ->onDelete ( 'cascade' );
+
+            $table->timestamps ();
         } );
 
     }

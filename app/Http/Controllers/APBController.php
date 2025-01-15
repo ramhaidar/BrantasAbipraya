@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AlatProyek;
 use App\Models\APB;
+use App\Models\ATB;
 use App\Models\RKB;
-use App\Models\Proyek;
 use App\Models\Alat;
 use App\Models\Saldo;
+use App\Models\Proyek;
+use App\Models\AlatProyek;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\MasterDataSparepart;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\DB;
 
 class APBController extends Controller
 {
@@ -218,9 +219,8 @@ class APBController extends Controller
         }
     }
 
-    public function mutasi ( Request $request )
+    public function mutasi_store ( Request $request )
     {
-        // Validate request
         $validated = $request->validate ( [ 
             'tanggal'          => 'required|date',
             'id_proyek'        => 'required|exists:proyek,id',
@@ -232,55 +232,88 @@ class APBController extends Controller
 
         try
         {
-            // Start transaction
             DB::beginTransaction ();
 
-            // Find the source saldo
             $saldo = Saldo::findOrFail ( $request->id_saldo );
 
-            // Check if requested quantity is available
             if ( $saldo->quantity < $request->quantity )
             {
                 throw new \Exception( 'Stok sparepart tidak mencukupi.' );
             }
 
-            // Create APB record for source project (outgoing)
-            APB::create ( [ 
+            // Create single APB record with pending status
+            $newAPB = APB::create ( [ 
                 'tanggal'                  => $request->tanggal,
                 'tipe'                     => $request->tipe,
-                'quantity'                 => -$request->quantity, // Negative for outgoing
+                'quantity'                 => $request->quantity,
+                'status'                   => 'pending',
                 'id_saldo'                 => $saldo->id,
                 'id_proyek'                => $request->id_proyek,
+                'id_tujuan_proyek'         => $request->id_proyek_tujuan,
                 'id_master_data_sparepart' => $saldo->id_master_data_sparepart,
-                'id_master_data_supplier'  => $saldo->id_master_data_supplier,
-                'keterangan'               => 'Mutasi ke Proyek: ' . Proyek::find ( $request->id_proyek_tujuan )->nama
+                'id_master_data_supplier'  => $saldo->id_master_data_supplier
             ] );
 
-            // Create APB record for destination project (incoming)
-            APB::create ( [ 
+            // Decrement the source saldo
+            // $saldo->decrementQuantity ( $request->quantity );
+
+            // Create ATB record for the destination project
+            ATB::create ( [ 
                 'tanggal'                  => $request->tanggal,
-                'tipe'                     => $request->tipe,
-                'quantity'                 => $request->quantity, // Positive for incoming
-                'id_saldo'                 => $saldo->id,
+                'tipe'                     => 'mutasi-proyek',
+                'quantity'                 => null,
+                'harga'                    => $saldo->harga,
                 'id_proyek'                => $request->id_proyek_tujuan,
+                'id_asal_proyek'           => $request->id_proyek,
+                'id_apb_mutasi'            => $newAPB->id,
+                'id_spb'                   => null,
+                'id_detail_spb'            => null,
                 'id_master_data_sparepart' => $saldo->id_master_data_sparepart,
-                'id_master_data_supplier'  => $saldo->id_master_data_supplier,
-                'keterangan'               => 'Mutasi dari Proyek: ' . Proyek::find ( $request->id_proyek )->nama
+                'id_master_data_supplier'  => $saldo->id_master_data_supplier
             ] );
-
-            // Update the saldo quantity
-            $saldo->decrementQuantity ( $request->quantity );
 
             DB::commit ();
 
             return redirect ()->back ()
-                ->with ( 'success', 'Mutasi sparepart berhasil dilakukan.' );
+                ->with ( 'success', 'Mutasi sparepart berhasil dibuat dan menunggu persetujuan.' );
         }
         catch ( \Exception $e )
         {
             DB::rollBack ();
             return redirect ()->back ()
                 ->with ( 'error', 'Gagal melakukan mutasi: ' . $e->getMessage () );
+        }
+    }
+
+    public function mutasi_destroy ( $id )
+    {
+        try
+        {
+            // Start transaction
+            DB::beginTransaction ();
+
+            // Find the APB record
+            $apb = APB::findOrFail ( $id );
+
+            if ( $apb->tipe !== 'mutasi-proyek' )
+            {
+                // Increment the quantity back to the saldo
+                $apb->saldo->incrementQuantity ( $apb->quantity );
+            }
+
+            $apb->atbMutasi->delete ();
+
+            // Delete the APB record
+            $apb->delete ();
+
+            DB::commit ();
+
+            return redirect ()->back ()->with ( 'success', 'Data APB berhasil dihapus.' );
+        }
+        catch ( \Exception $e )
+        {
+            DB::rollBack ();
+            return redirect ()->back ()->with ( 'error', 'Gagal menghapus data APB: ' . $e->getMessage () );
         }
     }
 
@@ -294,8 +327,11 @@ class APBController extends Controller
             // Find the APB record
             $apb = APB::findOrFail ( $id );
 
-            // Increment the quantity back to the saldo
-            $apb->saldo->incrementQuantity ( $apb->quantity );
+            if ( $apb->tipe !== 'mutasi-proyek' )
+            {
+                // Increment the quantity back to the saldo
+                $apb->saldo->incrementQuantity ( $apb->quantity );
+            }
 
             // Delete the APB record
             $apb->delete ();

@@ -27,7 +27,11 @@
                     </div>
                 </div>
 
-                @include('dashboard.apb.partials.table')
+                @if ($tipe === 'mutasi-proyek')
+                    @include('dashboard.apb.partials.mutasi-proyek.table')
+                @else
+                    @include('dashboard.apb.partials.table')
+                @endif
 
             </div>
         </div>
@@ -44,8 +48,13 @@
         @include('dashboard.apb.partials.modal-add')
     @endif
 
-    <!-- Modal for Delete -->
-    @include('dashboard.apb.partials.modal-delete')
+    @if ($tipe === 'mutasi-proyek')
+        <!-- Modal for Delete -->
+        @include('dashboard.apb.partials.mutasi-proyek.modal-delete')
+    @else
+        <!-- Modal for Delete -->
+        @include('dashboard.apb.partials.modal-delete')
+    @endif
 @endsection
 
 @push('scripts_2')

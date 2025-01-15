@@ -30,6 +30,11 @@
         <thead class="table-primary">
             <tr>
                 <th class="text-center">Tanggal</th>
+                <th class="text-center">Jenis Alat</th>
+                <th class="text-center">Kode Alat</th>
+                <th class="text-center">Merek Alat</th>
+                <th class="text-center">Tipe Alat</th>
+                <th class="text-center">Serial Number Alat</th>
                 <th class="text-center">Kode</th>
                 <th class="text-center">Supplier</th>
                 <th class="text-center">Sparepart</th>
@@ -37,6 +42,7 @@
                 <th class="text-center">Part Number</th>
                 <th class="text-center">Quantity Dikirim</th>
                 <th class="text-center">Quantity Diterima</th>
+                <th class="text-center">Quantity Digunakan</th>
                 <th class="text-center">Satuan</th>
                 <th class="text-center">Harga</th>
                 <th class="text-center">Net</th>
@@ -48,13 +54,19 @@
             @foreach ($apbs as $apb)
                 <tr>
                     <td class="text-center">{{ formatTanggal($apb->tanggal) }}</td>
+                    <td class="text-center">{{ $apb->alatProyek->masterDataAlat->jenis_alat ?? '-' }}</td>
+                    <td class="text-center">{{ $apb->alatProyek->masterDataAlat->kode_alat ?? '-' }}</td>
+                    <td class="text-center">{{ $apb->alatProyek->masterDataAlat->merek_alat ?? '-' }}</td>
+                    <td class="text-center">{{ $apb->alatProyek->masterDataAlat->tipe_alat ?? '-' }}</td>
+                    <td class="text-center">{{ $apb->alatProyek->masterDataAlat->serial_number ?? '-' }}</td>
                     <td class="text-center">{{ $apb->masterDataSparepart->kategoriSparepart->kode }}: {{ $apb->masterDataSparepart->kategoriSparepart->nama }}</td>
                     <td class="text-center">{{ $apb->masterDataSupplier->nama ?? '-' }}</td>
                     <td class="text-center">{{ $apb->masterDataSparepart->nama ?? '-' }}</td>
                     <td class="text-center">{{ $apb->masterDataSparepart->merk ?? '-' }}</td>
                     <td class="text-center">{{ $apb->masterDataSparepart->part_number ?? '-' }}</td>
-                    <td class="text-center">{{ $apb->quantity }}</td>
-                    <td class="text-center">{{ $apb->atbMutasi->quantity ?? '-' }}</td>
+                    <td class="text-center">{{ $apb->status !== null ? $apb->quantity : '-' }}</td>
+                    <td class="text-center">{{ $apb->status !== null ? $apb->atbMutasi->quantity ?? '-' : '-' }}</td>
+                    <td class="text-center">{{ $apb->status === null ? $apb->quantity : '-' }}</td>
                     <td class="text-center">{{ $apb->saldo->satuan ?? '-' }}</td>
                     <td class="text-center">{{ formatRupiah($apb->saldo->harga ?? 0) }}</td>
                     <td class="text-center">{{ formatRupiah(($apb->saldo->harga ?? 0) * $apb->quantity) }}</td>
@@ -65,6 +77,8 @@
                             <span class="badge bg-danger w-100">Rejected</span>
                         @elseif($apb->status === 'accepted')
                             <span class="badge bg-success w-100">Accepted</span>
+                        @elseif($apb->status === null)
+                            <span class="badge bg-dark w-100">Penggunaan</span>
                         @else
                             <span class="badge bg-secondary w-100">{{ ucfirst($apb->status ?? '-') }}</span>
                         @endif

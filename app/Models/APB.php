@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class APB extends Model
@@ -62,5 +63,10 @@ class APB extends Model
     public function alatProyek () : BelongsTo
     {
         return $this->belongsTo ( AlatProyek::class, 'id_alat_proyek' );
+    }
+
+    public function atbMutasi () : HasMany
+    {
+        return $this->hasMany ( ATB::class, 'id_apb_mutasi' );
     }
 }

@@ -218,6 +218,72 @@ class APBController extends Controller
         }
     }
 
+    public function mutasi ( Request $request )
+    {
+        // Validate request
+        $validated = $request->validate ( [ 
+            'tanggal'          => 'required|date',
+            'id_proyek'        => 'required|exists:proyek,id',
+            'id_proyek_tujuan' => 'required|exists:proyek,id|different:id_proyek',
+            'id_saldo'         => 'required|exists:saldo,id',
+            'quantity'         => 'required|integer|min:1',
+            'tipe'             => 'required|string'
+        ] );
+
+        try
+        {
+            // Start transaction
+            DB::beginTransaction ();
+
+            // Find the source saldo
+            $saldo = Saldo::findOrFail ( $request->id_saldo );
+
+            // Check if requested quantity is available
+            if ( $saldo->quantity < $request->quantity )
+            {
+                throw new \Exception( 'Stok sparepart tidak mencukupi.' );
+            }
+
+            // Create APB record for source project (outgoing)
+            APB::create ( [ 
+                'tanggal'                  => $request->tanggal,
+                'tipe'                     => $request->tipe,
+                'quantity'                 => -$request->quantity, // Negative for outgoing
+                'id_saldo'                 => $saldo->id,
+                'id_proyek'                => $request->id_proyek,
+                'id_master_data_sparepart' => $saldo->id_master_data_sparepart,
+                'id_master_data_supplier'  => $saldo->id_master_data_supplier,
+                'keterangan'               => 'Mutasi ke Proyek: ' . Proyek::find ( $request->id_proyek_tujuan )->nama
+            ] );
+
+            // Create APB record for destination project (incoming)
+            APB::create ( [ 
+                'tanggal'                  => $request->tanggal,
+                'tipe'                     => $request->tipe,
+                'quantity'                 => $request->quantity, // Positive for incoming
+                'id_saldo'                 => $saldo->id,
+                'id_proyek'                => $request->id_proyek_tujuan,
+                'id_master_data_sparepart' => $saldo->id_master_data_sparepart,
+                'id_master_data_supplier'  => $saldo->id_master_data_supplier,
+                'keterangan'               => 'Mutasi dari Proyek: ' . Proyek::find ( $request->id_proyek )->nama
+            ] );
+
+            // Update the saldo quantity
+            $saldo->decrementQuantity ( $request->quantity );
+
+            DB::commit ();
+
+            return redirect ()->back ()
+                ->with ( 'success', 'Mutasi sparepart berhasil dilakukan.' );
+        }
+        catch ( \Exception $e )
+        {
+            DB::rollBack ();
+            return redirect ()->back ()
+                ->with ( 'error', 'Gagal melakukan mutasi: ' . $e->getMessage () );
+        }
+    }
+
     public function destroy ( $id )
     {
         try

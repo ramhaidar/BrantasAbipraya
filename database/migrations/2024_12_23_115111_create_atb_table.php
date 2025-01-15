@@ -24,6 +24,7 @@ return new class extends Migration
             // Foreign keys sesuai dengan diagram
             $table->foreignId ( 'id_proyek' )->nullable ()->constrained ( 'proyek' )->nullOnDelete ();
             $table->foreignId ( 'id_asal_proyek' )->nullable ()->constrained ( 'proyek' )->nullOnDelete ();
+            $table->foreignId ( 'id_apb_mutasi' )->nullable ()->constrained ( 'apb' )->nullOnDelete ();
             $table->foreignId ( 'id_spb' )->nullable ()->constrained ( 'spb' )->nullOnDelete ();
             $table->foreignId ( 'id_detail_spb' )->nullable ()->constrained ( 'detail_spb' )->nullOnDelete ();
             $table->foreignId ( 'id_master_data_sparepart' )->nullable ()->constrained ( 'master_data_sparepart' )->nullOnDelete ();

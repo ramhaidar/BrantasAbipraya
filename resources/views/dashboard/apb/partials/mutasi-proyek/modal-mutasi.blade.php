@@ -76,8 +76,8 @@
                         </div>
 
                         <div class="col-12">
-                            <label class="form-label required" for="tujuan_proyek">Tujuan Proyek</label>
-                            <select class="form-control" id="tujuan_proyek" name="tujuan_proyek" required>
+                            <label class="form-label required" for="id_proyek_tujuan">Tujuan Proyek</label>
+                            <select class="form-control" id="id_proyek_tujuan" name="id_proyek_tujuan" required>
                                 <option value="">Pilih Proyek Tujuan</option>
                                 @foreach ($proyeks as $p)
                                     @if ($p->id != $proyek->id)
@@ -115,7 +115,7 @@
             $.datepicker.setDefaults($.datepicker.regional['id']);
 
             // Initialize sparepart select
-            $('#id_saldo_mutasi, #tujuan_proyek').select2({
+            $('#id_saldo_mutasi, #id_proyek_tujuan').select2({
                 placeholder: "Pilih",
                 allowClear: true,
                 dropdownParent: $('#modalForMutasi'),
@@ -123,7 +123,7 @@
             });
 
             // Add validation classes on change for Select2 elements
-            ['#id_saldo_mutasi', '#tujuan_proyek'].forEach(function(selector) {
+            ['#id_saldo_mutasi', '#id_proyek_tujuan'].forEach(function(selector) {
                 $(selector).on('change', function() {
                     if ($(this).val()) {
                         $(this).next('.select2-container').find('.select2-selection').removeClass('is-invalid').addClass('is-valid');

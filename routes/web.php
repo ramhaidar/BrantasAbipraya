@@ -20,6 +20,7 @@ use App\Http\Controllers\MasterDataAlatController;
 use App\Http\Controllers\DetailRKBUrgentController;
 use App\Http\Controllers\DetailSPBProyekController;
 use App\Http\Controllers\DetailRKBGeneralController;
+use App\Http\Controllers\LaporanLNPBTotalController;
 use App\Http\Controllers\EvaluasiRKBUrgentController;
 use App\Http\Controllers\LampiranRKBUrgentController;
 use App\Http\Controllers\TimelineRKBUrgentController;
@@ -30,6 +31,7 @@ use App\Http\Controllers\LampiranEvaluasiUrgentController;
 use App\Http\Controllers\TimelineEvaluasiUrgentController;
 use App\Http\Controllers\EvaluasiDetailRKBUrgentController;
 use App\Http\Controllers\EvaluasiDetailRKBGeneralController;
+use App\Http\Controllers\LaporanLNPBBulanBerjalanController;
 
 Route::get ( '/test', function ()
 {
@@ -1445,6 +1447,76 @@ Route::middleware ( 'auth' )
         Route::delete (
             '{id}',
             [ AlatProyekController::class, 'destroy' ]
+        )->where ( 'id', '[0-9]+' )
+            ->name ( 'destroy' );
+    } );
+
+// Rute Laporan LNPB Bulan Berjalan [LaporanLNPBBulanBerjalanController]
+Route::middleware ( 'auth' )
+    ->prefix ( 'laporan-lnpb-bulan-berjalan' )
+    ->as ( 'laporan.lnpb.bulan_berjalan.' )
+    ->group ( function ()
+    {
+        Route::get (
+            '/',
+            [ LaporanLNPBBulanBerjalanController::class, 'index' ]
+        )->name ( 'index' );
+
+        Route::get (
+            '{id}',
+            [ LaporanLNPBBulanBerjalanController::class, 'show' ]
+        )->where ( 'id', '[0-9]+' )
+            ->name ( 'show' );
+
+        Route::post (
+            '/',
+            [ LaporanLNPBBulanBerjalanController::class, 'store' ]
+        )->name ( 'store' );
+
+        Route::put (
+            '{id}',
+            [ LaporanLNPBBulanBerjalanController::class, 'update' ]
+        )->where ( 'id', '[0-9]+' )
+            ->name ( 'update' );
+
+        Route::delete (
+            '{id}',
+            [ LaporanLNPBBulanBerjalanController::class, 'destroy' ]
+        )->where ( 'id', '[0-9]+' )
+            ->name ( 'destroy' );
+    } );
+
+// Rute Laporan LNPB Total [LaporanLNPBTotalController] 
+Route::middleware ( 'auth' )
+    ->prefix ( 'laporan-lnpb-total' )
+    ->as ( 'laporan.lnpb.total.' )
+    ->group ( function ()
+    {
+        Route::get (
+            '/',
+            [ LaporanLNPBTotalController::class, 'index' ]
+        )->name ( 'index' );
+
+        Route::get (
+            '{id}',
+            [ LaporanLNPBTotalController::class, 'show' ]
+        )->where ( 'id', '[0-9]+' )
+            ->name ( 'show' );
+
+        Route::post (
+            '/',
+            [ LaporanLNPBTotalController::class, 'store' ]
+        )->name ( 'store' );
+
+        Route::put (
+            '{id}',
+            [ LaporanLNPBTotalController::class, 'update' ]
+        )->where ( 'id', '[0-9]+' )
+            ->name ( 'update' );
+
+        Route::delete (
+            '{id}',
+            [ LaporanLNPBTotalController::class, 'destroy' ]
         )->where ( 'id', '[0-9]+' )
             ->name ( 'destroy' );
     } );

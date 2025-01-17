@@ -404,25 +404,24 @@
                                             </li>
 
                                             <!-- Laporan Submenu (Level 2) -->
-                                            <li class="nav-item has-treeview {{ str_contains($page, 'Summary') || (str_contains($page, 'LNPB') && str_contains($headerPage, $item->nama)) ? 'menu-open' : '' }}">
-                                                <a class="ps-4 nav-link level-1 {{ str_contains($page, 'Summary') || (str_contains($page, 'LNPB') && str_contains($headerPage, $item->nama)) ? 'active' : '' }}" href="#" style="{{ str_contains($page, 'Summary') || (str_contains($page, 'LNPB') && str_contains($headerPage, $item->nama)) ? 'background-color: #66CDAA; color: #ffffff;' : '' }}">
+                                            <li class="nav-item has-treeview {{ str_contains($page, 'LNPB') || str_contains($page, 'Summary') ? 'menu-open' : '' }}">
+                                                <a class="ps-4 nav-link level-1 {{ str_contains($page, 'LNPB') || str_contains($page, 'Summary') ? 'active' : '' }}" href="#" style="{{ str_contains($page, 'LNPB') || str_contains($page, 'Summary') ? 'background-color: #66CDAA; color: #ffffff;' : '' }}">
                                                     <i class="bi me-2 nav-icon fs-5 bi-journal-text"></i>
-                                                    <p>Laporan</p>
+                                                    <p>LNPB</p>
                                                     <i class="right bi bi-caret-right-fill"></i>
                                                 </a>
                                                 <ul class="nav nav-treeview">
-
                                                     <!-- Level 3 Submenu Items under Laporan -->
                                                     <li class="nav-item">
-                                                        <a class="ps-5 nav-link level-2 {{ str_contains($page, 'LNPB Total') && str_contains($headerPage, $item->nama) ? 'active' : '' }}" href="{{ route('laporan.lnpb.total.index', ['id_proyek' => $item->id]) }}" style="{{ str_contains($page, 'LNPB Total') && str_contains($headerPage, $item->nama) ? 'background-color: #D3D3D3; color: #000000;' : '' }}">
+                                                        <a class="ps-5 nav-link level-2 {{ str_contains($page, 'LNPB Total') ? 'active' : '' }}" href="{{ route('laporan.lnpb.total.index', ['id_proyek' => $item->id]) }}" style="{{ str_contains($page, 'LNPB Total') ? 'background-color: #D3D3D3; color: #000000;' : '' }}">
                                                             <i class="bi me-2 nav-icon fs-5 bi-graph-up"></i>
-                                                            <p>LNPB Total</p>
+                                                            <p>Total</p>
                                                         </a>
                                                     </li>
                                                     <li class="nav-item">
-                                                        <a class="ps-5 nav-link level-2 {{ str_contains($page, 'LNPB Bulan Berjalan') && str_contains($headerPage, $item->nama) ? 'active' : '' }}" href="{{ route('laporan.lnpb.bulan_berjalan.index', ['id_proyek' => $item->id]) }}" style="{{ str_contains($page, 'LNPB Bulan Berjalan') && str_contains($headerPage, $item->nama) ? 'background-color: #D3D3D3; color: #000000;' : '' }}">
+                                                        <a class="ps-5 nav-link level-2 {{ $page === 'LNPB Bulan Berjalan' && str_contains($headerPage, $item->nama) ? 'active' : '' }}" href="{{ route('laporan.lnpb.bulan_berjalan.index', ['id_proyek' => $item->id]) }}" style="{{ $page === 'LNPB Bulan Berjalan' && str_contains($headerPage, $item->nama) ? 'background-color: #D3D3D3; color: #000000;' : '' }}">
                                                             <i class="bi me-2 nav-icon fs-5 bi-calendar-check"></i>
-                                                            <p>LNPB Bulan Berjalan</p>
+                                                            <p>Bulan Berjalan</p>
                                                         </a>
                                                     </li>
                                                 </ul>
@@ -603,12 +602,30 @@
             }
 
             function scrollToActiveElement() {
-                const activeElement = $('.sidebar .nav-link.active').last();
-                const halfDvh = window.innerHeight / 2;
+                // Find all active links at any level
+                const activeLinks = $('.sidebar .nav-link.active');
 
-                if (activeElement.length) {
+                // Find the deepest active link by checking nav-treeview nesting level
+                let deepestActiveLink = null;
+                let maxDepth = -1;
+
+                activeLinks.each(function() {
+                    const depth = $(this).parents('.nav-treeview').length;
+                    if (depth > maxDepth) {
+                        maxDepth = depth;
+                        deepestActiveLink = $(this);
+                    }
+                });
+
+                // If we found an active link, scroll to it
+                if (deepestActiveLink && deepestActiveLink.length) {
+                    const halfDvh = window.innerHeight / 2;
+
                     $('.sidebar .os-viewport').animate({
-                        scrollTop: activeElement.offset().top - $('.sidebar .os-viewport').offset().top + $('.sidebar .os-viewport').scrollTop() - halfDvh
+                        scrollTop: deepestActiveLink.offset().top -
+                            $('.sidebar .os-viewport').offset().top +
+                            $('.sidebar .os-viewport').scrollTop() -
+                            halfDvh
                     }, 200);
                 }
             }

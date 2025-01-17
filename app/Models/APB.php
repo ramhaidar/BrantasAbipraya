@@ -22,7 +22,7 @@ class APB extends Model
         'status',
         'id_saldo',
         'id_proyek',
-        'id_tujuan_proyek', // Add this
+        'id_tujuan_proyek',
         'id_master_data_sparepart',
         'id_master_data_supplier',
         'id_alat_proyek'
@@ -37,7 +37,7 @@ class APB extends Model
         'status'                   => 'string',
         'id_saldo'                 => 'integer',
         'id_proyek'                => 'integer',
-        'id_tujuan_proyek'         => 'integer', // Add this
+        'id_tujuan_proyek'         => 'integer',
         'id_master_data_sparepart' => 'integer',
         'id_master_data_supplier'  => 'integer',
         'id_alat_proyek'           => 'integer'

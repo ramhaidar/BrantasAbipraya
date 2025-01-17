@@ -48,9 +48,14 @@
                     <td class="text-center">{{ $atb->masterDataSparepart->nama }}</td>
                     <td class="text-center">{{ $atb->masterDataSparepart->merk }}</td>
                     <td class="text-center">{{ $atb->masterDataSparepart->part_number }}</td>
-                    <td class="text-center">{{ $atb->apbMutasi->quantity }}</td>
-                    <td class="text-center">{!! $atb->apbMutasi->status === 'rejected' ? '<span class="badge bg-danger w-100">Rejected</span>' : $atb->quantity ?? '-' !!}</td>
-                    <td class="text-center">{{ $atb->apbMutasi->saldo->satuan }}</td>
+                    <td class="text-center">{{ $atb->apbMutasi->quantity ?? '-' }}</td>
+                    @if (!isset($atb->apbMutasi))
+                        <td class="text-center">{{ $atb->quantity }}</td>
+                        <td class="text-center">{{ $atb->saldo->satuan }}</td>
+                    @else
+                        <td class="text-center">{!! $atb->apbMutasi->status === 'rejected' ? '<span class="badge bg-danger w-100">Rejected</span>' : $atb->quantity ?? '-' !!}</td>
+                        <td class="text-center">{{ $atb->apbMutasi->saldo->satuan }}</td>
+                    @endif
                     <td class="text-center">{{ formatRupiah($atb->harga) }}</td>
                     <td class="text-center">{{ formatRupiah($atb->quantity * $atb->harga) }}</td>
                     <td class="text-center doc-cell" data-id="{{ $atb->id }}">
@@ -67,12 +72,21 @@
                         </button>
                     </td>
                     <td class="text-center action-cell">
-                        <button class="btn btn-danger mx-1 rejectBtn" data-id="{{ $atb->id }}" {{ $atb->apbMutasi->status !== 'pending' ? 'disabled' : '' }}>
-                            <i class="bi bi-x-circle"></i>
-                        </button>
-                        <button class="btn btn-success acceptBtn" data-id="{{ $atb->id }}" data-max="{{ $atb->apbMutasi->quantity }}" data-max-text="(Max: {{ $atb->apbMutasi->quantity }})" type="button" {{ $atb->apbMutasi->status !== 'pending' ? 'disabled' : '' }}>
-                            <i class="bi bi-check-circle"></i>
-                        </button>
+                        @if (!isset($atb->apbMutasi))
+                            <button class="btn btn-danger mx-1 rejectBtn" disabled>
+                                <i class="bi bi-x-circle"></i>
+                            </button>
+                            <button class="btn btn-success acceptBtn" disabled>
+                                <i class="bi bi-check-circle"></i>
+                            </button>
+                        @else
+                            <button class="btn btn-danger mx-1 rejectBtn" data-id="{{ $atb->id }}" {{ $atb->apbMutasi->status !== 'pending' ? 'disabled' : '' }}>
+                                <i class="bi bi-x-circle"></i>
+                            </button>
+                            <button class="btn btn-success acceptBtn" data-id="{{ $atb->id }}" data-max="{{ $atb->apbMutasi->quantity }}" data-max-text="(Max: {{ $atb->apbMutasi->quantity }})" type="button" {{ $atb->apbMutasi->status !== 'pending' ? 'disabled' : '' }}>
+                                <i class="bi bi-check-circle"></i>
+                            </button>
+                        @endif
                     </td>
                 </tr>
             @endforeach

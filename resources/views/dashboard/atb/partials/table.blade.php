@@ -53,7 +53,7 @@
                     <td class="text-center">{{ $atb->masterDataSparepart->merk }}</td>
                     <td class="text-center">{{ $atb->masterDataSparepart->part_number }}</td>
                     <td class="text-center">{{ $atb->quantity }}</td>
-                    <td class="text-center">{{ $atb->detailSpb->satuan }}</td>
+                    <td class="text-center">{{ $atb->detailSpb->satuan ?? '-' }}</td>
                     <td class="text-center">{{ formatRupiah($atb->harga) }}</td>
                     <td class="text-center">{{ formatRupiah($atb->quantity * $atb->harga) }}</td>
                     <td class="text-center">{{ formatRupiah($atb->quantity * $atb->harga * 0.11) }}</td>

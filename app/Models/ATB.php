@@ -21,7 +21,7 @@ class ATB extends Model
         'harga',
         'id_proyek',
         'id_asal_proyek',
-        'id_apb_mutasi', // Add this
+        'id_apb_mutasi',
         'id_spb',
         'id_detail_spb',
         'id_master_data_sparepart',
@@ -31,14 +31,14 @@ class ATB extends Model
     protected $casts = [ 
         'id'                       => 'integer',
         'tipe'                     => 'string',
-        'dokumentasi_foto'         => 'string', // Changed from json to string
+        'dokumentasi_foto'         => 'string',
         'surat_tanda_terima'       => 'string',
         'tanggal'                  => 'date',
         'quantity'                 => 'integer',
         'harga'                    => 'integer',
         'id_proyek'                => 'integer',
         'id_asal_proyek'           => 'integer',
-        'id_apb_mutasi'            => 'integer', // Add this
+        'id_apb_mutasi'            => 'integer',
         'id_spb'                   => 'integer',
         'id_detail_spb'            => 'integer',
         'id_master_data_sparepart' => 'integer',
@@ -80,8 +80,8 @@ class ATB extends Model
         return $this->hasOne ( Saldo::class, 'id_atb' );
     }
 
-    public function apbMutasi(): BelongsTo
+    public function apbMutasi () : BelongsTo
     {
-        return $this->belongsTo(APB::class, 'id_apb_mutasi');
+        return $this->belongsTo ( APB::class, 'id_apb_mutasi' );
     }
 }

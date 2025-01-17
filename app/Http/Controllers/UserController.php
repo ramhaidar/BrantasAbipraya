@@ -11,7 +11,7 @@ class UserController extends Controller
     public function index ()
     {
         return view (
-            'users.user',
+            'dashboard.users.user',
             [ 
                 'headerPage' => 'User',
                 'page'       => 'Data User',

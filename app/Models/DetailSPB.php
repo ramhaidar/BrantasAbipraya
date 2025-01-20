@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\LinkSPBDetailSPB;
 use App\Models\MasterDataSparepart;
+use App\Models\ATB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -67,6 +68,11 @@ class DetailSPB extends Model
     public function linkRkbDetail () : BelongsTo
     {
         return $this->belongsTo ( LinkRKBDetail::class, 'id_link_rkb_detail' );
+    }
+
+    public function atbs () : HasMany
+    {
+        return $this->hasMany ( ATB::class, 'id_detail_spb' );
     }
 
     public function reduceQuantityBelumDiterima ( $quantity )

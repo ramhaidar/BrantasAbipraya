@@ -86,6 +86,7 @@
                         <th class="text-center">Merk</th>
                         <th class="text-center">Supplier</th>
                         <th class="text-center">Quantity PO</th>
+                        <th class="text-center">Quantity Diterima</th> <!-- Tambah kolom ini -->
                         <th class="text-center">Satuan</th>
                         <th class="text-center">Harga</th>
                         <th class="text-center">Jumlah Harga</th>
@@ -103,6 +104,12 @@
                                 <td class="text-center">{{ $linkSpbDetailSpb->detailSPb->masterDataSparepart->merk }}</td>
                                 <td class="text-center">{{ $riwayatSpb->masterDataSupplier->nama }}</td>
                                 <td class="text-center">{{ $linkSpbDetailSpb->detailSpb->quantity_po }}</td>
+                                <td class="text-center">
+                                    @php
+                                        $totalQuantityDiterima = $linkSpbDetailSpb->detailSpb->atbs->sum('quantity');
+                                    @endphp
+                                    {{ $totalQuantityDiterima }}
+                                </td>
                                 <td class="text-center">{{ $linkSpbDetailSpb->detailSPb->satuan }}</td>
                                 <td class="text-center">Rp {{ number_format($linkSpbDetailSpb->detailSPb->harga, 0, ',', '.') }}</td>
                                 <td class="text-center">Rp {{ number_format($linkSpbDetailSpb->detailSPb->harga * $linkSpbDetailSpb->detailSpb->quantity_po, 0, ',', '.') }}</td>
@@ -113,20 +120,17 @@
 
                 <tfoot class="table-primary">
                     <tr>
-                        <th class="ps-4" style="text-align: left;" colspan="8">Jumlah</th>
+                        <th class="ps-4" style="text-align: left;" colspan="9">Jumlah</th>
                         <th id="totalHarga" style="text-align: center;">Rp 0</th>
                         <th id="totalJumlahHarga" style="text-align: center;">Rp 0</th>
-                        {{-- <th></th> --}}
                     </tr>
                     <tr>
-                        <th class="ps-4" style="text-align: left;" colspan="9">PPN 11%</th>
+                        <th class="ps-4" style="text-align: left;" colspan="10">PPN 11%</th>
                         <th id="ppn11" style="text-align: center;">Rp 0</th>
-                        {{-- <th></th> --}}
                     </tr>
                     <tr>
-                        <th class="ps-4" style="text-align: left;" colspan="9">Grand Total</th>
+                        <th class="ps-4" style="text-align: left;" colspan="10">Grand Total</th>
                         <th id="grandTotal" style="text-align: center;">Rp 0</th>
-                        {{-- <th></th> --}}
                     </tr>
                 </tfoot>
 
@@ -180,8 +184,9 @@
                 let totalJumlahHarga = 0;
 
                 $('#table-data tbody tr').each(function() {
-                    const harga = unformatRupiah($(this).find('td:nth-child(9)').text());
-                    const jumlahHarga = unformatRupiah($(this).find('td:nth-child(10)').text());
+                    const harga = unformatRupiah($(this).find('td:nth-child(10)').text());
+                    const quantity = parseInt($(this).find('td:nth-child(7)').text()) || 0;
+                    const jumlahHarga = harga * quantity;
 
                     totalHarga += harga;
                     totalJumlahHarga += jumlahHarga;

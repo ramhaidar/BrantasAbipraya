@@ -30,6 +30,7 @@
         <thead class="table-primary">
             <tr>
                 <th class="text-center">Tanggal</th>
+                <th class="text-center">Tujuan Proyek</th>
                 <th class="text-center">Jenis Alat</th>
                 <th class="text-center">Kode Alat</th>
                 <th class="text-center">Merek Alat</th>
@@ -54,6 +55,7 @@
             @foreach ($apbs as $apb)
                 <tr>
                     <td class="text-center">{{ formatTanggal($apb->tanggal) }}</td>
+                    <td class="text-center">{{ $apb->tujuanProyek->nama ?? '-' }}</td>
                     <td class="text-center">{{ $apb->alatProyek->masterDataAlat->jenis_alat ?? '-' }}</td>
                     <td class="text-center">{{ $apb->alatProyek->masterDataAlat->kode_alat ?? '-' }}</td>
                     <td class="text-center">{{ $apb->alatProyek->masterDataAlat->merek_alat ?? '-' }}</td>

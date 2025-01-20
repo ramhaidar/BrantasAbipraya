@@ -18,9 +18,9 @@ class DetailRKBUrgentController extends Controller
 {
     public function index ( $id )
     {
-        $rkb                   = RKB::with ( [ 'proyek' ] )->find ( $id );
-        $proyeks               = Proyek::orderByDesc ( 'updated_at' )->get ();
-        $master_data_alat      = MasterDataAlat::all ();
+        $rkb     = RKB::with ( [ 'proyek' ] )->find ( $id );
+        $proyeks = Proyek::orderByDesc ( 'updated_at' )->get ();
+        // $master_data_alat      = MasterDataAlat::all ();
         $master_data_sparepart = MasterDataSparepart::all ();
         $kategori_sparepart    = KategoriSparepart::all ();
         $data                  = RKB::where ( "tipe", "Urgent" )
@@ -37,6 +37,12 @@ class DetailRKBUrgentController extends Controller
             ] )
             ->findOrFail ( $id );
 
+        $available_alat = MasterDataAlat::whereHas ( 'alatProyek', function ($query) use ($rkb)
+        {
+            $query->where ( 'id_proyek', $rkb->id_proyek )
+                ->whereNull ( 'removed_at' );
+        } )->get ();
+
         // sort linkAlatDetailRkbs berdasarkan id dari master_data_alat
         // $data->linkAlatDetailRkbs = $data->linkAlatDetailRkbs->sortBy ( 'id_master_data_alat' );
 
@@ -45,7 +51,8 @@ class DetailRKBUrgentController extends Controller
         return view ( 'dashboard.rkb.urgent.detail.detail', [ 
             'rkb'                   => $rkb,
             'proyeks'               => $proyeks,
-            'master_data_alat'      => $master_data_alat,
+            // 'master_data_alat'      => $master_data_alat,
+            'available_alat'        => $available_alat,
             'master_data_sparepart' => $master_data_sparepart,
             'kategori_sparepart'    => $kategori_sparepart,
             'data'                  => $data,

@@ -29,7 +29,7 @@
     <table class="m-0 table table-bordered table-striped" id="table-data">
         <thead class="table-primary">
             <tr>
-                <th class="text-center">Tanggal</th>
+                <th class="text-center">Tanggal Penerimaan</th>
                 <th class="text-center">Kode</th>
                 <th class="text-center">Supplier</th>
                 <th class="text-center">Sparepart</th>

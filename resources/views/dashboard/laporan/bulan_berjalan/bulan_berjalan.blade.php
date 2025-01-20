@@ -14,6 +14,13 @@
                     {{-- <a class="btn btn-primary btn-sm" id="button-for-modal-add" data-bs-toggle="modal" data-bs-target="#modalForAdd">
                         <i class="fa fa-plus"></i> <span class="ms-2">Tambah Data</span>
                     </a> --}}
+
+                    <p>Periode {{ \Carbon\Carbon::parse($startDate)->translatedFormat('d F') }} s/d {{ \Carbon\Carbon::parse($endDate)->translatedFormat('d F Y') }}</p>
+
+                    <button class="btn btn-primary btn-sm" id="toggleAllButton" type="button" onclick="toggleAll()">
+                        <i class="fa fa-expand" id="toggleAllIcon"></i>
+                        <span class="ms-2" id="toggleAllText">Expand All</span>
+                    </button>
                 </div>
 
                 @include('dashboard.laporan.bulan_berjalan.partials.table')

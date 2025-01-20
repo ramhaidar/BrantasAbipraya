@@ -565,12 +565,10 @@
 
         function toggleAll() {
             isAllExpanded = !isAllExpanded;
-            const button = document.getElementById('toggleAllButton');
-            const icon = button.querySelector('i');
-            const text = button.querySelector('span');
+            const icon = document.getElementById('toggleAllIcon');
+            const text = document.getElementById('toggleAllText');
 
-            icon.classList.toggle('fa-expand');
-            icon.classList.toggle('fa-compress');
+            icon.className = isAllExpanded ? 'fa fa-compress' : 'fa fa-expand';
             text.textContent = isAllExpanded ? 'Collapse All' : 'Expand All';
 
             // Toggle main sections
@@ -677,43 +675,17 @@
 
         function updateExpandAllButtonState() {
             const button = document.getElementById('toggleAllButton');
+            const icon = document.getElementById('toggleAllIcon');
+            const text = document.getElementById('toggleAllText');
+
             const allExpanded = Object.keys(state).every(section =>
                 !document.querySelectorAll(`.${section}`).length ||
                 state[section].isOpen
             );
 
             isAllExpanded = allExpanded;
-            button.textContent = allExpanded ? 'Collapse All' : 'Expand All';
+            icon.className = allExpanded ? 'fa fa-compress' : 'fa fa-expand';
+            text.textContent = allExpanded ? 'Collapse All' : 'Expand All';
         }
-
-        $(document).ready(function() {
-            $('.datetimepicker').datetimepicker({
-                timepicker: false,
-                format: 'Y-m-d',
-                closeOnDateSelect: true,
-            });
-
-            $('#filterButton').on('click', function() {
-                const startDate = $('#start_date').val();
-                const endDate = $('#end_date').val();
-
-                $.ajax({
-                    url: "{{ route('summary.fetchData') }}",
-                    method: 'GET',
-                    data: {
-                        start_date: startDate,
-                        end_date: endDate,
-                        id_proyek: {{ $proyek->id }},
-                    },
-                    success: function(response) {
-
-                        $('#table-container').html(response);
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error:', error);
-                    }
-                });
-            });
-        });
     </script>
 @endpush

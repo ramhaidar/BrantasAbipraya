@@ -56,9 +56,27 @@ class LaporanLNPBBulanBerjalanController extends Controller
         // +++
 
         // === Calculate ATB, APB, and Saldo === //
-        $ATB   = ATB::with ( 'masterDataSparepart.KategoriSparepart' )->where ( 'id_proyek', $request->id_proyek )->get ();
-        $APB   = APB::with ( 'masterDataSparepart.KategoriSparepart' )->where ( 'id_proyek', $request->id_proyek )->get ();
-        $SALDO = Saldo::with ( 'masterDataSparepart.KategoriSparepart' )->where ( 'id_proyek', $request->id_proyek )->get ();
+        $currentDate = now ();
+        $startDate   = $currentDate->copy ()->subMonth ()->day ( 26 );
+        $endDate     = $currentDate->copy ()->day ( 25 );
+
+        $ATB = ATB::with ( 'masterDataSparepart.KategoriSparepart' )
+            ->where ( 'id_proyek', $request->id_proyek )
+            ->whereBetween ( 'tanggal', [ $startDate, $endDate ] )
+            ->get ();
+
+        $APB = APB::with ( 'masterDataSparepart.KategoriSparepart' )
+            ->where ( 'id_proyek', $request->id_proyek )
+            ->whereBetween ( 'tanggal', [ $startDate, $endDate ] )
+            ->get ();
+
+        $SALDO = Saldo::with ( 'masterDataSparepart.KategoriSparepart', 'atb' )
+            ->where ( 'id_proyek', $request->id_proyek )
+            ->whereHas ( 'atb', function ($query) use ($startDate, $endDate)
+            {
+                $query->whereBetween ( 'tanggal', [ $startDate, $endDate ] );
+            } )
+            ->get ();
 
         $sums = [];
         foreach ( $data as $category )
@@ -154,7 +172,10 @@ class LaporanLNPBBulanBerjalanController extends Controller
             'proyek'     => $proyek,
             'proyeks'    => $proyeks,
             'sums'       => $sums,
-            "headerPage" => $proyek->nama,
+            'startDate'  => $startDate,
+            'endDate'    => $endDate,
+
+            'headerPage' => $proyek->nama,
             'page'       => 'LNPB Bulan Berjalan',
         ] );
     }

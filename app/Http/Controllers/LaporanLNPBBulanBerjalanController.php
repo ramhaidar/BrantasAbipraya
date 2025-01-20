@@ -130,7 +130,7 @@ class LaporanLNPBBulanBerjalanController extends Controller
                     {
                         return $item->quantity * $item->saldo->harga;
                     } ),
-                    'mutasi-proyek'    => $categoryItemsAPB->where ( 'tipe', 'mutasi-proyek' )->sum ( function ($item)
+                    'mutasi-proyek'    => $categoryItemsAPB->where ( 'tipe', 'mutasi-proyek' )->whereNotIn ( 'status', [ 'pending', 'rejected' ] )->sum ( function ($item)
                     {
                         return $item->quantity * $item->saldo->harga;
                     } ),

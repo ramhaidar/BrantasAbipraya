@@ -22,3 +22,5 @@ yarn-error.log
 /.zed
 .envx
 /BAK
+resources/views/dashboard/laporan/bulan_berjalan/partials/table.blade copy.php
+resources/views/dashboard/laporan/bulan_berjalan/partials/table.blade copy 2.php

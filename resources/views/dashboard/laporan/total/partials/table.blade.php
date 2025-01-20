@@ -94,7 +94,7 @@
             @endphp
 
             <tr class="collapse suku-cadang subheader-row" onclick="toggleAccordion('perbaikan')">
-                <td><strong>A</strong></td>
+                <td><strong>A.</strong></td>
                 <td><strong>PERBAIKAN</strong></td>
                 <td class="text-center"><strong>Rp{{ number_format($total_perbaikan_before['atb'], 0, ',', '.') }}</strong></td>
                 <td class="text-center"><strong>Rp{{ number_format($total_perbaikan_before['apb'], 0, ',', '.') }}</strong></td>
@@ -110,8 +110,8 @@
             @foreach ($sums_current as $key => $category)
                 @if ($category['jenis'] == 'Perbaikan')
                     <tr class="collapse perbaikan">
-                        <td>{{ $key }}</td>
-                        <td>{{ $category['nama'] }}</td>
+                        <td>{{ preg_replace('/(\d+)/', '.$1', $key) }}</td>
+                        <td>{{ ucwords(strtolower($category['nama'])) }}</td>
                         <td class="text-center">Rp{{ number_format($sums_before[$key]['atb'], 0, ',', '.') }}</td>
                         <td class="text-center">Rp{{ number_format($sums_before[$key]['apb'], 0, ',', '.') }}</td>
                         <td class="text-center">Rp{{ number_format($sums_before[$key]['saldo'], 0, ',', '.') }}</td>
@@ -145,7 +145,7 @@
             @endphp
 
             <tr class="collapse suku-cadang subheader-row" onclick="toggleAccordion('pemeliharaan')">
-                <td><strong>B</strong></td>
+                <td><strong>B.</strong></td>
                 <td><strong>PEMELIHARAAN</strong></td>
                 <td class="text-center"><strong>Rp{{ number_format($total_pemeliharaan_before['atb'], 0, ',', '.') }}</strong></td>
                 <td class="text-center"><strong>Rp{{ number_format($total_pemeliharaan_before['apb'], 0, ',', '.') }}</strong></td>
@@ -157,26 +157,6 @@
                 <td class="text-center"><strong>Rp{{ number_format($total_pemeliharaan_before['apb'] + $total_pemeliharaan_current['apb'], 0, ',', '.') }}</strong></td>
                 <td class="text-center"><strong>Rp{{ number_format($total_pemeliharaan_before['saldo'] + $total_pemeliharaan_current['saldo'], 0, ',', '.') }}</strong></td>
             </tr>
-
-            @foreach ($sums_current as $key => $category)
-                @if ($category['jenis'] == 'Pemeliharaan')
-                    <tr class="collapse pemeliharaan">
-                        <td>{{ $key }}</td>
-                        <td>{{ $category['nama'] }}</td>
-                        <td class="text-center">Rp{{ number_format($sums_before[$key]['atb'], 0, ',', '.') }}</td>
-                        <td class="text-center">Rp{{ number_format($sums_before[$key]['apb'], 0, ',', '.') }}</td>
-                        <td class="text-center">Rp{{ number_format($sums_before[$key]['saldo'], 0, ',', '.') }}</td>
-
-                        <td class="text-center">Rp{{ number_format($category['atb'], 0, ',', '.') }}</td>
-                        <td class="text-center">Rp{{ number_format($category['apb'], 0, ',', '.') }}</td>
-                        <td class="text-center">Rp{{ number_format($category['saldo'], 0, ',', '.') }}</td>
-
-                        <td class="text-center">Rp{{ number_format($sums_before[$key]['atb'] + $category['atb'], 0, ',', '.') }}</td>
-                        <td class="text-center">Rp{{ number_format($sums_before[$key]['apb'] + $category['apb'], 0, ',', '.') }}</td>
-                        <td class="text-center">Rp{{ number_format($sums_before[$key]['saldo'] + $category['saldo'], 0, ',', '.') }}</td>
-                    </tr>
-                @endif
-            @endforeach
 
             @php
                 $total_maintenance_kit_before = ['atb' => 0, 'apb' => 0, 'saldo' => 0];
@@ -212,8 +192,8 @@
             @foreach ($sums_current as $key => $category)
                 @if ($category['jenis'] == 'Pemeliharaan' && $category['subJenis'] == 'MAINTENANCE KIT')
                     <tr class="collapse maintenance-kit">
-                        <td>{{ $key }}</td>
-                        <td>{{ $category['nama'] }}</td>
+                        <td>{{ implode('.', str_split($key)) }}</td>
+                        <td>{{ ucwords(strtolower($category['nama'])) }}</td>
                         <td class="text-center">Rp{{ number_format($sums_before[$key]['atb'], 0, ',', '.') }}</td>
                         <td class="text-center">Rp{{ number_format($sums_before[$key]['apb'], 0, ',', '.') }}</td>
                         <td class="text-center">Rp{{ number_format($sums_before[$key]['saldo'], 0, ',', '.') }}</td>
@@ -263,8 +243,8 @@
             @foreach ($sums_current as $key => $category)
                 @if ($category['jenis'] == 'Pemeliharaan' && $category['subJenis'] == 'OIL & LUBRICANTS')
                     <tr class="collapse oil-lubricants">
-                        <td>{{ $key }}</td>
-                        <td>{{ $category['nama'] }}</td>
+                        <td>{{ implode('.', str_split($key)) }}</td>
+                        <td>{{ ucwords(strtolower($category['nama'])) }}</td>
                         <td class="text-center">Rp{{ number_format($sums_before[$key]['atb'], 0, ',', '.') }}</td>
                         <td class="text-center">Rp{{ number_format($sums_before[$key]['apb'], 0, ',', '.') }}</td>
                         <td class="text-center">Rp{{ number_format($sums_before[$key]['saldo'], 0, ',', '.') }}</td>
@@ -320,7 +300,7 @@
 
                     <tr class="collapse material">
                         <td>{{ $key }}</td>
-                        <td>{{ $category['nama'] }}</td>
+                        <td>{{ ucwords(strtolower($category['nama'])) }}</td>
                         <td class="text-center"><strong>Rp{{ number_format($sums_before[$key]['atb'], 0, ',', '.') }}</strong></td>
                         <td class="text-center"><strong>Rp{{ number_format($sums_before[$key]['apb'], 0, ',', '.') }}</strong></td>
                         <td class="text-center"><strong>Rp{{ number_format($sums_before[$key]['saldo'], 0, ',', '.') }}</strong></td>

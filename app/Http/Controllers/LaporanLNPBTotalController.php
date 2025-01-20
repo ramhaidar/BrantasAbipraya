@@ -130,7 +130,7 @@ class LaporanLNPBTotalController extends Controller
                 {
                     return $item->quantity * $item->harga;
                 } ),
-                'apb'      => $categoryItemsAPB->sum ( function ($item)
+                'apb'      => $categoryItemsAPB->whereNotIn ( 'status', [ 'pending', 'rejected' ] )->sum ( function ($item)
                 {
                     return $item->quantity * $item->saldo->harga;
                 } ),
@@ -164,7 +164,7 @@ class LaporanLNPBTotalController extends Controller
                 {
                     return $item->quantity * $item->harga;
                 } ),
-                'apb'      => $categoryItemsAPB_Before->sum ( function ($item)
+                'apb'      => $categoryItemsAPB_Before->whereNotIn ( 'status', [ 'pending', 'rejected' ] )->sum ( function ($item)
                 {
                     return $item->quantity * $item->saldo->harga;
                 } ),

@@ -17,19 +17,28 @@ class DetailRKBGeneralController extends Controller
 {
     public function index ( $id )
     {
-        $rkb                   = RKB::with ( [ 'proyek' ] )->find ( $id );
-        $proyeks               = Proyek::orderByDesc ( 'updated_at' )->get ();
-        $master_data_alat      = MasterDataAlat::whereHas ( 'alatProyek', function ($query) use ($rkb)
+        $rkb     = RKB::with ( [ 'proyek' ] )->find ( $id );
+        $proyeks = Proyek::orderByDesc ( 'updated_at' )->get ();
+        // $master_data_alat = MasterDataAlat::whereHas ( 'alatProyek', function ($query) use ($rkb)
+        // {
+        //     $query->where ( 'id_proyek', $rkb->id_proyek );
+        // } )->get ();
+
+        // Get available tools that are assigned to the project and not removed
+        $available_alat = MasterDataAlat::whereHas ( 'alatProyek', function ($query) use ($rkb)
         {
-            $query->where ( 'id_proyek', $rkb->id_proyek );
+            $query->where ( 'id_proyek', $rkb->id_proyek )
+                ->whereNull ( 'removed_at' );
         } )->get ();
+
         $master_data_sparepart = MasterDataSparepart::all ();
         $kategori_sparepart    = KategoriSparepart::all ();
 
         return view ( 'dashboard.rkb.general.detail.detail', [ 
             'rkb'                   => $rkb,
             'proyeks'               => $proyeks,
-            'master_data_alat'      => $master_data_alat,
+            // 'master_data_alat'      => $master_data_alat,
+            'available_alat'        => $available_alat,
             'master_data_sparepart' => $master_data_sparepart,
             'kategori_sparepart'    => $kategori_sparepart,
             'headerPage'            => "RKB General",

@@ -560,6 +560,51 @@
 @push('scripts_3')
     <script></script>
     <script>
+        // Add these variables at the top with the state object
+        let isAllExpanded = false;
+
+        function toggleAll() {
+            isAllExpanded = !isAllExpanded;
+            const button = document.getElementById('toggleAllButton');
+            const icon = button.querySelector('i');
+            const text = button.querySelector('span');
+
+            icon.classList.toggle('fa-expand');
+            icon.classList.toggle('fa-compress');
+            text.textContent = isAllExpanded ? 'Collapse All' : 'Expand All';
+
+            // Toggle main sections
+            const mainSections = ['suku-cadang', 'material'];
+            mainSections.forEach(section => {
+                const rows = document.querySelectorAll(`.${section}`);
+                rows.forEach(row => {
+                    row.style.display = isAllExpanded ? 'table-row' : 'none';
+                });
+                state[section].isOpen = isAllExpanded;
+
+                // Toggle subsections
+                if (state[section].children) {
+                    toggleChildren(section, isAllExpanded);
+                }
+            });
+        }
+
+        function toggleChildren(section, isExpanded) {
+            const children = state[section].children;
+            children.forEach(child => {
+                const rows = document.querySelectorAll(`.${child}`);
+                rows.forEach(row => {
+                    row.style.display = isExpanded ? 'table-row' : 'none';
+                });
+                state[child].isOpen = isExpanded;
+
+                // Recursively toggle nested children
+                if (state[child].children) {
+                    toggleChildren(child, isExpanded);
+                }
+            });
+        }
+
         let state = {
             'suku-cadang': {
                 isOpen: false,
@@ -601,6 +646,9 @@
             } else {
                 collapseChildren(section);
             }
+
+            // Check if all sections are expanded/collapsed and update button accordingly
+            updateExpandAllButtonState();
         }
 
         function collapseChildren(section) {
@@ -625,6 +673,17 @@
                     restoreChildrenState(child);
                 }
             });
+        }
+
+        function updateExpandAllButtonState() {
+            const button = document.getElementById('toggleAllButton');
+            const allExpanded = Object.keys(state).every(section =>
+                !document.querySelectorAll(`.${section}`).length ||
+                state[section].isOpen
+            );
+
+            isAllExpanded = allExpanded;
+            button.textContent = allExpanded ? 'Collapse All' : 'Expand All';
         }
 
         $(document).ready(function() {

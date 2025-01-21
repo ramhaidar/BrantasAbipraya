@@ -455,6 +455,22 @@
     <script>
         $(document).ready(function() {
 
+            function saveSidebarState(isCollapsed) {
+                localStorage.setItem('sidebarState', isCollapsed ? 'collapsed' : 'expanded');
+            }
+
+            function loadSidebarState() {
+                const savedState = localStorage.getItem('sidebarState');
+                if (savedState === 'collapsed') {
+                    $('body').addClass('sidebar-collapse');
+                } else {
+                    $('body').removeClass('sidebar-collapse');
+                }
+                // Update UI based on loaded state
+                toggleUserPanelText($('body').hasClass('sidebar-collapse'));
+                toggleSearchInput($('body').hasClass('sidebar-collapse'));
+            }
+
             function toProperCase(text) {
                 return text.replace(/\w\S*/g, function(word) {
                     return word.charAt(0).toUpperCase() + word.substr(1).toLowerCase();
@@ -530,18 +546,22 @@
             }
 
             function handleSidebarToggle() {
+                // When sidebar is collapsed
                 $(document).on('collapsed.lte.pushmenu', function() {
                     toggleUserPanelText(true);
                     toggleSearchInput(true);
+                    saveSidebarState(true);
                 });
 
+                // When sidebar is expanded
                 $(document).on('shown.lte.pushmenu', function() {
                     toggleUserPanelText(false);
                     toggleSearchInput(false);
+                    saveSidebarState(false);
                 });
 
-                toggleUserPanelText($('body').hasClass('sidebar-collapse'));
-                toggleSearchInput($('body').hasClass('sidebar-collapse'));
+                // Load initial state
+                loadSidebarState();
             }
 
             function toggleSearchInput(isCollapsed) {
@@ -640,23 +660,19 @@
             }
 
             function handleWindowResize() {
-                window.addEventListener('resize', function() {
+                const updateSidebarForWidth = () => {
                     const documentWidth = document.documentElement.clientWidth;
                     if (documentWidth < 768) {
                         document.querySelector('body').classList.add('sidebar-collapse');
+                        saveSidebarState(true);
                     } else {
-                        // document.querySelector('body').classList.remove('sidebar-collapse');
+                        // Only restore the saved state if screen is large enough
+                        loadSidebarState();
                     }
-                });
+                };
 
-                window.addEventListener('load', function() {
-                    const documentWidth = document.documentElement.clientWidth;
-                    if (documentWidth < 768) {
-                        document.querySelector('body').classList.add('sidebar-collapse');
-                    } else {
-                        // document.querySelector('body').classList.remove('sidebar-collapse');
-                    }
-                });
+                window.addEventListener('resize', updateSidebarForWidth);
+                window.addEventListener('load', updateSidebarForWidth);
             }
 
             // Initialize functions
@@ -667,6 +683,7 @@
             handleSearchInput();
             handleScrollToActiveElement();
             handleWindowResize();
+            loadSidebarState();
         });
     </script>
 

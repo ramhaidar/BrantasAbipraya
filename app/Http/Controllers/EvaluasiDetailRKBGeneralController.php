@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use App\Models\RKB;
+use App\Models\Saldo;
+use App\Models\Proyek;
+use App\Models\SaldoProyek;
+use Illuminate\Http\Request;
+use App\Models\MasterDataAlat;
 use App\Models\DetailRKBGeneral;
 use App\Models\KategoriSparepart;
-use App\Models\MasterDataAlat;
 use App\Models\MasterDataSparepart;
-use App\Models\Proyek;
-use App\Models\RKB;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 class EvaluasiDetailRKBGeneralController extends Controller
 {
@@ -21,7 +23,7 @@ class EvaluasiDetailRKBGeneralController extends Controller
         $master_data_sparepart = MasterDataSparepart::all ();
         $kategori_sparepart    = KategoriSparepart::all ();
 
-                "master_data_sparepart.merk",
+        // Get RKB details with relationships
         $alat_detail_rkbs = RKB::where ( "tipe", "General" )
             ->findOrFail ( $id )
             ->linkAlatDetailRkbs ()
@@ -33,6 +35,17 @@ class EvaluasiDetailRKBGeneralController extends Controller
             ->orderBy ( 'id_master_data_alat' )
             ->get ();
 
+        // Get stock quantities for each sparepart in this project using existing saldos relationship
+        $stockQuantities = Saldo::where ( 'id_proyek', $rkb->id_proyek )
+            ->get ()
+            ->groupBy ( 'id_master_data_sparepart' )
+            ->map ( function ($items)
+            {
+                return $items->sum ( 'quantity' );
+            } );
+
+        // dd ( $rkb );
+
         return view ( 'dashboard.evaluasi.general.detail.detail', [ 
             'rkb'                   => $rkb,
             'proyeks'               => $proyeks,
@@ -42,6 +55,7 @@ class EvaluasiDetailRKBGeneralController extends Controller
             'alat_detail_rkbs'      => $alat_detail_rkbs,
             'headerPage'            => "Evaluasi General",
             'page'                  => 'Detail Evaluasi General',
+            'stockQuantities'       => $stockQuantities,
         ] );
     }
 

@@ -31,12 +31,29 @@
                 </tr>
             </thead>
             <tbody>
+                @php
+                    $currentPartNumber = null;
+                    $rowspan = 0;
+                    $showStock = true;
+                @endphp
                 @foreach ($alat_detail_rkbs as $alat_detail_rkb)
                     @foreach ($alat_detail_rkb->linkRkbDetails as $rkb_detail)
                         @php
                             $detail = $rkb_detail->detailRkbGeneral;
                             $sparepart = $detail->masterDataSparepart;
                             $kategori = $detail->kategoriSparepart;
+
+                            if ($currentPartNumber !== $sparepart->part_number) {
+                                $currentPartNumber = $sparepart->part_number;
+                                $rowspan = $alat_detail_rkbs
+                                    ->flatMap(function ($item) use ($currentPartNumber) {
+                                        return $item->linkRkbDetails->filter(function ($detail) use ($currentPartNumber) {
+                                            return $detail->detailRkbGeneral->masterDataSparepart->part_number === $currentPartNumber;
+                                        });
+                                    })
+                                    ->count();
+                                $showStock = true;
+                            }
                         @endphp
                         <tr>
                             <td class="text-center">{{ $alat_detail_rkb->masterDataAlat->jenis_alat ?? '-' }}</td>
@@ -53,7 +70,12 @@
                                 @endphp
                                 <input class="form-control text-center {{ $backgroundColor }}" name="quantity_approved[{{ $detail->id }}]" type="number" value="{{ $detail->quantity_approved ?? $detail->quantity_requested }}" {{ $disabled }} min="0">
                             </td>
-                            <td class="text-center">{{ $detail->quantity_in_stock ?? 0 }}</td>
+                            @if ($showStock)
+                                <td class="text-center" rowspan="{{ $rowspan }}">{{ $stockQuantities[$sparepart->id] ?? 0 }}</td>
+                                @php $showStock = false; @endphp
+                            @else
+                                <td style="display: none;">{{ $stockQuantities[$sparepart->id] ?? 0 }}</td>
+                            @endif
                             <td class="text-center">{{ $detail->satuan }}</td>
                         </tr>
                     @endforeach

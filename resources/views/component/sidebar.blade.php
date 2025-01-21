@@ -77,9 +77,9 @@
 
     <div class="form-inline mt-0 mx-0 d-flex justify-content-center">
         <div class="input-group w-100">
-            <input class="form-control w-75" id="searchProyek" aria-label="Search" placeholder="Search">
-            <button class="btn btn-sidebar w-25">
-                <i class="fas fa-fw fa-search"></i>
+            <input class="form-control w-75" id="sidebarSearchProyek" aria-label="Search" placeholder="Search">
+            <button class="btn btn-sidebar w-25" id="sidebarSearchButton">
+                <i class="fas fa-fw fa-search" id="sidebarSearchIcon"></i>
             </button>
         </div>
     </div>
@@ -545,8 +545,9 @@
             }
 
             function toggleSearchInput(isCollapsed) {
-                const searchInput = $('.input-group .form-control');
-                const searchButton = $('.input-group .btn-sidebar');
+                // Use specific IDs for sidebar elements
+                const searchInput = $('#sidebarSearchProyek');
+                const searchButton = $('#sidebarSearchButton');
 
                 if (isCollapsed) {
                     searchInput.hide();
@@ -558,7 +559,8 @@
             }
 
             function handleSearchInput() {
-                $('#searchProyek').on('keyup', function() {
+                // Use specific ID for sidebar search
+                $('#sidebarSearchProyek').on('keyup', function() {
                     var searchText = $(this).val().toLowerCase();
 
                     $('.proyek-item').each(function() {
@@ -575,11 +577,12 @@
                     toggleSearchIcon();
                 });
 
-                $('.btn.btn-sidebar').on('click', function() {
-                    var searchButtonIcon = $(this).find('i');
+                // Use specific ID for sidebar search button
+                $('#sidebarSearchButton').on('click', function() {
+                    var searchButtonIcon = $('#sidebarSearchIcon');
 
                     if (searchButtonIcon.hasClass('fa-times')) {
-                        $('#searchProyek').val('');
+                        $('#sidebarSearchProyek').val('');
                         $('.proyek-item').show();
                         toggleSearchIcon();
                     }
@@ -589,8 +592,9 @@
             }
 
             function toggleSearchIcon() {
-                var searchText = $('#searchProyek').val().trim();
-                var searchButton = $('.btn.btn-sidebar i');
+                // Use specific IDs for sidebar elements
+                var searchText = $('#sidebarSearchProyek').val().trim();
+                var searchButton = $('#sidebarSearchIcon');
 
                 if (searchText.length > 0) {
                     searchButton.removeClass('fa-search').addClass('fa-times');

@@ -23,9 +23,9 @@
             <tr>
                 <th class="border-dark" rowspan="2">NO.</th>
                 <th class="border-dark" rowspan="2">U R A I A N</th>
-                <th class="border-dark" colspan="3">S/D BULAN LALU</th>
-                <th class="border-dark" colspan="3">BULAN INI</th>
-                <th class="border-dark" colspan="3">S/D BULAN INI</th>
+                <th class="border-dark" colspan="3">S/D BULAN LALU (RP)</th>
+                <th class="border-dark" colspan="3">BULAN INI (RP)</th>
+                <th class="border-dark" colspan="3">S/D BULAN INI (RP)</th>
             </tr>
             <tr>
                 <th class="border-dark">PENERIMAAN</th>
@@ -65,15 +65,15 @@
             <tr class="header-row accordion-header" onclick="toggleAccordion('suku-cadang')">
                 <td><strong>I</strong></td>
                 <td><strong>SUKU CADANG</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($suku_cadang_before['atb'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($suku_cadang_before['apb'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($suku_cadang_before['saldo'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($suku_cadang_current['atb'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($suku_cadang_current['apb'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($suku_cadang_current['saldo'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($suku_cadang_before['atb'] + $suku_cadang_current['atb'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($suku_cadang_before['apb'] + $suku_cadang_current['apb'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($suku_cadang_before['saldo'] + $suku_cadang_current['saldo'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($suku_cadang_before['atb'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($suku_cadang_before['apb'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($suku_cadang_before['saldo'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($suku_cadang_current['atb'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($suku_cadang_current['apb'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($suku_cadang_current['saldo'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($suku_cadang_before['atb'] + $suku_cadang_current['atb'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($suku_cadang_before['apb'] + $suku_cadang_current['apb'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($suku_cadang_before['saldo'] + $suku_cadang_current['saldo'], 0, ',', '.') }}</strong></td>
             </tr>
 
             @php
@@ -96,15 +96,15 @@
             <tr class="collapse suku-cadang subheader-row" onclick="toggleAccordion('perbaikan')">
                 <td><strong>A.</strong></td>
                 <td><strong>PERBAIKAN</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($total_perbaikan_before['atb'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($total_perbaikan_before['apb'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($total_perbaikan_before['saldo'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($total_perbaikan_current['atb'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($total_perbaikan_current['apb'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($total_perbaikan_current['saldo'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($total_perbaikan_before['atb'] + $total_perbaikan_current['atb'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($total_perbaikan_before['apb'] + $total_perbaikan_current['apb'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($total_perbaikan_before['saldo'] + $total_perbaikan_current['saldo'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($total_perbaikan_before['atb'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($total_perbaikan_before['apb'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($total_perbaikan_before['saldo'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($total_perbaikan_current['atb'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($total_perbaikan_current['apb'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($total_perbaikan_current['saldo'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($total_perbaikan_before['atb'] + $total_perbaikan_current['atb'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($total_perbaikan_before['apb'] + $total_perbaikan_current['apb'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($total_perbaikan_before['saldo'] + $total_perbaikan_current['saldo'], 0, ',', '.') }}</strong></td>
             </tr>
 
             @foreach ($sums_current as $key => $category)
@@ -112,17 +112,17 @@
                     <tr class="collapse perbaikan">
                         <td>{{ preg_replace('/(\d+)/', '.$1', $key) }}</td>
                         <td>{{ ucwords(strtolower($category['nama'])) }}</td>
-                        <td class="text-center">Rp{{ number_format($sums_before[$key]['atb'], 0, ',', '.') }}</td>
-                        <td class="text-center">Rp{{ number_format($sums_before[$key]['apb'], 0, ',', '.') }}</td>
-                        <td class="text-center">Rp{{ number_format($sums_before[$key]['saldo'], 0, ',', '.') }}</td>
+                        <td class="text-center">{{ number_format($sums_before[$key]['atb'], 0, ',', '.') }}</td>
+                        <td class="text-center">{{ number_format($sums_before[$key]['apb'], 0, ',', '.') }}</td>
+                        <td class="text-center">{{ number_format($sums_before[$key]['saldo'], 0, ',', '.') }}</td>
 
-                        <td class="text-center">Rp{{ number_format($category['atb'], 0, ',', '.') }}</td>
-                        <td class="text-center">Rp{{ number_format($category['apb'], 0, ',', '.') }}</td>
-                        <td class="text-center">Rp{{ number_format($category['saldo'], 0, ',', '.') }}</td>
+                        <td class="text-center">{{ number_format($category['atb'], 0, ',', '.') }}</td>
+                        <td class="text-center">{{ number_format($category['apb'], 0, ',', '.') }}</td>
+                        <td class="text-center">{{ number_format($category['saldo'], 0, ',', '.') }}</td>
 
-                        <td class="text-center">Rp{{ number_format($sums_before[$key]['atb'] + $category['atb'], 0, ',', '.') }}</td>
-                        <td class="text-center">Rp{{ number_format($sums_before[$key]['apb'] + $category['apb'], 0, ',', '.') }}</td>
-                        <td class="text-center">Rp{{ number_format($sums_before[$key]['saldo'] + $category['saldo'], 0, ',', '.') }}</td>
+                        <td class="text-center">{{ number_format($sums_before[$key]['atb'] + $category['atb'], 0, ',', '.') }}</td>
+                        <td class="text-center">{{ number_format($sums_before[$key]['apb'] + $category['apb'], 0, ',', '.') }}</td>
+                        <td class="text-center">{{ number_format($sums_before[$key]['saldo'] + $category['saldo'], 0, ',', '.') }}</td>
                     </tr>
                 @endif
             @endforeach
@@ -147,15 +147,15 @@
             <tr class="collapse suku-cadang subheader-row" onclick="toggleAccordion('pemeliharaan')">
                 <td><strong>B.</strong></td>
                 <td><strong>PEMELIHARAAN</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($total_pemeliharaan_before['atb'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($total_pemeliharaan_before['apb'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($total_pemeliharaan_before['saldo'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($total_pemeliharaan_current['atb'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($total_pemeliharaan_current['apb'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($total_pemeliharaan_current['saldo'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($total_pemeliharaan_before['atb'] + $total_pemeliharaan_current['atb'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($total_pemeliharaan_before['apb'] + $total_pemeliharaan_current['apb'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($total_pemeliharaan_before['saldo'] + $total_pemeliharaan_current['saldo'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($total_pemeliharaan_before['atb'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($total_pemeliharaan_before['apb'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($total_pemeliharaan_before['saldo'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($total_pemeliharaan_current['atb'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($total_pemeliharaan_current['apb'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($total_pemeliharaan_current['saldo'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($total_pemeliharaan_before['atb'] + $total_pemeliharaan_current['atb'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($total_pemeliharaan_before['apb'] + $total_pemeliharaan_current['apb'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($total_pemeliharaan_before['saldo'] + $total_pemeliharaan_current['saldo'], 0, ',', '.') }}</strong></td>
             </tr>
 
             @php
@@ -178,15 +178,15 @@
             <tr class="collapse pemeliharaan subheader-row" onclick="toggleAccordion('maintenance-kit')">
                 <td><strong>B.1</strong></td>
                 <td><strong>Maintenance Kit</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($total_maintenance_kit_before['atb'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($total_maintenance_kit_before['apb'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($total_maintenance_kit_before['saldo'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($total_maintenance_kit_current['atb'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($total_maintenance_kit_current['apb'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($total_maintenance_kit_current['saldo'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($total_maintenance_kit_before['atb'] + $total_maintenance_kit_current['atb'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($total_maintenance_kit_before['apb'] + $total_maintenance_kit_current['apb'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($total_maintenance_kit_before['saldo'] + $total_maintenance_kit_current['saldo'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($total_maintenance_kit_before['atb'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($total_maintenance_kit_before['apb'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($total_maintenance_kit_before['saldo'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($total_maintenance_kit_current['atb'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($total_maintenance_kit_current['apb'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($total_maintenance_kit_current['saldo'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($total_maintenance_kit_before['atb'] + $total_maintenance_kit_current['atb'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($total_maintenance_kit_before['apb'] + $total_maintenance_kit_current['apb'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($total_maintenance_kit_before['saldo'] + $total_maintenance_kit_current['saldo'], 0, ',', '.') }}</strong></td>
             </tr>
 
             @foreach ($sums_current as $key => $category)
@@ -194,17 +194,17 @@
                     <tr class="collapse maintenance-kit">
                         <td>{{ implode('.', str_split($key)) }}</td>
                         <td>{{ ucwords(strtolower($category['nama'])) }}</td>
-                        <td class="text-center">Rp{{ number_format($sums_before[$key]['atb'], 0, ',', '.') }}</td>
-                        <td class="text-center">Rp{{ number_format($sums_before[$key]['apb'], 0, ',', '.') }}</td>
-                        <td class="text-center">Rp{{ number_format($sums_before[$key]['saldo'], 0, ',', '.') }}</td>
+                        <td class="text-center">{{ number_format($sums_before[$key]['atb'], 0, ',', '.') }}</td>
+                        <td class="text-center">{{ number_format($sums_before[$key]['apb'], 0, ',', '.') }}</td>
+                        <td class="text-center">{{ number_format($sums_before[$key]['saldo'], 0, ',', '.') }}</td>
 
-                        <td class="text-center">Rp{{ number_format($category['atb'], 0, ',', '.') }}</td>
-                        <td class="text-center">Rp{{ number_format($category['apb'], 0, ',', '.') }}</td>
-                        <td class="text-center">Rp{{ number_format($category['saldo'], 0, ',', '.') }}</td>
+                        <td class="text-center">{{ number_format($category['atb'], 0, ',', '.') }}</td>
+                        <td class="text-center">{{ number_format($category['apb'], 0, ',', '.') }}</td>
+                        <td class="text-center">{{ number_format($category['saldo'], 0, ',', '.') }}</td>
 
-                        <td class="text-center">Rp{{ number_format($sums_before[$key]['atb'] + $category['atb'], 0, ',', '.') }}</td>
-                        <td class="text-center">Rp{{ number_format($sums_before[$key]['apb'] + $category['apb'], 0, ',', '.') }}</td>
-                        <td class="text-center">Rp{{ number_format($sums_before[$key]['saldo'] + $category['saldo'], 0, ',', '.') }}</td>
+                        <td class="text-center">{{ number_format($sums_before[$key]['atb'] + $category['atb'], 0, ',', '.') }}</td>
+                        <td class="text-center">{{ number_format($sums_before[$key]['apb'] + $category['apb'], 0, ',', '.') }}</td>
+                        <td class="text-center">{{ number_format($sums_before[$key]['saldo'] + $category['saldo'], 0, ',', '.') }}</td>
                     </tr>
                 @endif
             @endforeach
@@ -229,15 +229,15 @@
             <tr class="collapse pemeliharaan subheader-row" onclick="toggleAccordion('oil-lubricants')">
                 <td><strong>B.2</strong></td>
                 <td><strong>Oil & Lubricants</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($total_oil_lubricants_before['atb'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($total_oil_lubricants_before['apb'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($total_oil_lubricants_before['saldo'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($total_oil_lubricants_current['atb'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($total_oil_lubricants_current['apb'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($total_oil_lubricants_current['saldo'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($total_oil_lubricants_before['atb'] + $total_oil_lubricants_current['atb'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($total_oil_lubricants_before['apb'] + $total_oil_lubricants_current['apb'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($total_oil_lubricants_before['saldo'] + $total_oil_lubricants_current['saldo'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($total_oil_lubricants_before['atb'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($total_oil_lubricants_before['apb'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($total_oil_lubricants_before['saldo'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($total_oil_lubricants_current['atb'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($total_oil_lubricants_current['apb'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($total_oil_lubricants_current['saldo'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($total_oil_lubricants_before['atb'] + $total_oil_lubricants_current['atb'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($total_oil_lubricants_before['apb'] + $total_oil_lubricants_current['apb'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($total_oil_lubricants_before['saldo'] + $total_oil_lubricants_current['saldo'], 0, ',', '.') }}</strong></td>
             </tr>
 
             @foreach ($sums_current as $key => $category)
@@ -245,17 +245,17 @@
                     <tr class="collapse oil-lubricants">
                         <td>{{ implode('.', str_split($key)) }}</td>
                         <td>{{ ucwords(strtolower($category['nama'])) }}</td>
-                        <td class="text-center">Rp{{ number_format($sums_before[$key]['atb'], 0, ',', '.') }}</td>
-                        <td class="text-center">Rp{{ number_format($sums_before[$key]['apb'], 0, ',', '.') }}</td>
-                        <td class="text-center">Rp{{ number_format($sums_before[$key]['saldo'], 0, ',', '.') }}</td>
+                        <td class="text-center">{{ number_format($sums_before[$key]['atb'], 0, ',', '.') }}</td>
+                        <td class="text-center">{{ number_format($sums_before[$key]['apb'], 0, ',', '.') }}</td>
+                        <td class="text-center">{{ number_format($sums_before[$key]['saldo'], 0, ',', '.') }}</td>
 
-                        <td class="text-center">Rp{{ number_format($category['atb'], 0, ',', '.') }}</td>
-                        <td class="text-center">Rp{{ number_format($category['apb'], 0, ',', '.') }}</td>
-                        <td class="text-center">Rp{{ number_format($category['saldo'], 0, ',', '.') }}</td>
+                        <td class="text-center">{{ number_format($category['atb'], 0, ',', '.') }}</td>
+                        <td class="text-center">{{ number_format($category['apb'], 0, ',', '.') }}</td>
+                        <td class="text-center">{{ number_format($category['saldo'], 0, ',', '.') }}</td>
 
-                        <td class="text-center">Rp{{ number_format($sums_before[$key]['atb'] + $category['atb'], 0, ',', '.') }}</td>
-                        <td class="text-center">Rp{{ number_format($sums_before[$key]['apb'] + $category['apb'], 0, ',', '.') }}</td>
-                        <td class="text-center">Rp{{ number_format($sums_before[$key]['saldo'] + $category['saldo'], 0, ',', '.') }}</td>
+                        <td class="text-center">{{ number_format($sums_before[$key]['atb'] + $category['atb'], 0, ',', '.') }}</td>
+                        <td class="text-center">{{ number_format($sums_before[$key]['apb'] + $category['apb'], 0, ',', '.') }}</td>
+                        <td class="text-center">{{ number_format($sums_before[$key]['saldo'] + $category['saldo'], 0, ',', '.') }}</td>
                     </tr>
                 @endif
             @endforeach
@@ -265,17 +265,17 @@
                     <tr class="collapse pemeliharaan">
                         <td><strong>{{ $key }}</strong></td>
                         <td><strong>{{ $category['nama'] }}</strong></td>
-                        <td class="text-center"><strong>Rp{{ number_format($sums_before[$key]['atb'], 0, ',', '.') }}</strong></td>
-                        <td class="text-center"><strong>Rp{{ number_format($sums_before[$key]['apb'], 0, ',', '.') }}</strong></td>
-                        <td class="text-center"><strong>Rp{{ number_format($sums_before[$key]['saldo'], 0, ',', '.') }}</strong></td>
+                        <td class="text-center"><strong>{{ number_format($sums_before[$key]['atb'], 0, ',', '.') }}</strong></td>
+                        <td class="text-center"><strong>{{ number_format($sums_before[$key]['apb'], 0, ',', '.') }}</strong></td>
+                        <td class="text-center"><strong>{{ number_format($sums_before[$key]['saldo'], 0, ',', '.') }}</strong></td>
 
-                        <td class="text-center"><strong>Rp{{ number_format($category['atb'], 0, ',', '.') }}</strong></td>
-                        <td class="text-center"><strong>Rp{{ number_format($category['apb'], 0, ',', '.') }}</strong></td>
-                        <td class="text-center"><strong>Rp{{ number_format($category['saldo'], 0, ',', '.') }}</strong></td>
+                        <td class="text-center"><strong>{{ number_format($category['atb'], 0, ',', '.') }}</strong></td>
+                        <td class="text-center"><strong>{{ number_format($category['apb'], 0, ',', '.') }}</strong></td>
+                        <td class="text-center"><strong>{{ number_format($category['saldo'], 0, ',', '.') }}</strong></td>
 
-                        <td class="text-center"><strong>Rp{{ number_format($sums_before[$key]['atb'] + $category['atb'], 0, ',', '.') }}</strong></td>
-                        <td class="text-center"><strong>Rp{{ number_format($sums_before[$key]['apb'] + $category['apb'], 0, ',', '.') }}</strong></td>
-                        <td class="text-center"><strong>Rp{{ number_format($sums_before[$key]['saldo'] + $category['saldo'], 0, ',', '.') }}</strong></td>
+                        <td class="text-center"><strong>{{ number_format($sums_before[$key]['atb'] + $category['atb'], 0, ',', '.') }}</strong></td>
+                        <td class="text-center"><strong>{{ number_format($sums_before[$key]['apb'] + $category['apb'], 0, ',', '.') }}</strong></td>
+                        <td class="text-center"><strong>{{ number_format($sums_before[$key]['saldo'] + $category['saldo'], 0, ',', '.') }}</strong></td>
                     </tr>
                 @endif
             @endforeach
@@ -285,33 +285,33 @@
                     <tr class="header-row" onclick="toggleAccordion('material')">
                         <td><strong>II</strong></td>
                         <td><strong>MATERIAL</strong></td>
-                        <td class="text-center"><strong>Rp{{ number_format($sums_before[$key]['atb'], 0, ',', '.') }}</strong></td>
-                        <td class="text-center"><strong>Rp{{ number_format($sums_before[$key]['apb'], 0, ',', '.') }}</strong></td>
-                        <td class="text-center"><strong>Rp{{ number_format($sums_before[$key]['saldo'], 0, ',', '.') }}</strong></td>
+                        <td class="text-center"><strong>{{ number_format($sums_before[$key]['atb'], 0, ',', '.') }}</strong></td>
+                        <td class="text-center"><strong>{{ number_format($sums_before[$key]['apb'], 0, ',', '.') }}</strong></td>
+                        <td class="text-center"><strong>{{ number_format($sums_before[$key]['saldo'], 0, ',', '.') }}</strong></td>
 
-                        <td class="text-center"><strong>Rp{{ number_format($category['atb'], 0, ',', '.') }}</strong></td>
-                        <td class="text-center"><strong>Rp{{ number_format($category['apb'], 0, ',', '.') }}</strong></td>
-                        <td class="text-center"><strong>Rp{{ number_format($category['saldo'], 0, ',', '.') }}</strong></td>
+                        <td class="text-center"><strong>{{ number_format($category['atb'], 0, ',', '.') }}</strong></td>
+                        <td class="text-center"><strong>{{ number_format($category['apb'], 0, ',', '.') }}</strong></td>
+                        <td class="text-center"><strong>{{ number_format($category['saldo'], 0, ',', '.') }}</strong></td>
 
-                        <td class="text-center"><strong>Rp{{ number_format($sums_before[$key]['atb'] + $category['atb'], 0, ',', '.') }}</strong></td>
-                        <td class="text-center"><strong>Rp{{ number_format($sums_before[$key]['apb'] + $category['apb'], 0, ',', '.') }}</strong></td>
-                        <td class="text-center"><strong>Rp{{ number_format($sums_before[$key]['saldo'] + $category['saldo'], 0, ',', '.') }}</strong></td>
+                        <td class="text-center"><strong>{{ number_format($sums_before[$key]['atb'] + $category['atb'], 0, ',', '.') }}</strong></td>
+                        <td class="text-center"><strong>{{ number_format($sums_before[$key]['apb'] + $category['apb'], 0, ',', '.') }}</strong></td>
+                        <td class="text-center"><strong>{{ number_format($sums_before[$key]['saldo'] + $category['saldo'], 0, ',', '.') }}</strong></td>
                     </tr>
 
                     <tr class="collapse material">
                         <td>{{ $key }}</td>
                         <td>{{ ucwords(strtolower($category['nama'])) }}</td>
-                        <td class="text-center"><strong>Rp{{ number_format($sums_before[$key]['atb'], 0, ',', '.') }}</strong></td>
-                        <td class="text-center"><strong>Rp{{ number_format($sums_before[$key]['apb'], 0, ',', '.') }}</strong></td>
-                        <td class="text-center"><strong>Rp{{ number_format($sums_before[$key]['saldo'], 0, ',', '.') }}</strong></td>
+                        <td class="text-center"><strong>{{ number_format($sums_before[$key]['atb'], 0, ',', '.') }}</strong></td>
+                        <td class="text-center"><strong>{{ number_format($sums_before[$key]['apb'], 0, ',', '.') }}</strong></td>
+                        <td class="text-center"><strong>{{ number_format($sums_before[$key]['saldo'], 0, ',', '.') }}</strong></td>
 
-                        <td class="text-center"><strong>Rp{{ number_format($category['atb'], 0, ',', '.') }}</strong></td>
-                        <td class="text-center"><strong>Rp{{ number_format($category['apb'], 0, ',', '.') }}</strong></td>
-                        <td class="text-center"><strong>Rp{{ number_format($category['saldo'], 0, ',', '.') }}</strong></td>
+                        <td class="text-center"><strong>{{ number_format($category['atb'], 0, ',', '.') }}</strong></td>
+                        <td class="text-center"><strong>{{ number_format($category['apb'], 0, ',', '.') }}</strong></td>
+                        <td class="text-center"><strong>{{ number_format($category['saldo'], 0, ',', '.') }}</strong></td>
 
-                        <td class="text-center"><strong>Rp{{ number_format($sums_before[$key]['atb'] + $category['atb'], 0, ',', '.') }}</strong></td>
-                        <td class="text-center"><strong>Rp{{ number_format($sums_before[$key]['apb'] + $category['apb'], 0, ',', '.') }}</strong></td>
-                        <td class="text-center"><strong>Rp{{ number_format($sums_before[$key]['saldo'] + $category['saldo'], 0, ',', '.') }}</strong></td>
+                        <td class="text-center"><strong>{{ number_format($sums_before[$key]['atb'] + $category['atb'], 0, ',', '.') }}</strong></td>
+                        <td class="text-center"><strong>{{ number_format($sums_before[$key]['apb'] + $category['apb'], 0, ',', '.') }}</strong></td>
+                        <td class="text-center"><strong>{{ number_format($sums_before[$key]['saldo'] + $category['saldo'], 0, ',', '.') }}</strong></td>
                     </tr>
                 @endif
             @endforeach
@@ -337,15 +337,15 @@
 
             <tr class="border-dark">
                 <td class="text-center" colspan="2"><strong>TOTAL</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($grand_total_before['atb'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($grand_total_before['apb'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($grand_total_before['saldo'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($grand_total_current['atb'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($grand_total_current['apb'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($grand_total_current['saldo'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($grand_total_before['atb'] + $grand_total_current['atb'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($grand_total_before['apb'] + $grand_total_current['apb'], 0, ',', '.') }}</strong></td>
-                <td class="text-center"><strong>Rp{{ number_format($grand_total_before['saldo'] + $grand_total_current['saldo'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($grand_total_before['atb'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($grand_total_before['apb'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($grand_total_before['saldo'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($grand_total_current['atb'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($grand_total_current['apb'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($grand_total_current['saldo'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($grand_total_before['atb'] + $grand_total_current['atb'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($grand_total_before['apb'] + $grand_total_current['apb'], 0, ',', '.') }}</strong></td>
+                <td class="text-center"><strong>{{ number_format($grand_total_before['saldo'] + $grand_total_current['saldo'], 0, ',', '.') }}</strong></td>
             </tr>
         </tfoot>
     </table>

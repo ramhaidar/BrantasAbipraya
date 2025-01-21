@@ -23,12 +23,12 @@
             <tr>
                 <th class="border-dark" rowspan="2">NO.</th>
                 <th class="border-dark" rowspan="2">U R A I A N</th>
-                <th class="border-dark" colspan="4">PENERIMAAN (Rp)</th>
-                <th class="border-dark" rowspan="2">T O T A L<br>PENERIMAAN<br>(Rp)</th>
-                <th class="border-dark" colspan="4">PENGELUARAN (Rp)</th>
-                <th class="border-dark" rowspan="2">T O T A L<br>PENGELUARAN<br>(Rp)</th>
-                <th class="border-dark" colspan="4">SALDO (Rp)</th>
-                <th class="border-dark" rowspan="2">T O T A L<BR>SALDO<br>(Rp)</th>
+                <th class="border-dark" colspan="4">PENERIMAAN (RP)</th>
+                <th class="border-dark" rowspan="2">T O T A L<br>PENERIMAAN<br>(RP)</th>
+                <th class="border-dark" colspan="4">PENGELUARAN (RP)</th>
+                <th class="border-dark" rowspan="2">T O T A L<br>PENGELUARAN<br>(RP)</th>
+                <th class="border-dark" colspan="4">SALDO (RP)</th>
+                <th class="border-dark" rowspan="2">T O T A L<BR>SALDO<br>(RP)</th>
             </tr>
             <tr>
                 <th class="border-dark">HUTANG UNIT ALAT</th>

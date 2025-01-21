@@ -7,7 +7,6 @@
 
         #table-data td,
         #table-data th {
-            /* padding: 4px 8px; */
             vertical-align: middle;
         }
     </style>
@@ -32,32 +31,35 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($details as $item)
-                    <tr>
-                        <td class="text-center">{{ $item->master_data_alat ?? '-' }}</td>
-                        <td class="text-center">{{ $item->kode_alat ?? '-' }}</td>
-                        <td class="text-center">{{ $item->kategori_sparepart ?? '-' }}</td>
-                        <td class="text-center">{{ $item->sparepart_nama ?? '-' }}</td>
-                        <td class="text-center">{{ $item->part_number ?? '-' }}</td>
-                        <td class="text-center">{{ $item->merk ?? '-' }}</td>
-                        <td class="text-center">{{ $item->quantity_requested }}</td>
-                        <td class="text-center">
-                            @php
-                                $backgroundColor = $rkb->is_approved ? 'bg-primary-subtle' : ($item->quantity_approved !== null ? 'bg-success-subtle' : 'bg-warning-subtle');
-                                $disabled = $rkb->is_approved || $rkb->is_evaluated ? 'disabled' : '';
-                            @endphp
-                            <input class="form-control text-center {{ $backgroundColor }}" name="quantity_approved[{{ $item->id }}]" type="number" value="{{ $item->quantity_approved ?? $item->quantity_requested }}" {{ $disabled }} min="0">
-                        </td>
-                        <td class="text-center">{{ $item->quantity_in_stock ?? 0 }}</td>
-                        <td class="text-center">{{ $item->satuan }}</td>
-                    </tr>
+                @foreach ($alat_detail_rkbs as $alat_detail_rkb)
+                    @foreach ($alat_detail_rkb->linkRkbDetails as $rkb_detail)
+                        @php
+                            $detail = $rkb_detail->detailRkbGeneral;
+                            $sparepart = $detail->masterDataSparepart;
+                            $kategori = $detail->kategoriSparepart;
+                        @endphp
+                        <tr>
+                            <td class="text-center">{{ $alat_detail_rkb->masterDataAlat->jenis_alat ?? '-' }}</td>
+                            <td class="text-center">{{ $alat_detail_rkb->masterDataAlat->kode_alat ?? '-' }}</td>
+                            <td class="text-center">{{ $kategori ? "{$kategori->kode}: {$kategori->nama}" : '-' }}</td>
+                            <td class="text-center">{{ $sparepart->nama ?? '-' }}</td>
+                            <td class="text-center">{{ $sparepart->part_number ?? '-' }}</td>
+                            <td class="text-center">{{ $sparepart->merk ?? '-' }}</td>
+                            <td class="text-center">{{ $detail->quantity_requested }}</td>
+                            <td class="text-center">
+                                @php
+                                    $backgroundColor = $rkb->is_approved ? 'bg-primary-subtle' : ($detail->quantity_approved !== null ? 'bg-success-subtle' : 'bg-warning-subtle');
+                                    $disabled = $rkb->is_approved || $rkb->is_evaluated ? 'disabled' : '';
+                                @endphp
+                                <input class="form-control text-center {{ $backgroundColor }}" name="quantity_approved[{{ $detail->id }}]" type="number" value="{{ $detail->quantity_approved ?? $detail->quantity_requested }}" {{ $disabled }} min="0">
+                            </td>
+                            <td class="text-center">{{ $detail->quantity_in_stock ?? 0 }}</td>
+                            <td class="text-center">{{ $detail->satuan }}</td>
+                        </tr>
+                    @endforeach
                 @endforeach
             </tbody>
         </table>
-    </div>
-
-    <div class="d-flex justify-content-end mt-3">
-        {{ $details->links() }}
     </div>
 
     <button class="btn btn-success btn-sm approveBtn" id="hiddenApproveRkbButton" type="submit" hidden></button>

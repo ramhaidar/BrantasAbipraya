@@ -15,59 +15,33 @@ class EvaluasiDetailRKBGeneralController extends Controller
 {
     public function index ( $id )
     {
-        $rkb                   = RKB::with ( [ "proyek" ] )->find ( $id );
-        $proyeks               = Proyek::orderByDesc ( "updated_at" )->get ();
+        $rkb                   = RKB::with ( [ 'proyek' ] )->find ( $id );
+        $proyeks               = Proyek::orderByDesc ( 'updated_at' )->get ();
         $master_data_alat      = MasterDataAlat::all ();
         $master_data_sparepart = MasterDataSparepart::all ();
         $kategori_sparepart    = KategoriSparepart::all ();
 
-        $details = DetailRKBGeneral::query ()
-            ->select ( [ 
-                "detail_rkb_general.*",
-                "kategori_sparepart.kode as kategori_sparepart_kode",
-                "kategori_sparepart.nama as kategori_sparepart_nama",
-                "master_data_sparepart.nama as sparepart_nama",
-                "master_data_sparepart.part_number",
                 "master_data_sparepart.merk",
+        $alat_detail_rkbs = RKB::where ( "tipe", "General" )
+            ->findOrFail ( $id )
+            ->linkAlatDetailRkbs ()
+            ->with ( [ 
+                'masterDataAlat',
+                'linkRkbDetails.detailRkbGeneral.kategoriSparepart',
+                'linkRkbDetails.detailRkbGeneral.masterDataSparepart',
             ] )
-            ->leftJoin ( "kategori_sparepart", "detail_rkb_general.id_kategori_sparepart_sparepart", "=", "kategori_sparepart.id" )
-            ->leftJoin ( "master_data_sparepart", "detail_rkb_general.id_master_data_sparepart", "=", "master_data_sparepart.id" )
-            ->whereHas ( "linkRkbDetails.linkAlatDetailRkb.rkb", function ($q) use ($id)
-            {
-                $q->where ( "id", $id );
-            } )
-            ->orderBy ( "master_data_sparepart.part_number", "asc" )
-            ->paginate ( 100 );
+            ->orderBy ( 'id_master_data_alat' )
+            ->get ();
 
-        // Transform the data with original names
-        $details->getCollection ()->transform ( function ($item)
-        {
-            $alat = optional ( optional ( $item->linkRkbDetails->first () )->linkAlatDetailRkb->masterDataAlat );
-
-            return (object) [ 
-                'id'                 => $item->id,
-                'master_data_alat'   => $alat->jenis_alat ?? "-",
-                'kode_alat'          => $alat->kode_alat ?? "-",
-                'kategori_sparepart' => ( $item->kategori_sparepart_kode ? "{$item->kategori_sparepart_kode}: " : "" ) . ( $item->kategori_sparepart_nama ?? "-" ),
-                'sparepart_nama'     => $item->sparepart_nama ?? "-",
-                'part_number'        => $item->part_number ?? "-",
-                'merk'               => $item->merk ?? "-",
-                'quantity_requested' => $item->quantity_requested,
-                'quantity_approved'  => $item->quantity_approved,
-                'quantity_in_stock'  => $item->quantity_in_stock ?? 0,
-                'satuan'             => $item->satuan
-            ];
-        } );
-
-        return view ( "dashboard.evaluasi.general.detail.detail", [ 
-            "rkb"                   => $rkb,
-            "details"               => $details,
-            "proyeks"               => $proyeks,
-            "master_data_alat"      => $master_data_alat,
-            "master_data_sparepart" => $master_data_sparepart,
-            "kategori_sparepart"    => $kategori_sparepart,
-            "headerPage"            => "Evaluasi General",
-            "page"                  => "Detail Evaluasi General",
+        return view ( 'dashboard.evaluasi.general.detail.detail', [ 
+            'rkb'                   => $rkb,
+            'proyeks'               => $proyeks,
+            'master_data_alat'      => $master_data_alat,
+            'master_data_sparepart' => $master_data_sparepart,
+            'kategori_sparepart'    => $kategori_sparepart,
+            'alat_detail_rkbs'      => $alat_detail_rkbs,
+            'headerPage'            => "Evaluasi General",
+            'page'                  => 'Detail Evaluasi General',
         ] );
     }
 

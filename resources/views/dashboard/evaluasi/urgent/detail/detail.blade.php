@@ -14,14 +14,16 @@
                         </div>
                         <div class="d-flex justify-content-end gap-2">
                             <!-- Tombol Evaluasi -->
-                            @if ($rkb->is_evaluated)
-                                <button class="btn btn-danger btn-sm" id="evaluateBtnButton" data-bs-toggle="modal" data-bs-target="#modalForEvaluate" data-action="{{ route('evaluasi_rkb_urgent.detail.evaluate', $rkb->id) }}" data-message="Apakah Anda yakin ingin membatalkan hasil Evaluasi RKB ini?">
-                                    <i class="fa fa-check"></i> <span class="ms-2">Batalkan Evaluasi RKB</span>
-                                </button>
-                            @else
-                                <button class="btn btn-success btn-sm" id="evaluateBtnButton" data-bs-toggle="modal" data-bs-target="#modalForEvaluate" data-action="{{ route('evaluasi_rkb_urgent.detail.evaluate', $rkb->id) }}" data-message="Apakah Anda yakin ingin menyimpan hasil Evaluasi RKB ini?">
-                                    <i class="fa fa-check"></i> <span class="ms-2">Simpan Evaluasi RKB</span>
-                                </button>
+                            @if (!$rkb->is_approved)
+                                @if ($rkb->is_evaluated)
+                                    <button class="btn btn-danger btn-sm" id="evaluateBtnButton" data-bs-toggle="modal" data-bs-target="#modalForEvaluate" data-action="{{ route('evaluasi_rkb_urgent.detail.evaluate', $rkb->id) }}" data-message="Apakah Anda yakin ingin membatalkan hasil Evaluasi RKB ini?">
+                                        <i class="fa fa-check"></i> <span class="ms-2">Batalkan Evaluasi RKB</span>
+                                    </button>
+                                @else
+                                    <button class="btn btn-success btn-sm" id="evaluateBtnButton" data-bs-toggle="modal" data-bs-target="#modalForEvaluate" data-action="{{ route('evaluasi_rkb_urgent.detail.evaluate', $rkb->id) }}" data-message="Apakah Anda yakin ingin menyimpan hasil Evaluasi RKB ini?">
+                                        <i class="fa fa-check"></i> <span class="ms-2">Simpan Evaluasi RKB</span>
+                                    </button>
+                                @endif
                             @endif
 
                             <!-- Tombol Approve -->

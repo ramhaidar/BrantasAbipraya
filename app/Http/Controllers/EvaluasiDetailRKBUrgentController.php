@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\RKB;
+use App\Models\Saldo;
 use App\Models\Proyek;
 use Illuminate\Http\Request;
 use App\Models\MasterDataAlat;
@@ -37,6 +38,15 @@ class EvaluasiDetailRKBUrgentController extends Controller
             ->orderBy ( 'id_master_data_alat' )
             ->get ();
 
+        // Add this code to get stock quantities
+        $stockQuantities = Saldo::where ( 'id_proyek', $rkb->id_proyek )
+            ->get ()
+            ->groupBy ( 'id_master_data_sparepart' )
+            ->map ( function ($items)
+            {
+                return $items->sum ( 'quantity' );
+            } );
+
         return view ( 'dashboard.evaluasi.urgent.detail.detail', [ 
             'rkb'                   => $rkb,
             'proyeks'               => $proyeks,
@@ -46,6 +56,7 @@ class EvaluasiDetailRKBUrgentController extends Controller
             'alat_detail_rkbs'      => $alat_detail_rkbs,
             'headerPage'            => "Evaluasi Urgent",
             'page'                  => 'Detail Evaluasi Urgent',
+            'stockQuantities'       => $stockQuantities, // Add this line
         ] );
     }
 

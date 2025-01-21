@@ -33,7 +33,7 @@
                 <th class="text-center">Quantity</th>
                 <th class="text-center">Satuan</th>
                 <th class="text-center">Harga</th>
-                <th class="text-center">Net</th>
+                <th class="text-center">Jumlah Harga</th>
                 <th class="text-center">Dokumentasi</th>
                 <th class="text-center">Aksi</th>
             </tr>

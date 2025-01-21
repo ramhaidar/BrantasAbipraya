@@ -22,19 +22,20 @@ class EvaluasiDetailRKBUrgentController extends Controller
         $master_data_alat      = MasterDataAlat::all ();
         $master_data_sparepart = MasterDataSparepart::all ();
         $kategori_sparepart    = KategoriSparepart::all ();
-        $data                  = RKB::where ( "tipe", "Urgent" )
+
+        // Get RKB details with relationships
+        $alat_detail_rkbs = RKB::where ( "tipe", "Urgent" )
+            ->findOrFail ( $id )
+            ->linkAlatDetailRkbs ()
             ->with ( [ 
-                "linkAlatDetailRkbs" => function ($query)
-                {
-                    $query->orderBy ( 'id_master_data_alat' );
-                },
-                "linkAlatDetailRkbs.rkb",
-                "linkAlatDetailRkbs.masterDataAlat",
-                // "linkAlatDetailRkbs.timelineRkbUrgent",
-                "linkAlatDetailRkbs.linkRkbDetails",
-                "linkAlatDetailRkbs.lampiranRkbUrgent"
+                'masterDataAlat',
+                'linkRkbDetails.detailRkbUrgent.kategoriSparepart',
+                'linkRkbDetails.detailRkbUrgent.masterDataSparepart',
+                'lampiranRkbUrgent',
+                'timelineRkbUrgents'
             ] )
-            ->findOrFail ( $id );
+            ->orderBy ( 'id_master_data_alat' )
+            ->get ();
 
         return view ( 'dashboard.evaluasi.urgent.detail.detail', [ 
             'rkb'                   => $rkb,
@@ -42,8 +43,7 @@ class EvaluasiDetailRKBUrgentController extends Controller
             'master_data_alat'      => $master_data_alat,
             'master_data_sparepart' => $master_data_sparepart,
             'kategori_sparepart'    => $kategori_sparepart,
-            'data'                  => $data,
-
+            'alat_detail_rkbs'      => $alat_detail_rkbs,
             'headerPage'            => "Evaluasi Urgent",
             'page'                  => 'Detail Evaluasi Urgent',
         ] );
@@ -131,103 +131,6 @@ class EvaluasiDetailRKBUrgentController extends Controller
         return redirect ()
             ->route ( 'evaluasi_rkb_urgent.detail.index', $id_rkb )
             ->with ( 'success', 'RKB Berhasil di Approve!' );
-    }
-
-    public function getData ( Request $request, $id_rkb )
-    {
-        // Base query dengan relasi dan alias untuk kolom relasi
-        $query = DetailRKBUrgent::query ()
-            ->select ( [ 
-                'detail_rkb_urgent.*', // Kolom utama
-                'kategori_sparepart.kode as kategoriSparepartCode', // Alias untuk kode kategori sparepart
-                'kategori_sparepart.nama as kategoriSparepartName', // Alias untuk nama kategori sparepart
-                'master_data_sparepart.nama as sparepartName',      // Alias untuk nama sparepart
-                'master_data_sparepart.part_number as partNumber',  // Alias untuk part number
-                'master_data_sparepart.merk as merk',               // Alias untuk merk
-            ] )
-            ->leftJoin ( 'kategori_sparepart', 'detail_rkb_urgent.id_kategori_sparepart_sparepart', '=', 'kategori_sparepart.id' )
-            ->leftJoin ( 'master_data_sparepart', 'detail_rkb_urgent.id_master_data_sparepart', '=', 'master_data_sparepart.id' )
-            ->whereHas ( 'linkRkbDetails.linkAlatDetailRkb.rkb', function ($q) use ($id_rkb)
-            {
-                $q->where ( 'id', $id_rkb );
-            } );
-
-        // Pagination parameters
-        $draw   = $request->input ( 'draw' );
-        $start  = $request->input ( 'start', 0 );
-        $length = $request->input ( 'length', 10 );
-
-        // Sorting berdasarkan index kolom
-        if ( $order = $request->input ( 'order' ) )
-        {
-            $columnIndex   = $order[ 0 ][ 'column' ];
-            $sortDirection = $order[ 0 ][ 'dir' ];
-
-            switch ($columnIndex)
-            {
-                case 4: // Part Number
-                    $query->orderBy ( 'partNumber', $sortDirection );
-                    break;
-
-                default:
-                    $query->orderBy ( 'detail_rkb_urgent.created_at', 'desc' ); // Default sorting
-                    break;
-            }
-        }
-
-        // Filter pencarian
-        if ( $search = $request->input ( 'search.value' ) )
-        {
-            $query->where ( function ($q) use ($search)
-            {
-                $q->where ( 'detail_rkb_urgent.quantity_requested', 'LIKE', "%$search%" )
-                    ->orWhere ( 'detail_rkb_urgent.quantity_approved', 'LIKE', "%$search%" )
-                    ->orWhere ( 'detail_rkb_urgent.satuan', 'LIKE', "%$search%" )
-                    ->orWhere ( 'kategori_sparepart.kode', 'LIKE', "%$search%" )
-                    ->orWhere ( 'kategori_sparepart.nama', 'LIKE', "%$search%" )
-                    ->orWhere ( 'master_data_sparepart.nama', 'LIKE', "%$search%" )
-                    ->orWhere ( 'master_data_sparepart.part_number', 'LIKE', "%$search%" )
-                    ->orWhere ( 'master_data_sparepart.merk', 'LIKE', "%$search%" );
-            } );
-        }
-
-        // Total records
-        $totalRecords = $query->count ();
-
-        // Ambil data dengan paginasi
-        $data = $query->skip ( $start )->take ( $length )->get ();
-
-        // Get the RKB to access its status flags
-        $rkb = RKB::findOrFail ( $id_rkb );
-
-        // Format data untuk DataTable
-        $formattedData = $data->map ( function ($item) use ($rkb)
-        {
-            return [ 
-                'id'                  => $item->id,
-                'masterDataAlat'      => optional ( optional ( $item->linkRkbDetails->first () )->linkAlatDetailRkb->masterDataAlat )->jenis_alat ?? '-',
-                'kodeAlat'            => optional ( optional ( $item->linkRkbDetails->first () )->linkAlatDetailRkb->masterDataAlat )->kode_alat ?? '-',
-                'kategoriSparepart'   => ( $item->kategoriSparepartCode ? "{$item->kategoriSparepartCode}: " : '' ) . ( $item->kategoriSparepartName ?? '-' ), // Format Kode: Kategori
-                'masterDataSparepart' => $item->sparepartName ?? '-',
-                'partNumber'          => $item->partNumber ?? '-', // Menggunakan alias partNumber
-                'merk'                => $item->merk ?? '-',
-                'quantity_requested'  => $item->quantity_requested,
-                'quantity_approved'   => $item->quantity_approved,
-                'quantity_in_stock'   => $item->quantity_in_stock ?? 0,
-                'satuan'              => $item->satuan,
-                // Add the status flags from RKB
-                'is_approved'         => $rkb->is_approved,
-                'is_finalized'        => $rkb->is_finalized,
-                'is_evaluated'        => $rkb->is_evaluated
-            ];
-        } );
-
-        return response ()->json ( [ 
-            'draw'            => $draw,
-            'recordsTotal'    => $totalRecords,
-            'recordsFiltered' => $totalRecords,
-            'data'            => $formattedData->values (),
-        ] );
     }
 
     public function getDokumentasi ( $id )

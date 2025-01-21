@@ -12,8 +12,8 @@
         }
 
         .img-thumbnail {
-            width: 120px;
-            height: 120px;
+            width: 160px;
+            height: 160px;
             object-fit: cover;
             cursor: pointer;
         }
@@ -24,9 +24,9 @@
 
 @include('dashboard.evaluasi.urgent.detail.partials.modal-lampiran')
 
-<div class="ibox-body ms-0 ps-0 table-responsive" style="overflow-x: hidden">
-    <form id="approveRkbForm" method="POST" action="{{ route('evaluasi_rkb_urgent.detail.approve', ['id' => $data->id]) }}">
-        @csrf
+<form id="approveRkbForm" method="POST" action="{{ route('evaluasi_rkb_urgent.detail.approve', ['id' => $rkb->id]) }}">
+    @csrf
+    <div class="ibox-body ms-0 ps-0 table-responsive">
         <table class="m-0 table table-bordered table-striped" id="table-data">
             <thead class="table-primary">
                 <tr>
@@ -52,39 +52,39 @@
                     $processedAlat = [];
                 @endphp
 
-                @foreach ($data->linkAlatDetailRkbs as $item2)
-                    @foreach ($item2->linkRkbDetails as $item3)
+                @foreach ($alat_detail_rkbs as $alat_detail)
+                    @foreach ($alat_detail->linkRkbDetails as $rkb_detail)
                         @php
-                            $kodeAlat = $item2->masterDataAlat->kode_alat;
+                            $kodeAlat = $alat_detail->masterDataAlat->kode_alat;
                             if (!isset($alatRowCount[$kodeAlat])) {
-                                $alatRowCount[$kodeAlat] = collect($item2->linkRkbDetails)->count();
+                                $alatRowCount[$kodeAlat] = collect($alat_detail->linkRkbDetails)->count();
                             }
                         @endphp
 
                         <tr>
-                            <td class="text-center">{{ $item2->masterDataAlat->jenis_alat }}</td>
-                            <td class="text-center">{{ $item2->masterDataAlat->kode_alat }}</td>
-                            <td class="text-center">{{ $item3->detailRkbUrgent->kategoriSparepart->kode }}:
-                                {{ $item3->detailRkbUrgent->kategoriSparepart->nama }}</td>
-                            <td class="text-center">{{ $item3->detailRkbUrgent->masterDataSparepart->nama }}</td>
-                            <td class="text-center">{{ $item3->detailRkbUrgent->masterDataSparepart->part_number }}</td>
-                            <td class="text-center">{{ $item3->detailRkbUrgent->masterDataSparepart->merk }}</td>
-                            <td class="text-center">{{ $item3->detailRkbUrgent->nama_mekanik }}</td>
+                            <td class="text-center">{{ $alat_detail->masterDataAlat->jenis_alat }}</td>
+                            <td class="text-center">{{ $alat_detail->masterDataAlat->kode_alat }}</td>
+                            <td class="text-center">{{ $rkb_detail->detailRkbUrgent->kategoriSparepart->kode }}:
+                                {{ $rkb_detail->detailRkbUrgent->kategoriSparepart->nama }}</td>
+                            <td class="text-center">{{ $rkb_detail->detailRkbUrgent->masterDataSparepart->nama }}</td>
+                            <td class="text-center">{{ $rkb_detail->detailRkbUrgent->masterDataSparepart->part_number }}</td>
+                            <td class="text-center">{{ $rkb_detail->detailRkbUrgent->masterDataSparepart->merk }}</td>
+                            <td class="text-center">{{ $rkb_detail->detailRkbUrgent->nama_mekanik }}</td>
                             <td class="text-center">
-                                <button class="btn {{ $item3->detailRkbUrgent->dokumentasi ? 'btn-warning' : 'btn-primary' }}" data-id="{{ $item3->detailRkbUrgent->id }}" type="button" onclick="event.preventDefault(); event.stopPropagation(); showDokumentasi({{ $item3->detailRkbUrgent->id }});">
+                                <button class="btn {{ $rkb_detail->detailRkbUrgent->dokumentasi ? 'btn-warning' : 'btn-primary' }}" data-id="{{ $rkb_detail->detailRkbUrgent->id }}" type="button" onclick="event.preventDefault(); event.stopPropagation(); showDokumentasi({{ $rkb_detail->detailRkbUrgent->id }});">
                                     <i class="bi bi-file-earmark-text"></i>
                                 </button>
                             </td>
 
                             @if (!in_array($kodeAlat, $processedAlat))
                                 <td class="text-center" rowspan="{{ $alatRowCount[$kodeAlat] }}">
-                                    <a class="btn {{ $item2->timelineRkbUrgents->count() > 0 ? 'btn-warning' : 'btn-primary' }}" href="{{ route('evaluasi_rkb_urgent.detail.timeline.index', ['id' => $item2->id]) }}" onclick="event.stopPropagation();">
+                                    <a class="btn {{ $alat_detail->timelineRkbUrgents->count() > 0 ? 'btn-warning' : 'btn-primary' }}" href="{{ route('evaluasi_rkb_urgent.detail.timeline.index', ['id' => $alat_detail->id]) }}" onclick="event.stopPropagation();">
                                         <i class="bi bi-hourglass-split"></i>
                                     </a>
                                 </td>
 
                                 <td class="text-center" rowspan="{{ $alatRowCount[$kodeAlat] }}">
-                                    <button class="btn {{ $item2->lampiranRkbUrgent ? 'btn-warning' : 'btn-primary' }} lampiranBtn" data-bs-toggle="modal" data-bs-target="{{ $item2->lampiranRkbUrgent ? '#modalForLampiranExist' : '#modalForLampiranNew' }}" data-id-linkalatdetail="{{ $item2->id }}" data-id-lampiran="{{ $item2->lampiranRkbUrgent ? $item2->lampiranRkbUrgent->id : null }}" type="button" onclick="event.stopPropagation();">
+                                    <button class="btn {{ $alat_detail->lampiranRkbUrgent ? 'btn-warning' : 'btn-primary' }} lampiranBtn" data-bs-toggle="modal" data-bs-target="{{ $alat_detail->lampiranRkbUrgent ? '#modalForLampiranExist' : '#modalForLampiranNew' }}" data-id-linkalatdetail="{{ $alat_detail->id }}" data-id-lampiran="{{ $alat_detail->lampiranRkbUrgent ? $alat_detail->lampiranRkbUrgent->id : null }}" type="button" onclick="event.stopPropagation();">
                                         <i class="bi bi-paperclip"></i>
                                     </button>
                                 </td>
@@ -97,39 +97,39 @@
                                 <td style="display: none;"></td>
                             @endif
 
-                            <td class="text-center">{{ $item3->detailRkbUrgent->quantity_requested }}</td>
+                            <td class="text-center">{{ $rkb_detail->detailRkbUrgent->quantity_requested }}</td>
                             <td class="text-center">
                                 @php
                                     $backgroundColor = '';
-                                    if ($data->is_approved) {
+                                    if ($rkb->is_approved) {
                                         $backgroundColor = 'bg-primary-subtle';
                                     } else {
-                                        $backgroundColor = $item3->detailRkbUrgent->quantity_approved !== null ? 'bg-success-subtle' : 'bg-warning-subtle';
+                                        $backgroundColor = $rkb_detail->detailRkbUrgent->quantity_approved !== null ? 'bg-success-subtle' : 'bg-warning-subtle';
                                     }
 
-                                    $disabled = $data->is_approved || $data->is_evaluated ? 'disabled' : '';
+                                    $disabled = $rkb->is_approved || $rkb->is_evaluated ? 'disabled' : '';
                                 @endphp
-                                <input class="form-control text-center {{ $backgroundColor }}" name="quantity_approved[{{ $item3->detailRkbUrgent->id }}]" type="number" value="{{ $item3->detailRkbUrgent->quantity_approved ?? $item3->detailRkbUrgent->quantity_requested }}" min="0" {{ $disabled }} />
+                                <input class="form-control text-center {{ $backgroundColor }}" name="quantity_approved[{{ $rkb_detail->detailRkbUrgent->id }}]" type="number" value="{{ $rkb_detail->detailRkbUrgent->quantity_approved ?? $rkb_detail->detailRkbUrgent->quantity_requested }}" min="0" {{ $disabled }} />
                             </td>
                             <td class="text-center">{{ random_int(1, 15) }}</td>
-                            <td class="text-center">{{ $item3->detailRkbUrgent->satuan }}</td>
+                            <td class="text-center">{{ $rkb_detail->detailRkbUrgent->satuan }}</td>
                         </tr>
                     @endforeach
                 @endforeach
             </tbody>
         </table>
-    </form>
-</div>
+    </div>
+</form>
 
 @push('scripts_3')
     <script>
-        var table = $('#table-data').DataTable({
-            paginate: false,
-            ordering: false,
-        });
-
         document.addEventListener('DOMContentLoaded', function() {
             'use strict';
+
+            $('#table-data').DataTable({
+                paginate: false,
+                ordering: false,
+            });
 
             const dokumentasiPreviewContainer = document.getElementById('dokumentasiPreviewContainer');
             const largeImagePreviewForShow = document.getElementById('largeImagePreviewForShow');

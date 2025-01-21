@@ -1,12 +1,13 @@
 @push('styles_3')
     <style>
-        .table-container {
+        #table-data {
             font-size: 0.9em;
-            overflow-x: auto;
+            white-space: nowrap;
         }
 
-        .table td,
-        .table th {
+        #table-data td,
+        #table-data th {
+            /* padding: 4px 8px; */
             vertical-align: middle;
         }
     </style>

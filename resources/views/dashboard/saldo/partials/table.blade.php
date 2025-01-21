@@ -57,6 +57,12 @@
                 </tr>
             @endforeach
         </tbody>
+        <tfoot>
+            <tr class="table-primary">
+                <td class="text-center fw-bold" colspan="9">Grand Total</td>
+                <td class="text-center fw-bold" id="total-harga">0</td>
+            </tr>
+        </tfoot>
     </table>
 </div>
 
@@ -64,9 +70,42 @@
     <script>
         $(document).ready(function() {
             // Initialize DataTable
-            $('#table-data').DataTable({
+            var table = $('#table-data').DataTable({
                 paginate: false,
                 ordering: false,
+                // Add drawCallback to ensure calculation happens after table updates
+                drawCallback: function() {
+                    calculateTotal();
+                }
+            });
+
+            // Calculate total function
+            function calculateTotal() {
+                let total = 0;
+                // Only calculate visible rows
+                $('#table-data tbody tr:visible').each(function() {
+                    let value = $(this).find('td:last').text()
+                        .replace('Rp ', '')
+                        .replace(/\./g, '');
+                    total += parseInt(value) || 0; // Add || 0 to handle NaN
+                });
+
+                // Format the total
+                let formattedTotal = 'Rp ' + total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                $('#total-harga').html(formattedTotal);
+            }
+
+            // Initial calculation
+            calculateTotal();
+
+            // Add multiple event listeners to ensure catching all filter cases
+            table.on('search.dt draw.dt', function() {
+                setTimeout(calculateTotal, 100); // Add small delay to ensure DOM is updated
+            });
+
+            // Add listener for manual search input
+            $('.dataTables_filter input').on('input', function() {
+                setTimeout(calculateTotal, 100);
             });
         });
     </script>

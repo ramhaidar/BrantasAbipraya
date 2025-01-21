@@ -84,6 +84,15 @@
                 </tr>
             @endforeach
         </tbody>
+        <tfoot>
+            <tr class="table-primary">
+                <td class="text-center fw-bold" colspan="10">Grand Total</td>
+                <td class="text-center fw-bold" id="total-harga">0</td>
+                <td class="text-center fw-bold" id="total-ppn">0</td>
+                <td class="text-center fw-bold" id="total-bruto">0</td>
+                <td colspan="3"></td>
+            </tr>
+        </tfoot>
     </table>
 </div>
 
@@ -93,10 +102,53 @@
 @push('scripts_3')
     <script>
         $(document).ready(function() {
-            // Initialize DataTable
-            $('#table-data').DataTable({
+            var table = $('#table-data').DataTable({
                 paginate: false,
                 ordering: false,
+                drawCallback: function() {
+                    calculateTotals();
+                }
+            });
+
+            function calculateTotals() {
+                let totalHarga = 0;
+                let totalPPN = 0;
+                let totalBruto = 0;
+
+                $('#table-data tbody tr:visible').each(function() {
+                    // Get values from columns
+                    let harga = $(this).find('td:eq(10)').text()
+                        .replace('Rp ', '')
+                        .replace(/\./g, '');
+                    let ppn = $(this).find('td:eq(11)').text()
+                        .replace('Rp ', '')
+                        .replace(/\./g, '');
+                    let bruto = $(this).find('td:eq(12)').text()
+                        .replace('Rp ', '')
+                        .replace(/\./g, '');
+
+                    // Add to totals
+                    totalHarga += parseInt(harga) || 0;
+                    totalPPN += parseInt(ppn) || 0;
+                    totalBruto += parseInt(bruto) || 0;
+                });
+
+                // Format and display totals
+                $('#total-harga').html('Rp ' + totalHarga.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."));
+                $('#total-ppn').html('Rp ' + totalPPN.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."));
+                $('#total-bruto').html('Rp ' + totalBruto.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."));
+            }
+
+            // Initial calculation
+            calculateTotals();
+
+            // Add event listeners
+            table.on('search.dt draw.dt', function() {
+                setTimeout(calculateTotals, 100);
+            });
+
+            $('.dataTables_filter input').on('input', function() {
+                setTimeout(calculateTotals, 100);
             });
 
             // Group rows by SPB number and STT

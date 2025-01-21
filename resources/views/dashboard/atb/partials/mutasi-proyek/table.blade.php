@@ -93,6 +93,13 @@
                 </tr>
             @endforeach
         </tbody>
+        <tfoot>
+            <tr class="table-primary">
+                <td class="text-center fw-bold" colspan="11">Grand Total</td>
+                <td class="text-center fw-bold" id="total-harga">0</td>
+                <td colspan="2"></td>
+            </tr>
+        </tfoot>
     </table>
 </div>
 
@@ -102,10 +109,35 @@
 @push('scripts_3')
     <script>
         $(document).ready(function() {
-            // Initialize DataTable
-            $('#table-data').DataTable({
+            var table = $('#table-data').DataTable({
                 paginate: false,
                 ordering: false,
+                drawCallback: function() {
+                    calculateTotal();
+                }
+            });
+
+            function calculateTotal() {
+                let total = 0;
+                $('#table-data tbody tr:visible').each(function() {
+                    let value = $(this).find('td:eq(11)').text()
+                        .replace('Rp ', '')
+                        .replace(/\./g, '');
+                    total += parseInt(value) || 0;
+                });
+                
+                let formattedTotal = 'Rp ' + total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                $('#total-harga').html(formattedTotal);
+            }
+
+            calculateTotal();
+            
+            table.on('search.dt draw.dt', function() {
+                setTimeout(calculateTotal, 100);
+            });
+
+            $('.dataTables_filter input').on('input', function() {
+                setTimeout(calculateTotal, 100);
             });
         });
     </script>

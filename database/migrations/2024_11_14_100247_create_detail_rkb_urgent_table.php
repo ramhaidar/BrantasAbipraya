@@ -16,7 +16,7 @@ return new class extends Migration
             $table->bigInteger ( 'quantity_remainder' )->nullable (); // Jumlah sisa PO
             $table->string ( 'satuan' )->nullable (); // Satuan barang
             $table->string ( 'kronologi' )->nullable (); // Penjelasan urgensi
-            $table->string ( 'nama_mekanik' )->nullable (); // Nama mekanik terkait
+            $table->string ( 'nama_koordinator' )->nullable (); // Nama koordinator terkait
             $table->string ( 'dokumentasi' )->nullable ();
 
             $table->foreignId ( 'id_kategori_sparepart_sparepart' )->nullable ()

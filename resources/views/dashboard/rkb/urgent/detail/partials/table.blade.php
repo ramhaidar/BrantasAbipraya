@@ -34,7 +34,7 @@
                 <th class="text-center">Sparepart</th>
                 <th class="text-center">Part Number</th>
                 <th class="text-center">Merk</th>
-                <th class="text-center">Nama Mekanik</th>
+                <th class="text-center">Nama Koordinator</th>
                 <th class="text-center">Dokumentasi</th>
                 <th class="text-center">Timeline</th>
                 <th class="text-center">Lampiran</th>
@@ -67,7 +67,7 @@
                         <td class="text-center">{{ $item3->detailRkbUrgent->masterDataSparepart->nama }}</td>
                         <td class="text-center">{{ $item3->detailRkbUrgent->masterDataSparepart->part_number }}</td>
                         <td class="text-center">{{ $item3->detailRkbUrgent->masterDataSparepart->merk }}</td>
-                        <td class="text-center">{{ $item3->detailRkbUrgent->nama_mekanik }}</td>
+                        <td class="text-center">{{ $item3->detailRkbUrgent->nama_koordinator }}</td>
                         <td class="text-center">
                             <button class="btn {{ $item3->detailRkbUrgent->dokumentasi ? 'btn-warning' : 'btn-primary' }}"" data-id="{{ $item3->detailRkbUrgent->id }}" onclick="showDokumentasi({{ $item3->detailRkbUrgent->id }})">
                                 <i class="bi bi-file-earmark-text"></i>

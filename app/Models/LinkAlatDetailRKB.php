@@ -18,7 +18,7 @@ class LinkAlatDetailRKB extends Model
     protected $table = 'link_alat_detail_rkb';
 
     protected $fillable = [ 
-        'nama_mekanik',
+        'nama_koordinator',
         'id_rkb',
         'id_master_data_alat',
         'id_lampiran_rkb_urgent',
@@ -26,7 +26,7 @@ class LinkAlatDetailRKB extends Model
 
     protected $casts = [ 
         'id'                     => 'integer',
-        'nama_mekanik'           => 'string',
+        'nama_koordinator'       => 'string',
         'id_rkb'                 => 'integer',
         'id_master_data_alat'    => 'integer',
         'id_lampiran_rkb_urgent' => 'integer',

@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create ( 'link_alat_detail_rkb', function (Blueprint $table)
         {
             $table->id (); // PK
-            $table->string ( 'nama_mekanik' )->nullable ();
+            $table->string ( 'nama_koordinator' )->nullable ();
 
             $table->unsignedBigInteger ( 'id_rkb' )->nullable ();
             $table->unsignedBigInteger ( 'id_master_data_alat' )->nullable ();

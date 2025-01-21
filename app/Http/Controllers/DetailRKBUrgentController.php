@@ -68,7 +68,7 @@ class DetailRKBUrgentController extends Controller
         $validatedData = $request->validate ( [ 
             'quantity_requested'              => 'required|integer|min:1',
             'satuan'                          => 'required|string|max:50',
-            'nama_mekanik'                    => 'required|string|max:50',
+            'nama_koordinator'                => 'required|string|max:50',
             'kronologi'                       => 'required|string|max:1000',
             'id_master_data_alat'             => 'required|integer|exists:master_data_alat,id',
             'id_kategori_sparepart_sparepart' => 'required|integer|exists:kategori_sparepart,id',
@@ -87,7 +87,7 @@ class DetailRKBUrgentController extends Controller
             $detailRKBUrgent = DetailRkbUrgent::create ( [ 
                 'quantity_requested'              => $validatedData[ 'quantity_requested' ],
                 'satuan'                          => $validatedData[ 'satuan' ],
-                'nama_mekanik'                    => $validatedData[ 'nama_mekanik' ],
+                'nama_koordinator'                => $validatedData[ 'nama_koordinator' ],
                 'kronologi'                       => $validatedData[ 'kronologi' ],
                 'dokumentasi'                     => null, // Akan diisi nanti
                 'id_kategori_sparepart_sparepart' => $validatedData[ 'id_kategori_sparepart_sparepart' ],
@@ -123,7 +123,7 @@ class DetailRKBUrgentController extends Controller
                     'id_master_data_alat' => $validatedData[ 'id_master_data_alat' ],
                 ],
                 [ 
-                    'nama_mekanik' => $validatedData[ 'nama_mekanik' ], // Atur nilai default
+                    'nama_koordinator' => $validatedData[ 'nama_koordinator' ], // Atur nilai default
                 ]
             );
 

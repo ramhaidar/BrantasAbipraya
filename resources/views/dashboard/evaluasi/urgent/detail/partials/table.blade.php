@@ -36,7 +36,7 @@
                     <th class="text-center">Sparepart</th>
                     <th class="text-center">Part Number</th>
                     <th class="text-center">Merk</th>
-                    <th class="text-center">Nama Mekanik</th>
+                    <th class="text-center">Nama Koordinator</th>
                     <th class="text-center">Dokumentasi</th>
                     <th class="text-center">Timeline</th>
                     <th class="text-center">Lampiran</th>
@@ -60,11 +60,11 @@
                         @php
                             $kodeAlat = $alat_detail->masterDataAlat->kode_alat;
                             $sparepart = $rkb_detail->detailRkbUrgent->masterDataSparepart;
-                            
+
                             if (!isset($alatRowCount[$kodeAlat])) {
                                 $alatRowCount[$kodeAlat] = collect($alat_detail->linkRkbDetails)->count();
                             }
-                            
+
                             if ($currentPartNumber !== $sparepart->part_number) {
                                 $currentPartNumber = $sparepart->part_number;
                                 $rowspan = $alat_detail_rkbs
@@ -86,11 +86,9 @@
                             <td class="text-center">{{ $sparepart->nama }}</td>
                             <td class="text-center">{{ $sparepart->part_number }}</td>
                             <td class="text-center">{{ $sparepart->merk }}</td>
-                            <td class="text-center">{{ $rkb_detail->detailRkbUrgent->nama_mekanik }}</td>
+                            <td class="text-center">{{ $rkb_detail->detailRkbUrgent->nama_koordinator }}</td>
                             <td class="text-center">
-                                <button class="btn {{ $rkb_detail->detailRkbUrgent->dokumentasi ? 'btn-warning' : 'btn-primary' }}"
-                                    data-id="{{ $rkb_detail->detailRkbUrgent->id }}" type="button"
-                                    onclick="event.preventDefault(); event.stopPropagation(); showDokumentasi({{ $rkb_detail->detailRkbUrgent->id }});">
+                                <button class="btn {{ $rkb_detail->detailRkbUrgent->dokumentasi ? 'btn-warning' : 'btn-primary' }}" data-id="{{ $rkb_detail->detailRkbUrgent->id }}" type="button" onclick="event.preventDefault(); event.stopPropagation(); showDokumentasi({{ $rkb_detail->detailRkbUrgent->id }});">
                                     <i class="bi bi-file-earmark-text"></i>
                                 </button>
                             </td>

@@ -80,7 +80,7 @@ class DetailRKBGeneralController extends Controller
                 'id_master_data_alat' => $validatedData[ 'id_master_data_alat' ],
             ],
             [ 
-                'nama_mekanik' => null
+                'nama_koordinator' => null
             ] // Nilai default jika tidak ditemukan
         );
 

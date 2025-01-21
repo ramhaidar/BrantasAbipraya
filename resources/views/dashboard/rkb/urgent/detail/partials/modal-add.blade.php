@@ -47,9 +47,9 @@
                         </div>
 
                         <div class="col-12">
-                            <label class="form-label required" for="nama_mekanik">Nama Mekanik</label>
-                            <input class="form-control" id="nama_mekanik" name="nama_mekanik" type="text" placeholder="Nama Mekanik" required>
-                            <div class="invalid-feedback">Nama Mekanik diperlukan.</div>
+                            <label class="form-label required" for="nama_koordinator">Nama Koordinator</label>
+                            <input class="form-control" id="nama_koordinator" name="nama_koordinator" type="text" placeholder="Nama Koordinator" required>
+                            <div class="invalid-feedback">Nama Koordinator diperlukan.</div>
                         </div>
 
                         <div class="col-12">

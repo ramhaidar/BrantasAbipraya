@@ -22,7 +22,7 @@ class DetailRKBUrgent extends Model
         'quantity_remainder',
         'satuan',
         'kronologi',
-        'nama_mekanik',
+        'nama_koordinator',
         'dokumentasi',
         'id_kategori_sparepart_sparepart',
         'id_master_data_sparepart',
@@ -35,7 +35,7 @@ class DetailRKBUrgent extends Model
         'quantity_remainder' => 'integer',
         'satuan'             => 'string',
         'kronologi'          => 'string',
-        'nama_mekanik'       => 'string',
+        'nama_koordinator'   => 'string',
         'dokumentasi'        => 'string',
         'created_at'         => 'datetime',
         'updated_at'         => 'datetime',
@@ -56,15 +56,15 @@ class DetailRKBUrgent extends Model
         return $this->hasMany ( LinkRkbDetail::class, 'id_detail_rkb_urgent' );
     }
 
-    public function incrementQuantityRemainder($quantity)
+    public function incrementQuantityRemainder ( $quantity )
     {
-        $this->quantity_remainder = min($this->quantity_approved, $this->quantity_remainder + $quantity);
-        $this->save();
+        $this->quantity_remainder = min ( $this->quantity_approved, $this->quantity_remainder + $quantity );
+        $this->save ();
     }
 
-    public function decrementQuantityRemainder($quantity)
+    public function decrementQuantityRemainder ( $quantity )
     {
-        $this->quantity_remainder = max(0, $this->quantity_remainder - $quantity);
-        $this->save();
+        $this->quantity_remainder = max ( 0, $this->quantity_remainder - $quantity );
+        $this->save ();
     }
 }

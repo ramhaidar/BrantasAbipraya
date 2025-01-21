@@ -51,7 +51,34 @@ class EvaluasiDetailRKBUrgentController extends Controller
 
     public function evaluate ( Request $request, $id_rkb )
     {
-        // Validasi input untuk memastikan semua data sesuai
+        $rkb = RKB::find ( $id_rkb );
+
+        // If already evaluated, cancel evaluation
+        if ( $rkb->is_evaluated )
+        {
+            // Cannot cancel if already approved
+            if ( $rkb->is_approved )
+            {
+                return redirect ()
+                    ->back ()
+                    ->with ( 'error', 'Tidak dapat membatalkan evaluasi RKB yang sudah di-approve!' );
+            }
+
+            // Reset all quantity_approved values to 0
+            DetailRKBUrgent::whereHas ( 'linkRkbDetails.linkAlatDetailRkb.rkb', function ($query) use ($id_rkb)
+            {
+                $query->where ( 'id', $id_rkb );
+            } )->update ( [ 'quantity_approved' => null ] );
+
+            $rkb->is_evaluated = false;
+            $rkb->save ();
+
+            return redirect ()
+                ->route ( 'evaluasi_rkb_urgent.detail.index', $id_rkb )
+                ->with ( 'success', 'Evaluasi RKB berhasil dibatalkan!' );
+        }
+
+        // Existing evaluation logic
         $request->validate ( [ 
             'quantity_approved'   => 'required|array',
             'quantity_approved.*' => 'required|integer|min:0',
@@ -92,9 +119,10 @@ class EvaluasiDetailRKBUrgentController extends Controller
         DetailRKBUrgent::whereHas ( 'linkRkbDetails.linkAlatDetailRkb.rkb', function ($query) use ($id_rkb)
         {
             $query->where ( 'id', $id_rkb );
-        } )->each(function ($detail) {
-            $detail->incrementQuantityRemainder($detail->quantity_approved);
-        });
+        } )->each ( function ($detail)
+        {
+            $detail->incrementQuantityRemainder ( $detail->quantity_approved );
+        } );
 
         $rkb->is_approved = true;
         $rkb->save ();

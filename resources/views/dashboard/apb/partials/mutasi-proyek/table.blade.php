@@ -61,7 +61,7 @@
                     <td class="text-center">{{ $apb->alatProyek->masterDataAlat->merek_alat ?? '-' }}</td>
                     <td class="text-center">{{ $apb->alatProyek->masterDataAlat->tipe_alat ?? '-' }}</td>
                     <td class="text-center">{{ $apb->alatProyek->masterDataAlat->serial_number ?? '-' }}</td>
-                    <td class="text-center">{{ $apb->masterDataSparepart->kategoriSparepart->kode }}: {{ $apb->masterDataSparepart->kategoriSparepart->nama }}</td>
+                    <td class="text-center">{{ $apb->masterDataSparepart->kategoriSparepart ? $apb->masterDataSparepart->kategoriSparepart->kode . ': ' . $apb->masterDataSparepart->kategoriSparepart->nama : '-' }}</td>
                     <td class="text-center">{{ $apb->masterDataSupplier->nama ?? '-' }}</td>
                     <td class="text-center">{{ $apb->masterDataSparepart->nama ?? '-' }}</td>
                     <td class="text-center">{{ $apb->masterDataSparepart->merk ?? '-' }}</td>

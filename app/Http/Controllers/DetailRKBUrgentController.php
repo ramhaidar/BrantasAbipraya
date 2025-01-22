@@ -21,7 +21,7 @@ class DetailRKBUrgentController extends Controller
         $rkb     = RKB::with ( [ 'proyek' ] )->find ( $id );
         $proyeks = Proyek::with ( "users" )
             ->orderBy ( "updated_at", "desc" )
-            ->orderBy ( "id", "asc" )
+            ->orderBy ( "id", "desc" )
             ->get ();
         // $master_data_alat      = MasterDataAlat::all ();
         $master_data_sparepart = MasterDataSparepart::all ();

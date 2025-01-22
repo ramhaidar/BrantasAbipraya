@@ -21,7 +21,7 @@ class DetailRKBGeneralController extends Controller
 
         $proyeks = Proyek::with ( "users" )
             ->orderBy ( "updated_at", "desc" )
-            ->orderBy ( "id", "asc" )
+            ->orderBy ( "id", "desc" )
             ->get ();
 
         // $master_data_alat = MasterDataAlat::whereHas ( 'alatProyek', function ($query) use ($rkb)

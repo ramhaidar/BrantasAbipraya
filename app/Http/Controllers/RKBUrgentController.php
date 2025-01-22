@@ -15,7 +15,7 @@ class RKBUrgentController extends Controller
     {
         $proyeks = Proyek::with ( "users" )
             ->orderBy ( "updated_at", "desc" )
-            ->orderBy ( "id", "asc" )
+            ->orderBy ( "id", "desc" )
             ->get ();
 
         return view ( 'dashboard.rkb.urgent.urgent', [ 

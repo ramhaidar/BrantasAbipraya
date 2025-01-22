@@ -24,7 +24,7 @@ class AlatProyekController extends Controller
 
         $proyeks = Proyek::with ( "users" )
             ->orderBy ( "updated_at", "desc" )
-            ->orderBy ( "id", "asc" )
+            ->orderBy ( "id", "desc" )
             ->get ();
 
         $AlatAssigned = AlatProyek::with ( "masterDataAlat" )

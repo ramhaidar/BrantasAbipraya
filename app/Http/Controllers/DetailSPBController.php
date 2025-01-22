@@ -20,7 +20,7 @@ class DetailSPBController extends Controller
     {
         $proyeks = Proyek::with ( "users" )
             ->orderBy ( "updated_at", "desc" )
-            ->orderBy ( "id", "asc" )
+            ->orderBy ( "id", "desc" )
             ->get ();
         $rkb     = RKB::with ( [ 
             "linkAlatDetailRkbs.masterDataAlat",

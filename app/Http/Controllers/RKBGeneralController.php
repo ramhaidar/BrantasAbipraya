@@ -18,7 +18,7 @@ class RKBGeneralController extends Controller
     {
         $proyeks = Proyek::with ( "users" )
             ->orderBy ( "updated_at", "desc" )
-            ->orderBy ( "id", "asc" )
+            ->orderBy ( "id", "desc" )
             ->get ();
 
         return view ( 'dashboard.rkb.general.general', [ 
@@ -234,9 +234,9 @@ class RKBGeneralController extends Controller
         // Mapping data
         $data = $rkbData->map ( function ($item)
         {
-            $isFinalized = $item->is_finalized ?? false;
-            $isEvaluated = $item->is_evaluated ?? false;
-            $isApprovedVp = $item->is_approved_vp ?? false;
+            $isFinalized   = $item->is_finalized ?? false;
+            $isEvaluated   = $item->is_evaluated ?? false;
+            $isApprovedVp  = $item->is_approved_vp ?? false;
             $isApprovedSvp = $item->is_approved_svp ?? false;
 
             $status = match ( true )
@@ -250,15 +250,15 @@ class RKBGeneralController extends Controller
             };
 
             return [ 
-                'id'             => $item->id,
-                'nomor'          => $item->nomor,
-                'proyek'         => $item->proyek->nama ?? '-',
-                'periode'        => Carbon::parse ( $item->periode )->translatedFormat ( 'F Y' ),
-                'status'         => $status,
-                'is_finalized'   => $item->is_finalized,
-                'is_evaluated'   => $item->is_evaluated,
-                'is_approved_vp' => $item->is_approved_vp,
-                'is_approved_svp'=> $item->is_approved_svp,
+                'id'              => $item->id,
+                'nomor'           => $item->nomor,
+                'proyek'          => $item->proyek->nama ?? '-',
+                'periode'         => Carbon::parse ( $item->periode )->translatedFormat ( 'F Y' ),
+                'status'          => $status,
+                'is_finalized'    => $item->is_finalized,
+                'is_evaluated'    => $item->is_evaluated,
+                'is_approved_vp'  => $item->is_approved_vp,
+                'is_approved_svp' => $item->is_approved_svp,
             ];
         } );
 

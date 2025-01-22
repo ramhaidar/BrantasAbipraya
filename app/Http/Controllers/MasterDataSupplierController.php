@@ -14,7 +14,7 @@ class MasterDataSupplierController extends Controller
     {
         $proyeks = Proyek::with ( "users" )
             ->orderBy ( "updated_at", "desc" )
-            ->orderBy ( "id", "asc" )
+            ->orderBy ( "id", "desc" )
             ->get ();
 
         $spareparts = \App\Models\MasterDataSparepart::all ();

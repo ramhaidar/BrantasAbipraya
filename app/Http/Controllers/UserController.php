@@ -13,9 +13,10 @@ class UserController extends Controller
     {
         $proyeks = Proyek::with ( "users" )
             ->orderBy ( "updated_at", "desc" )
-            ->orderBy ( "id", "asc" )
+            ->orderBy ( "id", "desc" )
             ->get ();
-        $users   = User::orderBy ( 'updated_at', 'desc' )
+
+        $users = User::orderBy ( 'updated_at', 'desc' )
             ->orderBy ( 'id', 'asc' )
             ->get ();
 

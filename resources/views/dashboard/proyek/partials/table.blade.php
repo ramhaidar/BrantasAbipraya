@@ -56,7 +56,7 @@
                     [10, 25, 50],
                     [10, 25, 50]
                 ],
-                ordering: true,
+                ordering: false,
                 order: [],
                 displayStart: lastPage * 10, // Start from the last saved page
                 columnDefs: [{

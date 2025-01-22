@@ -18,7 +18,7 @@ class SPBController extends Controller
     {
         $proyeks = Proyek::with ( "users" )
             ->orderBy ( "updated_at", "desc" )
-            ->orderBy ( "id", "asc" )
+            ->orderBy ( "id", "desc" )
             ->get ();
         // $rkbs    = RKB::where ( 'is_approved', true )->get ();
 

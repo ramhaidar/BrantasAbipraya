@@ -14,7 +14,7 @@ class EvaluasiRKBGeneralController extends Controller
     {
         $proyeks = Proyek::with ( "users" )
             ->orderBy ( "updated_at", "desc" )
-            ->orderBy ( "id", "asc" )
+            ->orderBy ( "id", "desc" )
             ->get ();
 
         return view ( 'dashboard.evaluasi.general.evaluasi_general', [ 
@@ -88,9 +88,9 @@ class EvaluasiRKBGeneralController extends Controller
         // Mapping data
         $data = $rkbData->map ( function ($item)
         {
-            $isFinalized = $item->is_finalized ?? false;
-            $isEvaluated = $item->is_evaluated ?? false;
-            $isApprovedVp = $item->is_approved_vp ?? false;
+            $isFinalized   = $item->is_finalized ?? false;
+            $isEvaluated   = $item->is_evaluated ?? false;
+            $isApprovedVp  = $item->is_approved_vp ?? false;
             $isApprovedSvp = $item->is_approved_svp ?? false;
 
             $status = match ( true )

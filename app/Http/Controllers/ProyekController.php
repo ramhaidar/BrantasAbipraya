@@ -10,13 +10,16 @@ class ProyekController extends Controller
 {
     public function index ()
     {
-        // $proyek = Proyek::get ()->all ();
+        $proyeks = Proyek::with ( "users" )
+            ->orderBy ( "updated_at", "desc" )
+            ->orderBy ( "id", "desc" )
+            ->get ();
 
         return view ( "dashboard.proyek.proyek", [ 
             "headerPage" => "Proyek",
             "page"       => "Data Proyek",
-            // "proyek"     => $proyek,
-            "proyeks"    => Proyek::with ( "users" )->orderByDesc ( "updated_at" )->get (),
+
+            "proyeks"    => $proyeks,
         ] );
     }
 
@@ -59,7 +62,7 @@ class ProyekController extends Controller
     public function getData ( Request $request )
     {
         // Base query
-        $query = Proyek::query ();
+        $query = Proyek::with ( 'users' );
 
         // Handle search input
         if ( $search = $request->input ( 'search.value' ) )
@@ -77,7 +80,8 @@ class ProyekController extends Controller
         }
         else
         {
-            $query->orderBy ( 'updated_at', 'desc' );
+            $query->orderBy ( 'updated_at', 'desc' )
+                ->orderBy ( 'id', 'desc' );
         }
 
         // Pagination parameters
@@ -90,7 +94,9 @@ class ProyekController extends Controller
         $filteredRecords = $query->count ();
 
         // Fetch paginated data
-        $proyeks = $query->skip ( $start )->take ( $length )->get ();
+        $proyeks = $query->skip ( $start )
+            ->take ( $length )
+            ->get ();
 
         // Return JSON response
         return response ()->json ( [ 

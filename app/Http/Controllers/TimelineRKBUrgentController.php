@@ -17,7 +17,7 @@ class TimelineRKBUrgentController extends Controller
 
         $proyeks = Proyek::with ( "users" )
             ->orderBy ( "updated_at", "desc" )
-            ->orderBy ( "id", "asc" )
+            ->orderBy ( "id", "desc" )
             ->get ();
 
         $data = LinkAlatDetailRKB::with ( [ 

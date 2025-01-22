@@ -66,16 +66,4 @@ class MasterDataSparepart extends Model
     {
         return $this->hasMany ( APB::class, 'id_master_data_sparepart' );
     }
-
-    protected static function boot ()
-    {
-        parent::boot ();
-
-        static::deleting ( function ($sparepart)
-        {
-            // Add saldo deletion to existing deletions
-            $sparepart->saldo ()->delete ();
-            // ...existing deletion code...
-        } );
-    }
 }

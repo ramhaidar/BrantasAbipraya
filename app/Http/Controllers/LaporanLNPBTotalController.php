@@ -8,17 +8,41 @@ use App\Models\Saldo;
 use App\Models\Proyek;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 
 class LaporanLNPBTotalController extends Controller
 {
     public function index ( Request $request )
     {
-        $proyek = Proyek::with ( "users" )->find ( $request->id_proyek );
-
-        $proyeks = Proyek::with ( "users" )
+        $id_proyek = $request->id_proyek;
+        $proyek    = Proyek::with ( "users" )->find ( $request->id_proyek );
+        $proyeks   = Proyek::with ( "users" )
             ->orderBy ( "updated_at", "asc" )
             ->orderBy ( "id", "asc" )
             ->get ();
+
+        // Default date calculations
+        $currentDate      = now ();
+        $defaultStartDate = $currentDate->copy ()->subMonth ()->day ( 26 );
+        $defaultEndDate   = $currentDate->copy ()->day ( 25 );
+
+        // Validate and parse dates with error handling
+        try
+        {
+            $startDate = $request->filled ( 'startDate' ) && $request->startDate !== '-NaN-26'
+                ? Carbon::parse ( $request->startDate )
+                : $defaultStartDate;
+
+            $endDate = $request->filled ( 'endDate' ) && $request->endDate !== '-25'
+                ? Carbon::parse ( $request->endDate )
+                : $defaultEndDate;
+        }
+        catch ( \Exception $e )
+        {
+            // If date parsing fails, use defaults
+            $startDate = $defaultStartDate;
+            $endDate   = $defaultEndDate;
+        }
 
         // +++
         $data = [ 
@@ -57,10 +81,6 @@ class LaporanLNPBTotalController extends Controller
         // +++
 
         // === Calculate ATB, APB, and Saldo Current Period === //
-        $currentDate = now ();
-        $startDate   = $currentDate->copy ()->subMonth ()->day ( 26 );
-        $endDate     = $currentDate->copy ()->day ( 25 );
-
         $ATB_Current = ATB::with ( 'masterDataSparepart.KategoriSparepart' )
             ->where ( 'id_proyek', $request->id_proyek )
             ->whereBetween ( 'tanggal', [ $startDate, $endDate ] )

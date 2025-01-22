@@ -7,6 +7,7 @@ use App\Models\ATB;
 use App\Models\Proyek;
 use App\Models\Saldo;  // Add this import
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class LaporanLNPBBulanBerjalanController extends Controller
 {
@@ -56,9 +57,24 @@ class LaporanLNPBBulanBerjalanController extends Controller
         // +++
 
         // === Calculate ATB, APB, and Saldo === //
-        $currentDate = now ();
-        $startDate   = $currentDate->copy ()->subMonth ()->day ( 26 );
-        $endDate     = $currentDate->copy ()->day ( 25 );
+        $currentDate      = now ();
+        $defaultStartDate = $currentDate->copy ()->subMonth ()->day ( 26 );
+        $defaultEndDate   = $currentDate->copy ()->day ( 25 );
+
+        // Validate and parse dates with error handling
+        try {
+            $startDate = $request->filled('startDate') && $request->startDate !== '-NaN-26' 
+                ? Carbon::parse($request->startDate) 
+                : $defaultStartDate;
+                
+            $endDate = $request->filled('endDate') && $request->endDate !== '-25'
+                ? Carbon::parse($request->endDate) 
+                : $defaultEndDate;
+        } catch (\Exception $e) {
+            // If date parsing fails, use defaults
+            $startDate = $defaultStartDate;
+            $endDate = $defaultEndDate;
+        }
 
         $ATB = ATB::with ( 'masterDataSparepart.KategoriSparepart' )
             ->where ( 'id_proyek', $request->id_proyek )
@@ -180,7 +196,7 @@ class LaporanLNPBBulanBerjalanController extends Controller
         ] );
     }
 
-    public function semuaBulanBerjalan_index ()
+    public function semuaBulanBerjalan_index ( Request $request )
     {
         $proyeks = Proyek::with ( "users" )
             ->orderBy ( "updated_at", "asc" )
@@ -224,9 +240,13 @@ class LaporanLNPBBulanBerjalanController extends Controller
         // +++
 
         // === Calculate ATB, APB, and Saldo === //
-        $currentDate = now ();
-        $startDate   = $currentDate->copy ()->subMonth ()->day ( 26 );
-        $endDate     = $currentDate->copy ()->day ( 25 );
+        $currentDate      = now ();
+        $defaultStartDate = $currentDate->copy ()->subMonth ()->day ( 26 );
+        $defaultEndDate   = $currentDate->copy ()->day ( 25 );
+
+        // Use request dates if provided, otherwise use defaults
+        $startDate = $request->filled ( 'startDate' ) ? Carbon::parse ( $request->startDate ) : $defaultStartDate;
+        $endDate   = $request->filled ( 'endDate' ) ? Carbon::parse ( $request->endDate ) : $defaultEndDate;
 
         $ATB = ATB::with ( 'masterDataSparepart.KategoriSparepart' )
             ->whereBetween ( 'tanggal', [ $startDate, $endDate ] )

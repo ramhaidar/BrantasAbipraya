@@ -24,3 +24,5 @@ yarn-error.log
 /BAK
 resources/views/dashboard/laporan/bulan_berjalan/partials/table.blade copy.php
 resources/views/dashboard/laporan/bulan_berjalan/partials/table.blade copy 2.php
+resources/views/test
+app/Http/Controllers/TestController.php

@@ -8,24 +8,44 @@ use Illuminate\Http\Request;
 
 class ProyekController extends Controller
 {
-    public function index ()
+    public function index ( Request $request )
     {
-        $proyeks = Proyek::with ( "users" )
-            ->orderBy ( "updated_at", "desc" )
-            ->orderBy ( "id", "desc" )
-            ->get ();
+        // Validate and set perPage to allowed values only
+        $allowedPerPage = [ 10, 25, 50, 100 ];
+        $perPage        = in_array ( (int) $request->get ( 'per_page' ), $allowedPerPage ) ? (int) $request->get ( 'per_page' ) : 10;
+
+        $query = Proyek::query ()
+            ->with ( 'users' )
+            ->orderBy ( $request->get ( 'sort', 'updated_at' ), $request->get ( 'direction', 'desc' ) );
+
+        if ( $request->has ( 'search' ) )
+        {
+            $search = $request->get ( 'search' );
+            $query->where ( function ($q) use ($search)
+            {
+                $q->where ( 'nama', 'like', "%{$search}%" );
+            } );
+        }
+
+        $proyeks = $query->paginate ( $perPage )
+            ->withQueryString ();
+
+        $TableData = $query->paginate ( $perPage )
+            ->withQueryString ();
 
         return view ( "dashboard.proyek.proyek", [ 
             "headerPage" => "Proyek",
             "page"       => "Data Proyek",
 
             "proyeks"    => $proyeks,
+            "TableData"  => $TableData,
         ] );
     }
 
     public function show ( $id )
     {
-        $proyek = Proyek::findOrFail ( $id );
+        $proyek = Proyek::with ( 'users' )
+            ->findOrFail ( $id );
 
         return response ()->json ( [ 
             'data' => $proyek,

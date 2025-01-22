@@ -31,7 +31,10 @@ class SPBProyekController extends Controller
 
     public function getData ( Request $request )
     {
-        $query = RKB::with ( 'proyek' )->where ( 'is_approved', true )->select ( 'rkb.*' );
+        $query = RKB::with ( 'proyek' )
+            ->where ( 'is_approved_vp', true )
+            ->where ( 'is_approved_svp', true )
+            ->select ( 'rkb.*' );
 
         // Filter pencarian
         if ( $search = $request->input ( 'search.value' ) )
@@ -74,7 +77,9 @@ class SPBProyekController extends Controller
         $start  = $request->input ( 'start', 0 );
         $length = $request->input ( 'length', 10 );
 
-        $totalRecords    = RKB::where ( 'is_approved', true )->count (); // Total hanya untuk data "Disetujui"
+        $totalRecords    = RKB::where ( 'is_approved_vp', true )
+            ->where ( 'is_approved_svp', true )
+            ->count ();
         $filteredRecords = $query->count ();
 
         $rkbData = $query->skip ( $start )->take ( $length )->get ();

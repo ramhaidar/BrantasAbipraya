@@ -1071,6 +1071,17 @@ Route::middleware ( 'auth' )
             )->where ( 'id', '[0-9]+' )
                 ->name ( 'evaluate' );
 
+            // General RKB Approval Routes
+            Route::post (
+                '/approve/vp/{id}',
+                [ EvaluasiDetailRKBGeneralController::class, 'approveVP' ]
+            )->where ( 'id', '[0-9]+' )->name ( 'approve.vp' );
+
+            Route::post (
+                '/approve/svp/{id}',
+                [ EvaluasiDetailRKBGeneralController::class, 'approveSVP' ]
+            )->where ( 'id', '[0-9]+' )->name ( 'approve.svp' );
+
         } );
     } );
 
@@ -1159,6 +1170,17 @@ Route::middleware ( 'auth' )
                 [ EvaluasiDetailRKBUrgentController::class, 'getDokumentasi' ]
             )->where ( 'id', '[0-9]+' )
                 ->name ( 'dokumentasi' );
+
+            // Urgent RKB Approval Routes
+            Route::post (
+                '/approve/vp/{id}',
+                [ EvaluasiDetailRKBUrgentController::class, 'approveVP' ]
+            )->where ( 'id', '[0-9]+' )->name ( 'approve.vp' );
+
+            Route::post (
+                '/approve/svp/{id}',
+                [ EvaluasiDetailRKBUrgentController::class, 'approveSVP' ]
+            )->where ( 'id', '[0-9]+' )->name ( 'approve.svp' );
 
             // Rute Timeline Evaluasi Urgent [TimelineEvaluasiUrgentController]
             Route::prefix ( 'timeline' )

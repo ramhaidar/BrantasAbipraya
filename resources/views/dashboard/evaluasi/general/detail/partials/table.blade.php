@@ -65,8 +65,16 @@
                             <td class="text-center">{{ $detail->quantity_requested }}</td>
                             <td class="text-center">
                                 @php
-                                    $backgroundColor = $rkb->is_approved ? 'bg-primary-subtle' : ($detail->quantity_approved !== null ? 'bg-success-subtle' : 'bg-warning-subtle');
-                                    $disabled = $rkb->is_approved || $rkb->is_evaluated ? 'disabled' : '';
+                                    $backgroundColor = '';
+                                    if ($rkb->is_approved_svp) {
+                                        $backgroundColor = 'bg-primary-subtle';
+                                    } elseif ($rkb->is_approved_vp) {
+                                        $backgroundColor = 'bg-info-subtle';
+                                    } else {
+                                        $backgroundColor = $detail->quantity_approved !== null ? 'bg-success-subtle' : 'bg-warning-subtle';
+                                    }
+
+                                    $disabled = $rkb->is_approved_vp || $rkb->is_approved_svp || $rkb->is_evaluated ? 'disabled' : '';
                                 @endphp
                                 <input class="form-control text-center {{ $backgroundColor }}" name="quantity_approved[{{ $detail->id }}]" type="number" value="{{ $detail->quantity_approved ?? $detail->quantity_requested }}" {{ $disabled }} min="0">
                             </td>

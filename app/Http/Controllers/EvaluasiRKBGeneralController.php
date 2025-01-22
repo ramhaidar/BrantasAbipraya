@@ -90,14 +90,16 @@ class EvaluasiRKBGeneralController extends Controller
         {
             $isFinalized = $item->is_finalized ?? false;
             $isEvaluated = $item->is_evaluated ?? false;
-            $isApproved = $item->is_approved ?? false;
+            $isApprovedVp = $item->is_approved_vp ?? false;
+            $isApprovedSvp = $item->is_approved_svp ?? false;
 
             $status = match ( true )
             {
-                $isFinalized && $isEvaluated && $isApproved => 'Disetujui',
-                ! $isFinalized && ! $isEvaluated && ! $isApproved => 'Pengajuan',
-                $isFinalized && $isEvaluated && ! $isApproved => 'Menunggu Approval',
-                $isFinalized && ! $isEvaluated && ! $isApproved => 'Evaluasi',
+                $isFinalized && $isEvaluated && $isApprovedVp && $isApprovedSvp => 'Disetujui',
+                ! $isFinalized => 'Pengajuan',
+                $isFinalized && $isEvaluated && $isApprovedVp && ! $isApprovedSvp => 'Menunggu Approval SVP',
+                $isFinalized && $isEvaluated && ! $isApprovedVp => 'Menunggu Approval VP',
+                $isFinalized && ! $isEvaluated => 'Evaluasi',
 
                 default => 'Tidak Diketahui',
             };

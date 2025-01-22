@@ -123,9 +123,52 @@ class EvaluasiDetailRKBGeneralController extends Controller
             ->with ( "success", "RKB Berhasil di Evaluasi!" );
     }
 
-    public function approve ( Request $request, $id_rkb )
+    public function approveVP ( Request $request, $id_rkb )
     {
         $rkb = RKB::find ( $id_rkb );
+
+        // Check if can be approved by VP
+        if ( ! $rkb->is_evaluated )
+        {
+            return redirect ()
+                ->back ()
+                ->with ( 'error', 'RKB harus dievaluasi terlebih dahulu!' );
+        }
+
+        if ( $rkb->is_approved_vp )
+        {
+            return redirect ()
+                ->back ()
+                ->with ( 'error', 'RKB sudah di-approve oleh VP!' );
+        }
+
+        $rkb->is_approved_vp = true;
+        $rkb->vp_approved_at = now ();
+        $rkb->save ();
+
+        return redirect ()
+            ->route ( 'evaluasi_rkb_general.detail.index', $id_rkb )
+            ->with ( 'success', 'RKB Berhasil di Approve oleh VP!' );
+    }
+
+    public function approveSVP ( Request $request, $id_rkb )
+    {
+        $rkb = RKB::find ( $id_rkb );
+
+        // Check if can be approved by SVP
+        if ( ! $rkb->is_approved_vp )
+        {
+            return redirect ()
+                ->back ()
+                ->with ( 'error', 'RKB harus di-approve oleh VP terlebih dahulu!' );
+        }
+
+        if ( $rkb->is_approved_svp )
+        {
+            return redirect ()
+                ->back ()
+                ->with ( 'error', 'RKB sudah di-approve oleh SVP!' );
+        }
 
         // Update all DetailRKBGeneral records for this RKB
         DetailRKBGeneral::whereHas ( 'linkRkbDetails.linkAlatDetailRkb.rkb', function ($query) use ($id_rkb)
@@ -136,11 +179,12 @@ class EvaluasiDetailRKBGeneralController extends Controller
             $detail->incrementQuantityRemainder ( $detail->quantity_approved );
         } );
 
-        $rkb->is_approved = true;
+        $rkb->is_approved_svp = true;
+        $rkb->svp_approved_at = now ();
         $rkb->save ();
 
         return redirect ()
             ->route ( 'evaluasi_rkb_general.detail.index', $id_rkb )
-            ->with ( 'success', 'RKB Berhasil di Approve!' );
+            ->with ( 'success', 'RKB Berhasil di Approve oleh SVP!' );
     }
 }

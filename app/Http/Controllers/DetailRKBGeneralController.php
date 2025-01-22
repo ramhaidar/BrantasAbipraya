@@ -285,7 +285,10 @@ class DetailRKBGeneralController extends Controller
                 'master_data_sparepart.merk',
                 'rkb.is_finalized',
                 'rkb.is_evaluated',
-                'rkb.is_approved',
+                'rkb.is_approved_vp',
+                'rkb.is_approved_svp',
+                'rkb.vp_approved_at',
+                'rkb.svp_approved_at',
             ] )
             ->join ( 'link_rkb_detail', 'detail_rkb_general.id', '=', 'link_rkb_detail.id_detail_rkb_general' )
             ->join ( 'link_alat_detail_rkb', 'link_rkb_detail.id_link_alat_detail_rkb', '=', 'link_alat_detail_rkb.id' )
@@ -378,7 +381,10 @@ class DetailRKBGeneralController extends Controller
                 'satuan'              => $item->satuan,
                 'is_finalized'        => $item->is_finalized ? 1 : 0,
                 'is_evaluated'        => $item->is_evaluated ? 1 : 0,
-                'is_approved'         => $item->is_approved ? 1 : 0,
+                'is_approved_vp'      => $item->is_approved_vp ? 1 : 0,
+                'is_approved_svp'     => $item->is_approved_svp ? 1 : 0,
+                'vp_approved_at'      => $item->vp_approved_at,
+                'svp_approved_at'     => $item->svp_approved_at,
                 'aksi'                => '', // Actions rendered on the frontend
             ];
         } );

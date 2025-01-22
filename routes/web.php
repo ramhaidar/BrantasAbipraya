@@ -73,22 +73,21 @@ Route::get ( '/dashboard', [ DashboardController::class, 'index' ] )
     ->name ( 'dashboard' );
 
 // Rute Users [UserController]
-Route::prefix ( 'users' )->middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )->group ( function ()
-{
-    Route::get ( '/', [ UserController::class, 'index' ] )
-        ->name ( 'users' );
-    Route::get ( '/{user}', [ UserController::class, 'showByID' ] )
-        ->where ( 'user', '[0-9]+' )
-        ->name ( 'api.showUserByID' );
-    Route::post ( '/edit/{user}', [ UserController::class, 'update' ] )
-        ->where ( 'user', '[0-9]+' )
-        ->name ( 'user.post.update' );
-    Route::post ( '/add', [ UserController::class, 'store' ] )
-        ->name ( 'user.post.store' );
-    Route::delete ( '/delete/{user}', [ UserController::class, 'destroy' ] )
-        ->where ( 'user', '[0-9]+' )
-        ->name ( 'user.delete.destroy' );
-} );
+Route::prefix('users')->middleware([CheckRole::class . ':Admin,Pegawai,Boss'])->group(function () {
+    Route::get('/', [UserController::class, 'index'])
+        ->name('users');
+    Route::get('/{user}', [UserController::class, 'showByID'])
+        ->where('user', '[0-9]+')
+        ->name('api.showUserByID');
+    Route::put('/edit/{user}', [UserController::class, 'update']) // Changed from post to put
+        ->where('user', '[0-9]+')
+        ->name('user.put.update');
+    Route::post('/add', [UserController::class, 'store'])
+        ->name('user.post.store');
+    Route::delete('/delete/{user}', [UserController::class, 'destroy'])
+        ->where('user', '[0-9]+')
+        ->name('user.delete.destroy');
+});
 
 // Rute ATB [ATBController]
 Route::middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )

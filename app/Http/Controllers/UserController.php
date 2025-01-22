@@ -5,18 +5,28 @@ use App\Models\User;
 use App\Models\Proyek;
 use App\Models\UserProyek;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
     public function index ()
     {
+        $proyeks = Proyek::with ( "users" )
+            ->orderBy ( "updated_at", "desc" )
+            ->orderBy ( "id", "asc" )
+            ->get ();
+        $users   = User::orderBy ( 'updated_at', 'desc' )
+            ->orderBy ( 'id', 'asc' )
+            ->get ();
+
         return view (
             'dashboard.users.user',
             [ 
                 'headerPage' => 'User',
                 'page'       => 'Data User',
-                "proyeks"    => Proyek::with ( "users" )->orderBy ( "updated_at" )->get (),
-                'users'      => User::orderByDesc ( 'updated_at' )->get (),
+
+                'proyeks'    => $proyeks,
+                'users'      => $users,
             ]
         );
     }
@@ -67,58 +77,53 @@ class UserController extends Controller
 
     public function update ( Request $request, User $user )
     {
-        // Validate incoming request
-        $credentials = $request->validate ( [ 
-            'name'     => 'required',
-            'username' => 'required',
-            'sex'      => 'required|in:Laki-laki,Perempuan',
-            'role'     => 'required|in:Admin,Pegawai,Boss',
-            'proyek'   => 'array|nullable',
-            'phone'    => 'required|min:8|unique:users,phone,' . $user->id,
+        $validatedData = $request->validate ( [ 
+            'name'     => 'required|max:255',
+            'username' => 'required|max:255|unique:users,username,' . $user->id,
+            'sex'      => 'required',
+            'role'     => 'required',
+            'phone'    => 'required',
             'email'    => 'required|email|unique:users,email,' . $user->id,
+            'password' => 'nullable|min:8',
+            'proyek'   => 'nullable|array'
         ] );
 
-        // Validate and hash password if provided
-        if ( $request->password )
+
+        try
         {
-            $credentials += $request->validate ( [ 'password' => 'required|min:8' ] );
-            $credentials[ 'password' ] = bcrypt ( $request->password );
-        }
+            DB::beginTransaction ();
 
-        // Track current projects for the user
-        $currentProyekIds = $user->proyek ()->pluck ( 'id_proyek' )->toArray ();
-
-        // Get the new projects from the request
-        $newProyekIds = $request->proyek ?? [];
-
-        // Find projects to remove
-        $proyeksToRemove = array_diff ( $currentProyekIds, $newProyekIds );
-        if ( ! empty ( $proyeksToRemove ) )
-        {
-            UserProyek::where ( 'id_user', $user->id )
-                ->whereIn ( 'id_proyek', $proyeksToRemove )
-                ->delete ();
-        }
-
-        // Update or create new projects
-        foreach ( $newProyekIds as $proyek )
-        {
-            UserProyek::updateOrCreate (
-                [ 'id_user' => $user->id, 'id_proyek' => $proyek ],
-                [ 'id_user' => $user->id, 'id_proyek' => $proyek ]
+            // Remove proyek from data to be updated on users table
+            $userData = array_filter (
+                array_diff_key ( $validatedData, [ 'proyek' => '' ] ),
+                function ($value)
+                {
+                    return $value !== null;
+                }
             );
+
+            $user->update ( $userData );
+
+            // Handle proyek relationship separately
+            if ( isset ( $validatedData[ 'proyek' ] ) )
+            {
+                $user->proyek ()->sync ( $validatedData[ 'proyek' ] );
+            }
+
+            DB::commit ();
+            return redirect ()->back ()->with ( 'success', 'User berhasil diperbarui' );
         }
-
-        // Update user record
-        $user->update ( $credentials );
-
-        // Return response
-        return back ()->with ( 'success', 'Berhasil mengubah data user' );
+        catch ( \Exception $e )
+        {
+            DB::rollback ();
+            \Log::error ( 'User update error: ' . $e->getMessage () );
+            return redirect ()->back ()->with ( 'error', 'Terjadi kesalahan saat memperbarui user' );
+        }
     }
 
     public function destroy ( User $user )
     {
-        $msg = 'Akun ' . $user->role . ' berhasil dihapus';
+        $msg = 'User ' . $user->name . ' (' . $user->username . ') berhasil dihapus';
         $user->delete ();
         return back ()->with ( 'success', $msg );
     }

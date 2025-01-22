@@ -73,6 +73,11 @@ class User extends Authenticatable
         return $this->belongsToMany ( Proyek::class, 'user_proyek', 'id_user', 'id_proyek' );
     }
 
+    public function proyeks ()
+    {
+        return $this->belongsToMany ( Proyek::class, 'user_proyek', 'id_user', 'id_proyek' );
+    }
+
     public function alat ()
     {
         return $this->hasMany ( Alat::class, 'id_user' ); // Relasi untuk mendapatkan semua alat milik user ini

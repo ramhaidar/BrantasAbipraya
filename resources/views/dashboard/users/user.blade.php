@@ -33,5 +33,9 @@
 @endsection
 
 @push('scripts_2')
-    <script></script>
+    <script>
+        function showModalAdd() {
+            $('#modalForAdd').modal('show');
+        }
+    </script>
 @endpush

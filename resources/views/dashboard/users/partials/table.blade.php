@@ -35,9 +35,13 @@
                     <td class="text-center">{{ $user->role }}</td>
                     <td class="text-center">{{ $user->phone }}</td>
                     <td class="text-center">{{ $user->email }}</td>
-                    <td class=center class="text-center">
-                        <button class="btn btn-danger" data-bs-target=#modalForDelete data-bs-toggle=modal onclick="validationSecond({{ $user->id }},'{{ $user->name }}')"><i class="bi bi-trash3"></i></button>
-                        <a class="btn btn-warning ms-3" data-bs-target=#modalForEdit data-bs-toggle=modal onclick="fillFormEdit({{ $user->id }})"><i class="bi bi-pencil-square"></i></a>
+                    <td class="text-center">
+                        <button class="btn btn-danger deleteBtn" data-id="{{ $user->id }}" type="button">
+                            <i class="bi bi-trash3"></i>
+                        </button>
+                        <a class="btn btn-warning ms-3" data-bs-target=#modalForEdit data-bs-toggle=modal onclick="fillFormEdit({{ $user->id }})">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
                     </td>
                 </tr>
             @endforeach
@@ -61,6 +65,7 @@
                     [10, 25, 50, "All"]
                 ],
                 order: [],
+                ordering: false,
             });
         });
     </script>

@@ -1,67 +1,64 @@
-<!-- Modal Delete -->
-<div class="fade modal" id=modalForDelete data-bs-backdrop=static data-bs-keyboard=false aria-hidden=true aria-labelledby=staticBackdropLabel tabindex=-1>
-    <div class="modal-dialog modal-dialog-centered">
-        <div class=modal-content>
-            <div class=modal-header>
-                <h1 class="fs-5 modal-title" id=staticBackdropLabel>Form Konfirmasi</h1>
-                <button class=btn-close type=button onclick=closeModalDelete()></button>
+@push('styles_3')
+@endpush
+
+<div class="modal fade" id="modalForDelete" aria-hidden="true" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title w-100 pb-2">Konfirmasi Hapus</h5>
+                <button class="btn-close" data-bs-dismiss="modal" type="button"></button>
             </div>
-            <form method=POST>@csrf @method('DELETE')
-                <div class=modal-body>
-                    <div class=form-group>
-                        <div class="mb-3 mt-3">
-                            <p class="fw-bold form-label gap-0" for=confirm_name required>Ketik Ulang "
-                            <p class="m-0 text-primary" id=model-konfirmasi></p>"</p>
-                            <input class="form-control border-dark" id=confirm_name name=name required>
-                        </div>
-                    </div>
-                </div>
-                <div class=modal-footer><a class="btn btn-secondary" onclick=closeModalDelete()>Batal</a>
-                    <button class="btn btn-danger" type=submit>Hapus</button>
-                </div>
-            </form>
+            <div class="modal-body">
+                <span>Apakah Anda yakin ingin menghapus user ini?</span>
+                <br class="p-0 m-0">
+                <span>Tindakan ini tidak dapat dibatalkan!</span>
+            </div>
+            <div class="modal-footer d-flex w-100 justify-content-end">
+                <button class="btn btn-secondary me-2 w-25" data-bs-dismiss="modal">Batal</button>
+                <button class="btn btn-danger w-25" id="confirmDeleteButton">Hapus</button>
+            </div>
         </div>
     </div>
 </div>
 
+<form id="deleteForm" style="display: none;" method="POST">
+    @csrf
+    @method('DELETE')
+</form>
+
 @push('scripts_3')
     <script>
+        $(document).ready(function() {
+            // Event listener for delete buttons
+            $('.deleteBtn').on('click', function() {
+                const id = $(this).data('id');
+                showModalDelete(id);
+            });
+
+            // Handle confirmation button click
+            $('#confirmDeleteButton').on('click', function() {
+                const id = $(this).data('id');
+                if (id) {
+                    deleteWithForm(id);
+                }
+            });
+        });
+
+        function showModalDelete(id) {
+            if (id) {
+                $('#confirmDeleteButton').data('id', id);
+                $('#modalForDelete').modal('show');
+            }
+        }
+
         function closeModalDelete() {
             $('#modalForDelete').modal('hide');
         }
 
-        function showModalDelete() {
-            $('#modalForDelete').modal('show');
-        }
-
-        const validationSecond = (id, name) => {
-            document.querySelector('#model-konfirmasi').innerText = name;
-            document.querySelector('#modalForDelete form').action = `/users/delete/${id}`;
-        };
-
-        document.querySelector('#modalForDelete form').addEventListener('submit', function(event) {
-            var confirmationText = document.getElementById('model-konfirmasi').innerText.trim();
-            var inputName = document.querySelector('#confirm_name');
-            if (inputName.value.trim() !== confirmationText) {
-                event.preventDefault();
-                showSweetAlert2('Masukkan tidak sesuai. Silakan coba lagi!', 'error')
-            }
-        });
-
-        function showSweetAlert2(msg, icon) {
-            let title = '';
-            if (icon == 'success') {
-                title = 'Transaksi Berhasil!';
-                msg = `Berhasil ${msg}.`;
-            }
-            Swal.fire({
-                html: msg,
-                icon: icon,
-                confirmButtonText: 'Oke',
-                customClass: {
-                    popup: 'alert-custom-css'
-                }
-            });
+        function deleteWithForm(id) {
+            const form = document.getElementById('deleteForm');
+            form.action = `/users/delete/${id}`;
+            form.submit();
         }
     </script>
 @endpush

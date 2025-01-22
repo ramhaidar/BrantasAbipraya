@@ -1,81 +1,118 @@
+@push('styles_3')
+@endpush
+
 <!-- Modal Add -->
-<div class="fade modal" id=modalForAdd data-bs-backdrop=static data-bs-keyboard=false aria-hidden=true aria-labelledby=staticBackdropLabel tabindex=-1>
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-        <div class=modal-content>
-            <div class=modal-header>
-                <h1 class="fs-5 modal-title" id=modalForAddLabel>Tambah Data User</h1>
-                <button class=btn-close type=button onclick=closeModalAdd()></button>
+<div class="fade modal" id="modalForAdd" aria-hidden="true" aria-labelledby="staticBackdropLabel" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content rounded-4">
+            <div class="pt-3 px-3 m-0 d-flex w-100 justify-content-between">
+                <h5 class="modal-title w-100 pb-2" id="modalForAddLabel">Tambah Data User</h1>
+                    <button class="btn-close" data-bs-dismiss="modal" type="button" aria-label="Close"></button>
             </div>
-            <form class="w-100 d-flex align-items-center flex-column gap-3" style=overflow-y:auto method=POST action=/users/add>@csrf
-                <div class="w-100 d-flex align-items-center flex-column modal-body">
-                    <div class="w-100 form-floating mb-3 rounded">
-                        <input class="border-dark-subtle border form-control" id=add_name name=name placeholder="Nama anda" maxlength=255 required>
-                        <label for=add_name style="width:calc(100% - 20px)">Nama<span class="fw-bold text-danger">*</span></label>
-                    </div>
-                    <div class="w-100 form-floating mb-3 rounded">
-                        <input class="border-dark-subtle border form-control" id=add_username name=username placeholder="Nama anda" maxlength=255 required autocomplete="username">
-                        <label for=add_username style="width:calc(100% - 20px)">Username<span class="fw-bold text-danger">*</span></label>
-                    </div>
-                    <div class="w-100 mb-3 rounded">
-                        <label class=form-label for=tipe>Jenis Kelamin</label>
-                        <div class=input-group>
-                            <select class="form-control" id=add_sex name=sex required>
-                                <option value=Laki-laki>Laki-Laki</option>
-                                <option value=Perempuan>Perempuan</option>
+            <hr class="p-0 m-0 border border-secondary-subtle border-2 opacity-50">
+            <form class="needs-validation" id="userForm" style="overflow-y: auto" novalidate method="POST" action="/users/add">
+                @csrf
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label required" for="add_name">Nama</label>
+                            <input class="form-control" id="add_name" name="name" type="text" placeholder="Nama" required>
+                            <div class="invalid-feedback">Nama diperlukan.</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label required" for="add_username">Username</label>
+                            <input class="form-control" id="add_username" name="username" type="text" placeholder="Username" required>
+                            <div class="invalid-feedback">Username diperlukan.</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label required" for="add_sex">Jenis Kelamin</label>
+                            <select class="form-control" id="add_sex" name="sex" required>
+                                <option value="">Pilih Jenis Kelamin</option>
+                                <option value="Laki-laki">Laki-Laki</option>
+                                <option value="Perempuan">Perempuan</option>
+                            </select>
+                            <div class="invalid-feedback">Jenis Kelamin diperlukan.</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label required" for="add_role">Role</label>
+                            <select class="form-control" id="add_role" name="role" required>
+                                <option value="">Pilih Role</option>
+                                <option value="Admin">Admin</option>
+                                <option value="Pegawai">Pegawai</option>
+                                <option value="Boss">Boss</option>
+                            </select>
+                            <div class="invalid-feedback">Role diperlukan.</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label" for="add_proyek">Proyek</label>
+                            <select class="form-control w-100" id="add_proyek" name="proyek[]" multiple="multiple">
+                                @foreach ($proyeks as $item)
+                                    <option value="{{ $item->id }}">{{ $item->nama }}</option>
+                                @endforeach
                             </select>
                         </div>
-                    </div>
-                    <div class="w-100 mb-3 rounded">
-                        <label class=form-label for=role>Pilih Role</label>
-                        <div class=input-group>
-                            <select class="form-control" id=add_role name=role required>
-                                <option value=Admin>Admin</option>
-                                <option value=Pegawai>Pegawai</option>
-                                <option value=Boss>Boss</option>
-                            </select>
+
+                        <div class="col-12">
+                            <label class="form-label required" for="add_phone">Phone</label>
+                            <input class="form-control" id="add_phone" name="phone" type="text" placeholder="Phone" required>
+                            <div class="invalid-feedback">Phone diperlukan.</div>
                         </div>
-                    </div>
-                    <div class="w-100 mb-3 rounded">
-                        <label class="form-label w-100" for="proyek">Pilih Proyek</label>
-                        <select class="form-control w-100" id="add_proyek" name="proyek[]" style="width: 100%" multiple="multiple">
-                            @foreach ($proyeks as $item)
-                                <option value="{{ $item->id }}">{{ $item->nama }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="mb-1"></div>
-                    <div class="w-100 form-floating mb-3 rounded">
-                        <input class="border-dark-subtle border form-control" id=add_phone name=phone placeholder="Nama anda" maxlength=255 required>
-                        <label for=add_phone style="width:calc(100% - 20px)">Phone<span class="fw-bold text-danger">*</span></label>
-                    </div>
-                    <div class="w-100 form-floating mb-3 rounded">
-                        <input class="border-dark-subtle border form-control" id=add_email name=email type=email placeholder="Nama anda" maxlength=255 required>
-                        <label for=add_email style="width:calc(100% - 20px)">Email<span class="fw-bold text-danger">*</span></label>
-                    </div>
-                    <div class="w-100 form-floating mb-3 rounded">
-                        <input class="border-dark-subtle border form-control" id=add_password name=password type=password placeholder="Password anda" minlength=8 autocomplete="new-password">
-                        <label for=add_password style="width:calc(100% - 20px)">Password</label>
+
+                        <div class="col-12">
+                            <label class="form-label required" for="add_email">Email</label>
+                            <input class="form-control" id="add_email" name="email" type="email" placeholder="Email" required>
+                            <div class="invalid-feedback">Email diperlukan.</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label required" for="add_password">Password</label>
+                            <input class="form-control" id="add_password" name="password" type="password" placeholder="Password" required minlength="8">
+                            <div class="invalid-feedback">Password minimal 8 karakter diperlukan.</div>
+                        </div>
                     </div>
                 </div>
-                <div class="w-100 d-flex justify-content-between modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss=modal type=button>Batal</button>
-                    <button class="btn btn-primary" type=submit>Simpan</button>
+
+                <div class="modal-footer d-flex w-100 justify-content-end">
+                    <button class="btn btn-secondary me-2 w-25" type="reset">Reset</button>
+                    <button class="btn btn-primary w-25" id="add-user" type="submit">Simpan</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-@push('scripts_4')
+@push('scripts_3')
     <script>
-        $(document).ready(function() {
-            $('#add_sex').select2({
-                placeholder: "Pilih opsi",
-                width: '100%',
-                dropdownParent: $('#modalForAdd')
+        (() => {
+            'use strict'
+
+            const form = document.querySelector('#userForm');
+
+            form.addEventListener('submit', (event) => {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
             });
 
-            $('#add_role').select2({
+            form.querySelectorAll('input, select').forEach((input) => {
+                input.addEventListener('blur', () => {
+                    if (!input.checkValidity()) {
+                        input.classList.add('is-invalid');
+                    } else {
+                        input.classList.remove('is-invalid');
+                        input.classList.add('is-valid');
+                    }
+                });
+            });
+
+            // Initialize Select2
+            $('#add_sex, #add_role').select2({
                 placeholder: "Pilih opsi",
                 width: '100%',
                 dropdownParent: $('#modalForAdd')
@@ -87,19 +124,16 @@
                 closeOnSelect: false,
                 minimumResultsForSearch: 0,
                 dropdownParent: $('#modalForAdd'),
-            }).on("select2:select", function(e) {
-                $(this).select2('open');
-            }).on("select2:unselect", function(e) {
+                width: '100%'
+            }).on("select2:select select2:unselect", function() {
                 $(this).select2('open');
             });
-        });
 
-        function closeModalAdd() {
-            $('#modalForAdd').modal('hide');
-        }
-
-        function showModalAdd() {
-            $('#modalForAdd').modal('show');
-        }
+            $('#modalForAdd').on('hidden.bs.modal', function() {
+                $(this).find('form')[0].reset();
+                $(this).find('form').removeClass('was-validated');
+                $('#add_sex, #add_role, #add_proyek').val(null).trigger('change');
+            });
+        })()
     </script>
 @endpush

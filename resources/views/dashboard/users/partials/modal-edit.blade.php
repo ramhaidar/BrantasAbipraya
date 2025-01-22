@@ -1,64 +1,84 @@
+@push('styles_3')
+@endpush
+
 <!-- Modal Edit -->
-<div class="fade modal" id=modalForEdit data-bs-backdrop=static data-bs-keyboard=false aria-hidden=true aria-labelledby=staticBackdropLabel tabindex=-1>
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-        <div class=modal-content>
-            <div class=modal-header>
-                <h1 class="fs-5 modal-title" id=modalForEditLabel>Ubah Data User</h1>
-                <button class=btn-close data-bs-dismiss="modal" type=button></button>
+<div class="fade modal" id="modalForEdit" aria-hidden="true" aria-labelledby="staticBackdropLabel" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content rounded-4">
+            <div class="pt-3 px-3 m-0 d-flex w-100 justify-content-between">
+                <h5 class="modal-title w-100 pb-2" id="modalForEditLabel">Ubah Data User</h5>
+                <button class="btn-close" data-bs-dismiss="modal" type="button" aria-label="Close"></button>
             </div>
-            <form class="w-100 d-flex align-items-center flex-column gap-3" style=overflow-y:auto method=POST>@csrf
-                <div class="w-100 d-flex flex-column modal-body">
-                    <div class="w-100 form-floating mb-3 rounded">
-                        <input class="border-dark-subtle border form-control" id=edit_name name=name placeholder="Nama anda" maxlength=255 required>
-                        <label for=edit_name style="width:calc(100% - 20px)">Nama<span class="fw-bold text-danger">*</span></label>
-                    </div>
-                    <div class="w-100 form-floating mb-3 rounded">
-                        <input class="border-dark-subtle border form-control" id=edit_username name=username placeholder="Nama anda" maxlength=255 required autocomplete="username">
-                        <label for=edit_username style="width:calc(100% - 20px)">Username<span class="fw-bold text-danger">*</span></label>
-                    </div>
-                    <div class="w-100 mb-3 rounded">
-                        <label class=form-label for=sex>Jenis Kelamin</label>
-                        <div class=input-group>
-                            <select class="form-control" id=edit_sex name=sex required>
-                                <option value=Laki-laki>Laki-Laki</option>
-                                <option value=Perempuan>Perempuan</option>
+            <hr class="p-0 m-0 border border-secondary-subtle border-2 opacity-50">
+            <form class="needs-validation" id="editUserForm" style="overflow-y: auto" novalidate method="POST">
+                @csrf
+                @method('PUT')
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label required" for="edit_name">Nama</label>
+                            <input class="form-control" id="edit_name" name="name" type="text" placeholder="Nama" required>
+                            <div class="invalid-feedback">Nama diperlukan.</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label required" for="edit_username">Username</label>
+                            <input class="form-control" id="edit_username" name="username" type="text" placeholder="Username" required>
+                            <div class="invalid-feedback">Username diperlukan.</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label required" for="edit_sex">Jenis Kelamin</label>
+                            <select class="form-control" id="edit_sex" name="sex" required>
+                                <option value="">Pilih Jenis Kelamin</option>
+                                <option value="Laki-laki">Laki-Laki</option>
+                                <option value="Perempuan">Perempuan</option>
+                            </select>
+                            <div class="invalid-feedback">Jenis Kelamin diperlukan.</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label required" for="edit_role">Role</label>
+                            <select class="form-control" id="edit_role" name="role" required>
+                                <option value="">Pilih Role</option>
+                                <option value="Admin">Admin</option>
+                                <option value="Pegawai">Pegawai</option>
+                                <option value="Boss">Boss</option>
+                            </select>
+                            <div class="invalid-feedback">Role diperlukan.</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label" for="edit_proyek">Proyek</label>
+                            <select class="form-control w-100" id="edit_proyek" name="proyek[]" multiple="multiple">
+                                @foreach ($proyeks as $item)
+                                    <option value="{{ $item->id }}">{{ $item->nama }}</option>
+                                @endforeach
                             </select>
                         </div>
-                    </div>
-                    <div class="w-100 mb-3 rounded">
-                        <label class=form-label for=role>Pilih role</label>
-                        <div class=input-group>
-                            <select class="form-control" id=edit_role name=role required>
-                                <option value=Admin>Admin</option>
-                                <option value=Pegawai>Pegawai</option>
-                                <option value=Boss>Boss</option>
-                            </select>
+
+                        <div class="col-12">
+                            <label class="form-label required" for="edit_phone">Phone</label>
+                            <input class="form-control" id="edit_phone" name="phone" type="text" placeholder="Phone" required>
+                            <div class="invalid-feedback">Phone diperlukan.</div>
                         </div>
-                    </div>
-                    <div class="w-100 mb-3 rounded">
-                        <label class="form-label w-100" for="proyek">Pilih Proyek</label>
-                        <select class="form-control w-100" id="edit_proyek" name="proyek[]" style="width: 100%" multiple="multiple">
-                            @foreach ($proyeks as $item)
-                                <option value="{{ $item->id }}">{{ $item->nama }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="w-100 form-floating mb-3 rounded">
-                        <input class="border-dark-subtle border form-control" id=edit_phone name=phone placeholder="Nama anda" maxlength=255 required>
-                        <label for=edit_phone style="width:calc(100% - 20px)">Phone<span class="fw-bold text-danger">*</span></label>
-                    </div>
-                    <div class="w-100 form-floating mb-3 rounded">
-                        <input class="border-dark-subtle border form-control" id=edit_email name=email type=email placeholder="Nama anda" maxlength=255 required>
-                        <label for=edit_email style="width:calc(100% - 20px)">Email<span class="fw-bold text-danger">*</span></label>
-                    </div>
-                    <div class="w-100 form-floating mb-3 rounded">
-                        <input class="border-dark-subtle border form-control" id=edit_password name=password type=password placeholder="Password anda" minlength=8 autocomplete="current-password">
-                        <label for=edit_password style="width:calc(100% - 20px)">Password</label>
+
+                        <div class="col-12">
+                            <label class="form-label required" for="edit_email">Email</label>
+                            <input class="form-control" id="edit_email" name="email" type="email" placeholder="Email" required>
+                            <div class="invalid-feedback">Email diperlukan.</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label" for="edit_password">Password</label>
+                            <input class="form-control" id="edit_password" name="password" type="password" placeholder="Password" minlength="8">
+                            <div class="invalid-feedback">Password minimal 8 karakter.</div>
+                        </div>
                     </div>
                 </div>
-                <div class="w-100 d-flex justify-content-between modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss=modal type=button>Batal</button>
-                    <button class="btn btn-primary" type=submit>Simpan</button>
+                <div class="modal-footer d-flex w-100 justify-content-end">
+                    <button class="btn btn-secondary me-2 w-25" data-bs-dismiss="modal" type="button">Batal</button>
+                    <button class="btn btn-primary w-25" id="update-user" type="submit">Simpan</button>
                 </div>
             </form>
         </div>
@@ -67,7 +87,30 @@
 
 @push('scripts_3')
     <script>
-        $(document).ready(function() {
+        (() => {
+            'use strict'
+
+            const editForm = document.querySelector('#editUserForm');
+
+            editForm.addEventListener('submit', (event) => {
+                if (!editForm.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                editForm.classList.add('was-validated');
+            });
+
+            editForm.querySelectorAll('input, select').forEach((input) => {
+                input.addEventListener('blur', () => {
+                    if (!input.checkValidity()) {
+                        input.classList.add('is-invalid');
+                    } else {
+                        input.classList.remove('is-invalid');
+                        input.classList.add('is-valid');
+                    }
+                });
+            });
+
             // Initialize Select2
             $('#edit_sex, #edit_role').select2({
                 placeholder: "Pilih opsi",
@@ -80,48 +123,34 @@
                 allowClear: true,
                 closeOnSelect: false,
                 minimumResultsForSearch: 0,
-                dropdownParent: $('#modalForEdit')
+                dropdownParent: $('#modalForEdit'),
+                width: '100%'
             }).on("select2:select select2:unselect", function() {
                 $(this).select2('open');
             });
+        })();
 
-            // Modal show/hide functions
-            $('#modalForEdit').on('hidden.bs.modal', function() {
-                $(this).find('form')[0].reset();
-            });
-        });
+        function fillFormEdit(id) {
+            $.ajax({
+                url: `/users/${id}`,
+                type: 'GET',
+                success: function(response) {
+                    $('#editUserForm #edit_name').val(response.name);
+                    $('#editUserForm #edit_username').val(response.username);
+                    $('#editUserForm #edit_sex').val(response.sex).trigger('change');
+                    $('#editUserForm #edit_role').val(response.role).trigger('change');
+                    $('#editUserForm #edit_phone').val(response.phone);
+                    $('#editUserForm #edit_email').val(response.email);
 
-        // Fetch user data and fill form
-        function fillFormEdit(userId) {
-            document.querySelector('#modalForEdit form').action = `/users/edit/${userId}`;
-            fetchUserData(userId)
-                .then(data => {
-                    $('#edit_name').val(data.name);
-                    $('#edit_username').val(data.username);
-                    $('#edit_sex').val(data.sex).trigger('change');
-                    $('#edit_role').val(data.role).trigger('change');
-                    $('#edit_phone').val(data.phone);
-                    $('#edit_email').val(data.email);
+                    let proyekIds = response.proyek.map(proyek => proyek.id);
+                    $('#editUserForm #edit_proyek').val(proyekIds).trigger('change');
 
-                    let proyekIds = data.proyek.map(proyek => proyek.id);
-                    $('#edit_proyek').val(proyekIds).trigger('change');
-                })
-                .catch(error => {
-                    console.error("Error fetching user data:", error);
-                    showSweetAlert2("Failed to load user data. Please try again.", 'error');
-                });
-        }
-
-        // Fetch user data with AJAX
-        function fetchUserData(userId) {
-            return new Promise((resolve, reject) => {
-                $.ajax({
-                    url: `/users/${userId}`,
-                    type: 'GET',
-                    dataType: 'json',
-                    success: resolve,
-                    error: (xhr, status, error) => reject(error)
-                });
+                    $('#editUserForm').attr('action', `/users/edit/${id}`);
+                    $('#modalForEdit').modal('show');
+                },
+                error: function(xhr) {
+                    alert("Gagal mengambil data. Silakan coba lagi.");
+                }
             });
         }
     </script>

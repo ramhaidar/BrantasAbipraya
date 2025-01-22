@@ -22,7 +22,14 @@ return new class extends Migration
 
             $table->boolean ( 'is_finalized' )->default ( false ); // Status finalisasi
             $table->boolean ( 'is_evaluated' )->default ( false ); // Status evaluasi
-            $table->boolean ( 'is_approved' )->default ( false ); // Status persetujuan
+
+            // Replace single approval with two stages
+            $table->boolean ( 'is_approved_vp' )->default ( false ); // Approval by VP
+            $table->boolean ( 'is_approved_svp' )->default ( false ); // Approval by SVP
+
+            // Optional: Add timestamp columns for tracking when each approval occurred
+            $table->timestamp ( 'vp_approved_at' )->nullable ();
+            $table->timestamp ( 'svp_approved_at' )->nullable ();
 
             $table->foreignId ( 'id_proyek' )->nullable ()
                 ->constrained ( 'proyek' )->nullOnDelete (); // Relasi ke tabel proyek

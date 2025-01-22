@@ -21,19 +21,25 @@ class RKB extends Model
         'id_proyek',
         'is_finalized',
         'is_evaluated',
-        'is_approved',
+        'is_approved_vp',
+        'is_approved_svp',
+        'vp_approved_at',
+        'svp_approved_at',
     ];
 
     protected $casts = [ 
-        'id'           => 'integer',
-        'nomor'        => 'string',
-        'periode'      => 'date',
-        'tipe'         => 'string',
-        'is_finalized' => 'boolean',
-        'is_evaluated' => 'boolean',
-        'is_approved'  => 'boolean',
-        'created_at'   => 'datetime',
-        'updated_at'   => 'datetime',
+        'id'              => 'integer',
+        'nomor'           => 'string',
+        'periode'         => 'date',
+        'tipe'            => 'string',
+        'is_finalized'    => 'boolean',
+        'is_evaluated'    => 'boolean',
+        'is_approved_vp'  => 'boolean',
+        'is_approved_svp' => 'boolean',
+        'vp_approved_at'  => 'datetime',
+        'svp_approved_at' => 'datetime',
+        'created_at'      => 'datetime',
+        'updated_at'      => 'datetime',
     ];
 
     public function proyek () : BelongsTo

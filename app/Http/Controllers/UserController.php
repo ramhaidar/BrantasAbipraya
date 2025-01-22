@@ -16,8 +16,8 @@ class UserController extends Controller
             ->orderBy ( "id", "desc" )
             ->get ();
 
-        $users = User::orderBy ( 'updated_at', 'desc' )
-            ->orderBy ( 'id', 'asc' )
+        $users = User::orderBy ( "updated_at", "desc" )
+            ->orderBy ( "id", "desc" )
             ->get ();
 
         return view (

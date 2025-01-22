@@ -111,6 +111,35 @@
                                     </a>
                                 </li>
 
+                                <!-- Laporan Semua Proyek Menu -->
+                                <li class="nav-item has-treeview {{ str_contains($headerPage, 'Laporan Semua Proyek') ? 'menu-open' : '' }}">
+                                    <a class="nav-link {{ str_contains($headerPage, 'Laporan Semua Proyek') ? 'active' : '' }}" href="#" style="{{ str_contains($headerPage, 'Laporan Semua Proyek') ? 'background-color: #483D8B; color: #ffffff;' : '' }}">
+                                        <i class="bi me-2 nav-icon fs-5 bi-file-earmark-bar-graph"></i>
+                                        <p class="truncate-text">
+                                            <span class="text-content">Laporan Semua Proyek</span>
+                                        </p>
+                                        <i class="right bi bi-caret-right-fill"></i>
+                                    </a>
+                                    <ul class="nav nav-treeview">
+                                        <li class="nav-item">
+                                            <a class="nav-link level-1 {{ $page === 'LNPB Total' && $headerPage === 'Laporan Semua Proyek' ? 'active' : '' }}" href="{{ route('laporan.semua.total') }}" style="{{ $page === 'LNPB Total' && $headerPage === 'Laporan Semua Proyek' ? 'background-color: #66CDAA; color: #ffffff;' : '' }}">
+                                                <i class="bi me-2 nav-icon fs-5 bi-graph-up"></i>
+                                                <p class="truncate-text">
+                                                    <span class="text-content">LNPB Total</span>
+                                                </p>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link level-1 {{ $page === 'LNPB Bulan Berjalan' && str_contains($headerPage, 'Laporan Semua Proyek') ? 'active' : '' }}" href="{{ route('laporan.semua.bulanberjalan') }}" style="{{ $page === 'LNPB Bulan Berjalan' && str_contains($headerPage, 'Laporan Semua Proyek') ? 'background-color: #66CDAA; color: #ffffff;' : '' }}">
+                                                <i class="bi me-2 nav-icon fs-5 bi-calendar-check"></i>
+                                                <p class="truncate-text">
+                                                    <span class="text-content">LNPB Bulan Berjalan</span>
+                                                </p>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+
                                 <!-- Menu for Admin Role Only -->
                                 @if (Auth::user()->role == 'Admin')
                                     <li class="nav-item">
@@ -404,8 +433,8 @@
                                             </li>
 
                                             <!-- Laporan Submenu (Level 2) -->
-                                            <li class="nav-item has-treeview {{ str_contains($page, 'LNPB') || str_contains($page, 'Summary') ? 'menu-open' : '' }}">
-                                                <a class="ps-4 nav-link level-1 {{ str_contains($page, 'LNPB') || str_contains($page, 'Summary') ? 'active' : '' }}" href="#" style="{{ str_contains($page, 'LNPB') || str_contains($page, 'Summary') ? 'background-color: #66CDAA; color: #ffffff;' : '' }}">
+                                            <li class="nav-item has-treeview {{ (str_contains($page, 'LNPB') || str_contains($page, 'Summary')) && !str_contains($headerPage, 'Laporan Semua Proyek') ? 'menu-open' : '' }}">
+                                                <a class="ps-4 nav-link level-1 {{ (str_contains($page, 'LNPB') || str_contains($page, 'Summary')) && !str_contains($headerPage, 'Laporan Semua Proyek') ? 'active' : '' }}" href="#" style="{{ (str_contains($page, 'LNPB') || str_contains($page, 'Summary')) && !str_contains($headerPage, 'Laporan Semua Proyek') ? 'background-color: #66CDAA; color: #ffffff;' : '' }}">
                                                     <i class="bi me-2 nav-icon fs-5 bi-journal-text"></i>
                                                     <p>LNPB</p>
                                                     <i class="right bi bi-caret-right-fill"></i>
@@ -413,13 +442,13 @@
                                                 <ul class="nav nav-treeview">
                                                     <!-- Level 3 Submenu Items under Laporan -->
                                                     <li class="nav-item">
-                                                        <a class="ps-5 nav-link level-2 {{ str_contains($page, 'LNPB Total') ? 'active' : '' }}" href="{{ route('laporan.lnpb.total.index', ['id_proyek' => $item->id]) }}" style="{{ str_contains($page, 'LNPB Total') ? 'background-color: #D3D3D3; color: #000000;' : '' }}">
+                                                        <a class="ps-5 nav-link level-2 {{ $page === 'LNPB Total' && $headerPage !== 'Laporan Semua Proyek' ? 'active' : '' }}" href="{{ route('laporan.lnpb.total.index', ['id_proyek' => $item->id]) }}" style="{{ $page === 'LNPB Total' && $headerPage !== 'Laporan Semua Proyek' ? 'background-color: #D3D3D3; color: #000000;' : '' }}">
                                                             <i class="bi me-2 nav-icon fs-5 bi-graph-up"></i>
                                                             <p>Total</p>
                                                         </a>
                                                     </li>
                                                     <li class="nav-item">
-                                                        <a class="ps-5 nav-link level-2 {{ $page === 'LNPB Bulan Berjalan' && str_contains($headerPage, $item->nama) ? 'active' : '' }}" href="{{ route('laporan.lnpb.bulan_berjalan.index', ['id_proyek' => $item->id]) }}" style="{{ $page === 'LNPB Bulan Berjalan' && str_contains($headerPage, $item->nama) ? 'background-color: #D3D3D3; color: #000000;' : '' }}">
+                                                        <a class="ps-5 nav-link level-2 {{ $page === 'LNPB Bulan Berjalan' && !str_contains($headerPage, 'Laporan Semua Proyek') ? 'active' : '' }}" href="{{ route('laporan.lnpb.bulan_berjalan.index', ['id_proyek' => $item->id]) }}" style="{{ $page === 'LNPB Bulan Berjalan' && !str_contains($headerPage, 'Laporan Semua Proyek') ? 'background-color: #D3D3D3; color: #000000;' : '' }}">
                                                             <i class="bi me-2 nav-icon fs-5 bi-calendar-check"></i>
                                                             <p>Bulan Berjalan</p>
                                                         </a>
@@ -626,32 +655,69 @@
             }
 
             function scrollToActiveElement() {
-                // Find all active links at any level
-                const activeLinks = $('.sidebar .nav-link.active');
+                // Wait for DOM to be fully loaded and elements to be visible
+                setTimeout(() => {
+                    // Find active links and their parent menu items
+                    const activeLinks = $('.sidebar .nav-link.active');
+                    const activeMenuItems = $('.sidebar .nav-item.menu-open');
 
-                // Find the deepest active link by checking nav-treeview nesting level
-                let deepestActiveLink = null;
-                let maxDepth = -1;
+                    // Find the deepest active element
+                    let targetElement = null;
+                    let maxDepth = -1;
 
-                activeLinks.each(function() {
-                    const depth = $(this).parents('.nav-treeview').length;
-                    if (depth > maxDepth) {
-                        maxDepth = depth;
-                        deepestActiveLink = $(this);
+                    // Check active links
+                    activeLinks.each(function() {
+                        const depth = $(this).parents('.nav-treeview').length;
+                        if (depth > maxDepth) {
+                            maxDepth = depth;
+                            targetElement = $(this);
+                        }
+                    });
+
+                    // Check active menu items if no active link was found at deeper level
+                    if (!targetElement) {
+                        activeMenuItems.each(function() {
+                            const depth = $(this).parents('.nav-treeview').length;
+                            if (depth > maxDepth) {
+                                maxDepth = depth;
+                                targetElement = $(this);
+                            }
+                        });
                     }
-                });
 
-                // If we found an active link, scroll to it
-                if (deepestActiveLink && deepestActiveLink.length) {
-                    const halfDvh = window.innerHeight / 2;
+                    // If we found a target element, scroll to it
+                    if (targetElement && targetElement.length) {
+                        const sidebarViewport = $('.sidebar .os-viewport');
+                        const halfViewportHeight = sidebarViewport.height() / 2;
 
-                    $('.sidebar .os-viewport').animate({
-                        scrollTop: deepestActiveLink.offset().top -
-                            $('.sidebar .os-viewport').offset().top +
-                            $('.sidebar .os-viewport').scrollTop() -
-                            halfDvh
-                    }, 200);
-                }
+                        // Ensure parent menus are expanded
+                        targetElement.parents('.nav-treeview').show();
+                        targetElement.parents('.nav-item').addClass('menu-open');
+
+                        // Calculate scroll position
+                        const scrollTo = targetElement.offset().top -
+                            sidebarViewport.offset().top +
+                            sidebarViewport.scrollTop() -
+                            halfViewportHeight;
+
+                        // Smooth scroll
+                        sidebarViewport.animate({
+                            scrollTop: scrollTo
+                        }, {
+                            duration: 200,
+                            complete: function() {
+                                // Ensure element is still visible after animation
+                                const finalPosition = targetElement.offset().top;
+                                const viewportTop = sidebarViewport.offset().top;
+                                const viewportBottom = viewportTop + sidebarViewport.height();
+
+                                if (finalPosition < viewportTop || finalPosition > viewportBottom) {
+                                    sidebarViewport.scrollTop(scrollTo);
+                                }
+                            }
+                        });
+                    }
+                }, 100); // Small delay to ensure DOM is ready
             }
 
             function handleScrollToActiveElement() {

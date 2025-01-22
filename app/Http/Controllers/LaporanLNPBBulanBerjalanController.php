@@ -62,18 +62,21 @@ class LaporanLNPBBulanBerjalanController extends Controller
         $defaultEndDate   = $currentDate->copy ()->day ( 25 );
 
         // Validate and parse dates with error handling
-        try {
-            $startDate = $request->filled('startDate') && $request->startDate !== '-NaN-26' 
-                ? Carbon::parse($request->startDate) 
+        try
+        {
+            $startDate = $request->filled ( 'startDate' ) && $request->startDate !== '-NaN-26'
+                ? Carbon::parse ( $request->startDate )
                 : $defaultStartDate;
-                
-            $endDate = $request->filled('endDate') && $request->endDate !== '-25'
-                ? Carbon::parse($request->endDate) 
+
+            $endDate = $request->filled ( 'endDate' ) && $request->endDate !== '-25'
+                ? Carbon::parse ( $request->endDate )
                 : $defaultEndDate;
-        } catch (\Exception $e) {
+        }
+        catch ( \Exception $e )
+        {
             // If date parsing fails, use defaults
             $startDate = $defaultStartDate;
-            $endDate = $defaultEndDate;
+            $endDate   = $defaultEndDate;
         }
 
         $ATB = ATB::with ( 'masterDataSparepart.KategoriSparepart' )
@@ -202,6 +205,29 @@ class LaporanLNPBBulanBerjalanController extends Controller
             ->orderBy ( "updated_at", "asc" )
             ->orderBy ( "id", "asc" )
             ->get ();
+
+        // Default date calculations
+        $currentDate      = now ();
+        $defaultStartDate = $currentDate->copy ()->subMonth ()->day ( 26 );
+        $defaultEndDate   = $currentDate->copy ()->day ( 25 );
+
+        // Validate and parse dates with error handling
+        try
+        {
+            $startDate = $request->filled ( 'startDate' ) && $request->startDate !== '-NaN-26'
+                ? Carbon::parse ( $request->startDate )
+                : $defaultStartDate;
+
+            $endDate = $request->filled ( 'endDate' ) && $request->endDate !== '-25'
+                ? Carbon::parse ( $request->endDate )
+                : $defaultEndDate;
+        }
+        catch ( \Exception $e )
+        {
+            // If date parsing fails, use defaults
+            $startDate = $defaultStartDate;
+            $endDate   = $defaultEndDate;
+        }
 
         // +++
         $data = [ 

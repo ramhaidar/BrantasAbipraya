@@ -210,12 +210,35 @@ class LaporanLNPBTotalController extends Controller
         ] );
     }
 
-    public function semuaTotal_index ()
+    public function semuaTotal_index ( Request $request )
     {
         $proyeks = Proyek::with ( "users" )
             ->orderBy ( "updated_at", "asc" )
             ->orderBy ( "id", "asc" )
             ->get ();
+
+        // Default date calculations
+        $currentDate      = now ();
+        $defaultStartDate = $currentDate->copy ()->subMonth ()->day ( 26 );
+        $defaultEndDate   = $currentDate->copy ()->day ( 25 );
+
+        // Validate and parse dates with error handling
+        try
+        {
+            $startDate = $request->filled ( 'startDate' ) && $request->startDate !== '-NaN-26'
+                ? Carbon::parse ( $request->startDate )
+                : $defaultStartDate;
+
+            $endDate = $request->filled ( 'endDate' ) && $request->endDate !== '-25'
+                ? Carbon::parse ( $request->endDate )
+                : $defaultEndDate;
+        }
+        catch ( \Exception $e )
+        {
+            // If date parsing fails, use defaults
+            $startDate = $defaultStartDate;
+            $endDate   = $defaultEndDate;
+        }
 
         // +++
         $data = [ 
@@ -254,10 +277,6 @@ class LaporanLNPBTotalController extends Controller
         // +++
 
         // === Calculate ATB, APB, and Saldo Current Period === //
-        $currentDate = now ();
-        $startDate   = $currentDate->copy ()->subMonth ()->day ( 26 );
-        $endDate     = $currentDate->copy ()->day ( 25 );
-
         $ATB_Current = ATB::with ( 'masterDataSparepart.KategoriSparepart' )
             ->whereBetween ( 'tanggal', [ $startDate, $endDate ] )
             ->get ();

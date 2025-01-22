@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\APBController;
 use App\Http\Controllers\ATBController;
 use App\Http\Controllers\SPBController;
+use App\Http\Controllers\TestController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SaldoController;
 use App\Http\Controllers\ProyekController;
@@ -33,10 +34,10 @@ use App\Http\Controllers\EvaluasiDetailRKBUrgentController;
 use App\Http\Controllers\EvaluasiDetailRKBGeneralController;
 use App\Http\Controllers\LaporanLNPBBulanBerjalanController;
 
-Route::get ( '/test', function ()
-{
-    return view ( 'test' );
-} );
+Route::get (
+    '/test',
+    [ TestController::class, 'index' ]
+)->name ( 'test' );
 
 // Rute untuk Halaman Landing (HomePage)
 Route::get ( '/', function ()
@@ -1520,3 +1521,14 @@ Route::middleware ( 'auth' )
         )->where ( 'id', '[0-9]+' )
             ->name ( 'destroy' );
     } );
+
+// Rute Laporan Semua Proyek [LaporanLNPBBulanBerjalanController & LaporanLNPBTotalController] 
+Route::get (
+    '/laporan/semua-bulan-berjalan',
+    [ LaporanLNPBBulanBerjalanController::class, 'semuaBulanBerjalan_index' ]
+)->name ( 'laporan.semua.bulanberjalan' );
+
+Route::get (
+    '/laporan/semua-total',
+    [ LaporanLNPBTotalController::class, 'semuaTotal_index' ]
+)->name ( 'laporan.semua.total' );

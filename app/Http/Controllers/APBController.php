@@ -89,8 +89,6 @@ class APBController extends Controller
             ->get ()
             ->sortBy ( 'atb.tanggal' );
 
-        // dd ( $spareparts );
-
         $proyeks = Proyek::with ( "users" )
             ->orderBy ( "updated_at", "desc" )
             ->orderBy ( "id", "asc" )
@@ -227,7 +225,8 @@ class APBController extends Controller
             'id_proyek_tujuan' => 'required|exists:proyek,id|different:id_proyek',
             'id_saldo'         => 'required|exists:saldo,id',
             'quantity'         => 'required|integer|min:1',
-            'tipe'             => 'required|string'
+            'tipe'             => 'required|string',
+            'keterangan'       => 'nullable|string'
         ] );
 
         try
@@ -236,12 +235,24 @@ class APBController extends Controller
 
             $saldo = Saldo::findOrFail ( $request->id_saldo );
 
-            if ( $saldo->quantity < $request->quantity )
+            // Calculate pending quantity
+            $pendingQuantity = APB::where ( 'id_saldo', $saldo->id )
+                ->where ( 'tipe', 'mutasi-proyek' )
+                ->where ( 'status', 'pending' )
+                ->sum ( 'quantity' );
+
+            // Calculate available quantity
+            $availableQuantity = $saldo->quantity - $pendingQuantity;
+
+            if ( $availableQuantity < $request->quantity )
             {
-                throw new \Exception( 'Stok sparepart tidak mencukupi.' );
+                throw new \Exception(
+                    'Stok sparepart tidak mencukupi. Sisa stok yang tersedia: ' .
+                    $availableQuantity . ' ' . $saldo->masterDataSparepart->satuan
+                );
             }
 
-            // Create single APB record with pending status
+            // Create APB record with pending status
             $newAPB = APB::create ( [ 
                 'tanggal'                  => $request->tanggal,
                 'tipe'                     => $request->tipe,
@@ -251,11 +262,9 @@ class APBController extends Controller
                 'id_proyek'                => $request->id_proyek,
                 'id_tujuan_proyek'         => $request->id_proyek_tujuan,
                 'id_master_data_sparepart' => $saldo->id_master_data_sparepart,
-                'id_master_data_supplier'  => $saldo->id_master_data_supplier
+                'id_master_data_supplier'  => $saldo->id_master_data_supplier,
+                'keterangan'               => $request->keterangan
             ] );
-
-            // Decrement the source saldo
-            // $saldo->decrementQuantity ( $request->quantity );
 
             // Create ATB record for the destination project
             ATB::create ( [ 

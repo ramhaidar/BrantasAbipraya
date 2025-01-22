@@ -55,13 +55,23 @@
                             <select class="form-control" id="id_saldo_mutasi" name="id_saldo" required>
                                 <option value="">Pilih Sparepart</option>
                                 @foreach ($sparepartsForMutasi as $saldo)
-                                    <option value="{{ $saldo->id }}">
-                                        {{ $saldo->masterDataSparepart->nama }} -
-                                        {{ $saldo->masterDataSparepart->merk }} -
-                                        {{ $saldo->masterDataSparepart->part_number }} -
-                                        (Stok: {{ $saldo->quantity }})
-                                        [Masuk: {{ \Carbon\Carbon::parse($saldo->atb->tanggal)->format('d/m/Y') }}]
-                                    </option>
+                                    @php
+                                        $pendingQuantity = \App\Models\APB::where('id_saldo', $saldo->id)
+                                            ->where('tipe', 'mutasi-proyek')
+                                            ->where('status', 'pending')
+                                            ->sum('quantity');
+
+                                        $availableQuantity = $saldo->quantity - $pendingQuantity;
+                                    @endphp
+                                    @if ($availableQuantity > 0)
+                                        <option data-available="{{ $availableQuantity }}" data-satuan="{{ $saldo->satuan }}" value="{{ $saldo->id }}">
+                                            {{ $saldo->masterDataSparepart->nama }} -
+                                            {{ $saldo->masterDataSparepart->merk }} -
+                                            {{ $saldo->masterDataSparepart->part_number }} -
+                                            (Stok Tersedia: {{ $availableQuantity }})
+                                            [Masuk: {{ \Carbon\Carbon::parse($saldo->atb->tanggal)->format('d/m/Y') }}]
+                                        </option>
+                                    @endif
                                 @endforeach
                             </select>
                             <div class="invalid-feedback">Sparepart diperlukan.</div>
@@ -69,7 +79,7 @@
 
                         <div class="col-12">
                             <label class="form-label required" for="quantity_mutasi">
-                                <span class="p-0 m-0">Quantity</span><span id="QuantityPlaceholder"></span>
+                                <span class="p-0 m-0">Quantity</span><span id="SatuanPlaceholder"></span>
                             </label>
                             <input class="form-control" id="quantity_mutasi" name="quantity" type="number" min="1" max="1" disabled required>
                             <div class="invalid-feedback">Quantity diperlukan dan tidak boleh melebihi stok yang tersedia.</div>
@@ -137,31 +147,31 @@
             $('#id_saldo_mutasi').on('change', function() {
                 const selectedOption = $(this).find('option:selected');
                 const quantityInput = $('#quantity_mutasi');
-                const quantityPlaceholder = $('#QuantityPlaceholder');
+                const SatuanPlaceholder = $('#SatuanPlaceholder');
 
                 // Disable quantity input if no sparepart selected
                 if (!$(this).val()) {
                     quantityInput.prop('disabled', true).val('');
-                    quantityPlaceholder.text('');
+                    SatuanPlaceholder.text('');
                     return;
                 }
 
                 let maxQuantity = 0;
-                const stockMatch = selectedOption.text().match(/\(Stok: (\d+)\)/);
-                if (stockMatch && stockMatch[1]) {
-                    maxQuantity = parseInt(stockMatch[1]);
+                const availableQuantity = selectedOption.data('available');
+                if (availableQuantity) {
+                    maxQuantity = parseInt(availableQuantity);
                 }
 
-                // Get satuan from data attribute
-                const satuan = @json($sparepartsForMutasi->pluck('satuan', 'id'));
-                const selectedSatuan = satuan[$(this).val()];
-                quantityPlaceholder.text(` (dalam ${selectedSatuan})`);
+                // Get satuan directly from the option's data attribute
+                const satuan = selectedOption.data('satuan');
+                console.log('Satuan:', satuan); // For debugging
+                SatuanPlaceholder.text(` (dalam ${satuan})`);
 
                 // Enable and update quantity input constraints
                 quantityInput.prop('disabled', false);
                 quantityInput.attr('max', maxQuantity);
                 quantityInput.val('');
-                quantityInput.attr('title', `Quantity harus antara 1 dan ${maxQuantity} ${selectedSatuan}`);
+                quantityInput.attr('title', `Quantity harus antara 1 dan ${maxQuantity} ${satuan}`);
             });
 
             // Add quantity validation on input

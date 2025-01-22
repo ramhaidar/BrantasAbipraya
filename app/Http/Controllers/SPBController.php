@@ -16,7 +16,10 @@ class SPBController extends Controller
     // Index for SPB
     public function index ()
     {
-        $proyeks = Proyek::with ( "users" )->orderBy ( "updated_at" )->get ();
+        $proyeks = Proyek::with ( "users" )
+            ->orderBy ( "updated_at", "desc" )
+            ->orderBy ( "id", "asc" )
+            ->get ();
         // $rkbs    = RKB::where ( 'is_approved', true )->get ();
 
         return view ( 'dashboard.spb.spb', [ 

@@ -50,9 +50,10 @@ class SaldoController extends Controller
     {
         $tipe = strtolower ( str_replace ( ' ', '-', $tipe ) );
 
-        $proyek  = Proyek::with ( "users" )->find ( $id_proyek );
+        $proyek = Proyek::with ( "users" )->find ( $id_proyek );
+
         $proyeks = Proyek::with ( "users" )
-            ->orderBy ( "updated_at", "asc" )
+            ->orderBy ( "updated_at", "desc" )
             ->orderBy ( "id", "asc" )
             ->get ();
 

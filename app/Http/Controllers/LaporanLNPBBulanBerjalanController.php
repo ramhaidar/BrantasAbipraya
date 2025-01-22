@@ -16,7 +16,7 @@ class LaporanLNPBBulanBerjalanController extends Controller
         $proyek = Proyek::with ( "users" )->find ( $request->id_proyek );
 
         $proyeks = Proyek::with ( "users" )
-            ->orderBy ( "updated_at", "asc" )
+            ->orderBy ( "updated_at", "desc" )
             ->orderBy ( "id", "asc" )
             ->get ();
 
@@ -202,7 +202,7 @@ class LaporanLNPBBulanBerjalanController extends Controller
     public function semuaBulanBerjalan_index ( Request $request )
     {
         $proyeks = Proyek::with ( "users" )
-            ->orderBy ( "updated_at", "asc" )
+            ->orderBy ( "updated_at", "desc" )
             ->orderBy ( "id", "asc" )
             ->get ();
 

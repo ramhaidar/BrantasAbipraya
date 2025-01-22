@@ -213,7 +213,7 @@ class LaporanLNPBTotalController extends Controller
     public function semuaTotal_index ( Request $request )
     {
         $proyeks = Proyek::with ( "users" )
-            ->orderBy ( "updated_at", "asc" )
+            ->orderBy ( "updated_at", "desc" )
             ->orderBy ( "id", "asc" )
             ->get ();
 

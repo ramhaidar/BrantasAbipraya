@@ -13,7 +13,10 @@ class RKBUrgentController extends Controller
 {
     public function index ()
     {
-        $proyeks = Proyek::with ( "users" )->orderBy ( "updated_at", "asc" )->get ();
+        $proyeks = Proyek::with ( "users" )
+            ->orderBy ( "updated_at", "desc" )
+            ->orderBy ( "id", "asc" )
+            ->get ();
 
         return view ( 'dashboard.rkb.urgent.urgent', [ 
             'proyeks'    => $proyeks,

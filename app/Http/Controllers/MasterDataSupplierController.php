@@ -12,7 +12,10 @@ class MasterDataSupplierController extends Controller
 {
     public function index ()
     {
-        $proyeks = Proyek::with ( "users" )->orderBy ( "updated_at", "asc" )->orderBy ( "id", "asc" )->get ();
+        $proyeks = Proyek::with ( "users" )
+            ->orderBy ( "updated_at", "desc" )
+            ->orderBy ( "id", "asc" )
+            ->get ();
 
         $spareparts = \App\Models\MasterDataSparepart::all ();
 

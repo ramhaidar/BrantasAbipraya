@@ -19,7 +19,10 @@ class DetailRKBUrgentController extends Controller
     public function index ( $id )
     {
         $rkb     = RKB::with ( [ 'proyek' ] )->find ( $id );
-        $proyeks = Proyek::orderByDesc ( 'updated_at' )->get ();
+        $proyeks = Proyek::with ( "users" )
+            ->orderBy ( "updated_at", "desc" )
+            ->orderBy ( "id", "asc" )
+            ->get ();
         // $master_data_alat      = MasterDataAlat::all ();
         $master_data_sparepart = MasterDataSparepart::all ();
         $kategori_sparepart    = KategoriSparepart::all ();

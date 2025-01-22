@@ -62,7 +62,7 @@ class ATBController extends Controller
         $proyek = Proyek::with ( "users" )->find ( $id_proyek );
 
         $proyeks = Proyek::with ( "users" )
-            ->orderBy ( "updated_at", "asc" )
+            ->orderBy ( "updated_at", "desc" )
             ->orderBy ( "id", "asc" )
             ->get ();
 

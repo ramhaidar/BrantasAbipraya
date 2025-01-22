@@ -13,9 +13,14 @@ class TimelineRKBUrgentController extends Controller
 {
     public function index ( $id )
     {
-        $rkb     = Proyek::find ( $id );
-        $proyeks = Proyek::orderBy('updated_at', 'asc')->get();
-        $data    = LinkAlatDetailRKB::with ( [ 
+        $rkb = Proyek::find ( $id );
+
+        $proyeks = Proyek::with ( "users" )
+            ->orderBy ( "updated_at", "desc" )
+            ->orderBy ( "id", "asc" )
+            ->get ();
+
+        $data = LinkAlatDetailRKB::with ( [ 
             'rkb',
             'masterDataAlat',
             'timelineRkbUrgents',

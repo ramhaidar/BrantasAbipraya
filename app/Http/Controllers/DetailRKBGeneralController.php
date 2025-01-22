@@ -17,8 +17,13 @@ class DetailRKBGeneralController extends Controller
 {
     public function index ( $id )
     {
-        $rkb     = RKB::with ( [ 'proyek' ] )->find ( $id );
-        $proyeks = Proyek::orderByDesc ( 'updated_at' )->get ();
+        $rkb = RKB::with ( [ 'proyek' ] )->find ( $id );
+
+        $proyeks = Proyek::with ( "users" )
+            ->orderBy ( "updated_at", "desc" )
+            ->orderBy ( "id", "asc" )
+            ->get ();
+
         // $master_data_alat = MasterDataAlat::whereHas ( 'alatProyek', function ($query) use ($rkb)
         // {
         //     $query->where ( 'id_proyek', $rkb->id_proyek );

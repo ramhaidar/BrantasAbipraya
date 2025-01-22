@@ -92,7 +92,7 @@ class APBController extends Controller
         // dd ( $spareparts );
 
         $proyeks = Proyek::with ( "users" )
-            ->orderBy ( "updated_at", "asc" )
+            ->orderBy ( "updated_at", "desc" )
             ->orderBy ( "id", "asc" )
             ->get ();
 

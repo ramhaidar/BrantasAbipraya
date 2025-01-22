@@ -16,7 +16,10 @@ class RKBGeneralController extends Controller
 {
     public function index ()
     {
-        $proyeks = Proyek::orderBy ( 'updated_at', 'asc' )->get ();
+        $proyeks = Proyek::with ( "users" )
+            ->orderBy ( "updated_at", "desc" )
+            ->orderBy ( "id", "asc" )
+            ->get ();
 
         return view ( 'dashboard.rkb.general.general', [ 
             'proyeks'    => $proyeks,

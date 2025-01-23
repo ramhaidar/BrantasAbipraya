@@ -10,6 +10,10 @@
             /* padding: 4px 8px; */
             vertical-align: middle;
         }
+
+        #table-data th {
+            text-align: center;
+        }
     </style>
 @endpush
 

@@ -9,27 +9,49 @@ use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
-    public function index ()
+    public function index ( Request $request )
     {
+        // Validate and set perPage to allowed values only
+        $allowedPerPage = [ 10, 25, 50, 100 ];
+        $perPage        = in_array ( (int) $request->get ( 'per_page' ), $allowedPerPage ) ? (int) $request->get ( 'per_page' ) : 10;
+
+        $query = User::query ()
+            ->with ( 'proyek' )
+            ->orderBy ( $request->get ( 'sort', 'updated_at' ), $request->get ( 'direction', 'desc' ) );
+
+        if ( $request->has ( 'search' ) )
+        {
+            $search = $request->get ( 'search' );
+            $query->where ( function ($q) use ($search)
+            {
+                $q->where ( 'name', 'like', "%{$search}%" )
+                    ->orWhere ( 'username', 'like', "%{$search}%" )
+                    ->orWhere ( 'sex', 'like', "%{$search}%" )
+                    ->orWhere ( 'path_profile', 'like', "%{$search}%" )
+                    ->orWhere ( 'role', 'like', "%{$search}%" )
+                    ->orWhere ( 'phone', 'like', "%{$search}%" )
+                    ->orWhere ( 'email', 'like', "%{$search}%" );
+            } );
+        }
+
+        $users = $query->paginate ( $perPage )
+            ->withQueryString ();
+
+        $TableData = $query->paginate ( $perPage )
+            ->withQueryString ();
+
         $proyeks = Proyek::with ( "users" )
             ->orderBy ( "updated_at", "desc" )
             ->orderBy ( "id", "desc" )
             ->get ();
 
-        $users = User::orderBy ( "updated_at", "desc" )
-            ->orderBy ( "id", "desc" )
-            ->get ();
-
-        return view (
-            'dashboard.users.user',
-            [ 
-                'headerPage' => 'User',
-                'page'       => 'Data User',
-
-                'proyeks'    => $proyeks,
-                'users'      => $users,
-            ]
-        );
+        return view ( 'dashboard.users.user', [ 
+            'headerPage' => 'User',
+            'page'       => 'Data User',
+            'proyeks'    => $proyeks,
+            'users'      => $users,
+            'TableData'  => $TableData,
+        ] );
     }
 
     public function store ( Request $request )

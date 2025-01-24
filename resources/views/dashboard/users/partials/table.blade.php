@@ -10,24 +10,28 @@
             /* padding: 4px 8px; */
             vertical-align: middle;
         }
+
+        #table-data th {
+            text-align: center;
+        }
     </style>
 @endpush
 
-<div class="ibox-body ms-0 ps-0 table-responsive">
-    <table class="m-0 table table-bordered table-striped" id="table-data">
-        <thead class=table-primary>
+<div class="ibox-body table-responsive p-0 m-0">
+    <table class="table table-hover table-bordered table-striped align-middle w-100" id="table-data">
+        <thead class="table-primary">
             <tr>
-                <th class="text-center">Name</th>
-                <th class="text-center">Username</th>
-                <th class="text-center">Jenis Kelamin</th>
-                <th class="text-center">Role</th>
-                <th class="text-center">Phone</th>
-                <th class="text-center">Email</th>
-                <th class="text-center"></th>
+                <th>Name</th>
+                <th>Username</th>
+                <th>Jenis Kelamin</th>
+                <th>Role</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th></th>
             </tr>
         </thead>
-        <tbody id=body-table>
-            @foreach ($users as $user)
+        <tbody>
+            @forelse ($users as $user)
                 <tr>
                     <td class="text-center">{{ $user->name }}</td>
                     <td class="text-center">{{ $user->username }}</td>
@@ -36,37 +40,44 @@
                     <td class="text-center">{{ $user->phone }}</td>
                     <td class="text-center">{{ $user->email }}</td>
                     <td class="text-center">
-                        <button class="btn btn-danger deleteBtn" data-id="{{ $user->id }}" type="button">
+                        <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $user->id }}">
                             <i class="bi bi-trash3"></i>
                         </button>
-                        <a class="btn btn-warning ms-3" data-bs-target=#modalForEdit data-bs-toggle=modal onclick="fillFormEdit({{ $user->id }})">
+                        <button class="btn btn-warning mx-1" data-bs-target=#modalForEdit data-bs-toggle=modal onclick="fillFormEdit({{ $user->id }})">
                             <i class="bi bi-pencil-square"></i>
-                        </a>
+                        </button>
                     </td>
                 </tr>
-            @endforeach
+            @empty
+                <tr>
+                    <td class="text-center py-3 text-muted" colspan="7">
+                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                        No users found
+                    </td>
+                </tr>
+            @endforelse
         </tbody>
     </table>
 </div>
 
 @push('scripts_3')
     <script>
-        $(document).ready(function() {
-            new DataTable('#table-data', {
-                language: {
-                    paginate: {
-                        previous: '<i class="bi bi-caret-left"></i>',
-                        next: '<i class="bi bi-caret-right"></i>'
-                    }
-                },
-                pageLength: -1,
-                lengthMenu: [
-                    [10, 25, 50, -1],
-                    [10, 25, 50, "All"]
-                ],
-                order: [],
-                ordering: false,
+        document.addEventListener('DOMContentLoaded', function() {
+            const table = document.querySelector('#table-data');
+            const headers = table.querySelectorAll('thead th');
+            let aksiIndex;
+
+            headers.forEach((header, index) => {
+                if (header.textContent.trim() === '') {
+                    aksiIndex = index;
+                }
             });
+
+            if (aksiIndex !== undefined) {
+                table.querySelectorAll('tbody tr').forEach(row => {
+                    row.cells[aksiIndex].style.width = '1%';
+                });
+            }
         });
     </script>
 @endpush

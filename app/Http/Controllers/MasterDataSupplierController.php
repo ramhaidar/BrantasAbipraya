@@ -6,26 +6,78 @@ use App\Models\Alat;
 use App\Models\Proyek;
 use Illuminate\Http\Request;
 use App\Models\MasterDataSupplier;
+use App\Models\MasterDataSparepart;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class MasterDataSupplierController extends Controller
 {
-    public function index ()
+    public function index ( Request $request )
     {
-        $proyeks = Proyek::with ( "users" )
-            ->orderBy ( "updated_at", "desc" )
-            ->orderBy ( "id", "desc" )
-            ->get ();
+        $allowedPerPage = [ 10, 25, 50, 100 ];
+        $perPage        = in_array ( (int) $request->get ( 'per_page' ), $allowedPerPage ) ? (int) $request->get ( 'per_page' ) : 10;
 
-        $spareparts = \App\Models\MasterDataSparepart::all ();
+        $query = MasterDataSupplier::query ()
+            ->with ( [ 'masterDataSpareparts' ] )
+            ->orderBy ( $request->get ( 'sort', 'updated_at' ), $request->get ( 'direction', 'desc' ) );
+
+        if ( $request->has ( 'search' ) )
+        {
+            $search = $request->get ( 'search' );
+            $query->where ( function ($q) use ($search)
+            {
+                $q->where ( 'nama', 'like', "%{$search}%" )
+                    ->orWhere ( 'alamat', 'like', "%{$search}%" )
+                    ->orWhere ( 'contact_person', 'like', "%{$search}%" )
+                    ->orWhereHas ( 'masterDataSpareparts', function ($query) use ($search)
+                    {
+                        $query->where ( 'nama', 'like', "%{$search}%" )
+                            ->orWhere ( 'part_number', 'like', "%{$search}%" )
+                            ->orWhere ( 'merk', 'like', "%{$search}%" );
+                    } );
+            } );
+        }
+
+        $user = Auth::user ();
+
+        if ( $user->role === 'Pegawai' )
+        {
+            $query->where ( 'id_user', $user->id );
+        }
+        elseif ( $user->role === 'Boss' )
+        {
+            $proyeks       = $user->proyek ()
+                ->with ( "users" )
+                ->get ();
+            $usersInProyek = $proyeks->pluck ( 'users.*.id' )->flatten ();
+            $query->whereIn ( 'id_user', $usersInProyek );
+        }
+
+        $suppliers = $query->paginate ( $perPage )
+            ->withQueryString ();
+
+        $TableData = $query->paginate ( $perPage )
+            ->withQueryString ();
+
+        $spareparts = MasterDataSparepart::all ();
+        $proyeks    = [];
+
+        if ( $user->role !== 'Pegawai' )
+        {
+            $proyeks = Proyek::with ( "users" )
+                ->orderBy ( "updated_at", "asc" )
+                ->orderBy ( "id", "asc" )
+                ->get ();
+        }
 
         return view ( 'dashboard.masterdata.supplier.supplier', [ 
-            // 'proyek'     => $proyeks,
-            'proyeks'    => $proyeks,
-            'spareparts' => $spareparts,
-
             'headerPage' => "Master Data Supplier",
             'page'       => 'Data Supplier',
+
+            'proyeks'    => $proyeks,
+            'TableData'  => $TableData,
+            'suppliers'  => $suppliers,
+            'spareparts' => $spareparts,
         ] );
     }
 

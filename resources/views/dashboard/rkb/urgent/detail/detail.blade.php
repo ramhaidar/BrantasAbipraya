@@ -10,7 +10,7 @@
                 <div class="ibox">
                     <div class="ibox-head pe-0 ps-0">
                         <div class="ibox-title d-flex align-items-center gap-3">
-                            <a class="btn btn-outline-primary btn-sm" href="{{ route('rkb_general.index') }}">
+                            <a class="btn btn-outline-primary btn-sm" href="{{ route('rkb_urgent.index') }}">
                                 <i class="fa fa-arrow-left pe-1"></i> Kembali
                             </a>
                             <h5 class="fw-medium mb-0">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}</h5>

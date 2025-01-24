@@ -140,26 +140,6 @@
                                     </ul>
                                 </li>
 
-                                <!-- Menu for Admin Role Only -->
-                                @if (Auth::user()->role == 'Admin')
-                                    <li class="nav-item">
-                                        <a class="nav-link {{ $page === 'Data Proyek' ? 'active' : '' }}" href="{{ route('proyek.index') }}" style="{{ $headerPage === 'Proyek' ? 'background-color: #483D8B; color: #ffffff;' : '' }}">
-                                            <i class="bi me-2 nav-icon bi-kanban"></i>
-                                            <p class="truncate-text">
-                                                <span class="text-content">Proyek</span>
-                                            </p>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link {{ str_contains($page, 'Data User') ? 'active' : '' }}" href="{{ route('users') }}" style="{{ str_contains($headerPage, 'User') ? 'background-color: #483D8B; color: #ffffff;' : '' }}">
-                                            <i class="bi me-2 nav-icon bi-people-fill"></i>
-                                            <p class="truncate-text">
-                                                <span class="text-content">User</span>
-                                            </p>
-                                        </a>
-                                    </li>
-                                @endif
-
                                 <!-- Master Data Menu with Submenu -->
                                 <li class="nav-item has-treeview {{ str_contains($headerPage, 'Master Data') ? 'menu-open' : '' }}">
                                     <a class="nav-link {{ str_contains($headerPage, 'Master Data') ? 'active' : '' }}" href="#" style="{{ str_contains($headerPage, 'Master Data') ? 'background-color: #483D8B; color: #ffffff;' : '' }}">
@@ -299,6 +279,26 @@
                                         </li>
                                     </ul>
                                 </li>
+
+                                <!-- Menu for Admin Role Only -->
+                                @if (Auth::user()->role == 'Admin')
+                                    <li class="nav-item">
+                                        <a class="nav-link {{ $page === 'Data Proyek' ? 'active' : '' }}" href="{{ route('proyek.index') }}" style="{{ $headerPage === 'Proyek' ? 'background-color: #483D8B; color: #ffffff;' : '' }}">
+                                            <i class="bi me-2 nav-icon bi-kanban"></i>
+                                            <p class="truncate-text">
+                                                <span class="text-content">Proyek</span>
+                                            </p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link {{ str_contains($page, 'Data User') ? 'active' : '' }}" href="{{ route('users') }}" style="{{ str_contains($headerPage, 'User') ? 'background-color: #483D8B; color: #ffffff;' : '' }}">
+                                            <i class="bi me-2 nav-icon bi-people-fill"></i>
+                                            <p class="truncate-text">
+                                                <span class="text-content">User</span>
+                                            </p>
+                                        </a>
+                                    </li>
+                                @endif
 
                                 <li class="nav-header mt-2">LIST PROYEK: {{ $proyeks->count() }}</li>
 

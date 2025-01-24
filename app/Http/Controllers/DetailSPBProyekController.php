@@ -52,7 +52,7 @@ class DetailSPBProyekController extends Controller
             'riwayatSpbs' => $riwayatSpbs,
 
             'headerPage'  => "SPB Proyek",
-            'page'        => 'Detail SPB Proyek',
+            'page'        => 'Detail SPB Proyek [' . $rkb->proyek->nama . ' | ' . $rkb->nomor . ']',
         ] );
     }
 }

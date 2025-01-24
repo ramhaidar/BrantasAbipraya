@@ -71,7 +71,7 @@ class DetailSPBController extends Controller
             'spbAddendumEd' => $spbAddendumEd,
 
             'headerPage'    => "SPB Supplier",
-            'page'          => 'Detail SPB Supplier',
+            'page'          => 'Detail SPB Supplier' . ' [' . $rkb->proyek->nama . ' | ' . $rkb->nomor . ' ]',
         ] );
     }
 

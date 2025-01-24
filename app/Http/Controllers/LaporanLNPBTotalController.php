@@ -14,11 +14,11 @@ class LaporanLNPBTotalController extends Controller
 {
     public function index ( Request $request )
     {
-        $id_proyek = $request->id_proyek;
-        $proyek    = Proyek::with ( "users" )->find ( $request->id_proyek );
-        $proyeks   = Proyek::with ( "users" )
-            ->orderBy ( "updated_at", "asc" )
-            ->orderBy ( "id", "asc" )
+        $proyek = Proyek::with ( "users" )->find ( $request->id_proyek );
+
+        $proyeks = Proyek::with ( "users" )
+            ->orderBy ( "updated_at", "desc" )
+            ->orderBy ( "id", "desc" )
             ->get ();
 
         // Default date calculations

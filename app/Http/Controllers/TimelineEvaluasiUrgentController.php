@@ -12,7 +12,7 @@ class TimelineEvaluasiUrgentController extends Controller
 {
     public function index ( $id )
     {
-        $rkb = Proyek::find ( $id );
+        $proyek = Proyek::find ( $id );
 
         $proyeks = Proyek::with ( "users" )
             ->orderBy ( "updated_at", "desc" )
@@ -39,15 +39,15 @@ class TimelineEvaluasiUrgentController extends Controller
         // sort $data by timeline_rkb_urgent id
 // $data = $data->sortBy ( 'id' );
 
-        // dd ( $data );
+        // dd ( $data->rkb );
 
         return view ( 'dashboard.evaluasi.urgent.detail.timeline.timeline', [ 
-            'rkb'        => $rkb,
+            'proyek'     => $proyek,
             'proyeks'    => $proyeks,
             'data'       => $data,
 
             'headerPage' => "Evaluasi Urgent",
-            'page'       => 'Timeline Detail RKB Urgent',
+            'page'       => 'Timeline Detail RKB Urgent [' . $data->rkb->proyek->nama . ' | ' . $data->rkb->nomor . ']',
         ] );
     }
 

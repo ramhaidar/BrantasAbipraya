@@ -53,9 +53,10 @@ class EvaluasiDetailRKBGeneralController extends Controller
             'master_data_sparepart' => $master_data_sparepart,
             'kategori_sparepart'    => $kategori_sparepart,
             'alat_detail_rkbs'      => $alat_detail_rkbs,
-            'headerPage'            => "Evaluasi General",
-            'page'                  => 'Detail Evaluasi General',
             'stockQuantities'       => $stockQuantities,
+
+            'headerPage'            => "Evaluasi General",
+            'page'                  => 'Detail Evaluasi General [' . $rkb->proyek->nama . ' | ' . $rkb->nomor . ']',
         ] );
     }
 

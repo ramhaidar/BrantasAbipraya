@@ -16,7 +16,8 @@ class RiwayatSPBController extends Controller
             ->orderBy ( "updated_at", "desc" )
             ->orderBy ( "id", "desc" )
             ->get ();
-        $spb     = SPB::with ( [ 
+
+        $spb = SPB::with ( [ 
             'linkSpbDetailSpb.detailSpb.masterDataSparepart',
             'linkRkbSpbs',
             'masterDataSupplier',
@@ -27,7 +28,7 @@ class RiwayatSPBController extends Controller
             'spb'        => $spb,
 
             'headerPage' => "SPB Supplier",
-            'page'       => 'Riwayat SPB Supplier',
+            'page'       => 'Riwayat SPB Supplier [' . $spb->linkRkbSpbs[ 0 ]->rkb->proyek->nama . ' | ' . $spb->linkRkbSpbs[ 0 ]->rkb->nomor . ']',
         ] );
     }
 

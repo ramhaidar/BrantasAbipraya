@@ -3,7 +3,7 @@
         <form class="d-flex gap-2" action="{{ $route ?? url()->current() }}" method="GET">
             <div class="input-group">
                 <span class="input-group-text"><i class="fa fa-search"></i></span>
-                <input class="form-control" name="search" type="text" value="{{ request('search') }}" placeholder="Search equipment...">
+                <input class="form-control" name="search" type="text" value="{{ request('search') }}" placeholder="{{ $placeholder ?? 'Search items...' }}">
                 <button class="btn btn-primary" type="submit">Search</button>
             </div>
             <select class="form-select" name="per_page" style="width: auto;" onchange="this.form.submit()">

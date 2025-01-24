@@ -7,7 +7,6 @@
 
         #table-data td,
         #table-data th {
-            /* padding: 4px 8px; */
             vertical-align: middle;
         }
     </style>
@@ -125,13 +124,13 @@
                         .replace(/\./g, '');
                     total += parseInt(value) || 0;
                 });
-                
+
                 let formattedTotal = 'Rp ' + total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
                 $('#total-harga').html(formattedTotal);
             }
 
             calculateTotal();
-            
+
             table.on('search.dt draw.dt', function() {
                 setTimeout(calculateTotal, 100);
             });

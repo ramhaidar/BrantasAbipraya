@@ -7,7 +7,6 @@
 
         #table-data td,
         #table-data th {
-            /* padding: 4px 8px; */
             vertical-align: middle;
             text-align: center;
         }

@@ -31,25 +31,34 @@
         </thead>
         <tbody>
             @forelse ($TableData as $item)
-                <tr>
-                    <td class="text-center">{{ $item->linkRkbDetails[0]->linkAlatDetailRkb->masterDataAlat->jenis_alat ?? '-' }}</td>
-                    <td class="text-center">{{ $item->linkRkbDetails[0]->linkAlatDetailRkb->masterDataAlat->kode_alat ?? '-' }}</td>
-                    <td class="text-center">{{ $item->kategoriSparepart->kode ?? '-' }}: {{ $item->kategoriSparepart->nama ?? '-' }}</td>
-                    <td class="text-center">{{ $item->masterDataSparepart->nama ?? '-' }}</td>
-                    <td class="text-center">{{ $item->masterDataSparepart->part_number ?? '-' }}</td>
-                    <td class="text-center">{{ $item->masterDataSparepart->merk ?? '-' }}</td>
-                    <td class="text-center">{{ $item->quantity_requested }}</td>
-                    <td class="text-center">{{ $item->quantity_approved ?? '-' }}</td>
-                    <td class="text-center">{{ $item->satuan }}</td>
-                    <td class="text-center">
-                        <button class="btn btn-warning mx-1 ubahBtn" data-id="{{ $item->id }}" {{ $item->linkRkbDetails[0]->linkAlatDetailRkb->rkb->is_finalized ? 'disabled' : '' }} onclick="fillFormEditDetailRKB({{ $item->id }})">
-                            <i class="bi bi-pencil-square"></i>
-                        </button>
-                        <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item->id }}" {{ $item->linkRkbDetails[0]->linkAlatDetailRkb->rkb->is_finalized ? 'disabled' : '' }}>
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </td>
-                </tr>
+                @forelse ($item->linkRkbDetails as $detail)
+                    <tr>
+                        <td class="text-center">{{ $detail->linkAlatDetailRkb->masterDataAlat->jenis_alat ?? '-' }}</td>
+                        <td class="text-center">{{ $detail->linkAlatDetailRkb->masterDataAlat->kode_alat ?? '-' }}</td>
+                        <td class="text-center">{{ $item->kategoriSparepart->kode ?? '-' }}: {{ $item->kategoriSparepart->nama ?? '-' }}</td>
+                        <td class="text-center">{{ $item->masterDataSparepart->nama ?? '-' }}</td>
+                        <td class="text-center">{{ $item->masterDataSparepart->part_number ?? '-' }}</td>
+                        <td class="text-center">{{ $item->masterDataSparepart->merk ?? '-' }}</td>
+                        <td class="text-center">{{ $item->quantity_requested }}</td>
+                        <td class="text-center">{{ $item->quantity_approved ?? '-' }}</td>
+                        <td class="text-center">{{ $item->satuan }}</td>
+                        <td class="text-center">
+                            <button class="btn btn-warning mx-1 ubahBtn" data-id="{{ $item->id }}" {{ $detail->linkAlatDetailRkb->rkb->is_finalized ? 'disabled' : '' }} onclick="fillFormEditDetailRKB({{ $item->id }})">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                            <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item->id }}" {{ $detail->linkAlatDetailRkb->rkb->is_finalized ? 'disabled' : '' }}>
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td class="text-center py-3 text-muted" colspan="10">
+                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                            No RKB details found
+                        </td>
+                    </tr>
+                @endforelse
             @empty
                 <tr>
                     <td class="text-center py-3 text-muted" colspan="10">

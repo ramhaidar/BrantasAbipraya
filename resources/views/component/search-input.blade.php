@@ -5,7 +5,7 @@
                 <span class="input-group-text"><i class="fa fa-search"></i></span>
                 <input class="form-control" name="search" type="text" value="{{ request('search') }}" placeholder="{{ $placeholder ?? 'Search items...' }}">
                 @if (request('search'))
-                    <button class="btn btn-secondary" type="submit" onclick="document.getElementsByName('search')[0].value = ''">
+                    <button class="btn btn-secondary" type="button" onclick="this.form.querySelector('[name=search]').value = ''; this.form.submit();">
                         <i class="fa fa-times"></i>
                     </button>
                 @endif

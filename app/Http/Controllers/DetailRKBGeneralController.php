@@ -73,7 +73,7 @@ class DetailRKBGeneralController extends Controller
 
         return view ( 'dashboard.rkb.general.detail.detail', [ 
             'headerPage'            => "RKB General",
-            'page'                  => 'Detail RKB General',
+            'page'                  => 'Detail RKB General [' . $rkb->proyek->nama . ' | ' . $rkb->nomor . ']',
 
             'proyeks'               => $proyeks,
             'rkb'                   => $rkb,

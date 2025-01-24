@@ -74,7 +74,7 @@ class DetailRKBUrgentController extends Controller
 
         return view ( 'dashboard.rkb.urgent.detail.detail', [ 
             'headerPage'            => "RKB Urgent",
-            'page'                  => 'Detail RKB Urgent',
+            'page'                  => 'Detail RKB General [' . $rkb->proyek->nama . ' | ' . $rkb->nomor . ']',
 
             'proyeks'               => $proyeks,
             'rkb'                   => $rkb,

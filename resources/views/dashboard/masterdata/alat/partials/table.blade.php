@@ -8,9 +8,6 @@
         #table-data td,
         #table-data th {
             vertical-align: middle;
-        }
-
-        #table-data th {
             text-align: center;
         }
     </style>

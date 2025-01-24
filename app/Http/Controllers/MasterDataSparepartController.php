@@ -31,7 +31,13 @@ class MasterDataSparepartController extends Controller
                     ->orWhere ( 'merk', 'like', "%{$search}%" )
                     ->orWhereHas ( 'kategoriSparepart', function ($query) use ($search)
                     {
-                        $query->where ( 'nama', 'like', "%{$search}%" );
+                        $query->where ( function ($q) use ($search)
+                        {
+                            $q->where ( 'kode', 'like', "%{$search}%" )
+                                ->orWhere ( 'nama', 'like', "%{$search}%" )
+                                ->orWhere ( 'jenis', 'like', "%{$search}%" )
+                                ->orWhere ( 'sub_jenis', 'like', "%{$search}%" );
+                        } );
                     } );
             } );
         }

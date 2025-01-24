@@ -58,31 +58,26 @@
 
 @push('scripts_3')
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const table = document.querySelector('#table-data');
-            const headers = table.querySelectorAll('thead th');
-            let detailIndex, aksiIndex;
+        $(document).ready(function() {
+            const $table = $('#table-data');
+            const $headers = $table.find('thead th');
+            const textsToCheck = ['Detail', 'Aksi', 'Supplier'];
+            let indices = {};
 
-            headers.forEach((header, index) => {
-                if (header.textContent.trim() === 'Detail') {
-                    detailIndex = index;
-                }
-                if (header.textContent.trim() === 'Aksi') {
-                    aksiIndex = index;
+            // Find the indices of the headers that match the texts in textsToCheck array
+            $headers.each(function(index) {
+                const headerText = $(this).text().trim();
+                if (textsToCheck.includes(headerText)) {
+                    indices[headerText] = index;
                 }
             });
 
-            if (detailIndex !== undefined) {
-                table.querySelectorAll('tbody tr').forEach(row => {
-                    row.cells[detailIndex].style.width = '1%';
+            // Set the width of the corresponding columns in tbody
+            $.each(indices, function(text, index) {
+                $table.find('tbody tr').each(function() {
+                    $(this).find('td').eq(index).css('width', '1%');
                 });
-            }
-
-            if (aksiIndex !== undefined) {
-                table.querySelectorAll('tbody tr').forEach(row => {
-                    row.cells[aksiIndex].style.width = '1%';
-                });
-            }
+            });
         });
     </script>
 @endpush

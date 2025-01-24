@@ -25,8 +25,8 @@
                 <th>Proyek</th>
                 <th>Periode</th>
                 <th>Status</th>
-                <th></th>
-                <th></th>
+                <th>Detail</th>
+                <th>Aksi</th>
             </tr>
         </thead>
         <tbody>
@@ -47,7 +47,7 @@
                         @endif
                     </td>
                     <td class="text-center">
-                        <a class="btn btn-info mx-1 detailBtn" href="{{ route('rkb_general.detail.index', ['id' => $rkb->id]) }}">
+                        <a class="btn btn-primary mx-1 detailBtn" href="{{ route('rkb_general.detail.index', ['id' => $rkb->id]) }}">
                             <i class="fa-solid fa-file-pen"></i>
                         </a>
                     </td>
@@ -77,26 +77,26 @@
         document.addEventListener('DOMContentLoaded', function() {
             const table = document.querySelector('#table-data');
             const headers = table.querySelectorAll('thead th');
-            let aksiIndex1, aksiIndex2;
+            let detailIndex, aksiIndex;
 
             headers.forEach((header, index) => {
-                if (header.textContent.trim() === '') {
-                    if (aksiIndex1 === undefined) {
-                        aksiIndex1 = index;
-                    } else {
-                        aksiIndex2 = index;
-                    }
+                if (header.textContent.trim() === 'Detail') {
+                    detailIndex = index;
+                }
+                if (header.textContent.trim() === 'Aksi') {
+                    aksiIndex = index;
                 }
             });
 
-            if (aksiIndex1 !== undefined) {
+            if (detailIndex !== undefined) {
                 table.querySelectorAll('tbody tr').forEach(row => {
-                    row.cells[aksiIndex1].style.width = '1%';
+                    row.cells[detailIndex].style.width = '1%';
                 });
             }
-            if (aksiIndex2 !== undefined) {
+
+            if (aksiIndex !== undefined) {
                 table.querySelectorAll('tbody tr').forEach(row => {
-                    row.cells[aksiIndex2].style.width = '1%';
+                    row.cells[aksiIndex].style.width = '1%';
                 });
             }
         });

@@ -59,13 +59,22 @@
         document.addEventListener('DOMContentLoaded', function() {
             const table = document.querySelector('#table-data');
             const headers = table.querySelectorAll('thead th');
-            let aksiIndex;
+            let detailIndex, aksiIndex;
 
             headers.forEach((header, index) => {
+                if (header.textContent.trim() === 'Detail') {
+                    detailIndex = index;
+                }
                 if (header.textContent.trim() === 'Aksi') {
                     aksiIndex = index;
                 }
             });
+
+            if (detailIndex !== undefined) {
+                table.querySelectorAll('tbody tr').forEach(row => {
+                    row.cells[detailIndex].style.width = '1%';
+                });
+            }
 
             if (aksiIndex !== undefined) {
                 table.querySelectorAll('tbody tr').forEach(row => {

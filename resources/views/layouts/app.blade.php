@@ -64,11 +64,11 @@
     <div class="wrapper">
 
         <!-- Navbar -->
-        @include('component.navbar')
+        @include('components.navbar')
 
         <!-- Sidebar -->
         <aside class="elevation-4 main-sidebar sidebar-dark-primary" style="background-color: #212529">
-            @include('component.sidebar')
+            @include('components.sidebar')
         </aside>
 
         <!-- Content Wrapper -->

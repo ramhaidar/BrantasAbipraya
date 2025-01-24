@@ -17,14 +17,14 @@
                 </div>
 
                 <div class="p-0 m-0 py-3">
-                    @include('component.search-input', [
+                    @include('components.search-input', [
                         'route' => url()->current(),
                         'placeholder' => 'Search items...',
                     ])
                     @include('dashboard.rkb.general.partials.table', [
                         'TableData' => $TableData,
                     ])
-                    @include('component.pagination', [
+                    @include('components.pagination', [
                         'paginator' => $TableData->links()->paginator,
                     ])
                 </div>

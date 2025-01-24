@@ -16,7 +16,20 @@
                     </a>
                 </div>
 
-                @include('dashboard.masterdata.sparepart.partials.table')
+                <div class="p-0 m-0 py-3">
+                    @include('component.search-input', [
+                        'route' => url()->current(),
+                        'placeholder' => 'Search items...',
+                    ])
+                    @include('dashboard.masterdata.sparepart.partials.table', [
+                        'TableData' => $TableData,
+                    ])
+                    @include('component.pagination', [
+                        'paginator' => $TableData->links()->paginator,
+                    ])
+                </div>
+
+                {{-- @include('dashboard.masterdata.sparepart.partials.table') --}}
 
             </div>
         </div>

@@ -16,29 +16,48 @@ use Illuminate\Support\Facades\Storage;
 
 class DetailRKBUrgentController extends Controller
 {
-    public function index ( $id )
+    public function index ( Request $request, $id )
     {
-        $rkb     = RKB::with ( [ 'proyek' ] )->find ( $id );
-        $proyeks = Proyek::with ( "users" )
-            ->orderBy ( "updated_at", "desc" )
-            ->orderBy ( "id", "desc" )
-            ->get ();
-        // $master_data_alat      = MasterDataAlat::all ();
-        $master_data_sparepart = MasterDataSparepart::all ();
-        $kategori_sparepart    = KategoriSparepart::all ();
-        $data                  = RKB::where ( "tipe", "Urgent" )
-            ->with ( [ 
-                "linkAlatDetailRkbs" => function ($query)
-                {
-                    $query->orderBy ( 'id_master_data_alat' );
-                },
-                "linkAlatDetailRkbs.rkb",
-                "linkAlatDetailRkbs.masterDataAlat",
-                // "linkAlatDetailRkbs.timelineRkbUrgent",
-                "linkAlatDetailRkbs.linkRkbDetails",
-                "linkAlatDetailRkbs.lampiranRkbUrgent"
-            ] )
-            ->findOrFail ( $id );
+        $allowedPerPage = [ 10, 25, 50, 100 ];
+        $perPage        = in_array ( (int) $request->get ( 'per_page' ), $allowedPerPage ) ? (int) $request->get ( 'per_page' ) : 10;
+
+        $rkb = RKB::with ( [ 'proyek' ] )->find ( $id );
+
+        // Modified query with proper joins
+        $query = DetailRKBUrgent::query ()
+            ->join ( 'link_rkb_detail', 'detail_rkb_urgent.id', '=', 'link_rkb_detail.id_detail_rkb_urgent' )
+            ->join ( 'link_alat_detail_rkb', 'link_rkb_detail.id_link_alat_detail_rkb', '=', 'link_alat_detail_rkb.id' )
+            ->join ( 'master_data_alat', 'link_alat_detail_rkb.id_master_data_alat', '=', 'master_data_alat.id' )
+            ->join ( 'kategori_sparepart', 'detail_rkb_urgent.id_kategori_sparepart_sparepart', '=', 'kategori_sparepart.id' )
+            ->join ( 'master_data_sparepart', 'detail_rkb_urgent.id_master_data_sparepart', '=', 'master_data_sparepart.id' )
+            ->where ( 'link_alat_detail_rkb.id_rkb', $id )
+            ->select ( [ 
+                'detail_rkb_urgent.*',
+                'master_data_alat.jenis_alat',
+                'master_data_alat.kode_alat',
+                'kategori_sparepart.kode',
+                'kategori_sparepart.nama',
+                'master_data_sparepart.nama',
+                'master_data_sparepart.part_number',
+                'master_data_sparepart.merk'
+            ] );
+
+        if ( $request->has ( 'search' ) )
+        {
+            $search = $request->get ( 'search' );
+            $query->where ( function ($q) use ($search)
+            {
+                $q->where ( 'detail_rkb_urgent.satuan', 'like', "%{$search}%" )
+                    ->orWhere ( 'master_data_alat.jenis_alat', 'like', "%{$search}%" )
+                    ->orWhere ( 'master_data_alat.kode_alat', 'like', "%{$search}%" )
+                    ->orWhere ( 'kategori_sparepart.kode', 'like', "%{$search}%" )
+                    ->orWhere ( 'kategori_sparepart.nama', 'like', "%{$search}%" )
+                    ->orWhere ( 'master_data_sparepart.nama', 'like', "%{$search}%" )
+                    ->orWhere ( 'master_data_sparepart.part_number', 'like', "%{$search}%" )
+                    ->orWhere ( 'master_data_sparepart.merk', 'like', "%{$search}%" )
+                    ->orWhere ( 'link_alat_detail_rkb.nama_koordinator', 'like', "%{$search}%" ); // Added this line
+            } );
+        }
 
         $available_alat = MasterDataAlat::whereHas ( 'alatProyek', function ($query) use ($rkb)
         {
@@ -46,22 +65,23 @@ class DetailRKBUrgentController extends Controller
                 ->whereNull ( 'removed_at' );
         } )->get ();
 
-        // sort linkAlatDetailRkbs berdasarkan id dari master_data_alat
-        // $data->linkAlatDetailRkbs = $data->linkAlatDetailRkbs->sortBy ( 'id_master_data_alat' );
+        $detail_rkb = $query->paginate ( $perPage );
 
-        // dd ( $data->toArray () );
+        $proyeks = Proyek::with ( "users" )
+            ->orderBy ( "updated_at", "asc" )
+            ->orderBy ( "id", "asc" )
+            ->get ();
 
         return view ( 'dashboard.rkb.urgent.detail.detail', [ 
-            'rkb'                   => $rkb,
-            'proyeks'               => $proyeks,
-            // 'master_data_alat'      => $master_data_alat,
-            'available_alat'        => $available_alat,
-            'master_data_sparepart' => $master_data_sparepart,
-            'kategori_sparepart'    => $kategori_sparepart,
-            'data'                  => $data,
-
             'headerPage'            => "RKB Urgent",
             'page'                  => 'Detail RKB Urgent',
+
+            'proyeks'               => $proyeks,
+            'rkb'                   => $rkb,
+            'available_alat'        => $available_alat,
+            'master_data_sparepart' => MasterDataSparepart::all (),
+            'kategori_sparepart'    => KategoriSparepart::all (),
+            'TableData'             => $detail_rkb,
         ] );
     }
 
@@ -328,125 +348,6 @@ class DetailRKBUrgentController extends Controller
 
         return redirect ()->back ()->with ( 'success', 'Detail RKB Urgent and its links deleted successfully!' );
 
-    }
-
-
-
-    public function getData ( Request $request, $id_rkb )
-    {
-        // Query dengan join untuk mempermudah sorting kolom terkait relasi
-        $query = DetailRKBUrgent::query ()
-            ->select ( [ 
-                'detail_rkb_urgent.id',
-                'detail_rkb_urgent.quantity_requested',
-                'detail_rkb_urgent.quantity_approved',
-                'detail_rkb_urgent.satuan',
-                'master_data_alat.jenis_alat as namaAlat', // "Nama Alat" diambil dari jenis_alat
-                'master_data_alat.kode_alat as kodeAlat',
-                'kategori_sparepart.kode as kodeKategoriSparepart',
-                'kategori_sparepart.nama as namaKategoriSparepart',
-                'master_data_sparepart.nama as sparepart',
-                'master_data_sparepart.part_number',
-                'master_data_sparepart.merk',
-            ] )
-            ->join ( 'link_rkb_detail', 'detail_rkb_urgent.id', '=', 'link_rkb_detail.id_detail_rkb_urgent' )
-            ->join ( 'link_alat_detail_rkb', 'link_rkb_detail.id_link_alat_detail_rkb', '=', 'link_alat_detail_rkb.id' )
-            ->join ( 'master_data_alat', 'link_alat_detail_rkb.id_master_data_alat', '=', 'master_data_alat.id' )
-            ->leftJoin ( 'kategori_sparepart', 'detail_rkb_urgent.id_kategori_sparepart_sparepart', '=', 'kategori_sparepart.id' )
-            ->leftJoin ( 'master_data_sparepart', 'detail_rkb_urgent.id_master_data_sparepart', '=', 'master_data_sparepart.id' )
-            ->where ( 'link_alat_detail_rkb.id_rkb', $id_rkb );
-
-        // Filter pencarian
-        if ( $search = $request->input ( 'search.value' ) )
-        {
-            $query->where ( function ($q) use ($search)
-            {
-                $q->where ( 'master_data_alat.jenis_alat', 'like', "%{$search}%" )
-                    ->orWhere ( 'master_data_alat.kode_alat', 'like', "%{$search}%" )
-                    ->orWhere ( 'kategori_sparepart.kode', 'like', "%{$search}%" )
-                    ->orWhere ( 'kategori_sparepart.nama', 'like', "%{$search}%" )
-                    ->orWhere ( 'master_data_sparepart.nama', 'like', "%{$search}%" )
-                    ->orWhere ( 'master_data_sparepart.part_number', 'like', "%{$search}%" )
-                    ->orWhere ( 'master_data_sparepart.merk', 'like', "%{$search}%" )
-                    ->orWhere ( 'detail_rkb_urgent.satuan', 'like', "%{$search}%" )
-                    ->orWhere ( 'detail_rkb_urgent.quantity_requested', 'like', "%{$search}%" )
-                    ->orWhere ( 'detail_rkb_urgent.quantity_approved', 'like', "%{$search}%" );
-            } );
-        }
-
-        // Sorting
-        if ( $order = $request->input ( 'order' ) )
-        {
-            $columnIndex   = $order[ 0 ][ 'column' ];
-            $columnName    = $request->input ( 'columns' )[ $columnIndex ][ 'data' ];
-            $sortDirection = $order[ 0 ][ 'dir' ];
-
-            switch ($columnName)
-            {
-                case 'namaAlat':
-                    $query->orderBy ( 'master_data_alat.jenis_alat', $sortDirection );
-                    break;
-                case 'kodeAlat':
-                    $query->orderBy ( 'master_data_alat.kode_alat', $sortDirection );
-                    break;
-                case 'kategoriSparepart':
-                    $query->orderBy ( 'kategori_sparepart.kode', $sortDirection )
-                        ->orderBy ( 'kategori_sparepart.nama', $sortDirection );
-                    break;
-                case 'masterDataSparepart':
-                    $query->orderBy ( 'master_data_sparepart.nama', $sortDirection );
-                    break;
-                case 'partNumber':
-                    $query->orderBy ( 'master_data_sparepart.part_number', $sortDirection );
-                    break;
-                case 'merk':
-                    $query->orderBy ( 'master_data_sparepart.merk', $sortDirection );
-                    break;
-                default:
-                    $query->orderBy ( $columnName, $sortDirection );
-                    break;
-            }
-        }
-        else
-        {
-            $query->orderBy ( 'detail_rkb_urgent.updated_at', 'desc' );
-        }
-
-        // Pagination
-        $draw   = $request->input ( 'draw' );
-        $start  = $request->input ( 'start', 0 );
-        $length = $request->input ( 'length', 10 );
-
-        $totalRecords = DetailRKBUrgent::whereHas ( 'linkRkbDetails.linkAlatDetailRkb.rkb', function ($q) use ($id_rkb)
-        {
-            $q->where ( 'id_rkb', $id_rkb );
-        } )->count ();
-
-        $filteredRecords = $query->count ();
-
-        $data = $query->skip ( $start )->take ( $length )->get ()->map ( function ($item)
-        {
-            return [ 
-                'id'                  => $item->id,
-                'namaAlat'            => $item->namaAlat,
-                'kodeAlat'            => $item->kodeAlat,
-                'kategoriSparepart'   => "{$item->kodeKategoriSparepart}: {$item->namaKategoriSparepart}",
-                'masterDataSparepart' => $item->sparepart,
-                'partNumber'          => $item->part_number,
-                'merk'                => $item->merk,
-                'quantity_requested'  => $item->quantity_requested,
-                'quantity_approved'   => $item->quantity_approved ?? '-',
-                'satuan'              => $item->satuan,
-                'aksi'                => '', // Actions rendered on the frontend
-            ];
-        } );
-
-        return response ()->json ( [ 
-            'draw'            => $draw,
-            'recordsTotal'    => $totalRecords,
-            'recordsFiltered' => $filteredRecords,
-            'data'            => $data,
-        ] );
     }
 
     public function getDokumentasi ( $id )

@@ -22,8 +22,8 @@
         <thead class="table-primary">
             <tr>
                 <th>Nama Proyek</th>
-                <th class="text-center">Detail</th>
-                <th class="text-center">Aksi</th>
+                <th>Detail</th>
+                <th>Aksi</th>
             </tr>
         </thead>
         <tbody>

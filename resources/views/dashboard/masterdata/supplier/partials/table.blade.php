@@ -36,11 +36,11 @@
                         </button>
                     </td>
                     <td class="text-center">
-                        <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $supplier->id }}">
-                            <i class="bi bi-trash"></i>
-                        </button>
                         <button class="btn btn-warning mx-1" data-bs-target=#modalForEdit data-bs-toggle=modal onclick="fillFormEdit({{ $supplier->id }})">
                             <i class="bi bi-pencil-square"></i>
+                        </button>
+                        <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $supplier->id }}">
+                            <i class="bi bi-trash"></i>
                         </button>
                     </td>
                 </tr>

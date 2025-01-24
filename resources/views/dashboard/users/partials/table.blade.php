@@ -36,11 +36,11 @@
                     <td class="text-center">{{ $user->phone }}</td>
                     <td class="text-center">{{ $user->email }}</td>
                     <td class="text-center">
-                        <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $user->id }}">
-                            <i class="bi bi-trash3"></i>
-                        </button>
                         <button class="btn btn-warning mx-1" data-bs-target=#modalForEdit data-bs-toggle=modal onclick="fillFormEdit({{ $user->id }})">
                             <i class="bi bi-pencil-square"></i>
+                        </button>
+                        <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $user->id }}">
+                            <i class="bi bi-trash3"></i>
                         </button>
                     </td>
                 </tr>

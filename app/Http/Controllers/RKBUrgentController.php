@@ -111,7 +111,7 @@ class RKBUrgentController extends Controller
 
         return view ( 'dashboard.rkb.urgent.urgent', [ 
             'headerPage' => 'RKB General',
-            'page'       => 'Data RKB General',
+            'page'       => 'Data RKB Urgent',
 
             'proyeks'    => $proyeks,
             'TableData'  => $TableData,

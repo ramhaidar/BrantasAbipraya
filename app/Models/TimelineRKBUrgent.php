@@ -35,6 +35,24 @@ class TimelineRKBUrgent extends Model
         'updated_at'            => 'datetime',
     ];
 
+    public function getDiffInDaysRencanaAttribute ()
+    {
+        if ( $this->tanggal_awal_rencana && $this->tanggal_akhir_rencana )
+        {
+            return $this->tanggal_awal_rencana->diffInDays ( $this->tanggal_akhir_rencana );
+        }
+        return null;
+    }
+
+    public function getDiffInDaysActualAttribute ()
+    {
+        if ( $this->tanggal_awal_actual && $this->tanggal_akhir_actual )
+        {
+            return $this->tanggal_awal_actual->diffInDays ( $this->tanggal_akhir_actual );
+        }
+        return null;
+    }
+
     public function kategoriSparepart () : BelongsTo
     {
         return $this->belongsTo ( KategoriSparepart::class, 'id_kategori_sparepart_sparepart' );

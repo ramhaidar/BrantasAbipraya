@@ -47,7 +47,7 @@
                         @endif
                     </td>
                     <td class="text-center">
-                        <a class="btn btn-primary mx-1 detailBtn" href="{{ route('rkb_general.detail.index', ['id' => $rkb->id]) }}">
+                        <a class="btn btn-primary mx-1 detailBtn" href="{{ route('rkb_urgent.detail.index', ['id' => $rkb->id]) }}">
                             <i class="fa-solid fa-file-pen"></i>
                         </a>
                     </td>

@@ -12,53 +12,40 @@ class MasterDataAlatController extends Controller
 {
     public function index ( Request $request )
     {
-        $user    = Auth::user ();
-        $proyeks = [];
-        $alat    = [];
+        // Validate and set perPage to allowed values only
+        $allowedPerPage = [ 10, 25, 50, 100 ];
+        $perPage        = in_array ( (int) $request->get ( 'per_page' ), $allowedPerPage ) ? (int) $request->get ( 'per_page' ) : 10;
 
-        if ( $user->role === 'Admin' )
+        $query = MasterDataAlat::query ()
+            ->orderBy ( $request->get ( 'sort', 'updated_at' ), $request->get ( 'direction', 'desc' ) );
+
+        if ( $request->has ( 'search' ) )
         {
-            $proyeks = Proyek::with ( "users" )
-                ->orderBy ( "updated_at", "asc" )
-                ->orderBy ( "id", "asc" )
-                ->get ();
-
-            $alat = MasterDataAlat::orderBy ( 'updated_at', 'desc' )
-                ->paginate ( $request->input ( 'length', 10 ) );
+            $search = $request->get ( 'search' );
+            $query->where ( function ($q) use ($search)
+            {
+                $q->where ( 'jenis_alat', 'like', "%{$search}%" )
+                    ->orWhere ( 'kode_alat', 'like', "%{$search}%" )
+                    ->orWhere ( 'merek_alat', 'like', "%{$search}%" )
+                    ->orWhere ( 'tipe_alat', 'like', "%{$search}%" )
+                    ->orWhere ( 'serial_number', 'like', "%{$search}%" );
+            } );
         }
-        elseif ( $user->role === 'Boss' )
-        {
-            $proyeks = $user->proyek ()
-                ->with ( "users" )
-                ->orderBy ( "updated_at", "asc" )
-                ->orderBy ( "id", "asc" )
-                ->get ();
 
-            $usersInProyek = $proyeks->pluck ( 'users.*.id' )->flatten ();
-            $alat          = MasterDataAlat::whereIn ( 'id_user', $usersInProyek )
-                ->orderBy ( 'updated_at', 'desc' )
-                ->paginate ( $request->input ( 'length', 10 ) );
-        }
-        elseif ( $user->role === 'Pegawai' )
-        {
-            $proyeks = $user->proyek ()
-                ->with ( "users" )
-                ->orderBy ( "updated_at", "asc" )
-                ->orderBy ( "id", "asc" )
-                ->get ();
+        $proyeks = Proyek::with ( "users" )
+            ->orderBy ( "updated_at", "desc" )
+            ->orderBy ( "id", "desc" )
+            ->get ();
 
-            $alat = MasterDataAlat::where ( 'id_user', $user->id )
-                ->orderBy ( 'updated_at', 'desc' )
-                ->paginate ( $request->input ( 'length', 10 ) );
-        }
+        $TableData = $query->paginate ( $perPage )
+            ->withQueryString ();
 
         return view ( 'dashboard.masterdata.alat.alat', [ 
-            'proyeks'    => $proyeks,
-            // 'proyek'     => $proyeks,
-            // 'alat'       => $alat,
-
             'headerPage' => "Master Data Alat",
             'page'       => 'Data Alat',
+
+            'proyeks'    => $proyeks,
+            'TableData'  => $TableData,
         ] );
     }
 

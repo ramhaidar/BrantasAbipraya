@@ -432,23 +432,24 @@
                                                 </ul>
                                             </li>
 
-                                            <!-- Laporan Submenu (Level 2) -->
-                                            <li class="nav-item has-treeview {{ (str_contains($page, 'LNPB') || str_contains($page, 'Summary')) && !str_contains($headerPage, 'Laporan Semua Proyek') ? 'menu-open' : '' }}">
-                                                <a class="ps-4 nav-link level-1 {{ (str_contains($page, 'LNPB') || str_contains($page, 'Summary')) && !str_contains($headerPage, 'Laporan Semua Proyek') ? 'active' : '' }}" href="#" style="{{ (str_contains($page, 'LNPB') || str_contains($page, 'Summary')) && !str_contains($headerPage, 'Laporan Semua Proyek') ? 'background-color: #66CDAA; color: #ffffff;' : '' }}">
+                                            <!-- LNPB Submenu (Level 2) -->
+                                            <li class="nav-item has-treeview {{ isset($proyek) && $proyek->id == $item->id && (str_contains($page, 'LNPB') || str_contains($page, 'Summary')) ? 'menu-open' : '' }}">
+                                                <a class="ps-4 nav-link level-1 {{ isset($proyek) && $proyek->id == $item->id && (str_contains($page, 'LNPB') || str_contains($page, 'Summary')) ? 'active' : '' }}" href="#" style="{{ isset($proyek) && $proyek->id == $item->id && (str_contains($page, 'LNPB') || str_contains($page, 'Summary')) ? 'background-color: #66CDAA; color: #ffffff;' : '' }}">
                                                     <i class="bi me-2 nav-icon fs-5 bi-journal-text"></i>
                                                     <p>LNPB</p>
                                                     <i class="right bi bi-caret-right-fill"></i>
                                                 </a>
                                                 <ul class="nav nav-treeview">
-                                                    <!-- Level 3 Submenu Items under Laporan -->
+                                                    <!-- Total Submenu (Level 3) -->
                                                     <li class="nav-item">
-                                                        <a class="ps-5 nav-link level-2 {{ $page === 'LNPB Total' && $headerPage !== 'Laporan Semua Proyek' ? 'active' : '' }}" href="{{ route('laporan.lnpb.total.index', ['id_proyek' => $item->id]) }}" style="{{ $page === 'LNPB Total' && $headerPage !== 'Laporan Semua Proyek' ? 'background-color: #D3D3D3; color: #000000;' : '' }}">
+                                                        <a class="ps-5 nav-link level-2 {{ isset($proyek) && $proyek->id == $item->id && $page === 'LNPB Total' ? 'active' : '' }}" href="{{ route('laporan.lnpb.total.index', ['id_proyek' => $item->id]) }}" style="{{ isset($proyek) && $proyek->id == $item->id && $page === 'LNPB Total' ? 'background-color: #D3D3D3; color: #000000;' : '' }}">
                                                             <i class="bi me-2 nav-icon fs-5 bi-graph-up"></i>
                                                             <p>Total</p>
                                                         </a>
                                                     </li>
+                                                    <!-- Bulan Berjalan Submenu (Level 3) -->
                                                     <li class="nav-item">
-                                                        <a class="ps-5 nav-link level-2 {{ $page === 'LNPB Bulan Berjalan' && !str_contains($headerPage, 'Laporan Semua Proyek') ? 'active' : '' }}" href="{{ route('laporan.lnpb.bulan_berjalan.index', ['id_proyek' => $item->id]) }}" style="{{ $page === 'LNPB Bulan Berjalan' && !str_contains($headerPage, 'Laporan Semua Proyek') ? 'background-color: #D3D3D3; color: #000000;' : '' }}">
+                                                        <a class="ps-5 nav-link level-2 {{ isset($proyek) && $proyek->id == $item->id && $page === 'LNPB Bulan Berjalan' ? 'active' : '' }}" href="{{ route('laporan.lnpb.bulan_berjalan.index', ['id_proyek' => $item->id]) }}" style="{{ isset($proyek) && $proyek->id == $item->id && $page === 'LNPB Bulan Berjalan' ? 'background-color: #D3D3D3; color: #000000;' : '' }}">
                                                             <i class="bi me-2 nav-icon fs-5 bi-calendar-check"></i>
                                                             <p>Bulan Berjalan</p>
                                                         </a>

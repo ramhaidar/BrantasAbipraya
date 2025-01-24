@@ -88,7 +88,7 @@
         })();
 
         // Initialize Select2 for multi-select in edit modal
-        $('#edit_spareparts').select2({
+        const editSpareparts = $('#edit_spareparts').select2({
             placeholder: "Pilih Sparepart",
             allowClear: true,
             closeOnSelect: false,
@@ -99,6 +99,9 @@
         // Function to display modal for editing and populate form with server data
         function fillFormEdit(id) {
             const url = "{{ route('master_data_supplier.show', ':id') }}".replace(':id', id);
+
+            // Clear previous selections
+            editSpareparts.val(null).trigger('change');
 
             // AJAX GET request to fetch supplier data along with selected spareparts
             $.ajax({
@@ -111,8 +114,10 @@
                     $('#editSupplierForm #contact_person').val(response.data.contact_person);
 
                     // Set selected spareparts
-                    const selectedSpareparts = response.data.spareparts.map(sparepart => sparepart.id);
-                    $('#edit_spareparts').val(selectedSpareparts).trigger('change');
+                    if (response.data.master_data_spareparts && response.data.master_data_spareparts.length > 0) {
+                        const selectedSpareparts = response.data.master_data_spareparts.map(sparepart => sparepart.id);
+                        editSpareparts.val(selectedSpareparts).trigger('change');
+                    }
 
                     // Set action form to update the specific supplier with PUT method
                     $('#editSupplierForm').attr('action', "{{ route('master_data_supplier.update', ':id') }}".replace(':id', id));
@@ -126,10 +131,10 @@
             });
         }
 
-        // Event listener untuk tombol edit di tabel
-        // $(document).on('click', '.ubahBtn', function() {
-        //     const id = $(this).data('id'); // Ambil ID dari atribut data-id
-        //     fillFormEdit(id); // Panggil fungsi untuk mengisi form edit
-        // });
+        // Reset form when modal is hidden
+        $('#modalForEdit').on('hidden.bs.modal', function () {
+            $('#editSupplierForm').removeClass('was-validated');
+            editSpareparts.val(null).trigger('change');
+        });
     </script>
 @endpush

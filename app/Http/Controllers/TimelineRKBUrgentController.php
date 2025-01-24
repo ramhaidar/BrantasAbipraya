@@ -11,9 +11,86 @@ use App\Http\Controllers\Controller;
 
 class TimelineRKBUrgentController extends Controller
 {
-    public function index ( $id )
+    public function index ( Request $request, $id )
     {
+        // Get RKB data
         $rkb = Proyek::find ( $id );
+
+        // Validate and set perPage to allowed values only
+        $allowedPerPage = [ 10, 25, 50, 100 ];
+        $perPage        = in_array ( (int) $request->get ( 'per_page' ), $allowedPerPage ) ? (int) $request->get ( 'per_page' ) : 10;
+
+        $query = TimelineRKBUrgent::query ()
+            ->where ( 'id_link_alat_detail_rkb', $id )
+            ->orderBy ( $request->get ( 'sort', 'updated_at' ), $request->get ( 'direction', 'desc' ) );
+
+        if ( $request->has ( 'search' ) )
+        {
+            $search = strtolower ( $request->get ( 'search' ) );
+
+            // Convert Indonesian month names to numbers if present
+            $monthNames = [ 
+                'januari'   => '01',
+                'februari'  => '02',
+                'maret'     => '03',
+                'april'     => '04',
+                'mei'       => '05',
+                'juni'      => '06',
+                'juli'      => '07',
+                'agustus'   => '08',
+                'september' => '09',
+                'oktober'   => '10',
+                'november'  => '11',
+                'desember'  => '12'
+            ];
+
+            // Add Indonesian day names mapping to numbers (1=Monday, 7=Sunday)
+            $dayNames = [ 
+                'senin'  => 1,
+                'selasa' => 2,
+                'rabu'   => 3,
+                'kamis'  => 4,
+                'jumat'  => 5,
+                'jumaat' => 5, // alternative spelling
+                'sabtu'  => 6,
+                'minggu' => 7,
+                'ahad'   => 7 // alternative name
+            ];
+
+            $searchMonth = array_key_exists ( $search, $monthNames ) ? $monthNames[ $search ] : $search;
+            $searchDay   = array_key_exists ( $search, $dayNames ) ? $dayNames[ $search ] : null;
+
+            $query->where ( function ($q) use ($search, $searchMonth, $searchDay)
+            {
+                $q->where ( 'nama_rencana', 'like', "%{$search}%" )
+                    // Search by day difference
+                    ->orWhereRaw ( "DATEDIFF(tanggal_akhir_rencana, tanggal_awal_rencana) = ?", [ (int) $search ] )
+                    ->orWhereRaw ( "DATEDIFF(tanggal_akhir_actual, tanggal_awal_actual) = ?", [ (int) $search ] )
+                    // Search by year in any date field
+                    ->orWhereRaw ( "YEAR(tanggal_awal_rencana) = ?", [ (int) $search ] )
+                    ->orWhereRaw ( "YEAR(tanggal_akhir_rencana) = ?", [ (int) $search ] )
+                    ->orWhereRaw ( "YEAR(tanggal_awal_actual) = ?", [ (int) $search ] )
+                    ->orWhereRaw ( "YEAR(tanggal_akhir_actual) = ?", [ (int) $search ] )
+                    // Search by month in any date field
+                    ->orWhereRaw ( "MONTH(tanggal_awal_rencana) = ?", [ (int) $searchMonth ] )
+                    ->orWhereRaw ( "MONTH(tanggal_akhir_rencana) = ?", [ (int) $searchMonth ] )
+                    ->orWhereRaw ( "MONTH(tanggal_awal_actual) = ?", [ (int) $searchMonth ] )
+                    ->orWhereRaw ( "MONTH(tanggal_akhir_actual) = ?", [ (int) $searchMonth ] )
+                    // Search by day in any date field
+                    ->orWhereRaw ( "DAY(tanggal_awal_rencana) = ?", [ (int) $search ] )
+                    ->orWhereRaw ( "DAY(tanggal_akhir_rencana) = ?", [ (int) $search ] )
+                    ->orWhereRaw ( "DAY(tanggal_awal_actual) = ?", [ (int) $search ] )
+                    ->orWhereRaw ( "DAY(tanggal_akhir_actual) = ?", [ (int) $search ] )
+                    // Add weekday searches if a day name was provided
+                    ->when ( $searchDay, function ($query) use ($searchDay)
+                    {
+                        return $query->orWhereRaw ( "DAYOFWEEK(tanggal_awal_rencana) = ?", [ $searchDay + 1 ] )
+                            ->orWhereRaw ( "DAYOFWEEK(tanggal_akhir_rencana) = ?", [ $searchDay + 1 ] )
+                            ->orWhereRaw ( "DAYOFWEEK(tanggal_awal_actual) = ?", [ $searchDay + 1 ] )
+                            ->orWhereRaw ( "DAYOFWEEK(tanggal_akhir_actual) = ?", [ $searchDay + 1 ] );
+                    } );
+            } );
+        }
 
         $proyeks = Proyek::with ( "users" )
             ->orderBy ( "updated_at", "desc" )
@@ -27,27 +104,16 @@ class TimelineRKBUrgentController extends Controller
             'linkRkbDetails'
         ] )->find ( $id );
 
-        // dd ( $data );
-
-        // $data = TimelineRKBUrgent::find ( $id )->with ( [ 
-//     'kategoriSparepart',
-//     'masterDataSparepart',
-//     'linkAlatDetailRkb',
-// ] )->get ();
-
-        // Filter $data that have 
-
-        // sort $data by timeline_rkb_urgent id
-// $data = $data->sortBy ( 'id' );
-
-        // dd ( $data );
+        $TableData = $query->paginate ( $perPage )
+            ->withQueryString ();
 
         return view ( 'dashboard.rkb.urgent.detail.timeline.timeline', [ 
             'rkb'        => $rkb,
-            'proyeks'    => $proyeks,
             'data'       => $data,
+            'proyeks'    => $proyeks,
+            'TableData'  => $TableData,
 
-            'headerPage' => "RKB Urgent",
+            'headerPage' => 'RKB Urgent',
             'page'       => 'Timeline Detail RKB Urgent',
         ] );
     }

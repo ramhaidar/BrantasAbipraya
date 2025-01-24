@@ -43,7 +43,7 @@
                     <td class="text-center">{{ $sparepart->kategoriSparepart->sub_jenis ?? '-' }}</td>
                     <td class="text-center">{{ $sparepart->kategoriSparepart->nama }}</td>
                     <td class="text-center">
-                        <button class="btn btn-info detailBtn" data-id="{{ $sparepart['id'] }}">
+                        <button class="btn btn-primary detailBtn" data-id="{{ $sparepart['id'] }}">
                             <i class="bi bi-eye"></i>
                         </button>
                     </td>

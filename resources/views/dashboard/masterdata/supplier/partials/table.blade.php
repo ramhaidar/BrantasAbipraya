@@ -35,7 +35,7 @@
                     <td class="text-center">{{ $supplier->alamat }}</td>
                     <td class="text-center">{{ $supplier->contact_person }}</td>
                     <td class="text-center">
-                        <button class="btn btn-info detailBtn" data-id="{{ $supplier->id }}">
+                        <button class="btn btn-primary detailBtn" data-id="{{ $supplier->id }}">
                             <i class="bi bi-eye"></i>
                         </button>
                     </td>

@@ -9,7 +9,7 @@
             <div class="ibox">
                 <div class="ibox-head pe-0 ps-0">
                     <div class=ibox-title>
-                        <p class="fw-medium">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}</p>
+                        <h5 class="fw-medium">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}</h5>
                     </div>
                     <a class="btn btn-primary btn-sm" id=button-for-modal-add onclick=showModalAdd()>
                         <i class="fa fa-plus"></i> <span class=ms-2>Tambah Data</span>

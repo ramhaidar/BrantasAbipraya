@@ -9,9 +9,12 @@
             <div class="ibox">
                 <div class="ibox-head pe-0 ps-0">
                     <div class="ibox-title ps-2">
-                        <p class="fw-medium">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}</p>
+                        <h5 class="fw-medium">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}</h5>
                     </div>
-                    <div class="d-flex justify-content-end">
+                    <div class="ms-auto d-flex gap-2">
+                        <a class="btn btn-warning btn-sm me-2" href="{{ route('export.apb', ['id' => $proyek->id]) }}">
+                            <i class="fa-solid fa-file-excel"></i> <span class="ms-2">Export</span>
+                        </a>
                         @if ($tipe === 'mutasi-proyek')
                             <a class="btn btn-success btn-sm me-2" id="button-for-modal-add" data-bs-toggle="modal" data-bs-target="#modalForMutasi">
                                 <i class="fa fa-exchange"></i> <span class="ms-2">Mutasi Proyek</span>

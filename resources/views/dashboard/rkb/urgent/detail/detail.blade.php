@@ -16,7 +16,9 @@
                             <h5 class="fw-medium mb-0">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}</h5>
                         </div>
                         <div class="d-flex justify-content-end gap-2">
-                            <!-- Button to trigger the modal -->
+                            <a class="btn btn-warning btn-sm me-2 {{ $rkb->is_finalized ? '' : 'disabled' }}" href="{{ route('export.rkb_urgent', ['id' => $rkb->id]) }}">
+                                <i class="fa-solid fa-file-excel"></i> <span class="ms-2">Export</span>
+                            </a>
                             <a class="btn btn-success btn-sm finalizeBtn {{ $rkb->is_finalized ? 'disabled' : '' }}" id="button-for-modal-add" data-bs-toggle="modal" data-id="{{ $rkb->id }}" data-bs-target="#modalForFinalize">
                                 <i class="fa fa-check"></i> <span class="ms-2">Finalisasi Data</span>
                             </a>

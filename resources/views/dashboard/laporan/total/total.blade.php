@@ -36,26 +36,33 @@
         <div class="fade-in-up page-content">
             <div class="ibox">
                 <div class="ibox-head pe-0 ps-0">
-                    <div class="ibox-title ps-2">
-                        <p class="fw-medium">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}</p>
-                    </div>
-                    {{-- <a class="btn btn-primary btn-sm" id="button-for-modal-add" data-bs-toggle="modal" data-bs-target="#modalForAdd">
-                        <i class="fa fa-plus"></i> <span class="ms-2">Tambah Data</span>
-                    </a> --}}
+                    <div class="d-flex justify-content-between align-items-center w-100">
+                        <!-- Left side - Page title -->
+                        <div class="ibox-title ps-2">
+                            <h5 class="fw-medium">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}</h5>
+                        </div>
 
-                    <div class="d-flex align-items-center gap-2">
-                        <span>Periode {{ \Carbon\Carbon::parse($startDate)->translatedFormat('F Y') }}</span>
-                        <span>s/d</span>
-                        <div class="date-input-container">
-                            <input class="form-control" id="endDate" name="endDate" type="month" value="{{ \Carbon\Carbon::parse($endDate)->format('Y-m') }}" style="width: 150px;" onchange="filterPeriode()">
-                            <div class="date-input-overlay" onclick="document.getElementById('endDate').showPicker()"></div>
+                        <!-- Center - Period selection -->
+                        <div class="d-flex align-items-center gap-2">
+                            <span>Periode {{ \Carbon\Carbon::parse($startDate)->translatedFormat('F Y') }}</span>
+                            <span>s/d</span>
+                            <div class="date-input-container">
+                                <input class="form-control" id="endDate" name="endDate" type="month" value="{{ \Carbon\Carbon::parse($endDate)->format('Y-m') }}" style="width: 150px;" onchange="filterPeriode()">
+                                <div class="date-input-overlay" onclick="document.getElementById('endDate').showPicker()"></div>
+                            </div>
+                        </div>
+
+                        <!-- Right side - Buttons -->
+                        <div class="d-flex gap-2">
+                            <a class="btn btn-warning btn-sm" href="{{ isset($proyek) ? route('export.lnpb_total', ['id' => $proyek->id]) : route('export.lnpb_total') }}">
+                                <i class="fa-solid fa-file-excel"></i> <span class="ms-2">Export</span>
+                            </a>
+                            <button class="btn btn-primary btn-sm" id="toggleAllButton" type="button" onclick="toggleAll()">
+                                <i class="fa fa-expand" id="toggleAllIcon"></i>
+                                <span class="ms-2" id="toggleAllText">Expand All</span>
+                            </button>
                         </div>
                     </div>
-
-                    <button class="btn btn-primary btn-sm" id="toggleAllButton" type="button" onclick="toggleAll()">
-                        <i class="fa fa-expand" id="toggleAllIcon"></i>
-                        <span class="ms-2" id="toggleAllText">Expand All</span>
-                    </button>
                 </div>
 
                 @include('dashboard.laporan.total.partials.table')

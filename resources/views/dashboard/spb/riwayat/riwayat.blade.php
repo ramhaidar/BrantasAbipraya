@@ -8,27 +8,19 @@
         <div class="fade-in-up page-content">
             <div class="ibox">
                 <div class="ibox-head pe-0 ps-0">
-                    <div class="ibox-title ps-2">
-                        <p class="p-0 m-0 fw-medium">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}
-                        </p>
+                    <div class="ibox-title d-flex align-items-center gap-3">
+                        <a class="btn btn-outline-primary btn-sm" href="{{ route('spb.detail.index', ['id' => $spb->linkRkbSpbs[0]->rkb->id]) }}">
+                            <i class="fa fa-arrow-left pe-1"></i> Kembali
+                        </a>
+                        <h5 class="fw-medium">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}</h5>
                     </div>
 
-                    <div class="ms-auto d-flex gap-2 pe-2">
-                        <!-- Tambahkan Tombol Modal Preview -->
-                        <div class="ms-auto pe-2">
-                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPreview">
-                                <i class="fa fa-eye"></i> <span class="ms-2">Preview</span>
-                            </button>
-                        </div>
-
-                        <!-- Tambahkan Tombol Export PDF di Ujung Kanan -->
-                        <div class="ms-auto pe-2">
-                            <a class="btn btn-primary" href="{{ route('spb.detail.riwayat.export-pdf', ['id' => $spb->id]) }}" target="_blank">
-                                <i class="fa fa-file-pdf"></i> <span class="ms-2">Export PDF</span>
-                            </a>
-                        </div>
+                    <div class="ms-auto d-flex gap-2">
+                        <a class="btn btn-warning btn-sm me-2" href="{{ route('export.spb', ['id' => $spb->id]) }}">
+                            <i class="fa-solid fa-file-excel"></i> <span class="ms-2">Export</span>
+                        </a>
                     </div>
-                    {{-- <div class="ms-auto d-flex gap-2 pe-2">
+                    {{-- <div class="ms-auto d-flex gap-2">
                         <p class="text-end fw-medium">{{ $spb->nomor }}</p>
                     </div> --}}
                 </div>

@@ -82,7 +82,8 @@
 
         function fillFormEdit(id) {
             // Generate the URL to fetch data using the named route
-            const url = "{{ route('master_data_alat.update', ':id') }}".replace(':id', id);
+            const url = "{{ route('master_data_alat.show', ':id') }}".replace(':id', id);
+            const updateUrl = "{{ route('master_data_alat.update', ':id') }}".replace(':id', id);
 
             // Lakukan AJAX GET request ke server untuk mengambil data item
             $.ajax({
@@ -96,8 +97,8 @@
                     $('#editAlatForm #tipe_alat').val(response.tipe_alat);
                     $('#editAlatForm #serial_number').val(response.serial_number);
 
-                    // Set action form for update based on named route
-                    $('#editAlatForm').attr('action', url);
+                    // Set action form for update
+                    $('#editAlatForm').attr('action', updateUrl);
 
                     // Tampilkan modal edit
                     $('#modalForEdit').modal('show');
@@ -109,9 +110,9 @@
         }
 
         // Event listener untuk tombol edit di tabel
-        // $(document).on('click', '.ubahBtn', function() {
-        //     const id = $(this).data('id'); // Ambil ID dari atribut data-id
-        //     fillFormEdit(id); // Panggil fungsi untuk mengisi form edit
-        // });
+        $(document).on('click', '.ubahBtn', function() {
+            const id = $(this).data('id');
+            fillFormEdit(id);
+        });
     </script>
 @endpush

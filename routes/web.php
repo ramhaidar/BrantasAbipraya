@@ -17,6 +17,7 @@ use App\Http\Controllers\SPBProyekController;
 use App\Http\Controllers\AlatProyekController;
 use App\Http\Controllers\RiwayatSPBController;
 use App\Http\Controllers\RKBGeneralController;
+use App\Http\Controllers\ExportExcelController;
 use App\Http\Controllers\MasterDataAlatController;
 use App\Http\Controllers\DetailRKBUrgentController;
 use App\Http\Controllers\DetailSPBProyekController;
@@ -73,21 +74,22 @@ Route::get ( '/dashboard', [ DashboardController::class, 'index' ] )
     ->name ( 'dashboard' );
 
 // Rute Users [UserController]
-Route::prefix('users')->middleware([CheckRole::class . ':Admin,Pegawai,Boss'])->group(function () {
-    Route::get('/', [UserController::class, 'index'])
-        ->name('users');
-    Route::get('/{user}', [UserController::class, 'showByID'])
-        ->where('user', '[0-9]+')
-        ->name('api.showUserByID');
-    Route::put('/edit/{user}', [UserController::class, 'update']) // Changed from post to put
-        ->where('user', '[0-9]+')
-        ->name('user.put.update');
-    Route::post('/add', [UserController::class, 'store'])
-        ->name('user.post.store');
-    Route::delete('/delete/{user}', [UserController::class, 'destroy'])
-        ->where('user', '[0-9]+')
-        ->name('user.delete.destroy');
-});
+Route::prefix ( 'users' )->middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )->group ( function ()
+{
+    Route::get ( '/', [ UserController::class, 'index' ] )
+        ->name ( 'users' );
+    Route::get ( '/{user}', [ UserController::class, 'showByID' ] )
+        ->where ( 'user', '[0-9]+' )
+        ->name ( 'api.showUserByID' );
+    Route::put ( '/edit/{user}', [ UserController::class, 'update' ] ) // Changed from post to put
+        ->where ( 'user', '[0-9]+' )
+        ->name ( 'user.put.update' );
+    Route::post ( '/add', [ UserController::class, 'store' ] )
+        ->name ( 'user.post.store' );
+    Route::delete ( '/delete/{user}', [ UserController::class, 'destroy' ] )
+        ->where ( 'user', '[0-9]+' )
+        ->name ( 'user.delete.destroy' );
+} );
 
 // Rute ATB [ATBController]
 Route::middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )
@@ -1553,3 +1555,79 @@ Route::get (
     '/laporan/semua-total',
     [ LaporanLNPBTotalController::class, 'semuaTotal_index' ]
 )->name ( 'laporan.semua.total' );
+
+// Rute Export Excel [ExportExcelController]
+Route::prefix ( 'export' )
+    ->middleware ( 'auth' )
+    ->group ( function ()
+    {
+        Route::get (
+            '/rkb-general',
+            [ ExportExcelController::class, 'rkb_general' ]
+        )->name ( 'export.rkb_general' );
+
+        Route::get (
+            '/detail-rkb-general',
+            [ ExportExcelController::class, 'detail_rkb_general' ]
+        )->name ( 'export.detail_rkb_general' );
+
+        Route::get (
+            '/rkb-urgent',
+            [ ExportExcelController::class, 'rkb_urgent' ]
+        )->name ( 'export.rkb_urgent' );
+
+        Route::get (
+            '/detail-rkb-urgent',
+            [ ExportExcelController::class, 'detail_rkb_urgent' ]
+        )->name ( 'export.detail_rkb_urgent' );
+
+        Route::get (
+            '/timeline-rkb-urgent',
+            [ ExportExcelController::class, 'timeline_rkb_urgent' ]
+        )->name ( 'export.timeline_rkb_urgent' );
+
+        Route::get (
+            '/evaluasi-rkb-general',
+            [ ExportExcelController::class, 'evaluasi_rkb_general' ]
+        )->name ( 'export.evaluasi_rkb_general' );
+
+        Route::get (
+            '/evaluasi-rkb-urgent',
+            [ ExportExcelController::class, 'evaluasi_rkb_urgent' ]
+        )->name ( 'export.evaluasi_rkb_urgent' );
+
+        Route::get (
+            '/spb',
+            [ ExportExcelController::class, 'spb' ]
+        )->name ( 'export.spb' );
+
+        Route::get (
+            '/spb-proyek',
+            [ ExportExcelController::class, 'spb_proyek' ]
+        )->name ( 'export.spb_proyek' );
+
+        Route::get (
+            '/atb',
+            [ ExportExcelController::class, 'atb' ]
+        )->name ( 'export.atb' );
+
+        Route::get (
+            '/apb',
+            [ ExportExcelController::class, 'apb' ]
+        )->name ( 'export.apb' );
+
+        Route::get (
+            '/saldo',
+            [ ExportExcelController::class, 'saldo' ]
+        )->name ( 'export.saldo' );
+
+        Route::get (
+            '/lnpb-bulan-berjalan',
+            [ ExportExcelController::class, 'lnpb_bulan_berjalan' ]
+        )->name ( 'export.lnpb_bulan_berjalan' );
+
+        Route::get (
+            '/lnpb-total',
+            [ ExportExcelController::class, 'lnpb_total' ]
+        )->name ( 'export.lnpb_total' );
+    } );

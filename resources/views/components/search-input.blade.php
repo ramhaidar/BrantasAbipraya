@@ -2,7 +2,7 @@
     <div class="col-md-12 p-0 m-0">
         <form class="d-flex gap-2" action="{{ $route ?? url()->current() }}" method="GET">
             <div class="input-group">
-                <span class="input-group-text"><i class="fa fa-search"></i></span>
+                {{-- <span class="input-group-text"><i class="fa fa-search"></i></span> --}}
                 <input class="form-control" name="search" type="text" value="{{ request('search') }}" placeholder="{{ $placeholder ?? 'Search items...' }}">
                 @if (request('search'))
                     <button class="btn btn-secondary" type="button" onclick="this.form.querySelector('[name=search]').value = ''; this.form.submit();">

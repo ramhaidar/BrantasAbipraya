@@ -114,7 +114,7 @@ class TimelineRKBUrgentController extends Controller
             'TableData'  => $TableData,
 
             'headerPage' => 'RKB Urgent',
-            'page'       => 'Timeline Detail RKB Urgent',
+            'page'       => 'Timeline Detail RKB Urgent [' . $data->rkb->nomor . ' | ' . $data->masterDataAlat->jenis_alat . ' : ' . $data->masterDataAlat->kode_alat . ']',
         ] );
     }
 

@@ -11,9 +11,9 @@
                     <div class="ibox-title ps-2 d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center gap-3">
                             <a class="btn btn-outline-primary btn-sm" href="{{ route('rkb_urgent.detail.index', ['id' => $data->rkb->id]) }}">
-                                <i class="fa fa-arrow-left"></i> Kembali
+                                <i class="fa fa-arrow-left pe-1"></i> Kembali
                             </a>
-                            <h5 class="mb-0">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }} - {{ $data->rkb->nomor }} - {{ $data->masterDataAlat->jenis_alat }} : {{ $data->masterDataAlat->kode_alat }}</h5>
+                            <h5 class="mb-0">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}</h5>
                         </div>
                     </div>
                     <div class="d-flex justify-content-end gap-2">

@@ -58,8 +58,8 @@
 
                         <div class="col-12">
                             <label class="form-label required" for="add_phone">Phone</label>
-                            <input class="form-control" id="add_phone" name="phone" type="text" placeholder="Phone" required>
-                            <div class="invalid-feedback">Phone diperlukan.</div>
+                            <input class="form-control" id="add_phone" name="phone" type="text" placeholder="Phone" required minlength="8">
+                            <div class="invalid-feedback">Nomor telepon minimal 8 karakter.</div>
                         </div>
 
                         <div class="col-12">

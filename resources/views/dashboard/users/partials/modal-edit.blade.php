@@ -59,8 +59,8 @@
 
                         <div class="col-12">
                             <label class="form-label required" for="edit_phone">Phone</label>
-                            <input class="form-control" id="edit_phone" name="phone" type="text" placeholder="Phone" required>
-                            <div class="invalid-feedback">Phone diperlukan.</div>
+                            <input class="form-control" id="edit_phone" name="phone" type="text" placeholder="Phone" required minlength="8">
+                            <div class="invalid-feedback">Nomor telepon minimal 8 karakter.</div>
                         </div>
 
                         <div class="col-12">
@@ -71,7 +71,7 @@
 
                         <div class="col-12">
                             <label class="form-label" for="edit_password">Password</label>
-                            <input class="form-control" id="edit_password" name="password" type="password" placeholder="Password" minlength="8">
+                            <input class="form-control" id="edit_password" name="password" type="password" placeholder="Kosongkan jika tidak ingin mengubah password" minlength="8">
                             <div class="invalid-feedback">Password minimal 8 karakter.</div>
                         </div>
                     </div>

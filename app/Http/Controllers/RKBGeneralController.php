@@ -113,8 +113,9 @@ class RKBGeneralController extends Controller
         }
 
         return view ( 'dashboard.rkb.general.general', [ 
-            'headerPage' => "RKB General",
+            'headerPage' => 'RKB General',
             'page'       => 'Data RKB General',
+
             'proyeks'    => $proyeks,
             'TableData'  => $TableData,
         ] );

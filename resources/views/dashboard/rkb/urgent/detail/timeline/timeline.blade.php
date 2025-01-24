@@ -9,7 +9,7 @@
             <div class="ibox">
                 <div class="ibox-head pe-0 ps-0">
                     <div class="ibox-title ps-2 d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-start gap-3">
+                        <div class="d-flex align-items-center gap-3">
                             <a class="btn btn-outline-primary btn-sm" href="{{ route('rkb_urgent.detail.index', ['id' => $data->rkb->id]) }}">
                                 <i class="fa fa-arrow-left"></i> Kembali
                             </a>

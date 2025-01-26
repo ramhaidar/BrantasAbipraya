@@ -16,7 +16,6 @@
                             @if (isset($headerPage))
                                 {{ $headerPage }}
                             @endif
-                            @yield('header')
                         </h5>
                     </div>
                 </div>

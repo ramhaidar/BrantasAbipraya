@@ -753,6 +753,4 @@
             loadSidebarState();
         });
     </script>
-
-    @yield('script')
 @endpush

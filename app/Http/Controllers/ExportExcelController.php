@@ -1,20 +1,35 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\RKB;
+use App\Exports\DetailRKBGeneralExport;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class ExportExcelController extends Controller
 {
     public function rkb_general ( Request $request )
     {
-        dd ( $request->all () );
+        // dd ( $request->all () );
         // Dummy function for exporting RKB General
     }
 
-    public function detail_rkb_general ()
+    public function detail_rkb_general (Request $request)
     {
-        // Dummy function for exporting Detail RKB General
+        // Ambil data RKB berdasarkan parameter ID atau data lainnya
+        $rkb = RKB::find($request->id);
+
+        if (!$rkb) {
+            return redirect()->back()->withErrors(['error' => 'RKB tidak ditemukan']);
+        }
+
+        $periode = Carbon::parse($rkb->periode)->locale('id')->translatedFormat('F Y');
+
+        $fileName = "{$rkb->nomor}-{$rkb->proyek->nama}-{$periode}.xlsx";
+
+        // Generate dan unduh file Excel
+        return Excel::download(new DetailRKBGeneralExport, $fileName);;
     }
 
     public function rkb_urgent ( Request $request )

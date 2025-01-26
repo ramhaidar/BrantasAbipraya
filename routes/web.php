@@ -34,6 +34,8 @@ use App\Http\Controllers\TimelineEvaluasiUrgentController;
 use App\Http\Controllers\EvaluasiDetailRKBUrgentController;
 use App\Http\Controllers\EvaluasiDetailRKBGeneralController;
 use App\Http\Controllers\LaporanLNPBBulanBerjalanController;
+use App\Exports\DetailRKBGeneralExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 Route::get (
     '/test',

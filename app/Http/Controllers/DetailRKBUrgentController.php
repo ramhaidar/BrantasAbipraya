@@ -82,7 +82,10 @@ class DetailRKBUrgentController extends Controller
             'master_data_sparepart' => MasterDataSparepart::all (),
             'kategori_sparepart'    => KategoriSparepart::all (),
             'TableData'             => $detail_rkb,
+
+            'menuContext'           => 'rkb_urgent',  // Ensure this flag is passed for detail pages
         ] );
+
     }
 
     // Store a new DetailRKBUrgent

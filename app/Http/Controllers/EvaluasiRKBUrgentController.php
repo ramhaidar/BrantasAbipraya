@@ -18,11 +18,14 @@ class EvaluasiRKBUrgentController extends Controller
             ->get ();
 
         return view ( 'dashboard.evaluasi.urgent.evaluasi_urgent', [ 
-            'proyeks'    => $proyeks,
+            'proyeks'     => $proyeks,
 
-            'headerPage' => "Evaluasi Urgent",
-            'page'       => 'Data Evaluasi Urgent',
+            'headerPage'  => "Evaluasi Urgent",
+            'page'        => 'Data Evaluasi Urgent',
+
+            'menuContext' => 'evaluasi_urgent', // Add this flag
         ] );
+
     }
 
     public function getData ( Request $request )

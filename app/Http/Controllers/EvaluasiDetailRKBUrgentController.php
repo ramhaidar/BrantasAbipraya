@@ -58,7 +58,10 @@ class EvaluasiDetailRKBUrgentController extends Controller
 
             'headerPage'            => "Evaluasi Urgent",
             'page'                  => 'Detail Evaluasi Urgent [' . $rkb->proyek->nama . ' | ' . $rkb->nomor . ']',
+
+            'menuContext'           => 'evaluasi_urgent', // Add this flag
         ] );
+
     }
 
     public function evaluate ( Request $request, $id_rkb )

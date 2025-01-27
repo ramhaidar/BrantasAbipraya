@@ -110,12 +110,15 @@ class RKBUrgentController extends Controller
         }
 
         return view ( 'dashboard.rkb.urgent.urgent', [ 
-            'headerPage' => 'RKB Urgent',
-            'page'       => 'Data RKB Urgent',
+            'headerPage'  => 'RKB Urgent',
+            'page'        => 'Data RKB Urgent',
 
-            'proyeks'    => $proyeks,
-            'TableData'  => $TableData,
+            'proyeks'     => $proyeks,
+            'TableData'   => $TableData,
+
+            'menuContext' => 'rkb_urgent',  // Add this flag to indicate that Urgent is active
         ] );
+
     }
 
     /**

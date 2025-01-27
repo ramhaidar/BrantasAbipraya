@@ -42,13 +42,14 @@ class TimelineEvaluasiUrgentController extends Controller
         // dd ( $data->rkb );
 
         return view ( 'dashboard.evaluasi.urgent.detail.timeline.timeline', [ 
-            'proyek'     => $proyek,
-            'proyeks'    => $proyeks,
-            'data'       => $data,
-
-            'headerPage' => "Evaluasi Urgent",
-            'page'       => 'Timeline Detail RKB Urgent [' . $data->rkb->proyek->nama . ' | ' . $data->rkb->nomor . ']',
+            'proyek'      => $proyek,
+            'proyeks'     => $proyeks,
+            'data'        => $data,
+            'headerPage'  => "Evaluasi Urgent",
+            'menuContext' => 'evaluasi_urgent', // Specific to Urgent
+            'page'        => 'Timeline Detail RKB Urgent [' . $data->rkb->proyek->nama . ' | ' . $data->rkb->nomor . ']',
         ] );
+
     }
 
     public function show ( $id )

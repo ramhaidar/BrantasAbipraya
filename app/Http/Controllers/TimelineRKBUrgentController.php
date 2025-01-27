@@ -108,14 +108,15 @@ class TimelineRKBUrgentController extends Controller
             ->withQueryString ();
 
         return view ( 'dashboard.rkb.urgent.detail.timeline.timeline', [ 
-            'rkb'        => $rkb,
-            'data'       => $data,
-            'proyeks'    => $proyeks,
-            'TableData'  => $TableData,
-
-            'headerPage' => 'RKB Urgent',
-            'page'       => 'Timeline Detail RKB Urgent [' . $data->rkb->nomor . ' | ' . $data->masterDataAlat->jenis_alat . ' : ' . $data->masterDataAlat->kode_alat . ']',
+            'rkb'         => $rkb,
+            'data'        => $data,
+            'proyeks'     => $proyeks,
+            'TableData'   => $TableData,
+            'headerPage'  => 'RKB Urgent',
+            'menuContext' => 'rkb_urgent', // Specific to Urgent
+            'page'        => 'Timeline Detail RKB Urgent [' . $data->rkb->nomor . ' | ' . $data->masterDataAlat->jenis_alat . ' : ' . $data->masterDataAlat->kode_alat . ']',
         ] );
+
     }
 
     public function show ( $id )

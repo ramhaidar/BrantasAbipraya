@@ -55,7 +55,10 @@
 
                         <!-- Center - Period selection -->
                         <div class="d-flex align-items-center gap-2">
-                            <span>Periode {{ \Carbon\Carbon::parse($startDate)->translatedFormat('F Y') }}</span>
+                            <div class="date-input-container">
+                                <input class="form-control" id="startDate" name="startDate" type="month" value="{{ \Carbon\Carbon::parse($startDate)->format('Y-m') }}" style="width: 150px;" onchange="filterPeriode()">
+                                <div class="date-input-overlay" onclick="document.getElementById('startDate').showPicker()"></div>
+                            </div>
                             <span>s/d</span>
                             <div class="date-input-container">
                                 <input class="form-control" id="endDate" name="endDate" type="month" value="{{ \Carbon\Carbon::parse($endDate)->format('Y-m') }}" style="width: 150px;" onchange="filterPeriode()">
@@ -95,14 +98,8 @@
 @push('scripts_2')
     <script>
         function filterPeriode() {
+            let startDate = document.getElementById('startDate').value + '-26'; // Start at 26th
             let endDate = document.getElementById('endDate').value + '-25'; // End at 25th
-            let startDate = document.getElementById('endDate').value.split('-');
-            let startMonth = parseInt(startDate[1]) - 1;
-            if (startMonth === 0) {
-                startMonth = 12;
-                startDate[0] = parseInt(startDate[0]) - 1;
-            }
-            startDate = `${startDate[0]}-${String(startMonth).padStart(2, '0')}-26`; // Start at 26th of previous month
 
             let currentUrl = new URL(window.location.href);
             let id_proyek = currentUrl.searchParams.get('id_proyek');

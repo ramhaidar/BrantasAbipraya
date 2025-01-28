@@ -71,6 +71,10 @@ class LaporanLNPBBulanBerjalanController extends Controller
             $endDate = $request->filled ( 'endDate' ) && $request->endDate !== '-25'
                 ? Carbon::parse ( $request->endDate )
                 : $defaultEndDate;
+
+            // Ensure startDate is on the 26th and endDate is on the 25th
+            $startDate = $startDate->day ( 26 );
+            $endDate   = $endDate->day ( 25 );
         }
         catch ( \Exception $e )
         {
@@ -221,6 +225,10 @@ class LaporanLNPBBulanBerjalanController extends Controller
             $endDate = $request->filled ( 'endDate' ) && $request->endDate !== '-25'
                 ? Carbon::parse ( $request->endDate )
                 : $defaultEndDate;
+
+            // Ensure startDate is on the 26th and endDate is on the 25th
+            $startDate = $startDate->day ( 26 );
+            $endDate   = $endDate->day ( 25 );
         }
         catch ( \Exception $e )
         {

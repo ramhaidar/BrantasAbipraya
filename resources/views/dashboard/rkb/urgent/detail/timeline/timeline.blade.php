@@ -31,13 +31,16 @@
                     @include('components.search-input', [
                         'route' => url()->current(),
                         'placeholder' => 'Search items...',
+                        'show_all' => true,
                     ])
                     @include('dashboard.rkb.urgent.detail.timeline.partials.table', [
                         'TableData' => $TableData,
                     ])
-                    @include('components.pagination', [
-                        'paginator' => $TableData->links()->paginator,
-                    ])
+                    @if ($TableData->hasPages())
+                        @include('components.pagination', [
+                            'paginator' => $TableData,
+                        ])
+                    @endif
                 </div>
 
                 {{-- @include('dashboard.rkb.urgent.detail.timeline.partials.table') --}}

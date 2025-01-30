@@ -24,9 +24,11 @@
                     @include('dashboard.masterdata.supplier.partials.table', [
                         'TableData' => $TableData,
                     ])
-                    @include('components.pagination', [
-                        'paginator' => $TableData->links()->paginator,
-                    ])
+                    @if ($TableData->hasPages())
+                        @include('components.pagination', [
+                            'paginator' => $TableData,
+                        ])
+                    @endif
                 </div>
 
                 {{-- @include('dashboard.masterdata.supplier.partials.table') --}}

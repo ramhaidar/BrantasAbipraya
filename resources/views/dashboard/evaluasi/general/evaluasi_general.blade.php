@@ -23,9 +23,11 @@
                     @include('dashboard.evaluasi.general.partials.table', [
                         'TableData' => $TableData,
                     ])
-                    @include('components.pagination', [
-                        'paginator' => $TableData->links()->paginator,
-                    ])
+                    @if ($TableData->hasPages())
+                        @include('components.pagination', [
+                            'paginator' => $TableData,
+                        ])
+                    @endif
                 </div>
 
             </div>

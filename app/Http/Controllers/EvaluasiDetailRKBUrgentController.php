@@ -16,29 +16,60 @@ use Illuminate\Support\Facades\Storage;
 
 class EvaluasiDetailRKBUrgentController extends Controller
 {
-    public function index ( $id )
+    public function index ( Request $request, $id )
     {
-        $rkb                   = RKB::with ( [ 'proyek' ] )->find ( $id );
-        $proyeks               = Proyek::orderByDesc ( 'updated_at' )->get ();
-        $master_data_alat      = MasterDataAlat::all ();
-        $master_data_sparepart = MasterDataSparepart::all ();
-        $kategori_sparepart    = KategoriSparepart::all ();
+        $allowedPerPage = [ 10, 25, 50, 100, -1 ];
+        $perPage        = in_array ( (int) $request->get ( 'per_page' ), $allowedPerPage ) ? (int) $request->get ( 'per_page' ) : 10;
 
-        // Get RKB details with relationships
-        $alat_detail_rkbs = RKB::where ( "tipe", "Urgent" )
-            ->findOrFail ( $id )
-            ->linkAlatDetailRkbs ()
-            ->with ( [ 
-                'masterDataAlat',
-                'linkRkbDetails.detailRkbUrgent.kategoriSparepart',
-                'linkRkbDetails.detailRkbUrgent.masterDataSparepart',
-                'lampiranRkbUrgent',
-                'timelineRkbUrgents'
-            ] )
-            ->orderBy ( 'id_master_data_alat' )
-            ->get ();
+        $rkb = RKB::with ( [ 'proyek' ] )->find ( $id );
 
-        // Add this code to get stock quantities
+        // Get RKB details with relationships to preserve the model structure
+        $query = DetailRKBUrgent::with ( [ 
+            'linkRkbDetails.linkAlatDetailRkb.masterDataAlat',
+            'linkRkbDetails.linkAlatDetailRkb.timelineRkbUrgents',
+            'linkRkbDetails.linkAlatDetailRkb.lampiranRkbUrgent',
+            'kategoriSparepart',
+            'masterDataSparepart'
+        ] )
+            ->whereHas ( 'linkRkbDetails.linkAlatDetailRkb', function ($query) use ($id)
+            {
+                $query->where ( 'id_rkb', $id );
+            } );
+
+        // Add search functionality
+        if ( $request->has ( 'search' ) )
+        {
+            $search = $request->get ( 'search' );
+            $query->where ( function ($q) use ($search)
+            {
+                $q->where ( 'satuan', 'like', "%{$search}%" )
+                    ->orWhere ( 'nama_koordinator', 'like', "%{$search}%" )
+                    ->orWhereHas ( 'masterDataSparepart', function ($q) use ($search)
+                    {
+                        $q->where ( 'nama', 'like', "%{$search}%" )
+                            ->orWhere ( 'part_number', 'like', "%{$search}%" )
+                            ->orWhere ( 'merk', 'like', "%{$search}%" );
+                    } )
+                    ->orWhereHas ( 'kategoriSparepart', function ($q) use ($search)
+                    {
+                        $q->where ( 'kode', 'like', "%{$search}%" )
+                            ->orWhere ( 'nama', 'like', "%{$search}%" );
+                    } )
+                    ->orWhereHas ( 'linkRkbDetails.linkAlatDetailRkb.masterDataAlat', function ($q) use ($search)
+                    {
+                        $q->where ( 'jenis_alat', 'like', "%{$search}%" )
+                            ->orWhere ( 'kode_alat', 'like', "%{$search}%" );
+                    } );
+            } );
+        }
+
+        // Rest of the code remains the same
+        $available_alat = MasterDataAlat::whereHas ( 'alatProyek', function ($query) use ($rkb)
+        {
+            $query->where ( 'id_proyek', $rkb->id_proyek )
+                ->whereNull ( 'removed_at' );
+        } )->get ();
+
         $stockQuantities = Saldo::where ( 'id_proyek', $rkb->id_proyek )
             ->get ()
             ->groupBy ( 'id_master_data_sparepart' )
@@ -47,22 +78,93 @@ class EvaluasiDetailRKBUrgentController extends Controller
                 return $items->sum ( 'quantity' );
             } );
 
-        return view ( 'dashboard.evaluasi.urgent.detail.detail', [ 
-            'rkb'                   => $rkb,
-            'proyeks'               => $proyeks,
-            'master_data_alat'      => $master_data_alat,
-            'master_data_sparepart' => $master_data_sparepart,
-            'kategori_sparepart'    => $kategori_sparepart,
-            'alat_detail_rkbs'      => $alat_detail_rkbs,
-            'stockQuantities'       => $stockQuantities,
+        // Handle pagination
+        if ( $perPage === -1 )
+        {
+            $detail_rkb = $query->get (); // Get all records without pagination
 
+            // Handle empty results
+            if ( $detail_rkb->isEmpty () )
+            {
+                $detail_rkb = new \Illuminate\Pagination\LengthAwarePaginator(
+                    collect ( [] ), // Empty collection
+                    0, // Total
+                    1, // Per page
+                    1 // Current page
+                );
+            }
+            else
+            {
+                // Convert collection to LengthAwarePaginator
+                $detail_rkb = new \Illuminate\Pagination\LengthAwarePaginator(
+                    $detail_rkb,
+                    $detail_rkb->count (),
+                    max ( $detail_rkb->count (), 1 ), // Ensure perPage is at least 1
+                    1
+                );
+            }
+        }
+        else
+        {
+            // Regular pagination with error handling
+            $total = $query->count ();
+            if ( $total === 0 )
+            {
+                $detail_rkb = new \Illuminate\Pagination\LengthAwarePaginator(
+                    collect ( [] ), // Empty collection
+                    0, // Total
+                    $perPage,
+                    1 // Current page
+                );
+            }
+            else
+            {
+                $detail_rkb = $query->paginate ( $perPage );
+            }
+        }
+
+        $proyeks = Proyek::with ( "users" )
+            ->orderBy ( "updated_at", "asc" )
+            ->orderBy ( "id", "asc" )
+            ->get ();
+
+        return view ( 'dashboard.evaluasi.urgent.detail.detail', [ 
             'headerPage'            => "Evaluasi Urgent",
             'page'                  => 'Detail Evaluasi Urgent [' . $rkb->proyek->nama . ' | ' . $rkb->nomor . ']',
+            'menuContext'           => 'evaluasi_urgent',
 
-            'menuContext'           => 'evaluasi_urgent', // Add this flag
+            'proyeks'               => $proyeks,
+            'rkb'                   => $rkb,
+            'available_alat'        => $available_alat,
+            'master_data_sparepart' => MasterDataSparepart::all (),
+            'kategori_sparepart'    => KategoriSparepart::all (),
+            'TableData'             => $detail_rkb,
+            'stockQuantities'       => $stockQuantities,
         ] );
-
     }
+
+    public function getDokumentasi ( $id )
+    {
+        $detailRkbUrgent = DetailRkbUrgent::findOrFail ( $id );
+
+        // Assuming dokumentasi contains the folder path
+        $folderPath = $detailRkbUrgent->dokumentasi;
+
+        // Get all files from the folder
+        $files = Storage::disk ( 'public' )->files ( $folderPath );
+
+        // Prepare data for response
+        $data = array_map ( function ($file)
+        {
+            return [ 
+                'name' => basename ( $file ),
+                'url'  => Storage::url ( $file ),
+            ];
+        }, $files );
+
+        return response ()->json ( [ 'dokumentasi' => $data ] );
+    }
+
 
     public function evaluate ( Request $request, $id_rkb )
     {
@@ -95,24 +197,26 @@ class EvaluasiDetailRKBUrgentController extends Controller
 
         // Existing evaluation logic
         $request->validate ( [ 
-            'quantity_approved'   => 'required|array',
-            'quantity_approved.*' => 'required|integer|min:0',
+            "quantity_approved"   => "required|array",
+            "quantity_approved.*" => "required|integer|min:0",
         ] );
 
         // Ambil data dari input
-        $quantityApproved = $request->input ( 'quantity_approved' );
+        $quantityApproved = $request->input ( "quantity_approved" );
 
         // Loop untuk mengupdate setiap baris berdasarkan ID
         foreach ( $quantityApproved as $id => $quantity )
         {
-            $updated = DetailRKBUrgent::where ( 'id', $id )->update ( [ 'quantity_approved' => $quantity ] );
+            $updated = DetailRKBUrgent::where ( "id", $id )->update ( [ 
+                "quantity_approved" => $quantity,
+            ] );
 
             // Debug jika update gagal
             if ( ! $updated )
             {
                 return redirect ()
                     ->back ()
-                    ->with ( 'error', "Gagal mengupdate data untuk ID {$id}" );
+                    ->with ( "error", "Gagal mengupdate data untuk ID {$id}" );
             }
         }
 
@@ -122,45 +226,32 @@ class EvaluasiDetailRKBUrgentController extends Controller
 
         // Redirect dengan pesan sukses
         return redirect ()
-            ->route ( 'evaluasi_rkb_urgent.detail.index', $id_rkb )
-            ->with ( 'success', 'RKB Berhasil di Evaluasi!' );
-    }
-
-    public function approve ( Request $request, $id_rkb )
-    {
-        $rkb = RKB::find ( $id_rkb );
-
-        // Update all DetailRKBUrgent records for this RKB
-        DetailRKBUrgent::whereHas ( 'linkRkbDetails.linkAlatDetailRkb.rkb', function ($query) use ($id_rkb)
-        {
-            $query->where ( 'id', $id_rkb );
-        } )->each ( function ($detail)
-        {
-            $detail->incrementQuantityRemainder ( $detail->quantity_approved );
-        } );
-
-        $rkb->is_approved = true;
-        $rkb->save ();
-
-        // Redirect dengan pesan sukses
-        return redirect ()
-            ->route ( 'evaluasi_rkb_urgent.detail.index', $id_rkb )
-            ->with ( 'success', 'RKB Berhasil di Approve!' );
+            ->route ( "evaluasi_rkb_urgent.detail.index", $id_rkb )
+            ->with ( "success", "RKB Berhasil di Evaluasi!" );
     }
 
     public function approveVP ( Request $request, $id_rkb )
     {
         $rkb = RKB::find ( $id_rkb );
 
+        // If already approved by VP, cancel approval
+        if ( $rkb->is_approved_vp )
+        {
+            $rkb->is_approved_vp = false;
+            $rkb->vp_approved_at = null;
+            $rkb->save ();
+
+            return redirect ()
+                ->route ( 'evaluasi_rkb_urgent.detail.index', $id_rkb )
+                ->with ( 'success', 'Approve RKB oleh VP berhasil dibatalkan!' );
+        }
+
         // Check if can be approved by VP
         if ( ! $rkb->is_evaluated )
         {
-            return redirect ()->back ()->with ( 'error', 'RKB harus dievaluasi terlebih dahulu!' );
-        }
-
-        if ( $rkb->is_approved_vp )
-        {
-            return redirect ()->back ()->with ( 'error', 'RKB sudah di-approve oleh VP!' );
+            return redirect ()
+                ->back ()
+                ->with ( 'error', 'RKB harus dievaluasi terlebih dahulu!' );
         }
 
         $rkb->is_approved_vp = true;
@@ -176,15 +267,30 @@ class EvaluasiDetailRKBUrgentController extends Controller
     {
         $rkb = RKB::find ( $id_rkb );
 
+        // If already approved by SVP, cancel approval
+        if ( $rkb->is_approved_svp )
+        {
+            // Reset quantity_remainder values to 0
+            DetailRKBUrgent::whereHas ( 'linkRkbDetails.linkAlatDetailRkb.rkb', function ($query) use ($id_rkb)
+            {
+                $query->where ( 'id', $id_rkb );
+            } )->update ( [ 'quantity_remainder' => 0 ] );
+
+            $rkb->is_approved_svp = false;
+            $rkb->svp_approved_at = null;
+            $rkb->save ();
+
+            return redirect ()
+                ->route ( 'evaluasi_rkb_urgent.detail.index', $id_rkb )
+                ->with ( 'success', 'Approve RKB oleh SVP berhasil dibatalkan!' );
+        }
+
         // Check if can be approved by SVP
         if ( ! $rkb->is_approved_vp )
         {
-            return redirect ()->back ()->with ( 'error', 'RKB harus di-approve oleh VP terlebih dahulu!' );
-        }
-
-        if ( $rkb->is_approved_svp )
-        {
-            return redirect ()->back ()->with ( 'error', 'RKB sudah di-approve oleh SVP!' );
+            return redirect ()
+                ->back ()
+                ->with ( 'error', 'RKB harus di-approve oleh VP terlebih dahulu!' );
         }
 
         // Update all DetailRKBUrgent records for this RKB
@@ -203,27 +309,5 @@ class EvaluasiDetailRKBUrgentController extends Controller
         return redirect ()
             ->route ( 'evaluasi_rkb_urgent.detail.index', $id_rkb )
             ->with ( 'success', 'RKB Berhasil di Approve oleh SVP!' );
-    }
-
-    public function getDokumentasi ( $id )
-    {
-        $detailRkbUrgent = DetailRkbUrgent::findOrFail ( $id );
-
-        // Assuming dokumentasi contains the folder path
-        $folderPath = $detailRkbUrgent->dokumentasi;
-
-        // Get all files from the folder
-        $files = Storage::disk ( 'public' )->files ( $folderPath );
-
-        // Prepare data for response
-        $data = array_map ( function ($file)
-        {
-            return [ 
-                'name' => basename ( $file ),
-                'url'  => Storage::url ( $file ),
-            ];
-        }, $files );
-
-        return response ()->json ( [ 'dokumentasi' => $data ] );
     }
 }

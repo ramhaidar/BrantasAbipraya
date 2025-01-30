@@ -8,6 +8,7 @@
         #table-data td,
         #table-data th {
             vertical-align: middle;
+            text-align: center;
         }
 
         .img-thumbnail {
@@ -20,195 +21,137 @@
 @endpush
 
 @include('dashboard.evaluasi.urgent.detail.partials.modal-preview')
-
 @include('dashboard.evaluasi.urgent.detail.partials.modal-lampiran')
 
-<form id="approveRkbForm" method="POST" action="{{ route('evaluasi_rkb_urgent.detail.approve', ['id' => $rkb->id]) }}">
+<form id="approveRkbForm" method="POST" action="">
     @csrf
-    <div class="ibox-body ms-0 ps-0 table-responsive">
-        <table class="m-0 table table-bordered table-striped" id="table-data">
+    <div class="ibox-body table-responsive p-0 m-0">
+        <table class="table table-hover table-bordered table-striped align-middle w-100" id="table-data">
             <thead class="table-primary">
                 <tr>
-                    <th class="text-center">Nama Alat</th>
-                    <th class="text-center">Kode Alat</th>
-                    <th class="text-center">Kategori Sparepart</th>
-                    <th class="text-center">Sparepart</th>
-                    <th class="text-center">Part Number</th>
-                    <th class="text-center">Merk</th>
-                    <th class="text-center">Nama Koordinator</th>
-                    <th class="text-center">Dokumentasi</th>
-                    <th class="text-center">Timeline</th>
-                    <th class="text-center">Lampiran</th>
-                    <th class="text-center">Quantity Requested</th>
-                    <th class="text-center">Quantity Approved</th>
-                    <th class="text-center">Quantity in Stock</th>
-                    <th class="text-center">Satuan</th>
+                    <th>Nama Alat</th>
+                    <th>Kode Alat</th>
+                    <th>Kategori Sparepart</th>
+                    <th>Sparepart</th>
+                    <th>Part Number</th>
+                    <th>Merk</th>
+                    <th>Nama Koordinator</th>
+                    <th>Dokumentasi</th>
+                    <th>Timeline</th>
+                    <th>Lampiran</th>
+                    <th>Quantity Requested</th>
+                    <th>Quantity Approved</th>
+                    <th>Quantity in Stock</th>
+                    <th>Satuan</th>
                 </tr>
             </thead>
             <tbody>
-                @php
-                    $currentPartNumber = null;
-                    $rowspan = 0;
-                    $showStock = true;
-                    $alatRowCount = [];
-                    $processedAlat = [];
-                @endphp
-
-                @foreach ($alat_detail_rkbs as $alat_detail)
-                    @foreach ($alat_detail->linkRkbDetails as $rkb_detail)
-                        @php
-                            $kodeAlat = $alat_detail->masterDataAlat->kode_alat;
-                            $sparepart = $rkb_detail->detailRkbUrgent->masterDataSparepart;
-
-                            if (!isset($alatRowCount[$kodeAlat])) {
-                                $alatRowCount[$kodeAlat] = collect($alat_detail->linkRkbDetails)->count();
-                            }
-
-                            if ($currentPartNumber !== $sparepart->part_number) {
-                                $currentPartNumber = $sparepart->part_number;
-                                $rowspan = $alat_detail_rkbs
-                                    ->flatMap(function ($item) use ($currentPartNumber) {
-                                        return $item->linkRkbDetails->filter(function ($detail) use ($currentPartNumber) {
-                                            return $detail->detailRkbUrgent->masterDataSparepart->part_number === $currentPartNumber;
-                                        });
-                                    })
-                                    ->count();
-                                $showStock = true;
-                            }
-                        @endphp
-
+                @forelse ($TableData as $item)
+                    @forelse ($item->linkRkbDetails as $detail)
                         <tr>
-                            <td class="text-center">{{ $alat_detail->masterDataAlat->jenis_alat }}</td>
-                            <td class="text-center">{{ $alat_detail->masterDataAlat->kode_alat }}</td>
-                            <td class="text-center">{{ $rkb_detail->detailRkbUrgent->kategoriSparepart->kode }}:
-                                {{ $rkb_detail->detailRkbUrgent->kategoriSparepart->nama }}</td>
-                            <td class="text-center">{{ $sparepart->nama }}</td>
-                            <td class="text-center">{{ $sparepart->part_number }}</td>
-                            <td class="text-center">{{ $sparepart->merk }}</td>
-                            <td class="text-center">{{ $rkb_detail->detailRkbUrgent->nama_koordinator }}</td>
-                            <td class="text-center">
-                                <button class="btn {{ $rkb_detail->detailRkbUrgent->dokumentasi ? 'btn-warning' : 'btn-primary' }}" data-id="{{ $rkb_detail->detailRkbUrgent->id }}" type="button" onclick="event.preventDefault(); event.stopPropagation(); showDokumentasi({{ $rkb_detail->detailRkbUrgent->id }});">
+                            <td>{{ $detail->linkAlatDetailRkb->masterDataAlat->jenis_alat }}</td>
+                            <td>{{ $detail->linkAlatDetailRkb->masterDataAlat->kode_alat }}</td>
+                            <td>{{ $item->kategoriSparepart->kode }}: {{ $item->kategoriSparepart->nama }}</td>
+                            <td>{{ $item->masterDataSparepart->nama }}</td>
+                            <td>{{ $item->masterDataSparepart->part_number }}</td>
+                            <td>{{ $item->masterDataSparepart->merk }}</td>
+                            <td>{{ $detail->linkAlatDetailRkb->nama_koordinator }}</td>
+                            <td>
+                                <button class="btn {{ $item->dokumentasi ? 'btn-warning' : 'btn-primary' }}" data-id="{{ $item->id }}" type="button" onclick="event.preventDefault(); event.stopPropagation(); showDokumentasi({{ $item->id }});">
                                     <i class="bi bi-file-earmark-text"></i>
                                 </button>
                             </td>
-
-                            @if (!in_array($kodeAlat, $processedAlat))
-                                <td class="text-center" rowspan="{{ $alatRowCount[$kodeAlat] }}">
-                                    <a class="btn {{ $alat_detail->timelineRkbUrgents->count() > 0 ? 'btn-warning' : 'btn-primary' }}" href="{{ route('evaluasi_rkb_urgent.detail.timeline.index', ['id' => $alat_detail->id]) }}" onclick="event.stopPropagation();">
-                                        <i class="bi bi-hourglass-split"></i>
-                                    </a>
-                                </td>
-
-                                <td class="text-center" rowspan="{{ $alatRowCount[$kodeAlat] }}">
-                                    <button class="btn {{ $alat_detail->lampiranRkbUrgent ? 'btn-warning' : 'btn-primary' }} lampiranBtn" data-bs-toggle="modal" data-bs-target="{{ $alat_detail->lampiranRkbUrgent ? '#modalForLampiranExist' : '#modalForLampiranNew' }}" data-id-linkalatdetail="{{ $alat_detail->id }}" data-id-lampiran="{{ $alat_detail->lampiranRkbUrgent ? $alat_detail->lampiranRkbUrgent->id : null }}" type="button" onclick="event.stopPropagation();">
-                                        <i class="bi bi-paperclip"></i>
-                                    </button>
-                                </td>
-
-                                @php
-                                    $processedAlat[] = $kodeAlat;
-                                @endphp
-                            @else
-                                <td style="display: none;">{{ $alat_detail->timelineRkbUrgents->count() }}</td>
-                                <td style="display: none;">{{ $alat_detail->lampiranRkbUrgent ? 1 : 0 }}</td>
-                            @endif
-
-                            <td class="text-center">{{ $rkb_detail->detailRkbUrgent->quantity_requested }}</td>
-                            <td class="text-center">
-                                @php
-                                    $backgroundColor = '';
-                                    if ($rkb->is_approved_svp) {
-                                        $backgroundColor = 'bg-primary-subtle';
-                                    } elseif ($rkb->is_approved_vp) {
-                                        $backgroundColor = 'bg-info-subtle';
-                                    } else {
-                                        $backgroundColor = $rkb_detail->detailRkbUrgent->quantity_approved !== null ? 'bg-success-subtle' : 'bg-warning-subtle';
-                                    }
-
-                                    $disabled = $rkb->is_approved_vp || $rkb->is_approved_svp || $rkb->is_evaluated ? 'disabled' : '';
-                                @endphp
-                                <input class="form-control text-center {{ $backgroundColor }}" name="quantity_approved[{{ $rkb_detail->detailRkbUrgent->id }}]" type="number" value="{{ $rkb_detail->detailRkbUrgent->quantity_approved ?? $rkb_detail->detailRkbUrgent->quantity_requested }}" min="0" {{ $disabled }} />
+                            <td>
+                                <a class="btn {{ $detail->linkAlatDetailRkb->timelineRkbUrgents->count() > 0 ? 'btn-warning' : 'btn-primary' }}" href="{{ route('evaluasi_rkb_urgent.detail.timeline.index', ['id' => $detail->linkAlatDetailRkb->id]) }}" onclick="event.stopPropagation();">
+                                    <i class="bi bi-hourglass-split"></i>
+                                </a>
                             </td>
-
-                            @if ($showStock)
-                                <td class="text-center" rowspan="{{ $rowspan }}">
-                                    {{ $stockQuantities[$sparepart->id] ?? 0 }}
-                                </td>
-                                @php $showStock = false; @endphp
-                            @else
-                                <td style="display: none;">{{ $stockQuantities[$sparepart->id] ?? 0 }}</td>
-                            @endif
-
-                            <td class="text-center">{{ $rkb_detail->detailRkbUrgent->satuan }}</td>
+                            <td>
+                                <button class="btn {{ $detail->linkAlatDetailRkb->lampiranRkbUrgent ? 'btn-warning' : 'btn-primary' }} lampiranBtn" data-bs-toggle="modal" data-bs-target="{{ $detail->linkAlatDetailRkb->lampiranRkbUrgent ? '#modalForLampiranExist' : '#modalForLampiranNew' }}" data-id-linkalatdetail="{{ $detail->linkAlatDetailRkb->id }}" data-id-lampiran="{{ $detail->linkAlatDetailRkb->lampiranRkbUrgent ? $detail->linkAlatDetailRkb->lampiranRkbUrgent->id : null }}" type="button" onclick="event.stopPropagation();">
+                                    <i class="bi bi-paperclip"></i>
+                                </button>
+                            </td>
+                            <td>{{ $item->quantity_requested }}</td>
+                            <td>
+                                <input class="form-control text-center 
+                                    @if ($rkb->is_approved_svp) bg-primary-subtle
+                                    @elseif ($rkb->is_approved_vp) bg-info-subtle
+                                    @elseif($rkb->is_evaluated) bg-success-subtle 
+                                    @else bg-warning-subtle @endif" name="quantity_approved[{{ $item->id }}]" type="number" value="{{ $item->quantity_approved ?? $item->quantity_requested }}" min="0" {{ $rkb->is_evaluated ? 'disabled' : '' }}>
+                            </td>
+                            <td>{{ $stockQuantities[$item->id_master_data_sparepart] ?? 0 }}</td>
+                            <td>{{ $item->satuan }}</td>
                         </tr>
-                    @endforeach
-                @endforeach
+                    @empty
+                        <tr>
+                            <td class="text-center py-3 text-muted" colspan="14">
+                                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                No RKB details found
+                            </td>
+                        </tr>
+                    @endforelse
+                @empty
+                    <tr>
+                        <td class="text-center py-3 text-muted" colspan="14">
+                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                            No data found
+                        </td>
+                    </tr>
+                @endforelse
             </tbody>
         </table>
     </div>
+    <button class="btn btn-success btn-sm approveBtn" id="hiddenApproveRkbButton" type="submit" hidden></button>
 </form>
 
 @push('scripts_3')
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        $(document).ready(function() {
             'use strict';
 
-            $('#table-data').DataTable({
-                paginate: false,
-                ordering: false,
-            });
-
-            const dokumentasiPreviewContainer = document.getElementById('dokumentasiPreviewContainer');
-            const largeImagePreviewForShow = document.getElementById('largeImagePreviewForShow');
-            const dokumentasiPreviewModal = new bootstrap.Modal(document.getElementById('dokumentasiPreviewModal'));
-            const imagePreviewModalforShow = new bootstrap.Modal(document.getElementById(
-                'imagePreviewModalforShow'));
-
+            const $dokumentasiPreviewContainer = $('#dokumentasiPreviewContainer');
+            const $largeImagePreview = $('#largeImagePreviewForShow');
+            const $imagePreviewTitle = $('#imagePreviewTitleForShow');
             const dokumentasiRoute = @json(route('evaluasi_rkb_urgent.detail.dokumentasi', ['id' => ':id']));
 
             window.showDokumentasi = function(id) {
-                dokumentasiPreviewContainer.innerHTML = '';
-
+                $dokumentasiPreviewContainer.empty();
                 const fetchUrl = dokumentasiRoute.replace(':id', id);
 
-                fetch(fetchUrl)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.dokumentasi && data.dokumentasi.length > 0) {
+                $.getJSON(fetchUrl)
+                    .done(function(data) {
+                        if (data.dokumentasi?.length) {
                             data.dokumentasi.forEach(file => {
-                                const img = document.createElement('img');
-                                img.src = file.url;
-                                img.alt = file.name;
-                                img.title = file.name;
-                                img.classList.add('img-thumbnail');
-
-                                img.addEventListener('click', () => {
-                                    $('#dokumentasiPreviewModal').modal('hide');
-
-                                    largeImagePreviewForShow.src = file.url;
-                                    document.getElementById('imagePreviewTitleForShow')
-                                        .textContent = file.name;
-                                    imagePreviewModalforShow.show();
-                                });
-
-                                dokumentasiPreviewContainer.appendChild(img);
+                                $('<img>', {
+                                        src: file.url,
+                                        alt: file.name,
+                                        title: file.name
+                                    }).addClass('img-thumbnail')
+                                    .on('click', () => {
+                                        $('#dokumentasiPreviewModal').modal('hide');
+                                        $largeImagePreview.attr('src', file.url);
+                                        $imagePreviewTitle.text(file.name);
+                                        $('#imagePreviewModalforShow').modal('show');
+                                    })
+                                    .appendTo($dokumentasiPreviewContainer);
                             });
                         } else {
-                            dokumentasiPreviewContainer.innerHTML =
-                                '<p class="text-muted text-center">Tidak ada Dokumentasi</p>';
+                            $dokumentasiPreviewContainer.html(
+                                '<p class="text-muted text-center">Tidak ada Dokumentasi</p>'
+                            );
                         }
-
-                        dokumentasiPreviewModal.show();
+                        $('#dokumentasiPreviewModal').modal('show');
                     })
-                    .catch(error => {
-                        console.error('Error fetching dokumentasi:', error);
-                        dokumentasiPreviewContainer.innerHTML =
-                            '<p class="text-danger text-center">Failed to load dokumentasi</p>';
-                        dokumentasiPreviewModal.show();
+                    .fail(function(jqXHR, textStatus, errorThrown) {
+                        console.error('Error fetching dokumentasi:', textStatus, errorThrown);
+                        $dokumentasiPreviewContainer.html(
+                            '<p class="text-danger text-center">Failed to load dokumentasi</p>'
+                        );
+                        $('#dokumentasiPreviewModal').modal('show');
                     });
             };
 
-            document.getElementById('imagePreviewModalforShow').addEventListener('hidden.bs.modal', function() {
+            $('#imagePreviewModalforShow').on('hidden.bs.modal', function() {
                 $('#dokumentasiPreviewModal').modal('show');
             });
 
@@ -218,6 +161,30 @@
                     e.preventDefault();
                     e.stopPropagation();
                 }
+            });
+        });
+    </script>
+
+    <script>
+        $(document).ready(function() {
+            const $table = $('#table-data');
+            const $headers = $table.find('thead th');
+            const textsToCheck = ['Detail', 'Aksi', 'Supplier'];
+            let indices = {};
+
+            // Find the indices of the headers that match the texts in textsToCheck array
+            $headers.each(function(index) {
+                const headerText = $(this).text().trim();
+                if (textsToCheck.includes(headerText)) {
+                    indices[headerText] = index;
+                }
+            });
+
+            // Set the width of the corresponding columns in tbody
+            $.each(indices, function(text, index) {
+                $table.find('tbody tr').each(function() {
+                    $(this).find('td').eq(index).css('width', '1%');
+                });
             });
         });
     </script>

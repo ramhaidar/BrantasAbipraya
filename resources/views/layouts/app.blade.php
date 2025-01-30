@@ -52,6 +52,13 @@
     <!-- Title -->
     <title>@yield('title', 'Dashboard') | DPP Digital Logistic</title>
 
+    <!-- Custom Styles -->
+    <style>
+        .ibox-body {
+            overflow: auto !important;
+        }
+    </style>
+
     <!-- Styles -->
     @stack('styles_1')
     @stack('styles_2')

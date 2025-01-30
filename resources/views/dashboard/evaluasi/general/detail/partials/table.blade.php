@@ -13,7 +13,7 @@
     </style>
 @endpush
 
-<form id="approveRkbForm" method="POST" action="{{ route('evaluasi_rkb_general.detail.approve', $rkb->id) }}">
+<form id="approveRkbForm" method="POST" action="">
     @csrf
     <div class="ibox-body table-responsive p-0 m-0">
         <table class="table table-hover table-bordered table-striped align-middle w-100" id="table-data">

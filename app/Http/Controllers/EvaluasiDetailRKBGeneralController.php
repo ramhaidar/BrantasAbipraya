@@ -359,19 +359,24 @@ class EvaluasiDetailRKBGeneralController extends Controller
     {
         $rkb = RKB::find ( $id_rkb );
 
+        // If already approved by VP, cancel approval
+        if ( $rkb->is_approved_vp )
+        {
+            $rkb->is_approved_vp = false;
+            $rkb->vp_approved_at = null;
+            $rkb->save ();
+
+            return redirect ()
+                ->route ( 'evaluasi_rkb_general.detail.index', $id_rkb )
+                ->with ( 'success', 'Approve RKB oleh VP berhasil dibatalkan!' );
+        }
+
         // Check if can be approved by VP
         if ( ! $rkb->is_evaluated )
         {
             return redirect ()
                 ->back ()
                 ->with ( 'error', 'RKB harus dievaluasi terlebih dahulu!' );
-        }
-
-        if ( $rkb->is_approved_vp )
-        {
-            return redirect ()
-                ->back ()
-                ->with ( 'error', 'RKB sudah di-approve oleh VP!' );
         }
 
         $rkb->is_approved_vp = true;
@@ -387,19 +392,30 @@ class EvaluasiDetailRKBGeneralController extends Controller
     {
         $rkb = RKB::find ( $id_rkb );
 
+        // If already approved by SVP, cancel approval
+        if ( $rkb->is_approved_svp )
+        {
+            // Reset quantity_remainder values to 0
+            DetailRKBGeneral::whereHas ( 'linkRkbDetails.linkAlatDetailRkb.rkb', function ($query) use ($id_rkb)
+            {
+                $query->where ( 'id', $id_rkb );
+            } )->update ( [ 'quantity_remainder' => 0 ] );
+
+            $rkb->is_approved_svp = false;
+            $rkb->svp_approved_at = null;
+            $rkb->save ();
+
+            return redirect ()
+                ->route ( 'evaluasi_rkb_general.detail.index', $id_rkb )
+                ->with ( 'success', 'Approve RKB oleh SVP berhasil dibatalkan!' );
+        }
+
         // Check if can be approved by SVP
         if ( ! $rkb->is_approved_vp )
         {
             return redirect ()
                 ->back ()
                 ->with ( 'error', 'RKB harus di-approve oleh VP terlebih dahulu!' );
-        }
-
-        if ( $rkb->is_approved_svp )
-        {
-            return redirect ()
-                ->back ()
-                ->with ( 'error', 'RKB sudah di-approve oleh SVP!' );
         }
 
         // Update all DetailRKBGeneral records for this RKB

@@ -1063,12 +1063,6 @@ Route::middleware ( 'auth' )
                 ->name ( 'destroy' );
 
             Route::post (
-                '/approve/{id}',
-                [ EvaluasiDetailRKBGeneralController::class, 'approve' ]
-            )->where ( 'id', '[0-9]+' )
-                ->name ( 'approve' );
-
-            Route::post (
                 '/evaluate/{id}',
                 [ EvaluasiDetailRKBGeneralController::class, 'evaluate' ]
             )->where ( 'id', '[0-9]+' )

@@ -64,7 +64,9 @@ class DetailRKBGeneralController extends Controller
                 ->whereNull ( 'removed_at' );
         } )->get ();
 
-        $detail_rkb = $perPage === -1 ? $query->get () : $query->paginate ( $perPage );
+        $detail_rkb = $perPage === -1
+            ? $query->paginate ( $query->count () )
+            : $query->paginate ( $perPage );
 
         $proyeks = Proyek::with ( "users" )
             ->orderBy ( "updated_at", "asc" )

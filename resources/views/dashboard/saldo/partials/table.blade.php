@@ -8,14 +8,20 @@
         #table-data td,
         #table-data th {
             vertical-align: middle;
+            text-align: center;
+        }
+
+        .currency-value {
+            text-align: right !important;
+            padding-right: 10px !important;
         }
     </style>
 @endpush
 
 @php
-    function formatRupiah($number)
+    function formatRibuan($number)
     {
-        return 'Rp ' . number_format($number, 0, ',', '.');
+        return number_format($number, 0, ',', '.');
     }
 
     function formatTanggal($date)
@@ -52,15 +58,15 @@
                     <td class="text-center">{{ $saldo->masterDataSparepart->part_number ?? '-' }}</td>
                     <td class="text-center">{{ $saldo->quantity }}</td>
                     <td class="text-center">{{ $saldo->satuan ?? '-' }}</td>
-                    <td class="text-center">{{ formatRupiah($saldo->harga) }}</td>
-                    <td class="text-center">{{ formatRupiah($saldo->quantity * $saldo->harga) }}</td>
+                    <td class="currency-value">{{ formatRibuan($saldo->harga) }}</td>
+                    <td class="currency-value">{{ formatRibuan($saldo->quantity * $saldo->harga) }}</td>
                 </tr>
             @endforeach
         </tbody>
         <tfoot>
             <tr class="table-primary">
                 <td class="text-center fw-bold" colspan="9">Grand Total</td>
-                <td class="text-center fw-bold" id="total-harga">0</td>
+                <td class="text-center fw-bold currency-value" id="total-harga">0</td>
             </tr>
         </tfoot>
     </table>
@@ -85,13 +91,12 @@
                 // Only calculate visible rows
                 $('#table-data tbody tr:visible').each(function() {
                     let value = $(this).find('td:last').text()
-                        .replace('Rp ', '')
                         .replace(/\./g, '');
                     total += parseInt(value) || 0; // Add || 0 to handle NaN
                 });
 
                 // Format the total
-                let formattedTotal = 'Rp ' + total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                let formattedTotal = total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
                 $('#total-harga').html(formattedTotal);
             }
 

@@ -20,7 +20,7 @@
                             <label class="form-label required" for="id_master_data_alat">Alat</label>
                             <select class="form-control" id="id_master_data_alat" name="id_master_data_alat" required>
                                 <option value="">Pilih Alat</option>
-                                @foreach ($master_data_alat as $alat)
+                                @foreach ($available_alat as $alat)
                                     <option value="{{ $alat->id }}">{{ $alat->kode_alat }} - {{ $alat->jenis_alat }}</option>
                                 @endforeach
                             </select>

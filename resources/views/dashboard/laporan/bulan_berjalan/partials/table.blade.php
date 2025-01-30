@@ -11,7 +11,6 @@
             text-align: center;
         }
 
-        /* Add this new class for currency values */
         .currency-value {
             text-align: right !important;
             padding-right: 10px !important;

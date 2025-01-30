@@ -17,7 +17,7 @@ class TimelineRKBUrgentController extends Controller
         $rkb = Proyek::find ( $id );
 
         // Validate and set perPage to allowed values only
-        $allowedPerPage = [ 10, 25, 50, 100 ];
+        $allowedPerPage = [ -1, 10, 25, 50, 100 ];
         $perPage        = in_array ( (int) $request->get ( 'per_page' ), $allowedPerPage ) ? (int) $request->get ( 'per_page' ) : 10;
 
         $query = TimelineRKBUrgent::query ()
@@ -104,8 +104,40 @@ class TimelineRKBUrgentController extends Controller
             'linkRkbDetails'
         ] )->find ( $id );
 
-        $TableData = $query->paginate ( $perPage )
-            ->withQueryString ();
+        // Handle pagination or get all records
+        if ( $perPage === -1 )
+        {
+            $queryData  = $query->get ();
+            $TableData = new \Illuminate\Pagination\LengthAwarePaginator(
+                $queryData,
+                $queryData->count (),
+                -1,
+                1,
+                [ 
+                    'path'  => $request->url (),
+                    'query' => $request->query (),
+                ]
+            );
+        }
+        else
+        {
+            // Check if any results exist
+            if ($query->count() > 0) {
+                $TableData = $query->paginate($perPage)->withQueryString();
+            } else {
+                // Return empty paginator if no results
+                $TableData = new \Illuminate\Pagination\LengthAwarePaginator(
+                    [], // Empty array for items
+                    0,  // Total count
+                    $perPage,
+                    1,
+                    [
+                        'path' => $request->url(),
+                        'query' => $request->query(),
+                    ]
+                );
+            }
+        }
 
         return view ( 'dashboard.rkb.urgent.detail.timeline.timeline', [ 
             'rkb'         => $rkb,

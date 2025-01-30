@@ -1,12 +1,19 @@
 @push('styles_3')
     <style>
-        .table th {
-            text-align: center;
-            vertical-align: middle;
+        #table-data {
+            font-size: 0.9em;
+            white-space: nowrap;
         }
 
-        .table td {
+        #table-data td,
+        #table-data th {
             vertical-align: middle;
+            text-align: center;
+        }
+
+        .currency-value {
+            text-align: right !important;
+            padding-right: 10px !important;
         }
     </style>
 @endpush
@@ -61,7 +68,7 @@
         </div>
     </div>
 
-    <div class="table-responsive">
+    <div class="table-responsive pt-3 px-2">
         <table class="table table-striped table-bordered table-hover" id="table-data">
             <thead class="table-primary">
                 <tr>
@@ -85,9 +92,8 @@
                         <td class="text-center">{{ $item->detailSpb->masterDataSparepart->part_number }}</td>
                         <td class="text-center">{{ $item->detailSpb->quantity_po }}</td>
                         <td class="text-center">{{ $item->detailSpb->satuan }}</td>
-                        <td class="text-center">Rp {{ number_format($item->detailSpb->harga, 0, ',', '.') }}</td>
-                        <td class="text-center">Rp
-                            {{ number_format($item->detailSpb->quantity_po * $item->detailSpb->harga, 0, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($item->detailSpb->harga, 0, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($item->detailSpb->quantity_po * $item->detailSpb->harga, 0, ',', '.') }}</td>
                     </tr>
                 @empty
                     <tr>
@@ -102,16 +108,16 @@
             <tfoot class="table-primary">
                 <tr>
                     <th class="ps-4" style="text-align: left;" colspan="6">Jumlah</th>
-                    <th style="text-align: center;">Rp {{ number_format($totalHarga, 0, ',', '.') }}</th>
-                    <th style="text-align: center;">Rp {{ number_format($totalJumlahHarga, 0, ',', '.') }}</th>
+                    <th class="currency-value">{{ number_format($totalHarga, 0, ',', '.') }}</th>
+                    <th class="currency-value">{{ number_format($totalJumlahHarga, 0, ',', '.') }}</th>
                 </tr>
                 <tr>
                     <th class="ps-4" style="text-align: left;" colspan="7">PPN 11%</th>
-                    <th style="text-align: center;">Rp {{ number_format($ppn, 0, ',', '.') }}</th>
+                    <th class="currency-value">{{ number_format($ppn, 0, ',', '.') }}</th>
                 </tr>
                 <tr>
                     <th class="ps-4" style="text-align: left;" colspan="7">Grand Total</th>
-                    <th style="text-align: center;">Rp {{ number_format($grandTotal, 0, ',', '.') }}</th>
+                    <th class="currency-value">{{ number_format($grandTotal, 0, ',', '.') }}</th>
                 </tr>
             </tfoot>
         </table>
@@ -119,14 +125,5 @@
 </div>
 
 @push('scripts_3')
-    <script>
-        $(document).ready(function() {
-            $('#table-data').DataTable({
-                paginate: false,
-                ordering: false,
-                order: [],
-                searching: false,
-            });
-        });
-    </script>
+    <script></script>
 @endpush

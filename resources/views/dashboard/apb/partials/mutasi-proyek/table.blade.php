@@ -8,14 +8,20 @@
         #table-data td,
         #table-data th {
             vertical-align: middle;
+            text-align: center;
+        }
+
+        .currency-value {
+            text-align: right !important;
+            padding-right: 10px !important;
         }
     </style>
 @endpush
 
 @php
-    function formatRupiah($number)
+    function formatRibuan($number)
     {
-        return 'Rp ' . number_format($number, 0, ',', '.');
+        return number_format($number, 0, ',', '.');
     }
 
     function formatTanggal($date)
@@ -70,8 +76,8 @@
                     <td class="text-center">{{ $apb->status !== null ? $apb->atbMutasi->quantity ?? '-' : '-' }}</td>
                     <td class="text-center">{{ $apb->status === null ? $apb->quantity : '-' }}</td>
                     <td class="text-center">{{ $apb->saldo->satuan ?? '-' }}</td>
-                    <td class="text-center">{{ formatRupiah($apb->saldo->harga ?? 0) }}</td>
-                    <td class="text-center">{{ formatRupiah(($apb->saldo->harga ?? 0) * $apb->quantity) }}</td>
+                    <td class="currency-value">{{ formatRibuan($apb->saldo->harga ?? 0) }}</td>
+                    <td class="currency-value">{{ formatRibuan(($apb->saldo->harga ?? 0) * $apb->quantity) }}</td>
                     <td class="text-center">
                         @if ($apb->status === 'pending')
                             <span class="badge bg-warning w-100">Pending</span>
@@ -96,7 +102,7 @@
         <tfoot>
             <tr class="table-primary">
                 <td class="text-center fw-bold" colspan="17">Grand Total (Accepted & Penggunaan Only)</td>
-                <td class="text-center fw-bold" id="total-harga">0</td>
+                <td class="text-center fw-bold currency-value" id="total-harga">0</td>
                 <td colspan="2"></td>
             </tr>
         </tfoot>
@@ -123,13 +129,12 @@
                     // Only calculate if status is 'accepted' or 'penggunaan'
                     if (status === 'accepted' || status === 'penggunaan') {
                         let value = $(this).find('td:eq(17)').text()
-                            .replace('Rp ', '')
                             .replace(/\./g, '');
                         total += parseInt(value) || 0;
                     }
                 });
 
-                let formattedTotal = 'Rp ' + total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                let formattedTotal = total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
                 $('#total-harga').html(formattedTotal);
             }
 

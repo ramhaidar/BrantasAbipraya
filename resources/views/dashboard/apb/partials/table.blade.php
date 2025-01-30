@@ -8,14 +8,20 @@
         #table-data td,
         #table-data th {
             vertical-align: middle;
+            text-align: center;
+        }
+
+        .currency-value {
+            text-align: right !important;
+            padding-right: 10px !important;
         }
     </style>
 @endpush
 
 @php
-    function formatRupiah($number)
+    function formatRibuan($number)
     {
-        return 'Rp ' . number_format($number, 0, ',', '.');
+        return number_format($number, 0, ',', '.');
     }
 
     function formatTanggal($date)
@@ -64,8 +70,8 @@
                     <td class="text-center">{{ $apb->masterDataSparepart->part_number ?? '-' }}</td>
                     <td class="text-center">{{ $apb->quantity }}</td>
                     <td class="text-center">{{ $apb->saldo->satuan ?? '-' }}</td>
-                    <td class="text-center">{{ formatRupiah($apb->saldo->harga ?? 0) }}</td>
-                    <td class="text-center">{{ formatRupiah(($apb->saldo->harga ?? 0) * $apb->quantity) }}</td>
+                    <td class="currency-value">{{ formatRibuan($apb->saldo->harga ?? 0) }}</td>
+                    <td class="currency-value">{{ formatRibuan(($apb->saldo->harga ?? 0) * $apb->quantity) }}</td>
                     <!-- Removed root_cause cell -->
                     <td class="text-center">{{ $apb->mekanik ?? '-' }}</td>
                     <td class="text-center">
@@ -79,7 +85,7 @@
         <tfoot>
             <tr class="table-primary">
                 <td class="text-center fw-bold" colspan="14">Grand Total</td>
-                <td class="text-center fw-bold" id="total-harga">0</td>
+                <td class="text-center fw-bold currency-value" id="total-harga">0</td>
                 <td colspan="2"></td>
             </tr>
         </tfoot>
@@ -101,17 +107,16 @@
                 let total = 0;
                 $('#table-data tbody tr:visible').each(function() {
                     let value = $(this).find('td:eq(14)').text()
-                        .replace('Rp ', '')
                         .replace(/\./g, '');
                     total += parseInt(value) || 0;
                 });
-                
-                let formattedTotal = 'Rp ' + total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+                let formattedTotal = total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
                 $('#total-harga').html(formattedTotal);
             }
 
             calculateTotal();
-            
+
             table.on('search.dt draw.dt', function() {
                 setTimeout(calculateTotal, 100);
             });

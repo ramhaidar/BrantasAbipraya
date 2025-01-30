@@ -17,7 +17,7 @@ class EvaluasiDetailRKBGeneralController extends Controller
 {
     public function index ( Request $request, $id )
     {
-        $allowedPerPage = [ 10, 25, 50, 100 ];
+        $allowedPerPage = [ 10, 25, 50, 100, -1 ];
         $perPage        = in_array ( (int) $request->get ( 'per_page' ), $allowedPerPage ) ? (int) $request->get ( 'per_page' ) : 10;
 
         $rkb = RKB::with ( [ 'proyek' ] )->find ( $id );
@@ -63,7 +63,22 @@ class EvaluasiDetailRKBGeneralController extends Controller
                 ->whereNull ( 'removed_at' );
         } )->get ();
 
-        $detail_rkb = $query->paginate ( $perPage );
+        // Modify pagination to handle -1 case
+        if ( $perPage === -1 )
+        {
+            $detail_rkb = $query->get (); // Get all records without pagination
+            // Convert collection to LengthAwarePaginator to maintain compatibility
+            $detail_rkb = new \Illuminate\Pagination\LengthAwarePaginator(
+                $detail_rkb,
+                $detail_rkb->count (),
+                $detail_rkb->count (),
+                1
+            );
+        }
+        else
+        {
+            $detail_rkb = $query->paginate ( $perPage );
+        }
 
         $proyeks = Proyek::with ( "users" )
             ->orderBy ( "updated_at", "asc" )

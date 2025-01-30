@@ -32,6 +32,7 @@
                         @include('components.search-input', [
                             'route' => url()->current(),
                             'placeholder' => 'Search items...',
+                            'show_all' => true,
                         ])
                         @include('dashboard.rkb.general.detail.partials.table', [
                             'TableData' => $TableData,

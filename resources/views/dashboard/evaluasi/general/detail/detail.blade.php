@@ -64,6 +64,7 @@
                         @include('components.search-input', [
                             'route' => url()->current(),
                             'placeholder' => 'Search items...',
+                            'show_all' => true,
                         ])
                         @include('dashboard.evaluasi.general.detail.partials.table', [
                             'TableData' => $TableData,

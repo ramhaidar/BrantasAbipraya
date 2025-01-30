@@ -18,7 +18,7 @@ class DetailRKBUrgentController extends Controller
 {
     public function index ( Request $request, $id )
     {
-        $allowedPerPage = [ 10, 25, 50, 100 ];
+        $allowedPerPage = [ 10, 25, 50, 100, -1 ];
         $perPage        = in_array ( (int) $request->get ( 'per_page' ), $allowedPerPage ) ? (int) $request->get ( 'per_page' ) : 10;
 
         $rkb = RKB::with ( [ 'proyek' ] )->find ( $id );
@@ -65,7 +65,7 @@ class DetailRKBUrgentController extends Controller
                 ->whereNull ( 'removed_at' );
         } )->get ();
 
-        $detail_rkb = $query->paginate ( $perPage );
+        $detail_rkb = $perPage === -1 ? $query->get() : $query->paginate($perPage);
 
         $proyeks = Proyek::with ( "users" )
             ->orderBy ( "updated_at", "asc" )

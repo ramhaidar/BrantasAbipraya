@@ -8,15 +8,12 @@
         #table-data td,
         #table-data th {
             vertical-align: middle;
+            text-align: center;
         }
 
-        /* Add these styles */
-        #table-data th:nth-child(9),
-        #table-data th:nth-child(10),
-        #table-data td:nth-child(9),
-        #table-data td:nth-child(10) {
-            min-width: 10dvw;
-            width: 10dvw;
+        .currency-value {
+            text-align: right !important;
+            padding-right: 10px !important;
         }
 
         .loading-overlay {
@@ -111,8 +108,8 @@
                                     {{ $totalQuantityDiterima }}
                                 </td>
                                 <td class="text-center">{{ $linkSpbDetailSpb->detailSPb->satuan }}</td>
-                                <td class="text-center">Rp {{ number_format($linkSpbDetailSpb->detailSPb->harga, 0, ',', '.') }}</td>
-                                <td class="text-center">Rp {{ number_format($linkSpbDetailSpb->detailSPb->harga * $linkSpbDetailSpb->detailSpb->quantity_po, 0, ',', '.') }}</td>
+                                <td class="currency-value">{{ number_format($linkSpbDetailSpb->detailSPb->harga, 0, ',', '.') }}</td>
+                                <td class="currency-value">{{ number_format($linkSpbDetailSpb->detailSPb->harga * $linkSpbDetailSpb->detailSpb->quantity_po, 0, ',', '.') }}</td>
                             </tr>
                         @endforeach
                     @endforeach
@@ -121,16 +118,16 @@
                 <tfoot class="table-primary">
                     <tr>
                         <th class="ps-4" style="text-align: left;" colspan="9">Jumlah</th>
-                        <th id="totalHarga" style="text-align: center;">Rp 0</th>
-                        <th id="totalJumlahHarga" style="text-align: center;">Rp 0</th>
+                        <th class="currency-value" id="totalHarga">0</th>
+                        <th class="currency-value" id="totalJumlahHarga">0</th>
                     </tr>
                     <tr>
                         <th class="ps-4" style="text-align: left;" colspan="10">PPN 11%</th>
-                        <th id="ppn11" style="text-align: center;">Rp 0</th>
+                        <th class="currency-value" id="ppn11">0</th>
                     </tr>
                     <tr>
                         <th class="ps-4" style="text-align: left;" colspan="10">Grand Total</th>
-                        <th id="grandTotal" style="text-align: center;">Rp 0</th>
+                        <th class="currency-value" id="grandTotal">0</th>
                     </tr>
                 </tfoot>
 
@@ -160,11 +157,7 @@
             });
 
             function formatRupiah(angka) {
-                return new Intl.NumberFormat('id-ID', {
-                    style: 'currency',
-                    currency: 'IDR',
-                    minimumFractionDigits: 0
-                }).format(angka);
+                return angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
             }
 
             function unformatRupiah(rupiah) {
@@ -240,7 +233,7 @@
                     hargaInput.prop('disabled', false);
                 } else {
                     qtyInput.prop('disabled', true).val(0);
-                    hargaInput.prop('disabled', true).val('Rp 0');
+                    hargaInput.prop('disabled', true).val('0');
                     updateJumlahHarga(row);
                 }
             });

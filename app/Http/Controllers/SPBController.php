@@ -10,108 +10,187 @@ use Illuminate\Http\Request;
 use App\Models\LinkRKBDetail;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class SPBController extends Controller
 {
-    // Index for SPB
-    public function index ()
+    public function index ( Request $request )
     {
-        $proyeks = Proyek::with ( "users" )
-            ->orderBy ( "updated_at", "desc" )
-            ->orderBy ( "id", "desc" )
-            ->get ();
-        // $rkbs    = RKB::where ( 'is_approved', true )->get ();
+        $query = RKB::query ()
+            ->with ( [ 'proyek', 'spbs' ] )
+            ->whereHas ( 'spbs' )
+            ->orderBy ( $request->get ( 'sort', 'updated_at' ), $request->get ( 'direction', 'desc' ) );
 
-        return view ( 'dashboard.spb.spb', [ 
-            'proyeks'    => $proyeks,
-            // 'rkbs'       => $rkbs,
-
-            'headerPage' => "SPB Supplier",
-            'page'       => 'Data SPB Supplier',
-        ] );
-    }
-
-    public function getData ( Request $request )
-    {
-        $query = RKB::with ( 'proyek' )
-            ->where ( 'is_approved_vp', true )
-            ->where ( 'is_approved_svp', true )
-            ->select ( 'rkb.*' );
-
-        // Filter pencarian
-        if ( $search = $request->input ( 'search.value' ) )
+        if ( $request->has ( 'search' ) )
         {
+            $search = $request->get ( 'search' );
             $query->where ( function ($q) use ($search)
             {
                 $q->where ( 'nomor', 'like', "%{$search}%" )
-                    ->orWhereHas ( 'proyek', function ($q) use ($search)
+                    ->orWhereHas ( 'proyek', function ($query) use ($search)
                     {
-                        $q->where ( 'nama', 'like', "%{$search}%" );
+                        $query->where ( 'nama', 'like', "%{$search}%" );
                     } )
-                    ->orWhere ( 'periode', 'like', "%{$search}%" );
+                    ->orWhere ( function ($q) use ($search)
+                    {
+                        // Handle year search (4 digits)
+                        if ( preg_match ( '/^[0-9]{4}$/', $search ) )
+                        {
+                            $q->whereYear ( 'periode', $search );
+                        }
+                        // Handle month name in Indonesian or English
+                        elseif ( $this->isMonthName ( $search ) )
+                        {
+                            $monthNumber = $this->getMonthNumber ( $search );
+                            if ( $monthNumber )
+                            {
+                                $q->whereMonth ( 'periode', $monthNumber );
+                            }
+                        }
+                        // Handle "Month Year" format (e.g., "January 2023" or "Januari 2023")
+                        elseif ( preg_match ( '/^([A-Za-z]+)\s+([0-9]{4})$/', $search, $matches ) )
+                        {
+                            $monthNumber = $this->getMonthNumber ( $matches[ 1 ] );
+                            if ( $monthNumber )
+                            {
+                                $q->whereMonth ( 'periode', $monthNumber )
+                                    ->whereYear ( 'periode', $matches[ 2 ] );
+                            }
+                        }
+                    } )
+                    // Add type search functionality
+                    ->orWhere ( function ($q) use ($search)
+                    {
+                        $searchLower = strtolower ( $search );
+                        if ( in_array ( $searchLower, [ 'general', 'urgent' ] ) )
+                        {
+                            $q->where ( 'tipe', ucfirst ( $searchLower ) );
+                        }
+                    } );
             } );
         }
 
-        // Sorting
-        if ( $order = $request->input ( 'order' ) )
-        {
-            $columnIndex   = $order[ 0 ][ 'column' ];
-            $columnName    = $request->input ( 'columns' )[ $columnIndex ][ 'data' ];
-            $sortDirection = $order[ 0 ][ 'dir' ];
+        $user = auth ()->user ();
 
-            if ( in_array ( $columnName, [ 'nomor', 'periode' ] ) )
+        if ( $user->role === 'Pegawai' )
+        {
+            $query->whereHas ( 'proyek', function ($q) use ($user)
             {
-                $query->orderBy ( $columnName, $sortDirection );
-            }
-            elseif ( $columnName === 'proyek' )
+                $q->whereHas ( 'users', function ($q) use ($user)
+                {
+                    $q->where ( 'users.id', $user->id );
+                } );
+            } );
+        }
+        elseif ( $user->role === 'Boss' )
+        {
+            $proyeks       = $user->proyek ()->with ( "users" )->get ();
+            $usersInProyek = $proyeks->pluck ( 'users.*.id' )->flatten ();
+            $query->whereHas ( 'proyek', function ($q) use ($usersInProyek)
             {
-                $query->join ( 'proyek', 'rkb.id_proyek', '=', 'proyek.id' )
-                    ->orderBy ( 'proyek.nama', $sortDirection );
-            }
-        }
-        else
-        {
-            $query->orderBy ( 'updated_at', 'desc' );
+                $q->whereHas ( 'users', function ($q) use ($usersInProyek)
+                {
+                    $q->whereIn ( 'users.id', $usersInProyek );
+                } );
+            } );
         }
 
-        // Pagination
-        $draw   = $request->input ( 'draw' );
-        $start  = $request->input ( 'start', 0 );
-        $length = $request->input ( 'length', 10 );
+        $TableData = $query->paginate ( 10 )->withQueryString ();
 
-        $totalRecords    = RKB::where ( 'is_approved_vp', true )
-            ->where ( 'is_approved_svp', true )
-            ->count (); // Total hanya untuk data "Disetujui"
-        $filteredRecords = $query->count ();
-
-        $rkbData = $query->skip ( $start )->take ( $length )->get ();
-
-        // Mapping data
-        $data = $rkbData->map ( function ($item)
+        $proyeks = [];
+        if ( $user->role !== 'Pegawai' )
         {
-            return [ 
-                'id'      => $item->id,
-                'nomor'   => $item->nomor,
-                'proyek'  => $item->proyek->nama ?? '-',
-                'periode' => Carbon::parse ( $item->periode )->translatedFormat ( 'F Y' ),
-                'tipe'    => ucfirst ( $item->tipe ),
-            ];
-        } );
+            $proyeks = Proyek::with ( "users" )
+                ->orderBy ( "updated_at", "desc" )
+                ->orderBy ( "id", "desc" )
+                ->get ();
+        }
 
-        return response ()->json ( [ 
-            'draw'            => $draw,
-            'recordsTotal'    => $totalRecords,
-            'recordsFiltered' => $filteredRecords,
-            'data'            => $data,
+        return view ( 'dashboard.spb.spb', [ 
+            'headerPage' => "SPB Supplier",
+            'page'       => 'Data SPB Supplier',
+            'proyeks'    => $proyeks,
+            'TableData'  => $TableData,
         ] );
     }
 
-    protected function console ( $message )
+    /**
+     * Check if the given string is a month name
+     */
+    private function isMonthName ( $string )
     {
-        $output = new \Symfony\Component\Console\Output\ConsoleOutput();
-        $output->writeln ( $message );
+        $months = array_merge (
+            // Indonesian month names
+            [ 
+                'januari',
+                'februari',
+                'maret',
+                'april',
+                'mei',
+                'juni',
+                'juli',
+                'agustus',
+                'september',
+                'oktober',
+                'november',
+                'desember'
+            ],
+            // English month names
+            [ 
+                'january',
+                'february',
+                'march',
+                'april',
+                'may',
+                'june',
+                'july',
+                'august',
+                'september',
+                'october',
+                'november',
+                'december'
+            ]
+        );
+
+        return in_array ( strtolower ( $string ), $months );
     }
 
+    /**
+     * Get month number from month name
+     */
+    private function getMonthNumber ( $monthName )
+    {
+        $monthMap = [ 
+            // Indonesian
+            'januari'   => 1,
+            'februari'  => 2,
+            'maret'     => 3,
+            'april'     => 4,
+            'mei'       => 5,
+            'juni'      => 6,
+            'juli'      => 7,
+            'agustus'   => 8,
+            'september' => 9,
+            'oktober'   => 10,
+            'november'  => 11,
+            'desember'  => 12,
+            // English
+            'january'   => 1,
+            'february'  => 2,
+            'march'     => 3,
+            'april'     => 4,
+            'may'       => 5,
+            'june'      => 6,
+            'july'      => 7,
+            'august'    => 8,
+            'september' => 9,
+            'october'   => 10,
+            'november'  => 11,
+            'december'  => 12
+        ];
+
+        return $monthMap[ strtolower ( $monthName ) ] ?? null;
+    }
 
     public function destroy ( $id )
     {
@@ -150,7 +229,6 @@ class SPBController extends Controller
 
             \DB::commit ();
             return redirect ()->back ()->with ( 'success', 'SPB berhasil dihapus' );
-
         }
         catch ( \Exception $e )
         {
@@ -190,7 +268,6 @@ class SPBController extends Controller
 
             \DB::commit ();
             return redirect ()->back ()->with ( 'success', 'SPB berhasil di Addendum' );
-
         }
         catch ( \Exception $e )
         {

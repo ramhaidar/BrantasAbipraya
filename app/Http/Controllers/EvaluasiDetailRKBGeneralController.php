@@ -67,17 +67,45 @@ class EvaluasiDetailRKBGeneralController extends Controller
         if ( $perPage === -1 )
         {
             $detail_rkb = $query->get (); // Get all records without pagination
-            // Convert collection to LengthAwarePaginator to maintain compatibility
-            $detail_rkb = new \Illuminate\Pagination\LengthAwarePaginator(
-                $detail_rkb,
-                $detail_rkb->count (),
-                $detail_rkb->count (),
-                1
-            );
+
+            // Handle empty results
+            if ( $detail_rkb->isEmpty () )
+            {
+                $detail_rkb = new \Illuminate\Pagination\LengthAwarePaginator(
+                    collect ( [] ), // Empty collection
+                    0, // Total
+                    1, // Per page
+                    1 // Current page
+                );
+            }
+            else
+            {
+                // Convert collection to LengthAwarePaginator
+                $detail_rkb = new \Illuminate\Pagination\LengthAwarePaginator(
+                    $detail_rkb,
+                    $detail_rkb->count (),
+                    max ( $detail_rkb->count (), 1 ), // Ensure perPage is at least 1
+                    1
+                );
+            }
         }
         else
         {
-            $detail_rkb = $query->paginate ( $perPage );
+            // Regular pagination with error handling
+            $total = $query->count ();
+            if ( $total === 0 )
+            {
+                $detail_rkb = new \Illuminate\Pagination\LengthAwarePaginator(
+                    collect ( [] ), // Empty collection
+                    0, // Total
+                    $perPage,
+                    1 // Current page
+                );
+            }
+            else
+            {
+                $detail_rkb = $query->paginate ( $perPage );
+            }
         }
 
         $proyeks = Proyek::with ( "users" )
@@ -141,169 +169,6 @@ class EvaluasiDetailRKBGeneralController extends Controller
         ] );
 
         return redirect ()->back ()->with ( 'success', 'Detail RKB General created and linked successfully!' );
-    }
-
-    // Return the data in json for a specific DetailRKBGeneral
-    public function show ( $id )
-    {
-        // Ambil data DetailRKBGeneral dengan relasi terkait
-        $detailRKBGeneral = DetailRKBGeneral::with ( [ 
-            'kategoriSparepart:id,kode,nama',
-            'masterDataSparepart:id,nama,part_number,merk',
-            'linkRkbDetails.linkAlatDetailRkb.masterDataAlat:id,jenis_alat'
-        ] )->find ( $id );
-
-        if ( ! $detailRKBGeneral )
-        {
-            return response ()->json ( [ 
-                'error' => 'Detail RKB General not found!',
-            ], 404 );
-        }
-
-        // Format respons
-        return response ()->json ( [ 
-            'data' => [ 
-                'id'                              => $detailRKBGeneral->id,
-                'id_master_data_alat'             => optional ( $detailRKBGeneral->linkRkbDetails->first ()->linkAlatDetailRkb->masterDataAlat )->id,
-                'id_kategori_sparepart_sparepart' => $detailRKBGeneral->id_kategori_sparepart_sparepart,
-                'id_master_data_sparepart'        => $detailRKBGeneral->id_master_data_sparepart,
-                'quantity_requested'              => $detailRKBGeneral->quantity_requested,
-                'satuan'                          => $detailRKBGeneral->satuan,
-                'master_data_sparepart'           => [ 
-                    'id'      => $detailRKBGeneral->masterDataSparepart->id ?? null,
-                    'name'    => $detailRKBGeneral->masterDataSparepart->nama ?? null,
-                    'details' => $detailRKBGeneral->masterDataSparepart
-                        ? "{$detailRKBGeneral->masterDataSparepart->nama} - {$detailRKBGeneral->masterDataSparepart->part_number} - {$detailRKBGeneral->masterDataSparepart->merk}"
-                        : null,
-                ],
-            ]
-        ] );
-    }
-
-    // Update an existing DetailRKBGeneral
-    public function update ( Request $request, $id )
-    {
-        // Cari data DetailRKBGeneral
-        $detailRKBGeneral = DetailRKBGeneral::find ( $id );
-
-        if ( ! $detailRKBGeneral )
-        {
-            return redirect ()->back ()->with ( 'error', 'Detail RKB General not found!' );
-        }
-
-        // Validasi input
-        $validatedData = $request->validate ( [ 
-            'quantity_requested'              => 'required|integer|min:1',
-            'satuan'                          => 'required|string|max:50',
-            'id_master_data_alat'             => 'required|integer|exists:master_data_alat,id',
-            'id_kategori_sparepart_sparepart' => 'required|integer|exists:kategori_sparepart,id',
-            'id_master_data_sparepart'        => 'required|integer|exists:master_data_sparepart,id',
-            'id_rkb'                          => 'required|integer|exists:rkb,id', // Pastikan RKB terkait
-        ] );
-
-        try
-        {
-            // Update DetailRKBGeneral
-            $detailRKBGeneral->update ( [ 
-                'quantity_requested'              => $validatedData[ 'quantity_requested' ],
-                'satuan'                          => $validatedData[ 'satuan' ],
-                'id_kategori_sparepart_sparepart' => $validatedData[ 'id_kategori_sparepart_sparepart' ],
-                'id_master_data_sparepart'        => $validatedData[ 'id_master_data_sparepart' ],
-            ] );
-
-            // Ambil atau buat LinkAlatDetailRkb baru
-            $newLinkAlatDetailRKB = LinkAlatDetailRkb::firstOrCreate (
-                [ 
-                    'id_rkb'              => $validatedData[ 'id_rkb' ],
-                    'id_master_data_alat' => $validatedData[ 'id_master_data_alat' ],
-                ]
-            );
-
-            // Ambil LinkRKBDetail lama
-            $currentLinkRkbDetail = LinkRKBDetail::where ( 'id_detail_rkb_general', $id )->first ();
-
-            if ( $currentLinkRkbDetail )
-            {
-                $currentLinkAlatDetailRKBId = $currentLinkRkbDetail->id_link_alat_detail_rkb;
-
-                // Update LinkRKBDetail dengan LinkAlatDetailRkb baru
-                $currentLinkRkbDetail->update ( [ 
-                    'id_link_alat_detail_rkb' => $newLinkAlatDetailRKB->id,
-                ] );
-
-                // Periksa apakah LinkAlatDetailRKB lama masih digunakan
-                $remainingLinks = LinkRKBDetail::where ( 'id_link_alat_detail_rkb', $currentLinkAlatDetailRKBId )->exists ();
-
-                // Hapus LinkAlatDetailRKB lama jika tidak ada lagi relasi
-                if ( ! $remainingLinks )
-                {
-                    LinkAlatDetailRKB::where ( 'id', $currentLinkAlatDetailRKBId )->delete ();
-                }
-            }
-            else
-            {
-                // Jika belum ada, buat LinkRKBDetail baru
-                LinkRKBDetail::create ( [ 
-                    'id_detail_rkb_general'   => $detailRKBGeneral->id,
-                    'id_link_alat_detail_rkb' => $newLinkAlatDetailRKB->id,
-                ] );
-            }
-
-            return redirect ()->back ()->with ( 'success', 'Detail RKB General updated successfully!' );
-        }
-        catch ( \Exception $e )
-        {
-            return redirect ()->back ()->withErrors ( [ 
-                'error' => 'Failed to update Detail RKB General: ' . $e->getMessage (),
-            ] );
-        }
-    }
-
-    // Delete a specific DetailRKBGeneral
-    public function destroy ( $id )
-    {
-        // Cari data DetailRKBGeneral
-        $detailRKBGeneral = DetailRKBGeneral::find ( $id );
-
-        if ( ! $detailRKBGeneral )
-        {
-            return redirect ()->back ()->with ( 'error', 'Detail RKB General not found!' );
-        }
-
-        try
-        {
-            // Dapatkan semua LinkRKBDetail terkait dengan DetailRKBGeneral ini
-            $linkRkbDetails = LinkRKBDetail::where ( 'id_detail_rkb_general', $id )->get ();
-
-            // Hapus LinkRKBDetail
-            foreach ( $linkRkbDetails as $linkRkbDetail )
-            {
-                $linkAlatDetailRkbId = $linkRkbDetail->id_link_alat_detail_rkb;
-
-                // Hapus LinkRKBDetail
-                $linkRkbDetail->delete ();
-
-                // Cek apakah masih ada LinkRKBDetail yang menggunakan link_alat_detail_rkb ini
-                $remainingLinks = LinkRKBDetail::where ( 'id_link_alat_detail_rkb', $linkAlatDetailRkbId )->exists ();
-
-                // Jika tidak ada lagi, hapus link_alat_detail_rkb
-                if ( ! $remainingLinks )
-                {
-                    LinkAlatDetailRKB::where ( 'id', $linkAlatDetailRkbId )->delete ();
-                }
-            }
-
-            // Hapus DetailRKBGeneral
-            $detailRKBGeneral->delete ();
-
-            return redirect ()->back ()->with ( 'success', 'Detail RKB General and its links deleted successfully!' );
-        }
-        catch ( \Exception $e )
-        {
-            return redirect ()->back ()->withErrors ( [ 
-                'error' => 'Failed to delete Detail RKB General: ' . $e->getMessage (),
-            ] );
-        }
     }
 
     public function evaluate ( Request $request, $id_rkb )

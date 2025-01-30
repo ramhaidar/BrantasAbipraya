@@ -109,10 +109,12 @@ class EvaluasiRKBGeneralController extends Controller
         }
 
         return view ( 'dashboard.evaluasi.general.evaluasi_general', [ 
-            'headerPage' => 'Evaluasi General',
-            'page'       => 'Data Evaluasi General',
-            'proyeks'    => $proyeks,
-            'TableData'  => $TableData,
+            'headerPage'  => 'Evaluasi General',
+            'page'        => 'Data Evaluasi General',
+            'menuContext' => 'evaluasi_general',
+
+            'proyeks'     => $proyeks,
+            'TableData'   => $TableData,
         ] );
     }
 

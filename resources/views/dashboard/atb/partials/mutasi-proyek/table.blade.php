@@ -8,14 +8,20 @@
         #table-data td,
         #table-data th {
             vertical-align: middle;
+            text-align: center;
+        }
+
+        .currency-value {
+            text-align: right !important;
+            padding-right: 10px !important;
         }
     </style>
 @endpush
 
 @php
-    function formatRupiah($number)
+    function formatRibuan($number)
     {
-        return 'Rp ' . number_format($number, 0, ',', '.');
+        return number_format($number, 0, ',', '.');
     }
 @endphp
 
@@ -57,8 +63,8 @@
                         <td class="text-center">{!! $atb->apbMutasi->status === 'rejected' ? '<span class="badge bg-danger w-100">Rejected</span>' : $atb->quantity ?? '-' !!}</td>
                         <td class="text-center">{{ $atb->apbMutasi->saldo->satuan }}</td>
                     @endif
-                    <td class="text-center">{{ formatRupiah($atb->harga) }}</td>
-                    <td class="text-center">{{ formatRupiah($atb->quantity * $atb->harga) }}</td>
+                    <td class="currency-value">{{ formatRibuan($atb->harga) }}</td>
+                    <td class="currency-value">{{ formatRibuan($atb->quantity * $atb->harga) }}</td>
                     <td class="text-center doc-cell" data-id="{{ $atb->id }}">
                         @php
                             $storagePath = storage_path('app/public/' . $atb->dokumentasi_foto);
@@ -95,7 +101,7 @@
         <tfoot>
             <tr class="table-primary">
                 <td class="text-center fw-bold" colspan="11">Grand Total</td>
-                <td class="text-center fw-bold" id="total-harga">0</td>
+                <td class="text-center fw-bold currency-value" id="total-harga">0</td>
                 <td colspan="2"></td>
             </tr>
         </tfoot>
@@ -120,12 +126,11 @@
                 let total = 0;
                 $('#table-data tbody tr:visible').each(function() {
                     let value = $(this).find('td:eq(11)').text()
-                        .replace('Rp ', '')
                         .replace(/\./g, '');
                     total += parseInt(value) || 0;
                 });
 
-                let formattedTotal = 'Rp ' + total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                let formattedTotal = total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
                 $('#total-harga').html(formattedTotal);
             }
 

@@ -8,14 +8,20 @@
         #table-data td,
         #table-data th {
             vertical-align: middle;
+            text-align: center;
+        }
+
+        .currency-value {
+            text-align: right !important;
+            padding-right: 10px !important;
         }
     </style>
 @endpush
 
 @php
-    function formatRupiah($number)
+    function formatRibuan($number)
     {
-        return 'Rp ' . number_format($number, 0, ',', '.');
+        return number_format($number, 0, ',', '.');
     }
 @endphp
 
@@ -53,10 +59,10 @@
                     <td class="text-center">{{ $atb->masterDataSparepart->part_number }}</td>
                     <td class="text-center">{{ $atb->quantity }}</td>
                     <td class="text-center">{{ $atb->detailSpb->satuan ?? '-' }}</td>
-                    <td class="text-center">{{ formatRupiah($atb->harga) }}</td>
-                    <td class="text-center">{{ formatRupiah($atb->quantity * $atb->harga) }}</td>
-                    <td class="text-center">{{ formatRupiah($atb->quantity * $atb->harga * 0.11) }}</td>
-                    <td class="text-center">{{ formatRupiah($atb->quantity * $atb->harga * 1.11) }}</td>
+                    <td class="currency-value">{{ formatRibuan($atb->harga) }}</td>
+                    <td class="currency-value">{{ formatRibuan($atb->quantity * $atb->harga) }}</td>
+                    <td class="currency-value">{{ formatRibuan($atb->quantity * $atb->harga * 0.11) }}</td>
+                    <td class="currency-value">{{ formatRibuan($atb->quantity * $atb->harga * 1.11) }}</td>
                     <td class="text-center stt-cell">
                         <button class="btn btn-primary mx-1 sttBtn" onclick="showSTTModal('{{ $atb->id }}')">
                             <i class="bi bi-file-earmark-pdf"></i>
@@ -117,13 +123,10 @@
                 $('#table-data tbody tr:visible').each(function() {
                     // Get values from columns
                     let harga = $(this).find('td:eq(10)').text()
-                        .replace('Rp ', '')
                         .replace(/\./g, '');
                     let ppn = $(this).find('td:eq(11)').text()
-                        .replace('Rp ', '')
                         .replace(/\./g, '');
                     let bruto = $(this).find('td:eq(12)').text()
-                        .replace('Rp ', '')
                         .replace(/\./g, '');
 
                     // Add to totals
@@ -133,9 +136,9 @@
                 });
 
                 // Format and display totals
-                $('#total-harga').html('Rp ' + totalHarga.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."));
-                $('#total-ppn').html('Rp ' + totalPPN.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."));
-                $('#total-bruto').html('Rp ' + totalBruto.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."));
+                $('#total-harga').html(totalHarga.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."));
+                $('#total-ppn').html(totalPPN.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."));
+                $('#total-bruto').html(totalBruto.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."));
             }
 
             // Initial calculation

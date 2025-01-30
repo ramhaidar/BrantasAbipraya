@@ -8,86 +8,64 @@
         #table-data td,
         #table-data th {
             vertical-align: middle;
+            text-align: center;
         }
     </style>
 @endpush
 
 <form id="approveRkbForm" method="POST" action="{{ route('evaluasi_rkb_general.detail.approve', $rkb->id) }}">
     @csrf
-    <div class="ibox-body ms-0 ps-0 table-responsive">
-        <table class="m-0 table table-bordered table-striped" id="table-data">
+    <div class="ibox-body table-responsive p-0 m-0">
+        <table class="table table-hover table-bordered table-striped align-middle w-100" id="table-data">
             <thead class="table-primary">
                 <tr>
-                    <th class="text-center">Nama Alat</th>
-                    <th class="text-center">Kode Alat</th>
-                    <th class="text-center">Kategori Sparepart</th>
-                    <th class="text-center">Sparepart</th>
-                    <th class="text-center">Part Number</th>
-                    <th class="text-center">Merk</th>
-                    <th class="text-center">Quantity Requested</th>
-                    <th class="text-center">Quantity Approved</th>
-                    <th class="text-center">Quantity in Stock</th>
-                    <th class="text-center">Satuan</th>
+                    <th>Nama Alat</th>
+                    <th>Kode Alat</th>
+                    <th>Kategori Sparepart</th>
+                    <th>Sparepart</th>
+                    <th>Part Number</th>
+                    <th>Merk</th>
+                    <th>Quantity Requested</th>
+                    <th>Quantity Approved</th>
+                    <th>Satuan</th>
                 </tr>
             </thead>
             <tbody>
-                @php
-                    $currentPartNumber = null;
-                    $rowspan = 0;
-                    $showStock = true;
-                @endphp
-                @foreach ($alat_detail_rkbs as $alat_detail_rkb)
-                    @foreach ($alat_detail_rkb->linkRkbDetails as $rkb_detail)
-                        @php
-                            $detail = $rkb_detail->detailRkbGeneral;
-                            $sparepart = $detail->masterDataSparepart;
-                            $kategori = $detail->kategoriSparepart;
-
-                            if ($currentPartNumber !== $sparepart->part_number) {
-                                $currentPartNumber = $sparepart->part_number;
-                                $rowspan = $alat_detail_rkbs
-                                    ->flatMap(function ($item) use ($currentPartNumber) {
-                                        return $item->linkRkbDetails->filter(function ($detail) use ($currentPartNumber) {
-                                            return $detail->detailRkbGeneral->masterDataSparepart->part_number === $currentPartNumber;
-                                        });
-                                    })
-                                    ->count();
-                                $showStock = true;
-                            }
-                        @endphp
+                @forelse ($TableData as $item)
+                    @forelse ($item->linkRkbDetails as $detail)
                         <tr>
-                            <td class="text-center">{{ $alat_detail_rkb->masterDataAlat->jenis_alat ?? '-' }}</td>
-                            <td class="text-center">{{ $alat_detail_rkb->masterDataAlat->kode_alat ?? '-' }}</td>
-                            <td class="text-center">{{ $kategori ? "{$kategori->kode}: {$kategori->nama}" : '-' }}</td>
-                            <td class="text-center">{{ $sparepart->nama ?? '-' }}</td>
-                            <td class="text-center">{{ $sparepart->part_number ?? '-' }}</td>
-                            <td class="text-center">{{ $sparepart->merk ?? '-' }}</td>
-                            <td class="text-center">{{ $detail->quantity_requested }}</td>
+                            <td class="text-center">{{ $detail->linkAlatDetailRkb->masterDataAlat->jenis_alat ?? '-' }}</td>
+                            <td class="text-center">{{ $detail->linkAlatDetailRkb->masterDataAlat->kode_alat ?? '-' }}</td>
+                            <td class="text-center">{{ $item->kategoriSparepart->kode ?? '-' }}: {{ $item->kategoriSparepart->nama ?? '-' }}</td>
+                            <td class="text-center">{{ $item->masterDataSparepart->nama ?? '-' }}</td>
+                            <td class="text-center">{{ $item->masterDataSparepart->part_number ?? '-' }}</td>
+                            <td class="text-center">{{ $item->masterDataSparepart->merk ?? '-' }}</td>
+                            <td class="text-center">{{ $item->quantity_requested }}</td>
                             <td class="text-center">
-                                @php
-                                    $backgroundColor = '';
-                                    if ($rkb->is_approved_svp) {
-                                        $backgroundColor = 'bg-primary-subtle';
-                                    } elseif ($rkb->is_approved_vp) {
-                                        $backgroundColor = 'bg-info-subtle';
-                                    } else {
-                                        $backgroundColor = $detail->quantity_approved !== null ? 'bg-success-subtle' : 'bg-warning-subtle';
-                                    }
-
-                                    $disabled = $rkb->is_approved_vp || $rkb->is_approved_svp || $rkb->is_evaluated ? 'disabled' : '';
-                                @endphp
-                                <input class="form-control text-center {{ $backgroundColor }}" name="quantity_approved[{{ $detail->id }}]" type="number" value="{{ $detail->quantity_approved ?? $detail->quantity_requested }}" {{ $disabled }} min="0">
+                                <input class="form-control text-center
+                                        @if ($rkb->is_approved_svp) bg-primary-subtle
+                                        @elseif ($rkb->is_approved_vp) bg-info-subtle
+                                        @elseif($rkb->is_evaluated) bg-success-subtle 
+                                        @else bg-warning-subtle @endif" name="quantity_approved[{{ $item->id }}]" type="number" value="{{ $item->quantity_approved ?? $item->quantity_requested }}" min="0" {{ $rkb->is_evaluated ? 'disabled' : '' }}>
                             </td>
-                            @if ($showStock)
-                                <td class="text-center" rowspan="{{ $rowspan }}">{{ $stockQuantities[$sparepart->id] ?? 0 }}</td>
-                                @php $showStock = false; @endphp
-                            @else
-                                <td style="display: none;">{{ $stockQuantities[$sparepart->id] ?? 0 }}</td>
-                            @endif
-                            <td class="text-center">{{ $detail->satuan }}</td>
+                            <td class="text-center">{{ $item->satuan }}</td>
                         </tr>
-                    @endforeach
-                @endforeach
+                    @empty
+                        <tr>
+                            <td class="text-center py-3 text-muted" colspan="10">
+                                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                No RKB details found
+                            </td>
+                        </tr>
+                    @endforelse
+                @empty
+                    <tr>
+                        <td class="text-center py-3 text-muted" colspan="10">
+                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                            No data found
+                        </td>
+                    </tr>
+                @endforelse
             </tbody>
         </table>
     </div>
@@ -98,9 +76,24 @@
 @push('scripts_3')
     <script>
         $(document).ready(function() {
-            $('#table-data').DataTable({
-                paginate: false,
-                ordering: false,
+            const $table = $('#table-data');
+            const $headers = $table.find('thead th');
+            const textsToCheck = ['Detail', 'Aksi', 'Supplier'];
+            let indices = {};
+
+            // Find the indices of the headers that match the texts in textsToCheck array
+            $headers.each(function(index) {
+                const headerText = $(this).text().trim();
+                if (textsToCheck.includes(headerText)) {
+                    indices[headerText] = index;
+                }
+            });
+
+            // Set the width of the corresponding columns in tbody
+            $.each(indices, function(text, index) {
+                $table.find('tbody tr').each(function() {
+                    $(this).find('td').eq(index).css('width', '1%');
+                });
             });
         });
     </script>

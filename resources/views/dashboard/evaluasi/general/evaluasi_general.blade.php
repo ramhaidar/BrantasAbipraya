@@ -13,7 +13,20 @@
                     </div>
                 </div>
 
-                @include('dashboard.evaluasi.general.partials.table')
+                {{-- @include('dashboard.evaluasi.general.partials.table') --}}
+
+                <div class="p-0 m-0 py-3">
+                    @include('components.search-input', [
+                        'route' => url()->current(),
+                        'placeholder' => 'Search items...',
+                    ])
+                    @include('dashboard.evaluasi.general.partials.table', [
+                        'TableData' => $TableData,
+                    ])
+                    @include('components.pagination', [
+                        'paginator' => $TableData->links()->paginator,
+                    ])
+                </div>
 
             </div>
         </div>

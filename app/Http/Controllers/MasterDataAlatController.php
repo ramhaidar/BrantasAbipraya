@@ -37,7 +37,10 @@ class MasterDataAlatController extends Controller
             ->orderBy ( "id", "desc" )
             ->get ();
 
-        $TableData = $query->paginate ( $perPage )
+        $TableData = MasterDataAlat::with ( 'proyekCurrent' )
+            ->orderBy ( 'updated_at', 'desc' )
+            ->orderBy ( 'id', 'desc' )
+            ->paginate ( $perPage )
             ->withQueryString ();
 
         return view ( 'dashboard.masterdata.alat.alat', [ 

@@ -57,20 +57,19 @@ class MasterDataSparepartController extends Controller
             $query->whereIn ( 'id_user', $usersInProyek );
         }
 
-        $TableData = $query->paginate ( $perPage )
+        $TableData = MasterDataSparepart::with ( [ 'kategoriSparepart', 'masterDataSuppliers' ] )
+            ->orderBy ( 'updated_at', 'desc' )
+            ->orderBy ( 'id', 'desc' )
+            ->paginate ( $perPage )
             ->withQueryString ();
 
         $suppliers = MasterDataSupplier::all ();
         $kategori  = KategoriSparepart::all ();
-        $proyeks   = [];
 
-        if ( $user->role !== 'Pegawai' )
-        {
-            $proyeks = Proyek::with ( "users" )
-                ->orderBy ( "updated_at", "asc" )
-                ->orderBy ( "id", "asc" )
-                ->get ();
-        }
+        $proyeks = Proyek::with ( "users" )
+            ->orderBy ( "updated_at", "desc" )
+            ->orderBy ( "id", "desc" )
+            ->get ();
 
         return view ( 'dashboard.masterdata.sparepart.sparepart', [ 
             'headerPage' => "Master Data Sparepart",

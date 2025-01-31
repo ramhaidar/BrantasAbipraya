@@ -8,9 +8,9 @@
         #table-data td,
         #table-data th {
             vertical-align: middle;
+            text-align: center;
         }
 
-        /* Add these styles */
         #table-data th:nth-child(9),
         #table-data th:nth-child(10),
         #table-data td:nth-child(9),
@@ -42,12 +42,13 @@
 <div class="ibox-body ms-0 ps-0">
     <form id="detailSpbForm" action="{{ route('spb.detail.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
-        <input name="id_rkb" type="hidden" value="{{ $rkb->id }}">
+        <input name="id_rkb" type="hidden" value="{{ $TableData->first()->id }}">
         <input id="spb_addendum_input" name="spb_addendum_id" type="hidden">
 
         @php
             $sparepartGroups = [];
             $totalItems = 0;
+            $rkb = $TableData->first(); // Get the RKB model from paginator
             foreach ($rkb->linkAlatDetailRkbs as $detail1) {
                 foreach ($detail1->linkRkbDetails as $detail2) {
                     $remainder = $detail2->detailRkbUrgent?->quantity_remainder ?? ($detail2->detailRkbGeneral?->quantity_remainder ?? 0);
@@ -374,6 +375,30 @@
                 complete: function() {
                     $('.loading-overlay').remove();
                 }
+            });
+        });
+    </script>
+
+    <script>
+        $(document).ready(function() {
+            const $table = $('#table-data');
+            const $headers = $table.find('thead th');
+            const textsToCheck = ['Detail', 'Aksi', 'Supplier'];
+            let indices = {};
+
+            // Find the indices of the headers that match the texts in textsToCheck array
+            $headers.each(function(index) {
+                const headerText = $(this).text().trim();
+                if (textsToCheck.includes(headerText)) {
+                    indices[headerText] = index;
+                }
+            });
+
+            // Set the width of the corresponding columns in tbody
+            $.each(indices, function(text, index) {
+                $table.find('tbody tr').each(function() {
+                    $(this).find('td').eq(index).css('width', '1%');
+                });
             });
         });
     </script>

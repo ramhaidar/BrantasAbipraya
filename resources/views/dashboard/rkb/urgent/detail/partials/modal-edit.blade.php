@@ -24,19 +24,17 @@
 <div class="fade modal" id="modalForEdit" data-bs-keyboard="false" aria-hidden="true" aria-labelledby="modalForEditLabel" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content rounded-4">
-            <div class="pt-3 px-3 m-0 d-flex w-100 justify-content-between">
-                <h5 class="modal-title w-100 pb-2" id="modalForEditLabel">Ubah Rencana Kebutuhan Barang</h5>
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalForEditLabel">Ubah Rencana Kebutuhan Barang</h5>
                 <button class="btn-close" data-bs-dismiss="modal" type="button" aria-label="Close"></button>
             </div>
             <hr class="p-0 m-0 border border-secondary-subtle border-2 opacity-50">
-            <form class="needs-validation" id="editRKBUrgentForm" style="overflow-y: auto" novalidate method="POST">
+            <form class="needs-validation" id="editRKBUrgentForm" style="overflow-y: auto" novalidate method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
                 <div class="modal-body">
                     <div class="row g-3">
-                        <div class="col-12 hidden">
-                            <input id="id_rkb" name="id_rkb" type="hidden" value="{{ $rkb->id }}">
-                        </div>
+                        <input id="id_rkb" name="id_rkb" type="hidden" value="{{ $rkb->id }}">
 
                         <div class="col-12">
                             <label class="form-label required" for="id_master_data_alat_edit">Alat</label>
@@ -47,6 +45,32 @@
                                 @endforeach
                             </select>
                             <div class="invalid-feedback">Alat diperlukan.</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label required" for="nama_koordinator_edit">Nama Koordinator</label>
+                            <input class="form-control" id="nama_koordinator_edit" name="nama_koordinator" type="text" placeholder="Nama Koordinator" required>
+                            <div class="invalid-feedback">Nama Koordinator diperlukan.</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label required" for="kronologi_edit">Kronologi</label>
+                            <textarea class="form-control" id="kronologi_edit" name="kronologi" rows="3" placeholder="Kronologi" required></textarea>
+                            <div class="invalid-feedback">Kronologi diperlukan.</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label" for="dokumentasi_edit">Dokumentasi Baru</label>
+                            <input class="form-control" id="dokumentasiInputEdit" name="dokumentasi[]" type="file" accept="image/*" multiple>
+                            <div class="invalid-feedback" id="dokumentasi-invalid-feedback-edit">
+                                Dokumentasi diperlukan.
+                            </div>
+                            <div class="mt-3 d-flex flex-wrap gap-2" id="dokumentasiPreviewEdit"></div>
+
+                            <div class="mt-3">
+                                <label class="form-label">Dokumentasi Saat Ini</label>
+                                <div class="d-flex flex-wrap gap-2" id="existing-dokumentasi"></div>
+                            </div>
                         </div>
 
                         <div class="col-12">
@@ -104,6 +128,14 @@
 
 @push('scripts_3')
     <script>
+        // Define clearPreviewEdit function globally
+        function clearPreviewEdit() {
+            const dokumentasiPreview = document.getElementById('dokumentasiPreviewEdit');
+            if (dokumentasiPreview) {
+                dokumentasiPreview.innerHTML = '';
+            }
+        }
+
         $(document).ready(function() {
             'use strict';
 
@@ -166,6 +198,83 @@
                 const id = $(this).data('id'); // Get ID from the button
                 fillFormEditDetailRKB(id); // Populate and show the modal
             });
+
+            // Add file handling for edit form
+            const dokumentasiInputEdit = document.getElementById('dokumentasiInputEdit');
+            const dokumentasiPreviewEdit = document.getElementById('dokumentasiPreviewEdit');
+
+            dokumentasiInputEdit.addEventListener('change', function() {
+                clearPreviewEdit();
+
+                const files = Array.from(this.files);
+                const maxFileSize = 2 * 1024 * 1024; // 2 MB
+
+                files.forEach((file) => {
+                    if (!file.type.startsWith('image/')) {
+                        alert(`File "${file.name}" is not an image.`);
+                        return;
+                    }
+
+                    if (file.size > maxFileSize) {
+                        alert(`File "${file.name}" exceeds the 2 MB size limit.`);
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const previewElement = document.createElement('div');
+                        previewElement.classList.add('d-flex', 'flex-column', 'align-items-center', 'me-2', 'mb-2');
+                        
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.alt = file.name;
+                        img.classList.add('img-thumbnail', 'mb-1', 'preview-image');
+                        img.style.maxWidth = '100px';
+                        img.style.maxHeight = '100px';
+                        img.style.objectFit = 'cover';
+                        img.title = file.name;
+
+                        // Add click event for preview modal
+                        img.addEventListener('click', function() {
+                            $('#largeImagePreviewForEdit').attr('src', e.target.result);
+                            $('#imagePreviewTitleForEdit').text(file.name);
+                            $('#modalForEdit').modal('hide');
+                            $('#imagePreviewModalforEdit').modal('show');
+                        });
+
+                        const removeBtn = document.createElement('button');
+                        removeBtn.type = 'button';
+                        removeBtn.classList.add('btn', 'btn-danger', 'btn-sm');
+                        removeBtn.textContent = 'Remove';
+                        removeBtn.onclick = function() {
+                            previewElement.remove();
+                            const remainingFiles = Array.from(dokumentasiInputEdit.files)
+                                .filter(f => f !== file);
+                            const dataTransfer = new DataTransfer();
+                            remainingFiles.forEach(f => dataTransfer.items.add(f));
+                            dokumentasiInputEdit.files = dataTransfer.files;
+                        };
+
+                        previewElement.appendChild(img);
+                        previewElement.appendChild(removeBtn);
+                        dokumentasiPreviewEdit.appendChild(previewElement);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            });
+
+            // Add event listener for existing images preview
+            $(document).on('click', '#existing-dokumentasi img', function() {
+                $('#largeImagePreviewForEdit').attr('src', this.src);
+                $('#imagePreviewTitleForEdit').text(this.alt);
+                $('#modalForEdit').modal('hide');
+                $('#imagePreviewModalforEdit').modal('show');
+            });
+
+            // Handle modal transitions
+            $('#imagePreviewModalforEdit').on('hidden.bs.modal', function() {
+                $('#modalForEdit').modal('show');
+            });
         });
 
         // Function to display modal for editing and populate form with server data
@@ -184,10 +293,27 @@
 
                     // Populate fields with data
                     $('#id_master_data_alat_edit').val(response.data.id_master_data_alat).trigger('change');
+                    $('#nama_koordinator_edit').val(response.data.nama_koordinator); // Fix this line
+                    $('#kronologi_edit').val(response.data.kronologi); // Fix this line
                     $('#id_kategori_sparepart_sparepart_edit').val(response.data.id_kategori_sparepart_sparepart).trigger('change');
-
                     $('#quantity_requested_edit').val(response.data.quantity_requested);
                     $('#satuan_edit').val(response.data.satuan).trigger('change');
+
+                    // Display existing images
+                    const existingDokumentasi = document.getElementById('existing-dokumentasi');
+                    existingDokumentasi.innerHTML = '';
+                    if (response.data.dokumentasi) {
+                        response.data.dokumentasi.forEach(img => {
+                            // Create thumbnail for existing images
+                            const imgElement = document.createElement('img');
+                            imgElement.src = img.url;
+                            imgElement.alt = img.name;
+                            imgElement.classList.add('img-thumbnail');
+                            imgElement.style.maxWidth = '100px';
+                            imgElement.style.maxHeight = '100px';
+                            existingDokumentasi.appendChild(imgElement);
+                        });
+                    }
 
                     // Set action form to update the specific record with PUT method
                     $('#editRKBUrgentForm').attr('action', updateUrl);

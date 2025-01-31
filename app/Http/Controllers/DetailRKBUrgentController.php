@@ -204,6 +204,8 @@ class DetailRKBUrgentController extends Controller
                 'id_master_data_sparepart'        => $detailRKBUrgent->id_master_data_sparepart,
                 'quantity_requested'              => $detailRKBUrgent->quantity_requested,
                 'satuan'                          => $detailRKBUrgent->satuan,
+                'nama_koordinator'                => $detailRKBUrgent->nama_koordinator,  // Add this line
+                'kronologi'                       => $detailRKBUrgent->kronologi,  // Add this line
                 'master_data_sparepart'           => [ 
                     'id'      => $detailRKBUrgent->masterDataSparepart->id ?? null,
                     'name'    => $detailRKBUrgent->masterDataSparepart->nama ?? null,
@@ -232,59 +234,64 @@ class DetailRKBUrgentController extends Controller
         $validatedData = $request->validate ( [ 
             'quantity_requested'              => 'required|integer|min:1',
             'satuan'                          => 'required|string|max:50',
+            'nama_koordinator'                => 'required|string|max:50',
+            'kronologi'                       => 'required|string|max:1000',
             'id_master_data_alat'             => 'required|integer|exists:master_data_alat,id',
             'id_kategori_sparepart_sparepart' => 'required|integer|exists:kategori_sparepart,id',
             'id_master_data_sparepart'        => 'required|integer|exists:master_data_sparepart,id',
-            'id_rkb'                          => 'required|integer|exists:rkb,id', // Pastikan RKB terkait
+            'id_rkb'                          => 'required|integer|exists:rkb,id',
         ] );
 
         try
         {
-            // Update DetailRKBUrgent
-            $detailRKBUrgent->update ( [ 
+            $updateData = [
                 'quantity_requested'              => $validatedData[ 'quantity_requested' ],
                 'satuan'                          => $validatedData[ 'satuan' ],
+                'nama_koordinator'                => $validatedData[ 'nama_koordinator' ],
+                'kronologi'                       => $validatedData[ 'kronologi' ],
                 'id_kategori_sparepart_sparepart' => $validatedData[ 'id_kategori_sparepart_sparepart' ],
                 'id_master_data_sparepart'        => $validatedData[ 'id_master_data_sparepart' ],
-            ] );
+            ];
 
-            // Ambil atau buat LinkAlatDetailRkb baru
-            $newLinkAlatDetailRKB = LinkAlatDetailRkb::firstOrCreate (
-                [ 
-                    'id_rkb'              => $validatedData[ 'id_rkb' ],
-                    'id_master_data_alat' => $validatedData[ 'id_master_data_alat' ],
-                ]
-            );
-
-            // Ambil LinkRKBDetail lama
-            $currentLinkRkbDetail = LinkRKBDetail::where ( 'id_detail_rkb_urgent', $id )->first ();
-
-            if ( $currentLinkRkbDetail )
+            // Handle dokumentasi update only if files are uploaded
+            if ( $request->hasFile ( 'dokumentasi' ) )
             {
-                $currentLinkAlatDetailRKBId = $currentLinkRkbDetail->id_link_alat_detail_rkb;
-
-                // Update LinkRKBDetail dengan LinkAlatDetailRkb baru
-                $currentLinkRkbDetail->update ( [ 
-                    'id_link_alat_detail_rkb' => $newLinkAlatDetailRKB->id,
+                $request->validate ( [ 
+                    'dokumentasi.*' => 'required|file|mimes:jpeg,png,jpg,gif|max:2048',
                 ] );
 
-                // Periksa apakah LinkAlatDetailRKB lama masih digunakan
-                $remainingLinks = LinkRKBDetail::where ( 'id_link_alat_detail_rkb', $currentLinkAlatDetailRKBId )->exists ();
-
-                // Hapus LinkAlatDetailRKB lama jika tidak ada lagi relasi
-                if ( ! $remainingLinks )
+                // Delete old dokumentasi if exists
+                if ( $detailRKBUrgent->dokumentasi )
                 {
-                    LinkAlatDetailRKB::where ( 'id', $currentLinkAlatDetailRKBId )->delete ();
+                    Storage::disk ( 'public' )->deleteDirectory ( $detailRKBUrgent->dokumentasi );
                 }
+
+                // Get RKB number
+                $rkb       = RKB::findOrFail ( $validatedData[ 'id_rkb' ] );
+                $rkbNumber = $rkb->nomor;
+
+                // Create new folder path
+                $folderPath = "uploads/rkb_urgent/{$rkbNumber}/dokumentasi/{$detailRKBUrgent->id}/";
+
+                // Store new files
+                foreach ( $request->file ( 'dokumentasi' ) as $file )
+                {
+                    $originalName = pathinfo ( $file->getClientOriginalName (), PATHINFO_FILENAME );
+                    $extension    = $file->getClientOriginalExtension ();
+                    $timestamp    = now ()->format ( 'Y-m-d--H-i-s' );
+                    $fileName     = "{$originalName}___{$timestamp}.{$extension}";
+
+                    $file->storeAs ( $folderPath, $fileName, 'public' );
+                }
+
+                $updateData[ 'dokumentasi' ] = $folderPath;
             }
-            else
-            {
-                // Jika belum ada, buat LinkRKBDetail baru
-                LinkRKBDetail::create ( [ 
-                    'id_detail_rkb_urgent'    => $detailRKBUrgent->id,
-                    'id_link_alat_detail_rkb' => $newLinkAlatDetailRKB->id,
-                ] );
-            }
+
+            // Update DetailRKBUrgent
+            $detailRKBUrgent->update ( $updateData );
+
+            // Update link alat
+            // ...existing link update code...
 
             return redirect ()->back ()->with ( 'success', 'Detail RKB Urgent updated successfully!' );
         }
@@ -337,7 +344,6 @@ class DetailRKBUrgentController extends Controller
             // Jika tidak ada lagi, hapus link_alat_detail_rkb
             if ( ! $remainingLinks )
             {
-                LinkAlatDetailRKB::find ( $linkAlatDetailRkbId )->lampiranRkbUrgent->delete ();
                 LinkAlatDetailRKB::where ( 'id', $linkAlatDetailRkbId )->delete ();
             }
         }

@@ -20,51 +20,53 @@
     </style>
 @endpush
 
-<div class="ibox-body table-responsive p-0 m-0">
-    <table class="table table-hover table-bordered table-striped align-middle w-100" id="table-data">
-        <thead class="table-primary">
-            <tr>
-                <th>Uraian Pekerjaan</th>
-                <th>Waktu Penyelesaian (Rencana)</th>
-                <th>Tanggal Awal Rencana</th>
-                <th>Tanggal Akhir Rencana</th>
-                <th>Waktu Penyelesaian (Actual)</th>
-                <th>Tanggal Awal Actual</th>
-                <th>Tanggal Akhir Actual</th>
-                <th>Status</th>
-                <th>Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse ($TableData as $item)
+<div class="ibox-body ms-0 ps-0">
+    <div class="table-responsive">
+        <table class="m-0 table table-bordered table-striped" id="table-data">
+            <thead class="table-primary">
                 <tr>
-                    <td class="text-center">{{ $item->nama_rencana }}</td>
-                    <td class="text-center">{{ $item->diff_in_days_rencana ? $item->diff_in_days_rencana . ' Hari' : '-' }}</td>
-                    <td class="text-center">{{ $item->tanggal_awal_rencana ? $item->tanggal_awal_rencana->format('Y-m-d') : '-' }}</td>
-                    <td class="text-center">{{ $item->tanggal_akhir_rencana ? $item->tanggal_akhir_rencana->format('Y-m-d') : '-' }}</td>
-                    <td class="text-center">{{ $item->diff_in_days_actual ? $item->diff_in_days_actual . ' Hari' : '-' }}</td>
-                    <td class="text-center">{{ $item->tanggal_awal_actual ? $item->tanggal_awal_actual->format('Y-m-d') : '-' }}</td>
-                    <td class="text-center">{{ $item->tanggal_akhir_actual ? $item->tanggal_akhir_actual->format('Y-m-d') : '-' }}</td>
-                    <td class="text-center"><span class="badge {{ $item->is_done ? 'bg-success' : 'bg-warning' }} w-100">{{ $item->is_done ? 'Sudah Selesai' : 'Belum Selesai' }}</span></td>
-                    <td class="text-center">
-                        <button class="btn btn-warning mx-1 editBtn" data-id="{{ $item->id }}">
-                            <i class="bi bi-pencil-square"></i>
-                        </button>
-                        <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item->id }}">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </td>
+                    <th>Uraian Pekerjaan</th>
+                    <th>Waktu Penyelesaian (Rencana)</th>
+                    <th>Tanggal Awal Rencana</th>
+                    <th>Tanggal Akhir Rencana</th>
+                    <th>Waktu Penyelesaian (Actual)</th>
+                    <th>Tanggal Awal Actual</th>
+                    <th>Tanggal Akhir Actual</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
                 </tr>
-            @empty
-                <tr>
-                    <td class="text-center py-3" colspan="9">
-                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                        <span class="text-muted">No data found</span>
-                    </td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @forelse ($TableData as $item)
+                    <tr>
+                        <td class="text-center">{{ $item->nama_rencana }}</td>
+                        <td class="text-center">{{ $item->diff_in_days_rencana ? $item->diff_in_days_rencana . ' Hari' : '-' }}</td>
+                        <td class="text-center">{{ $item->tanggal_awal_rencana ? $item->tanggal_awal_rencana->format('Y-m-d') : '-' }}</td>
+                        <td class="text-center">{{ $item->tanggal_akhir_rencana ? $item->tanggal_akhir_rencana->format('Y-m-d') : '-' }}</td>
+                        <td class="text-center">{{ $item->diff_in_days_actual ? $item->diff_in_days_actual . ' Hari' : '-' }}</td>
+                        <td class="text-center">{{ $item->tanggal_awal_actual ? $item->tanggal_awal_actual->format('Y-m-d') : '-' }}</td>
+                        <td class="text-center">{{ $item->tanggal_akhir_actual ? $item->tanggal_akhir_actual->format('Y-m-d') : '-' }}</td>
+                        <td class="text-center"><span class="badge {{ $item->is_done ? 'bg-success' : 'bg-warning' }} w-100">{{ $item->is_done ? 'Sudah Selesai' : 'Belum Selesai' }}</span></td>
+                        <td class="text-center">
+                            <button class="btn btn-warning mx-1 editBtn" data-id="{{ $item->id }}">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                            <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item->id }}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td class="text-center py-3" colspan="9">
+                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                            <span class="text-muted">No data found</span>
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
 </div>
 
 @push('scripts_3')

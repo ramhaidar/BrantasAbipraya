@@ -24,75 +24,77 @@
 
 @include('dashboard.rkb.urgent.detail.partials.modal-lampiran')
 
-<div class="ibox-body table-responsive p-0 m-0">
-    <table class="table table-hover table-bordered table-striped align-middle w-100" id="table-data">
-        <thead class="table-primary">
-            <tr>
-                <th>Nama Alat</th>
-                <th>Kode Alat</th>
-                <th>Kategori Sparepart</th>
-                <th>Sparepart</th>
-                <th>Part Number</th>
-                <th>Merk</th>
-                <th>Nama Koordinator</th>
-                <th>Dokumentasi</th>
-                <th>Timeline</th>
-                <th>Lampiran</th>
-                <th>Quantity Requested</th>
-                <th>Quantity Approved</th>
-                <th>Satuan</th>
-                <th>Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse ($TableData as $item)
-                @foreach ($item->linkRkbDetails as $detail)
+<div class="ibox-body ms-0 ps-0">
+    <div class="table-responsive">
+        <table class="m-0 table table-bordered table-striped" id="table-data">
+            <thead class="table-primary">
+                <tr>
+                    <th>Nama Alat</th>
+                    <th>Kode Alat</th>
+                    <th>Kategori Sparepart</th>
+                    <th>Sparepart</th>
+                    <th>Part Number</th>
+                    <th>Merk</th>
+                    <th>Nama Koordinator</th>
+                    <th>Dokumentasi</th>
+                    <th>Timeline</th>
+                    <th>Lampiran</th>
+                    <th>Quantity Requested</th>
+                    <th>Quantity Approved</th>
+                    <th>Satuan</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($TableData as $item)
+                    @foreach ($item->linkRkbDetails as $detail)
+                        <tr>
+                            <td>{{ $detail->linkAlatDetailRkb->masterDataAlat->jenis_alat ?? '-' }}</td>
+                            <td>{{ $detail->linkAlatDetailRkb->masterDataAlat->kode_alat ?? '-' }}</td>
+                            <td>{{ $item->kategoriSparepart->kode ?? '-' }}: {{ $item->kategoriSparepart->nama ?? '-' }}</td>
+                            <td>{{ $item->masterDataSparepart->nama ?? '-' }}</td>
+                            <td>{{ $item->masterDataSparepart->part_number ?? '-' }}</td>
+                            <td>{{ $item->masterDataSparepart->merk ?? '-' }}</td>
+                            <td>{{ $detail->linkAlatDetailRkb->nama_koordinator ?? '-' }}</td>
+                            <td>
+                                <button class="btn {{ $item->dokumentasi ? 'btn-warning' : 'btn-primary' }}" onclick="showDokumentasi({{ $item->id }})">
+                                    <i class="bi bi-file-earmark-text"></i>
+                                </button>
+                            </td>
+                            <td>
+                                <a class="btn {{ $detail->linkAlatDetailRkb->timelineRkbUrgents->count() > 0 ? 'btn-warning' : 'btn-primary' }}" href="{{ route('rkb_urgent.detail.timeline.index', ['id' => $detail->linkAlatDetailRkb->id]) }}">
+                                    <i class="bi bi-hourglass-split"></i>
+                                </a>
+                            </td>
+                            <td>
+                                <button class="btn {{ $detail->linkAlatDetailRkb->lampiranRkbUrgent ? 'btn-warning' : 'btn-primary' }} lampiranBtn" data-bs-toggle="modal" data-bs-target="{{ $detail->linkAlatDetailRkb->lampiranRkbUrgent ? '#modalForLampiranExist' : '#modalForLampiranNew' }}" data-id-linkalatdetail="{{ $detail->linkAlatDetailRkb->id }}" data-id-lampiran="{{ $detail->linkAlatDetailRkb->lampiranRkbUrgent ? $detail->linkAlatDetailRkb->lampiranRkbUrgent->id : null }}">
+                                    <i class="bi bi-paperclip"></i>
+                                </button>
+                            </td>
+                            <td>{{ $item->quantity_requested }}</td>
+                            <td>{{ $item->quantity_approved ?? '-' }}</td>
+                            <td>{{ $item->satuan }}</td>
+                            <td>
+                                <button class="btn btn-warning mx-1 ubahBtn" data-id="{{ $item->id }}" {{ $detail->linkAlatDetailRkb->rkb->is_finalized ? 'disabled' : '' }} onclick="fillFormEditDetailRKB({{ $item->id }})">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                                <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item->id }}" {{ $detail->linkAlatDetailRkb->rkb->is_finalized ? 'disabled' : '' }}>
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    @endforeach
+                @empty
                     <tr>
-                        <td>{{ $detail->linkAlatDetailRkb->masterDataAlat->jenis_alat ?? '-' }}</td>
-                        <td>{{ $detail->linkAlatDetailRkb->masterDataAlat->kode_alat ?? '-' }}</td>
-                        <td>{{ $item->kategoriSparepart->kode ?? '-' }}: {{ $item->kategoriSparepart->nama ?? '-' }}</td>
-                        <td>{{ $item->masterDataSparepart->nama ?? '-' }}</td>
-                        <td>{{ $item->masterDataSparepart->part_number ?? '-' }}</td>
-                        <td>{{ $item->masterDataSparepart->merk ?? '-' }}</td>
-                        <td>{{ $detail->linkAlatDetailRkb->nama_koordinator ?? '-' }}</td>
-                        <td>
-                            <button class="btn {{ $item->dokumentasi ? 'btn-warning' : 'btn-primary' }}" onclick="showDokumentasi({{ $item->id }})">
-                                <i class="bi bi-file-earmark-text"></i>
-                            </button>
-                        </td>
-                        <td>
-                            <a class="btn {{ $detail->linkAlatDetailRkb->timelineRkbUrgents->count() > 0 ? 'btn-warning' : 'btn-primary' }}" href="{{ route('rkb_urgent.detail.timeline.index', ['id' => $detail->linkAlatDetailRkb->id]) }}">
-                                <i class="bi bi-hourglass-split"></i>
-                            </a>
-                        </td>
-                        <td>
-                            <button class="btn {{ $detail->linkAlatDetailRkb->lampiranRkbUrgent ? 'btn-warning' : 'btn-primary' }} lampiranBtn" data-bs-toggle="modal" data-bs-target="{{ $detail->linkAlatDetailRkb->lampiranRkbUrgent ? '#modalForLampiranExist' : '#modalForLampiranNew' }}" data-id-linkalatdetail="{{ $detail->linkAlatDetailRkb->id }}" data-id-lampiran="{{ $detail->linkAlatDetailRkb->lampiranRkbUrgent ? $detail->linkAlatDetailRkb->lampiranRkbUrgent->id : null }}">
-                                <i class="bi bi-paperclip"></i>
-                            </button>
-                        </td>
-                        <td>{{ $item->quantity_requested }}</td>
-                        <td>{{ $item->quantity_approved ?? '-' }}</td>
-                        <td>{{ $item->satuan }}</td>
-                        <td>
-                            <button class="btn btn-warning mx-1 ubahBtn" data-id="{{ $item->id }}" {{ $detail->linkAlatDetailRkb->rkb->is_finalized ? 'disabled' : '' }} onclick="fillFormEditDetailRKB({{ $item->id }})">
-                                <i class="bi bi-pencil-square"></i>
-                            </button>
-                            <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item->id }}" {{ $detail->linkAlatDetailRkb->rkb->is_finalized ? 'disabled' : '' }}>
-                                <i class="bi bi-trash"></i>
-                            </button>
+                        <td class="text-center py-3 text-muted" colspan="14">
+                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                            No data found
                         </td>
                     </tr>
-                @endforeach
-            @empty
-                <tr>
-                    <td class="text-center py-3 text-muted" colspan="14">
-                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                        No data found
-                    </td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
 </div>
 
 @push('scripts_3')

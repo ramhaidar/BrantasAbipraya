@@ -13,62 +13,64 @@
     </style>
 @endpush
 
-<div class="ibox-body table-responsive p-0 m-0">
-    <table class="table table-hover table-bordered table-striped align-middle w-100" id="table-data">
-        <thead class="table-primary">
-            <tr>
-                <th>Nama Alat</th>
-                <th>Kode Alat</th>
-                <th>Kategori Sparepart</th>
-                <th>Sparepart</th>
-                <th>Part Number</th>
-                <th>Merk</th>
-                <th>Quantity Requested</th>
-                <th>Quantity Approved</th>
-                <th>Satuan</th>
-                <th>Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse ($TableData as $item)
-                @forelse ($item->linkRkbDetails as $detail)
-                    <tr>
-                        <td class="text-center">{{ $detail->linkAlatDetailRkb->masterDataAlat->jenis_alat ?? '-' }}</td>
-                        <td class="text-center">{{ $detail->linkAlatDetailRkb->masterDataAlat->kode_alat ?? '-' }}</td>
-                        <td class="text-center">{{ $item->kategoriSparepart->kode ?? '-' }}: {{ $item->kategoriSparepart->nama ?? '-' }}</td>
-                        <td class="text-center">{{ $item->masterDataSparepart->nama ?? '-' }}</td>
-                        <td class="text-center">{{ $item->masterDataSparepart->part_number ?? '-' }}</td>
-                        <td class="text-center">{{ $item->masterDataSparepart->merk ?? '-' }}</td>
-                        <td class="text-center">{{ $item->quantity_requested }}</td>
-                        <td class="text-center">{{ $item->quantity_approved ?? '-' }}</td>
-                        <td class="text-center">{{ $item->satuan }}</td>
-                        <td class="text-center">
-                            <button class="btn btn-warning mx-1 ubahBtn" data-id="{{ $item->id }}" {{ $detail->linkAlatDetailRkb->rkb->is_finalized ? 'disabled' : '' }} onclick="fillFormEditDetailRKB({{ $item->id }})">
-                                <i class="bi bi-pencil-square"></i>
-                            </button>
-                            <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item->id }}" {{ $detail->linkAlatDetailRkb->rkb->is_finalized ? 'disabled' : '' }}>
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
+<div class="ibox-body ms-0 ps-0">
+    <div class="table-responsive">
+        <table class="m-0 table table-bordered table-striped" id="table-data">
+            <thead class="table-primary">
+                <tr>
+                    <th>Nama Alat</th>
+                    <th>Kode Alat</th>
+                    <th>Kategori Sparepart</th>
+                    <th>Sparepart</th>
+                    <th>Part Number</th>
+                    <th>Merk</th>
+                    <th>Quantity Requested</th>
+                    <th>Quantity Approved</th>
+                    <th>Satuan</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($TableData as $item)
+                    @forelse ($item->linkRkbDetails as $detail)
+                        <tr>
+                            <td class="text-center">{{ $detail->linkAlatDetailRkb->masterDataAlat->jenis_alat ?? '-' }}</td>
+                            <td class="text-center">{{ $detail->linkAlatDetailRkb->masterDataAlat->kode_alat ?? '-' }}</td>
+                            <td class="text-center">{{ $item->kategoriSparepart->kode ?? '-' }}: {{ $item->kategoriSparepart->nama ?? '-' }}</td>
+                            <td class="text-center">{{ $item->masterDataSparepart->nama ?? '-' }}</td>
+                            <td class="text-center">{{ $item->masterDataSparepart->part_number ?? '-' }}</td>
+                            <td class="text-center">{{ $item->masterDataSparepart->merk ?? '-' }}</td>
+                            <td class="text-center">{{ $item->quantity_requested }}</td>
+                            <td class="text-center">{{ $item->quantity_approved ?? '-' }}</td>
+                            <td class="text-center">{{ $item->satuan }}</td>
+                            <td class="text-center">
+                                <button class="btn btn-warning mx-1 ubahBtn" data-id="{{ $item->id }}" {{ $detail->linkAlatDetailRkb->rkb->is_finalized ? 'disabled' : '' }} onclick="fillFormEditDetailRKB({{ $item->id }})">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                                <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item->id }}" {{ $detail->linkAlatDetailRkb->rkb->is_finalized ? 'disabled' : '' }}>
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td class="text-center py-3 text-muted" colspan="10">
+                                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                No RKB details found
+                            </td>
+                        </tr>
+                    @endforelse
                 @empty
                     <tr>
                         <td class="text-center py-3 text-muted" colspan="10">
                             <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                            No RKB details found
+                            No data found
                         </td>
                     </tr>
                 @endforelse
-            @empty
-                <tr>
-                    <td class="text-center py-3 text-muted" colspan="10">
-                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                        No data found
-                    </td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 @push('scripts_3')

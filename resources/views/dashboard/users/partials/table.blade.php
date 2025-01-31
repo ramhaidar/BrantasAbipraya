@@ -13,47 +13,49 @@
     </style>
 @endpush
 
-<div class="ibox-body table-responsive p-0 m-0">
-    <table class="table table-hover table-bordered table-striped align-middle w-100" id="table-data">
-        <thead class="table-primary">
-            <tr>
-                <th>Name</th>
-                <th>Username</th>
-                <th>Jenis Kelamin</th>
-                <th>Role</th>
-                <th>Phone</th>
-                <th>Email</th>
-                <th>Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse ($users as $user)
+<div class="ibox-body ms-0 ps-0">
+    <div class="table-responsive">
+        <table class="m-0 table table-bordered table-striped" id="table-data">
+            <thead class="table-primary">
                 <tr>
-                    <td class="text-center">{{ $user->name }}</td>
-                    <td class="text-center">{{ $user->username }}</td>
-                    <td class="text-center">{{ $user->sex }}</td>
-                    <td class="text-center">{{ $user->role }}</td>
-                    <td class="text-center">{{ $user->phone }}</td>
-                    <td class="text-center">{{ $user->email }}</td>
-                    <td class="text-center">
-                        <button class="btn btn-warning mx-1" data-bs-target=#modalForEdit data-bs-toggle=modal onclick="fillFormEdit({{ $user->id }})">
-                            <i class="bi bi-pencil-square"></i>
-                        </button>
-                        <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $user->id }}">
-                            <i class="bi bi-trash3"></i>
-                        </button>
-                    </td>
+                    <th>Name</th>
+                    <th>Username</th>
+                    <th>Jenis Kelamin</th>
+                    <th>Role</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Aksi</th>
                 </tr>
-            @empty
-                <tr>
-                    <td class="text-center py-3 text-muted" colspan="7">
-                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                        No users found
-                    </td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @forelse ($users as $user)
+                    <tr>
+                        <td class="text-center">{{ $user->name }}</td>
+                        <td class="text-center">{{ $user->username }}</td>
+                        <td class="text-center">{{ $user->sex }}</td>
+                        <td class="text-center">{{ $user->role }}</td>
+                        <td class="text-center">{{ $user->phone }}</td>
+                        <td class="text-center">{{ $user->email }}</td>
+                        <td class="text-center">
+                            <button class="btn btn-warning mx-1" data-bs-target=#modalForEdit data-bs-toggle=modal onclick="fillFormEdit({{ $user->id }})">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                            <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $user->id }}">
+                                <i class="bi bi-trash3"></i>
+                            </button>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td class="text-center py-3 text-muted" colspan="7">
+                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                            No users found
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
 </div>
 
 @push('scripts_3')

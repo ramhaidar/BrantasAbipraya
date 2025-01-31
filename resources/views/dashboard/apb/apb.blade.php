@@ -31,9 +31,37 @@
                 </div>
 
                 @if ($tipe === 'mutasi-proyek')
-                    @include('dashboard.apb.partials.mutasi-proyek.table')
+                    {{-- @include('dashboard.apb.partials.mutasi-proyek.table') --}}
+                    <div class="p-0 m-0 py-3">
+                        @include('components.search-input', [
+                            'route' => url()->current(),
+                            'placeholder' => 'Search items...',
+                        ])
+                        @include('dashboard.apb.partials.mutasi-proyek.table', [
+                            'TableData' => $TableData,
+                        ])
+                        @if ($TableData->hasPages())
+                            @include('components.pagination', [
+                                'paginator' => $TableData,
+                            ])
+                        @endif
+                    </div>
                 @else
-                    @include('dashboard.apb.partials.table')
+                    {{-- @include('dashboard.apb.partials.table') --}}
+                    <div class="p-0 m-0 py-3">
+                        @include('components.search-input', [
+                            'route' => url()->current(),
+                            'placeholder' => 'Search items...',
+                        ])
+                        @include('dashboard.apb.partials.table', [
+                            'TableData' => $TableData,
+                        ])
+                        @if ($TableData->hasPages())
+                            @include('components.pagination', [
+                                'paginator' => $TableData,
+                            ])
+                        @endif
+                    </div>
                 @endif
 
             </div>

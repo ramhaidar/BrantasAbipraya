@@ -54,15 +54,201 @@ class APBController extends Controller
 
     private function showApbPage ( $tipe, $pageTitle, $id_proyek )
     {
-        // Ubah nilai $tipe menjadi huruf kecil dan ganti spasi dengan tanda hubung
+        // Validate and set perPage to allowed values only
+        $allowedPerPage = [ 10, 25, 50, 100 ];
+        $perPage        = in_array ( (int) request ()->get ( 'per_page' ), $allowedPerPage ) ? (int) request ()->get ( 'per_page' ) : 10;
+
+        // Clean and format tipe
         $tipe = strtolower ( str_replace ( ' ', '-', $tipe ) );
 
-        $proyek = Proyek::with ( "users" )->find ( $id_proyek );
+        // Get search query
+        $search = request ()->get ( 'search', '' );
 
-        // Get alat data for this project
-        $alats = AlatProyek::where ( 'id_proyek', $id_proyek )->get ();
+        // Get base APB query with relationships
+        $query = APB::with ( [ 
+            'masterDataSparepart.kategoriSparepart',
+            'masterDataSupplier',
+            'proyek',
+            'alatProyek.masterDataAlat',
+            'saldo'
+        ] )
+            ->where ( 'id_proyek', $id_proyek )
+            ->where ( 'tipe', $tipe );
 
-        // Modified spareparts query to filter by type and project
+        // Enhanced search functionality
+        if ( $search )
+        {
+            $query->where ( function ($q) use ($search)
+            {
+                $searchLower = strtolower ( trim ( $search ) );
+                $searchParts = explode ( ' ', $searchLower );
+
+                // Array of Indonesian day names with their database equivalents
+                $hariIndonesia = [ 
+                    'senin'  => 'Monday',
+                    'selasa' => 'Tuesday',
+                    'rabu'   => 'Wednesday',
+                    'kamis'  => 'Thursday',
+                    'jumat'  => 'Friday',
+                    "jum'at" => 'Friday',
+                    'sabtu'  => 'Saturday',
+                    'minggu' => 'Sunday',
+                ];
+
+                // Array of Indonesian month names with their numbers
+                $bulanIndonesia = [ 
+                    'januari'   => '01',
+                    'februari'  => '02',
+                    'maret'     => '03',
+                    'april'     => '04',
+                    'mei'       => '05',
+                    'juni'      => '06',
+                    'juli'      => '07',
+                    'agustus'   => '08',
+                    'september' => '09',
+                    'oktober'   => '10',
+                    'november'  => '11',
+                    'desember'  => '12',
+                ];
+
+                $isDateSearch = false;
+                $year         = null;
+                $month        = null;
+                $day          = null;
+
+                // Check each part of the search string
+                foreach ( $searchParts as $part )
+                {
+                    // Check for year
+                    if ( is_numeric ( $part ) && strlen ( $part ) === 4 )
+                    {
+                        $year         = $part;
+                        $isDateSearch = true;
+                        continue;
+                    }
+
+                    // Check for day name
+                    foreach ( $hariIndonesia as $indo => $eng )
+                    {
+                        if ( str_starts_with ( $indo, $part ) )
+                        {
+                            $isDateSearch = true;
+                            $q->orWhereRaw ( "DAYNAME(tanggal) = ?", [ $eng ] );
+                            break 2;
+                        }
+                    }
+
+                    // Check for month name
+                    foreach ( $bulanIndonesia as $indo => $num )
+                    {
+                        if ( str_starts_with ( $indo, $part ) )
+                        {
+                            $month        = $num;
+                            $isDateSearch = true;
+                            break;
+                        }
+                    }
+
+                    // Check for day number
+                    if ( is_numeric ( $part ) && strlen ( $part ) <= 2 )
+                    {
+                        $day          = sprintf ( "%02d", $part );
+                        $isDateSearch = true;
+                    }
+                }
+
+                // Apply date filters based on found components
+                if ( $isDateSearch )
+                {
+                    if ( $year )
+                    {
+                        $q->whereYear ( 'tanggal', $year );
+                    }
+                    if ( $month )
+                    {
+                        $q->whereMonth ( 'tanggal', $month );
+                    }
+                    if ( $day )
+                    {
+                        $q->whereDay ( 'tanggal', $day );
+                    }
+                }
+                else
+                {
+                    // Non-date search criteria
+                    $q->where ( function ($q) use ($search)
+                    {
+                        $q->whereHas ( 'masterDataSparepart', function ($q) use ($search)
+                        {
+                            $q->where ( 'nama', 'like', "%{$search}%" )
+                                ->orWhere ( 'part_number', 'like', "%{$search}%" )
+                                ->orWhere ( 'merk', 'like', "%{$search}%" )
+                                ->orWhereHas ( 'kategoriSparepart', function ($q) use ($search)
+                                {
+                                    $q->where ( 'kode', 'like', "%{$search}%" )
+                                        ->orWhere ( 'nama', 'like', "%{$search}%" );
+                                } );
+                        } )
+                            ->orWhereHas ( 'masterDataSupplier', function ($q) use ($search)
+                            {
+                                $q->where ( 'nama', 'like', "%{$search}%" );
+                            } )
+                            ->orWhereHas ( 'alatProyek.masterDataAlat', function ($q) use ($search)
+                            {
+                                $q->where ( 'jenis_alat', 'like', "%{$search}%" )
+                                    ->orWhere ( 'kode_alat', 'like', "%{$search}%" )
+                                    ->orWhere ( 'merek_alat', 'like', "%{$search}%" )
+                                    ->orWhere ( 'tipe_alat', 'like', "%{$search}%" )
+                                    ->orWhere ( 'serial_number', 'like', "%{$search}%" );
+                            } )
+                            // Add search for tujuan proyek
+                            ->orWhereHas ( 'tujuanProyek', function ($q) use ($search)
+                            {
+                                $q->where ( 'nama', 'like', "%{$search}%" );
+                            } )
+                            // Add search for satuan in saldo
+                            ->orWhereHas ( 'saldo', function ($q) use ($search)
+                            {
+                                $q->where ( 'satuan', 'like', "%{$search}%" );
+                            } )
+                            ->orWhere ( 'mekanik', 'like', "%{$search}%" );
+
+                        // For numeric searches (quantity, price, total price)
+                        if ( is_numeric ( str_replace ( [ ',', '.' ], '', $search ) ) )
+                        {
+                            $numericSearch = str_replace ( [ ',', '.' ], '', $search );
+                            $q->orWhere ( 'quantity', 'like', "%{$numericSearch}%" )
+                                ->orWhereHas ( 'saldo', function ($q) use ($numericSearch)
+                                {
+                                    $q->where ( 'harga', 'like', "%{$numericSearch}%" );
+                                } )
+                                // Add search for total price calculation
+                                ->orWhereRaw ( '(
+                                  SELECT s.harga * apb.quantity 
+                                  FROM saldo s 
+                                  WHERE s.id = apb.id_saldo
+                              ) LIKE ?', [ "%{$numericSearch}%" ] );
+                        }
+                    } );
+                }
+            } );
+        }
+
+        // Get paginated results
+        $TableData = $query->orderBy ( 'tanggal', 'desc' )
+            ->orderBy ( 'updated_at', 'desc' )
+            ->paginate ( $perPage )
+            ->withQueryString ();
+
+        // Get other required data
+        $proyek  = Proyek::with ( "users" )->findOrFail ( $id_proyek );
+        $alats   = AlatProyek::where ( 'id_proyek', $id_proyek )->get ();
+        $proyeks = Proyek::with ( "users" )->orderByDesc ( "updated_at" )->orderByDesc ( "id" )->get ();
+
+        // Get filtered SPBs if needed
+        $spbs = $this->getFilteredSpbs ( $id_proyek );
+
+        // Restore spareparts logic for modal
         $spareparts = Saldo::where ( 'quantity', '>', 0 )
             ->with ( [ 'masterDataSparepart', 'atb' ] )
             ->whereHas ( 'atb', function ($query) use ($tipe)
@@ -89,71 +275,47 @@ class APBController extends Controller
             ->get ()
             ->sortBy ( 'atb.tanggal' );
 
-        $proyeks = Proyek::with ( "users" )
-            ->orderBy ( "updated_at", "desc" )
-            ->orderBy ( "id", "desc" )
-            ->get ();
-
-        $rkbs = RKB::with ( "spbs.linkSpbDetailSpb.detailSpb" )->where ( 'id_proyek', $id_proyek )->get ();
-        $spbs = collect ();
-
-        foreach ( $rkbs as $rkb )
-        {
-            $spbs = $spbs->merge ( $rkb->spbs );
-        }
-
-        $filteredSpbs = collect ();
-
-        foreach ( $spbs as $index => $spb )
-        {
-            $allZero = true;
-            foreach ( $spb->linkSpbDetailSpb as $link )
-            {
-                if ( $link->detailSpb->quantity_belum_diterima > 0 )
-                {
-                    $allZero = false;
-                    break;
-                }
-            }
-
-            if ( ! $allZero )
-            {
-                if ( $spb->is_addendum == false && ! isset ( $spb->id_spb_original ) )
-                {
-                    $filteredSpbs->push ( $spb );
-                }
-
-                if ( $spb->is_addendum == true && isset ( $spb->id_spb_original ) )
-                {
-                    $filteredSpbs->push ( $spb );
-                }
-            }
-        }
-
-        $apbs = APB::with ( [ 
-            'masterDataSparepart',
-            'masterDataSupplier',
-            'proyek',
-            'alatProyek'
-        ] )
-            ->where ( 'id_proyek', $id_proyek )
-            ->where ( 'tipe', $tipe )
-            ->orderBy ( 'tanggal', 'desc' )
-            ->orderBy ( 'updated_at', 'desc' )
-            ->get ();
-
         return view ( "dashboard.apb.apb", [ 
             "proyek"              => $proyek,
             "alats"               => $alats,
-            "spareparts"          => $spareparts,
-            "sparepartsForMutasi" => $sparepartsForMutasi,
             "proyeks"             => $proyeks,
-            "spbs"                => $filteredSpbs,
+            "spbs"                => $spbs,
+            "spareparts"          => $spareparts, // Restored
+            "sparepartsForMutasi" => $sparepartsForMutasi, // Restored
             "headerPage"          => $proyek->nama,
             "page"                => $pageTitle,
             "tipe"                => $tipe,
-            "apbs"                => $apbs,
+            "TableData"           => $TableData,
+            "search"              => $search
         ] );
+    }
+
+    // Helper method to get filtered SPBs
+    private function getFilteredSpbs ( $id_proyek )
+    {
+        $rkbs = RKB::with ( "spbs.linkSpbDetailSpb.detailSpb" )
+            ->where ( 'id_proyek', $id_proyek )
+            ->get ();
+
+        $spbs = collect ();
+        foreach ( $rkbs as $rkb )
+        {
+            $filteredSpbs = $rkb->spbs->filter ( function ($spb)
+            {
+                $hasRemainingQuantity = $spb->linkSpbDetailSpb->some ( function ($link)
+                {
+                    return $link->detailSpb->quantity_belum_diterima > 0;
+                } );
+
+                return $hasRemainingQuantity &&
+                    ( ( ! $spb->is_addendum && ! isset ( $spb->id_spb_original ) ) ||
+                        ( $spb->is_addendum && isset ( $spb->id_spb_original ) ) );
+            } );
+
+            $spbs = $spbs->merge ( $filteredSpbs );
+        }
+
+        return $spbs;
     }
 
     public function store ( Request $request )

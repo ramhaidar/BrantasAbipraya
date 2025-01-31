@@ -9,15 +9,18 @@
             <div class="ibox">
                 <div class="ibox-head pe-0 ps-0">
                     <div class="ibox-title d-flex align-items-center gap-3">
-                        <a class="btn btn-outline-primary btn-sm" href="{{ route('spb.detail.index', ['id' => $spb->linkRkbSpbs[0]->rkb->id]) }}">
+                        <a class="btn btn-outline-primary btn-sm" href="{{ route('spb.detail.index', ['id' => $TableData->first()->linkRkbSpbs[0]->rkb->id]) }}">
                             <i class="fa fa-arrow-left pe-1"></i> Kembali
                         </a>
                         <h5 class="fw-medium">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}</h5>
                     </div>
 
                     <div class="ms-auto d-flex gap-2">
-                        <a class="btn btn-warning btn-sm me-2" href="{{ route('export.spb', ['id' => $spb->id]) }}">
-                            <i class="fa-solid fa-file-excel"></i> <span class="ms-2">Export</span>
+                        <a class="btn btn-danger btn-sm me-2" href="{{ route('spb.detail.riwayat.export-pdf', ['id' => $TableData->first()->id]) }}">
+                            <i class="fa-solid fa-file-pdf"></i> <span class="ms-2">Export PDF</span>
+                        </a>
+                        <a class="btn btn-success btn-sm me-2" href="{{ route('export.spb', ['id' => $TableData->first()->id]) }}">
+                            <i class="fa-solid fa-file-excel"></i> <span class="ms-2">Export Excel</span>
                         </a>
                     </div>
                     {{-- <div class="ms-auto d-flex gap-2">
@@ -25,7 +28,18 @@
                     </div> --}}
                 </div>
 
-                @include('dashboard.spb.riwayat.partials.table')
+                {{-- @include('dashboard.spb.riwayat.partials.table') --}}
+
+                <div class="p-0 m-0 py-3">
+                    @include('dashboard.spb.riwayat.partials.table', [
+                        'TableData' => $TableData,
+                    ])
+                    @if ($TableData->hasPages())
+                        @include('components.pagination', [
+                            'paginator' => $TableData,
+                        ])
+                    @endif
+                </div>
 
             </div>
         </div>

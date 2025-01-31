@@ -11,6 +11,14 @@
             text-align: center;
         }
 
+        #table-data th:nth-child(7),
+        #table-data th:nth-child(8),
+        #table-data td:nth-child(7),
+        #table-data td:nth-child(8) {
+            min-width: 10dvw;
+            width: 10dvw;
+        }
+
         .currency-value {
             text-align: right !important;
             padding-right: 10px !important;
@@ -23,9 +31,13 @@
     $totalHarga = 0;
     $totalJumlahHarga = 0;
 
-    foreach ($spb->linkSpbDetailSpb as $item) {
-        $totalHarga += $item->detailSpb->harga;
-        $totalJumlahHarga += $item->detailSpb->quantity_po * $item->detailSpb->harga;
+    if (isset($TableData)) {
+        foreach ($TableData as $spb) {
+            foreach ($spb->linkSpbDetailSpb as $item) {
+                $totalHarga += $item->detailSpb->harga;
+                $totalJumlahHarga += $item->detailSpb->quantity_po * $item->detailSpb->harga;
+            }
+        }
     }
 
     $ppn = $totalJumlahHarga * 0.11;
@@ -33,7 +45,7 @@
 @endphp
 
 <div class="ibox-body ms-0 ps-0">
-    <div class="container-fluid py-0 my-0">
+    <div class="container-fluid p-0 m-0 pb-3">
         <div class="row g-2">
             <div class="col-auto" style="width: 90px;">
                 <span class="fw-medium">Lampiran:</span>
@@ -68,8 +80,8 @@
         </div>
     </div>
 
-    <div class="table-responsive pt-3 px-2">
-        <table class="table table-striped table-bordered table-hover" id="table-data">
+    <div class="table-responsive">
+        <table class="m-0 table table-bordered table-striped" id="table-data">
             <thead class="table-primary">
                 <tr>
                     <th class="text-center">NO</th>
@@ -84,22 +96,24 @@
             </thead>
 
             <tbody>
-                @forelse ($spb->linkSpbDetailSpb as $index => $item)
-                    <tr>
-                        <td class="text-center">{{ $index + 1 }}</td>
-                        <td class="text-center">{{ $item->detailSpb->masterDataSparepart->nama }}</td>
-                        <td class="text-center">{{ $item->detailSpb->masterDataSparepart->merk }}</td>
-                        <td class="text-center">{{ $item->detailSpb->masterDataSparepart->part_number }}</td>
-                        <td class="text-center">{{ $item->detailSpb->quantity_po }}</td>
-                        <td class="text-center">{{ $item->detailSpb->satuan }}</td>
-                        <td class="currency-value">{{ number_format($item->detailSpb->harga, 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($item->detailSpb->quantity_po * $item->detailSpb->harga, 0, ',', '.') }}</td>
-                    </tr>
+                @forelse ($TableData as $spb)
+                    @foreach ($spb->linkSpbDetailSpb as $index => $item)
+                        <tr>
+                            <td class="text-center">{{ $index + 1 }}</td>
+                            <td class="text-center">{{ $item->detailSpb->masterDataSparepart->nama }}</td>
+                            <td class="text-center">{{ $item->detailSpb->masterDataSparepart->merk }}</td>
+                            <td class="text-center">{{ $item->detailSpb->masterDataSparepart->part_number }}</td>
+                            <td class="text-center">{{ $item->detailSpb->quantity_po }}</td>
+                            <td class="text-center">{{ $item->detailSpb->satuan }}</td>
+                            <td class="currency-value">{{ number_format($item->detailSpb->harga, 0, ',', '.') }}</td>
+                            <td class="currency-value">{{ number_format($item->detailSpb->quantity_po * $item->detailSpb->harga, 0, ',', '.') }}</td>
+                        </tr>
+                    @endforeach
                 @empty
                     <tr>
-                        <td class="text-center py-4" colspan="7">
-                            <i class="bi bi-inbox fs-1 text-secondary d-block"></i>
-                            <p class="text-secondary mt-2 mb-0">Belum ada detail SPB</p>
+                        <td class="text-center py-3 text-muted" colspan="8">
+                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                            Belum ada data SPB
                         </td>
                     </tr>
                 @endforelse
@@ -125,5 +139,27 @@
 </div>
 
 @push('scripts_3')
-    <script></script>
+    <script>
+        $(document).ready(function() {
+            const $table = $('#table-data');
+            const $headers = $table.find('thead th');
+            const textsToCheck = ['Detail', 'Aksi', 'Supplier'];
+            let indices = {};
+
+            // Find the indices of the headers that match the texts in textsToCheck array
+            $headers.each(function(index) {
+                const headerText = $(this).text().trim();
+                if (textsToCheck.includes(headerText)) {
+                    indices[headerText] = index;
+                }
+            });
+
+            // Set the width of the corresponding columns in tbody
+            $.each(indices, function(text, index) {
+                $table.find('tbody tr').each(function() {
+                    $(this).find('td').eq(index).css('width', '1%');
+                });
+            });
+        });
+    </script>
 @endpush

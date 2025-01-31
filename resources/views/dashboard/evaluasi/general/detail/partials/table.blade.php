@@ -27,11 +27,26 @@
                     <th>Merk</th>
                     <th>Quantity Requested</th>
                     <th>Quantity Approved</th>
+                    <th>Quantity in Stock</th>
                     <th>Satuan</th>
                 </tr>
             </thead>
             <tbody>
+                @php
+                    $currentPartNumber = null;
+                    $rowspan = 0;
+                    $showStock = true;
+                @endphp
                 @forelse ($TableData as $item)
+                    @php
+                        if ($currentPartNumber !== $item->masterDataSparepart->part_number) {
+                            $currentPartNumber = $item->masterDataSparepart->part_number;
+                            $rowspan = $TableData->filter(function($detail) use ($currentPartNumber) {
+                                return $detail->masterDataSparepart->part_number === $currentPartNumber;
+                            })->count();
+                            $showStock = true;
+                        }
+                    @endphp
                     @forelse ($item->linkRkbDetails as $detail)
                         <tr>
                             <td class="text-center">{{ $detail->linkAlatDetailRkb->masterDataAlat->jenis_alat ?? '-' }}</td>
@@ -46,8 +61,17 @@
                                         @if ($rkb->is_approved_svp) bg-primary-subtle
                                         @elseif ($rkb->is_approved_vp) bg-info-subtle
                                         @elseif($rkb->is_evaluated) bg-success-subtle 
-                                        @else bg-warning-subtle @endif" name="quantity_approved[{{ $item->id }}]" type="number" value="{{ $item->quantity_approved ?? $item->quantity_requested }}" min="0" {{ $rkb->is_evaluated ? 'disabled' : '' }}>
+                                        @else bg-warning-subtle @endif" 
+                                        name="quantity_approved[{{ $item->id }}]" 
+                                        type="number" 
+                                        value="{{ $item->quantity_approved ?? $item->quantity_requested }}" 
+                                        min="0" 
+                                        {{ $rkb->is_evaluated ? 'disabled' : '' }}>
                             </td>
+                            @if ($showStock)
+                                <td class="text-center" rowspan="{{ $rowspan }}">{{ $stockQuantities[$item->masterDataSparepart->id] ?? 0 }}</td>
+                                @php $showStock = false; @endphp
+                            @endif
                             <td class="text-center">{{ $item->satuan }}</td>
                         </tr>
                     @empty

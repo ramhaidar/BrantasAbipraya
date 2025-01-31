@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\RKB;
+use App\Models\Saldo;
 use App\Models\Proyek;
 use Illuminate\Http\Request;
 use App\Models\LinkRKBDetail;
@@ -113,6 +114,15 @@ class EvaluasiDetailRKBGeneralController extends Controller
             ->orderBy ( "id", "asc" )
             ->get ();
 
+        // Get stock quantities for each sparepart in this project
+        $stockQuantities = Saldo::where ( 'id_proyek', $rkb->id_proyek )
+            ->get ()
+            ->groupBy ( 'id_master_data_sparepart' )
+            ->map ( function ($items)
+            {
+                return $items->sum ( 'quantity' );
+            } );
+
         return view ( 'dashboard.evaluasi.general.detail.detail', [ 
             'headerPage'            => "Evaluasi General",
             'page'                  => 'Detail Evaluasi General [' . $rkb->proyek->nama . ' | ' . $rkb->nomor . ']',
@@ -122,6 +132,7 @@ class EvaluasiDetailRKBGeneralController extends Controller
             'master_data_sparepart' => MasterDataSparepart::all (),
             'kategori_sparepart'    => KategoriSparepart::all (),
             'TableData'             => $detail_rkb,
+            'stockQuantities'       => $stockQuantities,
         ] );
     }
 

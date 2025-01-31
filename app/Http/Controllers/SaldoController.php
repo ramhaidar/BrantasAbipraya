@@ -36,7 +36,6 @@ class SaldoController extends Controller
         );
     }
 
-
     public function panjar_proyek ( Request $request )
     {
         return $this->showSaldoPage (
@@ -48,30 +47,192 @@ class SaldoController extends Controller
 
     private function showSaldoPage ( $tipe, $pageTitle, $id_proyek )
     {
+        // Validate and set perPage to allowed values only
+        $allowedPerPage = [ 10, 25, 50, 100 ];
+        $perPage        = in_array ( (int) request ()->get ( 'per_page' ), $allowedPerPage ) ? (int) request ()->get ( 'per_page' ) : 10;
+
+        // Clean and format tipe
         $tipe = strtolower ( str_replace ( ' ', '-', $tipe ) );
 
-        $proyek = Proyek::with ( "users" )->find ( $id_proyek );
+        // Get search query
+        $search = request ()->get ( 'search', '' );
 
+        // Get base Saldo query with relationships
+        $query = Saldo::with ( [ 
+            'atb',
+            'masterDataSparepart.kategoriSparepart',
+            'masterDataSupplier',
+            'spb',
+            'proyek',
+            'asalProyek'
+        ] )
+            ->where ( 'id_proyek', $id_proyek )
+            ->where ( 'tipe', $tipe );
+
+        // Enhanced search functionality
+        if ( $search )
+        {
+            $query->where ( function ($q) use ($search)
+            {
+                $searchLower = strtolower ( trim ( $search ) );
+                $searchParts = explode ( ' ', $searchLower );
+
+                // Array of Indonesian day names with their database equivalents
+                $hariIndonesia = [ 
+                    'senin'  => 'Monday',
+                    'selasa' => 'Tuesday',
+                    'rabu'   => 'Wednesday',
+                    'kamis'  => 'Thursday',
+                    'jumat'  => 'Friday',
+                    "jum'at" => 'Friday',
+                    'sabtu'  => 'Saturday',
+                    'minggu' => 'Sunday',
+                ];
+
+                // Array of Indonesian month names with their numbers
+                $bulanIndonesia = [ 
+                    'januari'   => '01',
+                    'februari'  => '02',
+                    'maret'     => '03',
+                    'april'     => '04',
+                    'mei'       => '05',
+                    'juni'      => '06',
+                    'juli'      => '07',
+                    'agustus'   => '08',
+                    'september' => '09',
+                    'oktober'   => '10',
+                    'november'  => '11',
+                    'desember'  => '12',
+                ];
+
+                $isDateSearch = false;
+                $year         = null;
+                $month        = null;
+                $day          = null;
+
+                // Check each part of the search string
+                foreach ( $searchParts as $part )
+                {
+                    // Check for year
+                    if ( is_numeric ( $part ) && strlen ( $part ) === 4 )
+                    {
+                        $year         = $part;
+                        $isDateSearch = true;
+                        continue;
+                    }
+
+                    // Check for day name
+                    foreach ( $hariIndonesia as $indo => $eng )
+                    {
+                        if ( str_starts_with ( $indo, $part ) )
+                        {
+                            $isDateSearch = true;
+                            $q->orWhereHas ( 'atb', function ($query) use ($eng)
+                            {
+                                $query->whereRaw ( "DAYNAME(tanggal) = ?", [ $eng ] );
+                            } );
+                            break 2; // Exit both loops if day is found
+                        }
+                    }
+
+                    // Check for month name
+                    foreach ( $bulanIndonesia as $indo => $num )
+                    {
+                        if ( str_starts_with ( $indo, $part ) )
+                        {
+                            $month        = $num;
+                            $isDateSearch = true;
+                            break;
+                        }
+                    }
+
+                    // Check for day number
+                    if ( is_numeric ( $part ) && strlen ( $part ) <= 2 )
+                    {
+                        $day          = sprintf ( "%02d", $part );
+                        $isDateSearch = true;
+                    }
+                }
+
+                // Apply date filters based on found components
+                if ( $isDateSearch )
+                {
+                    $q->whereHas ( 'atb', function ($query) use ($year, $month, $day)
+                    {
+                        if ( $year )
+                        {
+                            $query->whereYear ( 'tanggal', $year );
+                        }
+                        if ( $month )
+                        {
+                            $query->whereMonth ( 'tanggal', $month );
+                        }
+                        if ( $day )
+                        {
+                            $query->whereDay ( 'tanggal', $day );
+                        }
+                    } );
+                }
+                else
+                {
+                    // Search in related tables
+                    $q->whereHas ( 'spb', function ($q) use ($search)
+                    {
+                        $q->where ( 'nomor', 'like', "%{$search}%" );
+                    } )
+                        ->orWhereHas ( 'masterDataSparepart', function ($q) use ($search)
+                        {
+                            $q->where ( 'nama', 'like', "%{$search}%" )
+                                ->orWhere ( 'part_number', 'like', "%{$search}%" )
+                                ->orWhere ( 'merk', 'like', "%{$search}%" )
+                                ->orWhereHas ( 'kategoriSparepart', function ($q) use ($search)
+                                {
+                                    $q->where ( 'kode', 'like', "%{$search}%" )
+                                        ->orWhere ( 'nama', 'like', "%{$search}%" );
+                                } );
+                        } )
+                        ->orWhereHas ( 'masterDataSupplier', function ($q) use ($search)
+                        {
+                            $q->where ( 'nama', 'like', "%{$search}%" );
+                        } )
+                        ->orWhereHas ( 'asalProyek', function ($q) use ($search)
+                        {
+                            $q->where ( 'nama', 'like', "%{$search}%" );
+                        } )
+                        ->orWhere ( 'satuan', 'like', "%{$search}%" );
+
+                    // For numeric searches
+                    if ( is_numeric ( str_replace ( [ ',', '.' ], '', $search ) ) )
+                    {
+                        $numericSearch = str_replace ( [ ',', '.' ], '', $search );
+                        $q->orWhere ( 'quantity', 'like', "%{$numericSearch}%" )
+                            ->orWhere ( 'harga', 'like', "%{$numericSearch}%" )
+                            ->orWhereRaw ( '(quantity * harga) like ?', [ "%{$numericSearch}%" ] );
+                    }
+                }
+            } );
+        }
+
+        // Get paginated results with proper perPage value
+        $TableData = $query->orderBy ( 'created_at', 'desc' )
+            ->paginate ( $perPage )
+            ->withQueryString ();
+
+        $proyek  = Proyek::with ( "users" )->findOrFail ( $id_proyek );
         $proyeks = Proyek::with ( "users" )
             ->orderBy ( "updated_at", "desc" )
             ->orderBy ( "id", "desc" )
             ->get ();
 
-        $saldos = Saldo::with ( 'atb' )
-            ->where ( 'saldo.id_proyek', $id_proyek )
-            ->where ( 'saldo.tipe', $tipe )
-            ->leftJoin ( 'atb', 'saldo.id_atb', '=', 'atb.id' )
-            ->orderBy ( 'atb.tanggal', 'desc' )
-            ->orderBy ( 'saldo.updated_at', 'desc' )
-            ->select ( 'saldo.*' )
-            ->get ();
-
         return view ( "dashboard.saldo.saldo", [ 
-            "proyek"     => $proyek,
-            "proyeks"    => $proyeks,
-            "saldos"     => $saldos,
-            "headerPage" => $proyek->nama,
-            "page"       => $pageTitle,
+            "proyek"         => $proyek,
+            "proyeks"        => $proyeks,
+            "TableData"      => $TableData, // Changed from saldos to TableData
+            "headerPage"     => $proyek->nama,
+            "page"           => $pageTitle,
+            "search"         => $search,
+            "allowedPerPage" => $allowedPerPage, // Add this to view
+            "perPage"        => $perPage // Add this to view
         ] );
     }
 

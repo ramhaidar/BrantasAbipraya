@@ -56,6 +56,10 @@ class ATBController extends Controller
 
     private function showAtbPage ( $tipe, $pageTitle, $id_proyek )
     {
+        // Validate and set perPage to allowed values only
+        $allowedPerPage = [ 10, 25, 50, 100 ];
+        $perPage        = in_array ( (int) request ()->get ( 'per_page' ), $allowedPerPage ) ? (int) request ()->get ( 'per_page' ) : 10;
+
         // Clean and format tipe
         $tipe = strtolower ( str_replace ( ' ', '-', $tipe ) );
 
@@ -68,70 +72,154 @@ class ATBController extends Controller
             'masterDataSparepart.kategoriSparepart',
             'masterDataSupplier',
             'detailSpb',
-            'apbMutasi', // Add this relationship
-            'asalProyek' // Add this relationship
+            'apbMutasi',
+            'asalProyek'
         ] )
             ->where ( 'id_proyek', $id_proyek )
-            ->where ( 'tipe', $tipe ); // Changed from hardcoded 'hutang-unit-alat' to dynamic $tipe
+            ->where ( 'tipe', $tipe );
 
         // Enhanced search functionality
         if ( $search )
         {
             $query->where ( function ($q) use ($search)
             {
-                // Existing search criteria for non-numeric searches
-                $q->whereHas ( 'spb', function ($q) use ($search)
+                $searchLower = strtolower ( trim ( $search ) );
+                $searchParts = explode ( ' ', $searchLower );
+
+                // Array of Indonesian day names with their database equivalents
+                $hariIndonesia = [ 
+                    'senin'  => 'Monday',
+                    'selasa' => 'Tuesday',
+                    'rabu'   => 'Wednesday',
+                    'kamis'  => 'Thursday',
+                    'jumat'  => 'Friday',
+                    "jum'at" => 'Friday',
+                    'sabtu'  => 'Saturday',
+                    'minggu' => 'Sunday',
+                ];
+
+                // Array of Indonesian month names with their numbers
+                $bulanIndonesia = [ 
+                    'januari'   => '01',
+                    'februari'  => '02',
+                    'maret'     => '03',
+                    'april'     => '04',
+                    'mei'       => '05',
+                    'juni'      => '06',
+                    'juli'      => '07',
+                    'agustus'   => '08',
+                    'september' => '09',
+                    'oktober'   => '10',
+                    'november'  => '11',
+                    'desember'  => '12',
+                ];
+
+                $isDateSearch = false;
+                $year         = null;
+                $month        = null;
+                $day          = null;
+
+                // Check each part of the search string
+                foreach ( $searchParts as $part )
                 {
-                    $q->where ( 'nomor', 'like', "%{$search}%" );
-                } )
-                    ->orWhereHas ( 'masterDataSparepart', function ($q) use ($search)
+                    // Check for year
+                    if ( is_numeric ( $part ) && strlen ( $part ) === 4 )
                     {
-                        $q->where ( 'nama', 'like', "%{$search}%" )
-                            ->orWhere ( 'part_number', 'like', "%{$search}%" )
-                            ->orWhere ( 'merk', 'like', "%{$search}%" )
-                            ->orWhereHas ( 'kategoriSparepart', function ($q) use ($search)
+                        $year         = $part;
+                        $isDateSearch = true;
+                        continue;
+                    }
+
+                    // Check for day name
+                    foreach ( $hariIndonesia as $indo => $eng )
+                    {
+                        if ( str_starts_with ( $indo, $part ) )
+                        {
+                            $isDateSearch = true;
+                            $q->orWhereRaw ( "DAYNAME(tanggal) = ?", [ $eng ] );
+                            break 2;
+                        }
+                    }
+
+                    // Check for month name
+                    foreach ( $bulanIndonesia as $indo => $num )
+                    {
+                        if ( str_starts_with ( $indo, $part ) )
+                        {
+                            $month        = $num;
+                            $isDateSearch = true;
+                            break;
+                        }
+                    }
+
+                    // Check for day number
+                    if ( is_numeric ( $part ) && strlen ( $part ) <= 2 )
+                    {
+                        $day          = sprintf ( "%02d", $part );
+                        $isDateSearch = true;
+                    }
+                }
+
+                // Apply date filters based on found components
+                if ( $isDateSearch )
+                {
+                    if ( $year )
+                    {
+                        $q->whereYear ( 'tanggal', $year );
+                    }
+                    if ( $month )
+                    {
+                        $q->whereMonth ( 'tanggal', $month );
+                    }
+                    if ( $day )
+                    {
+                        $q->whereDay ( 'tanggal', $day );
+                    }
+                }
+                else
+                {
+                    // Existing non-date search criteria
+                    $q->where ( function ($q) use ($search)
+                    {
+                        $q->whereHas ( 'spb', function ($q) use ($search)
+                        {
+                            $q->where ( 'nomor', 'like', "%{$search}%" );
+                        } )
+                            ->orWhereHas ( 'masterDataSparepart', function ($q) use ($search)
                             {
-                                $q->where ( 'kode', 'like', "%{$search}%" )
-                                    ->orWhere ( 'nama', 'like', "%{$search}%" );
+                                $q->where ( 'nama', 'like', "%{$search}%" )
+                                    ->orWhere ( 'part_number', 'like', "%{$search}%" )
+                                    ->orWhere ( 'merk', 'like', "%{$search}%" )
+                                    ->orWhereHas ( 'kategoriSparepart', function ($q) use ($search)
+                                    {
+                                        $q->where ( 'kode', 'like', "%{$search}%" )
+                                            ->orWhere ( 'nama', 'like', "%{$search}%" );
+                                    } );
+                            } )
+                            ->orWhereHas ( 'masterDataSupplier', function ($q) use ($search)
+                            {
+                                $q->where ( 'nama', 'like', "%{$search}%" );
+                            } )
+                            ->orWhereHas ( 'detailSpb', function ($q) use ($search)
+                            {
+                                $q->where ( 'satuan', 'like', "%{$search}%" );
+                            } )
+                            ->orWhereHas ( 'asalProyek', function ($q) use ($search)
+                            {
+                                $q->where ( 'nama', 'like', "%{$search}%" );
                             } );
-                    } )
-                    ->orWhereHas ( 'masterDataSupplier', function ($q) use ($search)
-                    {
-                        $q->where ( 'nama', 'like', "%{$search}%" );
-                    } )
-                    ->orWhereHas ( 'detailSpb', function ($q) use ($search)
-                    {
-                        $q->where ( 'satuan', 'like', "%{$search}%" );
-                    } )
-                    ->orWhereHas ( 'asalProyek', function ($q) use ($search)
-                    {
-                        $q->where ( 'nama', 'like', "%{$search}%" );
-                    } )
-                    // Add search for satuan in Saldo
-                    ->orWhereHas ( 'saldo', function ($q) use ($search)
-                    {
-                        $q->where ( 'satuan', 'like', "%{$search}%" );
+
+                        // For numeric searches
+                        if ( is_numeric ( str_replace ( [ ',', '.' ], '', $search ) ) )
+                        {
+                            $numericSearch = str_replace ( [ ',', '.' ], '', $search );
+                            $q->orWhere ( 'quantity', 'like', "%{$numericSearch}%" )
+                                ->orWhere ( 'harga', 'like', "%{$numericSearch}%" )
+                                ->orWhereRaw ( '(quantity * harga) like ?', [ "%{$numericSearch}%" ] )
+                                ->orWhereRaw ( '(quantity * harga * 0.11) like ?', [ "%{$numericSearch}%" ] )
+                                ->orWhereRaw ( '(quantity * harga * 1.11) like ?', [ "%{$numericSearch}%" ] );
+                        }
                     } );
-
-                // For numeric searches
-                if ( is_numeric ( str_replace ( [ ',', '.' ], '', $search ) ) )
-                {
-                    $numericSearch = str_replace ( [ ',', '.' ], '', $search );
-
-                    // Search in ATB quantity (Quantity Diterima)
-                    $q->orWhere ( 'quantity', 'like', "%{$numericSearch}%" );
-
-                    // Search in APB Mutasi quantity (Quantity Dikirim)
-                    $q->orWhereHas ( 'apbMutasi', function ($q) use ($numericSearch)
-                    {
-                        $q->where ( 'quantity', 'like', "%{$numericSearch}%" );
-                    } );
-
-                    // Search in other numeric fields
-                    $q->orWhere ( 'harga', 'like', "%{$numericSearch}%" )
-                        ->orWhereRaw ( '(quantity * harga) like ?', [ "%{$numericSearch}%" ] )
-                        ->orWhereRaw ( '(quantity * harga * 0.11) like ?', [ "%{$numericSearch}%" ] )
-                        ->orWhereRaw ( '(quantity * harga * 1.11) like ?', [ "%{$numericSearch}%" ] );
                 }
             } );
         }
@@ -139,7 +227,7 @@ class ATBController extends Controller
         // Get paginated results
         $TableData = $query->orderBy ( 'tanggal', 'desc' )
             ->orderBy ( 'updated_at', 'desc' )
-            ->paginate ( 10 )
+            ->paginate ( $perPage )
             ->withQueryString ();
 
         // Get required data

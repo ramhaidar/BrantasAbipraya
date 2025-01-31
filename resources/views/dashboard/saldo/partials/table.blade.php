@@ -3,6 +3,7 @@
         #table-data {
             font-size: 0.9em;
             white-space: nowrap;
+            width: 100%;
         }
 
         #table-data td,
@@ -49,20 +50,27 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($saldos as $saldo)
+                @forelse ($TableData as $item)
                     <tr>
-                        <td class="text-center">{{ formatTanggal($saldo->atb->tanggal) }}</td>
-                        <td class="text-center">{{ $saldo->masterDataSparepart->kategoriSparepart->kode }}: {{ $saldo->masterDataSparepart->kategoriSparepart->nama }}</td>
-                        <td class="text-center">{{ $saldo->masterDataSupplier->nama ?? '-' }}</td>
-                        <td class="text-center">{{ $saldo->masterDataSparepart->nama ?? '-' }}</td>
-                        <td class="text-center">{{ $saldo->masterDataSparepart->merk ?? '-' }}</td>
-                        <td class="text-center">{{ $saldo->masterDataSparepart->part_number ?? '-' }}</td>
-                        <td class="text-center">{{ $saldo->quantity }}</td>
-                        <td class="text-center">{{ $saldo->satuan ?? '-' }}</td>
-                        <td class="currency-value">{{ formatRibuan($saldo->harga) }}</td>
-                        <td class="currency-value">{{ formatRibuan($saldo->quantity * $saldo->harga) }}</td>
+                        <td class="text-center">{{ formatTanggal($item->atb->tanggal) }}</td>
+                        <td class="text-center">{{ $item->masterDataSparepart->kategoriSparepart->kode }}: {{ $item->masterDataSparepart->kategoriSparepart->nama }}</td>
+                        <td class="text-center">{{ $item->masterDataSupplier->nama ?? '-' }}</td>
+                        <td class="text-center">{{ $item->masterDataSparepart->nama ?? '-' }}</td>
+                        <td class="text-center">{{ $item->masterDataSparepart->merk ?? '-' }}</td>
+                        <td class="text-center">{{ $item->masterDataSparepart->part_number ?? '-' }}</td>
+                        <td class="text-center">{{ $item->quantity }}</td>
+                        <td class="text-center">{{ $item->satuan ?? '-' }}</td>
+                        <td class="currency-value">{{ formatRibuan($item->harga) }}</td>
+                        <td class="currency-value">{{ formatRibuan($item->quantity * $item->harga) }}</td>
                     </tr>
-                @endforeach
+                @empty
+                    <tr>
+                        <td class="text-center py-3 text-muted" colspan="16">
+                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                            No Saldo records found
+                        </td>
+                    </tr>
+                @endforelse
             </tbody>
             <tfoot>
                 <tr class="table-primary">
@@ -76,44 +84,23 @@
 
 @push('scripts_3')
     <script>
-        $(document).ready(function() {
-            // Initialize DataTable
-            var table = $('#table-data').DataTable({
-                paginate: false,
-                ordering: false,
-                // Add drawCallback to ensure calculation happens after table updates
-                drawCallback: function() {
-                    calculateTotal();
-                }
-            });
-
+        document.addEventListener('DOMContentLoaded', function() {
             // Calculate total function
             function calculateTotal() {
                 let total = 0;
-                // Only calculate visible rows
-                $('#table-data tbody tr:visible').each(function() {
-                    let value = $(this).find('td:last').text()
+                document.querySelectorAll('#table-data tbody tr').forEach(function(row) {
+                    let value = row.querySelector('td:last-child').textContent
                         .replace(/\./g, '');
-                    total += parseInt(value) || 0; // Add || 0 to handle NaN
+                    total += parseInt(value) || 0;
                 });
 
                 // Format the total
                 let formattedTotal = total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-                $('#total-harga').html(formattedTotal);
+                document.getElementById('total-harga').textContent = formattedTotal;
             }
 
             // Initial calculation
             calculateTotal();
-
-            // Add multiple event listeners to ensure catching all filter cases
-            table.on('search.dt draw.dt', function() {
-                setTimeout(calculateTotal, 100); // Add small delay to ensure DOM is updated
-            });
-
-            // Add listener for manual search input
-            $('.dataTables_filter input').on('input', function() {
-                setTimeout(calculateTotal, 100);
-            });
         });
     </script>
 @endpush

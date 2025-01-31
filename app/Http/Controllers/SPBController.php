@@ -16,9 +16,12 @@ class SPBController extends Controller
 {
     public function index ( Request $request )
     {
+        $allowedPerPage = [ 10, 25, 50, 100 ];
+        $perPage        = in_array ( (int) $request->get ( 'per_page' ), $allowedPerPage ) ? (int) $request->get ( 'per_page' ) : 10;
+
         $query = RKB::query ()
             ->with ( [ 'proyek', 'spbs' ] )
-            ->whereHas ( 'spbs' )
+            ->where ( 'is_approved_svp', true )
             ->orderBy ( $request->get ( 'sort', 'updated_at' ), $request->get ( 'direction', 'desc' ) );
 
         if ( $request->has ( 'search' ) )
@@ -95,7 +98,7 @@ class SPBController extends Controller
             } );
         }
 
-        $TableData = $query->paginate ( 10 )->withQueryString ();
+        $TableData = $query->paginate ( $perPage )->withQueryString ();
 
         $proyeks = [];
         if ( $user->role !== 'Pegawai' )

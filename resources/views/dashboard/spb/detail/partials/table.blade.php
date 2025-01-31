@@ -19,6 +19,11 @@
             width: 10dvw;
         }
 
+        .currency-value {
+            text-align: right !important;
+            padding-right: 10px !important;
+        }
+
         .loading-overlay {
             position: fixed;
             top: 0;
@@ -78,8 +83,9 @@
             }
         @endphp
 
-        <div class="row mb-3 ps-3">
-            <div class="col-md-4">
+        {{-- <div class="row mb-3 ps-3"> --}}
+        <div class="row p-0 m-0">
+            <div class="col-md-4 p-0 m-0 pb-3">
                 <label class="form-label">Pilih Supplier</label>
                 <select class="form-select supplier-select-main" id="supplier_main" name="supplier_main" {{ $totalItems === 0 ? 'disabled' : '' }}>
                     <option value="" disabled selected>Pilih Supplier</option>
@@ -93,8 +99,8 @@
             </div>
         </div>
 
-        <div class="table-responsive pe-3">
-            <table class="table table-bordered table-striped" id="table-data">
+        <div class="table-responsive">
+            <table class="m-0 table table-bordered table-striped" id="table-data">
                 <thead class="table-primary">
                     <tr>
                         <th class="text-center">Nama Alat</th>
@@ -102,8 +108,8 @@
                         <th class="text-center">Kategori</th>
                         <th class="text-center">Sparepart Requested</th>
                         <th class="text-center">Sparepart PO</th>
-                        <th class="text-center">Quantity Sisa</th>
-                        <th class="text-center">Quantity PO</th>
+                        <th class="text-center">Quantity<br>Sisa</th>
+                        <th class="text-center">Quantity<br>PO</th>
                         <th class="text-center">Satuan</th>
                         <th class="text-center">Harga</th>
                         <th class="text-center">Jumlah Harga</th>
@@ -111,7 +117,7 @@
                 </thead>
 
                 <tbody>
-                    @foreach ($sparepartGroups as $sparepartName => $group)
+                    @forelse ($sparepartGroups as $sparepartName => $group)
                         @foreach ($group as $index => $data)
                             <tr>
                                 <td class="text-center">{{ $data['alat']->jenis_alat }}</td>
@@ -143,36 +149,42 @@
                                     <input name="satuan[{{ $data['detail']->id }}]" type="hidden" value="{{ $data['detail']->detailRkbUrgent->satuan ?? $data['detail']->detailRkbGeneral->satuan }}">
                                 </td>
                                 <td class="text-center">
-                                    <input class="form-control text-center h-100 d-flex align-items-center justify-content-center" name="harga[{{ $data['detail']->id }}]" type="text" value="Rp 0" maxlength="-1" required disabled>
+                                    <input class="form-control text-center h-100 d-flex align-items-center justify-content-center" name="harga[{{ $data['detail']->id }}]" type="text" value="0" maxlength="-1" required disabled>
                                 </td>
                                 <td class="text-center">
-                                    <input class="form-control text-center bg-secondary h-100 d-flex align-items-center justify-content-center" type="text" value="Rp 0" readonly>
+                                    <input class="form-control text-center bg-secondary h-100 d-flex align-items-center justify-content-center" type="text" value="0" readonly>
                                 </td>
                                 <input name="alat_detail_id[{{ $data['detail']->id }}]" type="hidden" value="{{ $data['alat_detail_id'] }}">
                                 <input name="link_rkb_detail_id[{{ $data['detail']->id }}]" type="hidden" value="{{ $data['detail']->id }}">
                             </tr>
                         @endforeach
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td class="text-center py-3 text-muted" colspan="10">
+                                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                Tidak ada sparepart yang tersedia untuk pembuatan PO
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
                 <tfoot class="table-primary">
                     <tr>
                         <th class="ps-4" style="text-align: left;" colspan="8">Jumlah</th>
-                        <th id="totalHarga" style="text-align: center;">Rp 0</th>
-                        <th id="totalJumlahHarga" style="text-align: center;">Rp 0</th>
+                        <th class="currency-value" id="totalHarga">0</th>
+                        <th class="currency-value" id="totalJumlahHarga">0</th>
                         {{-- <th></th> --}}
                     </tr>
                     <tr>
                         <th class="ps-4" style="text-align: left;" colspan="9">PPN 11%</th>
-                        <th id="ppn11" style="text-align: center;">Rp 0</th>
+                        <th class="currency-value" id="ppn11">0</th>
                         {{-- <th></th> --}}
                     </tr>
                     <tr>
                         <th class="ps-4" style="text-align: left;" colspan="9">Grand Total</th>
-                        <th id="grandTotal" style="text-align: center;">Rp 0</th>
+                        <th class="currency-value" id="grandTotal">0</th>
                         {{-- <th></th> --}}
                     </tr>
                 </tfoot>
-
             </table>
     </form>
 </div>
@@ -180,27 +192,25 @@
 @push('scripts_3')
     <script>
         $(document).ready(function() {
-            $('#supplier_main').select2({
+            // Select2 initialization
+            $('#supplier_main, .sparepart-select').select2({
                 placeholder: 'Pilih Supplier',
                 width: '100%',
                 allowClear: true
             });
 
-            $('.sparepart-select').select2({
-                placeholder: 'Pilih Supplier',
-                width: '100%',
-                allowClear: true
-            });
-        });
-    </script>
+            // Set column widths for specific columns
+            const $table = $('#table-data');
+            const $headers = $table.find('thead th');
+            const textsToCheck = ['Quantity PO', 'Satuan', 'Harga', 'Jumlah Harga'];
 
-    <script>
-        $(document).ready(function() {
-            var table = $('#table-data').DataTable({
-                paginate: false,
-                ordering: false,
-                order: [],
-                searching: false,
+            $headers.each(function(index) {
+                const headerText = $(this).text().trim();
+                if (textsToCheck.includes(headerText)) {
+                    $table.find('tbody tr').each(function() {
+                        $(this).find('td').eq(index).css('width', '1%');
+                    });
+                }
             });
 
             function formatRupiah(angka) {
@@ -285,7 +295,7 @@
                     hargaInput.prop('disabled', false);
                 } else {
                     qtyInput.prop('disabled', true).val(0);
-                    hargaInput.prop('disabled', true).val('Rp 0');
+                    hargaInput.prop('disabled', true).val('0');
                     updateJumlahHarga(row);
                 }
             });

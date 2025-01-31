@@ -14,121 +14,81 @@ use Illuminate\Validation\Rule;
 
 class RKBGeneralController extends Controller
 {
-    public function index ( Request $request )
+    public function index(Request $request)
     {
-        $allowedPerPage = [ 10, 25, 50, 100 ];
-        $perPage        = in_array ( (int) $request->get ( 'per_page' ), $allowedPerPage ) ? (int) $request->get ( 'per_page' ) : 10;
+        $allowedPerPage = [10, 25, 50, 100];
+        $perPage = in_array((int)$request->get('per_page'), $allowedPerPage) ? (int)$request->get('per_page') : 10;
 
-        $query = RKB::query ()
-            ->with ( [ 'proyek', 'linkAlatDetailRkbs' ] )
-            ->where ( 'tipe', 'General' )
-            ->orderBy ( $request->get ( 'sort', 'updated_at' ), $request->get ( 'direction', 'desc' ) );
+        $query = RKB::query()
+            ->with(['proyek', 'linkAlatDetailRkbs'])
+            ->where('tipe', 'General');
 
-        if ( $request->has ( 'search' ) )
-        {
-            $search = $request->get ( 'search' );
-            $query->where ( function ($q) use ($search)
-            {
-                $q->where ( 'nomor', 'like', "%{$search}%" )
-                    ->orWhereHas ( 'proyek', function ($query) use ($search)
-                    {
-                        $query->where ( 'nama', 'like', "%{$search}%" );
-                    } )
-                    ->orWhere ( function ($q) use ($search)
-                    {
+        if ($request->has('search')) {
+            $search = $request->get('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('nomor', 'like', "%{$search}%")
+                    ->orWhereHas('proyek', function ($query) use ($search) {
+                        $query->where('nama', 'like', "%{$search}%");
+                    })
+                    ->orWhere(function ($q) use ($search) {
                         // Handle year search (4 digits)
-                        if ( preg_match ( '/^[0-9]{4}$/', $search ) )
-                        {
-                            $q->whereYear ( 'periode', $search );
+                        if (preg_match('/^[0-9]{4}$/', $search)) {
+                            $q->whereYear('periode', $search);
                         }
                         // Handle month name in Indonesian or English
-                        elseif ( $this->isMonthName ( $search ) )
-                        {
-                            $monthNumber = $this->getMonthNumber ( $search );
-                            if ( $monthNumber )
-                            {
-                                $q->whereMonth ( 'periode', $monthNumber );
+                        elseif ($this->isMonthName($search)) {
+                            $monthNumber = $this->getMonthNumber($search);
+                            if ($monthNumber) {
+                                $q->whereMonth('periode', $monthNumber);
                             }
                         }
                         // Handle "Month Year" format (e.g., "January 2023" or "Januari 2023")
-                        elseif ( preg_match ( '/^([A-Za-z]+)\s+([0-9]{4})$/', $search, $matches ) )
-                        {
-                            $monthNumber = $this->getMonthNumber ( $matches[ 1 ] );
-                            if ( $monthNumber )
-                            {
-                                $q->whereMonth ( 'periode', $monthNumber )
-                                    ->whereYear ( 'periode', $matches[ 2 ] );
+                        elseif (preg_match('/^([A-Za-z]+)\s+([0-9]{4})$/', $search, $matches)) {
+                            $monthNumber = $this->getMonthNumber($matches[1]);
+                            if ($monthNumber) {
+                                $q->whereMonth('periode', $monthNumber)
+                                    ->whereYear('periode', $matches[2]);
                             }
                         }
-                    } )
-                    ->orWhere ( function ($q) use ($search)
-                    {
+                    })
+                    ->orWhere(function ($q) use ($search) {
                         // Handle status search
-                        $statusKeywords = [ 'pengajuan', 'evaluasi', 'disetujui', 'tidak diketahui' ];
-                        if ( in_array ( strtolower ( $search ), $statusKeywords ) )
-                        {
-                            $this->getStatusQuery ( $q, $search );
+                        $statusKeywords = ['pengajuan', 'evaluasi', 'disetujui', 'tidak diketahui'];
+                        if (in_array(strtolower($search), $statusKeywords)) {
+                            $this->getStatusQuery($q, $search);
                         }
-                    } );
-            } );
+                    });
+            });
         }
 
-        $user = auth ()->user ();
+        $TableData = $query
+            ->orderBy('periode', 'desc')
+            ->orderBy('updated_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->paginate($perPage)
+            ->withQueryString();
 
-        if ( $user->role === 'Pegawai' )
-        {
-            $query->whereHas ( 'proyek', function ($q) use ($user)
-            {
-                $q->whereHas ( 'users', function ($q) use ($user)
-                {
-                    $q->where ( 'users.id', $user->id );
-                } );
-            } );
-        }
-        elseif ( $user->role === 'Boss' )
-        {
-            $proyeks       = $user->proyek ()
-                ->with ( "users" )
-                ->get ();
-            $usersInProyek = $proyeks->pluck ( 'users.*.id' )->flatten ();
-            $query->whereHas ( 'proyek', function ($q) use ($usersInProyek)
-            {
-                $q->whereHas ( 'users', function ($q) use ($usersInProyek)
-                {
-                    $q->whereIn ( 'users.id', $usersInProyek );
-                } );
-            } );
-        }
+        $proyeks = Proyek::with("users")
+            ->orderBy("updated_at", "asc")
+            ->orderBy("id", "asc")
+            ->get();
 
-        $TableData = $query->paginate ( $perPage )
-            ->withQueryString ();
-
-        $proyeks = [];
-        if ( $user->role !== 'Pegawai' )
-        {
-            $proyeks = Proyek::with ( "users" )
-                ->orderBy ( "updated_at", "asc" )
-                ->orderBy ( "id", "asc" )
-                ->get ();
-        }
-
-        return view ( 'dashboard.rkb.general.general', [ 
+        return view('dashboard.rkb.general.general', [
             'headerPage' => 'RKB General',
-            'page'       => 'Data RKB General',
-
-            'proyeks'    => $proyeks,
-            'TableData'  => $TableData,
-        ] );
+            'page' => 'Data RKB General',
+            'proyeks' => $proyeks,
+            'TableData' => $TableData,
+        ]);
     }
 
     /**
      * Check if the given string is a month name
      */
-    private function isMonthName ( $string )
+    private function isMonthName($string)
     {
-        $months = array_merge (
+        $months = array_merge(
             // Indonesian month names
-            [ 
+            [
                 'januari',
                 'februari',
                 'maret',
@@ -143,7 +103,7 @@ class RKBGeneralController extends Controller
                 'desember'
             ],
             // English month names
-            [ 
+            [
                 'january',
                 'february',
                 'march',
@@ -159,15 +119,15 @@ class RKBGeneralController extends Controller
             ]
         );
 
-        return in_array ( strtolower ( $string ), $months );
+        return in_array(strtolower($string), $months);
     }
 
     /**
      * Get month number from month name
      */
-    private function getMonthNumber ( $monthName )
+    private function getMonthNumber($monthName)
     {
-        $monthMap = [ 
+        $monthMap = [
             // Indonesian
             'januari'   => 1,
             'februari'  => 2,
@@ -196,277 +156,254 @@ class RKBGeneralController extends Controller
             'december'  => 12
         ];
 
-        return $monthMap[ strtolower ( $monthName ) ] ?? null;
+        return $monthMap[strtolower($monthName)] ?? null;
     }
 
-    private function getStatusQuery ( $query, $status )
+    private function getStatusQuery($query, $status)
     {
-        return match ( strtolower ( $status ) )
-        {
-            'pengajuan' => $query->where ( function ($q)
-                {
-                    $q->where ( 'is_finalized', false )
-                    ->where ( 'is_evaluated', false )
-                    ->where ( 'is_approved_vp', false )
-                    ->where ( 'is_approved_svp', false );
-                } ),
-            'evaluasi' => $query->where ( function ($q)
-                {
-                    $q->where ( 'is_finalized', true )
-                    ->where ( 'is_evaluated', false )
-                    ->where ( 'is_approved_vp', false )
-                    ->where ( 'is_approved_svp', false );
-                } ),
-            'disetujui' => $query->where ( function ($q)
-                {
-                    $q->where ( 'is_finalized', true )
-                    ->where ( 'is_evaluated', true )
-                    ->where ( 'is_approved_vp', true )
-                    ->where ( 'is_approved_svp', true );
-                } ),
+        return match (strtolower($status)) {
+            'pengajuan' => $query->where(function ($q) {
+                $q->where('is_finalized', false)
+                    ->where('is_evaluated', false)
+                    ->where('is_approved_vp', false)
+                    ->where('is_approved_svp', false);
+            }),
+            'evaluasi' => $query->where(function ($q) {
+                $q->where('is_finalized', true)
+                    ->where('is_evaluated', false)
+                    ->where('is_approved_vp', false)
+                    ->where('is_approved_svp', false);
+            }),
+            'disetujui' => $query->where(function ($q) {
+                $q->where('is_finalized', true)
+                    ->where('is_evaluated', true)
+                    ->where('is_approved_vp', true)
+                    ->where('is_approved_svp', true);
+            }),
             default => $query
         };
     }
 
-    public function show ( $id )
+    public function show($id)
     {
         // Gunakan eager loading untuk relasi terkait
-        $rkb = RKB::with ( [ 
+        $rkb = RKB::with([
             'proyek', // Relasi ke Proyek
             'linkAlatDetailRkbs.linkRkbDetails.detailRkbGeneral.kategoriSparepart',
             'linkAlatDetailRkbs.linkRkbDetails.detailRkbGeneral.masterDataSparepart'
-        ] )->find ( $id );
+        ])->find($id);
 
         // Cek apakah RKB ditemukan
-        if ( ! $rkb )
-        {
-            return response ()->json ( [ 
+        if (!$rkb) {
+            return response()->json([
                 'success' => false,
                 'message' => 'RKB Tidak Ditemukan.'
-            ], 404 );
+            ], 404);
         }
 
         // Format data untuk respons JSON
-        $formattedData = [ 
+        $formattedData = [
             'id'      => $rkb->id,
             'nomor'   => $rkb->nomor,
-            'periode' => Carbon::parse ( $rkb->periode )->format ( 'Y-m' ), // Format periode ke 'YYYY-MM'
-            'proyek'  => [ 
+            'periode' => Carbon::parse($rkb->periode)->format('Y-m'), // Format periode ke 'YYYY-MM'
+            'proyek'  => [
                 'id'   => $rkb->proyek->id ?? null,
                 'nama' => $rkb->proyek->nama ?? '-'
             ],
-            'details' => $rkb->linkAlatDetailRkbs->flatMap ( function ($linkAlat)
-            {
-                return $linkAlat->linkRkbDetails->map ( function ($detail)
-                {
+            'details' => $rkb->linkAlatDetailRkbs->flatMap(function ($linkAlat) {
+                return $linkAlat->linkRkbDetails->map(function ($detail) {
                     $general = $detail->detailRkbGeneral;
-                    return [ 
+                    return [
                         'quantity_requested' => $general->quantity_requested ?? null,
                         'quantity_approved'  => $general->quantity_approved ?? null,
                         'satuan'             => $general->satuan ?? null,
-                        'kategori_sparepart' => [ 
+                        'kategori_sparepart' => [
                             'id'   => $general->kategoriSparepart->id ?? null,
                             'nama' => $general->kategoriSparepart->nama ?? '-',
                         ],
-                        'sparepart'          => [ 
+                        'sparepart'          => [
                             'id'          => $general->masterDataSparepart->id ?? null,
                             'nama'        => $general->masterDataSparepart->nama ?? '-',
                             'part_number' => $general->masterDataSparepart->part_number ?? null,
                         ]
                     ];
-                } );
-            } )
+                });
+            })
         ];
 
-        return response ()->json ( [ 
+        return response()->json([
             'success' => true,
             'data'    => $formattedData
-        ] );
+        ]);
     }
 
-    public function store ( Request $request )
+    public function store(Request $request)
     {
         // Validasi data request
-        $validatedData = $request->validate ( [ 
-            'nomor'   => [ 'required', 'string', 'max:255', 'unique:rkb,nomor' ],
-            'periode' => [ 'required', 'regex:/^\d{4}-(0[1-9]|1[0-2])$/' ], // Validasi periode dalam format YYYY-MM
-            'proyek'  => [ 'required', 'integer', 'exists:proyek,id' ], // Validasi proyek ID
-        ] );
+        $validatedData = $request->validate([
+            'nomor'   => ['required', 'string', 'max:255', 'unique:rkb,nomor'],
+            'periode' => ['required', 'regex:/^\d{4}-(0[1-9]|1[0-2])$/'], // Validasi periode dalam format YYYY-MM
+            'proyek'  => ['required', 'integer', 'exists:proyek,id'], // Validasi proyek ID
+        ]);
 
         // Tambahkan hari default (26) agar sesuai dengan tipe DATE di database
-        $validatedData[ 'periode' ] = $validatedData[ 'periode' ] . '-26';
+        $validatedData['periode'] = $validatedData['periode'] . '-26';
 
         // Pastikan kolom 'proyek' dipetakan ke 'id_proyek'
-        $validatedData[ 'id_proyek' ] = $validatedData[ 'proyek' ];
-        unset ( $validatedData[ 'proyek' ] ); // Hapus field 'proyek' karena tidak ada di tabel
+        $validatedData['id_proyek'] = $validatedData['proyek'];
+        unset($validatedData['proyek']); // Hapus field 'proyek' karena tidak ada di tabel
 
         // Set default tipe ke 'General'
-        $validatedData[ 'tipe' ] = 'General';
+        $validatedData['tipe'] = 'General';
 
         // Simpan data ke tabel RKB
-        RKB::create ( $validatedData );
+        RKB::create($validatedData);
 
         // Redirect dengan pesan sukses
-        return redirect ()->route ( 'rkb_general.index' )->with ( 'success', 'RKB General successfully created' );
+        return redirect()->route('rkb_general.index')->with('success', 'RKB General successfully created');
     }
 
-    public function update ( Request $request, $id )
+    public function update(Request $request, $id)
     {
-        $rkb = RKB::find ( $id );
+        $rkb = RKB::find($id);
 
-        if ( ! $rkb )
-        {
-            return redirect ()->route ( 'rkb_general.index' )->with ( 'error', 'RKB not found' );
+        if (!$rkb) {
+            return redirect()->route('rkb_general.index')->with('error', 'RKB not found');
         }
 
         // Modify the request to map 'proyek' to 'id_proyek'
-        $request->merge ( [ 'id_proyek' => $request->proyek ] );
+        $request->merge(['id_proyek' => $request->proyek]);
 
         // Validate the request
-        $validatedData = $request->validate ( [ 
-            'nomor'     => [ 'sometimes', 'required', 'string', 'max:255', Rule::unique ( 'rkb', 'nomor' )->ignore ( $rkb->id ) ],
-            'periode'   => [ 'sometimes', 'required', 'date' ],
-            'id_proyek' => [ 'sometimes', 'required', 'integer', 'exists:proyek,id' ],
-        ] );
+        $validatedData = $request->validate([
+            'nomor'     => ['sometimes', 'required', 'string', 'max:255', Rule::unique('rkb', 'nomor')->ignore($rkb->id)],
+            'periode'   => ['sometimes', 'required', 'date'],
+            'id_proyek' => ['sometimes', 'required', 'integer', 'exists:proyek,id'],
+        ]);
 
         // Update the RKB record
-        $rkb->update ( $validatedData );
+        $rkb->update($validatedData);
 
-        return redirect ()->route ( 'rkb_general.index' )->with ( 'success', 'RKB successfully updated' );
+        return redirect()->route('rkb_general.index')->with('success', 'RKB successfully updated');
     }
 
-    public function destroy ( $id )
+    public function destroy($id)
     {
-        $rkb = RKB::find ( $id );
+        $rkb = RKB::find($id);
 
-        if ( ! $rkb )
-        {
-            return redirect ()->route ( 'rkb_general.index' )->with ( 'error', 'RKB not found' );
+        if (!$rkb) {
+            return redirect()->route('rkb_general.index')->with('error', 'RKB not found');
         }
 
-        $rkb->delete ();
+        $rkb->delete();
 
-        return redirect ()->route ( 'rkb_general.index' )->with ( 'success', 'RKB successfully deleted' );
+        return redirect()->route('rkb_general.index')->with('success', 'RKB successfully deleted');
     }
 
-    public function finalize ( $id )
+    public function finalize($id)
     {
         // check first if the RKB have link_alat_detail_rkb or not
-        $rkb = RKB::findOrFail ( $id );
-        if ( isset ( $rkb->linkAlatDetailRkbs ) )
-        {
-            if ( $rkb->linkAlatDetailRkbs->count () > 0 )
-            {
+        $rkb = RKB::findOrFail($id);
+        if (isset($rkb->linkAlatDetailRkbs)) {
+            if ($rkb->linkAlatDetailRkbs->count() > 0) {
 
-                $rkb = RKB::find ( $id );
+                $rkb = RKB::find($id);
 
-                if ( ! $rkb )
-                {
-                    return redirect ()->route ( 'rkb_general.index' )->with ( 'error', 'RKB not found' );
+                if (!$rkb) {
+                    return redirect()->route('rkb_general.index')->with('error', 'RKB not found');
                 }
 
                 $rkb->is_finalized = true;
-                $rkb->save ();
+                $rkb->save();
 
-                return redirect ()->route ( 'rkb_general.index' )->with ( 'success', 'RKB successfully finalized' );
+                return redirect()->route('rkb_general.index')->with('success', 'RKB successfully finalized');
             }
         }
-        return redirect ()->back ()->with ( 'error', 'Anda belum mengisi data detail RKB' );
+        return redirect()->back()->with('error', 'Anda belum mengisi data detail RKB');
     }
 
-    public function getData ( Request $request )
+    public function getData(Request $request)
     {
         // Filter hanya tipe "General"
-        $query = RKB::with ( 'proyek' )->where ( 'tipe', 'General' );
+        $query = RKB::with('proyek')->where('tipe', 'General');
 
         // Filter pencarian
-        if ( $search = $request->input ( 'search.value' ) )
-        {
-            $query->where ( function ($q) use ($search)
-            {
-                $q->where ( 'nomor', 'like', "%{$search}%" )
-                    ->orWhereHas ( 'proyek', function ($q) use ($search)
-                    {
-                        $q->where ( 'nama', 'like', "%{$search}%" );
-                    } )
-                    ->orWhere ( 'periode', 'like', "%{$search}%" )
-                    ->orWhereRaw ( "CASE 
+        if ($search = $request->input('search.value')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nomor', 'like', "%{$search}%")
+                    ->orWhereHas('proyek', function ($q) use ($search) {
+                        $q->where('nama', 'like', "%{$search}%");
+                    })
+                    ->orWhere('periode', 'like', "%{$search}%")
+                    ->orWhereRaw("CASE 
                         WHEN is_finalized = 1 AND is_approved = 1 THEN 'Disetujui'
                         WHEN is_finalized = 0 THEN 'Pengajuan'
                         ELSE 'Evaluasi' 
-                    END LIKE ?", [ "%{$search}%" ] );
-            } );
+                    END LIKE ?", ["%{$search}%"]);
+            });
         }
 
         // Sorting
-        if ( $order = $request->input ( 'order' ) )
-        {
-            $columnIndex   = $order[ 0 ][ 'column' ];
-            $columnName    = $request->input ( 'columns' )[ $columnIndex ][ 'data' ];
-            $sortDirection = $order[ 0 ][ 'dir' ];
+        if ($order = $request->input('order')) {
+            $columnIndex = $order[0]['column'];
+            $columnName = $request->input('columns')[$columnIndex]['data'];
+            $sortDirection = $order[0]['dir'];
 
-            if ( in_array ( $columnName, [ 'nomor', 'periode' ] ) )
-            {
-                $query->orderBy ( $columnName, $sortDirection );
+            if (in_array($columnName, ['nomor', 'periode'])) {
+                $query->orderBy($columnName, $sortDirection);
+            } elseif ($columnName === 'proyek') {
+                $query->join('proyek', 'rkb.id_proyek', '=', 'proyek.id')
+                    ->orderBy('proyek.nama', $sortDirection);
             }
-            elseif ( $columnName === 'proyek' )
-            {
-                $query->join ( 'proyek', 'rkb.id_proyek', '=', 'proyek.id' )
-                    ->orderBy ( 'proyek.nama', $sortDirection );
-            }
-        }
-        else
-        {
-            $query->orderBy ( 'updated_at', 'desc' );
+        } else {
+            $query->orderBy('updated_at', 'desc');
         }
 
         // Pagination
-        $draw   = $request->input ( 'draw' );
-        $start  = $request->input ( 'start', 0 );
-        $length = $request->input ( 'length', 10 );
+        $draw = $request->input('draw');
+        $start = $request->input('start', 0);
+        $length = $request->input('length', 10);
 
-        $totalRecords    = RKB::where ( 'tipe', 'General' )->count (); // Hanya hitung yang tipe General
-        $filteredRecords = $query->count ();
+        $totalRecords = RKB::where('tipe', 'General')->count(); // Hanya hitung yang tipe General
+        $filteredRecords = $query->count();
 
-        $rkbData = $query->skip ( $start )->take ( $length )->get ();
+        $rkbData = $query->skip($start)->take($length)->get();
 
         // Mapping data
-        $data = $rkbData->map ( function ($item)
-        {
-            $isFinalized   = $item->is_finalized ?? false;
-            $isEvaluated   = $item->is_evaluated ?? false;
-            $isApprovedVp  = $item->is_approved_vp ?? false;
+        $data = $rkbData->map(function ($item) {
+            $isFinalized = $item->is_finalized ?? false;
+            $isEvaluated = $item->is_evaluated ?? false;
+            $isApprovedVp = $item->is_approved_vp ?? false;
             $isApprovedSvp = $item->is_approved_svp ?? false;
 
-            $status = match ( true )
-            {
+            $status = match (true) {
                 $isFinalized && $isEvaluated && $isApprovedVp && $isApprovedSvp => 'Disetujui',
-                ! $isFinalized => 'Pengajuan',
-                $isFinalized && $isEvaluated && $isApprovedVp && ! $isApprovedSvp => 'Menunggu Approval SVP',
-                $isFinalized && $isEvaluated && ! $isApprovedVp => 'Menunggu Approval VP',
-                $isFinalized && ! $isEvaluated => 'Evaluasi',
+                !$isFinalized => 'Pengajuan',
+                $isFinalized && $isEvaluated && $isApprovedVp && !$isApprovedSvp => 'Menunggu Approval SVP',
+                $isFinalized && $isEvaluated && !$isApprovedVp => 'Menunggu Approval VP',
+                $isFinalized && !$isEvaluated => 'Evaluasi',
                 default => 'Tidak Diketahui',
             };
 
-            return [ 
+            return [
                 'id'              => $item->id,
                 'nomor'           => $item->nomor,
                 'proyek'          => $item->proyek->nama ?? '-',
-                'periode'         => Carbon::parse ( $item->periode )->translatedFormat ( 'F Y' ),
+                'periode'         => Carbon::parse($item->periode)->translatedFormat('F Y'),
                 'status'          => $status,
                 'is_finalized'    => $item->is_finalized,
                 'is_evaluated'    => $item->is_evaluated,
                 'is_approved_vp'  => $item->is_approved_vp,
                 'is_approved_svp' => $item->is_approved_svp,
             ];
-        } );
+        });
 
-        return response ()->json ( [ 
+        return response()->json([
             'draw'            => $draw,
             'recordsTotal'    => $totalRecords,
             'recordsFiltered' => $filteredRecords,
             'data'            => $data,
-        ] );
+        ]);
     }
 
 

@@ -31,6 +31,7 @@ class EvaluasiDetailRKBGeneralController extends Controller
             ->join ( 'kategori_sparepart', 'detail_rkb_general.id_kategori_sparepart_sparepart', '=', 'kategori_sparepart.id' )
             ->join ( 'master_data_sparepart', 'detail_rkb_general.id_master_data_sparepart', '=', 'master_data_sparepart.id' )
             ->where ( 'link_alat_detail_rkb.id_rkb', $id )
+            ->orderBy('master_data_sparepart.part_number') // Add this line to sort by part_number
             ->select ( [ 
                 'detail_rkb_general.*',
                 'master_data_alat.jenis_alat',

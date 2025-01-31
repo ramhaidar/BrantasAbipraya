@@ -33,92 +33,86 @@
             </thead>
             <tbody>
                 @php
-                    $currentPartNumber = null;
-                    $rowspan = 0;
-                    $showStock = true;
+                    // Group items by part number
+                    $groupedItems = $TableData->groupBy(function ($item) {
+                        return $item->masterDataSparepart->part_number;
+                    });
                 @endphp
-                @forelse ($TableData as $item)
+
+                @forelse ($groupedItems as $partNumber => $items)
                     @php
-                        if ($currentPartNumber !== $item->masterDataSparepart->part_number) {
-                            $currentPartNumber = $item->masterDataSparepart->part_number;
-                            $rowspan = $TableData->filter(function($detail) use ($currentPartNumber) {
-                                return $detail->masterDataSparepart->part_number === $currentPartNumber;
-                            })->count();
-                            $showStock = true;
-                        }
+                        $firstItem = $items->first();
+                        $rowspan = $items->count();
                     @endphp
-                    @forelse ($item->linkRkbDetails as $detail)
-                        <tr>
-                            <td class="text-center">{{ $detail->linkAlatDetailRkb->masterDataAlat->jenis_alat ?? '-' }}</td>
-                            <td class="text-center">{{ $detail->linkAlatDetailRkb->masterDataAlat->kode_alat ?? '-' }}</td>
-                            <td class="text-center">{{ $item->kategoriSparepart->kode ?? '-' }}: {{ $item->kategoriSparepart->nama ?? '-' }}</td>
-                            <td class="text-center">{{ $item->masterDataSparepart->nama ?? '-' }}</td>
-                            <td class="text-center">{{ $item->masterDataSparepart->part_number ?? '-' }}</td>
-                            <td class="text-center">{{ $item->masterDataSparepart->merk ?? '-' }}</td>
-                            <td class="text-center">{{ $item->quantity_requested }}</td>
-                            <td class="text-center">
-                                <input class="form-control text-center
-                                        @if ($rkb->is_approved_svp) bg-primary-subtle
-                                        @elseif ($rkb->is_approved_vp) bg-info-subtle
-                                        @elseif($rkb->is_evaluated) bg-success-subtle 
-                                        @else bg-warning-subtle @endif" 
-                                        name="quantity_approved[{{ $item->id }}]" 
-                                        type="number" 
-                                        value="{{ $item->quantity_approved ?? $item->quantity_requested }}" 
-                                        min="0" 
-                                        {{ $rkb->is_evaluated ? 'disabled' : '' }}>
-                            </td>
-                            @if ($showStock)
-                                <td class="text-center" rowspan="{{ $rowspan }}">{{ $stockQuantities[$item->masterDataSparepart->id] ?? 0 }}</td>
-                                @php $showStock = false; @endphp
-                            @endif
-                            <td class="text-center">{{ $item->satuan }}</td>
-                        </tr>
+
+                    @foreach ($items as $index => $item)
+                        @forelse ($item->linkRkbDetails as $detail)
+                            <tr>
+                                <td class="text-center">{{ $detail->linkAlatDetailRkb->masterDataAlat->jenis_alat ?? '-' }}</td>
+                                <td class="text-center">{{ $detail->linkAlatDetailRkb->masterDataAlat->kode_alat ?? '-' }}</td>
+                                <td class="text-center">{{ $item->kategoriSparepart->kode ?? '-' }}: {{ $item->kategoriSparepart->nama ?? '-' }}</td>
+                                <td class="text-center">{{ $item->masterDataSparepart->nama ?? '-' }}</td>
+                                <td class="text-center">{{ $partNumber ?? '-' }}</td>
+                                <td class="text-center">{{ $item->masterDataSparepart->merk ?? '-' }}</td>
+                                <td class="text-center">{{ $item->quantity_requested }}</td>
+                                <td class="text-center">
+                                    <input class="form-control text-center
+                                            @if ($rkb->is_approved_svp) bg-primary-subtle
+                                            @elseif ($rkb->is_approved_vp) bg-info-subtle
+                                            @elseif($rkb->is_evaluated) bg-success-subtle 
+                                            @else bg-warning-subtle @endif" name="quantity_approved[{{ $item->id }}]" type="number" value="{{ $item->quantity_approved ?? $item->quantity_requested }}" min="0" {{ $rkb->is_evaluated ? 'disabled' : '' }}>
+                                </td>
+                                @if ($index === 0)
+                                    <td class="text-center" rowspan="{{ $rowspan }}">{{ $stockQuantities[$item->masterDataSparepart->id] ?? 0 }}</td>
+                                @endif
+                                <td class="text-center">{{ $item->satuan }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td class="text-center py-3 text-muted" colspan="10">
+                                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                    No RKB details found
+                                </td>
+                            </tr>
+                        @endforelse
+                    @endforeach
                     @empty
                         <tr>
                             <td class="text-center py-3 text-muted" colspan="10">
                                 <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                                No RKB details found
+                                No data found
                             </td>
                         </tr>
                     @endforelse
-                @empty
-                    <tr>
-                        <td class="text-center py-3 text-muted" colspan="10">
-                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                            No data found
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+                </tbody>
+            </table>
+        </div>
 
-    <button class="btn btn-success btn-sm approveBtn" id="hiddenApproveRkbButton" type="submit" hidden></button>
-</form>
+        <button class="btn btn-success btn-sm approveBtn" id="hiddenApproveRkbButton" type="submit" hidden></button>
+    </form>
 
-@push('scripts_3')
-    <script>
-        $(document).ready(function() {
-            const $table = $('#table-data');
-            const $headers = $table.find('thead th');
-            const textsToCheck = ['Detail', 'Aksi', 'Supplier'];
-            let indices = {};
+    @push('scripts_3')
+        <script>
+            $(document).ready(function() {
+                const $table = $('#table-data');
+                const $headers = $table.find('thead th');
+                const textsToCheck = ['Detail', 'Aksi', 'Supplier'];
+                let indices = {};
 
-            // Find the indices of the headers that match the texts in textsToCheck array
-            $headers.each(function(index) {
-                const headerText = $(this).text().trim();
-                if (textsToCheck.includes(headerText)) {
-                    indices[headerText] = index;
-                }
-            });
+                // Find the indices of the headers that match the texts in textsToCheck array
+                $headers.each(function(index) {
+                    const headerText = $(this).text().trim();
+                    if (textsToCheck.includes(headerText)) {
+                        indices[headerText] = index;
+                    }
+                });
 
-            // Set the width of the corresponding columns in tbody
-            $.each(indices, function(text, index) {
-                $table.find('tbody tr').each(function() {
-                    $(this).find('td').eq(index).css('width', '1%');
+                // Set the width of the corresponding columns in tbody
+                $.each(indices, function(text, index) {
+                    $table.find('tbody tr').each(function() {
+                        $(this).find('td').eq(index).css('width', '1%');
+                    });
                 });
             });
-        });
-    </script>
-@endpush
+        </script>
+    @endpush

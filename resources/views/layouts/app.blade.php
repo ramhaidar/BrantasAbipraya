@@ -57,6 +57,10 @@
         .ibox-body {
             overflow: auto !important;
         }
+
+        .table-responsive {
+            overflow: auto !important;
+        }
     </style>
 
     <!-- Styles -->

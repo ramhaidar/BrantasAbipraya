@@ -10,44 +10,44 @@ use Illuminate\Support\Facades\Auth;
 
 class MasterDataAlatController extends Controller
 {
-public function index ( Request $request )
-{
-// Validate and set perPage to allowed values only
-$allowedPerPage = [ 10, 25, 50, 100 ];
-$perPage        = in_array ( (int) $request->get ( 'per_page' ), $allowedPerPage ) ? (int) $request->get ( 'per_page' ) : 10;
+    public function index ( Request $request )
+    {
+        // Validate and set perPage to allowed values only
+        $allowedPerPage = [ 10, 25, 50, 100 ];
+        $perPage        = in_array ( (int) $request->get ( 'per_page' ), $allowedPerPage ) ? (int) $request->get ( 'per_page' ) : 10;
 
-$query = MasterDataAlat::query ()
-->orderBy ( $request->get ( 'sort', 'updated_at' ), $request->get ( 'direction', 'desc' ) );
+        $query = MasterDataAlat::with ( 'proyekCurrent' )
+            ->orderBy ( $request->get ( 'sort', 'updated_at' ), $request->get ( 'direction', 'desc' ) );
 
-if ( $request->has ( 'search' ) )
-{
-$search = $request->get ( 'search' );
-$query->where ( function ($q) use ($search)
-{
-$q->where ( 'jenis_alat', 'like', "%{$search}%" )
-->orWhere ( 'kode_alat', 'like', "%{$search}%" )
-->orWhere ( 'merek_alat', 'like', "%{$search}%" )
-->orWhere ( 'tipe_alat', 'like', "%{$search}%" )
-->orWhere ( 'serial_number', 'like', "%{$search}%" );
-} );
-}
+        if ( $request->has ( 'search' ) )
+        {
+            $search = $request->get ( 'search' );
+            $query->where ( function ($q) use ($search)
+            {
+                $q->where ( 'jenis_alat', 'like', "%{$search}%" )
+                    ->orWhere ( 'kode_alat', 'like', "%{$search}%" )
+                    ->orWhere ( 'merek_alat', 'like', "%{$search}%" )
+                    ->orWhere ( 'tipe_alat', 'like', "%{$search}%" )
+                    ->orWhere ( 'serial_number', 'like', "%{$search}%" );
+            } );
+        }
 
-$proyeks = Proyek::with ( "users" )
-->orderBy ( "updated_at", "desc" )
-->orderBy ( "id", "desc" )
-->get ();
+        $proyeks = Proyek::with ( "users" )
+            ->orderBy ( "updated_at", "desc" )
+            ->orderBy ( "id", "desc" )
+            ->get ();
 
-$TableData = $query->paginate ( $perPage )
-->withQueryString ();
+        $TableData = $query->paginate ( $perPage )
+            ->withQueryString ();
 
-return view ( 'dashboard.masterdata.alat.alat', [ 
-'headerPage' => "Master Data Alat",
-'page'       => 'Data Alat',
+        return view ( 'dashboard.masterdata.alat.alat', [ 
+            'headerPage' => "Master Data Alat",
+            'page'       => 'Data Alat',
 
-'proyeks'    => $proyeks,
-'TableData'  => $TableData,
-] );
-}
+            'proyeks'    => $proyeks,
+            'TableData'  => $TableData,
+        ] );
+    }
 
     /**
      * Store a newly created resource in storage.

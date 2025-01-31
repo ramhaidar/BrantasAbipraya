@@ -71,10 +71,16 @@ class AlatProyekController extends Controller
 
         foreach ( $validatedData[ 'id_master_data_alat' ] as $alatId )
         {
+            // Create new AlatProyek record
             AlatProyek::create ( [ 
                 'id_master_data_alat' => $alatId,
                 'id_proyek'           => $validatedData[ 'id_proyek' ],
                 'assigned_at'         => now (),
+            ] );
+
+            // Update the current project in MasterDataAlat
+            MasterDataAlat::where ( 'id', $alatId )->update ( [ 
+                'id_proyek_current' => $validatedData[ 'id_proyek' ]
             ] );
         }
 
@@ -85,9 +91,14 @@ class AlatProyekController extends Controller
     {
         $alatProyek = AlatProyek::findOrFail ( $id );
 
-        // Set removed_at timestamp instead of deleting the record
+        // Set removed_at timestamp
         $alatProyek->update ( [ 
             'removed_at' => now ()
+        ] );
+
+        // Clear the current project from MasterDataAlat
+        $alatProyek->masterDataAlat ()->update ( [ 
+            'id_proyek_current' => null
         ] );
 
         return redirect ()->back ()->with ( 'success', 'Alat berhasil dihapus dari proyek' );

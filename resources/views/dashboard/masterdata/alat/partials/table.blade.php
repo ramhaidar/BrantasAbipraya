@@ -22,6 +22,7 @@
                 <th>Merek Alat</th>
                 <th>Tipe Alat</th>
                 <th>Serial Number</th>
+                <th>Lokasi Proyek Sekarang</th>
                 <th>Aksi</th>
             </tr>
         </thead>
@@ -33,6 +34,7 @@
                     <td>{{ $item->merek_alat }}</td>
                     <td>{{ $item->tipe_alat }}</td>
                     <td>{{ $item->serial_number }}</td>
+                    <td>{{ $item->current_project ? $item->current_project->nama : 'Not Assigned' }}</td>
                     <td class="text-center">
                         <button class="btn btn-warning mx-1 ubahBtn" data-id="{{ $item->id }}" onclick="fillFormEdit({{ $item->id }})">
                             <i class="bi bi-pencil-square"></i>
@@ -44,7 +46,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td class="text-center py-3 text-muted" colspan="6">
+                    <td class="text-center py-3 text-muted" colspan="7">
                         <i class="bi bi-inbox fs-1 d-block mb-2"></i>
                         No tools found
                     </td>

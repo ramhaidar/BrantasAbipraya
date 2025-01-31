@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Database\Factories\MasterDataAlatFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class MasterDataAlat extends Model
@@ -19,7 +20,6 @@ class MasterDataAlat extends Model
         'merek_alat',
         'tipe_alat',
         'serial_number',
-        'id_proyek_current',
     ];
 
     protected $casts = [ 
@@ -29,7 +29,6 @@ class MasterDataAlat extends Model
         'merek_alat'        => 'string',
         'tipe_alat'         => 'string',
         'serial_number'     => 'string',
-        'id_proyek_current' => 'integer',
     ];
 
     protected static function newFactory ()
@@ -57,9 +56,9 @@ class MasterDataAlat extends Model
         return $this->hasMany ( DetailSPB::class, 'id_master_data_alat' );
     }
 
-    public function proyekCurrent ()
+    public function proyekCurrent () : BelongsTo
     {
-        return $this->belongsTo ( Proyek::class, 'id_proyek_current' );
+        return $this->belongsTo ( Proyek::class, 'id_proyek_current', 'id' );
     }
 
     public function alatProyek ()
@@ -72,6 +71,14 @@ class MasterDataAlat extends Model
         return $this->belongsToMany ( Proyek::class, 'alat_proyek', 'id_alat', 'id_proyek' )
             ->withPivot ( 'assigned_at', 'removed_at' )
             ->withTimestamps ();
+    }
+
+    public function getCurrentProjectAttribute()
+    {
+        return $this->alatProyek()
+            ->whereNull('removed_at')
+            ->latest('assigned_at')
+            ->first()?->proyek;
     }
 
 }

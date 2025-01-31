@@ -31,45 +31,47 @@
     }
 @endphp
 
-<div class="ibox-body ms-0 ps-0 table-responsive">
-    <table class="m-0 table table-bordered table-striped" id="table-data">
-        <thead class="table-primary">
-            <tr>
-                <th class="text-center">Tanggal Penerimaan</th>
-                <th class="text-center">Kode</th>
-                <th class="text-center">Supplier</th>
-                <th class="text-center">Sparepart</th>
-                <th class="text-center">Merk</th>
-                <th class="text-center">Part Number</th>
-                <th class="text-center">Quantity</th>
-                <th class="text-center">Satuan</th>
-                <th class="text-center">Harga</th>
-                <th class="text-center">Jumlah Harga</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($saldos as $saldo)
+<div class="ibox-body ms-0 ps-0">
+    <div class="table-responsive">
+        <table class="m-0 table table-bordered table-striped" id="table-data">
+            <thead class="table-primary">
                 <tr>
-                    <td class="text-center">{{ formatTanggal($saldo->atb->tanggal) }}</td>
-                    <td class="text-center">{{ $saldo->masterDataSparepart->kategoriSparepart->kode }}: {{ $saldo->masterDataSparepart->kategoriSparepart->nama }}</td>
-                    <td class="text-center">{{ $saldo->masterDataSupplier->nama ?? '-' }}</td>
-                    <td class="text-center">{{ $saldo->masterDataSparepart->nama ?? '-' }}</td>
-                    <td class="text-center">{{ $saldo->masterDataSparepart->merk ?? '-' }}</td>
-                    <td class="text-center">{{ $saldo->masterDataSparepart->part_number ?? '-' }}</td>
-                    <td class="text-center">{{ $saldo->quantity }}</td>
-                    <td class="text-center">{{ $saldo->satuan ?? '-' }}</td>
-                    <td class="currency-value">{{ formatRibuan($saldo->harga) }}</td>
-                    <td class="currency-value">{{ formatRibuan($saldo->quantity * $saldo->harga) }}</td>
+                    <th class="text-center">Tanggal Penerimaan</th>
+                    <th class="text-center">Kode</th>
+                    <th class="text-center">Supplier</th>
+                    <th class="text-center">Sparepart</th>
+                    <th class="text-center">Merk</th>
+                    <th class="text-center">Part Number</th>
+                    <th class="text-center">Quantity</th>
+                    <th class="text-center">Satuan</th>
+                    <th class="text-center">Harga</th>
+                    <th class="text-center">Jumlah Harga</th>
                 </tr>
-            @endforeach
-        </tbody>
-        <tfoot>
-            <tr class="table-primary">
-                <td class="text-center fw-bold" colspan="9">Grand Total</td>
-                <td class="text-center fw-bold currency-value" id="total-harga">0</td>
-            </tr>
-        </tfoot>
-    </table>
+            </thead>
+            <tbody>
+                @foreach ($saldos as $saldo)
+                    <tr>
+                        <td class="text-center">{{ formatTanggal($saldo->atb->tanggal) }}</td>
+                        <td class="text-center">{{ $saldo->masterDataSparepart->kategoriSparepart->kode }}: {{ $saldo->masterDataSparepart->kategoriSparepart->nama }}</td>
+                        <td class="text-center">{{ $saldo->masterDataSupplier->nama ?? '-' }}</td>
+                        <td class="text-center">{{ $saldo->masterDataSparepart->nama ?? '-' }}</td>
+                        <td class="text-center">{{ $saldo->masterDataSparepart->merk ?? '-' }}</td>
+                        <td class="text-center">{{ $saldo->masterDataSparepart->part_number ?? '-' }}</td>
+                        <td class="text-center">{{ $saldo->quantity }}</td>
+                        <td class="text-center">{{ $saldo->satuan ?? '-' }}</td>
+                        <td class="currency-value">{{ formatRibuan($saldo->harga) }}</td>
+                        <td class="currency-value">{{ formatRibuan($saldo->quantity * $saldo->harga) }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+            <tfoot>
+                <tr class="table-primary">
+                    <td class="text-center fw-bold" colspan="9">Grand Total</td>
+                    <td class="text-center fw-bold currency-value" id="total-harga">0</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
 </div>
 
 @push('scripts_3')

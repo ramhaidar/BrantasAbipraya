@@ -13,40 +13,42 @@
     </style>
 @endpush
 
-<div class="ibox-body ms-0 ps-0 table-responsive">
-    <table class="m-0 table table-bordered table-striped" id="table-data">
-        <thead class="table-primary">
-            <tr>
-                <th class="text-center">No RKB</th>
-                <th class="text-center">Proyek</th>
-                <th class="text-center">Periode</th>
-                <th class="text-center">Tipe</th>
-                <th class="text-center">Detail SPB</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse ($TableData as $item)
+<div class="ibox-body ms-0 ps-0">
+    <div class="table-responsive">
+        <table class="m-0 table table-bordered table-striped" id="table-data">
+            <thead class="table-primary">
                 <tr>
-                    <td>{{ $item->nomor }}</td>
-                    <td>{{ $item->proyek->nama ?? '-' }}</td>
-                    <td>{{ \Carbon\Carbon::parse($item->periode)->translatedFormat('F Y') }}</td>
-                    <td>{{ ucfirst($item->tipe) }}</td>
-                    <td>
-                        <a class="btn btn-primary mx-1 detailBtn" data-id="{{ $item->id }}" href="{{ route('spb.detail.index', $item->id) }}">
-                            <i class="fa-solid fa-eye"></i>
-                        </a>
-                    </td>
+                    <th class="text-center">No RKB</th>
+                    <th class="text-center">Proyek</th>
+                    <th class="text-center">Periode</th>
+                    <th class="text-center">Tipe</th>
+                    <th class="text-center">Detail SPB</th>
                 </tr>
-            @empty
-                <tr>
-                    <td class="text-center py-3 text-muted" colspan="6">
-                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                        No RKB found
-                    </td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @forelse ($TableData as $item)
+                    <tr>
+                        <td>{{ $item->nomor }}</td>
+                        <td>{{ $item->proyek->nama ?? '-' }}</td>
+                        <td>{{ \Carbon\Carbon::parse($item->periode)->translatedFormat('F Y') }}</td>
+                        <td>{{ ucfirst($item->tipe) }}</td>
+                        <td>
+                            <a class="btn btn-primary mx-1 detailBtn" data-id="{{ $item->id }}" href="{{ route('spb.detail.index', $item->id) }}">
+                                <i class="fa-solid fa-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td class="text-center py-3 text-muted" colspan="6">
+                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                            No RKB found
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
 </div>
 
 @push('scripts_3')

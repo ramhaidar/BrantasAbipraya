@@ -8,6 +8,7 @@
         #table-data td,
         #table-data th {
             vertical-align: middle;
+            text-align: center;
         }
     </style>
 @endpush
@@ -25,15 +26,15 @@
             </tr>
         </thead>
         <tbody>
-            @foreach ($AlatAssigned as $alat)
+            @foreach ($TableData as $item)
                 <tr>
-                    <td class="text-center">{{ $alat->masterDataAlat->jenis_alat }}</td>
-                    <td class="text-center">{{ $alat->masterDataAlat->kode_alat }}</td>
-                    <td class="text-center">{{ $alat->masterDataAlat->merek_alat }}</td>
-                    <td class="text-center">{{ $alat->masterDataAlat->tipe_alat }}</td>
-                    <td class="text-center">{{ $alat->masterDataAlat->serial_number }}</td>
+                    <td class="text-center">{{ $item->masterDataAlat->jenis_alat }}</td>
+                    <td class="text-center">{{ $item->masterDataAlat->kode_alat }}</td>
+                    <td class="text-center">{{ $item->masterDataAlat->merek_alat }}</td>
+                    <td class="text-center">{{ $item->masterDataAlat->tipe_alat }}</td>
+                    <td class="text-center">{{ $item->masterDataAlat->serial_number }}</td>
                     <td class="text-center">
-                        <button class="btn btn-danger btn-sm deleteBtn" data-id="{{ $alat->id }}" type="button">
+                        <button class="btn btn-danger deleteBtn" data-id="{{ $item->id }}" type="button">
                             <i class="bi bi-trash"></i>
                         </button>
                     </td>
@@ -46,9 +47,24 @@
 @push('scripts_3')
     <script>
         $(document).ready(function() {
-            $('#table-data').DataTable({
-                paginate: false,
-                ordering: false,
+            const $table = $('#table-data');
+            const $headers = $table.find('thead th');
+            const textsToCheck = ['Detail', 'Aksi', 'Supplier'];
+            let indices = {};
+
+            // Find the indices of the headers that match the texts in textsToCheck array
+            $headers.each(function(index) {
+                const headerText = $(this).text().trim();
+                if (textsToCheck.includes(headerText)) {
+                    indices[headerText] = index;
+                }
+            });
+
+            // Set the width of the corresponding columns in tbody
+            $.each(indices, function(text, index) {
+                $table.find('tbody tr').each(function() {
+                    $(this).find('td').eq(index).css('width', '1%');
+                });
             });
         });
     </script>

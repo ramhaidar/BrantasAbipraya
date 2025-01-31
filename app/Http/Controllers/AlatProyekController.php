@@ -13,24 +13,37 @@ class AlatProyekController extends Controller
 {
     public function index ( Request $request )
     {
-        $user = Auth::user ();
+        // Validate and set perPage to allowed values only
+        $allowedPerPage = [ 10, 25, 50, 100 ];
+        $perPage        = in_array ( (int) $request->get ( 'per_page' ), $allowedPerPage ) ? (int) $request->get ( 'per_page' ) : 10;
 
-        $proyek = Proyek::with ( "users" )->find ( $request->id_proyek );
+        $proyek = Proyek::with ( "users" )->findOrFail ( $request->id_proyek );
 
-        if ( ! $proyek )
+        $query = AlatProyek::query ()
+            ->with ( 'masterDataAlat' )
+            ->where ( 'id_proyek', $proyek->id )
+            ->whereNull ( 'removed_at' )
+            ->orderBy ( $request->get ( 'sort', 'updated_at' ), $request->get ( 'direction', 'desc' ) );
+
+        if ( $request->has ( 'search' ) )
         {
-            abort ( 404, "Proyek tidak ditemukan" );
+            $search = $request->get ( 'search' );
+            $query->whereHas ( 'masterDataAlat', function ($q) use ($search)
+            {
+                $q->where ( 'jenis_alat', 'like', "%{$search}%" )
+                    ->orWhere ( 'kode_alat', 'like', "%{$search}%" )
+                    ->orWhere ( 'merek_alat', 'like', "%{$search}%" )
+                    ->orWhere ( 'tipe_alat', 'like', "%{$search}%" )
+                    ->orWhere ( 'serial_number', 'like', "%{$search}%" );
+            } );
         }
+
+        $TableData = $query->paginate ( $perPage )
+            ->withQueryString ();
 
         $proyeks = Proyek::with ( "users" )
             ->orderBy ( "updated_at", "desc" )
             ->orderBy ( "id", "desc" )
-            ->get ();
-
-        $AlatAssigned = AlatProyek::with ( "masterDataAlat" )
-            ->where ( 'id_proyek', $proyek->id )
-            ->whereNull ( 'removed_at' )
-            ->orderBy ( 'updated_at', 'desc' )
             ->get ();
 
         $AlatAvailable = MasterDataAlat::whereDoesntHave ( 'alatProyek', function ($query)
@@ -38,11 +51,10 @@ class AlatProyekController extends Controller
             $query->whereNull ( 'removed_at' );
         } )->get ();
 
-        // Kirim data ke view
         return view ( 'dashboard.alat.alat', [ 
             'proyeks'       => $proyeks,
             'proyek'        => $proyek,
-            'AlatAssigned'  => $AlatAssigned,
+            'TableData'     => $TableData,
             'AlatAvailable' => $AlatAvailable,
             'headerPage'    => "Data Alat Proyek",
             'page'          => 'Data Alat',

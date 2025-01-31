@@ -16,7 +16,22 @@
                     </a>
                 </div>
 
-                @include('dashboard.alat.partials.table')
+                {{-- @include('dashboard.alat.partials.table') --}}
+
+                <div class="p-0 m-0 py-3">
+                    @include('components.search-input', [
+                        'route' => url()->current(),
+                        'placeholder' => 'Search items...',
+                    ])
+                    @include('dashboard.alat.partials.table', [
+                        'TableData' => $TableData,
+                    ])
+                    @if ($TableData->hasPages())
+                        @include('components.pagination', [
+                            'paginator' => $TableData,
+                        ])
+                    @endif
+                </div>
 
             </div>
         </div>

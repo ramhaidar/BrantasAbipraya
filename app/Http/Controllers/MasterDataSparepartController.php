@@ -57,9 +57,6 @@ class MasterDataSparepartController extends Controller
             $query->whereIn ( 'id_user', $usersInProyek );
         }
 
-        $spareparts = $query->paginate ( $perPage )
-            ->withQueryString ();
-
         $TableData = $query->paginate ( $perPage )
             ->withQueryString ();
 

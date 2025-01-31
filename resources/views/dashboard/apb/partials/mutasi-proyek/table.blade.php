@@ -54,6 +54,7 @@
                     <th class="text-center">Satuan</th>
                     <th class="text-center">Harga</th>
                     <th class="text-center">Jumlah Harga</th>
+                    <th class="text-center">Mekanik</th>
                     <th class="text-center">Status</th>
                     <th class="text-center">Aksi</th>
                 </tr>
@@ -79,6 +80,7 @@
                         <td class="text-center">{{ $item->saldo->satuan ?? '-' }}</td>
                         <td class="currency-value">{{ formatRibuan($item->saldo->harga ?? 0) }}</td>
                         <td class="currency-value">{{ formatRibuan(($item->saldo->harga ?? 0) * $item->quantity) }}</td>
+                        <td class="text-center">{{ $item->mekanik ?? '-' }}</td>
                         <td class="text-center">
                             @if ($item->status === 'pending')
                                 <span class="badge bg-warning w-100">Pending</span>
@@ -111,7 +113,7 @@
                 <tr class="table-primary">
                     <td class="text-center fw-bold" colspan="17">Grand Total (Accepted & Penggunaan Only)</td>
                     <td class="text-center fw-bold currency-value" id="total-harga">0</td>
-                    <td colspan="2"></td>
+                    <td colspan="3"></td>
                 </tr>
             </tfoot>
         </table>
@@ -124,7 +126,7 @@
             function calculateTotal() {
                 let total = 0;
                 $('#table-data tbody tr:not(.d-none)').each(function() {
-                    let status = $(this).find('td:eq(18) .badge').text().trim().toLowerCase();
+                    let status = $(this).find('td:eq(19) .badge').text().trim().toLowerCase();
                     if (status === 'accepted' || status === 'penggunaan') {
                         let value = $(this).find('td:eq(17)').text()
                             .replace(/\./g, '');

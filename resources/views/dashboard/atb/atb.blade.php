@@ -24,7 +24,21 @@
                 </div>
 
                 @if ($tipe === 'hutang-unit-alat')
-                    @include('dashboard.atb.partials.table')
+                    {{-- @include('dashboard.atb.partials.table') --}}
+                    <div class="p-0 m-0 py-3">
+                        @include('components.search-input', [
+                            'route' => url()->current(),
+                            'placeholder' => 'Search items...',
+                        ])
+                        @include('dashboard.atb.partials.table', [
+                            'TableData' => $TableData,
+                        ])
+                        @if ($TableData->hasPages())
+                            @include('components.pagination', [
+                                'paginator' => $TableData,
+                            ])
+                        @endif
+                    </div>
                 @elseif ($tipe === 'mutasi-proyek')
                     @include('dashboard.atb.partials.mutasi-proyek.table')
                 @elseif ($tipe === 'panjar-unit-alat' || $tipe === 'panjar-proyek')

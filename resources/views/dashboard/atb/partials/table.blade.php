@@ -25,138 +25,123 @@
     }
 @endphp
 
-<div class="ibox-body ms-0 ps-0 table-responsive">
-    <table class="m-0 table table-bordered table-striped" id="table-data">
-        <thead class="table-primary">
-            <tr>
-                <th class="text-center">Nomor SPB</th>
-                <th class="text-center">Tanggal</th>
-                <th class="text-center">Kode</th>
-                <th class="text-center">Supplier</th>
-                <th class="text-center">Sparepart</th>
-                <th class="text-center">Merk</th>
-                <th class="text-center">Part Number</th>
-                <th class="text-center">Quantity</th>
-                <th class="text-center">Satuan</th>
-                <th class="text-center">Harga</th>
-                <th class="text-center">Jumlah Harga</th>
-                <th class="text-center">PPN</th>
-                <th class="text-center">Bruto</th>
-                <th class="text-center">STT</th>
-                <th class="text-center">Dokumentasi</th>
-                <th class="text-center">Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($atbs as $atb)
+<div class="ibox-body ms-0 ps-0">
+    <div class="table-responsive">
+        <table class="m-0 table table-bordered table-striped" id="table-data">
+            <thead class="table-primary">
                 <tr>
-                    <td class="text-center spb-number" data-spb="{{ $atb->spb->nomor }}" data-id="{{ $atb->id }}" data-stt="{{ $atb->surat_tanda_terima }}">{{ $atb->spb->nomor }}</td>
-                    <td class="text-center">{{ \Carbon\Carbon::parse($atb->tanggal)->translatedFormat('l, d F Y') }}</td>
-                    <td class="text-center">{{ $atb->masterDataSparepart->kategoriSparepart->kode }}: {{ $atb->masterDataSparepart->kategoriSparepart->nama }}</td>
-                    <td class="text-center">{{ $atb->masterDataSupplier->nama }}</td>
-                    <td class="text-center">{{ $atb->masterDataSparepart->nama }}</td>
-                    <td class="text-center">{{ $atb->masterDataSparepart->merk }}</td>
-                    <td class="text-center">{{ $atb->masterDataSparepart->part_number }}</td>
-                    <td class="text-center">{{ $atb->quantity }}</td>
-                    <td class="text-center">{{ $atb->detailSpb->satuan ?? '-' }}</td>
-                    <td class="currency-value">{{ formatRibuan($atb->harga) }}</td>
-                    <td class="currency-value">{{ formatRibuan($atb->quantity * $atb->harga) }}</td>
-                    <td class="currency-value">{{ formatRibuan($atb->quantity * $atb->harga * 0.11) }}</td>
-                    <td class="currency-value">{{ formatRibuan($atb->quantity * $atb->harga * 1.11) }}</td>
-                    <td class="text-center stt-cell">
-                        <button class="btn btn-primary mx-1 sttBtn" onclick="showSTTModal('{{ $atb->id }}')">
-                            <i class="bi bi-file-earmark-pdf"></i>
-                        </button>
-                    </td>
-                    <td class="text-center doc-cell" data-id="{{ $atb->id }}">
-                        @php
-                            $storagePath = storage_path('app/public/' . $atb->dokumentasi_foto);
-                            $hasImages = false;
-                            if ($atb->dokumentasi_foto && is_dir($storagePath)) {
-                                $files = glob($storagePath . '/*.{jpg,jpeg,png,heic}', GLOB_BRACE);
-                                $hasImages = !empty($files);
-                            }
-                        @endphp
-                        <button class="btn {{ $hasImages ? 'btn-primary' : 'btn-secondary' }} mx-1" onclick="showDokumentasiModal('{{ $atb->id }}')" {{ !$hasImages ? 'disabled' : '' }}>
-                            <i class="bi bi-images"></i>
-                        </button>
-                    </td>
-                    <td class="text-center action-cell">
-                        <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $atb->id }}">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </td>
+                    <th>Nomor SPB</th>
+                    <th>Tanggal</th>
+                    <th>Kode</th>
+                    <th>Supplier</th>
+                    <th>Sparepart</th>
+                    <th>Merk</th>
+                    <th>Part Number</th>
+                    <th>Quantity</th>
+                    <th>Satuan</th>
+                    <th>Harga</th>
+                    <th>Jumlah Harga</th>
+                    <th>PPN</th>
+                    <th>Bruto</th>
+                    <th>STT</th>
+                    <th>Dokumentasi</th>
+                    <th>Aksi</th>
                 </tr>
-            @endforeach
-        </tbody>
-        <tfoot>
-            <tr class="table-primary">
-                <td class="text-center fw-bold" colspan="10">Grand Total</td>
-                <td class="text-center fw-bold" id="total-harga">0</td>
-                <td class="text-center fw-bold" id="total-ppn">0</td>
-                <td class="text-center fw-bold" id="total-bruto">0</td>
-                <td colspan="3"></td>
-            </tr>
-        </tfoot>
-    </table>
+            </thead>
+            <tbody>
+                @forelse ($TableData as $item)
+                    <tr>
+                        <td class="spb-number" data-spb="{{ $item->spb->nomor }}" data-id="{{ $item->id }}" data-stt="{{ $item->surat_tanda_terima }}">
+                            {{ $item->spb->nomor }}
+                        </td>
+                        <td>{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('l, d F Y') }}</td>
+                        <td>{{ $item->masterDataSparepart->kategoriSparepart->kode }}: {{ $item->masterDataSparepart->kategoriSparepart->nama }}</td>
+                        <td>{{ $item->masterDataSupplier->nama }}</td>
+                        <td>{{ $item->masterDataSparepart->nama }}</td>
+                        <td>{{ $item->masterDataSparepart->merk }}</td>
+                        <td>{{ $item->masterDataSparepart->part_number }}</td>
+                        <td>{{ $item->quantity }}</td>
+                        <td>{{ $item->detailSpb->satuan ?? '-' }}</td>
+                        <td class="currency-value">{{ formatRibuan($item->harga) }}</td>
+                        <td class="currency-value">{{ formatRibuan($item->quantity * $item->harga) }}</td>
+                        <td class="currency-value">{{ formatRibuan($item->quantity * $item->harga * 0.11) }}</td>
+                        <td class="currency-value">{{ formatRibuan($item->quantity * $item->harga * 1.11) }}</td>
+                        <td class="text-center stt-cell">
+                            <button class="btn btn-primary mx-1 sttBtn" onclick="showSTTModal('{{ $item->id }}')">
+                                <i class="bi bi-file-earmark-pdf"></i>
+                            </button>
+                        </td>
+                        <td class="text-center doc-cell" data-id="{{ $item->id }}">
+                            @php
+                                $storagePath = storage_path('app/public/' . $item->dokumentasi_foto);
+                                $hasImages = false;
+                                if ($item->dokumentasi_foto && is_dir($storagePath)) {
+                                    $files = glob($storagePath . '/*.{jpg,jpeg,png,heic}', GLOB_BRACE);
+                                    $hasImages = !empty($files);
+                                }
+                            @endphp
+                            <button class="btn {{ $hasImages ? 'btn-primary' : 'btn-secondary' }} mx-1" onclick="showDokumentasiModal('{{ $item->id }}')" {{ !$hasImages ? 'disabled' : '' }}>
+                                <i class="bi bi-images"></i>
+                            </button>
+                        </td>
+                        <td class="text-center action-cell">
+                            <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item->id }}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td class="text-center py-3 text-muted" colspan="16">
+                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                            No ATB records found
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+            <tfoot>
+                <tr class="table-primary">
+                    <td class="text-center fw-bold" colspan="10">Grand Total</td>
+                    <td class="text-center fw-bold" id="total-harga">0</td>
+                    <td class="text-center fw-bold" id="total-ppn">0</td>
+                    <td class="text-center fw-bold" id="total-bruto">0</td>
+                    <td colspan="3"></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
 </div>
 
-<!-- Include dokumentasi modal -->
 @include('dashboard.atb.partials.modal-dokumentasi')
 
 @push('scripts_3')
     <script>
         $(document).ready(function() {
-            var table = $('#table-data').DataTable({
-                paginate: false,
-                ordering: false,
-                drawCallback: function() {
-                    calculateTotals();
-                }
-            });
-
             function calculateTotals() {
                 let totalHarga = 0;
                 let totalPPN = 0;
                 let totalBruto = 0;
 
-                $('#table-data tbody tr:visible').each(function() {
-                    // Get values from columns
-                    let harga = $(this).find('td:eq(10)').text()
-                        .replace(/\./g, '');
-                    let ppn = $(this).find('td:eq(11)').text()
-                        .replace(/\./g, '');
-                    let bruto = $(this).find('td:eq(12)').text()
-                        .replace(/\./g, '');
+                $('#table-data tbody tr').each(function() {
+                    let harga = $(this).find('td:eq(10)').text().replace(/\./g, '');
+                    let ppn = $(this).find('td:eq(11)').text().replace(/\./g, '');
+                    let bruto = $(this).find('td:eq(12)').text().replace(/\./g, '');
 
-                    // Add to totals
                     totalHarga += parseInt(harga) || 0;
                     totalPPN += parseInt(ppn) || 0;
                     totalBruto += parseInt(bruto) || 0;
                 });
 
-                // Format and display totals
                 $('#total-harga').html(totalHarga.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."));
                 $('#total-ppn').html(totalPPN.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."));
                 $('#total-bruto').html(totalBruto.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."));
             }
 
-            // Initial calculation
             calculateTotals();
-
-            // Add event listeners
-            table.on('search.dt draw.dt', function() {
-                setTimeout(calculateTotals, 100);
-            });
-
-            $('.dataTables_filter input').on('input', function() {
-                setTimeout(calculateTotals, 100);
-            });
 
             // Group rows by SPB number and STT
             function groupRows() {
                 let groups = {};
-
                 $('#table-data tbody tr').each(function() {
                     const $row = $(this);
                     const $spbCell = $row.find('.spb-number');
@@ -179,39 +164,29 @@
                         $spbCell.remove();
                     }
                 });
-
                 return groups;
             }
 
-            // Apply rowspans to grouped cells
             function applyRowspans(groups) {
                 Object.values(groups).forEach(group => {
                     const rowCount = group.rows.length;
                     if (rowCount > 1) {
-                        // Find first instance of this SPB number
                         const $spbCell = group.firstRow.find('.spb-number');
                         const $actionCell = group.firstRow.find('.action-cell');
-                        const $sttCell = group.firstRow.find('.stt-cell');
-
-                        // Set rowspans
                         $spbCell.attr('rowspan', rowCount);
                         $actionCell.attr('rowspan', rowCount);
-                        $sttCell.attr('rowspan', rowCount);
-
-                        // Remove extra cells from subsequent rows
                         group.rows.slice(1).forEach($row => {
-                            $row.find('.action-cell, .stt-cell').remove();
+                            $row.find('.action-cell').remove();
                         });
-
-                        // Update delete button data
                         $actionCell.find('.deleteBtn').data('ids', group.ids.join(','));
                     }
                 });
             }
 
-            // Execute grouping
             const groups = groupRows();
             applyRowspans(groups);
         });
     </script>
+
+    @include('scripts.adjustTableColumnWidthByHeaderText')
 @endpush

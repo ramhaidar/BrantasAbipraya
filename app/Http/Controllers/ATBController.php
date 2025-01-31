@@ -56,87 +56,128 @@ class ATBController extends Controller
 
     private function showAtbPage ( $tipe, $pageTitle, $id_proyek )
     {
-        // Ubah nilai $tipe menjadi huruf kecil dan ganti spasi dengan tanda hubung
+        // Clean and format tipe
         $tipe = strtolower ( str_replace ( ' ', '-', $tipe ) );
 
-        $proyek = Proyek::with ( "users" )->find ( $id_proyek );
+        // Get search query
+        $search = request ()->get ( 'search', '' );
 
-        $proyeks = Proyek::with ( "users" )
-            ->orderBy ( "updated_at", "desc" )
-            ->orderBy ( "id", "desc" )
-            ->get ();
-
-        $rkbs = RKB::with ( "spbs.linkSpbDetailSpb.detailSpb" )->where ( 'id_proyek', $id_proyek )->get ();
-        $spbs = collect ();
-
-        foreach ( $rkbs as $rkb )
-        {
-            $spbs = $spbs->merge ( $rkb->spbs );
-        }
-
-        $filteredSpbs = collect ();
-
-        foreach ( $spbs as $index => $spb )
-        {
-            $allZero = true;
-            foreach ( $spb->linkSpbDetailSpb as $link )
-            {
-                if ( $link->detailSpb->quantity_belum_diterima > 0 )
-                {
-                    $allZero = false;
-                    break;
-                }
-            }
-
-            if ( ! $allZero )
-            {
-                if ( $spb->is_addendum == false && ! isset ( $spb->id_spb_original ) )
-                {
-                    $filteredSpbs->push ( $spb );
-                }
-
-                if ( $spb->is_addendum == true && isset ( $spb->id_spb_original ) )
-                {
-                    $filteredSpbs->push ( $spb );
-                }
-            }
-        }
-
-        // Ambil data ATB dari database dengan relasi
-        $atbs = ATB::with ( [ 'spb', 'masterDataSparepart' ] )
+        // Get base ATB query with relationships
+        $query = ATB::with ( [ 
+            'spb',
+            'masterDataSparepart.kategoriSparepart',
+            'masterDataSupplier',
+            'detailSpb'
+        ] )
             ->where ( 'id_proyek', $id_proyek )
-            ->where ( 'tipe', $tipe )
-            ->orderBy ( 'tanggal', 'desc' )
+            ->where ( 'tipe', 'hutang-unit-alat' );
+
+        // Enhanced search functionality
+        if ( $search )
+        {
+            $query->where ( function ($q) use ($search)
+            {
+                // Existing search criteria
+                $q->whereHas ( 'spb', function ($q) use ($search)
+                {
+                    $q->where ( 'nomor', 'like', "%{$search}%" );
+                } )
+                    ->orWhereHas ( 'masterDataSparepart', function ($q) use ($search)
+                    {
+                        $q->where ( 'nama', 'like', "%{$search}%" )
+                            ->orWhere ( 'part_number', 'like', "%{$search}%" )
+                            ->orWhere ( 'merk', 'like', "%{$search}%" )
+                            ->orWhereHas ( 'kategoriSparepart', function ($q) use ($search)
+                            {
+                                $q->where ( 'kode', 'like', "%{$search}%" )
+                                  ->orWhere ( 'nama', 'like', "%{$search}%" ); // Add nama search
+                            });
+                    } )
+                    ->orWhereHas ( 'masterDataSupplier', function ($q) use ($search)
+                    {
+                        $q->where ( 'nama', 'like', "%{$search}%" );
+                    } )
+                    ->orWhereHas ( 'detailSpb', function ($q) use ($search)
+                    {
+                        $q->where ( 'satuan', 'like', "%{$search}%" );
+                    } );
+
+                // Search in numeric fields (convert search to number if possible)
+                if ( is_numeric ( str_replace ( [ ',', '.' ], '', $search ) ) )
+                {
+                    $numericSearch = (float) str_replace ( [ ',', '.' ], '', $search );
+
+                    // Search in harga
+                    $q->orWhere ( 'harga', 'like', "%{$numericSearch}%" )
+                        // Search in calculated fields using raw SQL
+                        ->orWhereRaw ( '(quantity * harga) like ?', [ "%{$numericSearch}%" ] )
+                        ->orWhereRaw ( '(quantity * harga * 0.11) like ?', [ "%{$numericSearch}%" ] )
+                        ->orWhereRaw ( '(quantity * harga * 1.11) like ?', [ "%{$numericSearch}%" ] );
+                }
+            } );
+        }
+
+        // Get paginated results
+        $TableData = $query->orderBy ( 'tanggal', 'desc' )
             ->orderBy ( 'updated_at', 'desc' )
-            ->get ();
+            ->paginate ( 10 )
+            ->withQueryString ();
 
-        // Initialize $spareparts as null
+        // Get required data
+        $proyek  = Proyek::with ( "users" )->findOrFail ( $id_proyek );
+        $proyeks = Proyek::with ( "users" )->orderByDesc ( "updated_at" )->orderByDesc ( "id" )->get ();
+
+        // Get SPBs if needed
+        $spbs = collect ();
+        if ( $tipe === 'hutang-unit-alat' )
+        {
+            $rkbs = RKB::with ( "spbs.linkSpbDetailSpb.detailSpb" )
+                ->where ( 'id_proyek', $id_proyek )
+                ->get ();
+
+            foreach ( $rkbs as $rkb )
+            {
+                $filteredSpbs = $rkb->spbs->filter ( function ($spb)
+                {
+                    $hasRemainingQuantity = $spb->linkSpbDetailSpb->some ( function ($link)
+                    {
+                        return $link->detailSpb->quantity_belum_diterima > 0;
+                    } );
+
+                    return $hasRemainingQuantity &&
+                        ( ( ! $spb->is_addendum && ! isset ( $spb->id_spb_original ) ) ||
+                            ( $spb->is_addendum && isset ( $spb->id_spb_original ) ) );
+                } );
+
+                $spbs = $spbs->merge ( $filteredSpbs );
+            }
+        }
+
+        // Get additional data based on type
         $spareparts = null;
-
-        // If type is panjar, get spareparts data
         if ( $tipe === 'panjar-unit-alat' || $tipe === 'panjar-proyek' )
         {
-            $spareparts = MasterDataSparepart::with ( [ 'KategoriSparepart' ] )->orderBy ( 'updated_at', 'desc' )
+            $spareparts = MasterDataSparepart::with ( 'KategoriSparepart' )
+                ->orderByDesc ( 'updated_at' )
                 ->get ();
         }
 
-        // Get KategoriSparepart data
-        $kategoriSpareparts = KategoriSparepart::all ();
-
-        // Get masterDataSupplier data
+        // Get common data
+        $kategoriSpareparts  = KategoriSparepart::all ();
         $masterDataSuppliers = MasterDataSupplier::all ();
 
         return view ( "dashboard.atb.atb", [ 
             "proyek"             => $proyek,
             "proyeks"            => $proyeks,
-            "spbs"               => $filteredSpbs,
-            "headerPage"         => $proyek->nama,
-            "page"               => $pageTitle,
+            "spbs"               => $spbs,
             "tipe"               => $tipe,
-            "atbs"               => $atbs,
+            "TableData"          => $TableData,
             "suppliers"          => $masterDataSuppliers,
             "spareparts"         => $spareparts,
-            "kategoriSpareparts" => $kategoriSpareparts // Add this line
+            "kategoriSpareparts" => $kategoriSpareparts,
+            "headerPage"         => $proyek->nama,
+            "page"               => $pageTitle,
+            "search"             => $search
         ] );
     }
 

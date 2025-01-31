@@ -67,17 +67,19 @@ class ATBController extends Controller
             'spb',
             'masterDataSparepart.kategoriSparepart',
             'masterDataSupplier',
-            'detailSpb'
+            'detailSpb',
+            'apbMutasi', // Add this relationship
+            'asalProyek' // Add this relationship
         ] )
             ->where ( 'id_proyek', $id_proyek )
-            ->where ( 'tipe', 'hutang-unit-alat' );
+            ->where ( 'tipe', $tipe ); // Changed from hardcoded 'hutang-unit-alat' to dynamic $tipe
 
         // Enhanced search functionality
         if ( $search )
         {
             $query->where ( function ($q) use ($search)
             {
-                // Existing search criteria
+                // Existing search criteria for non-numeric searches
                 $q->whereHas ( 'spb', function ($q) use ($search)
                 {
                     $q->where ( 'nomor', 'like', "%{$search}%" );
@@ -90,8 +92,8 @@ class ATBController extends Controller
                             ->orWhereHas ( 'kategoriSparepart', function ($q) use ($search)
                             {
                                 $q->where ( 'kode', 'like', "%{$search}%" )
-                                  ->orWhere ( 'nama', 'like', "%{$search}%" ); // Add nama search
-                            });
+                                    ->orWhere ( 'nama', 'like', "%{$search}%" );
+                            } );
                     } )
                     ->orWhereHas ( 'masterDataSupplier', function ($q) use ($search)
                     {
@@ -100,16 +102,33 @@ class ATBController extends Controller
                     ->orWhereHas ( 'detailSpb', function ($q) use ($search)
                     {
                         $q->where ( 'satuan', 'like', "%{$search}%" );
+                    } )
+                    ->orWhereHas ( 'asalProyek', function ($q) use ($search)
+                    {
+                        $q->where ( 'nama', 'like', "%{$search}%" );
+                    } )
+                    // Add search for satuan in Saldo
+                    ->orWhereHas ( 'saldo', function ($q) use ($search)
+                    {
+                        $q->where ( 'satuan', 'like', "%{$search}%" );
                     } );
 
-                // Search in numeric fields (convert search to number if possible)
+                // For numeric searches
                 if ( is_numeric ( str_replace ( [ ',', '.' ], '', $search ) ) )
                 {
-                    $numericSearch = (float) str_replace ( [ ',', '.' ], '', $search );
+                    $numericSearch = str_replace ( [ ',', '.' ], '', $search );
 
-                    // Search in harga
+                    // Search in ATB quantity (Quantity Diterima)
+                    $q->orWhere ( 'quantity', 'like', "%{$numericSearch}%" );
+
+                    // Search in APB Mutasi quantity (Quantity Dikirim)
+                    $q->orWhereHas ( 'apbMutasi', function ($q) use ($numericSearch)
+                    {
+                        $q->where ( 'quantity', 'like', "%{$numericSearch}%" );
+                    } );
+
+                    // Search in other numeric fields
                     $q->orWhere ( 'harga', 'like', "%{$numericSearch}%" )
-                        // Search in calculated fields using raw SQL
                         ->orWhereRaw ( '(quantity * harga) like ?', [ "%{$numericSearch}%" ] )
                         ->orWhereRaw ( '(quantity * harga * 0.11) like ?', [ "%{$numericSearch}%" ] )
                         ->orWhereRaw ( '(quantity * harga * 1.11) like ?', [ "%{$numericSearch}%" ] );

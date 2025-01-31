@@ -45,33 +45,33 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($atbs as $atb)
+                @foreach ($TableData as $item)
                     <tr>
-                        <td class="text-center">{{ \Carbon\Carbon::parse($atb->tanggal)->translatedFormat('l, d F Y') }}</td>
-                        <td class="text-center">{{ $atb->masterDataSparepart->kategoriSparepart->kode }}: {{ $atb->masterDataSparepart->kategoriSparepart->nama }}</td>
-                        <td class="text-center">{{ $atb->masterDataSupplier->nama ?? '-' }}</td>
-                        <td class="text-center">{{ $atb->masterDataSparepart->nama }}</td>
-                        <td class="text-center">{{ $atb->masterDataSparepart->merk }}</td>
-                        <td class="text-center">{{ $atb->masterDataSparepart->part_number }}</td>
-                        <td class="text-center">{{ $atb->quantity }}</td>
-                        <td class="text-center">{{ $atb->saldo->satuan }}</td>
-                        <td class="currency-value">{{ formatRibuan($atb->harga) }}</td>
-                        <td class="currency-value">{{ formatRibuan($atb->quantity * $atb->harga) }}</td>
-                        <td class="text-center doc-cell" data-id="{{ $atb->id }}">
+                        <td class="text-center">{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('l, d F Y') }}</td>
+                        <td class="text-center">{{ $item->masterDataSparepart->kategoriSparepart->kode }}: {{ $item->masterDataSparepart->kategoriSparepart->nama }}</td>
+                        <td class="text-center">{{ $item->masterDataSupplier->nama ?? '-' }}</td>
+                        <td class="text-center">{{ $item->masterDataSparepart->nama }}</td>
+                        <td class="text-center">{{ $item->masterDataSparepart->merk }}</td>
+                        <td class="text-center">{{ $item->masterDataSparepart->part_number }}</td>
+                        <td class="text-center">{{ $item->quantity }}</td>
+                        <td class="text-center">{{ $item->saldo->satuan }}</td>
+                        <td class="currency-value">{{ formatRibuan($item->harga) }}</td>
+                        <td class="currency-value">{{ formatRibuan($item->quantity * $item->harga) }}</td>
+                        <td class="text-center doc-cell" data-id="{{ $item->id }}">
                             @php
-                                $storagePath = storage_path('app/public/' . $atb->dokumentasi_foto);
+                                $storagePath = storage_path('app/public/' . $item->dokumentasi_foto);
                                 $hasImages = false;
-                                if ($atb->dokumentasi_foto && is_dir($storagePath)) {
+                                if ($item->dokumentasi_foto && is_dir($storagePath)) {
                                     $files = glob($storagePath . '/*.{jpg,jpeg,png,heic}', GLOB_BRACE);
                                     $hasImages = !empty($files);
                                 }
                             @endphp
-                            <button class="btn {{ $hasImages ? 'btn-primary' : 'btn-secondary' }} mx-1" onclick="showDokumentasiModal('{{ $atb->id }}')" {{ !$hasImages ? 'disabled' : '' }}>
+                            <button class="btn {{ $hasImages ? 'btn-primary' : 'btn-secondary' }} mx-1" onclick="showDokumentasiModal('{{ $item->id }}')" {{ !$hasImages ? 'disabled' : '' }}>
                                 <i class="bi bi-images"></i>
                             </button>
                         </td>
                         <td class="text-center action-cell">
-                            <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $atb->id }}">
+                            <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item->id }}">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </td>
@@ -94,36 +94,36 @@
 
 @push('scripts_3')
     <script>
-        $(document).ready(function() {
-            var table = $('#table-data').DataTable({
-                paginate: false,
-                ordering: false,
-                drawCallback: function() {
-                    calculateTotal();
-                }
+        document.addEventListener('DOMContentLoaded', function() {
+            calculateTotal();
+
+            // Add search functionality
+            document.querySelector('#tableSearch').addEventListener('input', function(e) {
+                const searchText = e.target.value.toLowerCase();
+                const rows = document.querySelectorAll('#table-data tbody tr');
+
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(searchText) ? '' : 'none';
+                });
+
+                calculateTotal();
             });
 
             function calculateTotal() {
                 let total = 0;
-                $('#table-data tbody tr:visible').each(function() {
-                    let value = $(this).find('td:eq(9)').text()
-                        .replace(/\./g, '');
+                const visibleRows = document.querySelectorAll('#table-data tbody tr:not([style*="display: none"])');
+
+                visibleRows.forEach(row => {
+                    const value = row.cells[9].textContent
+                        .replace(/\./g, '')
+                        .trim();
                     total += parseInt(value) || 0;
                 });
 
-                let formattedTotal = total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-                $('#total-harga').html(formattedTotal);
+                const formattedTotal = total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                document.getElementById('total-harga').textContent = formattedTotal;
             }
-
-            calculateTotal();
-
-            table.on('search.dt draw.dt', function() {
-                setTimeout(calculateTotal, 100);
-            });
-
-            $('.dataTables_filter input').on('input', function() {
-                setTimeout(calculateTotal, 100);
-            });
         });
     </script>
 @endpush

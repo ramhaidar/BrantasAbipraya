@@ -687,6 +687,13 @@ Route::middleware ( 'auth' )
             [ MasterDataAlatController::class, 'destroy' ]
         )->where ( 'id', '[0-9]+' )
             ->name ( 'master_data_alat.destroy' );
+
+        Route::get (
+            '/api/alat/history/{id}',
+            [ MasterDataAlatController::class, 'getHistory' ]
+        )
+            ->where ( 'id', '[0-9]+' )
+            ->name ( 'master_data_alat.history' );
     } );
 
 // Rute Master Data Sparepart [MasterDataSparepartController]

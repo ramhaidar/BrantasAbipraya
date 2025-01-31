@@ -45,6 +45,9 @@
 
     <!-- Modal for Delete Confirmation -->
     @include('dashboard.masterdata.alat.partials.modal-delete')
+    
+    <!-- Modal for History -->
+    @include('dashboard.masterdata.alat.partials.modal-history')
 @endsection
 
 @push('scripts_2')

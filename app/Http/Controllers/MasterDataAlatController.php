@@ -175,4 +175,15 @@ class MasterDataAlatController extends Controller
         ] );
     }
 
+    public function getHistory ( $id )
+    {
+        $alat = MasterDataAlat::findOrFail ( $id );
+        return response ()->json (
+            $alat->alatProyek ()
+                ->with ( 'proyek' )
+                ->orderBy ( 'assigned_at', 'desc' )
+                ->get ()
+        );
+    }
+
 }

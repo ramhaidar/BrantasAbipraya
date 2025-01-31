@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\RKB;
 use App\Models\SPB;
+use App\Models\RKB;
 use App\Models\Proyek;
 use Illuminate\Http\Request;
 use App\Models\MasterDataSupplier;
@@ -11,48 +11,40 @@ use App\Http\Controllers\Controller;
 
 class DetailSPBProyekController extends Controller
 {
-    public function index ( $id )
+    public function index ( Request $request, $id )
     {
-        $proyeks = Proyek::with ( "users" )
-            ->orderBy ( "updated_at", "desc" )
-            ->orderBy ( "id", "desc" )
-            ->get ();
-        $rkb     = RKB::with ( [ 
-            "linkAlatDetailRkbs.masterDataAlat",
-            "linkAlatDetailRkbs.linkRkbDetails.detailRkbGeneral.kategoriSparepart",
-            "linkAlatDetailRkbs.linkRkbDetails.detailRkbGeneral.masterDataSparepart" => fn ( $query ) => $query->orderBy ( 'nama' ),
-            "linkAlatDetailRkbs.linkRkbDetails.detailRkbUrgent.kategoriSparepart",
-            "linkAlatDetailRkbs.linkRkbDetails.detailRkbUrgent.masterDataSparepart"  => fn ( $query ) => $query->orderBy ( 'nama' ),
-            "linkAlatDetailRkbs.timelineRkbUrgents",
-            "linkAlatDetailRkbs.lampiranRkbUrgent",
-        ] )->findOrFail ( $id );
+        $rkb = RKB::findOrFail ( $id );
 
-        $totalItems = $rkb->linkAlatDetailRkbs->sum ( function ($detail1)
-        {
-            return $detail1->linkRkbDetails->sum ( function ($detail2)
-            {
-                $remainder = $detail2->detailRkbUrgent?->quantity_remainder ??
-                    $detail2->detailRkbGeneral?->quantity_remainder ?? 0;
-                return $remainder > 0 ? 1 : 0;
-            } );
-        } );
-
-        $riwayatSpbs = SPB::with (
-            [ 'linkSpbDetailSpb.detailSpb' ]
-        )
+        $spbs = SPB::with ( [ 
+            'linkSpbDetailSpb.detailSpb.masterDataAlat',
+            'linkSpbDetailSpb.detailSpb.masterDataSparepart.kategoriSparepart',
+            'linkSpbDetailSpb.detailSpb.atbs',
+            'masterDataSupplier',
+        ] )
             ->where ( 'is_addendum', false )
             ->whereIn ( 'id', $rkb->spbs ()->pluck ( 'id_spb' ) )
             ->get ();
 
-        return view ( 'dashboard.spb.proyek.detail.detail', [ 
-            'proyeks'     => $proyeks,
-            'rkb'         => $rkb,
-            'supplier'    => MasterDataSupplier::all (),
-            'totalItems'  => $totalItems,
-            'riwayatSpbs' => $riwayatSpbs,
+        // Create a simple paginator from collection with 10 items per page
+        $TableData = new \Illuminate\Pagination\LengthAwarePaginator(
+            $spbs->forPage ( $request->get ( 'page', 1 ), 10 ),
+            $spbs->count (),
+            10,
+            $request->get ( 'page', 1 ),
+            [ 'path' => $request->url (), 'query' => $request->query () ]
+        );
 
-            'headerPage'  => "SPB Proyek",
-            'page'        => 'Detail SPB Proyek [' . $rkb->proyek->nama . ' | ' . $rkb->nomor . ']',
+        $proyeks = auth ()->user ()->role !== 'Pegawai'
+            ? Proyek::with ( "users" )->latest ( "updated_at" )->latest ( "id" )->get ()
+            : [];
+
+        return view ( 'dashboard.spb.proyek.detail.detail', [ 
+            'headerPage' => "SPB Proyek",
+            'page'       => "Detail SPB Proyek [{$rkb->proyek->nama} | {$rkb->nomor}]",
+            'proyeks'    => $proyeks,
+            'TableData'  => $TableData,
+            'rkb'        => $rkb,
+            'supplier'   => MasterDataSupplier::all (),
         ] );
     }
 }

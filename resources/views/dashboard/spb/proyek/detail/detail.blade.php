@@ -32,7 +32,18 @@
                     </div> --}}
                 </div>
 
-                @include('dashboard.spb.proyek.detail.partials.table')
+                {{-- @include('dashboard.spb.proyek.detail.partials.table') --}}
+
+                <div class="p-0 m-0 py-3">
+                    @include('dashboard.spb.proyek.detail.partials.table', [
+                        'TableData' => $TableData,
+                    ])
+                    @if ($TableData->hasPages())
+                        @include('components.pagination', [
+                            'paginator' => $TableData,
+                        ])
+                    @endif
+                </div>
 
             </div>
         </div>

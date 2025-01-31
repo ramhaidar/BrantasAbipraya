@@ -63,7 +63,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($TableData as $item)
+                @forelse ($TableData as $item)
                     <tr>
                         <td class="text-center">{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('l, d F Y') }}</td>
                         <td class="text-center">{{ $item->asalProyek->nama ?? '-' }}</td>
@@ -113,7 +113,14 @@
                             @endif
                         </td>
                     </tr>
-                @endforeach
+                @empty
+                    <tr>
+                        <td class="text-center py-3 text-muted" colspan="16">
+                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                            No ATB records found
+                        </td>
+                    </tr>
+                @endforelse
             </tbody>
             <tfoot>
                 <tr class="table-primary">

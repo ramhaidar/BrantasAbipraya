@@ -1,12 +1,15 @@
 <?php
 use App\Http\Middleware\CheckRole;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Route;
+use App\Exports\DetailRKBGeneralExport;
 use App\Http\Controllers\APBController;
 use App\Http\Controllers\ATBController;
 use App\Http\Controllers\SPBController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SaldoController;
+use App\Http\Controllers\TestController2;
 use App\Http\Controllers\ProyekController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\SessionController;
@@ -34,13 +37,16 @@ use App\Http\Controllers\TimelineEvaluasiUrgentController;
 use App\Http\Controllers\EvaluasiDetailRKBUrgentController;
 use App\Http\Controllers\EvaluasiDetailRKBGeneralController;
 use App\Http\Controllers\LaporanLNPBBulanBerjalanController;
-use App\Exports\DetailRKBGeneralExport;
-use Maatwebsite\Excel\Facades\Excel;
 
 Route::get (
     '/test',
     [ TestController::class, 'index' ]
 )->name ( 'test' );
+
+Route::get (
+    '/test2',
+    [ TestController2::class, 'index' ]
+)->name ( 'test2' );
 
 // Rute untuk Halaman Landing (HomePage)
 Route::get ( '/', function ()
@@ -69,9 +75,9 @@ Route::middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )->group ( func
 } );
 
 // Rute Dashboard [DashboardController]
-Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->middleware([CheckRole::class . ':Admin,Pegawai,Boss'])
-    ->name('dashboard');
+Route::get ( '/dashboard', [ DashboardController::class, 'index' ] )
+    ->middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )
+    ->name ( 'dashboard' );
 
 // Rute Users [UserController]
 Route::prefix ( 'users' )->middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )->group ( function ()

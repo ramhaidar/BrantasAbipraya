@@ -26,3 +26,6 @@ resources/views/dashboard/laporan/bulan_berjalan/partials/table.blade copy.php
 resources/views/dashboard/laporan/bulan_berjalan/partials/table.blade copy 2.php
 resources/views/test
 app/Http/Controllers/TestController.php
+resources/views/test2.blade.php
+resources/views/dashboardx.blade.php
+app/Http/Controllers/TestController2.php

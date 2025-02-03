@@ -193,9 +193,10 @@ class DashboardController extends Controller
             ];
         }
 
-        return view ( 'dashboard', [ 
+        return view ( 'dashboard.dashboard.dashboard', [ 
             'headerPage'             => 'Dashboard',
             'page'                   => 'Dashboard',
+
             'proyeks'                => $proyeks,
             'selectedProject'        => $id_proyek,
             'totalATB'               => calculateOverallTotal ( $atbData ),

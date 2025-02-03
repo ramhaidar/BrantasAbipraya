@@ -10,329 +10,110 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 class DashboardController extends Controller
 {
-    public function index ()
+    public function index ( Request $request )
     {
-        $user = Auth::user ();
-        // if ( $user->role === 'Admin' )
-        // {
-        //     $proyeks                = Proyek::with ( "users" )->orderByDesc ( "updated_at" )->get ();
-        //     $totalHargaBarangMasuk  = ATB::get ()->sum ( function ($atb)
-        //     {
-        //         return $atb->net * $atb->quantity;
-        //     } );
-        //     $totalHargaBarangKeluar = APB::with ( 'saldo' )->get ()->sum ( function ($apb)
-        //     {
-        //         return $apb->saldo->net * $apb->quantity;
-        //     } );
-        //     $totalSemuaUser         = User::whereIn ( 'role', [ 'Pegawai', 'Boss' ] )->count ();
-        //     $atbsHabis              = ATB::with ( 'saldo.apb', 'proyek', 'komponen' )->get ()->map ( function ($atb)
-        //     {
-        //         $totalQuantityAPB        = $atb->saldo->apb->sum ( 'quantity' );
-        //         $atb->remaining_quantity = $atb->quantity - $totalQuantityAPB;
-        //         return $atb;
-        //     } )->filter ( function ($atb)
-        //     {
-        //         return $atb->remaining_quantity <= 10;
-        //     } );
-        //     $totalHargaSemuaBarang = Saldo::get ()->sum ( function ($saldo)
-        //     {
-        //         return $saldo->net * $saldo->current_quantity;
-        //     } );
-        //     $totalSemuaAlat        = Alat::count ();
-        // }
-        // elseif ( $user->role === 'Boss' )
-        // {
-        //     $proyeks               = $user->proyek ()->with ( "users" )->get ();
-        //     $totalProyek           = $proyeks->count ();
-        //     $proyekIds             = $proyeks->pluck ( 'id' )->toArray ();
-        //     $totalHargaBarangMasuk = ATB::whereIn ( 'id_proyek', $proyekIds )->get ()->sum ( function ($atb)
-        //     {
-        //         return ( $atb->harga ?? 0 ) * ( $atb->quantity ?? 0 );
-        //     } );
-
-        //     $saldoIds               = ATB::whereIn ( 'id_proyek', $proyekIds )->pluck ( 'id_saldo' )->toArray ();
-        //     $totalHargaBarangKeluar = APB::whereIn ( 'id_saldo', $saldoIds )->with ( 'saldo' )->get ()->sum ( function ($apb)
-        //     {
-        //         return $apb->saldo->net * $apb->quantity;
-        //     } );
-        //     $atbsHabis              = ATB::whereIn ( 'id_proyek', $proyekIds )->with ( 'saldo.apb', 'proyek', 'komponen' )->get ()->map ( function ($atb)
-        //     {
-        //         $totalQuantityAPB        = $atb->saldo->apb->sum ( 'quantity' );
-        //         $atb->remaining_quantity = $atb->quantity - $totalQuantityAPB;
-        //         return $atb;
-        //     } )->filter ( function ($atb)
-        //     {
-        //         return $atb->remaining_quantity <= 10;
-        //     } );
-        //     $totalHargaSemuaBarang = Saldo::whereIn ( 'id', $saldoIds )->get ()->sum ( function ($saldo)
-        //     {
-        //         return $saldo->net * $saldo->current_quantity;
-        //     } );
-        //     $totalSemuaAlat        = Alat::whereIn ( 'id_user', function ($query) use ($proyekIds)
-        //     {
-        //         $query->select ( 'id_user' )->from ( 'user_proyek' )->whereIn ( 'id_proyek', $proyekIds );
-        //     } )->count ();
-        // }
-        // elseif ( $user->role === 'Pegawai' )
-        // {
-        //     $proyeks                = $user->proyek ()->with ( "users" )->orderBy ( "updated_at", "asc" )->orderBy ( "id", "asc" )->get ();
-        //     $proyekIds              = $proyeks->pluck ( 'id' )->toArray ();
-        //     $totalHargaBarangMasuk  = ATB::whereIn ( 'id_proyek', $proyekIds )->get ()->sum ( function ($atb)
-        //     {
-        //         return $atb->net * $atb->quantity;
-        //     } );
-        //     $saldoIds               = ATB::whereIn ( 'id_proyek', $proyekIds )->pluck ( 'id_saldo' )->toArray ();
-        //     $totalHargaBarangKeluar = APB::whereIn ( 'id_saldo', $saldoIds )->with ( 'saldo' )->get ()->sum ( function ($apb)
-        //     {
-        //         return $apb->saldo->net * $apb->quantity;
-        //     } );
-        //     $atbsHabis              = ATB::with ( [ 'saldo.apb', 'proyek', 'komponen', 'masterData' ] )->get ()->map ( function ($atb)
-        //     {
-        //         $totalQuantityAPB        = $atb->saldo->apb->sum ( 'quantity' );
-        //         $atb->remaining_quantity = $atb->quantity - $totalQuantityAPB;
-        //         return $atb;
-        //     } )->filter ( function ($atb)
-        //     {
-        //         return $atb->masterData && $atb->remaining_quantity < $atb->masterData->buffer_stock;
-        //     } );
-        //     $totalHargaSemuaBarang = Saldo::whereIn ( 'id', $saldoIds )->get ()->sum ( function ($saldo)
-        //     {
-        //         return $saldo->net * $saldo->current_quantity;
-        //     } );
-        //     $totalSemuaAlat        = Alat::where ( 'id_user', $user->id )->count ();
-        // }
-
         $proyeks = Proyek::with ( "users" )
             ->orderBy ( "updated_at", "desc" )
             ->orderBy ( "id", "desc" )
             ->get ();
 
-        return view ( 'dashboard', [ 
-            'headerPage'             => 'Dashboard',
-            'page'                   => 'Dashboard',
-            'proyeks'                => $proyeks,
-            'totalHargaBarangMasuk'  => 0,
-            'totalHargaBarangKeluar' => 0,
-            'totalHargaSemuaBarang'  => 0,
-            'totalSemuaUser'         => $totalSemuaUser ?? 0,
-            'atbsHabis'              => [],
-            'totalSemuaAlat'         => 0,
-            'totalProyek'            => $totalProyek ?? 0,
-        ] );
-    }
-
-    public function filterByProyek ( $id )
-    {
         $user      = Auth::user ();
-        $projectId = $id;
-        if ( $projectId === 'all' )
+        $id_proyek = $request->query ( 'id_proyek' );
+
+        // Base queries
+        $atbQuery   = ATB::query ();
+        $apbQuery   = APB::with ( 'saldo' );
+        $saldoQuery = Saldo::query ();
+
+        // Apply project filter if provided
+        if ( $id_proyek )
         {
-            if ( $user->role === 'Admin' )
+            // Check authorization
+            if ( $user->role !== 'Admin' && ! $user->proyek ()->where ( 'proyek.id', $id_proyek )->exists () )
             {
-                $totalHargaBarangMasuk  = ATB::get ()->sum ( function ($atb)
-                {
-                    return $atb->net * $atb->quantity;
-                } );
-                $totalHargaBarangKeluar = APB::with ( 'saldo' )->get ()->sum ( function ($apb)
-                {
-                    return $apb->saldo->net * $apb->quantity;
-                } );
-
-                // Memperbaiki perhitungan total user dengan role Pegawai dan Boss saja
-                $totalSemuaUser = User::whereIn ( 'role', [ 'Pegawai', 'Boss' ] )->count ();
-
-                $atbsHabis = ATB::with ( 'saldo.apb', 'proyek', 'komponen', 'masterData' )->get ()->map ( function ($atb)
-                {
-                    $totalQuantityAPB        = $atb->saldo->apb->sum ( 'quantity' );
-                    $atb->remaining_quantity = $atb->quantity - $totalQuantityAPB;
-                    return $atb;
-                } )->filter ( function ($atb)
-                {
-                    return $atb->remaining_quantity <= 10;
-                } )->values ()->toArray ();
-
-                $totalHargaSemuaBarang = Saldo::get ()->sum ( function ($saldo)
-                {
-                    return $saldo->net * $saldo->current_quantity;
-                } );
-                $totalSemuaAlat        = Alat::count ();
-                $totalProyek           = Proyek::count ();
+                abort ( 403, 'Unauthorized access to this project' );
             }
-            elseif ( $user->role === 'Boss' )
+
+            $atbQuery->where ( 'id_proyek', $id_proyek );
+            $apbQuery->where ( 'id_proyek', $id_proyek ); // Added APB project filter
+            $saldoQuery->whereHas ( 'atb', function ($query) use ($id_proyek)
             {
-                $proyeks                = $user->proyek ()->with ( "users" )->get ();
-                $proyekIds              = $proyeks->pluck ( 'id' )->toArray ();
-                $totalProyek            = $proyeks->count ();
-                $totalHargaBarangMasuk  = ATB::whereIn ( 'id_proyek', $proyekIds )->get ()->sum ( function ($atb)
-                {
-                    return $atb->net * $atb->quantity;
-                } );
-                $saldoIds               = ATB::whereIn ( 'id_proyek', $proyekIds )->pluck ( 'id_saldo' )->toArray ();
-                $totalHargaBarangKeluar = APB::whereIn ( 'id_saldo', $saldoIds )->with ( 'saldo' )->get ()->sum ( function ($apb)
-                {
-                    return $apb->saldo->net * $apb->quantity;
-                } );
-                $atbsHabis              = ATB::whereIn ( 'id_proyek', $proyekIds )->with ( 'saldo.apb', 'proyek', 'komponen', 'masterData' )->get ()->map ( function ($atb)
-                {
-                    $totalQuantityAPB        = $atb->saldo->apb->sum ( 'quantity' );
-                    $atb->remaining_quantity = $atb->quantity - $totalQuantityAPB;
-                    return $atb;
-                } )->filter ( function ($atb)
-                {
-                    return $atb->remaining_quantity <= 10;
-                } )->values ()->toArray ();
-                $totalHargaSemuaBarang = Saldo::whereIn ( 'id', $saldoIds )->get ()->sum ( function ($saldo)
-                {
-                    return $saldo->net * $saldo->current_quantity;
-                } );
-                $totalSemuaAlat        = Alat::whereIn ( 'id_user', function ($query) use ($proyekIds)
-                {
-                    $query->select ( 'id_user' )->from ( 'user_proyek' )->whereIn ( 'id_proyek', $proyekIds );
-                } )->count ();
-            }
-            elseif ( $user->role === 'Pegawai' )
-            {
-                $proyeks                = $user->proyek ()->with ( "users" )->get ();
-                $proyekIds              = $proyeks->pluck ( 'id' )->toArray ();
-                $totalHargaBarangMasuk  = ATB::whereIn ( 'id_proyek', $proyekIds )->get ()->sum ( function ($atb)
-                {
-                    return $atb->net * $atb->quantity;
-                } );
-                $saldoIds               = ATB::whereIn ( 'id_proyek', $proyekIds )->pluck ( 'id_saldo' )->toArray ();
-                $totalHargaBarangKeluar = APB::whereIn ( 'id_saldo', $saldoIds )->with ( 'saldo' )->get ()->sum ( function ($apb)
-                {
-                    return $apb->saldo->net * $apb->quantity;
-                } );
-                $atbsHabis              = ATB::whereIn ( 'id_proyek', $proyekIds )->with ( 'saldo.apb', 'proyek', 'komponen', 'masterData' )->get ()->map ( function ($atb)
-                {
-                    $totalQuantityAPB        = $atb->saldo->apb->sum ( 'quantity' );
-                    $atb->remaining_quantity = $atb->quantity - $totalQuantityAPB;
-                    return $atb;
-                } )->filter ( function ($atb)
-                {
-                    return $atb->masterData && $atb->remaining_quantity < $atb->masterData->buffer_stock;
-                } )->values ()->toArray ();
-                $totalHargaSemuaBarang = Saldo::whereIn ( 'id', $saldoIds )->get ()->sum ( function ($saldo)
-                {
-                    return $saldo->net * $saldo->current_quantity;
-                } );
-                $totalSemuaAlat        = Alat::where ( 'id_user', $user->id )->count ();
-            }
+                $query->where ( 'id_proyek', $id_proyek );
+            } );
         }
-        else
+        elseif ( $user->role !== 'Admin' )
         {
-            if ( $user->role === 'Admin' )
+            // If not admin, only show user's projects
+            $userProyekIds = $user->proyek ()->pluck ( 'id' )->toArray ();
+            $atbQuery->whereIn ( 'id_proyek', $userProyekIds );
+            $apbQuery->whereIn ( 'id_proyek', $userProyekIds ); // Added APB projects filter
+            $saldoQuery->whereHas ( 'atb', function ($query) use ($userProyekIds)
             {
-                $totalHargaBarangMasuk  = ATB::where ( 'id_proyek', $projectId )->get ()->sum ( function ($atb)
-                {
-                    return $atb->net * $atb->quantity;
-                } );
-                $saldoIds               = ATB::where ( 'id_proyek', $projectId )->pluck ( 'id_saldo' )->toArray ();
-                $totalHargaBarangKeluar = APB::whereIn ( 'id_saldo', $saldoIds )->with ( 'saldo' )->get ()->sum ( function ($apb)
-                {
-                    return $apb->saldo->net * $apb->quantity;
-                } );
-                $totalHargaSemuaBarang  = Saldo::whereIn ( 'id', $saldoIds )->get ()->sum ( function ($saldo)
-                {
-                    return $saldo->net * $saldo->current_quantity;
-                } );
-                $atbsHabis              = ATB::where ( 'id_proyek', $projectId )->with ( 'saldo.apb', 'proyek', 'komponen', 'masterData' )->get ()->map ( function ($atb)
-                {
-                    $totalQuantityAPB        = $atb->saldo->apb->sum ( 'quantity' );
-                    $atb->remaining_quantity = $atb->quantity - $totalQuantityAPB;
-                    return $atb;
-                } )->filter ( function ($atb)
-                {
-                    return $atb->remaining_quantity <= 10;
-                } )->values ()->toArray ();
-                $totalSemuaAlat = Alat::where ( 'id_proyek', $projectId )->count ();
-                $totalSemuaUser = User::whereHas ( 'proyek', function ($query) use ($projectId)
-                {
-                    $query->where ( 'proyek.id', $projectId );
-                } )->count ();
-                $totalProyek    = Proyek::where ( 'proyek.id', $projectId )->count ();
-            }
-            elseif ( $user->role === 'Boss' )
-            {
-                $proyeks   = $user->proyek ()->where ( 'proyek.id', $projectId )->with ( "users" )->get ();
-                $proyekIds = $proyeks->pluck ( 'id' )->toArray ();
-                if ( $proyeks->isEmpty () )
-                {
-                    return response ()->json ( [ 'error' => 'Anda tidak memiliki akses ke proyek ini' ], 403 );
-                }
-                $totalHargaBarangMasuk  = ATB::where ( 'id_proyek', $projectId )->get ()->sum ( function ($atb)
-                {
-                    return $atb->net * $atb->quantity;
-                } );
-                $saldoIds               = ATB::where ( 'id_proyek', $projectId )->pluck ( 'id_saldo' )->toArray ();
-                $totalHargaBarangKeluar = APB::whereIn ( 'id_saldo', $saldoIds )->with ( 'saldo' )->get ()->sum ( function ($apb)
-                {
-                    return $apb->saldo->net * $apb->quantity;
-                } );
-                $atbsHabis              = ATB::where ( 'id_proyek', $projectId )->with ( 'saldo.apb', 'proyek', 'komponen', 'masterData' )->get ()->map ( function ($atb)
-                {
-                    $totalQuantityAPB        = $atb->saldo->apb->sum ( 'quantity' );
-                    $atb->remaining_quantity = $atb->quantity - $totalQuantityAPB;
-                    return $atb;
-                } )->filter ( function ($atb)
-                {
-                    return $atb->remaining_quantity <= 10;
-                } )->values ()->toArray ();
-                $totalHargaSemuaBarang = Saldo::whereIn ( 'id', $saldoIds )->get ()->sum ( function ($saldo)
-                {
-                    return $saldo->net * $saldo->current_quantity;
-                } );
-                $totalSemuaAlat        = Alat::whereIn ( 'id_user', function ($query) use ($proyekIds)
-                {
-                    $query->select ( 'id_user' )->from ( 'user_proyek' )->whereIn ( 'id_proyek', $proyekIds );
-                } )->count ();
-                $totalSemuaUser        = User::whereHas ( 'proyek', function ($query) use ($projectId)
-                {
-                    $query->where ( 'proyek.id', $projectId );
-                } )->count ();
-                $totalProyek           = Proyek::where ( 'proyek.id', $projectId )->count ();
-            }
-            elseif ( $user->role === 'Pegawai' )
-            {
-                $proyeks   = $user->proyek ()->where ( 'proyek.id', $projectId )->with ( "users" )->get ();
-                $proyekIds = $proyeks->pluck ( 'id' )->toArray ();
-                if ( $proyeks->isEmpty () )
-                {
-                    return response ()->json ( [ 'error' => 'Anda tidak memiliki akses ke proyek ini' ], 403 );
-                }
-                $totalHargaBarangMasuk  = ATB::where ( 'id_proyek', $projectId )->get ()->sum ( function ($atb)
-                {
-                    return $atb->net * $atb->quantity;
-                } );
-                $saldoIds               = ATB::where ( 'id_proyek', $projectId )->pluck ( 'id_saldo' )->toArray ();
-                $totalHargaBarangKeluar = APB::whereIn ( 'id_saldo', $saldoIds )->with ( 'saldo' )->get ()->sum ( function ($apb)
-                {
-                    return $apb->saldo->net * $apb->quantity;
-                } );
-                $atbsHabis              = ATB::where ( 'id_proyek', $projectId )->with ( 'saldo.apb', 'proyek', 'komponen', 'masterData' )->get ()->map ( function ($atb)
-                {
-                    $totalQuantityAPB        = $atb->saldo->apb->sum ( 'quantity' );
-                    $atb->remaining_quantity = $atb->quantity - $totalQuantityAPB;
-                    return $atb;
-                } )->filter ( function ($atb)
-                {
-                    return $atb->masterData && $atb->remaining_quantity < $atb->masterData->buffer_stock;
-                } )->values ()->toArray ();
-                $totalHargaSemuaBarang = Saldo::whereIn ( 'id', $saldoIds )->get ()->sum ( function ($saldo)
-                {
-                    return $saldo->net * $saldo->current_quantity;
-                } );
-                $totalSemuaAlat        = Alat::whereIn ( 'id_user', function ($query) use ($proyekIds)
-                {
-                    $query->select ( 'id_user' )->from ( 'user_proyek' )->whereIn ( 'id_proyek', $proyekIds );
-                } )->count ();
-                $totalSemuaUser        = User::whereHas ( 'proyek', function ($query) use ($projectId)
-                {
-                    $query->where ( 'proyek.id', $projectId );
-                } )->count ();
-                $totalProyek           = Proyek::where ( 'proyek.id', $projectId )->count ();
-            }
+                $query->whereIn ( 'id_proyek', $userProyekIds );
+            } );
         }
-        return response ()->json ( [ 'totalHargaBarangMasuk' => number_format ( $totalHargaBarangMasuk, 0, ',', '.' ), 'totalHargaBarangKeluar' => number_format ( $totalHargaBarangKeluar, 0, ',', '.' ), 'totalHargaSemuaBarang' => number_format ( $totalHargaSemuaBarang, 0, ',', '.' ), 'totalSemuaUser' => $totalSemuaUser ?? 0, 'totalProyek' => $totalProyek ?? 0, 'totalSemuaAlat' => $totalSemuaAlat, 'atbsHabis' => $atbsHabis ?? [] ] );
+
+        // Calculate ATB total
+        $totalATB = $atbQuery->get ()->sum ( function ($atb)
+        {
+            $total = 0;
+            switch ($atb->tipe)
+            {
+                case 'hutang-unit-alat':
+                case 'panjar-unit-alat':
+                case 'mutasi-proyek':
+                case 'panjar-proyek':
+                    $total = $atb->quantity * $atb->harga;
+                    break;
+            }
+            return $total;
+        } );
+
+        // Calculate APB total by type, excluding pending/rejected mutations
+        $totalAPB = $apbQuery->get ()->sum ( function ($apb)
+        {
+            $total = 0;
+            switch ($apb->tipe)
+            {
+                case 'hutang-unit-alat':
+                case 'panjar-unit-alat':
+                case 'panjar-proyek':
+                    $total = $apb->quantity * $apb->saldo->harga;
+                    break;
+                case 'mutasi-proyek':
+                    if ( ! in_array ( $apb->status, [ 'pending', 'rejected' ] ) )
+                    {
+                        $total = $apb->quantity * $apb->saldo->harga;
+                    }
+                    break;
+            }
+            return $total;
+        } );
+
+        // Calculate Saldo total by type
+        $totalSaldo = $saldoQuery->get ()->sum ( function ($saldo)
+        {
+            $total = 0;
+            switch ($saldo->tipe)
+            {
+                case 'hutang-unit-alat':
+                case 'panjar-unit-alat':
+                case 'mutasi-proyek':
+                case 'panjar-proyek':
+                    $total = $saldo->quantity * $saldo->harga;
+                    break;
+            }
+            return $total;
+        } );
+
+        return view ( 'dashboard', [ 
+            'headerPage'      => 'Dashboard Utama',
+            'page'            => 'Dashboard',
+            'proyeks'         => $proyeks,
+            'selectedProject' => $id_proyek,
+            'totalATB'        => $totalATB,
+            'totalAPB'        => $totalAPB,
+            'totalSaldo'      => $totalSaldo,
+        ] );
     }
 }

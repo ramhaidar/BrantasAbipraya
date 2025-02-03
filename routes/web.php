@@ -69,11 +69,9 @@ Route::middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )->group ( func
 } );
 
 // Rute Dashboard [DashboardController]
-Route::get ( '/dashboard', [ DashboardController::class, 'index' ] )
-    ->middleware ( [ 
-        CheckRole::class . ':Admin,Pegawai,Boss',
-    ] )
-    ->name ( 'dashboard' );
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware([CheckRole::class . ':Admin,Pegawai,Boss'])
+    ->name('dashboard');
 
 // Rute Users [UserController]
 Route::prefix ( 'users' )->middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )->group ( function ()

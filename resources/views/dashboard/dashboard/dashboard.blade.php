@@ -163,6 +163,40 @@
                 </div>
             </div>
         </div>
+
+        <div class="row mt-4">
+            <div class="col-12 col-xl-6">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h5 class="text-center pt-2 ps-1">
+                            <i class="fas fa-chart-pie mr-1"></i>
+                            Persentase Distribusi Bulan Ini
+                        </h5>
+                    </div>
+                    <div class="card-body d-flex justify-content-center align-items-center" style="background-color: #353a50; min-height: 300px;">
+                        <div class="chart">
+                            <div class="flex-grow-1 text-center" id="pieChartCurrent"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-xl-6">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h5 class="text-center pt-2 ps-1">
+                            <i class="fas fa-chart-pie mr-1"></i>
+                            Persentase Distribusi S/D Bulan Ini
+                        </h5>
+                    </div>
+                    <div class="card-body d-flex justify-content-center align-items-center" style="background-color: #353a50; min-height: 300px;">
+                        <div class="chart">
+                            <div class="flex-grow-1 text-center" id="pieChartTotal"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 @endsection
 
@@ -171,4 +205,5 @@
 
     @include('dashboard.dashboard.scripts.VerticalBarChart')
     @include('dashboard.dashboard.scripts.HorizontalBarChart')
+    @include('dashboard.dashboard.scripts.PieChart')
 @endpush

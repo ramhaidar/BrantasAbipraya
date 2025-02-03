@@ -41,7 +41,7 @@
             // Chart dimensions with increased top margin
             const margin = {
                 top: 80, // Increased from 60 to 80
-                right: 100,
+                right: 50,
                 bottom: 60,
                 left: 100
             };

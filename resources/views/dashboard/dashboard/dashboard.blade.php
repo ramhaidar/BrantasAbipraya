@@ -8,21 +8,55 @@
         }
 
         .tooltip {
-            position: fixed;
+            position: absolute;
             padding: 8px;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.9);
             color: white;
             border-radius: 4px;
             font-size: 12px;
             pointer-events: none;
-            z-index: 100;
-            max-width: 200px;
+            z-index: 9999;
+            max-width: 300px;
             word-wrap: break-word;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         .bar-overlay {
             fill: transparent;
             cursor: pointer;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        #currentMonthHorizontalChart,
+        #totalHorizontalChart {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            min-height: inherit;
+        }
+
+        .horizontal-chart-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            min-height: inherit;
+            margin-left: 20px;
+            /* Add some space on the left */
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .y-axis text {
+            font-size: 12px;
+            fill: white;
         }
     </style>
 @endpush
@@ -84,7 +118,7 @@
                         </h5>
                     </div>
                     <div class="card-body d-flex justify-content-center align-items-center" style="background-color: #353a50; min-height: 300px;">
-                        <div class="text-center" id="currentMonthVerticalChart"></div>
+                        <div class="flex-grow-1 text-center" id="currentMonthVerticalChart"></div>
                     </div>
                 </div>
             </div>
@@ -97,8 +131,35 @@
                         </h5>
                     </div>
                     <div class="card-body d-flex justify-content-center align-items-center" style="background-color: #353a50; min-height: 300px;">
-                        <div class="text-center" id="totalVerticalChart"></div>
+                        <div class="flex-grow-1 text-center" id="totalVerticalChart"></div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card card-primary">
+            <div class="card-header">
+                <h5 class="text-center pt-2 ps-1">
+                    <i class="fas fa-chart-bar mr-1"></i>
+                    Statistik Per Proyek Bulan Ini
+                </h5>
+            </div>
+            <div class="card-body" style="background-color: #353a50; height: {{ max(400, count($proyeks) * 80) }}px;">
+                <div class="horizontal-chart-wrapper">
+                    <div id="currentMonthHorizontalChart"></div>
+                </div>
+            </div>
+        </div>
+        <div class="card card-primary">
+            <div class="card-header">
+                <h5 class="text-center pt-2 ps-1">
+                    <i class="fas fa-chart-bar mr-1"></i>
+                    Statistik Per Proyek S/D Bulan Ini
+                </h5>
+            </div>
+            <div class="card-body" style="background-color: #353a50; height: {{ max(400, count($proyeks) * 80) }}px;">
+                <div class="horizontal-chart-wrapper">
+                    <div id="totalHorizontalChart"></div>
                 </div>
             </div>
         </div>
@@ -109,4 +170,5 @@
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 
     @include('dashboard.dashboard.scripts.VerticalBarChart')
+    @include('dashboard.dashboard.scripts.HorizontalBarChart')
 @endpush

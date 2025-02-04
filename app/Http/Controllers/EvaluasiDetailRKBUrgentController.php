@@ -18,28 +18,39 @@ class EvaluasiDetailRKBUrgentController extends Controller
 {
     public function index ( Request $request, $id )
     {
-        $allowedPerPage = [ 10, 25, 50, 100, -1 ];
-        $perPage        = in_array ( (int) $request->get ( 'per_page' ), $allowedPerPage ) ? (int) $request->get ( 'per_page' ) : 10;
+        if ( $request->get ( 'per_page' ) != -1 )
+        {
+            $parameters               = $request->except ( 'per_page' );
+            $parameters[ 'per_page' ] = -1;
+
+            return redirect ()->route (
+                'evaluasi_rkb_general.detail.index',
+                array_merge ( [ 'id' => $id ], $parameters )
+            );
+        }
+
+        $perPage = (int) $request->per_page;
 
         $rkb = RKB::with ( [ 'proyek' ] )->find ( $id );
 
         // Get RKB details with relationships and ordering
-        $query = DetailRKBUrgent::with([
+        $query = DetailRKBUrgent::with ( [ 
             'linkRkbDetails.linkAlatDetailRkb.masterDataAlat',
             'linkRkbDetails.linkAlatDetailRkb.timelineRkbUrgents',
             'linkRkbDetails.linkAlatDetailRkb.lampiranRkbUrgent',
             'kategoriSparepart',
             'masterDataSparepart'
-        ])
-            ->leftJoin('master_data_sparepart', 'detail_rkb_urgent.id_master_data_sparepart', '=', 'master_data_sparepart.id')
-            ->whereHas('linkRkbDetails.linkAlatDetailRkb', function($query) use ($id) {
-                $query->where('id_rkb', $id);
-            })
-            ->select([
+        ] )
+            ->leftJoin ( 'master_data_sparepart', 'detail_rkb_urgent.id_master_data_sparepart', '=', 'master_data_sparepart.id' )
+            ->whereHas ( 'linkRkbDetails.linkAlatDetailRkb', function ($query) use ($id)
+            {
+                $query->where ( 'id_rkb', $id );
+            } )
+            ->select ( [ 
                 'detail_rkb_urgent.*',
                 'master_data_sparepart.part_number'
-            ])
-            ->orderByRaw('CAST(master_data_sparepart.part_number AS CHAR) DESC');
+            ] )
+            ->orderByRaw ( 'CAST(master_data_sparepart.part_number AS CHAR) DESC' );
 
         // Add search functionality
         if ( $request->has ( 'search' ) )

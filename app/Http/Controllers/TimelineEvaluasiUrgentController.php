@@ -12,11 +12,20 @@ class TimelineEvaluasiUrgentController extends Controller
 {
     public function index ( Request $request, $id )
     {
-        $proyek = Proyek::find ( $id );
+        if ( $request->get ( 'per_page' ) != -1 )
+        {
+            $parameters               = $request->except ( 'per_page' );
+            $parameters[ 'per_page' ] = -1;
 
-        // Validate and set perPage to allowed values only
-        $allowedPerPage = [ -1, 10, 25, 50, 100 ];
-        $perPage        = in_array ( (int) $request->get ( 'per_page' ), $allowedPerPage ) ? (int) $request->get ( 'per_page' ) : 10;
+            return redirect ()->route (
+                'evaluasi_rkb_general.detail.index',
+                array_merge ( [ 'id' => $id ], $parameters )
+            );
+        }
+
+        $perPage = (int) $request->per_page;
+
+        $proyek = Proyek::find ( $id );
 
         $query = TimelineRKBUrgent::query ()
             ->where ( 'id_link_alat_detail_rkb', $id );
@@ -91,14 +100,49 @@ class TimelineEvaluasiUrgentController extends Controller
             'linkRkbDetails'
         ] )->find ( $id );
 
-        // Updated TableData logic
-        $TableData = $perPage === -1
-            ? $query->orderBy ( 'updated_at', 'desc' )
+        // Handle pagination with consistent sorting
+        if ( $perPage === -1 )
+        {
+            $queryData = $query->orderBy ( 'updated_at', 'desc' )
                 ->orderBy ( 'id', 'desc' )
-                ->paginate ( $query->count () )
-            : $query->orderBy ( 'updated_at', 'desc' )
-                ->orderBy ( 'id', 'desc' )
-                ->paginate ( $perPage );
+                ->get ();
+
+            $TableData = new \Illuminate\Pagination\LengthAwarePaginator(
+                $queryData,
+                $queryData->count (),
+                -1,
+                1,
+                [ 
+                    'path'  => $request->url (),
+                    'query' => $request->query (),
+                ]
+            );
+        }
+        else
+        {
+            // Check if any results exist
+            if ( $query->count () > 0 )
+            {
+                $TableData = $query->orderBy ( 'updated_at', 'desc' )
+                    ->orderBy ( 'id', 'desc' )
+                    ->paginate ( $perPage )
+                    ->withQueryString ();
+            }
+            else
+            {
+                // Return empty paginator if no results
+                $TableData = new \Illuminate\Pagination\LengthAwarePaginator(
+                    [],
+                    0,
+                    $perPage,
+                    1,
+                    [ 
+                        'path'  => $request->url (),
+                        'query' => $request->query (),
+                    ]
+                );
+            }
+        }
 
         // Updated proyeks query with consistent sorting
         $proyeks = Proyek::with ( "users" )

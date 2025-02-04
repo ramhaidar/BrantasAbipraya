@@ -52,15 +52,15 @@ class DetailRKBGeneral extends Model
         return $this->hasMany ( LinkRkbDetail::class, 'id_detail_rkb_general' );
     }
 
-    public function incrementQuantityRemainder($quantity)
+    public function incrementQuantityRemainder ( $quantity )
     {
-        $this->quantity_remainder = min($this->quantity_approved, $this->quantity_remainder + $quantity);
-        $this->save();
+        $this->quantity_remainder = min ( $this->quantity_approved, $this->quantity_remainder + $quantity );
+        $this->save ();
     }
 
-    public function decrementQuantityRemainder($quantity)
+    public function decrementQuantityRemainder ( $quantity )
     {
-        $this->quantity_remainder = max(0, $this->quantity_remainder - $quantity);
-        $this->save();
+        $this->quantity_remainder = max ( 0, $this->quantity_remainder - $quantity );
+        $this->save ();
     }
 }

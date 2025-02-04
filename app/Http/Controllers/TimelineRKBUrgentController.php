@@ -13,12 +13,21 @@ class TimelineRKBUrgentController extends Controller
 {
     public function index ( Request $request, $id )
     {
+        if ( $request->get ( 'per_page' ) != -1 )
+        {
+            $parameters               = $request->except ( 'per_page' );
+            $parameters[ 'per_page' ] = -1;
+
+            return redirect ()->route (
+                'evaluasi_rkb_general.detail.index',
+                array_merge ( [ 'id' => $id ], $parameters )
+            );
+        }
+
+        $perPage = (int) $request->per_page;
+
         // Get RKB data
         $rkb = Proyek::find ( $id );
-
-        // Validate and set perPage to allowed values only
-        $allowedPerPage = [ -1, 10, 25, 50, 100 ];
-        $perPage        = in_array ( (int) $request->get ( 'per_page' ), $allowedPerPage ) ? (int) $request->get ( 'per_page' ) : 10;
 
         $query = TimelineRKBUrgent::query ()
             ->where ( 'id_link_alat_detail_rkb', $id );

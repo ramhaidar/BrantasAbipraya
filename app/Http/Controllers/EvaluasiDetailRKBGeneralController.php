@@ -18,8 +18,18 @@ class EvaluasiDetailRKBGeneralController extends Controller
 {
     public function index ( Request $request, $id )
     {
-        $allowedPerPage = [ 10, 25, 50, 100, -1 ];
-        $perPage        = in_array ( (int) $request->get ( 'per_page' ), $allowedPerPage ) ? (int) $request->get ( 'per_page' ) : 10;
+        if ( $request->get ( 'per_page' ) != -1 )
+        {
+            $parameters             = $request->except ( 'per_page' );
+            $parameters[ 'per_page' ] = -1;
+
+            return redirect ()->route (
+                'evaluasi_rkb_general.detail.index',
+                array_merge ( [ 'id' => $id ], $parameters )
+            );
+        }
+
+        $perPage = (int) $request->per_page;
 
         $rkb = RKB::with ( [ 'proyek' ] )->find ( $id );
 

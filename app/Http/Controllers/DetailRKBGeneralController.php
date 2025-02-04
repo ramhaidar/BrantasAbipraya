@@ -64,9 +64,14 @@ class DetailRKBGeneralController extends Controller
                 ->whereNull ( 'removed_at' );
         } )->get ();
 
-        $detail_rkb = $perPage === -1
-            ? $query->paginate ( $query->count () )
-            : $query->paginate ( $perPage );
+        // Modified TableData to include ordering
+        $TableData = $perPage === -1
+            ? $query->orderBy('updated_at', 'asc')
+                   ->orderBy('id', 'asc')
+                   ->paginate($query->count())
+            : $query->orderBy('updated_at', 'asc')
+                   ->orderBy('id', 'asc')
+                   ->paginate($perPage);
 
         $proyeks = Proyek::with ( "users" )
             ->orderBy ( "updated_at", "asc" )
@@ -82,7 +87,7 @@ class DetailRKBGeneralController extends Controller
             'available_alat'        => $available_alat,
             'master_data_sparepart' => MasterDataSparepart::all (),
             'kategori_sparepart'    => KategoriSparepart::all (),
-            'TableData'             => $detail_rkb,
+            'TableData'             => $TableData,
         ] );
     }
 

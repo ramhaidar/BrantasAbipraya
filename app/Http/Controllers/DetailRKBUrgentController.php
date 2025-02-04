@@ -65,9 +65,14 @@ class DetailRKBUrgentController extends Controller
                 ->whereNull ( 'removed_at' );
         } )->get ();
 
-        $detail_rkb = $perPage === -1
-            ? $query->paginate ( $query->count () )
-            : $query->paginate ( $perPage );
+// Modified TableData to include ordering
+        $TableData = $perPage === -1
+            ? $query->orderBy('updated_at', 'asc')
+                   ->orderBy('id', 'asc')
+                   ->paginate($query->count())
+            : $query->orderBy('updated_at', 'asc')
+                   ->orderBy('id', 'asc')
+                   ->paginate($perPage);
 
         $proyeks = Proyek::with ( "users" )
             ->orderBy ( "updated_at", "asc" )
@@ -83,7 +88,7 @@ class DetailRKBUrgentController extends Controller
             'available_alat'        => $available_alat,
             'master_data_sparepart' => MasterDataSparepart::all (),
             'kategori_sparepart'    => KategoriSparepart::all (),
-            'TableData'             => $detail_rkb,
+            'TableData'             => $TableData,
 
             'menuContext'           => 'rkb_urgent',  // Ensure this flag is passed for detail pages
         ] );
@@ -244,7 +249,7 @@ class DetailRKBUrgentController extends Controller
 
         try
         {
-            $updateData = [
+            $updateData = [ 
                 'quantity_requested'              => $validatedData[ 'quantity_requested' ],
                 'satuan'                          => $validatedData[ 'satuan' ],
                 'nama_koordinator'                => $validatedData[ 'nama_koordinator' ],

@@ -8,6 +8,7 @@
             <hr class="p-0 m-0 border border-secondary-subtle border-2 opacity-50">
             <div class="modal-body">
                 <p class="p-0 m-0">Apakah Anda yakin ingin menghapus Detail RKB Urgent ini?</p>
+                <p class="p-0 m-0">Semua <span class="fw-bold text-danger">LAMPIRAN</span> terkait juga akan dihapus secara permanen!</p>
                 <p class="p-0 m-0">Tindakan ini tidak dapat dibatalkan!</p>
             </div>
             <div class="modal-footer d-flex w-100 justify-content-end">

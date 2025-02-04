@@ -44,7 +44,7 @@
                     <tr>
                         <td class="text-center py-3 text-muted" colspan="16">
                             <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                            Belum ada data alat yang tersedia
+                            Belum ada data alat yang tersedia untuk proyek ini.
                         </td>
                     </tr>
                 @endforelse

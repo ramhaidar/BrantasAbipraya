@@ -65,14 +65,14 @@ class DetailRKBUrgentController extends Controller
                 ->whereNull ( 'removed_at' );
         } )->get ();
 
-// Modified TableData to include ordering
+        // Modified TableData to include ordering
         $TableData = $perPage === -1
-            ? $query->orderBy('updated_at', 'asc')
-                   ->orderBy('id', 'asc')
-                   ->paginate($query->count())
-            : $query->orderBy('updated_at', 'asc')
-                   ->orderBy('id', 'asc')
-                   ->paginate($perPage);
+            ? $query->orderBy ( 'updated_at', 'asc' )
+                ->orderBy ( 'id', 'asc' )
+                ->paginate ( $query->count () )
+            : $query->orderBy ( 'updated_at', 'asc' )
+                ->orderBy ( 'id', 'asc' )
+                ->paginate ( $perPage );
 
         $proyeks = Proyek::with ( "users" )
             ->orderBy ( "updated_at", "asc" )

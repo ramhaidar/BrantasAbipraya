@@ -74,12 +74,13 @@
                                     <i class="bi bi-file-earmark-text"></i>
                                 </button>
                             </td>
-                            <td>
-                                <a class="btn {{ $alat->timelineRkbUrgents->count() > 0 ? 'btn-warning' : 'btn-primary' }}" href="{{ route('rkb_urgent.detail.timeline.index', ['id' => $alat->id]) }}">
-                                    <i class="bi bi-hourglass-split"></i>
-                                </a>
-                            </td>
                             @if ($loop->first)
+                                <td rowspan="{{ $items->count() }}">
+                                    <a class="btn {{ $alat->timelineRkbUrgents->count() > 0 ? 'btn-warning' : 'btn-primary' }}" href="{{ route('rkb_urgent.detail.timeline.index', ['id' => $alat->id]) }}">
+                                        <i class="bi bi-hourglass-split"></i>
+                                    </a>
+                                </td>
+
                                 <td rowspan="{{ $items->count() }}">
                                     <button class="btn {{ $alat->lampiranRkbUrgent ? 'btn-warning' : 'btn-primary' }} lampiranBtn" data-bs-toggle="modal" data-bs-target="{{ $alat->lampiranRkbUrgent ? '#modalForLampiranExist' : '#modalForLampiranNew' }}" data-id-linkalatdetail="{{ $alat->id }}" data-id-lampiran="{{ $alat->lampiranRkbUrgent ? $alat->lampiranRkbUrgent->id : null }}">
                                         <i class="bi bi-paperclip"></i>

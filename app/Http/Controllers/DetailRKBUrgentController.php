@@ -322,58 +322,54 @@ class DetailRKBUrgentController extends Controller
             return redirect ()->back ()->with ( 'error', 'Detail RKB Urgent not found!' );
         }
 
-        $rkb = $detailRKBUrgent->linkRkbDetails[ 0 ]->linkAlatDetailRKB->rkb;
-
-        if ( $rkb )
-        {
-            $rkbNumber  = $rkb->nomor;
-            $folderPath = 'uploads/rkb_urgent/' . $rkbNumber;
-            // Check if the folder exists before attempting to delete
-            if ( Storage::disk ( 'public' )->exists ( $folderPath ) )
-            {
-                Storage::disk ( 'public' )->deleteDirectory ( $folderPath );
-            }
-        }
-
-        // Dapatkan semua LinkRKBDetail terkait dengan DetailRKBUrgent ini
-        $linkRkbDetails = LinkRKBDetail::where ( 'id_detail_rkb_urgent', $id )->get ();
-
-        // Hapus LinkRKBDetail
-        foreach ( $linkRkbDetails as $linkRkbDetail )
-        {
-            $linkAlatDetailRkbId = $linkRkbDetail->id_link_alat_detail_rkb;
-
-            // Hapus LinkRKBDetail
-            $linkRkbDetail->delete ();
-
-            // Cek apakah masih ada LinkRKBDetail yang menggunakan link_alat_detail_rkb ini
-            $remainingLinks = LinkRKBDetail::where ( 'id_link_alat_detail_rkb', $linkAlatDetailRkbId )->exists ();
-
-            // Jika tidak ada lagi, hapus link_alat_detail_rkb
-            if ( ! $remainingLinks )
-            {
-                LinkAlatDetailRKB::where ( 'id', $linkAlatDetailRkbId )->delete ();
-            }
-        }
-
-        // Get the LinkAlatDetailRKB through the relationship
+        $rkb               = $detailRKBUrgent->linkRkbDetails[ 0 ]->linkAlatDetailRKB->rkb;
         $linkAlatDetailRKB = $detailRKBUrgent->linkRkbDetails[ 0 ]->linkAlatDetailRKB;
 
-        // If there's a LampiranRKBUrgent attached
+        // Delete this DetailRKBUrgent's dokumentasi folder
+        if ( $detailRKBUrgent->dokumentasi && Storage::disk ( 'public' )->exists ( $detailRKBUrgent->dokumentasi ) )
+        {
+            Storage::disk ( 'public' )->deleteDirectory ( $detailRKBUrgent->dokumentasi );
+        }
+
+        // Check if this is the last DetailRKBUrgent for this LinkAlatDetailRKB
+        $otherDetailRKBUrgents = LinkRKBDetail::where ( 'id_link_alat_detail_rkb', $linkAlatDetailRKB->id )
+            ->where ( 'id_detail_rkb_urgent', '!=', $id )
+            ->exists ();
+
+        // Always delete LampiranRKBUrgent if it exists
         if ( $linkAlatDetailRKB && $linkAlatDetailRKB->id_lampiran_rkb_urgent )
         {
-            // Delete the LampiranRKBUrgent record
             LampiranRKBUrgent::where ( 'id', $linkAlatDetailRKB->id_lampiran_rkb_urgent )->delete ();
-
-            // Update the LinkAlatDetailRKB to remove the reference
             $linkAlatDetailRKB->update ( [ 'id_lampiran_rkb_urgent' => null ] );
         }
 
-        // Hapus DetailRKBUrgent
+        // Delete LinkRKBDetail
+        foreach ( $detailRKBUrgent->linkRkbDetails as $linkRkbDetail )
+        {
+            $linkRkbDetail->delete ();
+        }
+
+        // If this is the last DetailRKBUrgent for this LinkAlatDetailRKB
+        if ( ! $otherDetailRKBUrgents )
+        {
+            // Delete the entire uploads/rkb_urgent folder
+            if ( $rkb )
+            {
+                $folderPath = 'uploads/rkb_urgent/' . $rkb->nomor;
+                if ( Storage::disk ( 'public' )->exists ( $folderPath ) )
+                {
+                    Storage::disk ( 'public' )->deleteDirectory ( $folderPath );
+                }
+            }
+
+            // Delete the LinkAlatDetailRKB
+            $linkAlatDetailRKB->delete ();
+        }
+
+        // Delete DetailRKBUrgent
         $detailRKBUrgent->delete ();
 
         return redirect ()->back ()->with ( 'success', 'Detail RKB Urgent and its links deleted successfully!' );
-
     }
 
     public function getDokumentasi ( $id )

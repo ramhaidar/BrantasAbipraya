@@ -23,18 +23,23 @@ class EvaluasiDetailRKBUrgentController extends Controller
 
         $rkb = RKB::with ( [ 'proyek' ] )->find ( $id );
 
-        // Get RKB details with relationships to preserve the model structure
-        $query = DetailRKBUrgent::with ( [ 
+        // Get RKB details with relationships and ordering
+        $query = DetailRKBUrgent::with([
             'linkRkbDetails.linkAlatDetailRkb.masterDataAlat',
             'linkRkbDetails.linkAlatDetailRkb.timelineRkbUrgents',
             'linkRkbDetails.linkAlatDetailRkb.lampiranRkbUrgent',
             'kategoriSparepart',
             'masterDataSparepart'
-        ] )
-            ->whereHas ( 'linkRkbDetails.linkAlatDetailRkb', function ($query) use ($id)
-            {
-                $query->where ( 'id_rkb', $id );
-            } );
+        ])
+            ->leftJoin('master_data_sparepart', 'detail_rkb_urgent.id_master_data_sparepart', '=', 'master_data_sparepart.id')
+            ->whereHas('linkRkbDetails.linkAlatDetailRkb', function($query) use ($id) {
+                $query->where('id_rkb', $id);
+            })
+            ->select([
+                'detail_rkb_urgent.*',
+                'master_data_sparepart.part_number'
+            ])
+            ->orderByRaw('CAST(master_data_sparepart.part_number AS CHAR) DESC');
 
         // Add search functionality
         if ( $request->has ( 'search' ) )
@@ -81,12 +86,12 @@ class EvaluasiDetailRKBUrgentController extends Controller
         // Handle pagination
         if ( $perPage === -1 )
         {
-            $detail_rkb = $query->get (); // Get all records without pagination
+            $TableData = $query->get (); // Get all records without pagination
 
             // Handle empty results
-            if ( $detail_rkb->isEmpty () )
+            if ( $TableData->isEmpty () )
             {
-                $detail_rkb = new \Illuminate\Pagination\LengthAwarePaginator(
+                $TableData = new \Illuminate\Pagination\LengthAwarePaginator(
                     collect ( [] ), // Empty collection
                     0, // Total
                     1, // Per page
@@ -96,10 +101,10 @@ class EvaluasiDetailRKBUrgentController extends Controller
             else
             {
                 // Convert collection to LengthAwarePaginator
-                $detail_rkb = new \Illuminate\Pagination\LengthAwarePaginator(
-                    $detail_rkb,
-                    $detail_rkb->count (),
-                    max ( $detail_rkb->count (), 1 ), // Ensure perPage is at least 1
+                $TableData = new \Illuminate\Pagination\LengthAwarePaginator(
+                    $TableData,
+                    $TableData->count (),
+                    max ( $TableData->count (), 1 ), // Ensure perPage is at least 1
                     1
                 );
             }
@@ -110,7 +115,7 @@ class EvaluasiDetailRKBUrgentController extends Controller
             $total = $query->count ();
             if ( $total === 0 )
             {
-                $detail_rkb = new \Illuminate\Pagination\LengthAwarePaginator(
+                $TableData = new \Illuminate\Pagination\LengthAwarePaginator(
                     collect ( [] ), // Empty collection
                     0, // Total
                     $perPage,
@@ -119,13 +124,13 @@ class EvaluasiDetailRKBUrgentController extends Controller
             }
             else
             {
-                $detail_rkb = $query->paginate ( $perPage );
+                $TableData = $query->paginate ( $perPage );
             }
         }
 
         $proyeks = Proyek::with ( "users" )
-            ->orderBy ( "updated_at", "asc" )
-            ->orderBy ( "id", "asc" )
+            ->orderBy ( "updated_at", "desc" )
+            ->orderBy ( "id", "desc" )
             ->get ();
 
         return view ( 'dashboard.evaluasi.urgent.detail.detail', [ 
@@ -138,7 +143,7 @@ class EvaluasiDetailRKBUrgentController extends Controller
             'available_alat'        => $available_alat,
             'master_data_sparepart' => MasterDataSparepart::all (),
             'kategori_sparepart'    => KategoriSparepart::all (),
-            'TableData'             => $detail_rkb,
+            'TableData'             => $TableData,
             'stockQuantities'       => $stockQuantities,
         ] );
     }

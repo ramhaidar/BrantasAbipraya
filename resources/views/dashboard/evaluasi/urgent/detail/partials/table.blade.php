@@ -46,50 +46,61 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse ($TableData as $item)
-                    @forelse ($item->linkRkbDetails as $detail)
+                @php
+                    // Group items by part number for stock quantities
+                    $groupedByPartNumber =
+                        $TableData instanceof \Illuminate\Pagination\LengthAwarePaginator
+                            ? collect($TableData->items())->groupBy(function ($item) {
+                                return optional($item->masterDataSparepart)->part_number;
+                            })
+                            : collect($TableData)->groupBy(function ($item) {
+                                return optional($item->masterDataSparepart)->part_number;
+                            });
+                @endphp
+
+                @forelse ($groupedByPartNumber as $partNumber => $items)
+                    @foreach ($items as $item)
+                        @php
+                            $detail = $item->linkRkbDetails->first();
+                            $alat = $detail->linkAlatDetailRkb;
+                        @endphp
                         <tr>
-                            <td>{{ $detail->linkAlatDetailRkb->masterDataAlat->jenis_alat }}</td>
-                            <td>{{ $detail->linkAlatDetailRkb->masterDataAlat->kode_alat }}</td>
-                            <td>{{ $item->kategoriSparepart->kode }}: {{ $item->kategoriSparepart->nama }}</td>
-                            <td>{{ $item->masterDataSparepart->nama }}</td>
-                            <td>{{ $item->masterDataSparepart->part_number }}</td>
-                            <td>{{ $item->masterDataSparepart->merk }}</td>
-                            <td>{{ $detail->linkAlatDetailRkb->nama_koordinator }}</td>
+                            <td>{{ $alat->masterDataAlat->jenis_alat ?? '-' }}</td>
+                            <td>{{ $alat->masterDataAlat->kode_alat ?? '-' }}</td>
+                            <td>{{ $item->kategoriSparepart->kode ?? '-' }}: {{ $item->kategoriSparepart->nama ?? '-' }}</td>
+                            <td>{{ $item->masterDataSparepart->nama ?? '-' }}</td>
+                            <td>{{ $item->masterDataSparepart->part_number ?? '-' }}</td>
+                            <td>{{ $item->masterDataSparepart->merk ?? '-' }}</td>
+                            <td>{{ $alat->nama_koordinator ?? '-' }}</td>
                             <td>
-                                <button class="btn {{ $item->dokumentasi ? 'btn-warning' : 'btn-primary' }}" data-id="{{ $item->id }}" type="button" onclick="event.preventDefault(); event.stopPropagation(); showDokumentasi({{ $item->id }});">
+                                <button class="btn {{ $item->dokumentasi ? 'btn-warning' : 'btn-primary' }}" data-id="{{ $item->id ?? '-' }}" type="button" onclick="event.preventDefault(); event.stopPropagation(); showDokumentasi({{ $item->id ?? '-' }});">
                                     <i class="bi bi-file-earmark-text"></i>
                                 </button>
                             </td>
                             <td>
-                                <a class="btn {{ $detail->linkAlatDetailRkb->timelineRkbUrgents->count() > 0 ? 'btn-warning' : 'btn-primary' }}" href="{{ route('evaluasi_rkb_urgent.detail.timeline.index', ['id' => $detail->linkAlatDetailRkb->id]) }}" onclick="event.stopPropagation();">
+                                <a class="btn {{ $alat->timelineRkbUrgents->count() > 0 ? 'btn-warning' : 'btn-primary' }}" href="{{ route('evaluasi_rkb_urgent.detail.timeline.index', ['id' => $alat->id ?? '-']) }}" onclick="event.stopPropagation();">
                                     <i class="bi bi-hourglass-split"></i>
                                 </a>
                             </td>
                             <td>
-                                <button class="btn {{ $detail->linkAlatDetailRkb->lampiranRkbUrgent ? 'btn-warning' : 'btn-primary' }} lampiranBtn" data-bs-toggle="modal" data-bs-target="{{ $detail->linkAlatDetailRkb->lampiranRkbUrgent ? '#modalForLampiranExist' : '#modalForLampiranNew' }}" data-id-linkalatdetail="{{ $detail->linkAlatDetailRkb->id }}" data-id-lampiran="{{ $detail->linkAlatDetailRkb->lampiranRkbUrgent ? $detail->linkAlatDetailRkb->lampiranRkbUrgent->id : null }}" type="button" onclick="event.stopPropagation();">
+                                <button class="btn {{ $alat->lampiranRkbUrgent ? 'btn-warning' : 'btn-primary' }} lampiranBtn" data-bs-toggle="modal" data-bs-target="{{ $alat->lampiranRkbUrgent ? '#modalForLampiranExist' : '#modalForLampiranNew' }}" data-id-linkalatdetail="{{ $alat->id ?? '-' }}" data-id-lampiran="{{ $alat->lampiranRkbUrgent ? $alat->lampiranRkbUrgent->id : '-' }}" type="button" onclick="event.stopPropagation();">
                                     <i class="bi bi-paperclip"></i>
                                 </button>
                             </td>
-                            <td>{{ $item->quantity_requested }}</td>
+                            <td>{{ $item->quantity_requested ?? '-' }}</td>
                             <td>
                                 <input class="form-control text-center 
                                     @if ($rkb->is_approved_svp) bg-primary-subtle
                                     @elseif ($rkb->is_approved_vp) bg-info-subtle
                                     @elseif($rkb->is_evaluated) bg-success-subtle 
-                                    @else bg-warning-subtle @endif" name="quantity_approved[{{ $item->id }}]" type="number" value="{{ $item->quantity_approved ?? $item->quantity_requested }}" min="0" {{ $rkb->is_evaluated ? 'disabled' : '' }}>
+                                    @else bg-warning-subtle @endif" name="quantity_approved[{{ $item->id ?? '-' }}]" type="number" value="{{ $item->quantity_approved ?? ($item->quantity_requested ?? '-') }}" min="0" {{ $rkb->is_evaluated ? 'disabled' : '' }}>
                             </td>
-                            <td>{{ $stockQuantities[$item->id_master_data_sparepart] ?? 0 }}</td>
-                            <td>{{ $item->satuan }}</td>
+                            @if ($loop->first)
+                                <td rowspan="{{ $items->count() }}">{{ $stockQuantities[$item->id_master_data_sparepart] ?? '-' }}</td>
+                            @endif
+                            <td>{{ $item->satuan ?? '-' }}</td>
                         </tr>
-                    @empty
-                        <tr>
-                            <td class="text-center py-3 text-muted" colspan="14">
-                                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                                No RKB details found
-                            </td>
-                        </tr>
-                    @endforelse
+                    @endforeach
                 @empty
                     <tr>
                         <td class="text-center py-3 text-muted" colspan="14">

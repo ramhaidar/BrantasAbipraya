@@ -13,8 +13,6 @@ class RiwayatSPBController extends Controller
 {
     public function index ( $id )
     {
-        $user = auth ()->user ();
-
         // Get single SPB record with relationships
         $spb = SPB::with ( [ 
             'linkSpbDetailSpb.detailSpb.masterDataSparepart',
@@ -22,23 +20,20 @@ class RiwayatSPBController extends Controller
             'masterDataSupplier',
         ] )->findOrFail ( $id );
 
-        // Create paginator manually from single SPB
+        $proyeks = Proyek::with ( "users" )
+            ->orderBy ( "updated_at", "desc" )
+            ->orderBy ( "id", "desc" )
+            ->get ();
+
+        // Create paginator manually from single SPB with sorting
         $TableData = new LengthAwarePaginator(
-            collect ( [ $spb ] ),  // items
+            collect ( [ $spb ] )
+                ->sortByDesc ( 'updated_at' )
+                ->sortByDesc ( 'id' ),  // items sorted
             1,                // total
             1,                // per page
             1                 // current page
         );
-
-        // Get projects for selection
-        $proyeks = [];
-        if ( $user->role !== 'Pegawai' )
-        {
-            $proyeks = Proyek::with ( "users" )
-                ->orderBy ( "updated_at", "desc" )
-                ->orderBy ( "id", "desc" )
-                ->get ();
-        }
 
         return view ( 'dashboard.spb.riwayat.riwayat', [ 
             'proyeks'    => $proyeks,

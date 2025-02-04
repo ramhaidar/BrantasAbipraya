@@ -15,80 +15,84 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class DetailSPBController extends Controller
 {
-    public function index($id)
+    public function index ( $id )
     {
-        $user = auth()->user();
+        $user = auth ()->user ();
 
         // Get single RKB record with relationships
-        $rkb = RKB::with([
+        $rkb = RKB::with ( [ 
             "linkAlatDetailRkbs.masterDataAlat",
             "linkAlatDetailRkbs.linkRkbDetails.detailRkbGeneral.kategoriSparepart",
-            "linkAlatDetailRkbs.linkRkbDetails.detailRkbGeneral.masterDataSparepart" => fn($query) => $query->orderBy('nama'),
+            "linkAlatDetailRkbs.linkRkbDetails.detailRkbGeneral.masterDataSparepart" => fn ( $query ) => $query->orderBy ( 'nama' ),
             "linkAlatDetailRkbs.linkRkbDetails.detailRkbUrgent.kategoriSparepart",
-            "linkAlatDetailRkbs.linkRkbDetails.detailRkbUrgent.masterDataSparepart" => fn($query) => $query->orderBy('nama'),
+            "linkAlatDetailRkbs.linkRkbDetails.detailRkbUrgent.masterDataSparepart"  => fn ( $query ) => $query->orderBy ( 'nama' ),
             "linkAlatDetailRkbs.timelineRkbUrgents",
             "linkAlatDetailRkbs.lampiranRkbUrgent",
             "proyek",
             "spbs"
-        ])->findOrFail($id);
+        ] )->findOrFail ( $id );
 
-        // Create paginator manually from single RKB
+        // Create paginator manually from single RKB, with sorting applied to collection
         $TableData = new LengthAwarePaginator(
-            collect([$rkb]),  // items
+            collect ( [ $rkb ] ),  // sorted items
             1,                // total
             1,                // per page
             1                 // current page
         );
 
         // Calculate total items for SPB creation
-        $totalItems = $rkb->linkAlatDetailRkbs->sum(function($detail1) {
-            return $detail1->linkRkbDetails->sum(function($detail2) {
+        $totalItems = $rkb->linkAlatDetailRkbs->sum ( function ($detail1)
+        {
+            return $detail1->linkRkbDetails->sum ( function ($detail2)
+            {
                 $remainder = $detail2->detailRkbUrgent?->quantity_remainder ??
                     $detail2->detailRkbGeneral?->quantity_remainder ?? 0;
                 return $remainder > 0 ? 1 : 0;
-            });
-        });
+            } );
+        } );
 
         // Get SPB history and addendum data
-        $riwayatSpb = SPB::with('linkSpbDetailSpb')
-            ->whereIn('id', $rkb->spbs()->pluck('id_spb'))
-            ->get();
+        $riwayatSpb = SPB::with ( 'linkSpbDetailSpb' )
+            ->whereIn ( 'id', $rkb->spbs ()->pluck ( 'id_spb' ) )
+            ->orderBy ( 'updated_at', 'desc' )
+            ->orderBy ( 'id', 'desc' )
+            ->get ();
 
-        $spbAddendumEd = SPB::whereIn('id', $rkb->spbs()->pluck('id_spb'))
-            ->where('is_addendum', true)
-            ->where(function($query) {
-                $query->where('nomor', 'not like', '%-1')
-                    ->where('nomor', 'not like', '%-2')
-                    ->where('nomor', 'not like', '%-3')
-                    ->where('nomor', 'not like', '%-4')
-                    ->where('nomor', 'not like', '%-5')
-                    ->where('nomor', 'not like', '%-6')
-                    ->where('nomor', 'not like', '%-7')
-                    ->where('nomor', 'not like', '%-8')
-                    ->where('nomor', 'not like', '%-9');
-            })
-            ->get();
+        $spbAddendumEd = SPB::whereIn ( 'id', $rkb->spbs ()->pluck ( 'id_spb' ) )
+            ->where ( 'is_addendum', true )
+            ->where ( function ($query)
+            {
+                $query->where ( 'nomor', 'not like', '%-1' )
+                    ->where ( 'nomor', 'not like', '%-2' )
+                    ->where ( 'nomor', 'not like', '%-3' )
+                    ->where ( 'nomor', 'not like', '%-4' )
+                    ->where ( 'nomor', 'not like', '%-5' )
+                    ->where ( 'nomor', 'not like', '%-6' )
+                    ->where ( 'nomor', 'not like', '%-7' )
+                    ->where ( 'nomor', 'not like', '%-8' )
+                    ->where ( 'nomor', 'not like', '%-9' );
+            } )
+            ->get ();
 
-        // Get projects for selection
-        $proyeks = [];
-        if ($user->role !== 'Pegawai') {
-            $proyeks = Proyek::with("users")
-                ->orderBy("updated_at", "desc")
-                ->orderBy("id", "desc")
-                ->get();
-        }
+        $proyeks = Proyek::with ( "users" )
+            ->orderBy ( "updated_at", "desc" )
+            ->orderBy ( "id", "desc" )
+            ->get ();
 
-        return view('dashboard.spb.detail.detail', [
-            'proyeks' => $proyeks,
-            'rkb' => $rkb, // Keep original RKB for detail form
-            'TableData' => $TableData, // Paginated data for consistency
-            'supplier' => MasterDataSupplier::all(),
-            'totalItems' => $totalItems,
-            'riwayatSpb' => $riwayatSpb,
+        $TableData->sortByDesc ( 'updated_at' )
+            ->sortByDesc ( 'id' );
+
+        return view ( 'dashboard.spb.detail.detail', [ 
+            'proyeks'       => $proyeks,
+            'rkb'           => $rkb, // Keep original RKB for detail form
+            'TableData'     => $TableData, // Paginated data for consistency
+            'supplier'      => MasterDataSupplier::all (),
+            'totalItems'    => $totalItems,
+            'riwayatSpb'    => $riwayatSpb,
             'spbAddendumEd' => $spbAddendumEd,
-            'headerPage' => "SPB Supplier",
-            'page' => 'Detail SPB Supplier' . ' [' . $rkb->proyek->nama . ' | ' . $rkb->nomor . ' ]',
-        ]);
+            'headerPage'    => "SPB Supplier",
+            'page'          => 'Detail SPB Supplier' . ' [' . $rkb->proyek->nama . ' | ' . $rkb->nomor . ' ]',
+        ] );
     }
 
     public function getSparepart ( $idSupplier )

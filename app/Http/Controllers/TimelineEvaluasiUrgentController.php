@@ -19,8 +19,7 @@ class TimelineEvaluasiUrgentController extends Controller
         $perPage        = in_array ( (int) $request->get ( 'per_page' ), $allowedPerPage ) ? (int) $request->get ( 'per_page' ) : 10;
 
         $query = TimelineRKBUrgent::query ()
-            ->where ( 'id_link_alat_detail_rkb', $id )
-            ->orderBy ( $request->get ( 'sort', 'updated_at' ), $request->get ( 'direction', 'desc' ) );
+            ->where ( 'id_link_alat_detail_rkb', $id );
 
         if ( $request->has ( 'search' ) )
         {
@@ -85,11 +84,6 @@ class TimelineEvaluasiUrgentController extends Controller
             } );
         }
 
-        $proyeks = Proyek::with ( "users" )
-            ->orderBy ( "updated_at", "desc" )
-            ->orderBy ( "id", "desc" )
-            ->get ();
-
         $data = LinkAlatDetailRKB::with ( [ 
             'rkb',
             'masterDataAlat',
@@ -97,40 +91,20 @@ class TimelineEvaluasiUrgentController extends Controller
             'linkRkbDetails'
         ] )->find ( $id );
 
-        // Handle pagination or get all records
-        if ( $perPage === -1 )
-        {
-            $queryData  = $query->get ();
-            $TableData = new \Illuminate\Pagination\LengthAwarePaginator(
-                $queryData,
-                $queryData->count (),
-                -1,
-                1,
-                [ 
-                    'path'  => $request->url (),
-                    'query' => $request->query (),
-                ]
-            );
-        }
-        else
-        {
-            // Check if any results exist
-            if ($query->count() > 0) {
-                $TableData = $query->paginate($perPage)->withQueryString();
-            } else {
-                // Return empty paginator if no results
-                $TableData = new \Illuminate\Pagination\LengthAwarePaginator(
-                    [], // Empty array for items
-                    0,  // Total count
-                    $perPage,
-                    1,
-                    [
-                        'path' => $request->url(),
-                        'query' => $request->query(),
-                    ]
-                );
-            }
-        }
+        // Updated TableData logic
+        $TableData = $perPage === -1
+            ? $query->orderBy ( 'updated_at', 'desc' )
+                ->orderBy ( 'id', 'desc' )
+                ->paginate ( $query->count () )
+            : $query->orderBy ( 'updated_at', 'desc' )
+                ->orderBy ( 'id', 'desc' )
+                ->paginate ( $perPage );
+
+        // Updated proyeks query with consistent sorting
+        $proyeks = Proyek::with ( "users" )
+            ->orderBy ( "updated_at", "desc" )
+            ->orderBy ( "id", "desc" )
+            ->get ();
 
         return view ( 'dashboard.evaluasi.urgent.detail.timeline.timeline', [ 
             'proyek'      => $proyek,

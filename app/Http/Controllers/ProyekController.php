@@ -15,8 +15,7 @@ class ProyekController extends Controller
         $perPage        = in_array ( (int) $request->get ( 'per_page' ), $allowedPerPage ) ? (int) $request->get ( 'per_page' ) : 10;
 
         $query = Proyek::query ()
-            ->with ( 'users' )
-            ->orderBy ( $request->get ( 'sort', 'updated_at' ), $request->get ( 'direction', 'desc' ) );
+            ->with ( 'users' );
 
         if ( $request->has ( 'search' ) )
         {
@@ -27,11 +26,20 @@ class ProyekController extends Controller
             } );
         }
 
-        $proyeks = $query->paginate ( $perPage )
-            ->withQueryString ();
+        $proyeks = Proyek::with ( "users" )
+            ->orderBy ( "updated_at", "desc" )
+            ->orderBy ( "id", "desc" )
+            ->get ();
 
-        $TableData = $query->paginate ( $perPage )
-            ->withQueryString ();
+        $TableData = $perPage === -1
+            ? $query->orderBy ( 'updated_at', 'desc' )
+                ->orderBy ( 'id', 'desc' )
+                ->paginate ( $query->count () )
+            : $query->orderBy ( 'updated_at', 'desc' )
+                ->orderBy ( 'id', 'desc' )
+                ->paginate ( $perPage );
+
+        $TableData = $TableData->withQueryString ();
 
         return view ( "dashboard.proyek.proyek", [ 
             "headerPage" => "Proyek",

@@ -18,8 +18,7 @@ class SPBProyekController extends Controller
 
         $query = RKB::query ()
             ->with ( 'proyek' )
-            ->where ( 'is_approved_svp', true )
-            ->orderBy ( $request->get ( 'sort', 'updated_at' ), $request->get ( 'direction', 'desc' ) );
+            ->where ( 'is_approved_svp', true );
 
         if ( $request->has ( 'search' ) )
         {
@@ -62,17 +61,17 @@ class SPBProyekController extends Controller
             } );
         }
 
-        $TableData = $query->paginate ( $perPage )
+        $TableData = $query
+            ->orderBy ( 'periode', 'desc' )
+            ->orderBy ( 'updated_at', 'desc' )
+            ->orderBy ( 'id', 'desc' )
+            ->paginate ( $perPage )
             ->withQueryString ();
 
-        $proyeks = [];
-        if ( auth ()->user ()->role !== 'Pegawai' )
-        {
-            $proyeks = Proyek::with ( "users" )
-                ->orderBy ( "updated_at", "desc" )
-                ->orderBy ( "id", "desc" )
-                ->get ();
-        }
+        $proyeks = Proyek::with ( "users" )
+            ->orderBy ( "updated_at", "desc" )
+            ->orderBy ( "id", "desc" )
+            ->get ();
 
         return view ( 'dashboard.spb.proyek.proyek', [ 
             'headerPage' => "SPB Proyek",

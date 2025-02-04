@@ -17,8 +17,7 @@ class EvaluasiRKBUrgentController extends Controller
 
         $query = RKB::query ()
             ->with ( [ 'proyek' ] )
-            ->where ( 'tipe', 'Urgent' )
-            ->orderBy ( $request->get ( 'sort', 'updated_at' ), $request->get ( 'direction', 'desc' ) );
+            ->where ( 'tipe', 'Urgent' );
 
         if ( $request->has ( 'search' ) )
         {
@@ -96,17 +95,17 @@ class EvaluasiRKBUrgentController extends Controller
             } );
         }
 
-        $TableData = $query->paginate ( $perPage )
+        $TableData = $query
+            ->orderBy ( 'periode', 'desc' )
+            ->orderBy ( 'updated_at', 'desc' )
+            ->orderBy ( 'id', 'desc' )
+            ->paginate ( $perPage )
             ->withQueryString ();
 
-        $proyeks = [];
-        if ( $user->role !== 'Pegawai' )
-        {
-            $proyeks = Proyek::with ( "users" )
-                ->orderBy ( "updated_at", "asc" )
-                ->orderBy ( "id", "asc" )
-                ->get ();
-        }
+        $proyeks = Proyek::with ( "users" )
+            ->orderBy ( "updated_at", "desc" )
+            ->orderBy ( "id", "desc" )
+            ->get ();
 
         return view ( 'dashboard.evaluasi.urgent.evaluasi_urgent', [ 
             'headerPage'  => "Evaluasi Urgent",

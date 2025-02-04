@@ -21,8 +21,7 @@ class TimelineRKBUrgentController extends Controller
         $perPage        = in_array ( (int) $request->get ( 'per_page' ), $allowedPerPage ) ? (int) $request->get ( 'per_page' ) : 10;
 
         $query = TimelineRKBUrgent::query ()
-            ->where ( 'id_link_alat_detail_rkb', $id )
-            ->orderBy ( $request->get ( 'sort', 'updated_at' ), $request->get ( 'direction', 'desc' ) );
+            ->where ( 'id_link_alat_detail_rkb', $id );
 
         if ( $request->has ( 'search' ) )
         {
@@ -104,10 +103,13 @@ class TimelineRKBUrgentController extends Controller
             'linkRkbDetails'
         ] )->find ( $id );
 
-        // Handle pagination or get all records
+        // Handle pagination with consistent sorting
         if ( $perPage === -1 )
         {
-            $queryData  = $query->get ();
+            $queryData = $query->orderBy ( 'updated_at', 'desc' )
+                ->orderBy ( 'id', 'desc' )
+                ->get ();
+
             $TableData = new \Illuminate\Pagination\LengthAwarePaginator(
                 $queryData,
                 $queryData->count (),
@@ -122,18 +124,24 @@ class TimelineRKBUrgentController extends Controller
         else
         {
             // Check if any results exist
-            if ($query->count() > 0) {
-                $TableData = $query->paginate($perPage)->withQueryString();
-            } else {
+            if ( $query->count () > 0 )
+            {
+                $TableData = $query->orderBy ( 'updated_at', 'desc' )
+                    ->orderBy ( 'id', 'desc' )
+                    ->paginate ( $perPage )
+                    ->withQueryString ();
+            }
+            else
+            {
                 // Return empty paginator if no results
                 $TableData = new \Illuminate\Pagination\LengthAwarePaginator(
-                    [], // Empty array for items
-                    0,  // Total count
+                    [],
+                    0,
                     $perPage,
                     1,
-                    [
-                        'path' => $request->url(),
-                        'query' => $request->query(),
+                    [ 
+                        'path'  => $request->url (),
+                        'query' => $request->query (),
                     ]
                 );
             }

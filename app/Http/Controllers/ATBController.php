@@ -233,8 +233,8 @@ class ATBController extends Controller
         // Get required data
         $proyek  = Proyek::with ( "users" )->findOrFail ( $id_proyek );
         $proyeks = Proyek::with ( "users" )
-            ->orderBy ( "updated_at", "asc" )
-            ->orderBy ( "id", "asc" )
+            ->orderBy ( "updated_at", "desc" )
+            ->orderBy ( "id", "desc" )
             ->get ();
 
         // Get SPBs if needed

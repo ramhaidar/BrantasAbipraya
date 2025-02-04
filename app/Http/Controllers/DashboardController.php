@@ -92,8 +92,8 @@ class DashboardController extends Controller
         $user      = Auth::user ();
         $id_proyek = $request->query ( "id_proyek" );
         $proyeks   = Proyek::with ( "users" )
-            ->latest ( "updated_at" )
-            ->latest ( "id" )
+            ->orderBy ( "updated_at", "desc" )
+            ->orderBy ( "id", "desc" )
             ->get ();
 
         // Date ranges
@@ -203,36 +203,48 @@ class DashboardController extends Controller
         $endDate
     ) {
         return [ 
-            "atbData"          => clone $atbQuery->get (),
-            "apbData"          => clone $apbQuery->get (),
-            "saldoData"        => clone $saldoQuery->get (),
-            "atbDataCurrent"   => clone $atbQuery
-                ->whereBetween ( "tanggal", [ $startDate, $endDate ] )
-                ->get (),
-            "apbDataCurrent"   => clone $apbQuery
-                ->whereBetween ( "tanggal", [ $startDate, $endDate ] )
-                ->get (),
-            "saldoDataCurrent" => clone $saldoQuery
-                ->whereHas (
-                    "atb",
-                    fn ( $q ) => $q->whereBetween ( "tanggal", [ 
-                        $startDate,
-                        $endDate,
-                    ] )
-                )
-                ->get (),
-            "atbDataTotal"     => clone $atbQuery
-                ->where ( "tanggal", "<=", $endDate )
-                ->get (),
-            "apbDataTotal"     => clone $apbQuery
-                ->where ( "tanggal", "<=", $endDate )
-                ->get (),
-            "saldoDataTotal"   => clone $saldoQuery
-                ->whereHas (
-                    "atb",
-                    fn ( $q ) => $q->where ( "tanggal", "<=", $endDate )
-                )
-                ->get (),
+            "atbData"          => clone $atbQuery->orderBy('updated_at', 'desc')
+                                                ->orderBy('id', 'desc')
+                                                ->get(),
+            "apbData"          => clone $apbQuery->orderBy('updated_at', 'desc')
+                                                ->orderBy('id', 'desc')
+                                                ->get(),
+            "saldoData"        => clone $saldoQuery->orderBy('updated_at', 'desc')
+                                                  ->orderBy('id', 'desc')
+                                                  ->get(),
+            "atbDataCurrent"   => clone $atbQuery->orderBy('updated_at', 'desc')
+                                                ->orderBy('id', 'desc')
+                                                ->whereBetween ( "tanggal", [ $startDate, $endDate ] )
+                                                ->get(),
+            "apbDataCurrent"   => clone $apbQuery->orderBy('updated_at', 'desc')
+                                                ->orderBy('id', 'desc')
+                                                ->whereBetween ( "tanggal", [ $startDate, $endDate ] )
+                                                ->get(),
+            "saldoDataCurrent" => clone $saldoQuery->orderBy('updated_at', 'desc')
+                                                  ->orderBy('id', 'desc')
+                                                  ->whereHas (
+                                                      "atb",
+                                                      fn ( $q ) => $q->whereBetween ( "tanggal", [ 
+                                                          $startDate,
+                                                          $endDate,
+                                                      ] )
+                                                  )
+                                                  ->get(),
+            "atbDataTotal"     => clone $atbQuery->orderBy('updated_at', 'desc')
+                                                ->orderBy('id', 'desc')
+                                                ->where ( "tanggal", "<=", $endDate )
+                                                ->get(),
+            "apbDataTotal"     => clone $apbQuery->orderBy('updated_at', 'desc')
+                                                ->orderBy('id', 'desc')
+                                                ->where ( "tanggal", "<=", $endDate )
+                                                ->get(),
+            "saldoDataTotal"   => clone $saldoQuery->orderBy('updated_at', 'desc')
+                                                  ->orderBy('id', 'desc')
+                                                  ->whereHas (
+                                                      "atb",
+                                                      fn ( $q ) => $q->where ( "tanggal", "<=", $endDate )
+                                                  )
+                                                  ->get(),
         ];
     }
 
@@ -322,7 +334,7 @@ class DashboardController extends Controller
                 $chartData[ $jenis ] = [ "atb" => 0, "apb" => 0, "saldo" => 0 ];
             }
 
-            $categoryTotal              = $this->calculateTotal ( $atbData, $category );
+            $categoryTotal                  = $this->calculateTotal ( $atbData, $category );
             $chartData[ $jenis ][ "atb" ] += $categoryTotal;
             $chartData[ $jenis ][ "apb" ] += $this->calculateTotal (
                 $apbData,

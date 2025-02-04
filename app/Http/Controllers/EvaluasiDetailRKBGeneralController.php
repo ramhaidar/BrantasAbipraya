@@ -31,7 +31,7 @@ class EvaluasiDetailRKBGeneralController extends Controller
             ->join ( 'kategori_sparepart', 'detail_rkb_general.id_kategori_sparepart_sparepart', '=', 'kategori_sparepart.id' )
             ->join ( 'master_data_sparepart', 'detail_rkb_general.id_master_data_sparepart', '=', 'master_data_sparepart.id' )
             ->where ( 'link_alat_detail_rkb.id_rkb', $id )
-            ->orderBy('master_data_sparepart.part_number') // Add this line to sort by part_number
+            ->orderBy ( 'master_data_sparepart.part_number' ) // Add this line to sort by part_number
             ->select ( [ 
                 'detail_rkb_general.*',
                 'master_data_alat.jenis_alat',
@@ -68,12 +68,12 @@ class EvaluasiDetailRKBGeneralController extends Controller
         // Modify pagination to handle -1 case
         if ( $perPage === -1 )
         {
-            $detail_rkb = $query->get (); // Get all records without pagination
+            $TableData = $query->get (); // Get all records without pagination
 
             // Handle empty results
-            if ( $detail_rkb->isEmpty () )
+            if ( $TableData->isEmpty () )
             {
-                $detail_rkb = new \Illuminate\Pagination\LengthAwarePaginator(
+                $TableData = new \Illuminate\Pagination\LengthAwarePaginator(
                     collect ( [] ), // Empty collection
                     0, // Total
                     1, // Per page
@@ -83,10 +83,10 @@ class EvaluasiDetailRKBGeneralController extends Controller
             else
             {
                 // Convert collection to LengthAwarePaginator
-                $detail_rkb = new \Illuminate\Pagination\LengthAwarePaginator(
-                    $detail_rkb,
-                    $detail_rkb->count (),
-                    max ( $detail_rkb->count (), 1 ), // Ensure perPage is at least 1
+                $TableData = new \Illuminate\Pagination\LengthAwarePaginator(
+                    $TableData,
+                    $TableData->count (),
+                    max ( $TableData->count (), 1 ), // Ensure perPage is at least 1
                     1
                 );
             }
@@ -97,7 +97,7 @@ class EvaluasiDetailRKBGeneralController extends Controller
             $total = $query->count ();
             if ( $total === 0 )
             {
-                $detail_rkb = new \Illuminate\Pagination\LengthAwarePaginator(
+                $TableData = new \Illuminate\Pagination\LengthAwarePaginator(
                     collect ( [] ), // Empty collection
                     0, // Total
                     $perPage,
@@ -106,13 +106,13 @@ class EvaluasiDetailRKBGeneralController extends Controller
             }
             else
             {
-                $detail_rkb = $query->paginate ( $perPage );
+                $TableData = $query->paginate ( $perPage );
             }
         }
 
         $proyeks = Proyek::with ( "users" )
-            ->orderBy ( "updated_at", "asc" )
-            ->orderBy ( "id", "asc" )
+            ->orderBy ( "updated_at", "desc" )
+            ->orderBy ( "id", "desc" )
             ->get ();
 
         // Get stock quantities for each sparepart in this project
@@ -132,7 +132,7 @@ class EvaluasiDetailRKBGeneralController extends Controller
             'available_alat'        => $available_alat,
             'master_data_sparepart' => MasterDataSparepart::all (),
             'kategori_sparepart'    => KategoriSparepart::all (),
-            'TableData'             => $detail_rkb,
+            'TableData'             => $TableData,
             'stockQuantities'       => $stockQuantities,
         ] );
     }

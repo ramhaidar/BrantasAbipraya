@@ -38,14 +38,14 @@ class AlatProyekController extends Controller
         }
 
         $TableData = $perPage === -1
-            ? $query->orderBy('updated_at', 'asc')
-                   ->orderBy('id', 'asc')
-                   ->paginate($query->count())
-            : $query->orderBy('updated_at', 'asc')
-                   ->orderBy('id', 'asc')
-                   ->paginate($perPage);
+            ? $query->orderBy ( 'updated_at', 'desc' )
+                ->orderBy ( 'id', 'desc' )
+                ->paginate ( $query->count () )
+            : $query->orderBy ( 'updated_at', 'desc' )
+                ->orderBy ( 'id', 'desc' )
+                ->paginate ( $perPage );
 
-        $TableData = $TableData->withQueryString();
+        $TableData = $TableData->withQueryString ();
 
         $proyeks = Proyek::with ( "users" )
             ->orderBy ( "updated_at", "desc" )

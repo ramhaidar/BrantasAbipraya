@@ -48,7 +48,7 @@ class UserController extends Controller
         return view ( 'dashboard.users.user', [ 
             'headerPage' => 'User',
             'page'       => 'Data User',
-            
+
             'proyeks'    => $proyeks,
             'users'      => $users,
             'TableData'  => $TableData,

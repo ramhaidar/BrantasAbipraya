@@ -56,18 +56,18 @@ class MasterDataSupplierController extends Controller
         $suppliers = $query->paginate ( $perPage )
             ->withQueryString ();
 
-        $TableData = MasterDataSupplier::query ()
-            ->orderBy ( 'updated_at', 'desc' )
-            ->orderBy ( 'id', 'desc' )
-            ->paginate ( $perPage )
-            ->withQueryString ();
-
         $spareparts = MasterDataSparepart::all ();
 
         $proyeks = Proyek::with ( "users" )
             ->orderBy ( "updated_at", "desc" )
             ->orderBy ( "id", "desc" )
             ->get ();
+
+        $TableData = MasterDataSupplier::query ()
+            ->orderBy ( 'updated_at', 'desc' )
+            ->orderBy ( 'id', 'desc' )
+            ->paginate ( $perPage )
+            ->withQueryString ();
 
         return view ( 'dashboard.masterdata.supplier.supplier', [ 
             'headerPage' => "Master Data Supplier",

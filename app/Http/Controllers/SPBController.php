@@ -104,16 +104,10 @@ class SPBController extends Controller
             ->paginate ( $perPage )
             ->withQueryString ();
 
-        // dd ( $TableData );
-
-        $proyeks = [];
-        if ( $user->role !== 'Pegawai' )
-        {
-            $proyeks = Proyek::with ( "users" )
-                ->orderBy ( "updated_at", "desc" )
-                ->orderBy ( "id", "desc" )
-                ->get ();
-        }
+        $proyeks = Proyek::with ( "users" )
+            ->orderBy ( "updated_at", "desc" )
+            ->orderBy ( "id", "desc" )
+            ->get ();
 
         return view ( 'dashboard.spb.spb', [ 
             'headerPage' => "SPB Supplier",

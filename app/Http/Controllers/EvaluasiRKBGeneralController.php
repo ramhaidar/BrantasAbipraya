@@ -17,8 +17,7 @@ class EvaluasiRKBGeneralController extends Controller
 
         $query = RKB::query ()
             ->with ( [ 'proyek' ] )
-            ->where ( 'tipe', 'General' )
-            ->orderBy ( $request->get ( 'sort', 'updated_at' ), $request->get ( 'direction', 'desc' ) );
+            ->where ( 'tipe', 'General' );
 
         if ( $request->has ( 'search' ) )
         {
@@ -96,17 +95,17 @@ class EvaluasiRKBGeneralController extends Controller
             } );
         }
 
-        $TableData = $query->paginate ( $perPage )
+        $TableData = $query
+            ->orderBy ( 'periode', 'desc' )
+            ->orderBy ( 'updated_at', 'desc' )
+            ->orderBy ( 'id', 'desc' )
+            ->paginate ( $perPage )
             ->withQueryString ();
 
-        $proyeks = [];
-        if ( $user->role !== 'Pegawai' )
-        {
-            $proyeks = Proyek::with ( "users" )
-                ->orderBy ( "updated_at", "asc" )
-                ->orderBy ( "id", "asc" )
-                ->get ();
-        }
+        $proyeks = Proyek::with ( "users" )
+            ->orderBy ( "updated_at", "desc" )
+            ->orderBy ( "id", "desc" )
+            ->get ();
 
         return view ( 'dashboard.evaluasi.general.evaluasi_general', [ 
             'headerPage'  => 'Evaluasi General',

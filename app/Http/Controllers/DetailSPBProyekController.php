@@ -38,6 +38,9 @@ class DetailSPBProyekController extends Controller
             ? Proyek::with ( "users" )->latest ( "updated_at" )->latest ( "id" )->get ()
             : [];
 
+        $TableData->sortByDesc ( 'updated_at' )
+            ->sortByDesc ( 'id' );
+
         return view ( 'dashboard.spb.proyek.detail.detail', [ 
             'headerPage' => "SPB Proyek",
             'page'       => "Detail SPB Proyek [{$rkb->proyek->nama} | {$rkb->nomor}]",

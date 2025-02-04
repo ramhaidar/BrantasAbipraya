@@ -1,5 +1,5 @@
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
+    $(document).ready(function() {
         function debounce(func, wait) {
             let timeout;
             return function executedFunction(...args) {
@@ -66,6 +66,12 @@
                 }
             ];
 
+            // Ensure at least one slice has a non-zero value
+            const hasNonZeroValue = pieData.some(d => d.value > 0);
+            if (!hasNonZeroValue) {
+                pieData.forEach(d => d.value = 1); // Assign a small value to each slice
+            }
+
             // Create pie layout
             const pie = d3.pie()
                 .value(d => d.value)
@@ -92,7 +98,7 @@
                 .enter()
                 .append('path')
                 .attr('d', arc)
-                .attr('fill', (d, i) => colors[Object.keys(colors)[i]])
+                .attr('fill', d => colors[d.data.name.toLowerCase()])
                 .attr('stroke', '#353a50')
                 .style('stroke-width', '2px')
                 .on('mouseover', function(event, d) {

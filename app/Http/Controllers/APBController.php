@@ -243,7 +243,10 @@ class APBController extends Controller
         // Get other required data
         $proyek  = Proyek::with ( "users" )->findOrFail ( $id_proyek );
         $alats   = AlatProyek::where ( 'id_proyek', $id_proyek )->get ();
-        $proyeks = Proyek::with ( "users" )->orderByDesc ( "updated_at" )->orderByDesc ( "id" )->get ();
+        $proyeks = Proyek::with ( "users" )
+            ->orderBy ( "updated_at", "asc" )
+            ->orderBy ( "id", "asc" )
+            ->get ();
 
         // Get filtered SPBs if needed
         $spbs = $this->getFilteredSpbs ( $id_proyek );

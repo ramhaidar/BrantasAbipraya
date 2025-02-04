@@ -18,9 +18,7 @@
                 </button>
             </div>
 
-            @if ($show_all ?? false)
-                <input name="per_page" type="hidden" value="-1">
-            @else
+            @if (($show_all ?? false) === false)
                 <select class="form-select" name="per_page" style="width: auto;" onchange="this.form.submit()">
                     @foreach ([10, 25, 50, 100] as $value)
                         <option value="{{ $value }}" {{ request('per_page', 10) == $value ? 'selected' : '' }}>

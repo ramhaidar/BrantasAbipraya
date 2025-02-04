@@ -22,8 +22,7 @@ class AlatProyekController extends Controller
         $query = AlatProyek::query ()
             ->with ( 'masterDataAlat' )
             ->where ( 'id_proyek', $proyek->id )
-            ->whereNull ( 'removed_at' )
-            ->orderBy ( $request->get ( 'sort', 'updated_at' ), $request->get ( 'direction', 'desc' ) );
+            ->whereNull ( 'removed_at' );
 
         if ( $request->has ( 'search' ) )
         {
@@ -38,8 +37,15 @@ class AlatProyekController extends Controller
             } );
         }
 
-        $TableData = $query->paginate ( $perPage )
-            ->withQueryString ();
+        $TableData = $perPage === -1
+            ? $query->orderBy('updated_at', 'asc')
+                   ->orderBy('id', 'asc')
+                   ->paginate($query->count())
+            : $query->orderBy('updated_at', 'asc')
+                   ->orderBy('id', 'asc')
+                   ->paginate($perPage);
+
+        $TableData = $TableData->withQueryString();
 
         $proyeks = Proyek::with ( "users" )
             ->orderBy ( "updated_at", "desc" )

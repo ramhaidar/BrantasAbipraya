@@ -27,7 +27,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($TableData as $item)
+                @forelse ($TableData as $item)
                     <tr>
                         <td class="text-center">{{ $item->masterDataAlat->jenis_alat }}</td>
                         <td class="text-center">{{ $item->masterDataAlat->kode_alat }}</td>
@@ -40,7 +40,14 @@
                             </button>
                         </td>
                     </tr>
-                @endforeach
+                @empty
+                    <tr>
+                        <td class="text-center py-3 text-muted" colspan="16">
+                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                            Belum ada data alat yang tersedia
+                        </td>
+                    </tr>
+                @endforelse
             </tbody>
         </table>
     </div>

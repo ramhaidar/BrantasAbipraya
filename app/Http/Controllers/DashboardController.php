@@ -125,16 +125,21 @@ class DashboardController extends Controller
         return view ( "dashboard.dashboard.dashboard", [ 
             "headerPage"             => "Dashboard",
             "page"                   => "Dashboard",
+
             "proyeks"                => $proyeks,
             "selectedProject"        => $id_proyek,
+
             "totalATB"               => $this->calculateOverallTotal ( $data[ "atbData" ] ),
             "totalAPB"               => $this->calculateOverallTotal ( $data[ "apbData" ] ),
             "totalSaldo"             => $this->calculateOverallTotal ( $data[ "saldoData" ] ),
+
             "chartData"              => $chartData[ "main" ],
             "chartDataCurrent"       => $chartData[ "current" ],
             "chartDataTotal"         => $chartData[ "total" ],
+
             "startDate"              => $startDate->format ( "Y-m-d" ),
             "endDate"                => $endDate->format ( "Y-m-d" ),
+
             "horizontalChartCurrent" => $horizontalCharts[ "current" ],
             "horizontalChartTotal"   => $horizontalCharts[ "total" ],
         ] );
@@ -203,48 +208,48 @@ class DashboardController extends Controller
         $endDate
     ) {
         return [ 
-            "atbData"          => clone $atbQuery->orderBy('updated_at', 'desc')
-                                                ->orderBy('id', 'desc')
-                                                ->get(),
-            "apbData"          => clone $apbQuery->orderBy('updated_at', 'desc')
-                                                ->orderBy('id', 'desc')
-                                                ->get(),
-            "saldoData"        => clone $saldoQuery->orderBy('updated_at', 'desc')
-                                                  ->orderBy('id', 'desc')
-                                                  ->get(),
-            "atbDataCurrent"   => clone $atbQuery->orderBy('updated_at', 'desc')
-                                                ->orderBy('id', 'desc')
-                                                ->whereBetween ( "tanggal", [ $startDate, $endDate ] )
-                                                ->get(),
-            "apbDataCurrent"   => clone $apbQuery->orderBy('updated_at', 'desc')
-                                                ->orderBy('id', 'desc')
-                                                ->whereBetween ( "tanggal", [ $startDate, $endDate ] )
-                                                ->get(),
-            "saldoDataCurrent" => clone $saldoQuery->orderBy('updated_at', 'desc')
-                                                  ->orderBy('id', 'desc')
-                                                  ->whereHas (
-                                                      "atb",
-                                                      fn ( $q ) => $q->whereBetween ( "tanggal", [ 
-                                                          $startDate,
-                                                          $endDate,
-                                                      ] )
-                                                  )
-                                                  ->get(),
-            "atbDataTotal"     => clone $atbQuery->orderBy('updated_at', 'desc')
-                                                ->orderBy('id', 'desc')
-                                                ->where ( "tanggal", "<=", $endDate )
-                                                ->get(),
-            "apbDataTotal"     => clone $apbQuery->orderBy('updated_at', 'desc')
-                                                ->orderBy('id', 'desc')
-                                                ->where ( "tanggal", "<=", $endDate )
-                                                ->get(),
-            "saldoDataTotal"   => clone $saldoQuery->orderBy('updated_at', 'desc')
-                                                  ->orderBy('id', 'desc')
-                                                  ->whereHas (
-                                                      "atb",
-                                                      fn ( $q ) => $q->where ( "tanggal", "<=", $endDate )
-                                                  )
-                                                  ->get(),
+            "atbData"          => clone $atbQuery->orderBy ( 'updated_at', 'desc' )
+                ->orderBy ( 'id', 'desc' )
+                ->get (),
+            "apbData"          => clone $apbQuery->orderBy ( 'updated_at', 'desc' )
+                ->orderBy ( 'id', 'desc' )
+                ->get (),
+            "saldoData"        => clone $saldoQuery->orderBy ( 'updated_at', 'desc' )
+                ->orderBy ( 'id', 'desc' )
+                ->get (),
+            "atbDataCurrent"   => clone $atbQuery->orderBy ( 'updated_at', 'desc' )
+                ->orderBy ( 'id', 'desc' )
+                ->whereBetween ( "tanggal", [ $startDate, $endDate ] )
+                ->get (),
+            "apbDataCurrent"   => clone $apbQuery->orderBy ( 'updated_at', 'desc' )
+                ->orderBy ( 'id', 'desc' )
+                ->whereBetween ( "tanggal", [ $startDate, $endDate ] )
+                ->get (),
+            "saldoDataCurrent" => clone $saldoQuery->orderBy ( 'updated_at', 'desc' )
+                ->orderBy ( 'id', 'desc' )
+                ->whereHas (
+                    "atb",
+                    fn ( $q ) => $q->whereBetween ( "tanggal", [ 
+                        $startDate,
+                        $endDate,
+                    ] )
+                )
+                ->get (),
+            "atbDataTotal"     => clone $atbQuery->orderBy ( 'updated_at', 'desc' )
+                ->orderBy ( 'id', 'desc' )
+                ->where ( "tanggal", "<=", $endDate )
+                ->get (),
+            "apbDataTotal"     => clone $apbQuery->orderBy ( 'updated_at', 'desc' )
+                ->orderBy ( 'id', 'desc' )
+                ->where ( "tanggal", "<=", $endDate )
+                ->get (),
+            "saldoDataTotal"   => clone $saldoQuery->orderBy ( 'updated_at', 'desc' )
+                ->orderBy ( 'id', 'desc' )
+                ->whereHas (
+                    "atb",
+                    fn ( $q ) => $q->where ( "tanggal", "<=", $endDate )
+                )
+                ->get (),
         ];
     }
 

@@ -1,5 +1,5 @@
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
+    $(document).ready(function() {
         // Format number to billions with rounding up and specific format
         const formatBillion = (number) => {
             const billions = (number / 1000000000);

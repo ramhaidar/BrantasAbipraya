@@ -1,5 +1,5 @@
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
+    $(document).ready(function() {
 
         // Initialize select2
         $('#projectSelect').select2({
@@ -242,7 +242,7 @@
             // Y-axis label - moved more to the left
             svg.append('text')
                 .attr('transform', 'rotate(-90)')
-                .attr('y', 0 - margin.left) // Reduced by 20px to move left
+                .attr('y', 0 - margin.left + 15) // Reduced by 20px to move left
                 .attr('x', 0 - (height / 2))
                 .attr('dy', '12px')
                 .style('text-anchor', 'middle')

@@ -21,8 +21,7 @@ class SPBController extends Controller
 
         $query = RKB::query ()
             ->with ( [ 'proyek', 'spbs' ] )
-            ->where ( 'is_approved_svp', true )
-            ->orderBy ( $request->get ( 'sort', 'updated_at' ), $request->get ( 'direction', 'desc' ) );
+            ->where ( 'is_approved_svp', true );
 
         if ( $request->has ( 'search' ) )
         {
@@ -98,7 +97,14 @@ class SPBController extends Controller
             } );
         }
 
-        $TableData = $query->paginate ( $perPage )->withQueryString ();
+        $TableData = $query
+            ->orderBy ( 'periode', 'desc' )
+            ->orderBy ( 'updated_at', 'desc' )
+            ->orderBy ( 'id', 'desc' )
+            ->paginate ( $perPage )
+            ->withQueryString ();
+
+        // dd ( $TableData );
 
         $proyeks = [];
         if ( $user->role !== 'Pegawai' )

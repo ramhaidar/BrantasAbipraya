@@ -46,31 +46,46 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse ($TableData as $item)
-                    @foreach ($item->linkRkbDetails as $detail)
+                @php
+                    // Group items by linkAlatDetailRkb ID
+                    $groupedItems = collect($TableData->items())->groupBy(function ($item) {
+                        return $item->linkRkbDetails->first()->linkAlatDetailRkb->id;
+                    });
+                @endphp
+
+                @forelse ($groupedItems as $alatId => $items)
+                    @php
+                        $firstItem = $items->first();
+                        $detail = $firstItem->linkRkbDetails->first();
+                        $alat = $detail->linkAlatDetailRkb;
+                    @endphp
+
+                    @foreach ($items as $item)
                         <tr>
-                            <td>{{ $detail->linkAlatDetailRkb->masterDataAlat->jenis_alat ?? '-' }}</td>
-                            <td>{{ $detail->linkAlatDetailRkb->masterDataAlat->kode_alat ?? '-' }}</td>
+                            <td>{{ $alat->masterDataAlat->jenis_alat ?? '-' }}</td>
+                            <td>{{ $alat->masterDataAlat->kode_alat ?? '-' }}</td>
                             <td>{{ $item->kategoriSparepart->kode ?? '-' }}: {{ $item->kategoriSparepart->nama ?? '-' }}</td>
                             <td>{{ $item->masterDataSparepart->nama ?? '-' }}</td>
                             <td>{{ $item->masterDataSparepart->part_number ?? '-' }}</td>
                             <td>{{ $item->masterDataSparepart->merk ?? '-' }}</td>
-                            <td>{{ $detail->linkAlatDetailRkb->nama_koordinator ?? '-' }}</td>
+                            <td>{{ $alat->nama_koordinator ?? '-' }}</td>
                             <td>
                                 <button class="btn {{ $item->dokumentasi ? 'btn-warning' : 'btn-primary' }}" onclick="showDokumentasi({{ $item->id }})">
                                     <i class="bi bi-file-earmark-text"></i>
                                 </button>
                             </td>
                             <td>
-                                <a class="btn {{ $detail->linkAlatDetailRkb->timelineRkbUrgents->count() > 0 ? 'btn-warning' : 'btn-primary' }}" href="{{ route('rkb_urgent.detail.timeline.index', ['id' => $detail->linkAlatDetailRkb->id]) }}">
+                                <a class="btn {{ $alat->timelineRkbUrgents->count() > 0 ? 'btn-warning' : 'btn-primary' }}" href="{{ route('rkb_urgent.detail.timeline.index', ['id' => $alat->id]) }}">
                                     <i class="bi bi-hourglass-split"></i>
                                 </a>
                             </td>
-                            <td>
-                                <button class="btn {{ $detail->linkAlatDetailRkb->lampiranRkbUrgent ? 'btn-warning' : 'btn-primary' }} lampiranBtn" data-bs-toggle="modal" data-bs-target="{{ $detail->linkAlatDetailRkb->lampiranRkbUrgent ? '#modalForLampiranExist' : '#modalForLampiranNew' }}" data-id-linkalatdetail="{{ $detail->linkAlatDetailRkb->id }}" data-id-lampiran="{{ $detail->linkAlatDetailRkb->lampiranRkbUrgent ? $detail->linkAlatDetailRkb->lampiranRkbUrgent->id : null }}">
-                                    <i class="bi bi-paperclip"></i>
-                                </button>
-                            </td>
+                            @if ($loop->first)
+                                <td rowspan="{{ $items->count() }}">
+                                    <button class="btn {{ $alat->lampiranRkbUrgent ? 'btn-warning' : 'btn-primary' }} lampiranBtn" data-bs-toggle="modal" data-bs-target="{{ $alat->lampiranRkbUrgent ? '#modalForLampiranExist' : '#modalForLampiranNew' }}" data-id-linkalatdetail="{{ $alat->id }}" data-id-lampiran="{{ $alat->lampiranRkbUrgent ? $alat->lampiranRkbUrgent->id : null }}">
+                                        <i class="bi bi-paperclip"></i>
+                                    </button>
+                                </td>
+                            @endif
                             <td>{{ $item->quantity_requested }}</td>
                             <td>{{ $item->quantity_approved ?? '-' }}</td>
                             <td>{{ $item->satuan }}</td>
@@ -98,32 +113,10 @@
 </div>
 
 @push('scripts_3')
+    @include('scripts.adjustTableColumnWidthByHeaderText')
+
     <script>
         $(document).ready(function() {
-            const $table = $('#table-data');
-            const $headers = $table.find('thead th');
-            const textsToCheck = ['Detail', 'Aksi', 'Supplier'];
-            let indices = {};
-
-            // Find the indices of the headers that match the texts in textsToCheck array
-            $headers.each(function(index) {
-                const headerText = $(this).text().trim();
-                if (textsToCheck.includes(headerText)) {
-                    indices[headerText] = index;
-                }
-            });
-
-            // Set the width of the corresponding columns in tbody
-            $.each(indices, function(text, index) {
-                $table.find('tbody tr').each(function() {
-                    $(this).find('td').eq(index).css('width', '1%');
-                });
-            });
-        });
-
-        document.addEventListener('DOMContentLoaded', function() {
-            'use strict';
-
             const dokumentasiPreviewContainer = document.getElementById('dokumentasiPreviewContainer');
             const largeImagePreviewForShow = document.getElementById('largeImagePreviewForShow');
             const dokumentasiPreviewModal = new bootstrap.Modal(document.getElementById('dokumentasiPreviewModal'));

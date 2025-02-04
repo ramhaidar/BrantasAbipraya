@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\LampiranRKBUrgent;
 use App\Models\RKB;
 use App\Models\Proyek;
 use Illuminate\Http\Request;
@@ -65,18 +66,20 @@ class DetailRKBUrgentController extends Controller
                 ->whereNull ( 'removed_at' );
         } )->get ();
 
-        // Modified TableData to include ordering
+        // Modified TableData to include ordering by master_data_alat.id
         $TableData = $perPage === -1
-            ? $query->orderBy ( 'updated_at', 'asc' )
-                ->orderBy ( 'id', 'asc' )
+            ? $query->orderBy ( 'master_data_alat.id', 'asc' )
+                ->orderBy ( 'updated_at', 'desc' )
+                ->orderBy ( 'id', 'desc' )
                 ->paginate ( $query->count () )
-            : $query->orderBy ( 'updated_at', 'asc' )
-                ->orderBy ( 'id', 'asc' )
+            : $query->orderBy ( 'master_data_alat.id', 'asc' )
+                ->orderBy ( 'updated_at', 'desc' )
+                ->orderBy ( 'id', 'desc' )
                 ->paginate ( $perPage );
 
         $proyeks = Proyek::with ( "users" )
-            ->orderBy ( "updated_at", "asc" )
-            ->orderBy ( "id", "asc" )
+            ->orderBy ( "updated_at", "desc" )
+            ->orderBy ( "id", "desc" )
             ->get ();
 
         return view ( 'dashboard.rkb.urgent.detail.detail', [ 
@@ -353,10 +356,17 @@ class DetailRKBUrgentController extends Controller
             }
         }
 
-        // Hapus LampiranRKBUrgent terkait
-        if ( $detailRKBUrgent->lampiranRkbUrgent )
+        // Get the LinkAlatDetailRKB through the relationship
+        $linkAlatDetailRKB = $detailRKBUrgent->linkRkbDetails[ 0 ]->linkAlatDetailRKB;
+
+        // If there's a LampiranRKBUrgent attached
+        if ( $linkAlatDetailRKB && $linkAlatDetailRKB->id_lampiran_rkb_urgent )
         {
-            $detailRKBUrgent->lampiranRkbUrgent->delete ();
+            // Delete the LampiranRKBUrgent record
+            LampiranRKBUrgent::where ( 'id', $linkAlatDetailRKB->id_lampiran_rkb_urgent )->delete ();
+
+            // Update the LinkAlatDetailRKB to remove the reference
+            $linkAlatDetailRKB->update ( [ 'id_lampiran_rkb_urgent' => null ] );
         }
 
         // Hapus DetailRKBUrgent

@@ -26,7 +26,7 @@
                     <th class="text-center">Proyek</th>
                     <th class="text-center">Periode</th>
                     <th class="text-center">Tipe</th>
-                    <th class="text-center">Detail SPB</th>
+                    <th class="text-center">Detail</th>
                 </tr>
             </thead>
             <tbody>

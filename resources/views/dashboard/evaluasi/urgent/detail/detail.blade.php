@@ -34,15 +34,11 @@
                             @endif
 
                             <!-- Tombol Approve VP -->
-                            @if ($rkb->is_approved_svp)
-                                <button class="btn btn-danger btn-sm" id="cancelApproveSvpButton" data-bs-toggle="modal" data-bs-target="#modalForApproveSvp" data-action="{{ route('evaluasi_rkb_urgent.detail.approve.svp', $rkb->id) }}" data-message="Apakah Anda yakin ingin membatalkan Approve RKB ini sebagai SVP?">
-                                    <i class="fa fa-times"></i> <span class="ms-2">Batalkan Approve RKB (SVP)</span>
-                                </button>
-                            @elseif ($rkb->is_approved_vp)
+                            @if ($rkb->is_approved_vp && !$rkb->is_approved_svp)
                                 <button class="btn btn-danger btn-sm" id="cancelApproveVpButton" data-bs-toggle="modal" data-bs-target="#modalForApproveVp" data-action="{{ route('evaluasi_rkb_urgent.detail.approve.vp', $rkb->id) }}" data-message="Apakah Anda yakin ingin membatalkan Approve RKB ini sebagai VP?">
                                     <i class="fa fa-times"></i> <span class="ms-2">Batalkan Approve RKB (VP)</span>
                                 </button>
-                            @else
+                            @elseif (!$rkb->is_approved_vp && !$rkb->is_approved_svp)
                                 <button class="btn btn-primary btn-sm" id="approveVpButton" data-bs-toggle="modal" data-bs-target="#modalForApproveVp" data-action="{{ route('evaluasi_rkb_urgent.detail.approve.vp', $rkb->id) }}" data-message="Apakah Anda yakin ingin Approve RKB ini sebagai VP?" {{ !$rkb->is_evaluated ? 'disabled' : '' }}>
                                     <i class="fa fa-check"></i> <span class="ms-2">Approve RKB (VP)</span>
                                 </button>
@@ -50,7 +46,7 @@
 
                             <!-- Tombol Approve SVP -->
                             @if (!$rkb->is_approved_svp && $rkb->is_approved_vp)
-                                <button class="btn btn-primary btn-sm" id="approveSvpButton" data-bs-toggle="modal" data-bs-target="#modalForApproveSvp" data-action="{{ route('evaluasi_rkb_urgent.detail.approve.svp', $rkb->id) }}" data-message="Apakah Anda yakin ingin Approve RKB ini sebagai SVP?" {{ !$rkb->is_approved_vp ? 'disabled' : '' }}>
+                                <button class="btn btn-primary btn-sm" id="approveSvpButton" data-bs-toggle="modal" data-bs-target="#modalForApproveSvp" data-action="{{ route('evaluasi_rkb_urgent.detail.approve.svp', $rkb->id) }}" data-message="Apakah Anda yakin ingin Approve RKB ini sebagai SVP?">
                                     <i class="fa fa-check"></i> <span class="ms-2">Approve RKB (SVP)</span>
                                 </button>
                             @endif

@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers;
+
 use App\Models\APB;
 use App\Models\ATB;
 use App\Models\Alat;
@@ -8,298 +10,361 @@ use App\Models\Saldo;
 use App\Models\Proyek;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Collection;
+
 class DashboardController extends Controller
 {
+    // Define categories as a class constant to avoid recreating it multiple times
+    private const CATEGORIES = [ 
+        [ "kode" => "A1", "nama" => "CABIN", "jenis" => "Perbaikan" ],
+        [ "kode" => "A2", "nama" => "ENGINE SYSTEM", "jenis" => "Perbaikan" ],
+        [ 
+            "kode"  => "A3",
+            "nama"  => "TRANSMISSION SYSTEM",
+            "jenis" => "Perbaikan",
+        ],
+        [ 
+            "kode"  => "A4",
+            "nama"  => "CHASSIS & SWING MACHINERY",
+            "jenis" => "Perbaikan",
+        ],
+        [ 
+            "kode"  => "A5",
+            "nama"  => "DIFFERENTIAL SYSTEM",
+            "jenis" => "Perbaikan",
+        ],
+        [ "kode" => "A6", "nama" => "ELECTRICAL SYSTEM", "jenis" => "Perbaikan" ],
+        [ 
+            "kode"  => "A7",
+            "nama"  => "HYDRAULIC/PNEUMATIC SYSTEM",
+            "jenis" => "Perbaikan",
+        ],
+        [ "kode" => "A8", "nama" => "STEERING SYSTEM", "jenis" => "Perbaikan" ],
+        [ "kode" => "A9", "nama" => "BRAKE SYSTEM", "jenis" => "Perbaikan" ],
+        [ "kode" => "A10", "nama" => "SUSPENSION", "jenis" => "Perbaikan" ],
+        [ "kode" => "A11", "nama" => "WORK EQUIPMENT", "jenis" => "Perbaikan" ],
+        [ "kode" => "A12", "nama" => "UNDERCARRIAGE", "jenis" => "Perbaikan" ],
+        [ "kode" => "A13", "nama" => "FINAL DRIVE", "jenis" => "Perbaikan" ],
+        [ "kode" => "A14", "nama" => "FREIGHT COST", "jenis" => "Perbaikan" ],
+        [ 
+            "kode"     => "B11",
+            "nama"     => "Oil Filter",
+            "jenis"    => "Pemeliharaan",
+            "subJenis" => "MAINTENANCE KIT",
+        ],
+        [ 
+            "kode"     => "B12",
+            "nama"     => "Fuel Filter",
+            "jenis"    => "Pemeliharaan",
+            "subJenis" => "MAINTENANCE KIT",
+        ],
+        [ 
+            "kode"     => "B13",
+            "nama"     => "Air Filter",
+            "jenis"    => "Pemeliharaan",
+            "subJenis" => "MAINTENANCE KIT",
+        ],
+        [ 
+            "kode"     => "B21",
+            "nama"     => "Engine Oil",
+            "jenis"    => "Pemeliharaan",
+            "subJenis" => "OIL & LUBRICANTS",
+        ],
+        [ 
+            "kode"     => "B22",
+            "nama"     => "Hydraulic Oil",
+            "jenis"    => "Pemeliharaan",
+            "subJenis" => "OIL & LUBRICANTS",
+        ],
+        [ "kode" => "B3", "nama" => "TYRE", "jenis" => "Pemeliharaan" ],
+        [ "kode" => "C1", "nama" => "WORKSHOP", "jenis" => "Material" ],
+    ];
+
+    private const VALID_TYPES = [ 
+        "hutang-unit-alat",
+        "panjar-unit-alat",
+        "mutasi-proyek",
+        "panjar-proyek",
+    ];
+
     public function index ( Request $request )
     {
         $user      = Auth::user ();
-        $id_proyek = $request->query ( 'id_proyek' );
-
-        // Fetch projects
-        $proyeks = Proyek::with ( "users" )
+        $id_proyek = $request->query ( "id_proyek" );
+        $proyeks   = Proyek::with ( "users" )
             ->latest ( "updated_at" )
             ->latest ( "id" )
             ->get ();
 
-        // Get date ranges
+        // Date ranges
         $currentDate = now ();
         $startDate   = $currentDate->copy ()->startOfMonth ();
         $endDate     = $currentDate->copy ()->endOfMonth ();
 
-        // Base queries with date range conditions
-        $atbQueryCurrent   = ATB::whereBetween ( 'tanggal', [ $startDate, $endDate ] );
-        $apbQueryCurrent   = APB::whereBetween ( 'tanggal', [ $startDate, $endDate ] );
-        $saldoQueryCurrent = Saldo::whereHas ( 'atb', fn ( $q ) => $q->whereBetween ( 'tanggal', [ $startDate, $endDate ] ) );
+        // Build base queries
+        [ $atbQuery, $apbQuery, $saldoQuery ] = $this->buildBaseQueries (
+            $user,
+            $id_proyek
+        );
 
-        $atbQueryTotal   = ATB::where ( 'tanggal', '<=', $endDate );
-        $apbQueryTotal   = APB::where ( 'tanggal', '<=', $endDate );
-        $saldoQueryTotal = Saldo::whereHas ( 'atb', fn ( $q ) => $q->where ( 'tanggal', '<=', $endDate ) );
+        // Get data for different date ranges
+        $data = $this->getQueriesData (
+            $atbQuery,
+            $apbQuery,
+            $saldoQuery,
+            $startDate,
+            $endDate
+        );
 
-        // Base queries
+        // Calculate chart data
+        $chartData = $this->calculateAllChartData ( $data );
+
+        // Calculate horizontal charts
+        $horizontalCharts = $this->calculateHorizontalCharts ( $proyeks, $data );
+
+        return view ( "dashboard.dashboard.dashboard", [ 
+            "headerPage"             => "Dashboard",
+            "page"                   => "Dashboard",
+            "proyeks"                => $proyeks,
+            "selectedProject"        => $id_proyek,
+            "totalATB"               => $this->calculateOverallTotal ( $data[ "atbData" ] ),
+            "totalAPB"               => $this->calculateOverallTotal ( $data[ "apbData" ] ),
+            "totalSaldo"             => $this->calculateOverallTotal ( $data[ "saldoData" ] ),
+            "chartData"              => $chartData[ "main" ],
+            "chartDataCurrent"       => $chartData[ "current" ],
+            "chartDataTotal"         => $chartData[ "total" ],
+            "startDate"              => $startDate->format ( "Y-m-d" ),
+            "endDate"                => $endDate->format ( "Y-m-d" ),
+            "horizontalChartCurrent" => $horizontalCharts[ "current" ],
+            "horizontalChartTotal"   => $horizontalCharts[ "total" ],
+        ] );
+    }
+
+    private function buildBaseQueries ( $user, $id_proyek )
+    {
         $atbQuery   = ATB::query ();
-        $apbQuery   = APB::with ( 'saldo' );
+        $apbQuery   = APB::with ( "saldo" );
         $saldoQuery = Saldo::query ();
 
-        // Filter projects based on role
         if ( $id_proyek )
         {
-            if ( $user->role !== 'Admin' && ! $user->proyek ()->where ( 'proyek.id', $id_proyek )->exists () )
+            if (
+                $user->role !== "Admin" &&
+                ! $user
+                    ->proyek ()
+                    ->where ( "proyek.id", $id_proyek )
+                    ->exists ()
+            )
             {
-                abort ( 403, 'Unauthorized access to this project' );
+                abort ( 403, "Unauthorized access to this project" );
             }
-            $atbQuery->where ( 'id_proyek', $id_proyek );
-            $apbQuery->where ( 'id_proyek', $id_proyek );
-            $saldoQuery->whereHas ( 'atb', fn ( $query ) => $query->where ( 'id_proyek', $id_proyek ) );
-
-            $atbQueryCurrent->where ( 'id_proyek', $id_proyek );
-            $apbQueryCurrent->where ( 'id_proyek', $id_proyek );
-            $saldoQueryCurrent->whereHas ( 'atb', fn ( $q ) => $q->where ( 'id_proyek', $id_proyek ) );
-
-            $atbQueryTotal->where ( 'id_proyek', $id_proyek );
-            $apbQueryTotal->where ( 'id_proyek', $id_proyek );
-            $saldoQueryTotal->whereHas ( 'atb', fn ( $q ) => $q->where ( 'id_proyek', $id_proyek ) );
+            $this->applyProjectFilter (
+                [ $atbQuery, $apbQuery, $saldoQuery ],
+                $id_proyek
+            );
         }
-        elseif ( $user->role !== 'Admin' )
+        elseif ( $user->role !== "Admin" )
         {
-            $userProyekIds = $user->proyek ()->pluck ( 'id' );
-            $atbQuery->whereIn ( 'id_proyek', $userProyekIds );
-            $apbQuery->whereIn ( 'id_proyek', $userProyekIds );
-            $saldoQuery->whereHas ( 'atb', fn ( $query ) => $query->whereIn ( 'id_proyek', $userProyekIds ) );
-
-            $userProyekIds = $user->proyek ()->pluck ( 'id' );
-            // Apply to both current and total queries
-            $atbQueryCurrent->whereIn ( 'id_proyek', $userProyekIds );
-            $apbQueryCurrent->whereIn ( 'id_proyek', $userProyekIds );
-            $saldoQueryCurrent->whereHas ( 'atb', fn ( $q ) => $q->whereIn ( 'id_proyek', $userProyekIds ) );
-
-            $atbQueryTotal->whereIn ( 'id_proyek', $userProyekIds );
-            $apbQueryTotal->whereIn ( 'id_proyek', $userProyekIds );
-            $saldoQueryTotal->whereHas ( 'atb', fn ( $q ) => $q->whereIn ( 'id_proyek', $userProyekIds ) );
+            $userProyekIds = $user->proyek ()->pluck ( "id" );
+            $this->applyUserProjectsFilter (
+                [ $atbQuery, $apbQuery, $saldoQuery ],
+                $userProyekIds
+            );
         }
 
-        // Preload data to avoid repeated queries
-        $atbData   = $atbQuery->get ();
-        $apbData   = $apbQuery->get ();
-        $saldoData = $saldoQuery->get ();
+        return [ $atbQuery, $apbQuery, $saldoQuery ];
+    }
 
-        // Get data
-        $atbDataCurrent   = $atbQueryCurrent->get ();
-        $apbDataCurrent   = $apbQueryCurrent->with ( 'saldo' )->get ();
-        $saldoDataCurrent = $saldoQueryCurrent->get ();
+    private function applyProjectFilter ( array $queries, $id_proyek )
+    {
+        $queries[ 0 ]->where ( "id_proyek", $id_proyek );
+        $queries[ 1 ]->where ( "id_proyek", $id_proyek );
+        $queries[ 2 ]->whereHas (
+            "atb",
+            fn ( $q ) => $q->where ( "id_proyek", $id_proyek )
+        );
+    }
 
-        $atbDataTotal   = $atbQueryTotal->get ();
-        $apbDataTotal   = $apbQueryTotal->with ( 'saldo' )->get ();
-        $saldoDataTotal = $saldoQueryTotal->get ();
+    private function applyUserProjectsFilter ( array $queries, $projectIds )
+    {
+        $queries[ 0 ]->whereIn ( "id_proyek", $projectIds );
+        $queries[ 1 ]->whereIn ( "id_proyek", $projectIds );
+        $queries[ 2 ]->whereHas (
+            "atb",
+            fn ( $q ) => $q->whereIn ( "id_proyek", $projectIds )
+        );
+    }
 
-        // Define category data
-        $categories = [ 
-            [ 'kode' => 'A1', 'nama' => 'CABIN', 'jenis' => 'Perbaikan' ],
-            [ 'kode' => 'A2', 'nama' => 'ENGINE SYSTEM', 'jenis' => 'Perbaikan' ],
-            [ 'kode' => 'A3', 'nama' => 'TRANSMISSION SYSTEM', 'jenis' => 'Perbaikan' ],
-            [ 'kode' => 'A4', 'nama' => 'CHASSIS & SWING MACHINERY', 'jenis' => 'Perbaikan' ],
-            [ 'kode' => 'A5', 'nama' => 'DIFFERENTIAL SYSTEM', 'jenis' => 'Perbaikan' ],
-            [ 'kode' => 'A6', 'nama' => 'ELECTRICAL SYSTEM', 'jenis' => 'Perbaikan' ],
-            [ 'kode' => 'A7', 'nama' => 'HYDRAULIC/PNEUMATIC SYSTEM', 'jenis' => 'Perbaikan' ],
-            [ 'kode' => 'A8', 'nama' => 'STEERING SYSTEM', 'jenis' => 'Perbaikan' ],
-            [ 'kode' => 'A9', 'nama' => 'BRAKE SYSTEM', 'jenis' => 'Perbaikan' ],
-            [ 'kode' => 'A10', 'nama' => 'SUSPENSION', 'jenis' => 'Perbaikan' ],
-            [ 'kode' => 'A11', 'nama' => 'WORK EQUIPMENT', 'jenis' => 'Perbaikan' ],
-            [ 'kode' => 'A12', 'nama' => 'UNDERCARRIAGE', 'jenis' => 'Perbaikan' ],
-            [ 'kode' => 'A13', 'nama' => 'FINAL DRIVE', 'jenis' => 'Perbaikan' ],
-            [ 'kode' => 'A14', 'nama' => 'FREIGHT COST', 'jenis' => 'Perbaikan' ],
-            [ 'kode' => 'B11', 'nama' => 'Oil Filter', 'jenis' => 'Pemeliharaan', 'subJenis' => 'MAINTENANCE KIT' ],
-            [ 'kode' => 'B12', 'nama' => 'Fuel Filter', 'jenis' => 'Pemeliharaan', 'subJenis' => 'MAINTENANCE KIT' ],
-            [ 'kode' => 'B13', 'nama' => 'Air Filter', 'jenis' => 'Pemeliharaan', 'subJenis' => 'MAINTENANCE KIT' ],
-            [ 'kode' => 'B21', 'nama' => 'Engine Oil', 'jenis' => 'Pemeliharaan', 'subJenis' => 'OIL & LUBRICANTS' ],
-            [ 'kode' => 'B22', 'nama' => 'Hydraulic Oil', 'jenis' => 'Pemeliharaan', 'subJenis' => 'OIL & LUBRICANTS' ],
-            [ 'kode' => 'B3', 'nama' => 'TYRE', 'jenis' => 'Pemeliharaan' ],
-            [ 'kode' => 'C1', 'nama' => 'WORKSHOP', 'jenis' => 'Material' ] // Changed from 'Workshop' to 'Material'
+    private function getQueriesData (
+        $atbQuery,
+        $apbQuery,
+        $saldoQuery,
+        $startDate,
+        $endDate
+    ) {
+        return [ 
+            "atbData"          => clone $atbQuery->get (),
+            "apbData"          => clone $apbQuery->get (),
+            "saldoData"        => clone $saldoQuery->get (),
+            "atbDataCurrent"   => clone $atbQuery
+                ->whereBetween ( "tanggal", [ $startDate, $endDate ] )
+                ->get (),
+            "apbDataCurrent"   => clone $apbQuery
+                ->whereBetween ( "tanggal", [ $startDate, $endDate ] )
+                ->get (),
+            "saldoDataCurrent" => clone $saldoQuery
+                ->whereHas (
+                    "atb",
+                    fn ( $q ) => $q->whereBetween ( "tanggal", [ 
+                        $startDate,
+                        $endDate,
+                    ] )
+                )
+                ->get (),
+            "atbDataTotal"     => clone $atbQuery
+                ->where ( "tanggal", "<=", $endDate )
+                ->get (),
+            "apbDataTotal"     => clone $apbQuery
+                ->where ( "tanggal", "<=", $endDate )
+                ->get (),
+            "saldoDataTotal"   => clone $saldoQuery
+                ->whereHas (
+                    "atb",
+                    fn ( $q ) => $q->where ( "tanggal", "<=", $endDate )
+                )
+                ->get (),
         ];
+    }
 
-        // Function to calculate totals per category
-        function calculateTotal ( $items, $category )
-        {
-            return $items->where ( 'masterDataSparepart.kategoriSparepart.kode', $category[ 'kode' ] )
-                ->sum ( fn ( $item ) => $item->quantity * ( $item->saldo->harga ?? $item->harga ?? 0 ) );
-        }
+    private function calculateAllChartData ( $data )
+    {
+        return [ 
+            "main"    => $this->calculateChartData (
+                $data[ "atbData" ],
+                $data[ "apbData" ],
+                $data[ "saldoData" ]
+            ),
+            "current" => $this->calculateChartData (
+                $data[ "atbDataCurrent" ],
+                $data[ "apbDataCurrent" ],
+                $data[ "saldoDataCurrent" ]
+            ),
+            "total"   => $this->calculateChartData (
+                $data[ "atbDataTotal" ],
+                $data[ "apbDataTotal" ],
+                $data[ "saldoDataTotal" ]
+            ),
+        ];
+    }
 
-        // Aggregate chart data
-        $chartData = [];
-        foreach ( $categories as $category )
-        {
-            $jenis = $category[ 'jenis' ];
-
-            $chartData[ $jenis ][ 'atb' ]   = ( $chartData[ $jenis ][ 'atb' ] ?? 0 ) + calculateTotal ( $atbData, $category );
-            $chartData[ $jenis ][ 'apb' ]   = ( $chartData[ $jenis ][ 'apb' ] ?? 0 ) + calculateTotal ( $apbData, $category );
-            $chartData[ $jenis ][ 'saldo' ] = ( $chartData[ $jenis ][ 'saldo' ] ?? 0 ) + calculateTotal ( $saldoData, $category );
-        }
-
-        // Calculate chart data for both periods
-        $chartDataCurrent = $this->calculateChartData ( $atbDataCurrent, $apbDataCurrent, $saldoDataCurrent );
-        $chartDataTotal   = $this->calculateChartData ( $atbDataTotal, $apbDataTotal, $saldoDataTotal );
-
-        // Calculate overall totals
-        function calculateOverallTotal ( $data )
-        {
-            return $data->sum ( fn ( $item ) => in_array ( $item->tipe, [ 'hutang-unit-alat', 'panjar-unit-alat', 'mutasi-proyek', 'panjar-proyek' ] )
-                ? $item->quantity * ( $item->saldo->harga ?? $item->harga ?? 0 )
-                : 0 );
-        }
-
-        // Add new data for horizontal charts
-        $horizontalChartCurrent = [];
-        $horizontalChartTotal   = [];
+    private function calculateHorizontalCharts ( $proyeks, $data )
+    {
+        $charts = [ "current" => [], "total" => [] ];
 
         foreach ( $proyeks as $proyek )
         {
-            // Current month data
-            $atbCurrentTotal = $atbDataCurrent
-                ->where ( 'id_proyek', $proyek->id )
-                ->sum ( fn ( $item ) => $item->quantity * $item->harga );
+            $charts[ "current" ][ $proyek->nama ] = $this->calculateProjectTotals (
+                $data[ "atbDataCurrent" ],
+                $data[ "apbDataCurrent" ],
+                $data[ "saldoDataCurrent" ],
+                $proyek->id
+            );
 
-            $apbCurrentTotal = $apbDataCurrent
-                ->where ( 'id_proyek', $proyek->id )
-                ->whereNotIn ( 'status', [ 'pending', 'rejected' ] )
-                ->sum ( fn ( $item ) => $item->quantity * ( $item->saldo->harga ?? 0 ) );
-
-            $saldoCurrentTotal = $saldoDataCurrent
-                ->where ( 'id_proyek', $proyek->id )
-                ->sum ( fn ( $item ) => $item->quantity * $item->harga );
-
-            $horizontalChartCurrent[ $proyek->nama ] = [ 
-                'penerimaan'  => $atbCurrentTotal,
-                'pengeluaran' => $apbCurrentTotal,
-                'saldo'       => $saldoCurrentTotal
-            ];
-
-            // Total to date data
-            $atbTotal = $atbDataTotal
-                ->where ( 'id_proyek', $proyek->id )
-                ->sum ( fn ( $item ) => $item->quantity * $item->harga );
-
-            $apbTotal = $apbDataTotal
-                ->where ( 'id_proyek', $proyek->id )
-                ->whereNotIn ( 'status', [ 'pending', 'rejected' ] )
-                ->sum ( fn ( $item ) => $item->quantity * ( $item->saldo->harga ?? 0 ) );
-
-            $saldoTotal = $saldoDataTotal
-                ->where ( 'id_proyek', $proyek->id )
-                ->sum ( fn ( $item ) => $item->quantity * $item->harga );
-
-            $horizontalChartTotal[ $proyek->nama ] = [ 
-                'penerimaan'  => $atbTotal,
-                'pengeluaran' => $apbTotal,
-                'saldo'       => $saldoTotal
-            ];
+            $charts[ "total" ][ $proyek->nama ] = $this->calculateProjectTotals (
+                $data[ "atbDataTotal" ],
+                $data[ "apbDataTotal" ],
+                $data[ "saldoDataTotal" ],
+                $proyek->id
+            );
         }
 
-        return view ( 'dashboard.dashboard.dashboard', [ 
-            'headerPage'             => 'Dashboard',
-            'page'                   => 'Dashboard',
+        return $charts;
+    }
 
-            'proyeks'                => $proyeks,
-            'selectedProject'        => $id_proyek,
-            'totalATB'               => calculateOverallTotal ( $atbData ),
-            'totalAPB'               => calculateOverallTotal ( $apbData ),
-            'totalSaldo'             => calculateOverallTotal ( $saldoData ),
-            'chartData'              => $chartData,
-            'chartDataCurrent'       => $chartDataCurrent,
-            'chartDataTotal'         => $chartDataTotal,
-            'startDate'              => $startDate->format ( 'Y-m-d' ),
-            'endDate'                => $endDate->format ( 'Y-m-d' ),
-            'horizontalChartCurrent' => $horizontalChartCurrent,
-            'horizontalChartTotal'   => $horizontalChartTotal,
-        ] );
+    private function calculateProjectTotals (
+        $atbData,
+        $apbData,
+        $saldoData,
+        $proyekId
+    ) {
+        return [ 
+            "penerimaan"  => $this->sumProjectData ( $atbData, $proyekId ),
+            "pengeluaran" => $this->sumProjectData ( $apbData, $proyekId, true ),
+            "saldo"       => $this->sumProjectData ( $saldoData, $proyekId ),
+        ];
+    }
+
+    private function sumProjectData ( $data, $proyekId, $isApb = false )
+    {
+        $filteredData = $data->where ( "id_proyek", $proyekId );
+        if ( $isApb )
+        {
+            $filteredData = $filteredData->whereNotIn ( "status", [ 
+                "pending",
+                "rejected",
+            ] );
+        }
+        return $filteredData->sum (
+            fn ( $item ) => $item->quantity *
+            ( $item->saldo->harga ?? ( $item->harga ?? 0 ) )
+        );
     }
 
     private function calculateChartData ( $atbData, $apbData, $saldoData )
     {
-        // Move categories array to class property or configuration
-        $categories = [ 
-            [ 'kode' => 'A1', 'nama' => 'CABIN', 'jenis' => 'Perbaikan' ],
-            [ 'kode' => 'A2', 'nama' => 'ENGINE SYSTEM', 'jenis' => 'Perbaikan' ],
-            [ 'kode' => 'A3', 'nama' => 'TRANSMISSION SYSTEM', 'jenis' => 'Perbaikan' ],
-            [ 'kode' => 'A4', 'nama' => 'CHASSIS & SWING MACHINERY', 'jenis' => 'Perbaikan' ],
-            [ 'kode' => 'A5', 'nama' => 'DIFFERENTIAL SYSTEM', 'jenis' => 'Perbaikan' ],
-            [ 'kode' => 'A6', 'nama' => 'ELECTRICAL SYSTEM', 'jenis' => 'Perbaikan' ],
-            [ 'kode' => 'A7', 'nama' => 'HYDRAULIC/PNEUMATIC SYSTEM', 'jenis' => 'Perbaikan' ],
-            [ 'kode' => 'A8', 'nama' => 'STEERING SYSTEM', 'jenis' => 'Perbaikan' ],
-            [ 'kode' => 'A9', 'nama' => 'BRAKE SYSTEM', 'jenis' => 'Perbaikan' ],
-            [ 'kode' => 'A10', 'nama' => 'SUSPENSION', 'jenis' => 'Perbaikan' ],
-            [ 'kode' => 'A11', 'nama' => 'WORK EQUIPMENT', 'jenis' => 'Perbaikan' ],
-            [ 'kode' => 'A12', 'nama' => 'UNDERCARRIAGE', 'jenis' => 'Perbaikan' ],
-            [ 'kode' => 'A13', 'nama' => 'FINAL DRIVE', 'jenis' => 'Perbaikan' ],
-            [ 'kode' => 'A14', 'nama' => 'FREIGHT COST', 'jenis' => 'Perbaikan' ],
-            [ 'kode' => 'B11', 'nama' => 'Oil Filter', 'jenis' => 'Pemeliharaan', 'subJenis' => 'MAINTENANCE KIT' ],
-            [ 'kode' => 'B12', 'nama' => 'Fuel Filter', 'jenis' => 'Pemeliharaan', 'subJenis' => 'MAINTENANCE KIT' ],
-            [ 'kode' => 'B13', 'nama' => 'Air Filter', 'jenis' => 'Pemeliharaan', 'subJenis' => 'MAINTENANCE KIT' ],
-            [ 'kode' => 'B21', 'nama' => 'Engine Oil', 'jenis' => 'Pemeliharaan', 'subJenis' => 'OIL & LUBRICANTS' ],
-            [ 'kode' => 'B22', 'nama' => 'Hydraulic Oil', 'jenis' => 'Pemeliharaan', 'subJenis' => 'OIL & LUBRICANTS' ],
-            [ 'kode' => 'B3', 'nama' => 'TYRE', 'jenis' => 'Pemeliharaan' ],
-            [ 'kode' => 'C1', 'nama' => 'WORKSHOP', 'jenis' => 'Material' ] // Changed from 'Workshop' to 'Material'
-        ];
-
         $chartData = [];
-        foreach ( $categories as $category )
+
+        foreach ( self::CATEGORIES as $category )
         {
-            $jenis = $category[ 'jenis' ];
+            $jenis = $category[ "jenis" ];
             if ( ! isset ( $chartData[ $jenis ] ) )
             {
-                $chartData[ $jenis ] = [ 
-                    'atb'   => 0,
-                    'apb'   => 0,
-                    'saldo' => 0
-                ];
+                $chartData[ $jenis ] = [ "atb" => 0, "apb" => 0, "saldo" => 0 ];
             }
 
-            // Calculate totals for this category
-            $chartData[ $jenis ][ 'atb' ] += $this->calculateTotal ( $atbData, $category );
-            $chartData[ $jenis ][ 'apb' ] += $this->calculateTotal ( $apbData, $category );
-            $chartData[ $jenis ][ 'saldo' ] += $this->calculateTotal ( $saldoData, $category );
+            $categoryTotal              = $this->calculateTotal ( $atbData, $category );
+            $chartData[ $jenis ][ "atb" ] += $categoryTotal;
+            $chartData[ $jenis ][ "apb" ] += $this->calculateTotal (
+                $apbData,
+                $category
+            );
+            $chartData[ $jenis ][ "saldo" ] += $this->calculateTotal (
+                $saldoData,
+                $category
+            );
         }
 
         return $chartData;
     }
 
-    private function calculateTotal ( $items, $category )
+    private function calculateTotal ( Collection $items, array $category )
     {
-        return $items->filter ( function ($item) use ($category)
-        {
-            return $item->masterDataSparepart->kategoriSparepart->kode === $category[ 'kode' ];
-        } )->sum ( function ($item)
-        {
-            return $item->quantity * ( $item->saldo->harga ?? $item->harga ?? 0 );
-        } );
+        return $items
+            ->filter (
+                fn ( $item ) => $item->masterDataSparepart->kategoriSparepart
+                    ->kode === $category[ "kode" ]
+            )
+            ->sum (
+                fn ( $item ) => $item->quantity *
+                ( $item->saldo->harga ?? ( $item->harga ?? 0 ) )
+            );
     }
 
-    private function calculateOverallTotal ( $data )
+    private function calculateOverallTotal ( Collection $data )
     {
-        $total = 0;
-        foreach ( $data as $item )
-        {
-            if ( in_array ( $item->tipe, [ 'hutang-unit-alat', 'panjar-unit-alat', 'mutasi-proyek', 'panjar-proyek' ] ) )
+        return $data
+            ->filter ( fn ( $item ) => in_array ( $item->tipe, self::VALID_TYPES ) )
+            ->sum ( function ($item)
             {
-                // For APB items
                 if ( $item instanceof APB )
                 {
-                    if ( ! in_array ( $item->status, [ 'pending', 'rejected' ] ) && $item->saldo )
-                    {
-                        $total += $item->quantity * $item->saldo->harga;
-                    }
+                    return ! in_array ( $item->status, [ "pending", "rejected" ] ) &&
+                        $item->saldo
+                        ? $item->quantity * $item->saldo->harga
+                        : 0;
                 }
-                // For ATB items
-                elseif ( $item instanceof ATB )
-                {
-                    $total += $item->quantity * $item->harga;
-                }
-                // For Saldo items
-                elseif ( $item instanceof Saldo )
-                {
-                    $total += $item->quantity * $item->harga;
-                }
-            }
-        }
-        return $total;
+                return $item->quantity *
+                    ( $item->saldo->harga ?? ( $item->harga ?? 0 ) );
+            } );
     }
-
 }

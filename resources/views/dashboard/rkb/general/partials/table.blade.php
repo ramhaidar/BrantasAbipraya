@@ -35,7 +35,7 @@
                         <td class="text-center">
                             @if (!$rkb->is_finalized && !$rkb->is_evaluated && !$rkb->is_approved_vp && !$rkb->is_approved_svp)
                                 <span class="badge bg-primary w-100">Pengajuan</span>
-                            @elseif($rkb->is_finalized && !$rkb->is_evaluated && !$rkb->is_approved_vp && !$rkb->is_approved_svp)
+                            @elseif($rkb->is_finalized && !$rkb->is_approved_svp)
                                 <span class="badge bg-warning w-100">Evaluasi</span>
                             @elseif($rkb->is_finalized && $rkb->is_evaluated && $rkb->is_approved_vp && $rkb->is_approved_svp)
                                 <span class="badge bg-success w-100">Disetujui</span>

@@ -175,43 +175,70 @@ class SaldoController extends Controller
                 }
                 else
                 {
-                    // Search in related tables
-                    $q->whereHas ( 'spb', function ($q) use ($search)
-                    {
-                        $q->where ( 'nomor', 'ilike', "%{$search}%" );
-                    } )
-                        ->orWhereHas ( 'masterDataSparepart', function ($q) use ($search)
-                        {
-                            $q->where ( 'nama', 'ilike', "%{$search}%" )
-                                ->orWhere ( 'part_number', 'ilike', "%{$search}%" )
-                                ->orWhere ( 'merk', 'ilike', "%{$search}%" )
-                                ->orWhereHas ( 'kategoriSparepart', function ($q) use ($search)
-                                {
-                                    $q->where ( 'kode', 'ilike', "%{$search}%" )
-                                        ->orWhere ( 'nama', 'ilike', "%{$search}%" );
-                                } );
-                        } )
-                        ->orWhereHas ( 'masterDataSupplier', function ($q) use ($search)
-                        {
-                            $q->where ( 'nama', 'ilike', "%{$search}%" );
-                        } )
-                        ->orWhereHas ( 'asalProyek', function ($q) use ($search)
-                        {
-                            $q->where ( 'nama', 'ilike', "%{$search}%" );
-                        } )
-                        ->orWhere ( 'satuan', 'ilike', "%{$search}%" );
-
-                    // For numeric searches
+                    // For numeric searches - check first if it's a numeric search
                     if ( is_numeric ( str_replace ( [ ',', '.' ], '', $search ) ) )
                     {
-                        $numericSearch = str_replace ( [ ',', '.' ], '', $search );
-                        $q->orWhere ( 'quantity', 'ilike', "%{$numericSearch}%" )
-                            ->orWhere ( 'harga', 'ilike', "%{$numericSearch}%" )
-                            ->orWhereRaw ( '(quantity * harga) like ?', [ "%{$numericSearch}%" ] );
+                        $numericSearch = (float) str_replace ( [ ',', '.' ], '', $search );
+                        $tolerance     = 0.1; // 10% tolerance
+                        $min           = $numericSearch * ( 1 - $tolerance );
+                        $max           = $numericSearch * ( 1 + $tolerance );
+
+                        $q->where ( function ($query) use ($numericSearch, $min, $max)
+                        {
+                            $query->where ( function ($q) use ($numericSearch)
+                            {
+                                // Exact matches
+                                $q->where ( 'saldo.quantity', $numericSearch )
+                                    ->orWhere ( 'saldo.harga', $numericSearch )
+                                    ->orWhereRaw ( '(saldo.quantity * saldo.harga) = ?', [ $numericSearch ] );
+                            } )->orWhere ( function ($q) use ($min, $max)
+                            {
+                                // Range matches
+                                $q->whereBetween ( 'saldo.quantity', [ $min, $max ] )
+                                    ->orWhereBetween ( 'saldo.harga', [ $min, $max ] )
+                                    ->orWhereRaw ( '(saldo.quantity * saldo.harga) BETWEEN ? AND ?', [ $min, $max ] );
+                            } );
+                        } );
+                    }
+                    else
+                    {
+                        // Text search for non-numeric values
+                        $q->where ( function ($query) use ($search)
+                        {
+                            $query->whereHas ( 'spb', function ($q) use ($search)
+                            {
+                                $q->where ( 'nomor', 'ilike', "%{$search}%" );
+                            } )
+                                ->orWhereHas ( 'masterDataSparepart', function ($q) use ($search)
+                                {
+                                    $q->where ( 'nama', 'ilike', "%{$search}%" )
+                                        ->orWhere ( 'part_number', 'ilike', "%{$search}%" )
+                                        ->orWhere ( 'merk', 'ilike', "%{$search}%" )
+                                        ->orWhereHas ( 'kategoriSparepart', function ($q) use ($search)
+                                        {
+                                            $q->where ( 'kode', 'ilike', "%{$search}%" )
+                                                ->orWhere ( 'nama', 'ilike', "%{$search}%" );
+                                        } );
+                                } )
+                                ->orWhereHas ( 'masterDataSupplier', function ($q) use ($search)
+                                {
+                                    $q->where ( 'nama', 'ilike', "%{$search}%" );
+                                } )
+                                ->orWhereHas ( 'asalProyek', function ($q) use ($search)
+                                {
+                                    $q->where ( 'nama', 'ilike', "%{$search}%" );
+                                } )
+                                ->orWhere ( 'saldo.satuan', 'ilike', "%{$search}%" );
+                        } );
                     }
                 }
             } );
         }
+
+        // Calculate total amount for all records
+        // Clone the query before adding pagination to get accurate total
+        $totalQuery  = clone $query;
+        $totalAmount = $totalQuery->sum ( \DB::raw ( 'saldo.quantity * saldo.harga' ) );
 
         // Get paginated results with proper perPage value
         $TableData = $query->join ( 'atb', 'saldo.id_atb', '=', 'atb.id' )
@@ -221,6 +248,9 @@ class SaldoController extends Controller
             ->orderBy ( 'saldo.id', 'desc' )
             ->paginate ( $perPage )
             ->withQueryString ();
+
+        // Add total amount to pagination object
+        $TableData->total_amount = $totalAmount;
 
         $proyek  = Proyek::with ( "users" )->findOrFail ( $id_proyek );
         $proyeks = Proyek::with ( "users" )

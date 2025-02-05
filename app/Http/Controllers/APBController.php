@@ -234,19 +234,9 @@ class APBController extends Controller
             } );
         }
 
-        // Get paginated results
-        $TableData = $query->orderBy ( 'tanggal', 'desc' )
-            ->orderBy ( 'updated_at', 'desc' )
-            ->paginate ( $perPage )
-            ->withQueryString ();
-
         // Get other required data
-        $proyek  = Proyek::with ( "users" )->findOrFail ( $id_proyek );
-        $alats   = AlatProyek::where ( 'id_proyek', $id_proyek )->get ();
-        $proyeks = Proyek::with ( "users" )
-            ->orderBy ( "updated_at", "desc" )
-            ->orderBy ( "id", "desc" )
-            ->get ();
+        $proyek = Proyek::with ( "users" )->findOrFail ( $id_proyek );
+        $alats  = AlatProyek::where ( 'id_proyek', $id_proyek )->get ();
 
         // Get filtered SPBs if needed
         $spbs = $this->getFilteredSpbs ( $id_proyek );
@@ -277,6 +267,18 @@ class APBController extends Controller
             } )
             ->get ()
             ->sortBy ( 'atb.tanggal' );
+
+        // Get paginated results
+        $TableData = $query->orderBy ( 'tanggal', 'desc' )
+            ->orderBy ( 'updated_at', 'desc' )
+            ->orderBy ( 'id', 'desc' )
+            ->paginate ( $perPage )
+            ->withQueryString ();
+
+        $proyeks = Proyek::with ( "users" )
+            ->orderBy ( "updated_at", "desc" )
+            ->orderBy ( "id", "desc" )
+            ->get ();
 
         return view ( "dashboard.apb.apb", [ 
             "proyek"              => $proyek,

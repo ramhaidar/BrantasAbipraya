@@ -227,6 +227,7 @@ class ATBController extends Controller
         // Get paginated results
         $TableData = $query->orderBy ( 'tanggal', 'desc' )
             ->orderBy ( 'updated_at', 'desc' )
+            ->orderBy ( 'id', 'desc' )
             ->paginate ( $perPage )
             ->withQueryString ();
 

@@ -66,8 +66,8 @@ class SaldoController extends Controller
             'proyek',
             'asalProyek'
         ] )
-            ->where ( 'id_proyek', $id_proyek )
-            ->where ( 'tipe', $tipe );
+            ->where ( 'saldo.id_proyek', $id_proyek )  // Add table prefix
+            ->where ( 'saldo.tipe', $tipe );           // Add table prefix
 
         // Enhanced search functionality
         if ( $search )
@@ -214,7 +214,11 @@ class SaldoController extends Controller
         }
 
         // Get paginated results with proper perPage value
-        $TableData = $query->orderBy ( 'created_at', 'desc' )
+        $TableData = $query->join ( 'atb', 'saldo.id_atb', '=', 'atb.id' )
+            ->select ( 'saldo.*' )
+            ->orderBy ( 'atb.tanggal', 'desc' )
+            ->orderBy ( 'saldo.updated_at', 'desc' )
+            ->orderBy ( 'saldo.id', 'desc' )
             ->paginate ( $perPage )
             ->withQueryString ();
 

@@ -26,7 +26,7 @@
 
 <div class="ibox-body ms-0 ps-0">
     <div class="table-responsive">
-        <table class="m-0 table table-bordered table-striped" id="table-data">
+        <table class="m-0 table table-bordered table-hover" id="table-data">
             <thead class="table-primary">
                 <tr>
                     <th>Nama Alat</th>

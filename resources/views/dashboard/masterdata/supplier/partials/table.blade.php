@@ -14,7 +14,7 @@
 @endpush
 
 <div class="ibox-body table-responsive p-0 m-0" style="overflow: auto">
-    <table class="table table-hover table-bordered table-striped align-middle w-100" id="table-data">
+    <table class="m-0 table table-bordered table-hover" id="table-data">
         <thead class="table-primary">
             <tr>
                 <th>Nama Supplier</th>

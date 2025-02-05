@@ -23,7 +23,7 @@
 @endpush
 
 <div class="ibox-body ms-0 ps-0 table-responsive overflow-auto">
-    <table class="m-0 table table-bordered table-striped" id="table-data">
+    <table class="m-0 table table-bordered table-hover" id="table-data">
         <thead class="table-primary border-dark">
             <tr>
                 <th class="border-dark" rowspan="2">NO.</th>

@@ -16,7 +16,7 @@
 <form id="approveRkbForm" method="POST" action="">
     @csrf
     <div class="ibox-body table-responsive p-0 m-0">
-        <table class="table table-hover table-bordered table-striped align-middle w-100" id="table-data">
+        <table class="m-0 table table-bordered table-hover" id="table-data">
             <thead class="table-primary">
                 <tr>
                     <th>Nama Alat</th>
@@ -39,7 +39,7 @@
                     });
                 @endphp
 
-                @forelse ($groupedItems as $partNumber => $items)
+                @forelse ( $groupedItems as $partNumber => $items )
                     @php
                         $firstItem = $items->first();
                         $rowspan = $items->count();
@@ -50,20 +50,22 @@
                             <tr>
                                 <td class="text-center">{{ $detail->linkAlatDetailRkb->masterDataAlat->jenis_alat ?? '-' }}</td>
                                 <td class="text-center">{{ $detail->linkAlatDetailRkb->masterDataAlat->kode_alat ?? '-' }}</td>
-                                <td class="text-center">{{ $item->kategoriSparepart->kode ?? '-' }}: {{ $item->kategoriSparepart->nama ?? '-' }}</td>
+                                <td class="text-center">{{ $item->kategoriSparepart->kode ?? '-' }}:
+                                    {{ $item->kategoriSparepart->nama ?? '-' }}</td>
                                 <td class="text-center">{{ $item->masterDataSparepart->nama ?? '-' }}</td>
                                 <td class="text-center">{{ $partNumber ?? '-' }}</td>
                                 <td class="text-center">{{ $item->masterDataSparepart->merk ?? '-' }}</td>
                                 <td class="text-center">{{ $item->quantity_requested }}</td>
                                 <td class="text-center">
                                     <input class="form-control text-center
-                                            @if ($rkb->is_approved_svp) bg-primary-subtle
-                                            @elseif ($rkb->is_approved_vp) bg-info-subtle
-                                            @elseif($rkb->is_evaluated) bg-success-subtle 
-                                            @else bg-warning-subtle @endif" name="quantity_approved[{{ $item->id }}]" type="number" value="{{ $item->quantity_approved ?? $item->quantity_requested }}" min="0" {{ $rkb->is_evaluated ? 'disabled' : '' }}>
+                                    @if ($rkb->is_approved_svp) bg-primary-subtle
+                                    @elseif ($rkb->is_approved_vp) bg-info-subtle
+                                    @elseif($rkb->is_evaluated) bg-success-subtle 
+                                    @else bg-warning-subtle @endif" name="quantity_approved[{{ $item->id }}]" type="number" value="{{ $item->quantity_approved ?? $item->quantity_requested }}" min="0" {{ $rkb->is_evaluated ? 'disabled' : '' }}>
                                 </td>
                                 @if ($index === 0)
-                                    <td class="text-center" rowspan="{{ $rowspan }}">{{ $stockQuantities[$item->masterDataSparepart->id] ?? 0 }}</td>
+                                    <td class="text-center" rowspan="{{ $rowspan }}">
+                                        {{ $stockQuantities[$item->masterDataSparepart->id] ?? 0 }}</td>
                                 @endif
                                 <td class="text-center">{{ $item->satuan }}</td>
                             </tr>
@@ -92,27 +94,5 @@
     </form>
 
     @push('scripts_3')
-        <script>
-            $(document).ready(function() {
-                const $table = $('#table-data');
-                const $headers = $table.find('thead th');
-                const textsToCheck = ['Detail', 'Aksi', 'Supplier'];
-                let indices = {};
-
-                // Find the indices of the headers that match the texts in textsToCheck array
-                $headers.each(function(index) {
-                    const headerText = $(this).text().trim();
-                    if (textsToCheck.includes(headerText)) {
-                        indices[headerText] = index;
-                    }
-                });
-
-                // Set the width of the corresponding columns in tbody
-                $.each(indices, function(text, index) {
-                    $table.find('tbody tr').each(function() {
-                        $(this).find('td').eq(index).css('width', '1%');
-                    });
-                });
-            });
-        </script>
+        @include('scripts.adjustTableColumnWidthByHeaderText')
     @endpush

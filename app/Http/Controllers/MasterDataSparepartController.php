@@ -65,8 +65,8 @@ class MasterDataSparepartController extends Controller
             ->orderBy ( "id", "desc" )
             ->get ();
 
-        $TableData = MasterDataSparepart::with ( [ 'kategoriSparepart', 'masterDataSuppliers' ] )
-            ->orderBy ( 'updated_at', 'desc' )
+        // Use the filtered query for TableData instead of creating a new query
+        $TableData = $query->orderBy ( 'updated_at', 'desc' )
             ->orderBy ( 'id', 'desc' )
             ->paginate ( $perPage )
             ->withQueryString ();

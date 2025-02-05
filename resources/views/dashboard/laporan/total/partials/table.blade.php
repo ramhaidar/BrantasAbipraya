@@ -19,6 +19,17 @@
         .collapse {
             display: none;
         }
+
+        /* Add background colors */
+        .bg-bulan-lalu {
+            background-color: #e6ffe6 !important; /* Light green */
+        }
+        .bg-bulan-ini {
+            background-color: #fff2e6 !important; /* Light orange */
+        }
+        .bg-sd-bulan-ini {
+            background-color: #e6f3ff !important; /* Light blue */
+        }
     </style>
 @endpush
 
@@ -306,17 +317,17 @@
                     <tr class="collapse material">
                         <td>{{ $key }}</td>
                         <td>{{ ucwords(strtolower($category['nama'])) }}</td>
-                        <td class="currency-value"><strong>{{ number_format($sums_before[$key]['atb'], 0, ',', '.') }}</strong></td>
-                        <td class="currency-value"><strong>{{ number_format($sums_before[$key]['apb'], 0, ',', '.') }}</strong></td>
-                        <td class="currency-value"><strong>{{ number_format($sums_before[$key]['saldo'], 0, ',', '.') }}</strong></td>
+                        <td class="currency-value">{{ number_format($sums_before[$key]['atb'], 0, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($sums_before[$key]['apb'], 0, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($sums_before[$key]['saldo'], 0, ',', '.') }}</td>
 
-                        <td class="currency-value"><strong>{{ number_format($category['atb'], 0, ',', '.') }}</strong></td>
-                        <td class="currency-value"><strong>{{ number_format($category['apb'], 0, ',', '.') }}</strong></td>
-                        <td class="currency-value"><strong>{{ number_format($category['saldo'], 0, ',', '.') }}</strong></td>
+                        <td class="currency-value">{{ number_format($category['atb'], 0, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['apb'], 0, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['saldo'], 0, ',', '.') }}</td>
 
-                        <td class="currency-value"><strong>{{ number_format($sums_before[$key]['atb'] + $category['atb'], 0, ',', '.') }}</strong></td>
-                        <td class="currency-value"><strong>{{ number_format($sums_before[$key]['apb'] + $category['apb'], 0, ',', '.') }}</strong></td>
-                        <td class="currency-value"><strong>{{ number_format($sums_before[$key]['saldo'] + $category['saldo'], 0, ',', '.') }}</strong></td>
+                        <td class="currency-value">{{ number_format($sums_before[$key]['atb'] + $category['atb'], 0, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($sums_before[$key]['apb'] + $category['apb'], 0, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($sums_before[$key]['saldo'] + $category['saldo'], 0, ',', '.') }}</td>
                     </tr>
                 @endif
             @endforeach
@@ -486,5 +497,69 @@
             icon.className = allExpanded ? 'fa fa-compress' : 'fa fa-expand';
             text.textContent = allExpanded ? 'Collapse All' : 'Expand All';
         }
+
+        function setBackgroundForColumns() {
+            const table = document.getElementById('table-data');
+            const tbody = table.getElementsByTagName('tbody')[0];
+            const tfoot = table.getElementsByTagName('tfoot')[0];
+
+            // Process tbody rows
+            const bodyRows = tbody.getElementsByTagName('tr');
+            for (let row of bodyRows) {
+                const cells = row.cells;
+                if (cells.length > 0) {
+                    // Add background for S/D BULAN LALU (columns 3-5)
+                    for (let i = 2; i <= 4; i++) {
+                        if (cells[i]) {
+                            cells[i].classList.add('bg-bulan-lalu');
+                        }
+                    }
+                    // Add background for BULAN INI (columns 6-8)
+                    for (let i = 5; i <= 7; i++) {
+                        if (cells[i]) {
+                            cells[i].classList.add('bg-bulan-ini');
+                        }
+                    }
+                    // Add background for S/D BULAN INI (columns 9-11)
+                    for (let i = 8; i <= 10; i++) {
+                        if (cells[i]) {
+                            cells[i].classList.add('bg-sd-bulan-ini');
+                        }
+                    }
+                }
+            }
+
+            // Process tfoot rows - special handling for colspan
+            const footRows = tfoot.getElementsByTagName('tr');
+            for (let row of footRows) {
+                const cells = row.cells;
+                if (cells.length > 0) {
+                    // Skip first cell (index 0) which has colspan=2
+                    // S/D BULAN LALU columns
+                    for (let i = 1; i <= 3; i++) {
+                        if (cells[i]) {
+                            cells[i].classList.add('bg-bulan-lalu');
+                        }
+                    }
+                    // BULAN INI columns
+                    for (let i = 4; i <= 6; i++) {
+                        if (cells[i]) {
+                            cells[i].classList.add('bg-bulan-ini');
+                        }
+                    }
+                    // S/D BULAN INI columns
+                    for (let i = 7; i <= 9; i++) {
+                        if (cells[i]) {
+                            cells[i].classList.add('bg-sd-bulan-ini');
+                        }
+                    }
+                }
+            }
+        }
+
+        // Add the event listener to call the function when document is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            setBackgroundForColumns();
+        });
     </script>
 @endpush

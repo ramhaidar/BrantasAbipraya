@@ -54,9 +54,14 @@ class SPB extends Model
         return $this->belongsTo ( SPB::class, 'id_spb_original' );
     }
 
-    public function addendum () : HasOne
+    // public function addendum () : HasOne
+    // {
+    //     return $this->hasOne ( SPB::class, 'id_spb_original' );
+    // }
+
+    public function addendums () : hasMany
     {
-        return $this->hasOne ( SPB::class, 'id_spb_original' );
+        return $this->hasMany ( SPB::class, 'id_spb_original' );
     }
 
     public function atbs () : HasMany

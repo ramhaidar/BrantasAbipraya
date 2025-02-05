@@ -24,10 +24,7 @@ class DetailRKBUrgentController extends Controller
             $parameters               = $request->except ( 'per_page' );
             $parameters[ 'per_page' ] = -1;
 
-            return redirect ()->route (
-                'evaluasi_rkb_general.detail.index',
-                array_merge ( [ 'id' => $id ], $parameters )
-            );
+            return redirect ()->to ( $request->url () . '?' . http_build_query ( $parameters ) );
         }
 
         $perPage = (int) $request->per_page;

@@ -14,10 +14,7 @@ return new class extends Migration
             $table->string ( 'nomor' ); // Nomor unik RKB
             $table->date ( 'periode' ); // Format mm-yyyy dapat diatur di aplikasi
 
-            $table->enum (
-                'tipe',
-                [ 'general', 'urgent' ]
-            )->default ( 'general' );
+            $table->enum ( 'tipe', [ 'general', 'urgent' ] )->default ( 'general' );
 
 
             $table->boolean ( 'is_finalized' )->default ( false ); // Status finalisasi

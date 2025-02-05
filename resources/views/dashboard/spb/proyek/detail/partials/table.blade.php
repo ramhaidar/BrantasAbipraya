@@ -38,7 +38,11 @@
             </thead>
             <tbody>
                 @forelse ($TableData as $item)
-                    @forelse ($item->linkSpbDetailSpb as $detail)
+                    @php
+                        $details = isset($item->originalSpb) ? $item->originalSpb->linkSpbDetailSpb : $item->linkSpbDetailSpb;
+                    @endphp
+
+                    @forelse ($details as $detail)
                         <tr>
                             <td class="text-center">{{ $detail->detailSPB->masterDataAlat->jenis_alat }}</td>
                             <td class="text-center">{{ $detail->detailSPB->masterDataAlat->kode_alat }}</td>
@@ -46,7 +50,7 @@
                             <td class="text-center">{{ $detail->detailSPB->masterDataSparepart->nama }}</td>
                             <td class="text-center">{{ $detail->detailSPB->masterDataSparepart->merk }}</td>
                             <td class="text-center">{{ $item->masterDataSupplier->nama }}</td>
-                            <td class="text-center">{{ $detail->detailSPB->quantity_po }}</td>
+                            <td class="text-center">{{ $item->linkSpbDetailSpb[$loop->index]->detailSPB->quantity_po }}</td>
                             <td class="text-center">{{ $detail->detailSPB->atbs->sum('quantity') }}</td>
                             <td class="text-center">{{ $detail->detailSPB->satuan }}</td>
                             <td class="currency-value">{{ number_format($detail->detailSPB->harga, 0, ',', '.') }}</td>
@@ -68,7 +72,6 @@
                         </td>
                     </tr>
                 @endforelse
-
             </tbody>
             <tfoot class="table-primary">
                 <tr>

@@ -120,63 +120,6 @@ class MasterDataAlatController extends Controller
         return redirect ()->route ( 'master_data_alat.index' )->with ( 'success', 'Master Data Alat berhasil dihapus' );
     }
 
-    public function getData ( Request $request )
-    {
-        // Base query
-        $query = MasterDataAlat::query ();
-
-        // Handle search input
-        if ( $search = $request->input ( 'search.value' ) )
-        {
-            $query->where ( function ($q) use ($search)
-            {
-                $q->where ( 'jenis_alat', 'ilike', "%{$search}%" )
-                    ->orWhere ( 'kode_alat', 'ilike', "%{$search}%" )
-                    ->orWhere ( 'merek_alat', 'ilike', "%{$search}%" )
-                    ->orWhere ( 'tipe_alat', 'ilike', "%{$search}%" )
-                    ->orWhere ( 'serial_number', 'ilike', "%{$search}%" );
-            } );
-        }
-
-        // Handle ordering
-        if ( $order = $request->input ( 'order' ) )
-        {
-            $columnIndex   = $order[ 0 ][ 'column' ];
-            $columnName    = $request->input ( 'columns' )[ $columnIndex ][ 'data' ];
-            $sortDirection = $order[ 0 ][ 'dir' ];
-
-            // Prevent ordering by columns that are not in the database
-            if ( in_array ( $columnName, [ 'jenis_alat', 'kode_alat', 'merek_alat', 'tipe_alat', 'serial_number', 'updated_at' ] ) )
-            {
-                $query->orderBy ( $columnName, $sortDirection );
-            }
-        }
-        else
-        {
-            $query->orderBy ( 'updated_at', 'desc' );
-        }
-
-        // Pagination parameters
-        $draw   = $request->input ( 'draw' );
-        $start  = $request->input ( 'start', 0 );
-        $length = $request->input ( 'length', 10 );
-
-        // Get total and filtered counts
-        $totalRecords    = MasterDataAlat::count ();
-        $filteredRecords = $query->count ();
-
-        // Fetch the data with pagination
-        $alat = $query->skip ( $start )->take ( $length )->get ();
-
-        // Return response
-        return response ()->json ( [ 
-            'draw'            => $draw,
-            'recordsTotal'    => $totalRecords,
-            'recordsFiltered' => $filteredRecords,
-            'data'            => $alat,
-        ] );
-    }
-
     public function getHistory ( $id )
     {
         $alat = MasterDataAlat::findOrFail ( $id );

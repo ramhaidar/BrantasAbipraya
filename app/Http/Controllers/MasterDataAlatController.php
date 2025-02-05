@@ -16,10 +16,12 @@ class MasterDataAlatController extends Controller
         $allowedPerPage = [ 10, 25, 50, 100 ];
         $perPage        = in_array ( (int) $request->get ( 'per_page' ), $allowedPerPage ) ? (int) $request->get ( 'per_page' ) : 10;
 
+        // Build base query
         $query = MasterDataAlat::with ( 'proyekCurrent' )
             ->orderBy ( $request->get ( 'sort', 'updated_at' ), $request->get ( 'direction', 'desc' ) );
 
-        if ( $request->has ( 'search' ) )
+        // Apply search filter if search parameter exists
+        if ( $request->has ( 'search' ) && ! empty ( $request->get ( 'search' ) ) )
         {
             $search = $request->get ( 'search' );
             $query->where ( function ($q) use ($search)
@@ -32,21 +34,18 @@ class MasterDataAlatController extends Controller
             } );
         }
 
+        // Get projects data
         $proyeks = Proyek::with ( "users" )
             ->orderBy ( "updated_at", "desc" )
             ->orderBy ( "id", "desc" )
             ->get ();
 
-        $TableData = MasterDataAlat::with ( 'proyekCurrent' )
-            ->orderBy ( 'updated_at', 'desc' )
-            ->orderBy ( 'id', 'desc' )
-            ->paginate ( $perPage )
-            ->withQueryString ();
+        // Use the filtered query for pagination
+        $TableData = $query->paginate ( $perPage )->withQueryString ();
 
         return view ( 'dashboard.masterdata.alat.alat', [ 
             'headerPage' => "Master Data Alat",
             'page'       => 'Data Alat',
-
             'proyeks'    => $proyeks,
             'TableData'  => $TableData,
         ] );

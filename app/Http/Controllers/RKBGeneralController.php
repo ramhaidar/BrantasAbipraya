@@ -186,8 +186,6 @@ class RKBGeneralController extends Controller
             'evaluasi' => $query->where ( function ($q)
                 {
                     $q->where ( 'is_finalized', true )
-                    ->where ( 'is_evaluated', false )
-                    ->where ( 'is_approved_vp', false )
                     ->where ( 'is_approved_svp', false );
                 } ),
             'disetujui' => $query->where ( function ($q)
@@ -196,6 +194,36 @@ class RKBGeneralController extends Controller
                     ->where ( 'is_evaluated', true )
                     ->where ( 'is_approved_vp', true )
                     ->where ( 'is_approved_svp', true );
+                } ),
+            'tidak diketahui' => $query->where ( function ($q)
+                {
+                    $q->whereNotIn ( 'id', function ($sub)
+                    {
+                        $sub->select ( 'id' )
+                        ->from ( 'rkb' )
+                        ->where ( function ($q1)
+                        {
+                            // Pengajuan condition
+                            $q1->where ( 'is_finalized', false )
+                            ->where ( 'is_evaluated', false )
+                            ->where ( 'is_approved_vp', false )
+                            ->where ( 'is_approved_svp', false );
+                        } )
+                        ->orWhere ( function ($q2)
+                        {
+                            // Evaluasi condition
+                            $q2->where ( 'is_finalized', true )
+                            ->where ( 'is_approved_svp', false );
+                        } )
+                        ->orWhere ( function ($q3)
+                        {
+                            // Disetujui condition
+                            $q3->where ( 'is_finalized', true )
+                            ->where ( 'is_evaluated', true )
+                            ->where ( 'is_approved_vp', true )
+                            ->where ( 'is_approved_svp', true );
+                        } );
+                    } );
                 } ),
             default => $query
         };

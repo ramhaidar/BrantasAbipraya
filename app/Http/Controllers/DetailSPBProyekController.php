@@ -20,6 +20,7 @@ class DetailSPBProyekController extends Controller
             'linkSpbDetailSpb.detailSpb.masterDataSparepart.kategoriSparepart',
             'linkSpbDetailSpb.detailSpb.atbs',
             'masterDataSupplier',
+            'originalSpb.addendums',
         ] )
             ->where ( 'is_addendum', false )
             ->whereIn ( 'id', $rkb->spbs ()->pluck ( 'id_spb' ) )

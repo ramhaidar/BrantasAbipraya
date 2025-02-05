@@ -19,6 +19,21 @@
         .collapse {
             display: none;
         }
+
+        .bg-penerimaan {
+            background-color: #e6ffe6 !important;
+            /* Light green */
+        }
+
+        .bg-pengeluaran {
+            background-color: #fff2e6 !important;
+            /* Light orange */
+        }
+
+        .bg-saldo {
+            background-color: #e6f3ff !important;
+            /* Light blue */
+        }
     </style>
 @endpush
 
@@ -692,5 +707,70 @@
             icon.className = allExpanded ? 'fa fa-compress' : 'fa fa-expand';
             text.textContent = allExpanded ? 'Collapse All' : 'Expand All';
         }
+
+        // Update the setBackgroundForColumns function to handle colspan in tfoot
+        function setBackgroundForColumns() {
+            const table = document.getElementById('table-data');
+            const tbody = table.getElementsByTagName('tbody')[0];
+            const tfoot = table.getElementsByTagName('tfoot')[0];
+
+            // Process tbody rows
+            const bodyRows = tbody.getElementsByTagName('tr');
+            for (let row of bodyRows) {
+                const cells = row.cells;
+                if (cells.length > 0) {
+                    // Add background for Penerimaan (columns 3-6)
+                    for (let i = 2; i <= 5; i++) {
+                        if (cells[i]) {
+                            cells[i].classList.add('bg-penerimaan');
+                        }
+                    }
+                    // Add background for Pengeluaran (columns 8-11)
+                    for (let i = 7; i <= 10; i++) {
+                        if (cells[i]) {
+                            cells[i].classList.add('bg-pengeluaran');
+                        }
+                    }
+                    // Add background for Saldo (columns 13-16)
+                    for (let i = 12; i <= 15; i++) {
+                        if (cells[i]) {
+                            cells[i].classList.add('bg-saldo');
+                        }
+                    }
+                }
+            }
+
+            // Process tfoot rows - special handling for colspan
+            const footRows = tfoot.getElementsByTagName('tr');
+            for (let row of footRows) {
+                const cells = row.cells;
+                if (cells.length > 0) {
+                    // Skip first cell (index 0) which has colspan=2
+                    // Penerimaan columns
+                    for (let i = 1; i <= 4; i++) {
+                        if (cells[i]) {
+                            cells[i].classList.add('bg-penerimaan');
+                        }
+                    }
+                    // Pengeluaran columns
+                    for (let i = 6; i <= 9; i++) {
+                        if (cells[i]) {
+                            cells[i].classList.add('bg-pengeluaran');
+                        }
+                    }
+                    // Saldo columns
+                    for (let i = 11; i <= 14; i++) {
+                        if (cells[i]) {
+                            cells[i].classList.add('bg-saldo');
+                        }
+                    }
+                }
+            }
+        }
+
+        // Call the function when document is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            setBackgroundForColumns();
+        });
     </script>
 @endpush

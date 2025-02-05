@@ -2,7 +2,7 @@
     $(document).ready(function() {
         const $table = $('#table-data');
         const $headers = $table.find('thead th');
-        const textsToCheck = ['Detail', 'Aksi', 'Supplier', 'Riwayat', 'Evaluasi'];
+        const textsToCheck = ['Detail', 'Aksi', 'Supplier', 'Riwayat', 'Evaluasi', 'STT', 'Dokumentasi'];
         let indices = {};
 
         // Find the indices of the headers that match the texts in textsToCheck array

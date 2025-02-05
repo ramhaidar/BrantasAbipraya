@@ -26,17 +26,17 @@ class MasterDataSparepartController extends Controller
             $search = $request->get ( 'search' );
             $query->where ( function ($q) use ($search)
             {
-                $q->where ( 'nama', 'like', "%{$search}%" )
-                    ->orWhere ( 'part_number', 'like', "%{$search}%" )
-                    ->orWhere ( 'merk', 'like', "%{$search}%" )
+                $q->where ( 'nama', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'part_number', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'merk', 'ilike', "%{$search}%" )
                     ->orWhereHas ( 'kategoriSparepart', function ($query) use ($search)
                     {
                         $query->where ( function ($q) use ($search)
                         {
-                            $q->where ( 'kode', 'like', "%{$search}%" )
-                                ->orWhere ( 'nama', 'like', "%{$search}%" )
-                                ->orWhere ( 'jenis', 'like', "%{$search}%" )
-                                ->orWhere ( 'sub_jenis', 'like', "%{$search}%" );
+                            $q->where ( 'kode', 'ilike', "%{$search}%" )
+                                ->orWhere ( 'nama', 'ilike', "%{$search}%" )
+                                ->orWhere ( 'jenis', 'ilike', "%{$search}%" )
+                                ->orWhere ( 'sub_jenis', 'ilike', "%{$search}%" );
                         } );
                     } );
             } );
@@ -205,13 +205,13 @@ class MasterDataSparepartController extends Controller
         {
             $query->where ( function ($q) use ($search)
             {
-                $q->where ( 'master_data_sparepart.nama', 'like', "%{$search}%" )
-                    ->orWhere ( 'master_data_sparepart.part_number', 'like', "%{$search}%" )
-                    ->orWhere ( 'master_data_sparepart.merk', 'like', "%{$search}%" )
-                    ->orWhere ( 'kategori_sparepart.kode', 'like', "%{$search}%" )
-                    ->orWhere ( 'kategori_sparepart.nama', 'like', "%{$search}%" )
-                    ->orWhere ( 'kategori_sparepart.jenis', 'like', "%{$search}%" )
-                    ->orWhere ( 'kategori_sparepart.sub_jenis', 'like', "%{$search}%" );
+                $q->where ( 'master_data_sparepart.nama', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'master_data_sparepart.part_number', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'master_data_sparepart.merk', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'kategori_sparepart.kode', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'kategori_sparepart.nama', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'kategori_sparepart.jenis', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'kategori_sparepart.sub_jenis', 'ilike', "%{$search}%" );
             } );
         }
 

@@ -22,7 +22,7 @@ class ProyekController extends Controller
             $search = $request->get ( 'search' );
             $query->where ( function ($q) use ($search)
             {
-                $q->where ( 'nama', 'like', "%{$search}%" );
+                $q->where ( 'nama', 'ilike', "%{$search}%" );
             } );
         }
 
@@ -95,7 +95,7 @@ class ProyekController extends Controller
         // Handle search input
         if ( $search = $request->input ( 'search.value' ) )
         {
-            $query->where ( 'nama', 'like', "%{$search}%" );
+            $query->where ( 'nama', 'ilike', "%{$search}%" );
         }
 
         // Handle ordering

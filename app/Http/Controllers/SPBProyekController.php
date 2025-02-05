@@ -25,12 +25,12 @@ class SPBProyekController extends Controller
             $search = $request->get ( 'search' );
             $query->where ( function ($q) use ($search)
             {
-                $q->where ( 'nomor', 'like', "%{$search}%" )
+                $q->where ( 'nomor', 'ilike', "%{$search}%" )
                     ->orWhereHas ( 'proyek', function ($q) use ($search)
                     {
-                        $q->where ( 'nama', 'like', "%{$search}%" );
+                        $q->where ( 'nama', 'ilike', "%{$search}%" );
                     } )
-                    ->orWhere ( 'tipe', 'like', "%{$search}%" )
+                    ->orWhere ( 'tipe', 'ilike', "%{$search}%" )
                     ->orWhere ( function ($q) use ($search)
                     {
                         // Handle year search (4 digits)

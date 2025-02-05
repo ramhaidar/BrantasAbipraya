@@ -28,10 +28,10 @@ class SPBController extends Controller
             $search = $request->get ( 'search' );
             $query->where ( function ($q) use ($search)
             {
-                $q->where ( 'nomor', 'like', "%{$search}%" )
+                $q->where ( 'nomor', 'ilike', "%{$search}%" )
                     ->orWhereHas ( 'proyek', function ($query) use ($search)
                     {
-                        $query->where ( 'nama', 'like', "%{$search}%" );
+                        $query->where ( 'nama', 'ilike', "%{$search}%" );
                     } )
                     ->orWhere ( function ($q) use ($search)
                     {

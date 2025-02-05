@@ -68,7 +68,7 @@ class TimelineEvaluasiUrgentController extends Controller
 
             $query->where ( function ($q) use ($search, $searchMonth, $searchDay)
             {
-                $q->where ( 'nama_rencana', 'like', "%{$search}%" )
+                $q->where ( 'nama_rencana', 'ilike', "%{$search}%" )
                     ->orWhereRaw ( "DATEDIFF(tanggal_akhir_rencana, tanggal_awal_rencana) = ?", [ (int) $search ] )
                     ->orWhereRaw ( "DATEDIFF(tanggal_akhir_actual, tanggal_awal_actual) = ?", [ (int) $search ] )
                     ->orWhereRaw ( "YEAR(tanggal_awal_rencana) = ?", [ (int) $search ] )

@@ -26,14 +26,14 @@ class MasterDataSupplierController extends Controller
             $search = $request->get ( 'search' );
             $query->where ( function ($q) use ($search)
             {
-                $q->where ( 'nama', 'like', "%{$search}%" )
-                    ->orWhere ( 'alamat', 'like', "%{$search}%" )
-                    ->orWhere ( 'contact_person', 'like', "%{$search}%" )
+                $q->where ( 'nama', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'alamat', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'contact_person', 'ilike', "%{$search}%" )
                     ->orWhereHas ( 'masterDataSpareparts', function ($query) use ($search)
                     {
-                        $query->where ( 'nama', 'like', "%{$search}%" )
-                            ->orWhere ( 'part_number', 'like', "%{$search}%" )
-                            ->orWhere ( 'merk', 'like', "%{$search}%" );
+                        $query->where ( 'nama', 'ilike', "%{$search}%" )
+                            ->orWhere ( 'part_number', 'ilike', "%{$search}%" )
+                            ->orWhere ( 'merk', 'ilike', "%{$search}%" );
                     } );
             } );
         }
@@ -165,9 +165,9 @@ class MasterDataSupplierController extends Controller
         {
             $query->where ( function ($query) use ($search)
             {
-                $query->where ( 'nama', 'like', "%{$search}%" )
-                    ->orWhere ( 'alamat', 'like', "%{$search}%" )
-                    ->orWhere ( 'contact_person', 'like', "%{$search}%" );
+                $query->where ( 'nama', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'alamat', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'contact_person', 'ilike', "%{$search}%" );
             } );
         }
 

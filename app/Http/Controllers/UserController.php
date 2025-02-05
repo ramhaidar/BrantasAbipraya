@@ -24,13 +24,13 @@ class UserController extends Controller
             $search = $request->get ( 'search' );
             $query->where ( function ($q) use ($search)
             {
-                $q->where ( 'name', 'like', "%{$search}%" )
-                    ->orWhere ( 'username', 'like', "%{$search}%" )
-                    ->orWhere ( 'sex', 'like', "%{$search}%" )
-                    ->orWhere ( 'path_profile', 'like', "%{$search}%" )
-                    ->orWhere ( 'role', 'like', "%{$search}%" )
-                    ->orWhere ( 'phone', 'like', "%{$search}%" )
-                    ->orWhere ( 'email', 'like', "%{$search}%" );
+                $q->where ( 'name', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'username', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'sex', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'path_profile', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'role', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'phone', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'email', 'ilike', "%{$search}%" );
             } );
         }
 

@@ -58,15 +58,15 @@ class DetailRKBUrgentController extends Controller
             $search = $request->get ( 'search' );
             $query->where ( function ($q) use ($search)
             {
-                $q->where ( 'detail_rkb_urgent.satuan', 'like', "%{$search}%" )
-                    ->orWhere ( 'master_data_alat.jenis_alat', 'like', "%{$search}%" )
-                    ->orWhere ( 'master_data_alat.kode_alat', 'like', "%{$search}%" )
-                    ->orWhere ( 'kategori_sparepart.kode', 'like', "%{$search}%" )
-                    ->orWhere ( 'kategori_sparepart.nama', 'like', "%{$search}%" )
-                    ->orWhere ( 'master_data_sparepart.nama', 'like', "%{$search}%" )
-                    ->orWhere ( 'master_data_sparepart.part_number', 'like', "%{$search}%" )
-                    ->orWhere ( 'master_data_sparepart.merk', 'like', "%{$search}%" )
-                    ->orWhere ( 'link_alat_detail_rkb.nama_koordinator', 'like', "%{$search}%" ); // Added this line
+                $q->where ( 'detail_rkb_urgent.satuan', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'master_data_alat.jenis_alat', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'master_data_alat.kode_alat', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'kategori_sparepart.kode', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'kategori_sparepart.nama', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'master_data_sparepart.nama', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'master_data_sparepart.part_number', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'master_data_sparepart.merk', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'link_alat_detail_rkb.nama_koordinator', 'ilike', "%{$search}%" ); // Added this line
             } );
         }
 

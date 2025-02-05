@@ -180,47 +180,47 @@ class APBController extends Controller
                     {
                         $q->whereHas ( 'masterDataSparepart', function ($q) use ($search)
                         {
-                            $q->where ( 'nama', 'like', "%{$search}%" )
-                                ->orWhere ( 'part_number', 'like', "%{$search}%" )
-                                ->orWhere ( 'merk', 'like', "%{$search}%" )
+                            $q->where ( 'nama', 'ilike', "%{$search}%" )
+                                ->orWhere ( 'part_number', 'ilike', "%{$search}%" )
+                                ->orWhere ( 'merk', 'ilike', "%{$search}%" )
                                 ->orWhereHas ( 'kategoriSparepart', function ($q) use ($search)
                                 {
-                                    $q->where ( 'kode', 'like', "%{$search}%" )
-                                        ->orWhere ( 'nama', 'like', "%{$search}%" );
+                                    $q->where ( 'kode', 'ilike', "%{$search}%" )
+                                        ->orWhere ( 'nama', 'ilike', "%{$search}%" );
                                 } );
                         } )
                             ->orWhereHas ( 'masterDataSupplier', function ($q) use ($search)
                             {
-                                $q->where ( 'nama', 'like', "%{$search}%" );
+                                $q->where ( 'nama', 'ilike', "%{$search}%" );
                             } )
                             ->orWhereHas ( 'alatProyek.masterDataAlat', function ($q) use ($search)
                             {
-                                $q->where ( 'jenis_alat', 'like', "%{$search}%" )
-                                    ->orWhere ( 'kode_alat', 'like', "%{$search}%" )
-                                    ->orWhere ( 'merek_alat', 'like', "%{$search}%" )
-                                    ->orWhere ( 'tipe_alat', 'like', "%{$search}%" )
-                                    ->orWhere ( 'serial_number', 'like', "%{$search}%" );
+                                $q->where ( 'jenis_alat', 'ilike', "%{$search}%" )
+                                    ->orWhere ( 'kode_alat', 'ilike', "%{$search}%" )
+                                    ->orWhere ( 'merek_alat', 'ilike', "%{$search}%" )
+                                    ->orWhere ( 'tipe_alat', 'ilike', "%{$search}%" )
+                                    ->orWhere ( 'serial_number', 'ilike', "%{$search}%" );
                             } )
                             // Add search for tujuan proyek
                             ->orWhereHas ( 'tujuanProyek', function ($q) use ($search)
                             {
-                                $q->where ( 'nama', 'like', "%{$search}%" );
+                                $q->where ( 'nama', 'ilike', "%{$search}%" );
                             } )
                             // Add search for satuan in saldo
                             ->orWhereHas ( 'saldo', function ($q) use ($search)
                             {
-                                $q->where ( 'satuan', 'like', "%{$search}%" );
+                                $q->where ( 'satuan', 'ilike', "%{$search}%" );
                             } )
-                            ->orWhere ( 'mekanik', 'like', "%{$search}%" );
+                            ->orWhere ( 'mekanik', 'ilike', "%{$search}%" );
 
                         // For numeric searches (quantity, price, total price)
                         if ( is_numeric ( str_replace ( [ ',', '.' ], '', $search ) ) )
                         {
                             $numericSearch = str_replace ( [ ',', '.' ], '', $search );
-                            $q->orWhere ( 'quantity', 'like', "%{$numericSearch}%" )
+                            $q->orWhere ( 'quantity', 'ilike', "%{$numericSearch}%" )
                                 ->orWhereHas ( 'saldo', function ($q) use ($numericSearch)
                                 {
-                                    $q->where ( 'harga', 'like', "%{$numericSearch}%" );
+                                    $q->where ( 'harga', 'ilike', "%{$numericSearch}%" );
                                 } )
                                 // Add search for total price calculation
                                 ->orWhereRaw ( '(

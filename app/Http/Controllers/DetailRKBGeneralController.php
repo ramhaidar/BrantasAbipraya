@@ -57,14 +57,14 @@ class DetailRKBGeneralController extends Controller
             $search = $request->get ( 'search' );
             $query->where ( function ($q) use ($search)
             {
-                $q->where ( 'detail_rkb_general.satuan', 'like', "%{$search}%" )
-                    ->orWhere ( 'master_data_alat.jenis_alat', 'like', "%{$search}%" )
-                    ->orWhere ( 'master_data_alat.kode_alat', 'like', "%{$search}%" )
-                    ->orWhere ( 'kategori_sparepart.kode', 'like', "%{$search}%" )
-                    ->orWhere ( 'kategori_sparepart.nama', 'like', "%{$search}%" )
-                    ->orWhere ( 'master_data_sparepart.nama', 'like', "%{$search}%" )
-                    ->orWhere ( 'master_data_sparepart.part_number', 'like', "%{$search}%" )
-                    ->orWhere ( 'master_data_sparepart.merk', 'like', "%{$search}%" );
+                $q->where ( 'detail_rkb_general.satuan', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'master_data_alat.jenis_alat', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'master_data_alat.kode_alat', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'kategori_sparepart.kode', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'kategori_sparepart.nama', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'master_data_sparepart.nama', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'master_data_sparepart.part_number', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'master_data_sparepart.merk', 'ilike', "%{$search}%" );
             } );
         }
 

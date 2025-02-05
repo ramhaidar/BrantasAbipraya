@@ -21,24 +21,24 @@ class RKBGeneralController extends Controller
 
         $query = RKB::query ()
             ->with ( [ 'proyek', 'linkAlatDetailRkbs' ] )
-            ->where ( 'tipe', 'General' );
+            ->where ( 'tipe', 'general' );
 
         if ( $request->has ( 'search' ) )
         {
             $search = $request->get ( 'search' );
             $query->where ( function ($q) use ($search)
             {
-                $q->where ( 'nomor', 'like', "%{$search}%" )
+                $q->where ( 'nomor', 'ilike', "%{$search}%" ) // Menggunakan ilike untuk case-insensitive
                     ->orWhereHas ( 'proyek', function ($query) use ($search)
                     {
-                        $query->where ( 'nama', 'like', "%{$search}%" );
+                        $query->where ( 'nama', 'ilike', "%{$search}%" );
                     } )
                     ->orWhere ( function ($q) use ($search)
                     {
                         // Handle year search (4 digits)
                         if ( preg_match ( '/^[0-9]{4}$/', $search ) )
                         {
-                            $q->whereYear ( 'periode', $search );
+                            $q->whereRaw ( 'EXTRACT(YEAR FROM periode) = ?', [ $search ] ); // PostgreSQL syntax
                         }
                         // Handle month name in Indonesian or English
                         elseif ( $this->isMonthName ( $search ) )
@@ -46,17 +46,19 @@ class RKBGeneralController extends Controller
                             $monthNumber = $this->getMonthNumber ( $search );
                             if ( $monthNumber )
                             {
-                                $q->whereMonth ( 'periode', $monthNumber );
+                                $q->whereRaw ( 'EXTRACT(MONTH FROM periode) = ?', [ $monthNumber ] ); // PostgreSQL syntax
                             }
                         }
-                        // Handle "Month Year" format (e.g., "January 2023" or "Januari 2023")
+                        // Handle "Month Year" format
                         elseif ( preg_match ( '/^([A-Za-z]+)\s+([0-9]{4})$/', $search, $matches ) )
                         {
                             $monthNumber = $this->getMonthNumber ( $matches[ 1 ] );
                             if ( $monthNumber )
                             {
-                                $q->whereMonth ( 'periode', $monthNumber )
-                                    ->whereYear ( 'periode', $matches[ 2 ] );
+                                $q->whereRaw (
+                                    'EXTRACT(MONTH FROM periode) = ? AND EXTRACT(YEAR FROM periode) = ?',
+                                    [ $monthNumber, $matches[ 2 ] ]
+                                ); // PostgreSQL syntax
                             }
                         }
                     } )
@@ -272,7 +274,7 @@ class RKBGeneralController extends Controller
         unset ( $validatedData[ 'proyek' ] ); // Hapus field 'proyek' karena tidak ada di tabel
 
         // Set default tipe ke 'General'
-        $validatedData[ 'tipe' ] = 'General';
+        $validatedData[ 'tipe' ] = 'general';
 
         // Simpan data ke tabel RKB
         RKB::create ( $validatedData );
@@ -344,101 +346,4 @@ class RKBGeneralController extends Controller
         }
         return redirect ()->back ()->with ( 'error', 'Anda belum mengisi data detail RKB' );
     }
-
-    public function getData ( Request $request )
-    {
-        // Filter hanya tipe "General"
-        $query = RKB::with ( 'proyek' )->where ( 'tipe', 'General' );
-
-        // Filter pencarian
-        if ( $search = $request->input ( 'search.value' ) )
-        {
-            $query->where ( function ($q) use ($search)
-            {
-                $q->where ( 'nomor', 'like', "%{$search}%" )
-                    ->orWhereHas ( 'proyek', function ($q) use ($search)
-                    {
-                        $q->where ( 'nama', 'like', "%{$search}%" );
-                    } )
-                    ->orWhere ( 'periode', 'like', "%{$search}%" )
-                    ->orWhereRaw ( "CASE 
-                        WHEN is_finalized = 1 AND is_approved = 1 THEN 'Disetujui'
-                        WHEN is_finalized = 0 THEN 'Pengajuan'
-                        ELSE 'Evaluasi' 
-                    END LIKE ?", [ "%{$search}%" ] );
-            } );
-        }
-
-        // Sorting
-        if ( $order = $request->input ( 'order' ) )
-        {
-            $columnIndex   = $order[ 0 ][ 'column' ];
-            $columnName    = $request->input ( 'columns' )[ $columnIndex ][ 'data' ];
-            $sortDirection = $order[ 0 ][ 'dir' ];
-
-            if ( in_array ( $columnName, [ 'nomor', 'periode' ] ) )
-            {
-                $query->orderBy ( $columnName, $sortDirection );
-            }
-            elseif ( $columnName === 'proyek' )
-            {
-                $query->join ( 'proyek', 'rkb.id_proyek', '=', 'proyek.id' )
-                    ->orderBy ( 'proyek.nama', $sortDirection );
-            }
-        }
-        else
-        {
-            $query->orderBy ( 'updated_at', 'desc' );
-        }
-
-        // Pagination
-        $draw   = $request->input ( 'draw' );
-        $start  = $request->input ( 'start', 0 );
-        $length = $request->input ( 'length', 10 );
-
-        $totalRecords    = RKB::where ( 'tipe', 'General' )->count (); // Hanya hitung yang tipe General
-        $filteredRecords = $query->count ();
-
-        $rkbData = $query->skip ( $start )->take ( $length )->get ();
-
-        // Mapping data
-        $data = $rkbData->map ( function ($item)
-        {
-            $isFinalized   = $item->is_finalized ?? false;
-            $isEvaluated   = $item->is_evaluated ?? false;
-            $isApprovedVp  = $item->is_approved_vp ?? false;
-            $isApprovedSvp = $item->is_approved_svp ?? false;
-
-            $status = match ( true )
-            {
-                $isFinalized && $isEvaluated && $isApprovedVp && $isApprovedSvp => 'Disetujui',
-                ! $isFinalized => 'Pengajuan',
-                $isFinalized && $isEvaluated && $isApprovedVp && ! $isApprovedSvp => 'Menunggu Approval SVP',
-                $isFinalized && $isEvaluated && ! $isApprovedVp => 'Menunggu Approval VP',
-                $isFinalized && ! $isEvaluated => 'Evaluasi',
-                default => 'Tidak Diketahui',
-            };
-
-            return [ 
-                'id'              => $item->id,
-                'nomor'           => $item->nomor,
-                'proyek'          => $item->proyek->nama ?? '-',
-                'periode'         => Carbon::parse ( $item->periode )->translatedFormat ( 'F Y' ),
-                'status'          => $status,
-                'is_finalized'    => $item->is_finalized,
-                'is_evaluated'    => $item->is_evaluated,
-                'is_approved_vp'  => $item->is_approved_vp,
-                'is_approved_svp' => $item->is_approved_svp,
-            ];
-        } );
-
-        return response ()->json ( [ 
-            'draw'            => $draw,
-            'recordsTotal'    => $totalRecords,
-            'recordsFiltered' => $filteredRecords,
-            'data'            => $data,
-        ] );
-    }
-
-
 }

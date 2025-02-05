@@ -155,7 +155,7 @@ class DetailSPBController extends Controller
                 $baseNumber = $originalSpb->nomor;
 
                 // Find the highest increment for this base number
-                $highestIncrement = SPB::where ( 'nomor', 'LIKE', $baseNumber . '-%' )
+                $highestIncrement = SPB::where ( 'nomor', 'ilike', $baseNumber . '-%' )
                     ->get ()
                     ->map ( function ($item) use ($baseNumber)
                     {

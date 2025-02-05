@@ -58,23 +58,23 @@ class EvaluasiDetailRKBUrgentController extends Controller
             $search = $request->get ( 'search' );
             $query->where ( function ($q) use ($search)
             {
-                $q->where ( 'satuan', 'like', "%{$search}%" )
-                    ->orWhere ( 'nama_koordinator', 'like', "%{$search}%" )
+                $q->where ( 'satuan', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'nama_koordinator', 'ilike', "%{$search}%" )
                     ->orWhereHas ( 'masterDataSparepart', function ($q) use ($search)
                     {
-                        $q->where ( 'nama', 'like', "%{$search}%" )
-                            ->orWhere ( 'part_number', 'like', "%{$search}%" )
-                            ->orWhere ( 'merk', 'like', "%{$search}%" );
+                        $q->where ( 'nama', 'ilike', "%{$search}%" )
+                            ->orWhere ( 'part_number', 'ilike', "%{$search}%" )
+                            ->orWhere ( 'merk', 'ilike', "%{$search}%" );
                     } )
                     ->orWhereHas ( 'kategoriSparepart', function ($q) use ($search)
                     {
-                        $q->where ( 'kode', 'like', "%{$search}%" )
-                            ->orWhere ( 'nama', 'like', "%{$search}%" );
+                        $q->where ( 'kode', 'ilike', "%{$search}%" )
+                            ->orWhere ( 'nama', 'ilike', "%{$search}%" );
                     } )
                     ->orWhereHas ( 'linkRkbDetails.linkAlatDetailRkb.masterDataAlat', function ($q) use ($search)
                     {
-                        $q->where ( 'jenis_alat', 'like', "%{$search}%" )
-                            ->orWhere ( 'kode_alat', 'like', "%{$search}%" );
+                        $q->where ( 'jenis_alat', 'ilike', "%{$search}%" )
+                            ->orWhere ( 'kode_alat', 'ilike', "%{$search}%" );
                     } );
             } );
         }

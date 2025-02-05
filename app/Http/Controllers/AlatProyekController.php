@@ -29,11 +29,11 @@ class AlatProyekController extends Controller
             $search = $request->get ( 'search' );
             $query->whereHas ( 'masterDataAlat', function ($q) use ($search)
             {
-                $q->where ( 'jenis_alat', 'like', "%{$search}%" )
-                    ->orWhere ( 'kode_alat', 'like', "%{$search}%" )
-                    ->orWhere ( 'merek_alat', 'like', "%{$search}%" )
-                    ->orWhere ( 'tipe_alat', 'like', "%{$search}%" )
-                    ->orWhere ( 'serial_number', 'like', "%{$search}%" );
+                $q->where ( 'jenis_alat', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'kode_alat', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'merek_alat', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'tipe_alat', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'serial_number', 'ilike', "%{$search}%" );
             } );
         }
 

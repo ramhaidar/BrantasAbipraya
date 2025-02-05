@@ -178,35 +178,35 @@ class SaldoController extends Controller
                     // Search in related tables
                     $q->whereHas ( 'spb', function ($q) use ($search)
                     {
-                        $q->where ( 'nomor', 'like', "%{$search}%" );
+                        $q->where ( 'nomor', 'ilike', "%{$search}%" );
                     } )
                         ->orWhereHas ( 'masterDataSparepart', function ($q) use ($search)
                         {
-                            $q->where ( 'nama', 'like', "%{$search}%" )
-                                ->orWhere ( 'part_number', 'like', "%{$search}%" )
-                                ->orWhere ( 'merk', 'like', "%{$search}%" )
+                            $q->where ( 'nama', 'ilike', "%{$search}%" )
+                                ->orWhere ( 'part_number', 'ilike', "%{$search}%" )
+                                ->orWhere ( 'merk', 'ilike', "%{$search}%" )
                                 ->orWhereHas ( 'kategoriSparepart', function ($q) use ($search)
                                 {
-                                    $q->where ( 'kode', 'like', "%{$search}%" )
-                                        ->orWhere ( 'nama', 'like', "%{$search}%" );
+                                    $q->where ( 'kode', 'ilike', "%{$search}%" )
+                                        ->orWhere ( 'nama', 'ilike', "%{$search}%" );
                                 } );
                         } )
                         ->orWhereHas ( 'masterDataSupplier', function ($q) use ($search)
                         {
-                            $q->where ( 'nama', 'like', "%{$search}%" );
+                            $q->where ( 'nama', 'ilike', "%{$search}%" );
                         } )
                         ->orWhereHas ( 'asalProyek', function ($q) use ($search)
                         {
-                            $q->where ( 'nama', 'like', "%{$search}%" );
+                            $q->where ( 'nama', 'ilike', "%{$search}%" );
                         } )
-                        ->orWhere ( 'satuan', 'like', "%{$search}%" );
+                        ->orWhere ( 'satuan', 'ilike', "%{$search}%" );
 
                     // For numeric searches
                     if ( is_numeric ( str_replace ( [ ',', '.' ], '', $search ) ) )
                     {
                         $numericSearch = str_replace ( [ ',', '.' ], '', $search );
-                        $q->orWhere ( 'quantity', 'like', "%{$numericSearch}%" )
-                            ->orWhere ( 'harga', 'like', "%{$numericSearch}%" )
+                        $q->orWhere ( 'quantity', 'ilike', "%{$numericSearch}%" )
+                            ->orWhere ( 'harga', 'ilike', "%{$numericSearch}%" )
                             ->orWhereRaw ( '(quantity * harga) like ?', [ "%{$numericSearch}%" ] );
                     }
                 }

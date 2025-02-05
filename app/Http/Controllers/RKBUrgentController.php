@@ -18,17 +18,17 @@ class RKBUrgentController extends Controller
 
         $query = RKB::query ()
             ->with ( [ 'proyek', 'linkAlatDetailRkbs' ] )
-            ->where ( 'tipe', 'Urgent' );
+            ->where ( 'tipe', 'urgent' );
 
         if ( $request->has ( 'search' ) )
         {
             $search = $request->get ( 'search' );
             $query->where ( function ($q) use ($search)
             {
-                $q->where ( 'nomor', 'like', "%{$search}%" )
+                $q->where ( 'nomor', 'ilike', "%{$search}%" )
                     ->orWhereHas ( 'proyek', function ($query) use ($search)
                     {
-                        $query->where ( 'nama', 'like', "%{$search}%" );
+                        $query->where ( 'nama', 'ilike', "%{$search}%" );
                     } )
                     ->orWhere ( function ($q) use ($search)
                     {
@@ -270,7 +270,7 @@ class RKBUrgentController extends Controller
         unset ( $validatedData[ 'proyek' ] ); // Hapus field 'proyek' karena tidak ada di tabel
 
         // Set default tipe ke 'General'
-        $validatedData[ 'tipe' ] = 'Urgent';
+        $validatedData[ 'tipe' ] = 'urgent';
 
         // Simpan data ke tabel RKB
         RKB::create ( $validatedData );
@@ -360,19 +360,19 @@ class RKBUrgentController extends Controller
     public function getData ( Request $request )
     {
         // Filter hanya tipe "General"
-        $query = RKB::with ( 'proyek' )->where ( 'tipe', 'Urgent' );
+        $query = RKB::with ( 'proyek' )->where ( 'tipe', 'urgent' );
 
         // Filter pencarian
         if ( $search = $request->input ( 'search.value' ) )
         {
             $query->where ( function ($q) use ($search)
             {
-                $q->where ( 'nomor', 'like', "%{$search}%" )
+                $q->where ( 'nomor', 'ilike', "%{$search}%" )
                     ->orWhereHas ( 'proyek', function ($q) use ($search)
                     {
-                        $q->where ( 'nama', 'like', "%{$search}%" );
+                        $q->where ( 'nama', 'ilike', "%{$search}%" );
                     } )
-                    ->orWhere ( 'periode', 'like', "%{$search}%" )
+                    ->orWhere ( 'periode', 'ilike', "%{$search}%" )
                     ->orWhereRaw ( "CASE 
                     WHEN is_finalized = 1 AND is_approved = 1 THEN 'Disetujui'
                     WHEN is_finalized = 0 THEN 'Pengajuan'

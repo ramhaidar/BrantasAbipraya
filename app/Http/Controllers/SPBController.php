@@ -59,41 +59,24 @@ class SPBController extends Controller
                                     ->whereYear ( 'periode', $matches[ 2 ] );
                             }
                         }
-                    } )
-                    // Add type search functionality
-                    ->orWhere ( function ($q) use ($search)
+                    } );
+
+                // Add separate type search
+                $searchLower = strtolower ( $search );
+                if ( $searchLower === 'urgent' || $searchLower === 'general' )
+                {
+                    $q->orWhereHas ( 'linkAlatDetailRkbs.linkRkbDetails', function ($query) use ($searchLower)
                     {
-                        $searchLower = strtolower ( $search );
-                        if ( in_array ( $searchLower, [ 'general', 'urgent' ] ) )
+                        if ( $searchLower === 'urgent' )
                         {
-                            $q->where ( 'tipe', ucfirst ( $searchLower ) );
+                            $query->whereHas ( 'detailRkbUrgent' );
+                        }
+                        else
+                        {
+                            $query->whereHas ( 'detailRkbGeneral' );
                         }
                     } );
-            } );
-        }
-
-        $user = auth ()->user ();
-
-        if ( $user->role === 'Pegawai' )
-        {
-            $query->whereHas ( 'proyek', function ($q) use ($user)
-            {
-                $q->whereHas ( 'users', function ($q) use ($user)
-                {
-                    $q->where ( 'users.id', $user->id );
-                } );
-            } );
-        }
-        elseif ( $user->role === 'Boss' )
-        {
-            $proyeks       = $user->proyek ()->with ( "users" )->get ();
-            $usersInProyek = $proyeks->pluck ( 'users.*.id' )->flatten ();
-            $query->whereHas ( 'proyek', function ($q) use ($usersInProyek)
-            {
-                $q->whereHas ( 'users', function ($q) use ($usersInProyek)
-                {
-                    $q->whereIn ( 'users.id', $usersInProyek );
-                } );
+                }
             } );
         }
 

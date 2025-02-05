@@ -31,7 +31,13 @@
                         <td>{{ $item->nomor }}</td>
                         <td>{{ $item->proyek->nama ?? '-' }}</td>
                         <td>{{ \Carbon\Carbon::parse($item->periode)->translatedFormat('F Y') }}</td>
-                        <td>{{ ucfirst($item->tipe) }}</td>
+                        <td>
+                            @if ($item->tipe == 'general')
+                                <span class="badge bg-primary w-100">General</span>
+                            @else
+                                <span class="badge bg-danger w-100">Urgent</span>
+                            @endif
+                        </td>
                         <td>
                             <a class="btn btn-primary mx-1 detailBtn" data-id="{{ $item->id }}" href="{{ route('spb.detail.index', $item->id) }}">
                                 <i class="fa-solid fa-eye"></i>

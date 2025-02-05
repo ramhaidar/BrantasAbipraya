@@ -182,8 +182,6 @@ class RKBUrgentController extends Controller
             'evaluasi' => $query->where ( function ($q)
                 {
                     $q->where ( 'is_finalized', true )
-                    ->where ( 'is_evaluated', false )
-                    ->where ( 'is_approved_vp', false )
                     ->where ( 'is_approved_svp', false );
                 } ),
             'disetujui' => $query->where ( function ($q)
@@ -192,6 +190,29 @@ class RKBUrgentController extends Controller
                     ->where ( 'is_evaluated', true )
                     ->where ( 'is_approved_vp', true )
                     ->where ( 'is_approved_svp', true );
+                } ),
+            'tidak diketahui' => $query->where ( function ($q)
+                {
+                    $q->whereNot ( function ($subQ)
+                    {
+                        // Not Pengajuan
+                        $subQ->where ( 'is_finalized', false )
+                        ->where ( 'is_evaluated', false )
+                        ->where ( 'is_approved_vp', false )
+                        ->where ( 'is_approved_svp', false );
+                    } )->whereNot ( function ($subQ)
+                    {
+                        // Not Evaluasi
+                        $subQ->where ( 'is_finalized', true )
+                        ->where ( 'is_approved_svp', false );
+                    } )->whereNot ( function ($subQ)
+                    {
+                        // Not Disetujui
+                        $subQ->where ( 'is_finalized', true )
+                        ->where ( 'is_evaluated', true )
+                        ->where ( 'is_approved_vp', true )
+                        ->where ( 'is_approved_svp', true );
+                    } );
                 } ),
             default => $query
         };

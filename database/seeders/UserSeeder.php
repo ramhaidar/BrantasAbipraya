@@ -13,7 +13,7 @@ class UserSeeder extends Seeder
         $roles              = [ 'Pegawai', 'Admin', 'Boss' ];
         $users              = [ 'pegawai', 'admin', 'boss' ];
         $passwords          = [ 'pegawai123', 'admin123', 'boss123' ];
-        $defaultProfilePath = '\UserDefault.png';
+        $defaultProfilePath = '/UserDefault.png';
 
         foreach ( $roles as $index => $role )
         {

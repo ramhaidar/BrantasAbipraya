@@ -35,7 +35,13 @@
                         <td class="text-center">{{ $rkb->nomor }}</td>
                         <td class="text-center">{{ $rkb->proyek->nama ?? '-' }}</td>
                         <td class="text-center">{{ Carbon::parse($rkb->periode)->translatedFormat('F Y') }}</td>
-                        <td class="text-center">{{ ucfirst($rkb->tipe) }}</td>
+                        <td>
+                            @if ($rkb->tipe == 'general')
+                                <span class="badge bg-primary w-100">General</span>
+                            @else
+                                <span class="badge bg-danger w-100">Urgent</span>
+                            @endif
+                        </td>
                         <td class="text-center">
                             <a class="btn btn-primary mx-1 detailBtn" data-id="{{ $rkb->id }}" href="{{ route('spb.proyek.detail.index', $rkb->id) }}">
                                 <i class="fa-solid fa-eye"></i>

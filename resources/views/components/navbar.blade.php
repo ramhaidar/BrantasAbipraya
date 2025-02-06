@@ -58,14 +58,14 @@
                         </button>
 
                         <!-- Menu Dropdown -->
-                        <ul class="dropdown-menu dropdown-menu-lg-start w-100 shadow-lg border-1" style="top: 115%; left: -190%;">
-                            <form class="w-100" action="/logout" method="post">
-                                @csrf
-                                <button class="dropdown-item w-100" type="submit">
+                        <form class="w-100 p-0 m-0" action="/logout" method="post">
+                            @csrf
+                            <button class="dropdown-item w-100" type="submit">
+                                <ul class="dropdown-menu dropdown-menu-lg-start w-100 shadow-lg border-2 border-danger-subtle py-2 px-3" style="top: 150%; left: -190%;">
                                     <i class="bi bi-box-arrow-left me-2 w-100"></i> Log Out
-                                </button>
-                            </form>
-                        </ul>
+                                </ul>
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>

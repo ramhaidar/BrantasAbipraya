@@ -27,7 +27,7 @@
                     <th>Quantity Requested</th>
                     <th>Quantity Approved</th>
                     <th>Satuan</th>
-                    @if (Auth::user()->role === 'admin_divisi' || Auth::user()->role === 'superadmin')
+                    @if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin')
                         <th>Aksi</th>
                     @endif
                 </tr>
@@ -45,7 +45,7 @@
                             <td class="text-center">{{ $item->quantity_requested }}</td>
                             <td class="text-center">{{ $item->quantity_approved ?? '-' }}</td>
                             <td class="text-center">{{ $item->satuan }}</td>
-                            @if (Auth::user()->role === 'admin_divisi' || Auth::user()->role === 'superadmin')
+                            @if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin')
                                 <td class="text-center">
                                     <button class="btn btn-warning mx-1 ubahBtn" data-id="{{ $item->id }}" {{ $detail->linkAlatDetailRkb->rkb->is_finalized ? 'disabled' : '' }} onclick="fillFormEditDetailRKB({{ $item->id }})">
                                         <i class="bi bi-pencil-square"></i>

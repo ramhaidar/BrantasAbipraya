@@ -19,7 +19,7 @@
                             <a class="btn btn-warning btn-sm {{ $rkb->is_finalized ? '' : 'disabled' }}" href="{{ route('export.detail_rkb_general', ['id' => $rkb->id]) }}">
                                 <i class="fa-solid fa-file-excel"></i> <span class="ms-2">Export</span>
                             </a>
-                            @if (Auth::user()->role === 'admin_divisi' || Auth::user()->role === 'superadmin')
+                            @if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin')
                                 <a class="btn btn-success btn-sm btn-hide-text-mobile finalizeBtn {{ $rkb->is_finalized ? 'disabled' : '' }}" data-bs-toggle="modal" data-id="{{ $rkb->id }}" data-bs-target="#modalForFinalize">
                                     <i class="fa fa-check"></i> <span class="ms-2">Finalisasi Data</span>
                                 </a>
@@ -52,7 +52,7 @@
             </div>
         </div>
 
-        @if (Auth::user()->role === 'admin_divisi' || Auth::user()->role === 'superadmin')
+        @if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin')
             <!-- Modal for Adding Data -->
             @include('dashboard.rkb.general.detail.partials.modal-add')
 

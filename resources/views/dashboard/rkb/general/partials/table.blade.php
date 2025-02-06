@@ -23,7 +23,7 @@
                     <th>Periode</th>
                     <th>Status</th>
                     <th>Detail</th>
-                    @if (Auth::user()->role === 'admin_divisi' || Auth::user()->role === 'superadmin')
+                    @if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin')
                         <th>Aksi</th>
                     @endif
                 </tr>
@@ -50,7 +50,7 @@
                                 <i class="fa-solid fa-file-pen"></i>
                             </a>
                         </td>
-                        @if (Auth::user()->role === 'admin_divisi' || Auth::user()->role === 'superadmin')
+                        @if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin')
                             <td class="text-center">
                                 <button class="btn btn-warning mx-1 ubahBtn" {{ $rkb->is_finalized ? 'disabled' : '' }} onclick="fillFormEditRKB({{ $rkb->id }})">
                                     <i class="bi bi-pencil-square"></i>

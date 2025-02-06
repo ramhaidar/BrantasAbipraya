@@ -33,7 +33,7 @@
                     <th>Tanggal Awal Actual</th>
                     <th>Tanggal Akhir Actual</th>
                     <th>Status</th>
-                    @if (Auth::user()->role === 'admin_divisi' || Auth::user()->role === 'superadmin')
+                    @if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin')
                         <th>Aksi</th>
                     @endif
                 </tr>
@@ -49,7 +49,7 @@
                         <td class="text-center">{{ $item->tanggal_awal_actual ? $item->tanggal_awal_actual->format('Y-m-d') : '-' }}</td>
                         <td class="text-center">{{ $item->tanggal_akhir_actual ? $item->tanggal_akhir_actual->format('Y-m-d') : '-' }}</td>
                         <td class="text-center"><span class="badge {{ $item->is_done ? 'bg-success' : 'bg-warning' }} w-100">{{ $item->is_done ? 'Sudah Selesai' : 'Belum Selesai' }}</span></td>
-                        @if (Auth::user()->role === 'admin_divisi' || Auth::user()->role === 'superadmin')
+                        @if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin')
                             <td class="text-center">
                                 <button class="btn btn-warning mx-1 editBtn" data-id="{{ $item->id }}">
                                     <i class="bi bi-pencil-square"></i>

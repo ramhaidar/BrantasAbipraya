@@ -12,7 +12,7 @@
                         <h5 class="fw-medium">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}</h5>
                     </div>
                     <div class="d-flex justify-content-end gap-2">
-                        @if (Auth::user()->role === 'admin_divisi' || Auth::user()->role === 'superadmin')
+                        @if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin')
                             <a class="btn btn-primary btn-sm btn-hide-text-mobile" data-bs-toggle="modal" data-bs-target="#modalForAdd">
                                 <i class="fa fa-plus"></i> <span class="ms-2">Tambah Data</span>
                             </a>
@@ -41,7 +41,7 @@
         </div>
     </div>
 
-    @if (Auth::user()->role === 'admin_divisi' || Auth::user()->role === 'superadmin')
+    @if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin')
         <!-- Modal for Adding Data -->
         @include('dashboard.rkb.urgent.partials.modal-add')
 

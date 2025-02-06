@@ -9,8 +9,11 @@ use App\Models\User;
 use App\Models\Saldo;
 use App\Models\Proyek;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Models\KategoriSparepart;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
@@ -116,11 +119,30 @@ class DashboardController extends Controller
             $endDate
         );
 
+        // dd ( $data[ 'atbDataTotal' ] );
+
         // Calculate chart data
         $chartData = $this->calculateAllChartData ( $data );
 
         // Calculate horizontal charts
         $horizontalCharts = $this->calculateHorizontalCharts ( $proyeks, $data );
+
+        // Add these lines before the return statement
+        $categoryData = [];
+        if ( $id_proyek )
+        {
+            $categoryData = $this->getCategoryDataForProject (
+                $id_proyek,
+                $data[ 'atbDataCurrent' ],
+                $data[ 'apbDataCurrent' ],
+                $data[ 'saldoDataCurrent' ],
+                $data[ 'atbDataTotal' ],
+                $data[ 'apbDataTotal' ],
+                $data[ 'saldoDataTotal' ]
+            );
+        }
+
+        // dd ( $categoryData );
 
         return view ( "dashboard.dashboard.dashboard", [ 
             "headerPage"             => "Dashboard",
@@ -142,6 +164,7 @@ class DashboardController extends Controller
 
             "horizontalChartCurrent" => $horizontalCharts[ "current" ],
             "horizontalChartTotal"   => $horizontalCharts[ "total" ],
+            "categoryData"           => $categoryData,
         ] );
     }
 
@@ -182,54 +205,52 @@ class DashboardController extends Controller
         );
     }
 
-    private function getQueriesData (
-        $atbQuery,
-        $apbQuery,
-        $saldoQuery,
-        $startDate,
-        $endDate
-    ) {
+    private function getQueriesData ( $atbQuery, $apbQuery, $saldoQuery, $startDate, $endDate )
+    {
+        // First, get base queries with proper eager loading
+        $atbBase = clone $atbQuery->with ( [ 'masterDataSparepart.kategoriSparepart', 'saldo' ] )
+            ->orderBy ( 'updated_at', 'desc' )
+            ->orderBy ( 'id', 'desc' );
+
+        $apbBase = clone $apbQuery->with ( [ 'masterDataSparepart.kategoriSparepart', 'saldo' ] )
+            ->orderBy ( 'updated_at', 'desc' )
+            ->orderBy ( 'id', 'desc' );
+
+        $saldoBase = clone $saldoQuery->with ( [ 'masterDataSparepart.kategoriSparepart', 'atb' ] )
+            ->orderBy ( 'updated_at', 'desc' )
+            ->orderBy ( 'id', 'desc' );
+
+        // Build all queries using the base queries
         return [ 
-            "atbData"          => clone $atbQuery->orderBy ( 'updated_at', 'desc' )
-                ->orderBy ( 'id', 'desc' )
-                ->get (),
-            "apbData"          => clone $apbQuery->orderBy ( 'updated_at', 'desc' )
-                ->orderBy ( 'id', 'desc' )
-                ->get (),
-            "saldoData"        => clone $saldoQuery->orderBy ( 'updated_at', 'desc' )
-                ->orderBy ( 'id', 'desc' )
-                ->get (),
-            "atbDataCurrent"   => clone $atbQuery->orderBy ( 'updated_at', 'desc' )
-                ->orderBy ( 'id', 'desc' )
+            "atbData"          => ( clone $atbBase )->get (),
+            "apbData"          => ( clone $apbBase )->get (),
+            "saldoData"        => ( clone $saldoBase )->get (),
+
+            "atbDataCurrent"   => ( clone $atbBase )
                 ->whereBetween ( "tanggal", [ $startDate, $endDate ] )
                 ->get (),
-            "apbDataCurrent"   => clone $apbQuery->orderBy ( 'updated_at', 'desc' )
-                ->orderBy ( 'id', 'desc' )
+            "apbDataCurrent"   => ( clone $apbBase )
                 ->whereBetween ( "tanggal", [ $startDate, $endDate ] )
                 ->get (),
-            "saldoDataCurrent" => clone $saldoQuery->orderBy ( 'updated_at', 'desc' )
-                ->orderBy ( 'id', 'desc' )
+            "saldoDataCurrent" => ( clone $saldoBase )
                 ->whereHas (
                     "atb",
-                    fn ( $q ) => $q->whereBetween ( "tanggal", [ 
-                        $startDate,
-                        $endDate,
-                    ] )
+                    fn ( $q ) =>
+                    $q->whereBetween ( "tanggal", [ $startDate, $endDate ] )
                 )
                 ->get (),
-            "atbDataTotal"     => clone $atbQuery->orderBy ( 'updated_at', 'desc' )
-                ->orderBy ( 'id', 'desc' )
+
+            "atbDataTotal"     => ( clone $atbBase )
                 ->where ( "tanggal", "<=", $endDate )
                 ->get (),
-            "apbDataTotal"     => clone $apbQuery->orderBy ( 'updated_at', 'desc' )
-                ->orderBy ( 'id', 'desc' )
+            "apbDataTotal"     => ( clone $apbBase )
                 ->where ( "tanggal", "<=", $endDate )
                 ->get (),
-            "saldoDataTotal"   => clone $saldoQuery->orderBy ( 'updated_at', 'desc' )
-                ->orderBy ( 'id', 'desc' )
+            "saldoDataTotal"   => ( clone $saldoBase )
                 ->whereHas (
                     "atb",
-                    fn ( $q ) => $q->where ( "tanggal", "<=", $endDate )
+                    fn ( $q ) =>
+                    $q->where ( "tanggal", "<=", $endDate )
                 )
                 ->get (),
         ];
@@ -365,5 +386,118 @@ class DashboardController extends Controller
                 return $item->quantity *
                     ( $item->saldo->harga ?? ( $item->harga ?? 0 ) );
             } );
+    }
+
+    private function getCategoryDataForProject ( $projectId, $atbCurrent, $apbCurrent, $saldoCurrent, $atbTotal, $apbTotal, $saldoTotal )
+    {
+        $categories  = KategoriSparepart::all ();
+        $currentData = [];
+        $totalData   = [];
+
+        foreach ( $categories as $category )
+        {
+            // Calculate current period totals
+            $currentAtb = $atbCurrent
+                ->filter ( function ($item) use ($category)
+                {
+                    return $item->masterDataSparepart &&
+                        $item->masterDataSparepart->id_kategori_sparepart == $category->id;
+                } )
+                ->sum ( function ($item)
+                {
+                    return $item->quantity * ( $item->harga ?? 0 );
+                } );
+
+            $currentApb = $apbCurrent
+                ->filter ( function ($item) use ($category)
+                {
+                    return $item->masterDataSparepart &&
+                        $item->masterDataSparepart->id_kategori_sparepart == $category->id &&
+                        ! in_array ( $item->status, [ 'pending', 'rejected' ] );
+                } )
+                ->sum ( function ($item)
+                {
+                    return $item->quantity * ( $item->saldo->harga ?? 0 );
+                } );
+
+            $currentSaldo = $saldoCurrent
+                ->filter ( function ($item) use ($category)
+                {
+                    return $item->masterDataSparepart &&
+                        $item->masterDataSparepart->id_kategori_sparepart == $category->id;
+                } )
+                ->sum ( function ($item)
+                {
+                    return $item->quantity * ( $item->harga ?? 0 );
+                } );
+
+            // Calculate total period totals
+            $totalAtb = $atbTotal
+                ->filter ( function ($item) use ($category)
+                {
+                    return $item->masterDataSparepart &&
+                        $item->masterDataSparepart->id_kategori_sparepart == $category->id;
+                } )
+                ->sum ( function ($item)
+                {
+                    return $item->quantity * ( $item->harga ?? 0 );
+                } );
+
+            $totalApb = $apbTotal
+                ->filter ( function ($item) use ($category)
+                {
+                    return $item->masterDataSparepart &&
+                        $item->masterDataSparepart->id_kategori_sparepart == $category->id &&
+                        ! in_array ( $item->status, [ 'pending', 'rejected' ] );
+                } )
+                ->sum ( function ($item)
+                {
+                    return $item->quantity * ( $item->saldo->harga ?? 0 );
+                } );
+
+            $totalSaldo = $saldoTotal
+                ->filter ( function ($item) use ($category)
+                {
+                    return $item->masterDataSparepart &&
+                        $item->masterDataSparepart->id_kategori_sparepart == $category->id;
+                } )
+                ->sum ( function ($item)
+                {
+                    return $item->quantity * ( $item->harga ?? 0 );
+                } );
+
+            // Include all categories regardless of their values
+            $currentData[ $category->nama ] = [ 
+                'ATB'   => $currentAtb,
+                'APB'   => $currentApb,
+                'Saldo' => $currentSaldo
+            ];
+
+            $totalData[ $category->nama ] = [ 
+                'ATB'   => $totalAtb,
+                'APB'   => $totalApb,
+                'Saldo' => $totalSaldo
+            ];
+        }
+
+        // Sort by highest total value
+        $currentData = $this->sortCategoryData ( $currentData );
+        $totalData   = $this->sortCategoryData ( $totalData );
+
+        return [ 
+            'current' => $currentData,
+            'total'   => $totalData
+        ];
+    }
+
+    private function sortCategoryData ( $data )
+    {
+        uasort ( $data, function ($a, $b)
+        {
+            $totalA = $a[ 'ATB' ] + $a[ 'APB' ];
+            $totalB = $b[ 'ATB' ] + $b[ 'APB' ];
+            return $totalB <=> $totalA;
+        } );
+        return $data;
     }
 }

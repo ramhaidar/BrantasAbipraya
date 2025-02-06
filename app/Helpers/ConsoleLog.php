@@ -7,6 +7,8 @@ if ( ! function_exists ( 'console' ) )
     function console ( $message )
     {
         $output = new ConsoleOutput();
+        $output->writeln ( "___\n" );
         $output->writeln ( $message );
+        $output->writeln ( "___\n" );
     }
 }

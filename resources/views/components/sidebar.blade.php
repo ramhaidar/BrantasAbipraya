@@ -68,11 +68,21 @@
         <div class="image ps-3 me-2">
             <img class="img-circle elevation-2" src="{{ Auth::user()->path_profile ?? 'dist/img/user2-160x160.jpg' }}" alt="User Image" style="border-radius: 50%; width: 40px; height: 40px; border: 2pt solid #fff;">
         </div>
-        <div class="info text-center w-100 me-2">
-            <a class="d-block text-center user-info-text text-white truncate-text" href="#" style="text-decoration: none">
-                <span class="text-content m-0 p-0">{{ Auth::user()->name }}</span>
+        <div class="info text-center w-100 p-0 m-0 me-2">
+            <a class="d-block ps-2 pb-1 user-info-text text-white truncate-text p-0 m-0" href="#" style="text-decoration: none">
+                <span class="user-text-content m-0 p-0">{{ Auth::user()->name }}</span>
                 <br class="p-0 m-0">
-                <span class="text-content m-0 p-0">{{ ucfirst(Auth::user()->role) }}</span>
+                @if (Auth::user()->role === 'superadmin')
+                    <span class="user-text-content m-0 px-1 py-1 badge bg-danger rounded-1 fw-normal">SuperAdmin</span>
+                @elseif (Auth::user()->role === 'svp')
+                    <span class="user-text-content m-0 px-1 py-1 badge bg-primary rounded-1 fw-normal">Senior Vice President</span>
+                @elseif (Auth::user()->role === 'vp')
+                    <span class="user-text-content m-0 px-1 py-1 badge bg-success rounded-1 fw-normal">Vice President</span>
+                @elseif (Auth::user()->role === 'admin_divisi')
+                    <span class="user-text-content m-0 px-1 py-1 badge bg-warning text-dark rounded-1 fw-normal">Admin Divisi</span>
+                @elseif (Auth::user()->role === 'koordinator')
+                    <span class="user-text-content m-0 px-1 py-1 badge bg-info text-dark rounded-1 fw-normal">Koordinator Proyek</span>
+                @endif
             </a>
         </div>
     </div>
@@ -510,7 +520,22 @@
 
             function initializeTooltip() {
                 const truncateLength = 13;
+                const userTextTruncateLength = 21; // New specific length for user text
 
+                // Handle user text content specifically
+                $(".user-text-content").each(function() {
+                    let text = $(this).text().trim();
+                    if (text.length > userTextTruncateLength) {
+                        const truncatedText = text.substring(0, userTextTruncateLength) + '...';
+                        $(this).text(truncatedText);
+                        $(this).attr('data-bs-toggle', 'tooltip');
+                        $(this).attr('title', text);
+                    } else {
+                        $(this).text(text);
+                    }
+                });
+
+                // Handle other truncate text elements
                 $(".truncate-text .text-content").each(function() {
                     let text = $(this).text().trim();
                     if (text.length > truncateLength) {

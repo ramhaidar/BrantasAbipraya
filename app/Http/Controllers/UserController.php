@@ -34,10 +34,9 @@ class UserController extends Controller
             } );
         }
 
-        $users = $query->paginate ( $perPage )
-            ->withQueryString ();
-
-        $TableData = $query->paginate ( $perPage )
+        $TableData = $query->orderBy ( 'updated_at', 'desc' )
+            ->orderBy ( 'id', 'desc' )
+            ->paginate ( $perPage )
             ->withQueryString ();
 
         $proyeks = Proyek::with ( "users" )
@@ -50,7 +49,6 @@ class UserController extends Controller
             'page'       => 'Data User',
 
             'proyeks'    => $proyeks,
-            'users'      => $users,
             'TableData'  => $TableData,
         ] );
     }
@@ -63,7 +61,7 @@ class UserController extends Controller
             'name'         => 'required',
             'username'     => 'required',
             'sex'          => 'required|in:Laki-laki,Perempuan',
-            'role'         => 'required|in:Admin,Pegawai,Boss',
+            'role'         => 'required|in:superadmin,svp,vp,admin_divisi,koordinator_proyek',
             'proyek'       => 'array',
             'phone'        => 'required|min:8|unique:users',
             'email'        => 'required|email|unique:users',
@@ -104,8 +102,8 @@ class UserController extends Controller
         $validatedData = $request->validate ( [ 
             'name'     => 'required|max:255',
             'username' => 'required|max:255|unique:users,username,' . $user->id,
-            'sex'      => 'required',
-            'role'     => 'required',
+            'sex'      => 'required|in:Laki-laki,Perempuan',
+            'role'     => 'required|in:superadmin,svp,vp,admin_divisi,koordinator_proyek',
             'phone'    => 'required',
             'email'    => 'required|email|unique:users,email,' . $user->id,
             'password' => 'nullable|min:8',

@@ -25,7 +25,9 @@
                     <th>Serial Number</th>
                     <th>Lokasi Proyek (Sekarang)</th>
                     <th>Riwayat</th>
-                    <th>Aksi</th>
+                    @if (auth()->user()->role == 'admin_divisi' || auth()->user()->role == 'superadmin')
+                        <th>Aksi</th>
+                    @endif
                 </tr>
             </thead>
             <tbody>
@@ -42,18 +44,20 @@
                                 <i class="bi bi-clock-history"></i>
                             </button>
                         </td>
-                        <td class="text-center">
-                            <button class="btn btn-warning mx-1 ubahBtn" data-id="{{ $item->id }}" onclick="fillFormEdit({{ $item->id }})">
-                                <i class="bi bi-pencil-square"></i>
-                            </button>
-                            <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item->id }}">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </td>
+                        @if (auth()->user()->role == 'admin_divisi' || auth()->user()->role == 'superadmin')
+                            <td class="text-center">
+                                <button class="btn btn-warning mx-1 ubahBtn" data-id="{{ $item->id }}" onclick="fillFormEdit({{ $item->id }})">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                                <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item->id }}">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        @endif
                     </tr>
                 @empty
                     <tr>
-                        <td class="text-center py-3 text-muted" colspan="8">
+                        <td class="text-center py-3 text-muted" colspan="{{ auth()->user()->role == 'admin_divisi' || auth()->user()->role == 'superadmin' ? '8' : '6' }}">
                             <i class="bi bi-inbox fs-1 d-block mb-2"></i>
                             No tools found
                         </td>

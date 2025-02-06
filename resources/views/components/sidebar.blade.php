@@ -70,7 +70,9 @@
         </div>
         <div class="info text-center w-100 me-2">
             <a class="d-block text-center user-info-text text-white truncate-text" href="#" style="text-decoration: none">
-                <span class="text-content">{{ Auth::user()->name }} - {{ ucfirst(Auth::user()->role) }}</span>
+                <span class="text-content m-0 p-0">{{ Auth::user()->name }}</span>
+                <br class="p-0 m-0">
+                <span class="text-content m-0 p-0">{{ ucfirst(Auth::user()->role) }}</span>
             </a>
         </div>
     </div>
@@ -457,6 +459,9 @@
                                     </li>
                                 @endforeach
 
+                                <div class="mb-2">
+                                    <p></p>
+                                </div>
                                 <div class="mb-5">
                                     <p></p>
                                 </div>

@@ -54,7 +54,6 @@
                 .attr('transform', `translate(${margin.left},${margin.top})`);
 
             // Get projects and prepare data
-            const projects = Object.keys(processedData);
             const series = ['atb', 'apb', 'saldo'];
             const colors = {
                 atb: '#fe6d73', // Red
@@ -62,9 +61,18 @@
                 saldo: '#16ce9a' // Green
             };
 
+            // Sort projects by total value
+            const projects = Object.keys(processedData).sort((a, b) => {
+                // Calculate total value for each project
+                const totalA = series.reduce((sum, serie) => sum + (processedData[a][serie] || 0), 0);
+                const totalB = series.reduce((sum, serie) => sum + (processedData[b][serie] || 0), 0);
+                // Sort from highest to lowest
+                return totalB - totalA;
+            });
+
             // Scales
             const y0 = d3.scaleBand()
-                .domain(projects)
+                .domain(projects) // Now using sorted projects array
                 .rangeRound([0, height])
                 .paddingInner(0.2)
                 .paddingOuter(0.3);

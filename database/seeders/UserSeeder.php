@@ -10,28 +10,41 @@ class UserSeeder extends Seeder
 {
     public function run () : void
     {
-        $roles              = [ 'Pegawai', 'Admin', 'Boss' ];
-        $users              = [ 'pegawai', 'admin', 'boss' ];
-        $passwords          = [ 'pegawai123', 'admin123', 'boss123' ];
+        $roles = [ 
+            'superadmin',
+            'svp',
+            'vp',
+            'admin_divisi',
+            'koordinator_proyek'
+        ];
+
+        $users = [ 
+            'superadmin',
+            'svp',
+            'vp',
+            'admin_divisi',
+            'koordinator'
+        ];
+
+        $passwords = [ 
+            'superadmin123',
+            'svp123',
+            'vp123',
+            'admin123',
+            'koordinator123'
+        ];
+
         $defaultProfilePath = '/UserDefault.png';
 
         foreach ( $roles as $index => $role )
         {
             User::factory ()->create ( [ 
-                'name'         => $role,
+                'name'         => ucfirst ( $role ),
                 'username'     => $users[ $index ],
                 'role'         => $role,
                 'password'     => Hash::make ( $passwords[ $index ] ),
                 'path_profile' => $defaultProfilePath,
             ] );
         }
-
-        User::factory ()->create ( [ 
-            'name'         => 'John Doe Smith William',
-            'username'     => 'johndoe',
-            'role'         => 'Pegawai',
-            'password'     => Hash::make ( 'john1234' ),
-            'path_profile' => $defaultProfilePath,
-        ] );
     }
 }

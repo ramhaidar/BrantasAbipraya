@@ -153,27 +153,9 @@ class DashboardController extends Controller
 
         if ( $id_proyek )
         {
-            if (
-                $user->role !== "Admin" &&
-                ! $user
-                    ->proyek ()
-                    ->where ( "proyek.id", $id_proyek )
-                    ->exists ()
-            )
-            {
-                abort ( 403, "Unauthorized access to this project" );
-            }
             $this->applyProjectFilter (
                 [ $atbQuery, $apbQuery, $saldoQuery ],
                 $id_proyek
-            );
-        }
-        elseif ( $user->role !== "Admin" )
-        {
-            $userProyekIds = $user->proyek ()->pluck ( "id" );
-            $this->applyUserProjectsFilter (
-                [ $atbQuery, $apbQuery, $saldoQuery ],
-                $userProyekIds
             );
         }
 

@@ -27,20 +27,24 @@
                                             <a class="btn btn-sm btn-primary me-2" href="{{ route('spb.detail.riwayat.index', $item->id) }}">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <form class="d-inline" action="{{ route('spb.addendum', $item->id) }}" method="POST">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button class="btn btn-sm btn-warning me-2" type="submit" {{ $item->is_addendum ? 'disabled' : '' }}>
-                                                    <i class="fas fa-pencil"></i>
-                                                </button>
-                                            </form>
-                                            <form class="d-inline" action="{{ route('spb.destroy', $item->id) }}" method="POST">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button class="btn btn-sm btn-danger" type="submit" {{ $item->is_addendum == true && !isset($item->id_spb_original) ? 'disabled' : '' }}>
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
+                                            @if (Auth::user()->role === 'admin_divisi' || Auth::user()->role === 'superadmin')
+                                                <form class="d-inline" action="{{ route('spb.addendum', $item->id) }}" method="POST">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button class="btn btn-sm btn-warning me-2" type="submit" {{ $item->is_addendum ? 'disabled' : '' }}>
+                                                        <i class="fas fa-pencil"></i>
+                                                    </button>
+                                                </form>
+                                            @endif
+                                            @if (Auth::user()->role === 'superadmin')
+                                                <form class="d-inline" action="{{ route('spb.destroy', $item->id) }}" method="POST">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button class="btn btn-sm btn-danger" type="submit" {{ $item->is_addendum == true && !isset($item->id_spb_original) ? 'disabled' : '' }}>
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>

@@ -13,9 +13,9 @@
                     </div>
                     <div class="d-flex justify-content-end gap-2">
                         <!-- Button Placeholder -->
-                        <a class="btn btn-primary btn-sm btn-hide-text-mobile" data-bs-toggle="modal" data-bs-target="#modalForAdd">
+                        {{-- <a class="btn btn-primary btn-sm btn-hide-text-mobile" data-bs-toggle="modal" data-bs-target="#modalForAdd">
                             <i class="fa fa-plus"></i> <span class="ms-2">Tambah Data</span>
-                        </a>
+                        </a> --}}
                     </div>
                 </div>
 
@@ -39,15 +39,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Modal for Adding Data -->
-    {{-- @include('dashboard.rkb.urgent.partials.modal-add') --}}
-
-    <!-- Modal for Deleting Data -->
-    {{-- @include('dashboard.rkb.urgent.partials.modal-delete') --}}
-
-    <!-- Modal for Editing Data -->
-    {{-- @include('dashboard.rkb.urgent.partials.modal-edit') --}}
 @endsection
 
 @push('scripts_2')

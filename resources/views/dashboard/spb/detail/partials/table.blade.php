@@ -84,21 +84,22 @@
             }
         @endphp
 
-        {{-- <div class="row mb-3 ps-3"> --}}
-        <div class="row p-0 m-0">
-            <div class="col-md-4 p-0 m-0 pb-3">
-                <label class="form-label">Pilih Supplier</label>
-                <select class="form-select supplier-select-main" id="supplier_main" name="supplier_main" {{ $totalItems === 0 ? 'disabled' : '' }}>
-                    <option value="" disabled selected>Pilih Supplier</option>
-                    @foreach ($supplier as $item)
-                        <option value="{{ $item->id }}">{{ $item->nama }}</option>
-                    @endforeach
-                </select>
-                @if ($totalItems === 0)
-                    <small class="text-danger">Tidak ada item yang tersedia untuk pembuatan SPB</small>
-                @endif
+        @if (Auth::user()->role === 'admin_divisi' || Auth::user()->role === 'superadmin')
+            <div class="row p-0 m-0">
+                <div class="col-md-4 p-0 m-0 pb-3">
+                    <label class="form-label">Pilih Supplier</label>
+                    <select class="form-select supplier-select-main" id="supplier_main" name="supplier_main" {{ $totalItems === 0 ? 'disabled' : '' }}>
+                        <option value="" disabled selected>Pilih Supplier</option>
+                        @foreach ($supplier as $item)
+                            <option value="{{ $item->id }}">{{ $item->nama }}</option>
+                        @endforeach
+                    </select>
+                    @if ($totalItems === 0)
+                        <small class="text-danger">Tidak ada item yang tersedia untuk pembuatan SPB</small>
+                    @endif
+                </div>
             </div>
-        </div>
+        @endif
 
         <div class="table-responsive">
             <table class="m-0 table table-bordered table-hover" id="table-data">
@@ -150,10 +151,10 @@
                                     <input name="satuan[{{ $data['detail']->id }}]" type="hidden" value="{{ $data['detail']->detailRkbUrgent->satuan ?? $data['detail']->detailRkbGeneral->satuan }}">
                                 </td>
                                 <td class="text-center">
-                                    <input class="form-control text-center h-100 d-flex align-items-center justify-content-center" name="harga[{{ $data['detail']->id }}]" type="text" value="0" maxlength="-1" required disabled>
+                                    <input class="form-control text-center h-100 d-flex align-items-center justify-content-center" name="harga[{{ $data['detail']->id }}]" type="text" value="Rp 0" placeholder="Rp 0" maxlength="-1" required disabled>
                                 </td>
                                 <td class="text-center">
-                                    <input class="form-control text-center bg-secondary h-100 d-flex align-items-center justify-content-center" type="text" value="0" readonly>
+                                    <input class="form-control text-center bg-secondary h-100 d-flex align-items-center justify-content-center" type="text" value="Rp 0" readonly>
                                 </td>
                                 <input name="alat_detail_id[{{ $data['detail']->id }}]" type="hidden" value="{{ $data['alat_detail_id'] }}">
                                 <input name="link_rkb_detail_id[{{ $data['detail']->id }}]" type="hidden" value="{{ $data['detail']->id }}">
@@ -296,7 +297,7 @@
                     hargaInput.prop('disabled', false);
                 } else {
                     qtyInput.prop('disabled', true).val(0);
-                    hargaInput.prop('disabled', true).val('0');
+                    hargaInput.prop('disabled', true).val('Rp 0');
                     updateJumlahHarga(row);
                 }
             });

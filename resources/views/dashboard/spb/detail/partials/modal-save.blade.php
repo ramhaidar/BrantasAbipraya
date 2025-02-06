@@ -102,17 +102,20 @@
                     return;
                 }
 
-                // Cek apakah harga sudah diisi untuk setiap item yang dipilih
+                // Improved price validation
                 let isPriceValid = true;
                 $('input[name^="harga"]').each(function() {
-                    if (!$(this).prop('disabled') && ($(this).val() === 'Rp 0' || $(this).val() === 'Rp0')) {
-                        isPriceValid = false;
-                        return false; // break the loop
+                    if (!$(this).prop('disabled')) {
+                        const priceValue = $(this).val().replace(/[^\d]/g, '');
+                        if (!priceValue || parseInt(priceValue) === 0) {
+                            isPriceValid = false;
+                            return false; // break the loop
+                        }
                     }
                 });
 
                 if (!isPriceValid) {
-                    alert('Pastikan harga sudah diisi untuk setiap item yang dipilih');
+                    alert('Pastikan harga sudah diisi untuk setiap item yang dipilih dan tidak boleh 0');
                     return;
                 }
 

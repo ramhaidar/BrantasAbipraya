@@ -19,9 +19,11 @@
                             <i class="fa fa-save"></i> <span class="ms-2">Riwayat Pembuatan SPB</span>
                         </button>
 
-                        <button class="btn btn-success btn-sm" id="save-spb-button" data-bs-toggle="modal" data-bs-target="#modalForSaveSPB" {{ $totalItems === 0 ? 'disabled' : '' }}>
-                            <i class="fa fa-add"></i> <span class="ms-2">Buat SPB</span>
-                        </button>
+                        @if (Auth::user()->role === 'admin_divisi' || Auth::user()->role === 'superadmin')
+                            <button class="btn btn-success btn-sm" id="save-spb-button" data-bs-toggle="modal" data-bs-target="#modalForSaveSPB" {{ $totalItems === 0 ? 'disabled' : '' }}>
+                                <i class="fa fa-add"></i> <span class="ms-2">Buat SPB</span>
+                            </button>
+                        @endif
                     </div>
                 </div>
 

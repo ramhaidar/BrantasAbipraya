@@ -122,13 +122,15 @@
                     </tr>
                 @endforelse
             </tbody>
-            <tfoot>
-                <tr class="table-primary">
-                    <td class="text-center fw-bold" colspan="11">Grand Total</td>
-                    <td class="text-center fw-bold currency-value" id="total-harga">0</td>
-                    <td colspan="2"></td>
-                </tr>
-            </tfoot>
+            @if ($TableData->currentPage() === $TableData->lastPage())
+                <tfoot>
+                    <tr class="table-primary">
+                        <td class="text-center fw-bold" colspan="11">Grand Total (Keseluruhan)</td>
+                        <td class="text-center fw-bold currency-value">{{ formatRibuan($TableData->total_harga) }}</td>
+                        <td colspan="2"></td>
+                    </tr>
+                </tfoot>
+            @endif
         </table>
     </div>
 </div>
@@ -138,35 +140,9 @@
 
 @push('scripts_3')
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            calculateTotal();
-
-            // Search functionality
-            document.getElementById('searchInput').addEventListener('input', function() {
-                const searchText = this.value.toLowerCase();
-                const rows = document.querySelectorAll('#table-data tbody tr');
-
-                rows.forEach(row => {
-                    const text = row.textContent.toLowerCase();
-                    row.style.display = text.includes(searchText) ? '' : 'none';
-                });
-
-                calculateTotal();
-            });
-
-            function calculateTotal() {
-                let total = 0;
-                const visibleRows = document.querySelectorAll('#table-data tbody tr:not([style*="display: none"])');
-
-                visibleRows.forEach(row => {
-                    const value = row.cells[11].textContent
-                        .replace(/\./g, '');
-                    total += parseInt(value) || 0;
-                });
-
-                const formattedTotal = total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-                document.getElementById('total-harga').textContent = formattedTotal;
-            }
+        // Remove the calculateTotal function since we're using server-side totals
+        $(document).ready(function() {
+            // Keep only grouping functionality if needed
         });
     </script>
 

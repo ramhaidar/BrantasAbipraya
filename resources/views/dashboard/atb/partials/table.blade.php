@@ -99,15 +99,17 @@
                     </tr>
                 @endforelse
             </tbody>
+            @if($TableData->currentPage() === $TableData->lastPage())
             <tfoot>
                 <tr class="table-primary">
-                    <td class="text-center fw-bold" colspan="10">Grand Total</td>
-                    <td class="text-center fw-bold" id="total-harga">0</td>
-                    <td class="text-center fw-bold" id="total-ppn">0</td>
-                    <td class="text-center fw-bold" id="total-bruto">0</td>
+                    <td class="text-center fw-bold" colspan="10">Grand Total (Keseluruhan)</td>
+                    <td class="text-center fw-bold currency-value">{{ formatRibuan($TableData->total_harga) }}</td>
+                    <td class="text-center fw-bold currency-value">{{ formatRibuan($TableData->total_ppn) }}</td>
+                    <td class="text-center fw-bold currency-value">{{ formatRibuan($TableData->total_bruto) }}</td>
                     <td colspan="3"></td>
                 </tr>
             </tfoot>
+            @endif
         </table>
     </div>
 </div>
@@ -117,28 +119,6 @@
 @push('scripts_3')
     <script>
         $(document).ready(function() {
-            function calculateTotals() {
-                let totalHarga = 0;
-                let totalPPN = 0;
-                let totalBruto = 0;
-
-                $('#table-data tbody tr').each(function() {
-                    let harga = $(this).find('td:eq(10)').text().replace(/\./g, '');
-                    let ppn = $(this).find('td:eq(11)').text().replace(/\./g, '');
-                    let bruto = $(this).find('td:eq(12)').text().replace(/\./g, '');
-
-                    totalHarga += parseInt(harga) || 0;
-                    totalPPN += parseInt(ppn) || 0;
-                    totalBruto += parseInt(bruto) || 0;
-                });
-
-                $('#total-harga').html(totalHarga.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."));
-                $('#total-ppn').html(totalPPN.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."));
-                $('#total-bruto').html(totalBruto.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."));
-            }
-
-            calculateTotals();
-
             // Group rows by SPB number and STT
             function groupRows() {
                 let groups = {};

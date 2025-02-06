@@ -136,7 +136,7 @@ class ATBController extends Controller
                         if ( str_starts_with ( $indo, $part ) )
                         {
                             $isDateSearch = true;
-                            $q->orWhereRaw ( "DAYNAME(tanggal) = ?", [ $eng ] );
+                            $q->orWhereRaw ( "TO_CHAR(tanggal, 'Day') ILIKE ?", [ $eng . '%' ] );
                             break 2;
                         }
                     }
@@ -212,17 +212,44 @@ class ATBController extends Controller
                         // For numeric searches
                         if ( is_numeric ( str_replace ( [ ',', '.' ], '', $search ) ) )
                         {
-                            $numericSearch = str_replace ( [ ',', '.' ], '', $search );
-                            $q->orWhere ( 'quantity', 'ilike', "%{$numericSearch}%" )
-                                ->orWhere ( 'harga', 'ilike', "%{$numericSearch}%" )
-                                ->orWhereRaw ( '(quantity * harga) like ?', [ "%{$numericSearch}%" ] )
-                                ->orWhereRaw ( '(quantity * harga * 0.11) like ?', [ "%{$numericSearch}%" ] )
-                                ->orWhereRaw ( '(quantity * harga * 1.11) like ?', [ "%{$numericSearch}%" ] );
+                            $numericSearch = (float) str_replace ( [ ',', '.' ], '', $search );
+                            $tolerance     = 0.1; // 10% tolerance
+                            $min           = $numericSearch * ( 1 - $tolerance );
+                            $max           = $numericSearch * ( 1 + $tolerance );
+
+                            $q->orWhere ( function ($query) use ($numericSearch, $min, $max)
+                            {
+                                // First, try exact matches
+                                $query->where(function($q) use ($numericSearch) {
+                                    $q->where('atb.quantity', '=', $numericSearch)
+                                      ->orWhere('atb.harga', '=', $numericSearch)
+                                      ->orWhereRaw('CAST((atb.quantity * atb.harga) AS DECIMAL(15,2)) = ?', [$numericSearch])
+                                      ->orWhereRaw('CAST((atb.quantity * atb.harga * 0.11) AS DECIMAL(15,2)) = ?', [$numericSearch])
+                                      ->orWhereRaw('CAST((atb.quantity * atb.harga * 1.11) AS DECIMAL(15,2)) = ?', [$numericSearch]);
+                                });
+                                
+                                // Then try range matches
+                                $query->orWhere(function($q) use ($min, $max) {
+                                    $q->whereBetween('atb.quantity', [$min, $max])
+                                      ->orWhereBetween('atb.harga', [$min, $max])
+                                      ->orWhereRaw('CAST((atb.quantity * atb.harga) AS DECIMAL(15,2)) BETWEEN ? AND ?', [$min, $max])
+                                      ->orWhereRaw('CAST((atb.quantity * atb.harga * 0.11) AS DECIMAL(15,2)) BETWEEN ? AND ?', [$min, $max])
+                                      ->orWhereRaw('CAST((atb.quantity * atb.harga * 1.11) AS DECIMAL(15,2)) BETWEEN ? AND ?', [$min, $max]);
+                                });
+                            } );
                         }
                     } );
                 }
             } );
         }
+
+        // Calculate total amounts for all records before pagination
+        $totalQuery = clone $query;
+        $totals     = $totalQuery->selectRaw ( '
+            SUM(quantity * harga) as total_harga,
+            SUM(quantity * harga * 0.11) as total_ppn,
+            SUM(quantity * harga * 1.11) as total_bruto
+        ' )->first ();
 
         // Get paginated results
         $TableData = $query->orderBy ( 'tanggal', 'desc' )
@@ -230,6 +257,11 @@ class ATBController extends Controller
             ->orderBy ( 'id', 'desc' )
             ->paginate ( $perPage )
             ->withQueryString ();
+
+        // Add totals to pagination object
+        $TableData->total_harga = $totals->total_harga;
+        $TableData->total_ppn   = $totals->total_ppn;
+        $TableData->total_bruto = $totals->total_bruto;
 
         // Get required data
         $proyek  = Proyek::with ( "users" )->findOrFail ( $id_proyek );

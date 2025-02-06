@@ -90,40 +90,33 @@
                     </tr>
                 @endforelse
             </tbody>
-            <tfoot>
-                <tr class="table-primary">
-                    <td class="text-center fw-bold" colspan="14">Grand Total</td>
-                    <td class="text-center fw-bold currency-value" id="total-harga">0</td>
-                    <td colspan="2"></td>
-                </tr>
-            </tfoot>
+            @if ($TableData->currentPage() === $TableData->lastPage())
+                <tfoot>
+                    <tr class="table-primary">
+                        <td class="text-center fw-bold" colspan="14">Grand Total</td>
+                        <td class="text-center fw-bold currency-value" id="total-harga">{{ formatRibuan($TableData->total_amount) }}</td>
+                        <td colspan="2"></td>
+                    </tr>
+                </tfoot>
+            @endif
         </table>
     </div>
 </div>
 
 @push('scripts_3')
     <script>
-        $(document).ready(function() {
+        document.addEventListener('DOMContentLoaded', function() {
             function calculateTotal() {
                 let total = 0;
-                $('#table-data tbody tr:not(.d-none)').each(function() {
-                    let value = $(this).find('td:eq(14)').text()
+                document.querySelectorAll('#table-data tbody tr').forEach(function(row) {
+                    let value = row.querySelector('td:nth-child(15)').textContent
                         .replace(/\./g, '');
                     total += parseInt(value) || 0;
                 });
 
                 let formattedTotal = total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-                $('#total-harga').html(formattedTotal);
+                document.getElementById('total-harga').textContent = formattedTotal;
             }
-
-            $('#searchInput').on('keyup', function() {
-                let value = $(this).val().toLowerCase();
-                $('#table-data tbody tr').each(function() {
-                    let rowText = $(this).text().toLowerCase();
-                    $(this).toggleClass('d-none', rowText.indexOf(value) === -1);
-                });
-                calculateTotal();
-            });
 
             calculateTotal();
         });

@@ -234,6 +234,22 @@ class APBController extends Controller
             } );
         }
 
+        // Calculate total amount for all records with explicit table references for all columns
+        $totalQuery  = clone $query;
+        $totalAmount = DB::table ( 'apb' )
+            ->join ( 'saldo', 'apb.id_saldo', '=', 'saldo.id' )
+            ->where ( 'apb.id_proyek', $id_proyek )
+            ->where ( 'apb.tipe', $tipe )
+            ->when ( $tipe === 'mutasi-proyek', function ($query)
+            {
+                $query->where ( function ($q)
+                {
+                    $q->where ( 'apb.status', 'accepted' )
+                        ->orWhereNull ( 'apb.status' );
+                } );
+            } )
+            ->sum ( DB::raw ( 'apb.quantity * saldo.harga' ) );
+
         // Get other required data
         $proyek = Proyek::with ( "users" )->findOrFail ( $id_proyek );
         $alats  = AlatProyek::where ( 'id_proyek', $id_proyek )->get ();
@@ -274,6 +290,9 @@ class APBController extends Controller
             ->orderBy ( 'id', 'desc' )
             ->paginate ( $perPage )
             ->withQueryString ();
+
+        // Add total amount to pagination object
+        $TableData->total_amount = $totalAmount;
 
         $proyeks = Proyek::with ( "users" )
             ->orderBy ( "updated_at", "desc" )

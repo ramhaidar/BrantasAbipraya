@@ -26,7 +26,9 @@
                     <th>Sub Jenis</th>
                     <th>Kategori</th>
                     <th>Supplier</th>
-                    <th>Aksi</th>
+                    @if (Auth::user()->role === 'admin_divisi' || Auth::user()->role === 'superadmin')
+                        <th>Aksi</th>
+                    @endif
                 </tr>
             </thead>
             <tbody>
@@ -44,14 +46,16 @@
                                 <i class="bi bi-eye"></i>
                             </button>
                         </td>
-                        <td class="text-center">
-                            <button class="btn btn-warning mx-1" data-bs-target=#modalForEdit data-bs-toggle=modal onclick="fillFormEdit({{ $sparepart['id'] }})">
-                                <i class="bi bi-pencil-square"></i>
-                            </button>
-                            <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $sparepart['id'] }}">
-                                <i class="bi bi-trash3"></i>
-                            </button>
-                        </td>
+                        @if (Auth::user()->role === 'admin_divisi' || Auth::user()->role === 'superadmin')
+                            <td class="text-center">
+                                <button class="btn btn-warning mx-1" data-bs-target=#modalForEdit data-bs-toggle=modal onclick="fillFormEdit({{ $sparepart['id'] }})">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                                <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $sparepart['id'] }}">
+                                    <i class="bi bi-trash3"></i>
+                                </button>
+                            </td>
+                        @endif
                     </tr>
                 @empty
                     <tr>

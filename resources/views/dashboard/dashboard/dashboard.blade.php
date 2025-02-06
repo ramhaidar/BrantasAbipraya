@@ -137,32 +137,61 @@
             </div>
         </div>
 
-        <div class="card card-primary">
-            <div class="card-header">
-                <h5 class="text-center pt-2 ps-1">
-                    <i class="fas fa-chart-bar mr-1"></i>
-                    Statistik Per Proyek Bulan Ini
-                </h5>
-            </div>
-            <div class="card-body" style="background-color: #353a50; height: {{ max(400, count($proyeks) * 80) }}px;">
-                <div class="horizontal-chart-wrapper">
-                    <div id="currentMonthHorizontalChart"></div>
+        @if (!request('id_proyek'))
+            <div class="card card-primary">
+                <div class="card-header">
+                    <h5 class="text-center pt-2 ps-1">
+                        <i class="fas fa-chart-bar mr-1"></i>
+                        Statistik Per Proyek Bulan Ini
+                    </h5>
+                </div>
+                <div class="card-body" style="background-color: #353a50; height: {{ max(400, count($proyeks) * 80) }}px;">
+                    <div class="horizontal-chart-wrapper">
+                        <div id="currentMonthHorizontalChart"></div>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="card card-primary">
-            <div class="card-header">
-                <h5 class="text-center pt-2 ps-1">
-                    <i class="fas fa-chart-bar mr-1"></i>
-                    Statistik Per Proyek S/D Bulan Ini
-                </h5>
-            </div>
-            <div class="card-body" style="background-color: #353a50; height: {{ max(400, count($proyeks) * 80) }}px;">
-                <div class="horizontal-chart-wrapper">
-                    <div id="totalHorizontalChart"></div>
+            <div class="card card-primary">
+                <div class="card-header">
+                    <h5 class="text-center pt-2 ps-1">
+                        <i class="fas fa-chart-bar mr-1"></i>
+                        Statistik Per Proyek S/D Bulan Ini
+                    </h5>
+                </div>
+                <div class="card-body" style="background-color: #353a50; height: {{ max(400, count($proyeks) * 80) }}px;">
+                    <div class="horizontal-chart-wrapper">
+                        <div id="totalHorizontalChart"></div>
+                    </div>
                 </div>
             </div>
-        </div>
+        @else
+            <div class="card card-primary">
+                <div class="card-header">
+                    <h5 class="text-center pt-2 ps-1">
+                        <i class="fas fa-chart-bar mr-1"></i>
+                        Statistik Kategori Sparepart Bulan Ini
+                    </h5>
+                </div>
+                <div class="card-body" style="background-color: #353a50; height: {{ max(400, count($categoryData['current']) * 80) }}px;">
+                    <div class="horizontal-chart-wrapper">
+                        <div id="categoryChartCurrent"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="card card-primary">
+                <div class="card-header">
+                    <h5 class="text-center pt-2 ps-1">
+                        <i class="fas fa-chart-bar mr-1"></i>
+                        Statistik Kategori Sparepart S/D Bulan Ini
+                    </h5>
+                </div>
+                <div class="card-body" style="background-color: #353a50; height: {{ max(400, count($categoryData['current']) * 80) }}px;">
+                    <div class="horizontal-chart-wrapper">
+                        <div id="categoryChartTotal"></div>
+                    </div>
+                </div>
+            </div>
+        @endif
 
         <div class="row mt-4">
             <div class="col-12 col-xl-6">
@@ -204,6 +233,10 @@
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 
     @include('dashboard.dashboard.scripts.VerticalBarChart')
-    @include('dashboard.dashboard.scripts.HorizontalBarChart')
+    @if (!request('id_proyek'))
+        @include('dashboard.dashboard.scripts.HorizontalBarChart')
+    @else
+        @include('dashboard.dashboard.scripts.CategoryHorizontalChart')
+    @endif
     @include('dashboard.dashboard.scripts.PieChart')
 @endpush

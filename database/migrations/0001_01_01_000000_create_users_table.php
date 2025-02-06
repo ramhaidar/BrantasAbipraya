@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string ( 'username' );
             $table->string ( 'sex' );
             $table->string ( 'path_profile' )->default ( '/images/profile-default.jpg' );
-            $table->string ( 'role' )->default ( 'Pegawai' );
+            $table->enum ( 'role', [ 'superadmin', 'svp', 'vp', 'admin_divisi', 'koordinator_proyek' ] );
             $table->string ( 'phone' )->unique ();
             $table->string ( 'email' )->unique ();
             $table->string ( 'password' );

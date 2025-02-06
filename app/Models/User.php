@@ -52,7 +52,7 @@ class User extends Authenticatable
         'username'       => 'string',
         'sex'            => 'string',
         'path_profile'   => 'string',
-        'role'           => 'string',
+        'role'           => 'enum:superadmin,svp,vp,admin_divisi,koordinator_proyek',
         'phone'          => 'string',
         'email'          => 'string',
         'password'       => 'hashed',

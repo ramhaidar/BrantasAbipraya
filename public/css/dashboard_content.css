@@ -33,11 +33,11 @@ td {
 }
 
 @media screen and (max-width: 500px) {
-    #button-for-modal-add span {
+    .btn-hide-text-mobile span {
         display: none;
     }
 
-    #button-for-modal-add {
+    .btn-hide-text-mobile {
         font-size: 20px;
     }
 }
@@ -170,12 +170,12 @@ td {
 
 /* CSS to hide the button text on small screens (mobile devices) */
 @media (max-width: 768px) {
-    #button-for-modal-add span {
+    .btn-hide-text-mobile span {
         display: none;
         /* Hide the text inside the span */
     }
 
-    #button-for-modal-add i {
+    .btn-hide-text-mobile i {
         margin-right: 0;
         /* Remove the margin if the icon is too spaced */
     }

@@ -34,11 +34,11 @@ td {
 }
 
 @media screen and (max-width: 500px) {
-    #button-for-modal-add span {
+    .btn-hide-text-mobile span {
         display: none;
     }
 
-    #button-for-modal-add {
+    .btn-hide-text-mobile {
         font-size: 20px;
     }
 }
@@ -131,9 +131,7 @@ td {
     z-index: 2;
 }
 
-#table-data_wrapper
-    .row:first-child:first-child
-    .col-sm-12.col-md-6:first-child {
+#table-data_wrapper .row:first-child:first-child .col-sm-12.col-md-6:first-child {
     padding: 0px;
 }
 

@@ -72,6 +72,8 @@ class SaldoController extends Controller
         // Enhanced search functionality
         if ( $search )
         {
+            console ( date ( '### Y-m-d H:i:s' ) . ": " . $search );
+
             $query->where ( function ($q) use ($search)
             {
                 $searchLower = strtolower ( trim ( $search ) );
@@ -129,7 +131,8 @@ class SaldoController extends Controller
                             $isDateSearch = true;
                             $q->orWhereHas ( 'atb', function ($query) use ($eng)
                             {
-                                $query->whereRaw ( "DAYNAME(tanggal) = ?", [ $eng ] );
+                                // Ganti DAYNAME dengan TO_CHAR untuk PostgreSQL
+                                $query->whereRaw ( "TO_CHAR(tanggal, 'Day') ILIKE ?", [ $eng . '%' ] );
                             } );
                             break 2; // Exit both loops if day is found
                         }
@@ -146,8 +149,8 @@ class SaldoController extends Controller
                         }
                     }
 
-                    // Check for day number
-                    if ( is_numeric ( $part ) && strlen ( $part ) <= 2 )
+                    // Check for day number only if it's not a numeric search
+                    if ( is_numeric ( $part ) && strlen ( $part ) <= 2 && ! is_numeric ( str_replace ( [ ',', '.' ], '', $search ) ) )
                     {
                         $day          = sprintf ( "%02d", $part );
                         $isDateSearch = true;
@@ -183,20 +186,22 @@ class SaldoController extends Controller
                         $min           = $numericSearch * ( 1 - $tolerance );
                         $max           = $numericSearch * ( 1 + $tolerance );
 
-                        $q->where ( function ($query) use ($numericSearch, $min, $max)
+                        $q->orWhere ( function ($query) use ($numericSearch, $min, $max)
                         {
+                            // First, try exact matches
                             $query->where ( function ($q) use ($numericSearch)
                             {
-                                // Exact matches
-                                $q->where ( 'saldo.quantity', $numericSearch )
-                                    ->orWhere ( 'saldo.harga', $numericSearch )
-                                    ->orWhereRaw ( '(saldo.quantity * saldo.harga) = ?', [ $numericSearch ] );
-                            } )->orWhere ( function ($q) use ($min, $max)
+                                $q->where ( 'saldo.quantity', '=', $numericSearch )
+                                    ->orWhere ( 'saldo.harga', '=', $numericSearch )
+                                    ->orWhereRaw ( 'CAST((saldo.quantity * saldo.harga) AS DECIMAL(15,2)) = ?', [ $numericSearch ] );
+                            } );
+
+                            // Then try range matches
+                            $query->orWhere ( function ($q) use ($min, $max)
                             {
-                                // Range matches
                                 $q->whereBetween ( 'saldo.quantity', [ $min, $max ] )
                                     ->orWhereBetween ( 'saldo.harga', [ $min, $max ] )
-                                    ->orWhereRaw ( '(saldo.quantity * saldo.harga) BETWEEN ? AND ?', [ $min, $max ] );
+                                    ->orWhereRaw ( 'CAST((saldo.quantity * saldo.harga) AS DECIMAL(15,2)) BETWEEN ? AND ?', [ $min, $max ] );
                             } );
                         } );
                     }
@@ -228,7 +233,8 @@ class SaldoController extends Controller
                                 {
                                     $q->where ( 'nama', 'ilike', "%{$search}%" );
                                 } )
-                                ->orWhere ( 'saldo.satuan', 'ilike', "%{$search}%" );
+                                ->orWhere ( 'saldo.satuan', 'ilike', "%{$search}%" )
+                                ->orWhere ( 'saldo.quantity', '=', $search );
                         } );
                     }
                 }

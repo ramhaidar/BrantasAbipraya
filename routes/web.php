@@ -65,7 +65,7 @@ Route::middleware ( 'guest' )->group ( function ()
 } );
 
 // Rute Logout [SessionController]
-Route::middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )->group ( function ()
+Route::middleware ( [ CheckRole::class . ':superadmin,svp,vp,admin_divisi,koordinator_proyek' ] )->group ( function ()
 {
     Route::post ( '/logout', [ SessionController::class, 'logout' ] )
         ->name ( 'logout.post' );
@@ -76,11 +76,11 @@ Route::middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )->group ( func
 
 // Rute Dashboard [DashboardController]
 Route::get ( '/dashboard', [ DashboardController::class, 'index' ] )
-    ->middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )
+    ->middleware ( [ CheckRole::class . ':superadmin,svp,vp,admin_divisi,koordinator_proyek' ] )
     ->name ( 'dashboard' );
 
 // Rute Users [UserController]
-Route::prefix ( 'users' )->middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )->group ( function ()
+Route::prefix ( 'users' )->middleware ( [ CheckRole::class . ':superadmin,svp,vp,admin_divisi,koordinator_proyek' ] )->group ( function ()
 {
     Route::get ( '/', [ UserController::class, 'index' ] )
         ->name ( 'users' );
@@ -98,7 +98,7 @@ Route::prefix ( 'users' )->middleware ( [ CheckRole::class . ':Admin,Pegawai,Bos
 } );
 
 // Rute ATB [ATBController]
-Route::middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )
+Route::middleware ( [ CheckRole::class . ':superadmin,svp,vp,admin_divisi,koordinator_proyek' ] )
     ->prefix ( 'atb' )
     ->as ( 'atb.' )
     ->group ( function ()
@@ -228,7 +228,7 @@ Route::middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )
     } );
 
 // Rute APB [APBController]
-Route::middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )
+Route::middleware ( [ CheckRole::class . ':superadmin,svp,vp,admin_divisi,koordinator_proyek' ] )
     ->prefix ( 'apb' )
     ->as ( 'apb.' )
     ->group ( function ()
@@ -358,7 +358,7 @@ Route::middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )
     } );
 
 // Rute Saldo [SaldoController]
-Route::middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )
+Route::middleware ( [ CheckRole::class . ':superadmin,svp,vp,admin_divisi,koordinator_proyek' ] )
     ->prefix ( 'saldo' )
     ->as ( 'saldo.' )
     ->group ( function ()
@@ -482,11 +482,11 @@ Route::middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )
     } );
 
 Route::get ( '/laporan/summary', [ LaporanController::class, 'summary' ] )->middleware ( [ 
-    CheckRole::class . ':Admin,Pegawai,Boss',
+    CheckRole::class . ':superadmin,svp,vp,admin_divisi,koordinator_proyek',
 ] )
     ->name ( 'laporan.summary' );
 Route::get ( '/laporan/lnpb', [ LaporanController::class, 'LNPB' ] )->middleware ( [ 
-    CheckRole::class . ':Admin,Pegawai,Boss',
+    CheckRole::class . ':superadmin,svp,vp,admin_divisi,koordinator_proyek',
 ] )
     ->name ( 'laporan.lnpb' );
 
@@ -513,7 +513,7 @@ Route::prefix ( 'ajax' )->group ( function ()
 // Route::get ( '/dashboard/proyek/actions/{id}', [ DashboardController::class, 'filterByProyek' ] )
 //     ->where ( 'id', '[0-9]+' )
 //     ->middleware ( [ 
-//         CheckRole::class . ':Admin,Pegawai,Boss',
+//         CheckRole::class . ':superadmin,svp,vp,admin_divisi,koordinator_proyek',
 //     ] )
 //     ->name ( 'dashboard.filter' );
 
@@ -534,7 +534,7 @@ Route::get (
 
 // Rute Proyek [ProyekController]
 Route::prefix ( 'proyek' )
-    ->middleware ( [ CheckRole::class . ':Admin,Pegawai,Boss' ] )
+    ->middleware ( [ CheckRole::class . ':superadmin,svp,vp,admin_divisi,koordinator_proyek' ] )
     ->group ( function ()
     {
         Route::get (

@@ -276,8 +276,8 @@
                                     </ul>
                                 </li>
 
-                                <!-- Menu for Admin Role Only -->
-                                @if (Auth::user()->role == 'Admin')
+                                <!-- Menu for SuperAdmin Role Only -->
+                                @if (Auth::user()->role === 'superadmin')
                                     <li class="nav-item">
                                         <a class="nav-link {{ $page === 'Data Proyek' ? 'active' : '' }}" href="{{ route('proyek.index') }}" style="{{ $headerPage === 'Proyek' ? 'background-color: #483D8B; color: #ffffff;' : '' }}">
                                             <i class="bi me-2 nav-icon bi-kanban"></i>

@@ -7,6 +7,7 @@ use App\Models\RKB;
 use App\Models\Proyek;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class EvaluasiRKBUrgentController extends Controller
 {
@@ -102,7 +103,18 @@ class EvaluasiRKBUrgentController extends Controller
             ->paginate ( $perPage )
             ->withQueryString ();
 
-        $proyeks = Proyek::with ( "users" )
+        // Filter projects based on user role
+        $user         = Auth::user ();
+        $proyeksQuery = Proyek::with ( "users" );
+        if ( $user->role === 'koordinator_proyek' )
+        {
+            $proyeksQuery->whereHas ( 'users', function ($query) use ($user)
+            {
+                $query->where ( 'users.id', $user->id );
+            } );
+        }
+
+        $proyeks = $proyeksQuery
             ->orderBy ( "updated_at", "desc" )
             ->orderBy ( "id", "desc" )
             ->get ();

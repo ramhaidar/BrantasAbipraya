@@ -6,6 +6,7 @@ use App\Models\Saldo;
 use App\Models\Proyek;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class SaldoController extends Controller
 {
@@ -258,8 +259,20 @@ class SaldoController extends Controller
         // Add total amount to pagination object
         $TableData->total_amount = $totalAmount;
 
-        $proyek  = Proyek::with ( "users" )->findOrFail ( $id_proyek );
-        $proyeks = Proyek::with ( "users" )
+        $proyek = Proyek::with ( "users" )->findOrFail ( $id_proyek );
+
+        // Filter projects based on user role
+        $user         = Auth::user ();
+        $proyeksQuery = Proyek::with ( "users" );
+        if ( $user->role === 'koordinator_proyek' )
+        {
+            $proyeksQuery->whereHas ( 'users', function ($query) use ($user)
+            {
+                $query->where ( 'users.id', $user->id );
+            } );
+        }
+
+        $proyeks = $proyeksQuery
             ->orderBy ( "updated_at", "desc" )
             ->orderBy ( "id", "desc" )
             ->get ();

@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\APB;
 use App\Models\ATB;
 use App\Models\Proyek;
-use App\Models\Saldo;  // Add this import
 use Illuminate\Http\Request;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Saldo;  // Add this import
 
 class LaporanLNPBBulanBerjalanController extends Controller
 {
@@ -15,7 +16,18 @@ class LaporanLNPBBulanBerjalanController extends Controller
     {
         $proyek = Proyek::with ( "users" )->find ( $request->id_proyek );
 
-        $proyeks = Proyek::with ( "users" )
+        // Filter projects based on user role
+        $user         = Auth::user ();
+        $proyeksQuery = Proyek::with ( "users" );
+        if ( $user->role === 'koordinator_proyek' )
+        {
+            $proyeksQuery->whereHas ( 'users', function ($query) use ($user)
+            {
+                $query->where ( 'users.id', $user->id );
+            } );
+        }
+
+        $proyeks = $proyeksQuery
             ->orderBy ( "updated_at", "desc" )
             ->orderBy ( "id", "desc" )
             ->get ();
@@ -205,7 +217,18 @@ class LaporanLNPBBulanBerjalanController extends Controller
 
     public function semuaBulanBerjalan_index ( Request $request )
     {
-        $proyeks = Proyek::with ( "users" )
+        // Filter projects based on user role
+        $user         = Auth::user ();
+        $proyeksQuery = Proyek::with ( "users" );
+        if ( $user->role === 'koordinator_proyek' )
+        {
+            $proyeksQuery->whereHas ( 'users', function ($query) use ($user)
+            {
+                $query->where ( 'users.id', $user->id );
+            } );
+        }
+
+        $proyeks = $proyeksQuery
             ->orderBy ( "updated_at", "desc" )
             ->orderBy ( "id", "desc" )
             ->get ();

@@ -12,6 +12,7 @@ use App\Models\MasterDataSupplier;
 use Illuminate\Support\Facades\DB;
 use App\Models\MasterDataSparepart;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\SaldoController;
 use App\Models\KategoriSparepart; // Add this line
@@ -220,22 +221,24 @@ class ATBController extends Controller
                             $q->orWhere ( function ($query) use ($numericSearch, $min, $max)
                             {
                                 // First, try exact matches
-                                $query->where(function($q) use ($numericSearch) {
-                                    $q->where('atb.quantity', '=', $numericSearch)
-                                      ->orWhere('atb.harga', '=', $numericSearch)
-                                      ->orWhereRaw('CAST((atb.quantity * atb.harga) AS DECIMAL(15,2)) = ?', [$numericSearch])
-                                      ->orWhereRaw('CAST((atb.quantity * atb.harga * 0.11) AS DECIMAL(15,2)) = ?', [$numericSearch])
-                                      ->orWhereRaw('CAST((atb.quantity * atb.harga * 1.11) AS DECIMAL(15,2)) = ?', [$numericSearch]);
-                                });
-                                
+                                $query->where ( function ($q) use ($numericSearch)
+                                {
+                                    $q->where ( 'atb.quantity', '=', $numericSearch )
+                                        ->orWhere ( 'atb.harga', '=', $numericSearch )
+                                        ->orWhereRaw ( 'CAST((atb.quantity * atb.harga) AS DECIMAL(15,2)) = ?', [ $numericSearch ] )
+                                        ->orWhereRaw ( 'CAST((atb.quantity * atb.harga * 0.11) AS DECIMAL(15,2)) = ?', [ $numericSearch ] )
+                                        ->orWhereRaw ( 'CAST((atb.quantity * atb.harga * 1.11) AS DECIMAL(15,2)) = ?', [ $numericSearch ] );
+                                } );
+
                                 // Then try range matches
-                                $query->orWhere(function($q) use ($min, $max) {
-                                    $q->whereBetween('atb.quantity', [$min, $max])
-                                      ->orWhereBetween('atb.harga', [$min, $max])
-                                      ->orWhereRaw('CAST((atb.quantity * atb.harga) AS DECIMAL(15,2)) BETWEEN ? AND ?', [$min, $max])
-                                      ->orWhereRaw('CAST((atb.quantity * atb.harga * 0.11) AS DECIMAL(15,2)) BETWEEN ? AND ?', [$min, $max])
-                                      ->orWhereRaw('CAST((atb.quantity * atb.harga * 1.11) AS DECIMAL(15,2)) BETWEEN ? AND ?', [$min, $max]);
-                                });
+                                $query->orWhere ( function ($q) use ($min, $max)
+                                {
+                                    $q->whereBetween ( 'atb.quantity', [ $min, $max ] )
+                                        ->orWhereBetween ( 'atb.harga', [ $min, $max ] )
+                                        ->orWhereRaw ( 'CAST((atb.quantity * atb.harga) AS DECIMAL(15,2)) BETWEEN ? AND ?', [ $min, $max ] )
+                                        ->orWhereRaw ( 'CAST((atb.quantity * atb.harga * 0.11) AS DECIMAL(15,2)) BETWEEN ? AND ?', [ $min, $max ] )
+                                        ->orWhereRaw ( 'CAST((atb.quantity * atb.harga * 1.11) AS DECIMAL(15,2)) BETWEEN ? AND ?', [ $min, $max ] );
+                                } );
                             } );
                         }
                     } );
@@ -264,8 +267,20 @@ class ATBController extends Controller
         $TableData->total_bruto = $totals->total_bruto;
 
         // Get required data
-        $proyek  = Proyek::with ( "users" )->findOrFail ( $id_proyek );
-        $proyeks = Proyek::with ( "users" )
+        $proyek = Proyek::with ( "users" )->findOrFail ( $id_proyek );
+
+        // Filter projects based on user role
+        $user         = Auth::user ();
+        $proyeksQuery = Proyek::with ( "users" );
+        if ( $user->role === 'koordinator_proyek' )
+        {
+            $proyeksQuery->whereHas ( 'users', function ($query) use ($user)
+            {
+                $query->where ( 'users.id', $user->id );
+            } );
+        }
+
+        $proyeks = $proyeksQuery
             ->orderBy ( "updated_at", "desc" )
             ->orderBy ( "id", "desc" )
             ->get ();

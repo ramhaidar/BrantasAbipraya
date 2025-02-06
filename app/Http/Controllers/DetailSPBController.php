@@ -11,14 +11,13 @@ use App\Models\LinkRKBDetail;
 use App\Models\MasterDataSupplier;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class DetailSPBController extends Controller
 {
     public function index ( $id )
     {
-        $user = auth ()->user ();
-
         // Get single RKB record with relationships
         $rkb = RKB::with ( [ 
             "linkAlatDetailRkbs.masterDataAlat",
@@ -74,7 +73,18 @@ class DetailSPBController extends Controller
             } )
             ->get ();
 
-        $proyeks = Proyek::with ( "users" )
+        // Filter projects based on user role
+        $user         = Auth::user ();
+        $proyeksQuery = Proyek::with ( "users" );
+        if ( $user->role === 'koordinator_proyek' )
+        {
+            $proyeksQuery->whereHas ( 'users', function ($query) use ($user)
+            {
+                $query->where ( 'users.id', $user->id );
+            } );
+        }
+
+        $proyeks = $proyeksQuery
             ->orderBy ( "updated_at", "desc" )
             ->orderBy ( "id", "desc" )
             ->get ();

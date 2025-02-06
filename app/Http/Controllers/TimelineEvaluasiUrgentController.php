@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\LinkAlatDetailRKB;
 use App\Models\TimelineRKBUrgent;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class TimelineEvaluasiUrgentController extends Controller
 {
@@ -141,8 +142,18 @@ class TimelineEvaluasiUrgentController extends Controller
             }
         }
 
-        // Updated proyeks query with consistent sorting
-        $proyeks = Proyek::with ( "users" )
+        // Filter projects based on user role
+        $user         = Auth::user ();
+        $proyeksQuery = Proyek::with ( "users" );
+        if ( $user->role === 'koordinator_proyek' )
+        {
+            $proyeksQuery->whereHas ( 'users', function ($query) use ($user)
+            {
+                $query->where ( 'users.id', $user->id );
+            } );
+        }
+
+        $proyeks = $proyeksQuery
             ->orderBy ( "updated_at", "desc" )
             ->orderBy ( "id", "desc" )
             ->get ();

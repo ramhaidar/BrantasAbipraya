@@ -4,9 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\SPB;
 use App\Models\Proyek;
-use Barryvdh\DomPDF\Facade\PDF;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\PDF;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class RiwayatSPBController extends Controller
@@ -20,7 +21,18 @@ class RiwayatSPBController extends Controller
             'masterDataSupplier',
         ] )->findOrFail ( $id );
 
-        $proyeks = Proyek::with ( "users" )
+        // Filter projects based on user role
+        $user         = Auth::user ();
+        $proyeksQuery = Proyek::with ( "users" );
+        if ( $user->role === 'koordinator_proyek' )
+        {
+            $proyeksQuery->whereHas ( 'users', function ($query) use ($user)
+            {
+                $query->where ( 'users.id', $user->id );
+            } );
+        }
+
+        $proyeks = $proyeksQuery
             ->orderBy ( "updated_at", "desc" )
             ->orderBy ( "id", "desc" )
             ->get ();

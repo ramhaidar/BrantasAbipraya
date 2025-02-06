@@ -12,6 +12,7 @@ use App\Models\KategoriSparepart;
 use Illuminate\Support\Facades\DB;
 use App\Models\MasterDataSparepart;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class EvaluasiDetailRKBUrgentController extends Controller
@@ -136,7 +137,18 @@ class EvaluasiDetailRKBUrgentController extends Controller
             }
         }
 
-        $proyeks = Proyek::with ( "users" )
+        // Filter projects based on user role
+        $user         = Auth::user ();
+        $proyeksQuery = Proyek::with ( "users" );
+        if ( $user->role === 'koordinator_proyek' )
+        {
+            $proyeksQuery->whereHas ( 'users', function ($query) use ($user)
+            {
+                $query->where ( 'users.id', $user->id );
+            } );
+        }
+
+        $proyeks = $proyeksQuery
             ->orderBy ( "updated_at", "desc" )
             ->orderBy ( "id", "desc" )
             ->get ();

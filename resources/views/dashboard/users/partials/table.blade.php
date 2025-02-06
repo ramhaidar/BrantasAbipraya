@@ -28,7 +28,7 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse ($users as $user)
+                @forelse ($TableData as $user)
                     <tr>
                         <td class="text-center">{{ $user->name }}</td>
                         <td class="text-center">{{ $user->username }}</td>

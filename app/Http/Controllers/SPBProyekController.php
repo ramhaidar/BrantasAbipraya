@@ -17,9 +17,30 @@ class SPBProyekController extends Controller
         $allowedPerPage = [ 10, 25, 50, 100 ];
         $perPage        = in_array ( (int) $request->get ( 'per_page' ), $allowedPerPage ) ? (int) $request->get ( 'per_page' ) : 10;
 
-        $query = RKB::query ()
-            ->with ( 'proyek' )
-            ->where ( 'is_approved_svp', true );
+        $user = Auth::user();
+
+        // Filter projects based on user role
+        $proyeksQuery = Proyek::with("users");
+        if ($user->role === 'koordinator_proyek') {
+            $proyeksQuery->whereHas('users', function ($query) use ($user) {
+                $query->where('users.id', $user->id);
+            });
+        }
+
+        $proyeks = $proyeksQuery
+            ->orderBy("updated_at", "desc")
+            ->orderBy("id", "desc")
+            ->get();
+
+        $query = RKB::query()
+            ->with('proyek')
+            ->where('is_approved_svp', true);
+
+        // Add project filtering for koordinator_proyek
+        if ($user->role === 'koordinator_proyek') {
+            $proyekIds = $proyeks->pluck('id')->toArray();
+            $query->whereIn('id_proyek', $proyekIds);
+        }
 
         if ( $request->has ( 'search' ) )
         {
@@ -68,22 +89,6 @@ class SPBProyekController extends Controller
             ->orderBy ( 'id', 'desc' )
             ->paginate ( $perPage )
             ->withQueryString ();
-
-        // Filter projects based on user role
-        $user         = Auth::user ();
-        $proyeksQuery = Proyek::with ( "users" );
-        if ( $user->role === 'koordinator_proyek' )
-        {
-            $proyeksQuery->whereHas ( 'users', function ($query) use ($user)
-            {
-                $query->where ( 'users.id', $user->id );
-            } );
-        }
-
-        $proyeks = $proyeksQuery
-            ->orderBy ( "updated_at", "desc" )
-            ->orderBy ( "id", "desc" )
-            ->get ();
 
         return view ( 'dashboard.spb.proyek.proyek', [ 
             'headerPage' => "SPB Proyek",

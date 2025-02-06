@@ -17,9 +17,11 @@
                         </div>
                     </div>
                     <div class="d-flex justify-content-end gap-2">
-                        <a class="btn btn-primary btn-sm btn-hide-text-mobile {{ $rkb->is_finalized ? 'disabled' : '' }}" data-bs-toggle="modal" data-bs-target="#modalForAdd">
-                            <i class="fa fa-plus"></i> <span class="ms-2">Tambah Data</span>
-                        </a>
+                        @if (Auth::user()->role === 'admin_divisi' || Auth::user()->role === 'superadmin')
+                            <a class="btn btn-primary btn-sm btn-hide-text-mobile {{ $rkb->is_finalized ? 'disabled' : '' }}" data-bs-toggle="modal" data-bs-target="#modalForAdd">
+                                <i class="fa fa-plus"></i> <span class="ms-2">Tambah Data</span>
+                            </a>
+                        @endif
                     </div>
                 </div>
 
@@ -45,17 +47,16 @@
         </div>
     </div>
 
-    <!-- Modal for Adding Data -->
-    @include('dashboard.rkb.urgent.detail.timeline.partials.modal-add')
+    @if (Auth::user()->role === 'admin_divisi' || Auth::user()->role === 'superadmin')
+        <!-- Modal for Adding Data -->
+        @include('dashboard.rkb.urgent.detail.timeline.partials.modal-add')
 
-    <!-- Modal for Deleting Data -->
-    @include('dashboard.rkb.urgent.detail.timeline.partials.modal-delete')
+        <!-- Modal for Deleting Data -->
+        @include('dashboard.rkb.urgent.detail.timeline.partials.modal-delete')
 
-    <!-- Modal for Editing Data -->
-    @include('dashboard.rkb.urgent.detail.timeline.partials.modal-edit')
-
-    <!-- Modal for Finalization Data -->
-    {{-- @include('dashboard.rkb.urgent.detail.partials.modal-finalization') --}}
+        <!-- Modal for Editing Data -->
+        @include('dashboard.rkb.urgent.detail.timeline.partials.modal-edit')
+    @endif
 @endsection
 
 @push('scripts_2')

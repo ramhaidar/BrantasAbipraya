@@ -42,7 +42,9 @@
                     <th>Quantity Requested</th>
                     <th>Quantity Approved</th>
                     <th>Satuan</th>
-                    <th>Aksi</th>
+                    @if (Auth::user()->role === 'admin_divisi' || Auth::user()->role === 'superadmin')
+                        <th>Aksi</th>
+                    @endif
                 </tr>
             </thead>
             <tbody>
@@ -90,14 +92,16 @@
                             <td>{{ $item->quantity_requested }}</td>
                             <td>{{ $item->quantity_approved ?? '-' }}</td>
                             <td>{{ $item->satuan }}</td>
-                            <td>
-                                <button class="btn btn-warning mx-1 ubahBtn" data-id="{{ $item->id }}" {{ $detail->linkAlatDetailRkb->rkb->is_finalized ? 'disabled' : '' }} onclick="fillFormEditDetailRKB({{ $item->id }})">
-                                    <i class="bi bi-pencil-square"></i>
-                                </button>
-                                <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item->id }}" {{ $detail->linkAlatDetailRkb->rkb->is_finalized ? 'disabled' : '' }}>
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </td>
+                            @if (Auth::user()->role === 'admin_divisi' || Auth::user()->role === 'superadmin')
+                                <td>
+                                    <button class="btn btn-warning mx-1 ubahBtn" data-id="{{ $item->id }}" {{ $detail->linkAlatDetailRkb->rkb->is_finalized ? 'disabled' : '' }} onclick="fillFormEditDetailRKB({{ $item->id }})">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+                                    <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item->id }}" {{ $detail->linkAlatDetailRkb->rkb->is_finalized ? 'disabled' : '' }}>
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            @endif
                         </tr>
                     @endforeach
                 @empty

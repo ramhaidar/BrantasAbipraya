@@ -19,12 +19,14 @@
                             <a class="btn btn-warning btn-sm {{ $rkb->is_finalized ? '' : 'disabled' }}" href="{{ route('export.rkb_urgent', ['id' => $rkb->id]) }}">
                                 <i class="fa-solid fa-file-excel"></i> <span class="ms-2">Export</span>
                             </a>
-                            <a class="btn btn-success btn-sm btn-hide-text-mobile finalizeBtn {{ $rkb->is_finalized ? 'disabled' : '' }}" data-bs-toggle="modal" data-id="{{ $rkb->id }}" data-bs-target="#modalForFinalize">
-                                <i class="fa fa-check"></i> <span class="ms-2">Finalisasi Data</span>
-                            </a>
-                            <a class="btn btn-primary btn-sm btn-hide-text-mobile {{ $rkb->is_finalized ? 'disabled' : '' }}" data-bs-toggle="modal" data-bs-target="#modalForAdd">
-                                <i class="fa fa-plus"></i> <span class="ms-2">Tambah Data</span>
-                            </a>
+                            @if (Auth::user()->role === 'admin_divisi' || Auth::user()->role === 'superadmin')
+                                <a class="btn btn-success btn-sm btn-hide-text-mobile finalizeBtn {{ $rkb->is_finalized ? 'disabled' : '' }}" data-bs-toggle="modal" data-id="{{ $rkb->id }}" data-bs-target="#modalForFinalize">
+                                    <i class="fa fa-check"></i> <span class="ms-2">Finalisasi Data</span>
+                                </a>
+                                <a class="btn btn-primary btn-sm btn-hide-text-mobile {{ $rkb->is_finalized ? 'disabled' : '' }}" data-bs-toggle="modal" data-bs-target="#modalForAdd">
+                                    <i class="fa fa-plus"></i> <span class="ms-2">Tambah Data</span>
+                                </a>
+                            @endif
                         </div>
                     </div>
 
@@ -50,17 +52,19 @@
             </div>
         </div>
 
-        <!-- Modal for Adding Data -->
-        @include('dashboard.rkb.urgent.detail.partials.modal-add')
+        @if (Auth::user()->role === 'admin_divisi' || Auth::user()->role === 'superadmin')
+            <!-- Modal for Adding Data -->
+            @include('dashboard.rkb.urgent.detail.partials.modal-add')
 
-        <!-- Modal for Deleting Data -->
-        @include('dashboard.rkb.urgent.detail.partials.modal-delete')
+            <!-- Modal for Deleting Data -->
+            @include('dashboard.rkb.urgent.detail.partials.modal-delete')
 
-        <!-- Modal for Editing Data -->
-        @include('dashboard.rkb.urgent.detail.partials.modal-edit')
+            <!-- Modal for Editing Data -->
+            @include('dashboard.rkb.urgent.detail.partials.modal-edit')
 
-        <!-- Modal for Finalization Data -->
-        @include('dashboard.rkb.urgent.detail.partials.modal-finalization')
+            <!-- Modal for Finalization Data -->
+            @include('dashboard.rkb.urgent.detail.partials.modal-finalization')
+        @endif
     @endsection
 
 @endif

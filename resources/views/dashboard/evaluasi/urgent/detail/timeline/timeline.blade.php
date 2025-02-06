@@ -43,18 +43,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Modal for Adding Data -->
-    @include('dashboard.evaluasi.urgent.detail.timeline.partials.modal-add')
-
-    <!-- Modal for Deleting Data -->
-    @include('dashboard.evaluasi.urgent.detail.timeline.partials.modal-delete')
-
-    <!-- Modal for Editing Data -->
-    @include('dashboard.evaluasi.urgent.detail.timeline.partials.modal-edit')
-
-    <!-- Modal for Finalization Data -->
-    {{-- @include('dashboard.evaluasi.urgent.detail.partials.modal-finalization') --}}
 @endsection
 
 @push('scripts_2')

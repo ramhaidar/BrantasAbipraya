@@ -21,34 +21,46 @@
                             </a>
 
                             <!-- Tombol Evaluasi -->
-                            @if (!$rkb->is_approved_vp && !$rkb->is_approved_svp)
+                            @if (!$rkb->is_approved_svp)
                                 @if ($rkb->is_evaluated)
-                                    <button class="btn btn-danger btn-sm" id="evaluateBtnButton" data-bs-toggle="modal" data-bs-target="#modalForEvaluate" data-action="{{ route('evaluasi_rkb_general.detail.evaluate', $rkb->id) }}" data-message="Apakah Anda yakin ingin membatalkan Evaluasi RKB ini?">
-                                        <i class="fa fa-times"></i> <span class="ms-2">Batalkan Evaluasi RKB</span>
-                                    </button>
+                                    @if (Auth::user()->role === 'vp' || Auth::user()->role === 'superadmin')
+                                        <button class="btn btn-danger btn-sm" id="evaluateBtnButton" data-bs-toggle="modal" data-bs-target="#modalForEvaluate" data-action="{{ route('evaluasi_rkb_general.detail.evaluate', $rkb->id) }}" data-message="Apakah Anda yakin ingin membatalkan Evaluasi RKB ini?">
+                                            <i class="fa fa-times"></i> <span class="ms-2">Batalkan Evaluasi RKB</span>
+                                        </button>
+                                    @endif
                                 @else
-                                    <button class="btn btn-success btn-sm" id="evaluateBtnButton" data-bs-toggle="modal" data-bs-target="#modalForEvaluate" data-action="{{ route('evaluasi_rkb_general.detail.evaluate', $rkb->id) }}" data-message="Apakah Anda yakin ingin menyimpan hasil Evaluasi RKB ini?">
-                                        <i class="fa fa-check"></i> <span class="ms-2">Simpan Evaluasi RKB</span>
-                                    </button>
+                                    @if (Auth::user()->role === 'admin_divisi' || Auth::user()->role === 'superadmin')
+                                        <button class="btn btn-success btn-sm" id="evaluateBtnButton" data-bs-toggle="modal" data-bs-target="#modalForEvaluate" data-action="{{ route('evaluasi_rkb_general.detail.evaluate', $rkb->id) }}" data-message="Apakah Anda yakin ingin menyimpan hasil Evaluasi RKB ini?">
+                                            <i class="fa fa-check"></i> <span class="ms-2">Simpan Evaluasi RKB</span>
+                                        </button>
+                                    @endif
                                 @endif
                             @endif
 
                             <!-- Tombol Approve VP -->
-                            @if ($rkb->is_approved_vp && !$rkb->is_approved_svp)
-                                <button class="btn btn-danger btn-sm" id="cancelApproveVpButton" data-bs-toggle="modal" data-bs-target="#modalForApproveVp" data-action="{{ route('evaluasi_rkb_general.detail.approve.vp', $rkb->id) }}" data-message="Apakah Anda yakin ingin membatalkan Approve RKB ini sebagai VP?">
-                                    <i class="fa fa-times"></i> <span class="ms-2">Batalkan Approve RKB (VP)</span>
-                                </button>
-                            @elseif (!$rkb->is_approved_vp && !$rkb->is_approved_svp)
-                                <button class="btn btn-primary btn-sm" id="approveVpButton" data-bs-toggle="modal" data-bs-target="#modalForApproveVp" data-action="{{ route('evaluasi_rkb_general.detail.approve.vp', $rkb->id) }}" data-message="Apakah Anda yakin ingin Approve RKB ini sebagai VP?" {{ !$rkb->is_evaluated ? 'disabled' : '' }}>
-                                    <i class="fa fa-check"></i> <span class="ms-2">Approve RKB (VP)</span>
-                                </button>
+                            @if (!$rkb->is_approved_svp)
+                                @if ($rkb->is_approved_vp)
+                                    @if (Auth::user()->role === 'svp' || Auth::user()->role === 'superadmin')
+                                        <button class="btn btn-danger btn-sm" id="cancelApproveVpButton" data-bs-toggle="modal" data-bs-target="#modalForApproveVp" data-action="{{ route('evaluasi_rkb_general.detail.approve.vp', $rkb->id) }}" data-message="Apakah Anda yakin ingin membatalkan Approve RKB ini sebagai VP?">
+                                            <i class="fa fa-times"></i> <span class="ms-2">Batalkan Approve RKB (VP)</span>
+                                        </button>
+                                    @endif
+                                @elseif (!$rkb->is_approved_vp)
+                                    @if (Auth::user()->role === 'vp' || Auth::user()->role === 'superadmin')
+                                        <button class="btn btn-primary btn-sm" id="approveVpButton" data-bs-toggle="modal" data-bs-target="#modalForApproveVp" data-action="{{ route('evaluasi_rkb_general.detail.approve.vp', $rkb->id) }}" data-message="Apakah Anda yakin ingin Approve RKB ini sebagai VP?" {{ !$rkb->is_evaluated ? 'disabled' : '' }}>
+                                            <i class="fa fa-check"></i> <span class="ms-2">Approve RKB (VP)</span>
+                                        </button>
+                                    @endif
+                                @endif
                             @endif
 
                             <!-- Tombol Approve SVP -->
                             @if (!$rkb->is_approved_svp && $rkb->is_approved_vp)
-                                <button class="btn btn-primary btn-sm" id="approveSvpButton" data-bs-toggle="modal" data-bs-target="#modalForApproveSvp" data-action="{{ route('evaluasi_rkb_general.detail.approve.svp', $rkb->id) }}" data-message="Apakah Anda yakin ingin Approve RKB ini sebagai SVP?">
-                                    <i class="fa fa-check"></i> <span class="ms-2">Approve RKB (SVP)</span>
-                                </button>
+                                @if (Auth::user()->role === 'svp' || Auth::user()->role === 'superadmin')
+                                    <button class="btn btn-primary btn-sm" id="approveSvpButton" data-bs-toggle="modal" data-bs-target="#modalForApproveSvp" data-action="{{ route('evaluasi_rkb_general.detail.approve.svp', $rkb->id) }}" data-message="Apakah Anda yakin ingin Approve RKB ini sebagai SVP?">
+                                        <i class="fa fa-check"></i> <span class="ms-2">Approve RKB (SVP)</span>
+                                    </button>
+                                @endif
                             @endif
                         </div>
 
@@ -76,23 +88,33 @@
             </div>
         </div>
 
-        <!-- Modal for Adding Data -->
-        @include('dashboard.evaluasi.general.detail.partials.modal-add')
+        <!-- Include modals based on roles -->
+        @if (Auth::user()->role === 'admin_divisi' || Auth::user()->role === 'superadmin')
+            <!-- Modal for Adding Data -->
+            @include('dashboard.evaluasi.general.detail.partials.modal-add')
 
-        <!-- Modal for Deleting Data -->
-        @include('dashboard.evaluasi.general.detail.partials.modal-delete')
+            <!-- Modal for Deleting Data -->
+            @include('dashboard.evaluasi.general.detail.partials.modal-delete')
 
-        <!-- Modal for Editing Data -->
-        @include('dashboard.evaluasi.general.detail.partials.modal-edit')
+            <!-- Modal for Editing Data -->
+            @include('dashboard.evaluasi.general.detail.partials.modal-edit')
 
-        <!-- Modal for Evaluation Data -->
-        @include('dashboard.evaluasi.general.detail.partials.modal-evaluate')
+            <!-- Modal for Evaluation Data -->
+            @include('dashboard.evaluasi.general.detail.partials.modal-evaluate')
+        @endif
 
-        <!-- Modal for VP Approval -->
-        @include('dashboard.evaluasi.general.detail.partials.modal-approve-vp')
+        @if (Auth::user()->role === 'vp' || Auth::user()->role === 'superadmin')
+            <!-- Modal for Evaluation Data -->
+            @include('dashboard.evaluasi.general.detail.partials.modal-evaluate')
 
-        <!-- Modal for SVP Approval -->
-        @include('dashboard.evaluasi.general.detail.partials.modal-approve-svp')
+            <!-- Modal for VP Approval -->
+            @include('dashboard.evaluasi.general.detail.partials.modal-approve-vp')
+        @endif
+
+        @if (Auth::user()->role === 'svp' || Auth::user()->role === 'superadmin')
+            <!-- Modal for SVP Approval -->
+            @include('dashboard.evaluasi.general.detail.partials.modal-approve-svp')
+        @endif
     @endsection
 
     @push('scripts_2')

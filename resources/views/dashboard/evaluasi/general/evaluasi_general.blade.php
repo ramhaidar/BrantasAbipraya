@@ -13,9 +13,9 @@
                     </div>
                     <div class="d-flex justify-content-end gap-2">
                         <!-- Button Placeholder -->
-                        <a class="btn btn-success btn-sm btn-hide-text-mobile" data-bs-toggle="modal" data-bs-target="#modalForFinalize">
+                        {{-- <a class="btn btn-success btn-sm btn-hide-text-mobile" data-bs-toggle="modal" data-bs-target="#modalForFinalize">
                             <i class="fa fa-check"></i> <span class="ms-2">Finalisasi Data</span>
-                        </a>
+                        </a> --}}
                     </div>
                 </div>
 
@@ -40,14 +40,16 @@
         </div>
     </div>
 
-    <!-- Modal for Adding Data -->
-    @include('dashboard.evaluasi.general.partials.modal-add')
+    @if (Auth::user()->role === 'admin_divisi' || Auth::user()->role === 'superadmin')
+        <!-- Modal for Adding Data -->
+        @include('dashboard.evaluasi.general.partials.modal-add')
 
-    <!-- Modal for Deleting Data -->
-    @include('dashboard.evaluasi.general.partials.modal-delete')
+        <!-- Modal for Deleting Data -->
+        @include('dashboard.evaluasi.general.partials.modal-delete')
 
-    <!-- Modal for Editing Data -->
-    @include('dashboard.evaluasi.general.partials.modal-edit')
+        <!-- Modal for Editing Data -->
+        @include('dashboard.evaluasi.general.partials.modal-edit')
+    @endif
 @endsection
 
 @push('scripts_2')

@@ -12,9 +12,11 @@
                         <h5 class="fw-medium">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}</h5>
                     </div>
                     <div class="d-flex justify-content-end gap-2">
-                        <a class="btn btn-primary btn-sm" id=btn-hide-text-mobile onclick=showModalAdd()>
-                            <i class="fa fa-plus"></i> <span class=ms-2>Tambah Data</span>
-                        </a>
+                        @if (Auth::user()->role === 'superadmin')
+                            <a class="btn btn-primary btn-sm" id=btn-hide-text-mobile onclick=showModalAdd()>
+                                <i class="fa fa-plus"></i> <span class=ms-2>Tambah Data</span>
+                            </a>
+                        @endif
                     </div>
                 </div>
 

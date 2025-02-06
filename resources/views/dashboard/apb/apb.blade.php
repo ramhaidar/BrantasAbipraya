@@ -11,19 +11,19 @@
                     <div class="ibox-title ps-2">
                         <h5 class="fw-medium">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}</h5>
                     </div>
-                    <div class="ms-auto d-flex gap-2">
-                        <a class="btn btn-warning btn-sm me-2" href="{{ route('export.apb', ['id' => $proyek->id]) }}">
+                    <div class="d-flex justify-content-end gap-2">
+                        <a class="btn btn-warning btn-sm" href="{{ route('export.apb', ['id' => $proyek->id]) }}">
                             <i class="fa-solid fa-file-excel"></i> <span class="ms-2">Export</span>
                         </a>
                         @if ($tipe === 'mutasi-proyek')
-                            <a class="btn btn-success btn-sm me-2" id="button-for-modal-add" data-bs-toggle="modal" data-bs-target="#modalForMutasi">
+                            <a class="btn btn-success btn-sm btn-hide-text-mobile" data-bs-toggle="modal" data-bs-target="#modalForMutasi">
                                 <i class="fa fa-exchange"></i> <span class="ms-2">Mutasi Proyek</span>
                             </a>
-                            <a class="btn btn-primary btn-sm" id="button-for-modal-add" data-bs-toggle="modal" data-bs-target="#modalForAdd">
+                            <a class="btn btn-primary btn-sm btn-hide-text-mobile" data-bs-toggle="modal" data-bs-target="#modalForAdd">
                                 <i class="fa fa-wrench"></i> <span class="ms-2">Gunakan Sparepart</span>
                             </a>
                         @else
-                            <a class="btn btn-primary btn-sm me-2" id="button-for-modal-add" data-bs-toggle="modal" data-bs-target="#modalForAdd">
+                            <a class="btn btn-primary btn-sm btn-hide-text-mobile" data-bs-toggle="modal" data-bs-target="#modalForAdd">
                                 <i class="fa fa-plus"></i> <span class="ms-2">Tambah Data APB</span>
                             </a>
                         @endif

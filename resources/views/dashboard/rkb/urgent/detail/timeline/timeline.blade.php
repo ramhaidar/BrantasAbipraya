@@ -17,11 +17,7 @@
                         </div>
                     </div>
                     <div class="d-flex justify-content-end gap-2">
-                        <!-- Button to trigger the modal -->
-                        {{-- <a class="btn btn-success btn-sm finalizeBtn {{ $rkb->is_finalized ? 'disabled' : '' }}" id="button-for-modal-add" data-bs-toggle="modal" data-id="{{ $rkb->id }}" data-bs-target="#modalForFinalize">
-                            <i class="fa fa-check"></i> <span class="ms-2">Finalisasi Data</span>
-                        </a> --}}
-                        <a class="btn btn-primary btn-sm {{ $rkb->is_finalized ? 'disabled' : '' }}" id="button-for-modal-add" data-bs-toggle="modal" data-bs-target="#modalForAdd">
+                        <a class="btn btn-primary btn-sm btn-hide-text-mobile {{ $rkb->is_finalized ? 'disabled' : '' }}" data-bs-toggle="modal" data-bs-target="#modalForAdd">
                             <i class="fa fa-plus"></i> <span class="ms-2">Tambah Data</span>
                         </a>
                     </div>

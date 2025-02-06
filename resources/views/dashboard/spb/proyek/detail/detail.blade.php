@@ -15,21 +15,11 @@
                         <h5 class="fw-medium">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}</h5>
                     </div>
 
-                    <div class="ms-auto d-flex gap-2">
-                        <a class="btn btn-warning btn-sm me-2" href="{{ route('export.spb_proyek', ['id' => $rkb->id]) }}">
+                    <div class="d-flex justify-content-end gap-2">
+                        <a class="btn btn-warning btn-sm" href="{{ route('export.spb_proyek', ['id' => $rkb->id]) }}">
                             <i class="fa-solid fa-file-excel"></i> <span class="ms-2">Export</span>
                         </a>
                     </div>
-
-                    {{-- <div class="ms-auto d-flex gap-2">
-                        <button class="btn btn-warning btn-sm" id="riwayat-spb-button" data-bs-toggle="modal" data-bs-target="#modalRiwayatSPB">
-                            <i class="fa fa-save"></i> <span class="ms-2">Riwayat Pembuatan SPB</span>
-                        </button>
-
-                        <button class="btn btn-success btn-sm" id="save-spb-button" data-bs-toggle="modal" data-bs-target="#modalForSaveSPB" {{ $totalItems === 0 ? 'disabled' : '' }}>
-                            <i class="fa fa-add"></i> <span class="ms-2">Buat SPB</span>
-                        </button>
-                    </div> --}}
                 </div>
 
                 {{-- @include('dashboard.spb.proyek.detail.partials.table') --}}

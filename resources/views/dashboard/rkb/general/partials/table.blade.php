@@ -23,7 +23,9 @@
                     <th>Periode</th>
                     <th>Status</th>
                     <th>Detail</th>
-                    <th>Aksi</th>
+                    @if (Auth::user()->role === 'admin_divisi' || Auth::user()->role === 'superadmin')
+                        <th>Aksi</th>
+                    @endif
                 </tr>
             </thead>
             <tbody>
@@ -48,14 +50,16 @@
                                 <i class="fa-solid fa-file-pen"></i>
                             </a>
                         </td>
-                        <td class="text-center">
-                            <button class="btn btn-warning mx-1 ubahBtn" {{ $rkb->is_finalized ? 'disabled' : '' }} onclick="fillFormEditRKB({{ $rkb->id }})">
-                                <i class="bi bi-pencil-square"></i>
-                            </button>
-                            <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $rkb->id }}" {{ $rkb->is_finalized ? 'disabled' : '' }}>
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </td>
+                        @if (Auth::user()->role === 'admin_divisi' || Auth::user()->role === 'superadmin')
+                            <td class="text-center">
+                                <button class="btn btn-warning mx-1 ubahBtn" {{ $rkb->is_finalized ? 'disabled' : '' }} onclick="fillFormEditRKB({{ $rkb->id }})">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                                <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $rkb->id }}" {{ $rkb->is_finalized ? 'disabled' : '' }}>
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        @endif
                     </tr>
                 @empty
                     <tr>

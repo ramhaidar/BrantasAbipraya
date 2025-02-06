@@ -15,17 +15,14 @@
                         <h5 class="fw-medium">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}</h5>
                     </div>
 
-                    <div class="ms-auto d-flex gap-2">
-                        <a class="btn btn-danger btn-sm me-2" href="{{ route('spb.detail.riwayat.export-pdf', ['id' => $TableData->first()->id]) }}">
+                    <div class="d-flex justify-content-end gap-2">
+                        <a class="btn btn-danger btn-sm" href="{{ route('spb.detail.riwayat.export-pdf', ['id' => $TableData->first()->id]) }}">
                             <i class="fa-solid fa-file-pdf"></i> <span class="ms-2">Export PDF</span>
                         </a>
-                        <a class="btn btn-success btn-sm me-2" href="{{ route('export.spb', ['id' => $TableData->first()->id]) }}">
+                        <a class="btn btn-success btn-sm" href="{{ route('export.spb', ['id' => $TableData->first()->id]) }}">
                             <i class="fa-solid fa-file-excel"></i> <span class="ms-2">Export Excel</span>
                         </a>
                     </div>
-                    {{-- <div class="ms-auto d-flex gap-2">
-                        <p class="text-end fw-medium">{{ $spb->nomor }}</p>
-                    </div> --}}
                 </div>
 
                 {{-- @include('dashboard.spb.riwayat.partials.table') --}}

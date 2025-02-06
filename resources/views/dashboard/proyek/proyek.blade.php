@@ -11,9 +11,11 @@
                     <div class="ibox-title ps-2">
                         <h5 class="fw-medium">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}</h5>
                     </div>
-                    <a class="btn btn-primary btn-sm" id="button-for-modal-add" data-bs-toggle="modal" data-bs-target="#modalForAdd">
-                        <i class="fa fa-plus"></i> <span class="ms-2">Tambah Data</span>
-                    </a>
+                    <div class="d-flex justify-content-end gap-2">
+                        <a class="btn btn-primary btn-sm btn-hide-text-mobile" data-bs-toggle="modal" data-bs-target="#modalForAdd">
+                            <i class="fa fa-plus"></i> <span class="ms-2">Tambah Data</span>
+                        </a>
+                    </div>
                 </div>
 
                 <div class="p-0 m-0 py-3">

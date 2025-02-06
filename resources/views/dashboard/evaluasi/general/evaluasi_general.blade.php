@@ -11,6 +11,12 @@
                     <div class="ibox-title ps-2">
                         <h5 class="fw-medium">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}</h5>
                     </div>
+                    <div class="d-flex justify-content-end gap-2">
+                        <!-- Button Placeholder -->
+                        <a class="btn btn-success btn-sm btn-hide-text-mobile" data-bs-toggle="modal" data-bs-target="#modalForFinalize">
+                            <i class="fa fa-check"></i> <span class="ms-2">Finalisasi Data</span>
+                        </a>
+                    </div>
                 </div>
 
                 {{-- @include('dashboard.evaluasi.general.partials.table') --}}

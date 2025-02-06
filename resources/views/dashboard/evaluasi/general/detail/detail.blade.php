@@ -16,7 +16,7 @@
                             <h5 class="fw-medium">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}</h5>
                         </div>
                         <div class="d-flex justify-content-end gap-2">
-                            <a class="btn btn-warning btn-sm me-2 {{ $rkb->is_approved_svp ? '' : 'disabled' }}" href="{{ route('export.evaluasi_rkb_general', ['id' => $rkb->id]) }}">
+                            <a class="btn btn-warning btn-sm {{ $rkb->is_approved_svp ? '' : 'disabled' }}" href="{{ route('export.evaluasi_rkb_general', ['id' => $rkb->id]) }}">
                                 <i class="fa-solid fa-file-excel"></i> <span class="ms-2">Export</span>
                             </a>
 

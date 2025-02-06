@@ -14,7 +14,7 @@
                         </a>
                         <h5 class="fw-medium">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}</h5>
                     </div>
-                    <div class="ms-auto d-flex gap-2">
+                    <div class="d-flex justify-content-end gap-2">
                         <button class="btn btn-warning btn-sm" id="riwayat-spb-button" data-bs-toggle="modal" data-bs-target="#modalRiwayatSPB">
                             <i class="fa fa-save"></i> <span class="ms-2">Riwayat Pembuatan SPB</span>
                         </button>

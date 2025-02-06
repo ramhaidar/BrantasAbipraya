@@ -80,7 +80,7 @@
                     <span class="user-text-content m-0 px-1 py-1 badge bg-success rounded-1 fw-normal">Vice President</span>
                 @elseif (Auth::user()->role === 'admin_divisi')
                     <span class="user-text-content m-0 px-1 py-1 badge bg-warning text-dark rounded-1 fw-normal">Admin Divisi</span>
-                @elseif (Auth::user()->role === 'koordinator')
+                @elseif (Auth::user()->role === 'koordinator_proyek')
                     <span class="user-text-content m-0 px-1 py-1 badge bg-info text-dark rounded-1 fw-normal">Koordinator Proyek</span>
                 @endif
             </a>

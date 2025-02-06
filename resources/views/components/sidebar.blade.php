@@ -89,8 +89,8 @@
 
     <div class="form-inline mt-0 mx-0 d-flex justify-content-center">
         <div class="input-group w-100">
-            <input class="form-control w-75" id="sidebarSearchProyek" aria-label="Search" placeholder="Search">
-            <button class="btn btn-sidebar w-25" id="sidebarSearchButton">
+            <input class="form-control rounded-0 w-75" id="sidebarSearchProyek" aria-label="Search" placeholder="Search">
+            <button class="btn btn-sidebar w-25 rounded-0" id="sidebarSearchButton">
                 <i class="fas fa-fw fa-search" id="sidebarSearchIcon"></i>
             </button>
         </div>

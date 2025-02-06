@@ -41,9 +41,11 @@
                             <label class="form-label required" for="edit_role">Role</label>
                             <select class="form-control" id="edit_role" name="role" required>
                                 <option value="">Pilih Role</option>
-                                <option value="Admin">Admin</option>
-                                <option value="Pegawai">Pegawai</option>
-                                <option value="Boss">Boss</option>
+                                <option value="superadmin">Super Admin</option>
+                                <option value="svp">SVP</option>
+                                <option value="vp">VP</option>
+                                <option value="admin_divisi">Admin Divisi</option>
+                                <option value="koordinator_proyek">Koordinator Proyek</option>
                             </select>
                             <div class="invalid-feedback">Role diperlukan.</div>
                         </div>

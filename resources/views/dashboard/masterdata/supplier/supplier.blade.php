@@ -11,9 +11,11 @@
                     <div class="ibox-title ps-2">
                         <h5 class="fw-medium">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}</h5>
                     </div>
-                    <a class="btn btn-primary btn-sm" id="button-for-modal-add" data-bs-toggle="modal" data-bs-target="#modalForAdd">
-                        <i class="fa fa-plus"></i> <span class="ms-2">Tambah Data</span>
-                    </a>
+                    @if (Auth::user()->role === 'admin_divisi' || Auth::user()->role === 'superadmin')
+                        <a class="btn btn-primary btn-sm" id="button-for-modal-add" data-bs-toggle="modal" data-bs-target="#modalForAdd">
+                            <i class="fa fa-plus"></i> <span class="ms-2">Tambah Data</span>
+                        </a>
+                    @endif
                 </div>
 
                 <div class="p-0 m-0 py-3">
@@ -37,14 +39,16 @@
         </div>
     </div>
 
-    <!-- Modal for Adding Data -->
-    @include('dashboard.masterdata.supplier.partials.modal-add')
+    @if (Auth::user()->role === 'admin_divisi' || Auth::user()->role === 'superadmin')
+        <!-- Modal for Adding Data -->
+        @include('dashboard.masterdata.supplier.partials.modal-add')
 
-    <!-- Modal for Editing Data -->
-    @include('dashboard.masterdata.supplier.partials.modal-edit')
+        <!-- Modal for Editing Data -->
+        @include('dashboard.masterdata.supplier.partials.modal-edit')
 
-    <!-- Modal for Delete Confirmation -->
-    @include('dashboard.masterdata.supplier.partials.modal-delete')
+        <!-- Modal for Delete Confirmation -->
+        @include('dashboard.masterdata.supplier.partials.modal-delete')
+    @endif
 
     <!-- Modal for Detail Data -->
     @include('dashboard.masterdata.supplier.partials.modal-detail')

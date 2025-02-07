@@ -56,22 +56,25 @@
                         <!-- Center - Period selection -->
                         <div class="d-flex align-items-center gap-2">
                             <div class="date-input-container">
-                                <input class="form-control" id="startDate" name="startDate" type="month" value="{{ \Carbon\Carbon::parse($startDate)->format('Y-m') }}" style="width: 150px;" onchange="filterPeriode()">
+                                <input class="form-control" id="startDate" name="startDate" type="month" value="{{ \Carbon\Carbon::parse($startDate)->format('Y-m') }}" style="width: 150px;">
                                 <div class="date-input-overlay" onclick="document.getElementById('startDate').showPicker()"></div>
                             </div>
                             <span>s/d</span>
                             <div class="date-input-container">
-                                <input class="form-control" id="endDate" name="endDate" type="month" value="{{ \Carbon\Carbon::parse($endDate)->format('Y-m') }}" style="width: 150px;" onchange="filterPeriode()">
+                                <input class="form-control" id="endDate" name="endDate" type="month" value="{{ \Carbon\Carbon::parse($endDate)->format('Y-m') }}" style="width: 150px;">
                                 <div class="date-input-overlay" onclick="document.getElementById('endDate').showPicker()"></div>
                             </div>
+                            <button class="btn btn-primary btn-sm btn-hide-text-mobile ms-1" onclick="filterPeriode()">
+                                <i class="fa fa-filter"></i> <span class="ms-2">Filter</span>
+                            </button>
                         </div>
 
                         <!-- Right side - Buttons -->
-                        <div class="d-flex gap-2">
-                            <a class="btn btn-warning btn-sm" href="{{ isset($proyek) ? route('export.lnpb_bulan_berjalan', ['id' => $proyek->id]) : route('export.lnpb_bulan_berjalan') }}">
+                        <div class="d-flex justify-content-end gap-2">
+                            <a class="btn btn-warning btn-sm btn-hide-text-mobile" href="{{ isset($proyek) ? route('export.lnpb_bulan_berjalan', ['id' => $proyek->id]) : route('export.lnpb_bulan_berjalan') }}">
                                 <i class="fa-solid fa-file-excel"></i> <span class="ms-2">Export</span>
                             </a>
-                            <button class="btn btn-primary btn-sm" id="toggleAllButton" type="button" onclick="toggleAll()">
+                            <button class="btn btn-primary btn-sm btn-hide-text-mobile" id="toggleAllButton" type="button" onclick="toggleAll()">
                                 <i class="fa fa-expand" id="toggleAllIcon"></i>
                                 <span class="ms-2" id="toggleAllText">Expand All</span>
                             </button>
@@ -84,15 +87,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Modal for Adding Data -->
-    {{-- @include('dashboard.masterdata.alat.partials.modal-add') --}}
-
-    <!-- Modal for Editing Data -->
-    {{-- @include('dashboard.masterdata.alat.partials.modal-edit') --}}
-
-    <!-- Modal for Delete Confirmation -->
-    {{-- @include('dashboard.masterdata.alat.partials.modal-delete') --}}
 @endsection
 
 @push('scripts_2')

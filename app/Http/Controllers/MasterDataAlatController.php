@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Proyek;
 use Illuminate\Http\Request;
 use App\Models\MasterDataAlat;
-use App\Models\MasterDataSupplier;
 use Illuminate\Support\Facades\Auth;
 
 class MasterDataAlatController extends Controller
@@ -87,16 +86,6 @@ class MasterDataAlatController extends Controller
         $alat = MasterDataAlat::findOrFail ( $id );
 
         return response ()->json ( $alat );
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit ( $id )
-    {
-        $alat = MasterDataAlat::findOrFail ( $id );
-
-        return view ( 'dashboard.masterdata.alat.edit', compact ( 'alat' ) );
     }
 
     /**

@@ -35,12 +35,12 @@ class SessionController extends Controller
             $request->session ()->regenerate ();
 
             return redirect ( 'dashboard' )
-                ->with ( 'success', 'Welcome ' . Auth::user ()->name );
+                ->with ( 'success', 'Selamat Datang ' . Auth::user ()->name );
         }
 
         return back ()
-            ->with ( 'loginError', 'Login Failed!' )
-            ->with ( 'error', 'Username or Password is incorrect' );
+            ->with ( 'loginError', 'Login Gagal!' )
+            ->with ( 'error', 'Username atau Password Salah!' );
     }
 
     public function logout ( Request $request )

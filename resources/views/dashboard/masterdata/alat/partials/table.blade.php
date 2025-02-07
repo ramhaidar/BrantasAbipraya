@@ -13,21 +13,22 @@
 
         .filter-popup {
             position: fixed;
-            /* Changed from absolute to fixed */
             background: white;
             border: 1px solid #ddd;
             border-radius: 4px;
             padding: 7px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
+            z-index: 3000;
             max-height: 300px;
             min-width: 200px;
+            margin: 10px;
+            /* Increased margin around popup */
         }
 
         /* Add new styles for right-aligned popups */
         .filter-popup.right-aligned {
-            right: 10px;
-            /* Add some padding from window edge */
+            right: 25px;
+            /* Increased padding from window edge */
         }
 
         .table-responsive {
@@ -86,7 +87,7 @@
                                             </div>
                                         @endforeach
                                     </div>
-                                    <button class="btn btn-primary btn-sm mt-2" type="button" onclick="applyFilter('jenis')">Apply</button>
+                                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('jenis')"><i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span></button>
                                 </div>
                             </div>
                         </th>
@@ -119,7 +120,7 @@
                                             </div>
                                         @endforeach
                                     </div>
-                                    <button class="btn btn-primary btn-sm mt-2" type="button" onclick="applyFilter('kode')">Apply</button>
+                                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('kode')"><i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span></button>
                                 </div>
                             </div>
                         </th>
@@ -152,7 +153,7 @@
                                             </div>
                                         @endforeach
                                     </div>
-                                    <button class="btn btn-primary btn-sm mt-2" type="button" onclick="applyFilter('merek')">Apply</button>
+                                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('merek')"><i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span></button>
                                 </div>
                             </div>
                         </th>
@@ -185,7 +186,7 @@
                                             </div>
                                         @endforeach
                                     </div>
-                                    <button class="btn btn-primary btn-sm mt-2" type="button" onclick="applyFilter('tipe')">Apply</button>
+                                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('tipe')"><i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span></button>
                                 </div>
                             </div>
                         </th>
@@ -218,7 +219,7 @@
                                             </div>
                                         @endforeach
                                     </div>
-                                    <button class="btn btn-primary btn-sm mt-2" type="button" onclick="applyFilter('serial')">Apply</button>
+                                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('serial')"><i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span></button>
                                 </div>
                             </div>
                         </th>
@@ -251,7 +252,7 @@
                                             </div>
                                         @endforeach
                                     </div>
-                                    <button class="btn btn-primary btn-sm mt-2" type="button" onclick="applyFilter('proyek')">Apply</button>
+                                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('proyek')"><i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span></button>
                                 </div>
                             </div>
                         </th>
@@ -324,33 +325,42 @@
         function positionPopup(popup, button) {
             const buttonRect = button[0].getBoundingClientRect();
             const windowWidth = $(window).width();
+            const windowHeight = $(window).height();
             const popupWidth = popup.outerWidth();
+            const popupHeight = popup.outerHeight();
+            const safetyMargin = 25; // Increased safety margin from edges
+            const verticalGap = 10; // Gap between button and popup
 
             // Calculate vertical position
-            let top = buttonRect.bottom + 5; // 5px gap
-            const popupHeight = popup.outerHeight();
-            const windowHeight = $(window).height();
+            let top = buttonRect.bottom + verticalGap;
 
             // Check if popup would go below viewport
-            if (top + popupHeight > windowHeight) {
-                top = buttonRect.top - popupHeight - 5;
+            if (top + popupHeight > windowHeight - safetyMargin) {
+                top = buttonRect.top - popupHeight - verticalGap;
             }
+
+            // Ensure top is not negative and has minimum margin from top
+            top = Math.max(safetyMargin, top);
 
             // Calculate horizontal position
             let left = buttonRect.left;
 
             // Check if popup would go off right edge
-            if (left + popupWidth > windowWidth - 10) { // 10px safety margin
-                left = windowWidth - popupWidth - 10;
+            if (left + popupWidth > windowWidth - safetyMargin) {
+                left = windowWidth - popupWidth - safetyMargin;
                 popup.addClass('right-aligned');
             } else {
                 popup.removeClass('right-aligned');
             }
 
-            // Set the position
+            // Ensure left is not negative and has minimum margin from left
+            left = Math.max(safetyMargin, left);
+
+            // Set the position with smooth transition
             popup.css({
                 top: `${top}px`,
-                left: `${left}px`
+                left: `${left}px`,
+                transition: 'left 0.2s, top 0.2s' // Optional: adds smooth movement
             });
         }
 

@@ -19,7 +19,7 @@
             border-radius: 4px;
             padding: 7px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
+            z-index: 3000;
             max-height: 300px;
             min-width: 200px;
             /* Remove margin-top since we'll position it via JavaScript */
@@ -87,7 +87,7 @@
                                             </div>
                                         @endforeach
                                     </div>
-                                    <button class="btn btn-primary btn-sm mt-2" type="button" onclick="applyFilter('nama')">Apply</button>
+                                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('nama')"><i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span></button>
                                 </div>
                             </div>
                         </th>
@@ -120,7 +120,7 @@
                                             </div>
                                         @endforeach
                                     </div>
-                                    <button class="btn btn-primary btn-sm mt-2" type="button" onclick="applyFilter('part_number')">Apply</button>
+                                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('part_number')"><i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span></button>
                                 </div>
                             </div>
                         </th>
@@ -153,7 +153,7 @@
                                             </div>
                                         @endforeach
                                     </div>
-                                    <button class="btn btn-primary btn-sm mt-2" type="button" onclick="applyFilter('merk')">Apply</button>
+                                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('merk')"><i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span></button>
                                 </div>
                             </div>
                         </th>
@@ -186,7 +186,7 @@
                                             </div>
                                         @endforeach
                                     </div>
-                                    <button class="btn btn-primary btn-sm mt-2" type="button" onclick="applyFilter('kode')">Apply</button>
+                                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('kode')"><i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span></button>
                                 </div>
                             </div>
                         </th>
@@ -219,7 +219,7 @@
                                             </div>
                                         @endforeach
                                     </div>
-                                    <button class="btn btn-primary btn-sm mt-2" type="button" onclick="applyFilter('jenis')">Apply</button>
+                                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('jenis')"><i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span></button>
                                 </div>
                             </div>
                         </th>
@@ -252,7 +252,7 @@
                                             </div>
                                         @endforeach
                                     </div>
-                                    <button class="btn btn-primary btn-sm mt-2" type="button" onclick="applyFilter('sub_jenis')">Apply</button>
+                                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('sub_jenis')"><i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span></button>
                                 </div>
                             </div>
                         </th>
@@ -285,7 +285,7 @@
                                             </div>
                                         @endforeach
                                     </div>
-                                    <button class="btn btn-primary btn-sm mt-2" type="button" onclick="applyFilter('kategori')">Apply</button>
+                                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('kategori')"><i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span></button>
                                 </div>
                             </div>
                         </th>
@@ -360,33 +360,42 @@
         function positionPopup(popup, button) {
             const buttonRect = button[0].getBoundingClientRect();
             const windowWidth = $(window).width();
+            const windowHeight = $(window).height();
             const popupWidth = popup.outerWidth();
+            const popupHeight = popup.outerHeight();
+            const safetyMargin = 25; // Increased safety margin from edges
+            const verticalGap = 10; // Gap between button and popup
 
             // Calculate vertical position
-            let top = buttonRect.bottom + 5; // 5px gap
-            const popupHeight = popup.outerHeight();
-            const windowHeight = $(window).height();
+            let top = buttonRect.bottom + verticalGap;
 
             // Check if popup would go below viewport
-            if (top + popupHeight > windowHeight) {
-                top = buttonRect.top - popupHeight - 5;
+            if (top + popupHeight > windowHeight - safetyMargin) {
+                top = buttonRect.top - popupHeight - verticalGap;
             }
+
+            // Ensure top is not negative and has minimum margin from top
+            top = Math.max(safetyMargin, top);
 
             // Calculate horizontal position
             let left = buttonRect.left;
 
             // Check if popup would go off right edge
-            if (left + popupWidth > windowWidth - 10) { // 10px safety margin
-                left = windowWidth - popupWidth - 10;
+            if (left + popupWidth > windowWidth - safetyMargin) {
+                left = windowWidth - popupWidth - safetyMargin;
                 popup.addClass('right-aligned');
             } else {
                 popup.removeClass('right-aligned');
             }
 
-            // Set the position
+            // Ensure left is not negative and has minimum margin from left
+            left = Math.max(safetyMargin, left);
+
+            // Set the position with smooth transition
             popup.css({
                 top: `${top}px`,
-                left: `${left}px`
+                left: `${left}px`,
+                transition: 'left 0.2s, top 0.2s' // Optional: adds smooth movement
             });
         }
 
@@ -399,18 +408,9 @@
             });
         });
 
-        // Close popups when clicking outside
-        $(document).on('click', function(event) {
-            if (!$(event.target).closest('.filter-popup, button[onclick^="toggleFilter"]').length) {
-                $('.filter-popup').hide();
-            }
-        });
-
         function filterCheckboxes(type) {
             const searchText = $(event.target).val().toLowerCase();
-            // Fix the selector for sub_jenis
-            const cssType = type.replace('-', '_').replace('_', '-');
-            const selector = `.${cssType}-checkbox`;
+            const selector = `.${type}-checkbox`;
             $(selector).each(function() {
                 const label = $(this).next('label').text().toLowerCase();
                 $(this).parent().toggle(label.includes(searchText));
@@ -418,23 +418,22 @@
         }
 
         function applyFilter(type) {
-            // Fix the selector for sub_jenis
-            const cssType = type.replace('-', '_').replace('_', '-');
-            const selector = `.${cssType}-checkbox:checked`;
+            const selector = `.${type}-checkbox:checked`;
             const selected = $(selector).map(function() {
                 return $(this).val();
             }).get();
 
-            // Convert type for URL parameter (replace hyphen with underscore)
-            const paramType = type.replace('-', '_');
-
+            // Dapatkan semua parameter URL saat ini
             const urlParams = new URLSearchParams(window.location.search);
+
+            // Update atau hapus parameter filter yang diubah
             if (selected.length > 0) {
-                urlParams.set(`selected_${paramType}`, selected.join(','));
+                urlParams.set(`selected_${type}`, selected.join(','));
             } else {
-                urlParams.delete(`selected_${paramType}`);
+                urlParams.delete(`selected_${type}`);
             }
 
+            // Redirect dengan parameter yang diupdate
             window.location.href = `${window.location.pathname}?${urlParams.toString()}`;
         }
 

@@ -1,15 +1,23 @@
 <div class="p-0 m-0 row mb-3">
     <div class="col-md-12 p-0 m-0">
         <form class="d-flex gap-2" action="{{ $route ?? url()->current() }}" method="GET">
-            {{-- Preserve existing query parameters --}}
-            @foreach (request()->except(['search', 'per_page']) as $key => $value)
-                <input name="{{ $key }}" type="hidden" value="{{ $value }}">
+            {{-- Preserve all existing query parameters --}}
+            @foreach (request()->query() as $key => $value)
+                @if (!in_array($key, ['search', 'per_page']) && !empty($value))
+                    @if (is_array($value))
+                        @foreach ($value as $arrayValue)
+                            <input name="{{ $key }}[]" type="hidden" value="{{ $arrayValue }}">
+                        @endforeach
+                    @else
+                        <input name="{{ $key }}" type="hidden" value="{{ $value }}">
+                    @endif
+                @endif
             @endforeach
 
             <div class="input-group">
                 <input class="form-control" name="search" type="text" value="{{ request('search') }}" placeholder="{{ $placeholder ?? 'Search items...' }}">
                 @if (request('search'))
-                    <button class="btn btn-secondary" type="button" onclick="this.form.querySelector('[name=search]').value = ''; this.form.submit();">
+                    <button class="btn btn-secondary" type="button" onclick="clearSearch(this)">
                         <i class="fa fa-times"></i>
                     </button>
                 @endif
@@ -30,3 +38,12 @@
         </form>
     </div>
 </div>
+
+<script>
+    function clearSearch(button) {
+        const form = button.closest('form');
+        const searchInput = form.querySelector('[name=search]');
+        searchInput.value = '';
+        form.submit();
+    }
+</script>

@@ -29,9 +29,36 @@ class MasterDataAlatController extends Controller
                     ->orWhere ( 'kode_alat', 'ilike', "%{$search}%" )
                     ->orWhere ( 'merek_alat', 'ilike', "%{$search}%" )
                     ->orWhere ( 'tipe_alat', 'ilike', "%{$search}%" )
-                    ->orWhere ( 'serial_number', 'ilike', "%{$search}%" );
+                    ->orWhere ( 'serial_number', 'ilike', "%{$search}%" )
+                    ->orWhereHas ( 'alatProyek', function ($sq) use ($search)
+                    {
+                        $sq->whereNull ( 'removed_at' )
+                            ->whereHas ( 'proyek', function ($pq) use ($search)
+                            {
+                                $pq->where ( 'nama', 'ilike', "%{$search}%" );
+                            } );
+                    } )
+                    ->orWhere ( function ($sq) use ($search)
+                    {
+                        // Jika search term mengandung "belum ditugaskan"
+                        if ( str_contains ( strtolower ( $search ), 'belum ditugaskan' ) )
+                        {
+                            $sq->whereDoesntHave ( 'alatProyek', function ($aq)
+                            {
+                                $aq->whereNull ( 'removed_at' );
+                            } );
+                        }
+                    } );
             } );
         }
+
+        // Apply filters
+        $this->handleJenisFilter ( $request, $query );
+        $this->handleMerekFilter ( $request, $query );
+        $this->handleKodeFilter ( $request, $query );
+        $this->handleTipeFilter ( $request, $query );
+        $this->handleSerialFilter ( $request, $query );
+        $this->handleProyekFilter ( $request, $query );
 
         // Filter projects based on user role
         $user         = Auth::user ();
@@ -52,12 +79,178 @@ class MasterDataAlatController extends Controller
         // Use the filtered query for pagination
         $TableData = $query->paginate ( $perPage )->withQueryString ();
 
+        // Get unique values for filters
+        $uniqueValues = [ 
+            'jenis'  => MasterDataAlat::distinct ()->pluck ( 'jenis_alat' ),
+            'merek'  => MasterDataAlat::distinct ()->pluck ( 'merek_alat' ),
+            'kode'   => MasterDataAlat::distinct ()->pluck ( 'kode_alat' ),
+            'tipe'   => MasterDataAlat::distinct ()->pluck ( 'tipe_alat' ),
+            'serial' => MasterDataAlat::distinct ()->pluck ( 'serial_number' ),
+            'proyek' => Proyek::distinct ()->pluck ( 'nama' ),
+        ];
+
         return view ( 'dashboard.masterdata.alat.alat', [ 
-            'headerPage' => "Master Data Alat",
-            'page'       => 'Data Alat',
-            'proyeks'    => $proyeks,
-            'TableData'  => $TableData,
+            'headerPage'   => "Master Data Alat",
+            'page'         => 'Data Alat',
+            'proyeks'      => $proyeks,
+            'TableData'    => $TableData,
+            'uniqueValues' => $uniqueValues,
         ] );
+    }
+
+    private function handleJenisFilter ( Request $request, $query )
+    {
+        if ( $request->filled ( 'selected_jenis' ) )
+        {
+            $jenis = explode ( ',', $request->selected_jenis );
+            if ( in_array ( 'null', $jenis ) )
+            {
+                $nonNullValues = array_filter ( $jenis, fn ( $value ) => $value !== 'null' );
+                $query->where ( function ($q) use ($nonNullValues)
+                {
+                    $q->whereNull ( 'jenis_alat' )
+                        ->orWhereIn ( 'jenis_alat', $nonNullValues );
+                } );
+            }
+            else
+            {
+                $query->whereIn ( 'jenis_alat', $jenis );
+            }
+        }
+    }
+
+    private function handleMerekFilter ( Request $request, $query )
+    {
+        if ( $request->filled ( 'selected_merek' ) )
+        {
+            $merek = explode ( ',', $request->selected_merek );
+            if ( in_array ( 'null', $merek ) )
+            {
+                $nonNullValues = array_filter ( $merek, fn ( $value ) => $value !== 'null' );
+                $query->where ( function ($q) use ($nonNullValues)
+                {
+                    $q->whereNull ( 'merek_alat' )
+                        ->orWhereIn ( 'merek_alat', $nonNullValues );
+                } );
+            }
+            else
+            {
+                $query->whereIn ( 'merek_alat', $merek );
+            }
+        }
+    }
+
+    private function handleKodeFilter ( Request $request, $query )
+    {
+        if ( $request->filled ( 'selected_kode' ) )
+        {
+            $kode = explode ( ',', $request->selected_kode );
+            if ( in_array ( 'null', $kode ) )
+            {
+                $nonNullValues = array_filter ( $kode, fn ( $value ) => $value !== 'null' );
+                $query->where ( function ($q) use ($nonNullValues)
+                {
+                    $q->whereNull ( 'kode_alat' )
+                        ->orWhereIn ( 'kode_alat', $nonNullValues );
+                } );
+            }
+            else
+            {
+                $query->whereIn ( 'kode_alat', $kode );
+            }
+        }
+    }
+
+    private function handleTipeFilter ( Request $request, $query )
+    {
+        if ( $request->filled ( 'selected_tipe' ) )
+        {
+            $tipe = explode ( ',', $request->selected_tipe );
+            if ( in_array ( 'null', $tipe ) )
+            {
+                $nonNullValues = array_filter ( $tipe, fn ( $value ) => $value !== 'null' );
+                $query->where ( function ($q) use ($nonNullValues)
+                {
+                    $q->whereNull ( 'tipe_alat' )
+                        ->orWhereIn ( 'tipe_alat', $nonNullValues );
+                } );
+            }
+            else
+            {
+                $query->whereIn ( 'tipe_alat', $tipe );
+            }
+        }
+    }
+
+    private function handleSerialFilter ( Request $request, $query )
+    {
+        if ( $request->filled ( 'selected_serial' ) )
+        {
+            $serial = explode ( ',', $request->selected_serial );
+            if ( in_array ( 'null', $serial ) )
+            {
+                $nonNullValues = array_filter ( $serial, fn ( $value ) => $value !== 'null' );
+                $query->where ( function ($q) use ($nonNullValues)
+                {
+                    $q->whereNull ( 'serial_number' )
+                        ->orWhereIn ( 'serial_number', $nonNullValues );
+                } );
+            }
+            else
+            {
+                $query->whereIn ( 'serial_number', $serial );
+            }
+        }
+    }
+
+    private function handleProyekFilter ( Request $request, $query )
+    {
+        if ( $request->filled ( 'selected_proyek' ) )
+        {
+            $proyek = explode ( ',', $request->selected_proyek );
+            if ( in_array ( 'null', $proyek ) )
+            {
+                $nonNullValues = array_filter ( $proyek, fn ( $value ) => $value !== 'null' );
+                if ( empty ( $nonNullValues ) )
+                {
+                    // Jika hanya memilih "Belum Ditugaskan"
+                    $query->whereDoesntHave ( 'alatProyek', function ($q)
+                    {
+                        $q->whereNull ( 'removed_at' );
+                    } );
+                }
+                else
+                {
+                    // Jika memilih "Belum Ditugaskan" dan proyek lain
+                    $query->where ( function ($q) use ($nonNullValues)
+                    {
+                        $q->whereDoesntHave ( 'alatProyek', function ($sub)
+                        {
+                            $sub->whereNull ( 'removed_at' );
+                        } )->orWhereHas ( 'alatProyek', function ($sub) use ($nonNullValues)
+                        {
+                            $sub->whereNull ( 'removed_at' )
+                                ->whereHas ( 'proyek', function ($p) use ($nonNullValues)
+                                {
+                                    $p->whereIn ( 'nama', $nonNullValues );
+                                } );
+                        } );
+                    } );
+                }
+            }
+            else
+            {
+                // Jika hanya memilih proyek (tanpa "Belum Ditugaskan")
+                $query->whereHas ( 'alatProyek', function ($q) use ($proyek)
+                {
+                    $q->whereNull ( 'removed_at' )
+                        ->whereHas ( 'proyek', function ($p) use ($proyek)
+                        {
+                            $p->whereIn ( 'nama', $proyek );
+                        } );
+                } );
+            }
+        }
     }
 
     /**

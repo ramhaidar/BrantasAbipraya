@@ -53,6 +53,10 @@ class MasterDataSupplierController extends Controller
             $query->whereIn ( 'id_user', $usersInProyek );
         }
 
+        $this->handleNamaFilter ( $request, $query );
+        $this->handleAlamatFilter ( $request, $query );
+        $this->handleContactPersonFilter ( $request, $query );
+
         $suppliers = $query->paginate ( $perPage )
             ->withQueryString ();
 
@@ -80,15 +84,85 @@ class MasterDataSupplierController extends Controller
             ->paginate ( $perPage )
             ->withQueryString ();
 
-        return view ( 'dashboard.masterdata.supplier.supplier', [ 
-            'headerPage' => "Master Data Supplier",
-            'page'       => 'Data Supplier',
+        $uniqueValues = [ 
+            'nama'           => MasterDataSupplier::whereNotNull ( 'nama' )->distinct ()->pluck ( 'nama' ),
+            'alamat'         => MasterDataSupplier::whereNotNull ( 'alamat' )->distinct ()->pluck ( 'alamat' ),
+            'contact_person' => MasterDataSupplier::whereNotNull ( 'contact_person' )->distinct ()->pluck ( 'contact_person' ),
+        ];
 
-            'proyeks'    => $proyeks,
-            'TableData'  => $TableData,
-            'suppliers'  => $suppliers,
-            'spareparts' => $spareparts,
+        return view ( 'dashboard.masterdata.supplier.supplier', [ 
+            'headerPage'   => "Master Data Supplier",
+            'page'         => 'Data Supplier',
+
+            'proyeks'      => $proyeks,
+            'TableData'    => $TableData,
+            'suppliers'    => $suppliers,
+            'spareparts'   => $spareparts,
+            'uniqueValues' => $uniqueValues,
         ] );
+    }
+
+    private function handleNamaFilter ( Request $request, $query )
+    {
+        if ( $request->filled ( 'selected_nama' ) )
+        {
+            $nama = explode ( ',', $request->selected_nama );
+            if ( in_array ( 'null', $nama ) )
+            {
+                $nonNullValues = array_filter ( $nama, fn ( $value ) => $value !== 'null' );
+                $query->where ( function ($q) use ($nonNullValues)
+                {
+                    $q->whereNull ( 'nama' )
+                        ->orWhereIn ( 'nama', $nonNullValues );
+                } );
+            }
+            else
+            {
+                $query->whereIn ( 'nama', $nama );
+            }
+        }
+    }
+
+    private function handleAlamatFilter ( Request $request, $query )
+    {
+        if ( $request->filled ( 'selected_alamat' ) )
+        {
+            $alamat = explode ( ',', $request->selected_alamat );
+            if ( in_array ( 'null', $alamat ) )
+            {
+                $nonNullValues = array_filter ( $alamat, fn ( $value ) => $value !== 'null' );
+                $query->where ( function ($q) use ($nonNullValues)
+                {
+                    $q->whereNull ( 'alamat' )
+                        ->orWhereIn ( 'alamat', $nonNullValues );
+                } );
+            }
+            else
+            {
+                $query->whereIn ( 'alamat', $alamat );
+            }
+        }
+    }
+
+    private function handleContactPersonFilter ( Request $request, $query )
+    {
+        if ( $request->filled ( 'selected_contact_person' ) )
+        {
+            $contactPerson = explode ( ',', $request->selected_contact_person );
+            if ( in_array ( 'null', $contactPerson ) )
+            {
+                $nonNullValues = array_filter ( $contactPerson, fn ( $value ) => $value !== 'null' );
+                $query->where ( function ($q) use ($nonNullValues)
+                {
+                    $q->whereNull ( 'contact_person' )
+                        ->orWhereIn ( 'contact_person', $nonNullValues );
+                } );
+            }
+            else
+            {
+                $query->whereIn ( 'contact_person', $contactPerson );
+            }
+        }
     }
 
     public function show ( $id )

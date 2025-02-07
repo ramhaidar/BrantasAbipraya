@@ -27,6 +27,29 @@ class ProyekController extends Controller
             } );
         }
 
+        if ( $request->filled ( 'selected_nama' ) )
+        {
+            $nama = explode ( ',', $request->selected_nama );
+            if ( in_array ( 'null', $nama ) )
+            {
+                $nonNullValues = array_filter ( $nama, fn ( $value ) => $value !== 'null' );
+                $query->where ( function ($q) use ($nonNullValues)
+                {
+                    $q->whereNull ( 'nama' )
+                        ->orWhere ( 'nama', '-' )
+                        ->orWhereIn ( 'nama', $nonNullValues );
+                } );
+            }
+            else
+            {
+                $query->whereIn ( 'nama', $nama );
+            }
+        }
+
+        $uniqueValues = [ 
+            'nama' => Proyek::whereNotNull ( 'nama' )->distinct ()->pluck ( 'nama' ),
+        ];
+
         // Filter projects based on user role
         $user         = Auth::user ();
         $proyeksQuery = Proyek::with ( "users" );
@@ -54,11 +77,12 @@ class ProyekController extends Controller
         $TableData = $TableData->withQueryString ();
 
         return view ( "dashboard.proyek.proyek", [ 
-            "headerPage" => "Proyek",
-            "page"       => "Data Proyek",
+            "headerPage"   => "Proyek",
+            "page"         => "Data Proyek",
 
-            "proyeks"    => $proyeks,
-            "TableData"  => $TableData,
+            "proyeks"      => $proyeks,
+            "TableData"    => $TableData,
+            'uniqueValues' => $uniqueValues,
         ] );
     }
 

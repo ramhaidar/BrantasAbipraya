@@ -32,15 +32,7 @@ td {
     justify-content: space-between;
 }
 
-@media screen and (max-width: 500px) {
-    .btn-hide-text-mobile span {
-        display: none;
-    }
 
-    .btn-hide-text-mobile {
-        font-size: 20px;
-    }
-}
 
 .ibox {
     position: relative;
@@ -168,8 +160,18 @@ td {
     }
 }
 
+@media screen and (max-width: 1234px) {
+    .btn-hide-text-mobile span {
+        display: none;
+    }
+
+    .btn-hide-text-mobile {
+        font-size: 20px;
+    }
+}
+
 /* CSS to hide the button text on small screens (mobile devices) */
-@media (max-width: 768px) {
+@media (max-width: 1234px) {
     .btn-hide-text-mobile span {
         display: none;
         /* Hide the text inside the span */

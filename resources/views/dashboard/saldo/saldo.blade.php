@@ -38,17 +38,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Modal for Adding Data -->
-    {{-- @include('dashboard.atb.partials.modal-add') --}}
-
-    <!-- Modal for STT -->
-    {{-- @include('dashboard.atb.partials.modal-stt') --}}
-
-    <!-- Modal for Delete -->
-    {{-- @include('dashboard.atb.partials.modal-delete') --}}
-
-    <!-- Modal for Dokumentasi is already included in table partial -->
 @endsection
 
 @push('scripts_2')

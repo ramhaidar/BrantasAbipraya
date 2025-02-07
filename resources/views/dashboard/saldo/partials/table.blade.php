@@ -85,24 +85,5 @@
 </div>
 
 @push('scripts_3')
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Calculate total function
-            function calculateTotal() {
-                let total = 0;
-                document.querySelectorAll('#table-data tbody tr').forEach(function(row) {
-                    let value = row.querySelector('td:last-child').textContent
-                        .replace(/\./g, '');
-                    total += parseInt(value) || 0;
-                });
-
-                // Format the total
-                let formattedTotal = total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-                document.getElementById('total-harga').textContent = formattedTotal;
-            }
-
-            // Initial calculation
-            calculateTotal();
-        });
-    </script>
+    <script></script>
 @endpush

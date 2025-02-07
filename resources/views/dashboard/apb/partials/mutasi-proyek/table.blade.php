@@ -56,7 +56,9 @@
                     <th class="text-center">Jumlah Harga</th>
                     <th class="text-center">Mekanik</th>
                     <th class="text-center">Status</th>
-                    <th class="text-center">Aksi</th>
+                    @if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin')
+                        <th class="text-center">Aksi</th>
+                    @endif
                 </tr>
             </thead>
             <tbody>
@@ -94,11 +96,13 @@
                                 <span class="badge bg-secondary w-100">{{ ucfirst($item->status ?? '-') }}</span>
                             @endif
                         </td>
-                        <td class="text-center">
-                            <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item->id }}" {{ in_array($item->status, ['accepted', 'rejected']) ? 'disabled' : '' }}>
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </td>
+                        @if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin')
+                            <td class="text-center">
+                                <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item->id }}" {{ in_array($item->status, ['accepted', 'rejected']) ? 'disabled' : '' }}>
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        @endif
                     </tr>
                 @empty
                     <tr>
@@ -123,24 +127,5 @@
 </div>
 
 @push('scripts_3')
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            function calculateTotal() {
-                let total = 0;
-                document.querySelectorAll('#table-data tbody tr').forEach(function(row) {
-                    let status = row.querySelector('td:nth-child(20) .badge').textContent.trim().toLowerCase();
-                    if (status === 'accepted' || status === 'penggunaan') {
-                        let value = row.querySelector('td:nth-child(18)').textContent
-                            .replace(/\./g, '');
-                        total += parseInt(value) || 0;
-                    }
-                });
-
-                let formattedTotal = total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-                document.getElementById('total-harga').textContent = formattedTotal;
-            }
-
-            calculateTotal();
-        });
-    </script>
+    <script></script>
 @endpush

@@ -1,47 +1,5 @@
 @push('styles_3')
-    <style>
-        #table-data {
-            font-size: 0.9em;
-            white-space: nowrap;
-        }
-
-        #table-data td,
-        #table-data th {
-            vertical-align: middle;
-            text-align: center;
-        }
-
-        .filter-popup {
-            position: fixed;
-            /* Changed from absolute to fixed */
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 7px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            z-index: 3000;
-            max-height: 300px;
-            min-width: 200px;
-            /* Remove margin-top since we'll position it via JavaScript */
-        }
-
-        /* Add new styles for right-aligned popups */
-        .filter-popup.right-aligned {
-            right: 10px;
-            /* Add some padding from window edge */
-        }
-
-        .table-responsive {
-            overflow-x: visible !important;
-            /* Allow popups to overflow */
-        }
-
-        .checkbox-list {
-            padding: 5px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-    </style>
+    @include('styles.tables')
 @endpush
 
 <div class="ibox-body ms-0 ps-0">

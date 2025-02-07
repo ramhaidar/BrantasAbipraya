@@ -42,6 +42,14 @@ class MasterDataSparepartController extends Controller
             } );
         }
 
+        $this->handleNamaFilter ( $request, $query );
+        $this->handlePartNumberFilter ( $request, $query );
+        $this->handleMerkFilter ( $request, $query );
+        $this->handleKodeFilter ( $request, $query );
+        $this->handleJenisFilter ( $request, $query );
+        $this->handleSubJenisFilter ( $request, $query );
+        $this->handleKategoriFilter ( $request, $query );
+
         $user = Auth::user ();
 
         if ( $user->role === 'Pegawai' )
@@ -60,7 +68,6 @@ class MasterDataSparepartController extends Controller
         $suppliers = MasterDataSupplier::all ();
         $kategori  = KategoriSparepart::all ();
 
-        // Filter projects based on user role
         $user         = Auth::user ();
         $proyeksQuery = Proyek::with ( "users" );
         if ( $user->role === 'koordinator_proyek' )
@@ -76,21 +83,205 @@ class MasterDataSparepartController extends Controller
             ->orderBy ( "id", "desc" )
             ->get ();
 
-        // Use the filtered query for TableData instead of creating a new query
+        $uniqueValues = [ 
+            'nama'        => MasterDataSparepart::whereNotNull ( 'nama' )->distinct ()->pluck ( 'nama' ),
+            'part_number' => MasterDataSparepart::whereNotNull ( 'part_number' )->distinct ()->pluck ( 'part_number' ),
+            'merk'        => MasterDataSparepart::whereNotNull ( 'merk' )->distinct ()->pluck ( 'merk' ),
+            'kode'        => KategoriSparepart::whereNotNull ( 'kode' )->distinct ()->pluck ( 'kode' ),
+            'jenis'       => KategoriSparepart::whereNotNull ( 'jenis' )->distinct ()->pluck ( 'jenis' )->sort (),
+            'sub_jenis'   => KategoriSparepart::whereNotNull ( 'sub_jenis' )->distinct ()->pluck ( 'sub_jenis' )->sort ()->values (),
+            'kategori'    => KategoriSparepart::whereNotNull ( 'nama' )->distinct ()->pluck ( 'nama' ),
+        ];
+
         $TableData = $query->orderBy ( 'updated_at', 'desc' )
             ->orderBy ( 'id', 'desc' )
             ->paginate ( $perPage )
             ->withQueryString ();
 
         return view ( 'dashboard.masterdata.sparepart.sparepart', [ 
-            'headerPage' => "Master Data Sparepart",
-            'page'       => 'Data Sparepart',
-
-            'proyeks'    => $proyeks,
-            'TableData'  => $TableData,
-            'suppliers'  => $suppliers,
-            'categories' => $kategori,
+            'headerPage'   => "Master Data Sparepart",
+            'page'         => 'Data Sparepart',
+            'proyeks'      => $proyeks,
+            'TableData'    => $TableData,
+            'suppliers'    => $suppliers,
+            'categories'   => $kategori,
+            'uniqueValues' => $uniqueValues,
         ] );
+    }
+
+    private function handleNamaFilter ( Request $request, $query )
+    {
+        if ( $request->filled ( 'selected_nama' ) )
+        {
+            $nama = explode ( ',', $request->selected_nama );
+            if ( in_array ( 'null', $nama ) )
+            {
+                $nonNullValues = array_filter ( $nama, fn ( $value ) => $value !== 'null' );
+                $query->where ( function ($q) use ($nonNullValues)
+                {
+                    $q->whereNull ( 'nama' )
+                        ->orWhereIn ( 'nama', $nonNullValues );
+                } );
+            }
+            else
+            {
+                $query->whereIn ( 'nama', $nama );
+            }
+        }
+    }
+
+    private function handlePartNumberFilter ( Request $request, $query )
+    {
+        if ( $request->filled ( 'selected_part_number' ) )
+        {
+            $partNumber = explode ( ',', $request->selected_part_number );
+            if ( in_array ( 'null', $partNumber ) )
+            {
+                $nonNullValues = array_filter ( $partNumber, fn ( $value ) => $value !== 'null' );
+                $query->where ( function ($q) use ($nonNullValues)
+                {
+                    $q->whereNull ( 'part_number' )
+                        ->orWhereIn ( 'part_number', $nonNullValues );
+                } );
+            }
+            else
+            {
+                $query->whereIn ( 'part_number', $partNumber );
+            }
+        }
+    }
+
+    private function handleMerkFilter ( Request $request, $query )
+    {
+        if ( $request->filled ( 'selected_merk' ) )
+        {
+            $merk = explode ( ',', $request->selected_merk );
+            if ( in_array ( 'null', $merk ) )
+            {
+                $nonNullValues = array_filter ( $merk, fn ( $value ) => $value !== 'null' );
+                $query->where ( function ($q) use ($nonNullValues)
+                {
+                    $q->whereNull ( 'merk' )
+                        ->orWhereIn ( 'merk', $nonNullValues );
+                } );
+            }
+            else
+            {
+                $query->whereIn ( 'merk', $merk );
+            }
+        }
+    }
+
+    private function handleKategoriFilter ( Request $request, $query )
+    {
+        if ( $request->filled ( 'selected_kategori' ) )
+        {
+            $kategori = explode ( ',', $request->selected_kategori );
+            if ( in_array ( 'null', $kategori ) )
+            {
+                $nonNullValues = array_filter ( $kategori, fn ( $value ) => $value !== 'null' );
+                $query->where ( function ($q) use ($nonNullValues)
+                {
+                    $q->whereDoesntHave ( 'kategoriSparepart' )
+                        ->orWhereHas ( 'kategoriSparepart', function ($sq) use ($nonNullValues)
+                        {
+                            $sq->whereIn ( 'nama', $nonNullValues );
+                        } );
+                } );
+            }
+            else
+            {
+                $query->whereHas ( 'kategoriSparepart', function ($q) use ($kategori)
+                {
+                    $q->whereIn ( 'nama', $kategori );
+                } );
+            }
+        }
+    }
+
+    private function handleKodeFilter ( Request $request, $query )
+    {
+        if ( $request->filled ( 'selected_kode' ) )
+        {
+            $kode = explode ( ',', $request->selected_kode );
+            if ( in_array ( 'null', $kode ) )
+            {
+                $nonNullValues = array_filter ( $kode, fn ( $value ) => $value !== 'null' );
+                $query->where ( function ($q) use ($nonNullValues)
+                {
+                    $q->whereDoesntHave ( 'kategoriSparepart' )
+                        ->orWhereHas ( 'kategoriSparepart', function ($sq) use ($nonNullValues)
+                        {
+                            $sq->whereIn ( 'kode', $nonNullValues );
+                        } );
+                } );
+            }
+            else
+            {
+                $query->whereHas ( 'kategoriSparepart', function ($q) use ($kode)
+                {
+                    $q->whereIn ( 'kode', $kode );
+                } );
+            }
+        }
+    }
+
+    private function handleJenisFilter ( Request $request, $query )
+    {
+        if ( $request->filled ( 'selected_jenis' ) )
+        {
+            $jenis = explode ( ',', $request->selected_jenis );
+            if ( in_array ( 'null', $jenis ) )
+            {
+                $nonNullValues = array_filter ( $jenis, fn ( $value ) => $value !== 'null' );
+                $query->where ( function ($q) use ($nonNullValues)
+                {
+                    $q->whereDoesntHave ( 'kategoriSparepart' )
+                        ->orWhereHas ( 'kategoriSparepart', function ($sq) use ($nonNullValues)
+                        {
+                            $sq->whereIn ( 'jenis', $nonNullValues );
+                        } );
+                } );
+            }
+            else
+            {
+                $query->whereHas ( 'kategoriSparepart', function ($q) use ($jenis)
+                {
+                    $q->whereIn ( 'jenis', $jenis );
+                } );
+            }
+        }
+    }
+
+    private function handleSubJenisFilter ( Request $request, $query )
+    {
+        if ( $request->filled ( 'selected_sub_jenis' ) )
+        {
+            $subJenis = explode ( ',', $request->selected_sub_jenis );
+            if ( in_array ( 'null', $subJenis ) )
+            {
+                $nonNullValues = array_filter ( $subJenis, fn ( $value ) => $value !== 'null' );
+                $query->where ( function ($q) use ($nonNullValues)
+                {
+                    $q->whereDoesntHave ( 'kategoriSparepart' )
+                        ->orWhereHas ( 'kategoriSparepart', function ($sq) use ($nonNullValues)
+                        {
+                            $sq->whereNull ( 'sub_jenis' )
+                                ->when ( ! empty ( $nonNullValues ), function ($q) use ($nonNullValues)
+                                {
+                                    $q->orWhereIn ( 'sub_jenis', $nonNullValues );
+                                } );
+                        } );
+                } );
+            }
+            else
+            {
+                $query->whereHas ( 'kategoriSparepart', function ($q) use ($subJenis)
+                {
+                    $q->whereIn ( 'sub_jenis', $subJenis );
+                } );
+            }
+        }
     }
 
     public function store ( Request $request )
@@ -99,12 +290,11 @@ class MasterDataSparepartController extends Controller
             'nama'        => [ 'required', 'string', 'max:255' ],
             'part_number' => [ 'required', 'string', 'max:255' ],
             'merk'        => [ 'required', 'string', 'max:255' ],
-            'kategori'    => [ 'required', 'exists:kategori_sparepart,id' ], // Validasi id_kategori_sparepart
-            'suppliers'   => [ 'array' ], // Validasi bahwa suppliers adalah array
-            'suppliers.*' => [ 'exists:master_data_supplier,id' ], // Pastikan setiap supplier ID valid
+            'kategori'    => [ 'required', 'exists:kategori_sparepart,id' ],
+            'suppliers'   => [ 'array' ],
+            'suppliers.*' => [ 'exists:master_data_supplier,id' ],
         ] );
 
-        // Simpan data utama MasterDataSparepart
         $sparepart                        = new MasterDataSparepart;
         $sparepart->nama                  = $request->input ( 'nama' );
         $sparepart->part_number           = $request->input ( 'part_number' );
@@ -112,7 +302,6 @@ class MasterDataSparepartController extends Controller
         $sparepart->id_kategori_sparepart = $request->input ( 'kategori' );
         $sparepart->save ();
 
-        // Sinkronisasi suppliers menggunakan relasi many-to-many
         $sparepart->masterDataSuppliers ()->sync ( $request->input ( 'suppliers', [] ) );
 
         return redirect ()->route ( 'master_data_sparepart.index' )
@@ -129,7 +318,7 @@ class MasterDataSparepartController extends Controller
                 'nama'                  => $sparepart->nama,
                 'part_number'           => $sparepart->part_number,
                 'merk'                  => $sparepart->merk,
-                'id_kategori_sparepart' => optional ( $sparepart->kategoriSparepart )->id, // Include ID kategori
+                'id_kategori_sparepart' => optional ( $sparepart->kategoriSparepart )->id,
                 'kategori'              => $sparepart->kategoriSparepart ? [ 
                     'nama'      => $sparepart->kategoriSparepart->nama,
                     'kode'      => $sparepart->kategoriSparepart->kode,
@@ -150,22 +339,18 @@ class MasterDataSparepartController extends Controller
             'nama'        => [ 'required', 'string', 'max:255' ],
             'part_number' => [ 'required', 'string', 'max:255' ],
             'merk'        => [ 'required', 'string', 'max:255' ],
-            'kategori'    => [ 'required', 'exists:kategori_sparepart,id' ], // Validasi id_kategori_sparepart
+            'kategori'    => [ 'required', 'exists:kategori_sparepart,id' ],
             'suppliers'   => [ 'array' ],
             'suppliers.*' => [ 'exists:master_data_supplier,id' ],
         ] );
 
-        // Temukan sparepart berdasarkan ID
         $sparepart = MasterDataSparepart::findOrFail ( $id );
 
-        // Update data sparepart
         $sparepart->update ( $request->only ( [ 'nama', 'part_number', 'merk', 'kategori' ] ) );
 
-        // Update id_kategori_sparepart
         $sparepart->id_kategori_sparepart = $request->input ( 'kategori' );
         $sparepart->save ();
 
-        // Sync suppliers, even if empty
         $sparepart->masterDataSuppliers ()->sync ( $request->input ( 'suppliers', [] ) );
 
         return redirect ()->route ( 'master_data_sparepart.index' )->with ( 'success', 'Master Data Sparepart berhasil diperbarui' );

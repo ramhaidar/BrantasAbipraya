@@ -12,7 +12,8 @@
         }
 
         .filter-popup {
-            position: absolute;
+            position: fixed;
+            /* Changed from absolute to fixed */
             background: white;
             border: 1px solid #ddd;
             border-radius: 4px;
@@ -21,7 +22,17 @@
             z-index: 1000;
             max-height: 300px;
             min-width: 200px;
-            margin-top: 15px;
+        }
+
+        /* Add new styles for right-aligned popups */
+        .filter-popup.right-aligned {
+            right: 10px;
+            /* Add some padding from window edge */
+        }
+
+        .table-responsive {
+            overflow-x: visible !important;
+            /* Allow popups to overflow */
         }
 
         .checkbox-list {
@@ -301,8 +312,56 @@
     <script>
         function toggleFilter(id) {
             $('.filter-popup').not(`#${id}`).hide();
-            $(`#${id}`).toggle();
+            const popup = $(`#${id}`);
+            const button = $(`button[onclick="toggleFilter('${id}')"]`);
+
+            if (popup.is(':hidden')) {
+                positionPopup(popup, button);
+            }
+            popup.toggle();
         }
+
+        function positionPopup(popup, button) {
+            const buttonRect = button[0].getBoundingClientRect();
+            const windowWidth = $(window).width();
+            const popupWidth = popup.outerWidth();
+
+            // Calculate vertical position
+            let top = buttonRect.bottom + 5; // 5px gap
+            const popupHeight = popup.outerHeight();
+            const windowHeight = $(window).height();
+
+            // Check if popup would go below viewport
+            if (top + popupHeight > windowHeight) {
+                top = buttonRect.top - popupHeight - 5;
+            }
+
+            // Calculate horizontal position
+            let left = buttonRect.left;
+
+            // Check if popup would go off right edge
+            if (left + popupWidth > windowWidth - 10) { // 10px safety margin
+                left = windowWidth - popupWidth - 10;
+                popup.addClass('right-aligned');
+            } else {
+                popup.removeClass('right-aligned');
+            }
+
+            // Set the position
+            popup.css({
+                top: `${top}px`,
+                left: `${left}px`
+            });
+        }
+
+        // Update popup positions on window resize
+        $(window).on('resize', function() {
+            $('.filter-popup:visible').each(function() {
+                const id = $(this).attr('id');
+                const button = $(`button[onclick="toggleFilter('${id}')"]`);
+                positionPopup($(this), button);
+            });
+        });
 
         function filterCheckboxes(type) {
             const searchText = $(event.target).val().toLowerCase();

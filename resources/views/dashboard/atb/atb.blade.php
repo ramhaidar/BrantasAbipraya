@@ -15,10 +15,12 @@
                         <a class="btn btn-warning btn-sm" href="{{ route('export.atb', ['id' => $proyek->id]) }}">
                             <i class="fa-solid fa-file-excel"></i> <span class="ms-2">Export</span>
                         </a>
-                        @if ($tipe !== 'mutasi-proyek')
-                            <a class="btn btn-primary btn-sm btn-hide-text-mobile" data-bs-toggle="modal" data-bs-target="#modalForAdd">
-                                <i class="fa fa-plus"></i> <span class="ms-2">Tambah Data ATB</span>
-                            </a>
+                        @if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin')
+                            @if ($tipe !== 'mutasi-proyek')
+                                <a class="btn btn-primary btn-sm btn-hide-text-mobile" data-bs-toggle="modal" data-bs-target="#modalForAdd">
+                                    <i class="fa fa-plus"></i> <span class="ms-2">Tambah Data ATB</span>
+                                </a>
+                            @endif
                         @endif
                     </div>
                 </div>
@@ -77,12 +79,16 @@
         </div>
     </div>
 
-    @if ($tipe === 'hutang-unit-alat')
-        <!-- Modal for Adding Data -->
-        @include('dashboard.atb.partials.hutang-unit-alat.modal-add')
-    @elseif ($tipe === 'panjar-unit-alat' || $tipe === 'panjar-proyek')
-        <!-- Modal for Adding Data -->
-        @include('dashboard.atb.partials.panjar-unit-alat_panjar_proyek.modal-add')
+    @include('dashboard.atb.partials.modal-dokumentasi')
+
+    @if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin')
+        @if ($tipe === 'hutang-unit-alat')
+            <!-- Modal for Adding Data -->
+            @include('dashboard.atb.partials.hutang-unit-alat.modal-add')
+        @elseif ($tipe === 'panjar-unit-alat' || $tipe === 'panjar-proyek')
+            <!-- Modal for Adding Data -->
+            @include('dashboard.atb.partials.panjar-unit-alat_panjar_proyek.modal-add')
+        @endif
     @endif
 
     @if ($tipe === 'hutang-unit-alat')
@@ -90,14 +96,18 @@
         @include('dashboard.atb.partials.modal-stt')
     @endif
 
-    @include('dashboard.atb.partials.modal-delete')
+    @if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin')
+        @include('dashboard.atb.partials.modal-delete')
+    @endif
 
-    @if ($tipe === 'mutasi-proyek')
-        <!-- Modal for Accept -->
-        @include('dashboard.atb.partials.mutasi-proyek.modal-accept')
+    @if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin')
+        @if ($tipe === 'mutasi-proyek')
+            <!-- Modal for Accept -->
+            @include('dashboard.atb.partials.mutasi-proyek.modal-accept')
 
-        <!-- Modal for Reject -->
-        @include('dashboard.atb.partials.mutasi-proyek.modal-reject')
+            <!-- Modal for Reject -->
+            @include('dashboard.atb.partials.mutasi-proyek.modal-reject')
+        @endif
     @endif
 @endsection
 

@@ -109,6 +109,7 @@ class MasterDataAlatController extends Controller
                 $query->where ( function ($q) use ($nonNullValues)
                 {
                     $q->whereNull ( 'jenis_alat' )
+                        ->orWhere ( 'jenis_alat', '-' )
                         ->orWhereIn ( 'jenis_alat', $nonNullValues );
                 } );
             }
@@ -130,6 +131,7 @@ class MasterDataAlatController extends Controller
                 $query->where ( function ($q) use ($nonNullValues)
                 {
                     $q->whereNull ( 'merek_alat' )
+                        ->orWhere ( 'merek_alat', '-' )
                         ->orWhereIn ( 'merek_alat', $nonNullValues );
                 } );
             }
@@ -151,6 +153,7 @@ class MasterDataAlatController extends Controller
                 $query->where ( function ($q) use ($nonNullValues)
                 {
                     $q->whereNull ( 'kode_alat' )
+                        ->orWhere ( 'kode_alat', '-' )
                         ->orWhereIn ( 'kode_alat', $nonNullValues );
                 } );
             }
@@ -172,6 +175,7 @@ class MasterDataAlatController extends Controller
                 $query->where ( function ($q) use ($nonNullValues)
                 {
                     $q->whereNull ( 'tipe_alat' )
+                        ->orWhere ( 'tipe_alat', '-' )
                         ->orWhereIn ( 'tipe_alat', $nonNullValues );
                 } );
             }
@@ -193,6 +197,7 @@ class MasterDataAlatController extends Controller
                 $query->where ( function ($q) use ($nonNullValues)
                 {
                     $q->whereNull ( 'serial_number' )
+                        ->orWhere ( 'serial_number', '-' )
                         ->orWhereIn ( 'serial_number', $nonNullValues );
                 } );
             }

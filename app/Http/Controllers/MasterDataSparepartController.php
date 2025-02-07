@@ -120,6 +120,7 @@ class MasterDataSparepartController extends Controller
                 $query->where ( function ($q) use ($nonNullValues)
                 {
                     $q->whereNull ( 'nama' )
+                        ->orWhere ( 'nama', '-' )
                         ->orWhereIn ( 'nama', $nonNullValues );
                 } );
             }
@@ -141,6 +142,7 @@ class MasterDataSparepartController extends Controller
                 $query->where ( function ($q) use ($nonNullValues)
                 {
                     $q->whereNull ( 'part_number' )
+                        ->orWhere ( 'part_number', '-' )
                         ->orWhereIn ( 'part_number', $nonNullValues );
                 } );
             }
@@ -162,6 +164,7 @@ class MasterDataSparepartController extends Controller
                 $query->where ( function ($q) use ($nonNullValues)
                 {
                     $q->whereNull ( 'merk' )
+                        ->orWhere ( 'merk', '-' )
                         ->orWhereIn ( 'merk', $nonNullValues );
                 } );
             }

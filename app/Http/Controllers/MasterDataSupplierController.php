@@ -113,6 +113,7 @@ class MasterDataSupplierController extends Controller
                 $query->where ( function ($q) use ($nonNullValues)
                 {
                     $q->whereNull ( 'nama' )
+                        ->orWhere ( 'nama', '-' )
                         ->orWhereIn ( 'nama', $nonNullValues );
                 } );
             }
@@ -134,6 +135,7 @@ class MasterDataSupplierController extends Controller
                 $query->where ( function ($q) use ($nonNullValues)
                 {
                     $q->whereNull ( 'alamat' )
+                        ->orWhere ( 'alamat', '-' )
                         ->orWhereIn ( 'alamat', $nonNullValues );
                 } );
             }
@@ -155,6 +157,7 @@ class MasterDataSupplierController extends Controller
                 $query->where ( function ($q) use ($nonNullValues)
                 {
                     $q->whereNull ( 'contact_person' )
+                        ->orWhere ( 'contact_person', '-' )
                         ->orWhereIn ( 'contact_person', $nonNullValues );
                 } );
             }

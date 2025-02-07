@@ -48,7 +48,7 @@
     <form class="mb-3" id="filter-form" method="GET">
         <div class="mb-3 d-flex justify-content-end">
             @if (request('selected_jenis') || request('selected_merek') || request('selected_kode') || request('selected_tipe') || request('selected_serial') || request('selected_proyek'))
-                <a class="btn btn-danger btn-sm btn-hide-text-mobile" href="{{ route('master_data_alat.index') }}">
+                <a class="btn btn-danger btn-sm btn-hide-text-mobile" href="{{ request()->url() . (request('search') ? '?search=' . request('search') : '') }}">
                     <i class="bi bi-x-circle"></i> <span class="ms-2">Hapus Semua Filter</span>
                 </a>
             @endif

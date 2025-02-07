@@ -239,15 +239,15 @@
                             </div>
                             <div class="filter-popup" id="sub-jenis-filter" style="display: none;">
                                 <div class="p-2">
-                                    <input class="form-control form-control-sm mb-2" type="text" placeholder="Search sub jenis..." onkeyup="filterCheckboxes('sub-jenis')">
+                                    <input class="form-control form-control-sm mb-2" type="text" placeholder="Search sub jenis..." onkeyup="filterCheckboxes('sub_jenis')">
                                     <div class="checkbox-list text-start">
                                         <div class="form-check">
-                                            <input class="form-check-input sub-jenis-checkbox" type="checkbox" value="null" {{ in_array('null', explode(',', request('selected_sub_jenis', ''))) ? 'checked' : '' }}>
+                                            <input class="form-check-input sub_jenis-checkbox" type="checkbox" value="null" {{ in_array('null', explode(',', request('selected_sub_jenis', ''))) ? 'checked' : '' }}>
                                             <label class="form-check-label" onclick="toggleCheckbox(this)">Empty/Null</label>
                                         </div>
                                         @foreach ($uniqueValues['sub_jenis'] as $subJenis)
                                             <div class="form-check">
-                                                <input class="form-check-input sub-jenis-checkbox" type="checkbox" value="{{ $subJenis }}" {{ in_array($subJenis, explode(',', request('selected_sub_jenis', ''))) ? 'checked' : '' }}>
+                                                <input class="form-check-input sub_jenis-checkbox" type="checkbox" value="{{ $subJenis }}" {{ in_array($subJenis, explode(',', request('selected_sub_jenis', ''))) ? 'checked' : '' }}>
                                                 <label class="form-check-label" onclick="toggleCheckbox(this)">{{ $subJenis }}</label>
                                             </div>
                                         @endforeach

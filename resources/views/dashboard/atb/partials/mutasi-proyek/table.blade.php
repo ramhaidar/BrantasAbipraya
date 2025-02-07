@@ -59,7 +59,9 @@
                     <th class="text-center">Harga</th>
                     <th class="text-center">Jumlah Harga</th>
                     <th class="text-center">Dokumentasi</th>
-                    <th class="text-center">Aksi</th>
+                    @if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin')
+                        <th class="text-center">Aksi</th>
+                    @endif
                 </tr>
             </thead>
             <tbody>
@@ -95,23 +97,25 @@
                                 <i class="bi bi-images"></i>
                             </button>
                         </td>
-                        <td class="text-center action-cell">
-                            @if (!isset($item->apbMutasi))
-                                <button class="btn btn-danger mx-1 rejectBtn" disabled>
-                                    <i class="bi bi-x-circle"></i>
-                                </button>
-                                <button class="btn btn-success acceptBtn" disabled>
-                                    <i class="bi bi-check-circle"></i>
-                                </button>
-                            @else
-                                <button class="btn btn-danger mx-1 rejectBtn" data-id="{{ $item->id }}" {{ $item->apbMutasi->status !== 'pending' ? 'disabled' : '' }}>
-                                    <i class="bi bi-x-circle"></i>
-                                </button>
-                                <button class="btn btn-success acceptBtn" data-id="{{ $item->id }}" data-max="{{ $item->apbMutasi->quantity }}" data-max-text="(Max: {{ $item->apbMutasi->quantity }})" type="button" {{ $item->apbMutasi->status !== 'pending' ? 'disabled' : '' }}>
-                                    <i class="bi bi-check-circle"></i>
-                                </button>
-                            @endif
-                        </td>
+                        @if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin')
+                            <td class="text-center action-cell">
+                                @if (!isset($item->apbMutasi))
+                                    <button class="btn btn-danger mx-1 rejectBtn" disabled>
+                                        <i class="bi bi-x-circle"></i>
+                                    </button>
+                                    <button class="btn btn-success acceptBtn" disabled>
+                                        <i class="bi bi-check-circle"></i>
+                                    </button>
+                                @else
+                                    <button class="btn btn-danger mx-1 rejectBtn" data-id="{{ $item->id }}" {{ $item->apbMutasi->status !== 'pending' ? 'disabled' : '' }}>
+                                        <i class="bi bi-x-circle"></i>
+                                    </button>
+                                    <button class="btn btn-success acceptBtn" data-id="{{ $item->id }}" data-max="{{ $item->apbMutasi->quantity }}" data-max-text="(Max: {{ $item->apbMutasi->quantity }})" type="button" {{ $item->apbMutasi->status !== 'pending' ? 'disabled' : '' }}>
+                                        <i class="bi bi-check-circle"></i>
+                                    </button>
+                                @endif
+                            </td>
+                        @endif
                     </tr>
                 @empty
                     <tr>
@@ -135,16 +139,8 @@
     </div>
 </div>
 
-<!-- Include dokumentasi modal -->
-@include('dashboard.atb.partials.modal-dokumentasi')
-
 @push('scripts_3')
-    <script>
-        // Remove the calculateTotal function since we're using server-side totals
-        $(document).ready(function() {
-            // Keep only grouping functionality if needed
-        });
-    </script>
+    <script></script>
 
     @include('scripts.adjustTableColumnWidthByHeaderText')
 @endpush

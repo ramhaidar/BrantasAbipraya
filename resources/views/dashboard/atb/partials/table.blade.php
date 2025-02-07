@@ -118,8 +118,6 @@
     </div>
 </div>
 
-@include('dashboard.atb.partials.modal-dokumentasi')
-
 @push('scripts_3')
     <script>
         $(document).ready(function() {

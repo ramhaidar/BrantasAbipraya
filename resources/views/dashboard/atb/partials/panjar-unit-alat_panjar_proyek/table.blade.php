@@ -41,7 +41,9 @@
                     <th class="text-center">Harga</th>
                     <th class="text-center">Jumlah Harga</th>
                     <th class="text-center">Dokumentasi</th>
-                    <th class="text-center">Aksi</th>
+                    @if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin')
+                        <th class="text-center">Aksi</th>
+                    @endif
                 </tr>
             </thead>
             <tbody>
@@ -70,11 +72,13 @@
                                 <i class="bi bi-images"></i>
                             </button>
                         </td>
-                        <td class="text-center action-cell">
-                            <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item->id }}">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </td>
+                        @if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin')
+                            <td class="text-center action-cell">
+                                <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item->id }}">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        @endif
                     </tr>
                 @empty
                     <tr>
@@ -85,14 +89,14 @@
                     </tr>
                 @endforelse
             </tbody>
-            @if($TableData->currentPage() === $TableData->lastPage())
-            <tfoot>
-                <tr class="table-primary">
-                    <td class="text-center fw-bold" colspan="9">Grand Total (Keseluruhan)</td>
-                    <td class="text-center fw-bold currency-value">{{ formatRibuan($TableData->total_harga) }}</td>
-                    <td colspan="2"></td>
-                </tr>
-            </tfoot>
+            @if ($TableData->currentPage() === $TableData->lastPage())
+                <tfoot>
+                    <tr class="table-primary">
+                        <td class="text-center fw-bold" colspan="9">Grand Total (Keseluruhan)</td>
+                        <td class="text-center fw-bold currency-value">{{ formatRibuan($TableData->total_harga) }}</td>
+                        <td colspan="2"></td>
+                    </tr>
+                </tfoot>
             @endif
         </table>
     </div>
@@ -102,12 +106,7 @@
 @include('dashboard.atb.partials.modal-dokumentasi')
 
 @push('scripts_3')
-    <script>
-        // Remove the calculateTotal function since we're using server-side totals
-        $(document).ready(function() {
-            // Keep only grouping functionality if needed
-        });
-    </script>
+    <script></script>
 
     @include('scripts.adjustTableColumnWidthByHeaderText')
 @endpush

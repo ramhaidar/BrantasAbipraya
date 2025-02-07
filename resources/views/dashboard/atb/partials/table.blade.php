@@ -45,7 +45,9 @@
                     <th>Bruto</th>
                     <th>STT</th>
                     <th>Dokumentasi</th>
-                    <th>Aksi</th>
+                    @if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin')
+                        <th>Aksi</th>
+                    @endif
                 </tr>
             </thead>
             <tbody>
@@ -84,11 +86,13 @@
                                 <i class="bi bi-images"></i>
                             </button>
                         </td>
-                        <td class="text-center action-cell">
-                            <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item->id }}">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </td>
+                        @if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin')
+                            <td class="text-center action-cell">
+                                <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item->id }}">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        @endif
                     </tr>
                 @empty
                     <tr>
@@ -99,16 +103,16 @@
                     </tr>
                 @endforelse
             </tbody>
-            @if($TableData->currentPage() === $TableData->lastPage())
-            <tfoot>
-                <tr class="table-primary">
-                    <td class="text-center fw-bold" colspan="10">Grand Total (Keseluruhan)</td>
-                    <td class="text-center fw-bold currency-value">{{ formatRibuan($TableData->total_harga) }}</td>
-                    <td class="text-center fw-bold currency-value">{{ formatRibuan($TableData->total_ppn) }}</td>
-                    <td class="text-center fw-bold currency-value">{{ formatRibuan($TableData->total_bruto) }}</td>
-                    <td colspan="3"></td>
-                </tr>
-            </tfoot>
+            @if ($TableData->currentPage() === $TableData->lastPage())
+                <tfoot>
+                    <tr class="table-primary">
+                        <td class="text-center fw-bold" colspan="10">Grand Total (Keseluruhan)</td>
+                        <td class="text-center fw-bold currency-value">{{ formatRibuan($TableData->total_harga) }}</td>
+                        <td class="text-center fw-bold currency-value">{{ formatRibuan($TableData->total_ppn) }}</td>
+                        <td class="text-center fw-bold currency-value">{{ formatRibuan($TableData->total_bruto) }}</td>
+                        <td colspan="3"></td>
+                    </tr>
+                </tfoot>
             @endif
         </table>
     </div>
@@ -151,14 +155,33 @@
                 Object.values(groups).forEach(group => {
                     const rowCount = group.rows.length;
                     if (rowCount > 1) {
-                        const $spbCell = group.firstRow.find('.spb-number');
-                        const $actionCell = group.firstRow.find('.action-cell');
+                        const $firstRow = group.firstRow;
+                        const $spbCell = $firstRow.find('.spb-number');
+                        const $sttCell = $firstRow.find('.stt-cell');
+                        const $actionCell = $firstRow.find('.action-cell');
+
+                        // Apply rowspan to SPB number cell
                         $spbCell.attr('rowspan', rowCount);
-                        $actionCell.attr('rowspan', rowCount);
+
+                        // Apply rowspan to STT cell
+                        $sttCell.attr('rowspan', rowCount);
+
+                        // Apply rowspan to action cell if it exists
+                        if ($actionCell.length) {
+                            $actionCell.attr('rowspan', rowCount);
+                        }
+
+                        // Remove cells from subsequent rows
                         group.rows.slice(1).forEach($row => {
+                            $row.find('.stt-cell').remove();
                             $row.find('.action-cell').remove();
                         });
-                        $actionCell.find('.deleteBtn').data('ids', group.ids.join(','));
+
+                        // Store all IDs in the delete button if it exists
+                        const $deleteBtn = $actionCell.find('.deleteBtn');
+                        if ($deleteBtn.length) {
+                            $deleteBtn.data('ids', group.ids.join(','));
+                        }
                     }
                 });
             }

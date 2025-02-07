@@ -36,8 +36,8 @@
                                     <div class="checkbox-list text-start">
                                         @foreach ($uniqueValues['name'] as $name)
                                             <div class="form-check">
-                                                <input class="form-check-input name-checkbox" type="checkbox" value="{{ $name }}" {{ in_array($name, explode(',', request('selected_name', ''))) ? 'checked' : '' }}>
-                                                <label class="form-check-label" onclick="toggleCheckbox(this)">{{ $name }}</label>
+                                                <input class="form-check-input name-checkbox" type="checkbox" value="{{ $name }}" style="cursor: pointer" {{ in_array($name, explode(',', request('selected_name', ''))) ? 'checked' : '' }}>
+                                                <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">{{ $name }}</label>
                                             </div>
                                         @endforeach
                                     </div>
@@ -67,8 +67,8 @@
                                     <div class="checkbox-list text-start">
                                         @foreach ($uniqueValues['username'] as $username)
                                             <div class="form-check">
-                                                <input class="form-check-input username-checkbox" type="checkbox" value="{{ $username }}" {{ in_array($username, explode(',', request('selected_username', ''))) ? 'checked' : '' }}>
-                                                <label class="form-check-label" onclick="toggleCheckbox(this)">{{ $username }}</label>
+                                                <input class="form-check-input username-checkbox" type="checkbox" value="{{ $username }}" style="cursor: pointer" {{ in_array($username, explode(',', request('selected_username', ''))) ? 'checked' : '' }}>
+                                                <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">{{ $username }}</label>
                                             </div>
                                         @endforeach
                                     </div>
@@ -98,8 +98,8 @@
                                     <div class="checkbox-list text-start">
                                         @foreach ($uniqueValues['sex'] as $sex)
                                             <div class="form-check">
-                                                <input class="form-check-input sex-checkbox" type="checkbox" value="{{ $sex }}" {{ in_array($sex, explode(',', request('selected_sex', ''))) ? 'checked' : '' }}>
-                                                <label class="form-check-label" onclick="toggleCheckbox(this)">{{ $sex }}</label>
+                                                <input class="form-check-input sex-checkbox" type="checkbox" value="{{ $sex }}" style="cursor: pointer" {{ in_array($sex, explode(',', request('selected_sex', ''))) ? 'checked' : '' }}>
+                                                <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">{{ $sex }}</label>
                                             </div>
                                         @endforeach
                                     </div>
@@ -129,8 +129,8 @@
                                     <div class="checkbox-list text-start">
                                         @foreach ($uniqueValues['role'] as $role)
                                             <div class="form-check">
-                                                <input class="form-check-input role-checkbox" type="checkbox" value="{{ $role }}" {{ in_array($role, explode(',', request('selected_role', ''))) ? 'checked' : '' }}>
-                                                <label class="form-check-label" onclick="toggleCheckbox(this)">{{ $role }}</label>
+                                                <input class="form-check-input role-checkbox" type="checkbox" value="{{ $role }}" style="cursor: pointer" {{ in_array($role, explode(',', request('selected_role', ''))) ? 'checked' : '' }}>
+                                                <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">{{ $role }}</label>
                                             </div>
                                         @endforeach
                                     </div>
@@ -160,8 +160,8 @@
                                     <div class="checkbox-list text-start">
                                         @foreach ($uniqueValues['phone'] as $phone)
                                             <div class="form-check">
-                                                <input class="form-check-input phone-checkbox" type="checkbox" value="{{ $phone }}" {{ in_array($phone, explode(',', request('selected_phone', ''))) ? 'checked' : '' }}>
-                                                <label class="form-check-label" onclick="toggleCheckbox(this)">{{ $phone }}</label>
+                                                <input class="form-check-input phone-checkbox" type="checkbox" value="{{ $phone }}" style="cursor: pointer" {{ in_array($phone, explode(',', request('selected_phone', ''))) ? 'checked' : '' }}>
+                                                <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">{{ $phone }}</label>
                                             </div>
                                         @endforeach
                                     </div>
@@ -191,8 +191,8 @@
                                     <div class="checkbox-list text-start">
                                         @foreach ($uniqueValues['email'] as $email)
                                             <div class="form-check">
-                                                <input class="form-check-input email-checkbox" type="checkbox" value="{{ $email }}" {{ in_array($email, explode(',', request('selected_email', ''))) ? 'checked' : '' }}>
-                                                <label class="form-check-label" onclick="toggleCheckbox(this)">{{ $email }}</label>
+                                                <input class="form-check-input email-checkbox" type="checkbox" value="{{ $email }}" style="cursor: pointer" {{ in_array($email, explode(',', request('selected_email', ''))) ? 'checked' : '' }}>
+                                                <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">{{ $email }}</label>
                                             </div>
                                         @endforeach
                                     </div>

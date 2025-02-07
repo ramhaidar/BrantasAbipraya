@@ -35,13 +35,13 @@
                                     <input class="form-control form-control-sm mb-2" type="text" placeholder="Search nama..." onkeyup="filterCheckboxes('nama')">
                                     <div class="checkbox-list text-start">
                                         <div class="form-check">
-                                            <input class="form-check-input nama-checkbox" type="checkbox" value="null" {{ in_array('null', explode(',', request('selected_nama', ''))) ? 'checked' : '' }}>
-                                            <label class="form-check-label" onclick="toggleCheckbox(this)">Empty/Null</label>
+                                            <input class="form-check-input nama-checkbox" type="checkbox" value="null" style="cursor: pointer" {{ in_array('null', explode(',', request('selected_nama', ''))) ? 'checked' : '' }}>
+                                            <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">Empty/Null</label>
                                         </div>
                                         @foreach ($uniqueValues['nama'] as $nama)
                                             <div class="form-check">
-                                                <input class="form-check-input nama-checkbox" type="checkbox" value="{{ $nama }}" {{ in_array($nama, explode(',', request('selected_nama', ''))) ? 'checked' : '' }}>
-                                                <label class="form-check-label" onclick="toggleCheckbox(this)">{{ $nama }}</label>
+                                                <input class="form-check-input nama-checkbox" type="checkbox" value="{{ $nama }}" style="cursor: pointer" {{ in_array($nama, explode(',', request('selected_nama', ''))) ? 'checked' : '' }}>
+                                                <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">{{ $nama }}</label>
                                             </div>
                                         @endforeach
                                     </div>

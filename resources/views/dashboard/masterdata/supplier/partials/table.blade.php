@@ -35,13 +35,13 @@
                                     <input class="form-control form-control-sm mb-2" type="text" placeholder="Search nama..." onkeyup="filterCheckboxes('nama')">
                                     <div class="checkbox-list text-start">
                                         <div class="form-check">
-                                            <input class="form-check-input nama-checkbox" type="checkbox" value="null" {{ in_array('null', explode(',', request('selected_nama', ''))) ? 'checked' : '' }}>
-                                            <label class="form-check-label" onclick="toggleCheckbox(this)">Empty/Null</label>
+                                            <input class="form-check-input nama-checkbox" type="checkbox" value="null" style="cursor: pointer" {{ in_array('null', explode(',', request('selected_nama', ''))) ? 'checked' : '' }}>
+                                            <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">Empty/Null</label>
                                         </div>
                                         @foreach ($uniqueValues['nama'] as $nama)
                                             <div class="form-check">
-                                                <input class="form-check-input nama-checkbox" type="checkbox" value="{{ $nama }}" {{ in_array($nama, explode(',', request('selected_nama', ''))) ? 'checked' : '' }}>
-                                                <label class="form-check-label" onclick="toggleCheckbox(this)">{{ $nama }}</label>
+                                                <input class="form-check-input nama-checkbox" type="checkbox" value="{{ $nama }}" style="cursor: pointer" {{ in_array($nama, explode(',', request('selected_nama', ''))) ? 'checked' : '' }}>
+                                                <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">{{ $nama }}</label>
                                             </div>
                                         @endforeach
                                     </div>
@@ -70,13 +70,13 @@
                                     <input class="form-control form-control-sm mb-2" type="text" placeholder="Search alamat..." onkeyup="filterCheckboxes('alamat')">
                                     <div class="checkbox-list text-start">
                                         <div class="form-check">
-                                            <input class="form-check-input alamat-checkbox" type="checkbox" value="null" {{ in_array('null', explode(',', request('selected_alamat', ''))) ? 'checked' : '' }}>
-                                            <label class="form-check-label" onclick="toggleCheckbox(this)">Empty/Null</label>
+                                            <input class="form-check-input alamat-checkbox" type="checkbox" value="null" style="cursor: pointer" {{ in_array('null', explode(',', request('selected_alamat', ''))) ? 'checked' : '' }}>
+                                            <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">Empty/Null</label>
                                         </div>
                                         @foreach ($uniqueValues['alamat'] as $alamat)
                                             <div class="form-check">
-                                                <input class="form-check-input alamat-checkbox" type="checkbox" value="{{ $alamat }}" {{ in_array($alamat, explode(',', request('selected_alamat', ''))) ? 'checked' : '' }}>
-                                                <label class="form-check-label" onclick="toggleCheckbox(this)">{{ $alamat }}</label>
+                                                <input class="form-check-input alamat-checkbox" type="checkbox" value="{{ $alamat }}" style="cursor: pointer" {{ in_array($alamat, explode(',', request('selected_alamat', ''))) ? 'checked' : '' }}>
+                                                <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">{{ $alamat }}</label>
                                             </div>
                                         @endforeach
                                     </div>
@@ -105,13 +105,13 @@
                                     <input class="form-control form-control-sm mb-2" type="text" placeholder="Search contact person..." onkeyup="filterCheckboxes('contact_person')">
                                     <div class="checkbox-list text-start">
                                         <div class="form-check">
-                                            <input class="form-check-input contact_person-checkbox" type="checkbox" value="null" {{ in_array('null', explode(',', request('selected_contact_person', ''))) ? 'checked' : '' }}>
-                                            <label class="form-check-label" onclick="toggleCheckbox(this)">Empty/Null</label>
+                                            <input class="form-check-input contact_person-checkbox" type="checkbox" value="null" style="cursor: pointer" {{ in_array('null', explode(',', request('selected_contact_person', ''))) ? 'checked' : '' }}>
+                                            <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">Empty/Null</label>
                                         </div>
                                         @foreach ($uniqueValues['contact_person'] as $contactPerson)
                                             <div class="form-check">
-                                                <input class="form-check-input contact_person-checkbox" type="checkbox" value="{{ $contactPerson }}" {{ in_array($contactPerson, explode(',', request('selected_contact_person', ''))) ? 'checked' : '' }}>
-                                                <label class="form-check-label" onclick="toggleCheckbox(this)">{{ $contactPerson }}</label>
+                                                <input class="form-check-input contact_person-checkbox" type="checkbox" value="{{ $contactPerson }}" style="cursor: pointer" {{ in_array($contactPerson, explode(',', request('selected_contact_person', ''))) ? 'checked' : '' }}>
+                                                <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">{{ $contactPerson }}</label>
                                             </div>
                                         @endforeach
                                     </div>

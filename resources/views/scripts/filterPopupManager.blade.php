@@ -111,7 +111,7 @@
         const urlParams = new URLSearchParams(window.location.search);
 
         // Hapus semua parameter filter tapi pertahankan parameter lain
-        const paramsToKeep = ['search', 'per_page'];
+        const paramsToKeep = ['search', 'per_page', 'id_proyek'];
         const currentParams = Array.from(urlParams.keys());
 
         currentParams.forEach(param => {

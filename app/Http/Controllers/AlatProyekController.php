@@ -13,15 +13,37 @@ class AlatProyekController extends Controller
 {
     public function index ( Request $request )
     {
-        // Validate and set perPage to allowed values only
+        $perPage = $this->getPerPage ( $request );
+        $proyek  = Proyek::with ( "users" )->findOrFail ( $request->id_proyek );
+        $query   = $this->buildQuery ( $request, $proyek->id );
+
+        $TableData     = $this->getTableData ( $query, $perPage );
+        $proyeks       = $this->getProyeks ();
+        $AlatAvailable = $this->getAlatAvailable ();
+        $uniqueValues  = $this->getUniqueValues ();
+
+        return view ( 'dashboard.alat.alat', [ 
+            'proyeks'       => $proyeks,
+            'proyek'        => $proyek,
+            'TableData'     => $TableData,
+            'AlatAvailable' => $AlatAvailable,
+            'headerPage'    => "Data Alat Proyek",
+            'page'          => 'Data Alat',
+            'uniqueValues'  => $uniqueValues,
+        ] );
+    }
+
+    private function getPerPage ( Request $request )
+    {
         $allowedPerPage = [ 10, 25, 50, 100 ];
-        $perPage        = in_array ( (int) $request->get ( 'per_page' ), $allowedPerPage ) ? (int) $request->get ( 'per_page' ) : 10;
+        return in_array ( (int) $request->get ( 'per_page' ), $allowedPerPage ) ? (int) $request->get ( 'per_page' ) : 10;
+    }
 
-        $proyek = Proyek::with ( "users" )->findOrFail ( $request->id_proyek );
-
+    private function buildQuery ( Request $request, $proyekId )
+    {
         $query = AlatProyek::query ()
             ->with ( 'masterDataAlat' )
-            ->where ( 'id_proyek', $proyek->id )
+            ->where ( 'id_proyek', $proyekId )
             ->whereNull ( 'removed_at' );
 
         if ( $request->has ( 'search' ) )
@@ -37,25 +59,32 @@ class AlatProyekController extends Controller
             } );
         }
 
+        $this->applyFilters ( $request, $query );
+
+        return $query;
+    }
+
+    private function applyFilters ( Request $request, $query )
+    {
         $this->handleJenisAlatFilter ( $request, $query );
         $this->handleKodeAlatFilter ( $request, $query );
         $this->handleMerekAlatFilter ( $request, $query );
         $this->handleTipeAlatFilter ( $request, $query );
         $this->handleSerialNumberFilter ( $request, $query );
+    }
 
-        $TableData = $perPage === -1
-            ? $query->orderBy ( 'updated_at', 'desc' )
-                ->orderBy ( 'id', 'desc' )
-                ->paginate ( $query->count () )
-            : $query->orderBy ( 'updated_at', 'desc' )
-                ->orderBy ( 'id', 'desc' )
-                ->paginate ( $perPage );
+    private function getTableData ( $query, $perPage )
+    {
+        return $perPage === -1
+            ? $query->orderBy ( 'updated_at', 'desc' )->orderBy ( 'id', 'desc' )->paginate ( $query->count () )
+            : $query->orderBy ( 'updated_at', 'desc' )->orderBy ( 'id', 'desc' )->paginate ( $perPage )->withQueryString ();
+    }
 
-        $TableData = $TableData->withQueryString ();
-
-        // Filter projects based on user role
+    private function getProyeks ()
+    {
         $user         = Auth::user ();
         $proyeksQuery = Proyek::with ( "users" );
+
         if ( $user->role === 'koordinator_proyek' )
         {
             $proyeksQuery->whereHas ( 'users', function ($query) use ($user)
@@ -64,33 +93,26 @@ class AlatProyekController extends Controller
             } );
         }
 
-        $proyeks = $proyeksQuery
-            ->orderBy ( "updated_at", "desc" )
-            ->orderBy ( "id", "desc" )
-            ->get ();
+        return $proyeksQuery->orderBy ( "updated_at", "desc" )->orderBy ( "id", "desc" )->get ();
+    }
 
-        $AlatAvailable = MasterDataAlat::whereDoesntHave ( 'alatProyek', function ($query)
+    private function getAlatAvailable ()
+    {
+        return MasterDataAlat::whereDoesntHave ( 'alatProyek', function ($query)
         {
             $query->whereNull ( 'removed_at' );
         } )->get ();
+    }
 
-        $uniqueValues = [ 
+    private function getUniqueValues ()
+    {
+        return [ 
             'jenis_alat'    => MasterDataAlat::whereNotNull ( 'jenis_alat' )->distinct ()->pluck ( 'jenis_alat' ),
             'kode_alat'     => MasterDataAlat::whereNotNull ( 'kode_alat' )->distinct ()->pluck ( 'kode_alat' ),
             'merek_alat'    => MasterDataAlat::whereNotNull ( 'merek_alat' )->distinct ()->pluck ( 'merek_alat' ),
             'tipe_alat'     => MasterDataAlat::whereNotNull ( 'tipe_alat' )->distinct ()->pluck ( 'tipe_alat' ),
             'serial_number' => MasterDataAlat::whereNotNull ( 'serial_number' )->distinct ()->pluck ( 'serial_number' ),
         ];
-
-        return view ( 'dashboard.alat.alat', [ 
-            'proyeks'       => $proyeks,
-            'proyek'        => $proyek,
-            'TableData'     => $TableData,
-            'AlatAvailable' => $AlatAvailable,
-            'headerPage'    => "Data Alat Proyek",
-            'page'          => 'Data Alat',
-            'uniqueValues'  => $uniqueValues,
-        ] );
     }
 
     private function handleJenisAlatFilter ( Request $request, $query )
@@ -98,23 +120,7 @@ class AlatProyekController extends Controller
         if ( $request->filled ( 'selected_jenis_alat' ) )
         {
             $jenisAlat = explode ( ',', $request->selected_jenis_alat );
-            if ( in_array ( 'null', $jenisAlat ) )
-            {
-                $nonNullValues = array_filter ( $jenisAlat, fn ( $value ) => $value !== 'null' );
-                $query->whereHas ( 'masterDataAlat', function ($q) use ($nonNullValues)
-                {
-                    $q->whereNull ( 'jenis_alat' )
-                        ->orWhere ( 'jenis_alat', '-' )
-                        ->orWhereIn ( 'jenis_alat', $nonNullValues );
-                } );
-            }
-            else
-            {
-                $query->whereHas ( 'masterDataAlat', function ($q) use ($jenisAlat)
-                {
-                    $q->whereIn ( 'jenis_alat', $jenisAlat );
-                } );
-            }
+            $this->applyFilter ( $query, 'jenis_alat', $jenisAlat );
         }
     }
 
@@ -123,23 +129,7 @@ class AlatProyekController extends Controller
         if ( $request->filled ( 'selected_kode_alat' ) )
         {
             $kodeAlat = explode ( ',', $request->selected_kode_alat );
-            if ( in_array ( 'null', $kodeAlat ) )
-            {
-                $nonNullValues = array_filter ( $kodeAlat, fn ( $value ) => $value !== 'null' );
-                $query->whereHas ( 'masterDataAlat', function ($q) use ($nonNullValues)
-                {
-                    $q->whereNull ( 'kode_alat' )
-                        ->orWhere ( 'kode_alat', '-' )
-                        ->orWhereIn ( 'kode_alat', $nonNullValues );
-                } );
-            }
-            else
-            {
-                $query->whereHas ( 'masterDataAlat', function ($q) use ($kodeAlat)
-                {
-                    $q->whereIn ( 'kode_alat', $kodeAlat );
-                } );
-            }
+            $this->applyFilter ( $query, 'kode_alat', $kodeAlat );
         }
     }
 
@@ -148,23 +138,7 @@ class AlatProyekController extends Controller
         if ( $request->filled ( 'selected_merek_alat' ) )
         {
             $merekAlat = explode ( ',', $request->selected_merek_alat );
-            if ( in_array ( 'null', $merekAlat ) )
-            {
-                $nonNullValues = array_filter ( $merekAlat, fn ( $value ) => $value !== 'null' );
-                $query->whereHas ( 'masterDataAlat', function ($q) use ($nonNullValues)
-                {
-                    $q->whereNull ( 'merek_alat' )
-                        ->orWhere ( 'merek_alat', '-' )
-                        ->orWhereIn ( 'merek_alat', $nonNullValues );
-                } );
-            }
-            else
-            {
-                $query->whereHas ( 'masterDataAlat', function ($q) use ($merekAlat)
-                {
-                    $q->whereIn ( 'merek_alat', $merekAlat );
-                } );
-            }
+            $this->applyFilter ( $query, 'merek_alat', $merekAlat );
         }
     }
 
@@ -173,23 +147,7 @@ class AlatProyekController extends Controller
         if ( $request->filled ( 'selected_tipe_alat' ) )
         {
             $tipeAlat = explode ( ',', $request->selected_tipe_alat );
-            if ( in_array ( 'null', $tipeAlat ) )
-            {
-                $nonNullValues = array_filter ( $tipeAlat, fn ( $value ) => $value !== 'null' );
-                $query->whereHas ( 'masterDataAlat', function ($q) use ($nonNullValues)
-                {
-                    $q->whereNull ( 'tipe_alat' )
-                        ->orWhere ( 'tipe_alat', '-' )
-                        ->orWhereIn ( 'tipe_alat', $nonNullValues );
-                } );
-            }
-            else
-            {
-                $query->whereHas ( 'masterDataAlat', function ($q) use ($tipeAlat)
-                {
-                    $q->whereIn ( 'tipe_alat', $tipeAlat );
-                } );
-            }
+            $this->applyFilter ( $query, 'tipe_alat', $tipeAlat );
         }
     }
 
@@ -198,23 +156,28 @@ class AlatProyekController extends Controller
         if ( $request->filled ( 'selected_serial_number' ) )
         {
             $serialNumber = explode ( ',', $request->selected_serial_number );
-            if ( in_array ( 'null', $serialNumber ) )
+            $this->applyFilter ( $query, 'serial_number', $serialNumber );
+        }
+    }
+
+    private function applyFilter ( $query, $field, $values )
+    {
+        if ( in_array ( 'null', $values ) )
+        {
+            $nonNullValues = array_filter ( $values, fn ( $value ) => $value !== 'null' );
+            $query->whereHas ( 'masterDataAlat', function ($q) use ($field, $nonNullValues)
             {
-                $nonNullValues = array_filter ( $serialNumber, fn ( $value ) => $value !== 'null' );
-                $query->whereHas ( 'masterDataAlat', function ($q) use ($nonNullValues)
-                {
-                    $q->whereNull ( 'serial_number' )
-                        ->orWhere ( 'serial_number', '-' )
-                        ->orWhereIn ( 'serial_number', $nonNullValues );
-                } );
-            }
-            else
+                $q->whereNull ( $field )
+                    ->orWhere ( $field, '-' )
+                    ->orWhereIn ( $field, $nonNullValues );
+            } );
+        }
+        else
+        {
+            $query->whereHas ( 'masterDataAlat', function ($q) use ($field, $values)
             {
-                $query->whereHas ( 'masterDataAlat', function ($q) use ($serialNumber)
-                {
-                    $q->whereIn ( 'serial_number', $serialNumber );
-                } );
-            }
+                $q->whereIn ( $field, $values );
+            } );
         }
     }
 
@@ -228,14 +191,12 @@ class AlatProyekController extends Controller
 
         foreach ( $validatedData[ 'id_master_data_alat' ] as $alatId )
         {
-            // Create new AlatProyek record
             AlatProyek::create ( [ 
                 'id_master_data_alat' => $alatId,
                 'id_proyek'           => $validatedData[ 'id_proyek' ],
                 'assigned_at'         => now (),
             ] );
 
-            // Update the current project in MasterDataAlat
             MasterDataAlat::where ( 'id', $alatId )->update ( [ 
                 'id_proyek_current' => $validatedData[ 'id_proyek' ]
             ] );
@@ -248,12 +209,10 @@ class AlatProyekController extends Controller
     {
         $alatProyek = AlatProyek::findOrFail ( $id );
 
-        // Set removed_at timestamp
         $alatProyek->update ( [ 
             'removed_at' => now ()
         ] );
 
-        // Clear the current project from MasterDataAlat
         $alatProyek->masterDataAlat ()->update ( [ 
             'id_proyek_current' => null
         ] );

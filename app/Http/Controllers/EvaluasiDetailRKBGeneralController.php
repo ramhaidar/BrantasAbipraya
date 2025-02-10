@@ -262,7 +262,7 @@ class EvaluasiDetailRKBGeneralController extends Controller
 
         // Redirect dengan pesan sukses
         return redirect ()
-            ->route ( "evaluasi_rkb_general.detail.index", $id_rkb )
+            ->back ()
             ->with ( "success", "RKB Berhasil di Evaluasi!" );
     }
 
@@ -295,7 +295,7 @@ class EvaluasiDetailRKBGeneralController extends Controller
         $rkb->save ();
 
         return redirect ()
-            ->route ( 'evaluasi_rkb_general.detail.index', $id_rkb )
+            ->back ()
             ->with ( 'success', 'RKB Berhasil di Approve oleh VP!' );
     }
 
@@ -343,7 +343,7 @@ class EvaluasiDetailRKBGeneralController extends Controller
         $rkb->save ();
 
         return redirect ()
-            ->route ( 'evaluasi_rkb_general.detail.index', $id_rkb )
+            ->back ()
             ->with ( 'success', 'RKB Berhasil di Approve oleh SVP!' );
     }
 }

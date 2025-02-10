@@ -1,9 +1,9 @@
 <div class="p-0 m-0 row mb-3">
     <div class="col-md-12 p-0 m-0">
-        <form class="d-flex gap-2" action="{{ $route ?? url()->current() }}" method="GET">
+        <form class="d-flex gap-2" action="{{ $route ?? url()->current() }}" method="GET" onsubmit="return resetPage(this)">
             {{-- Preserve all existing query parameters --}}
             @foreach (request()->query() as $key => $value)
-                @if (!in_array($key, ['search', 'per_page']) && !empty($value))
+                @if (!in_array($key, ['search', 'per_page', 'page']) && !empty($value))
                     @if (is_array($value))
                         @foreach ($value as $arrayValue)
                             <input name="{{ $key }}[]" type="hidden" value="{{ $arrayValue }}">
@@ -44,6 +44,24 @@
         const form = button.closest('form');
         const searchInput = form.querySelector('[name=search]');
         searchInput.value = '';
+        resetPage(form);
         form.submit();
+    }
+
+    function resetPage(form) {
+        // Remove existing page input if any
+        const existingPageInput = form.querySelector('input[name="page"]');
+        if (existingPageInput) {
+            existingPageInput.remove();
+        }
+        // Add page=1 if there's a search value
+        if (form.querySelector('[name="search"]').value) {
+            const pageInput = document.createElement('input');
+            pageInput.type = 'hidden';
+            pageInput.name = 'page';
+            pageInput.value = '1';
+            form.appendChild(pageInput);
+        }
+        return true;
     }
 </script>

@@ -130,23 +130,29 @@
             return $(this).val();
         }).get();
 
-        // Dapatkan semua parameter URL saat ini
         const urlParams = new URLSearchParams(window.location.search);
 
-        // Update atau hapus parameter filter yang diubah
+        // Reset page parameter ke 1
+        if (urlParams.has('page')) {
+            urlParams.set('page', '1');
+        }
+
         if (selected.length > 0) {
             urlParams.set(`selected_${type}`, selected.join(','));
         } else {
             urlParams.delete(`selected_${type}`);
         }
 
-        // Redirect dengan parameter yang diupdate
         window.location.href = `${window.location.pathname}?${urlParams.toString()}`;
     }
 
     function clearFilter(type) {
-        // Dapatkan semua parameter URL saat ini
         const urlParams = new URLSearchParams(window.location.search);
+
+        // Reset page parameter ke 1
+        if (urlParams.has('page')) {
+            urlParams.set('page', '1');
+        }
 
         if (type === 'price') {
             urlParams.delete('price_min');
@@ -156,13 +162,17 @@
             urlParams.delete(`selected_${type}`);
         }
 
-        // Redirect dengan parameter yang diupdate
         window.location.href = `${window.location.pathname}?${urlParams.toString()}`;
     }
 
     // Handler untuk tombol "Clear All Filters"
     function clearAllFilters() {
         const urlParams = new URLSearchParams(window.location.search);
+
+        // Reset page parameter ke 1
+        if (urlParams.has('page')) {
+            urlParams.set('page', '1');
+        }
 
         // Hapus semua parameter filter tapi pertahankan parameter lain
         const paramsToKeep = ['search', 'per_page', 'id_proyek'];

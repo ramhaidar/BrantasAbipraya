@@ -36,4 +36,11 @@
         max-height: 200px;
         overflow-y: auto;
     }
+
+    .img-thumbnail {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        cursor: pointer;
+    }
 </style>

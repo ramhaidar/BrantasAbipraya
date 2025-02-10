@@ -17,10 +17,12 @@ class AlatProyekController extends Controller
         $proyek  = Proyek::with ( "users" )->findOrFail ( $request->id_proyek );
         $query   = $this->buildQuery ( $request, $proyek->id );
 
+        // Get unique values from the filtered data
+        $uniqueValues = $this->getUniqueValues ( $proyek->id );
+
         $TableData     = $this->getTableData ( $query, $perPage );
         $proyeks       = $this->getProyeks ();
         $AlatAvailable = $this->getAlatAvailable ();
-        $uniqueValues  = $this->getUniqueValues ();
 
         return view ( 'dashboard.alat.alat', [ 
             'proyeks'       => $proyeks,
@@ -104,14 +106,20 @@ class AlatProyekController extends Controller
         } )->get ();
     }
 
-    private function getUniqueValues ()
+    private function getUniqueValues ( $proyekId )
     {
+        $alatIds = AlatProyek::where ( 'id_proyek', $proyekId )
+            ->whereNull ( 'removed_at' )
+            ->pluck ( 'id_master_data_alat' );
+
+        $query = MasterDataAlat::whereIn ( 'id', $alatIds );
+
         return [ 
-            'jenis_alat'    => MasterDataAlat::whereNotNull ( 'jenis_alat' )->distinct ()->pluck ( 'jenis_alat' ),
-            'kode_alat'     => MasterDataAlat::whereNotNull ( 'kode_alat' )->distinct ()->pluck ( 'kode_alat' ),
-            'merek_alat'    => MasterDataAlat::whereNotNull ( 'merek_alat' )->distinct ()->pluck ( 'merek_alat' ),
-            'tipe_alat'     => MasterDataAlat::whereNotNull ( 'tipe_alat' )->distinct ()->pluck ( 'tipe_alat' ),
-            'serial_number' => MasterDataAlat::whereNotNull ( 'serial_number' )->distinct ()->pluck ( 'serial_number' ),
+            'jenis_alat'    => $query->clone ()->whereNotNull ( 'jenis_alat' )->distinct ()->pluck ( 'jenis_alat' ),
+            'kode_alat'     => $query->clone ()->whereNotNull ( 'kode_alat' )->distinct ()->pluck ( 'kode_alat' ),
+            'merek_alat'    => $query->clone ()->whereNotNull ( 'merek_alat' )->distinct ()->pluck ( 'merek_alat' ),
+            'tipe_alat'     => $query->clone ()->whereNotNull ( 'tipe_alat' )->distinct ()->pluck ( 'tipe_alat' ),
+            'serial_number' => $query->clone ()->whereNotNull ( 'serial_number' )->distinct ()->pluck ( 'serial_number' ),
         ];
     }
 

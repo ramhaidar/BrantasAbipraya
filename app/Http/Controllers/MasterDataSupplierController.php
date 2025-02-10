@@ -84,10 +84,13 @@ class MasterDataSupplierController extends Controller
             ->paginate ( $perPage )
             ->withQueryString ();
 
+        // Clone the query before pagination to get unique values
+        $queryForUniqueValues = clone $query;
+
         $uniqueValues = [ 
-            'nama'           => MasterDataSupplier::whereNotNull ( 'nama' )->distinct ()->pluck ( 'nama' ),
-            'alamat'         => MasterDataSupplier::whereNotNull ( 'alamat' )->distinct ()->pluck ( 'alamat' ),
-            'contact_person' => MasterDataSupplier::whereNotNull ( 'contact_person' )->distinct ()->pluck ( 'contact_person' ),
+            'nama'           => $queryForUniqueValues->get ()->pluck ( 'nama' )->unique ()->values (),
+            'alamat'         => $queryForUniqueValues->get ()->pluck ( 'alamat' )->unique ()->values (),
+            'contact_person' => $queryForUniqueValues->get ()->pluck ( 'contact_person' )->unique ()->values (),
         ];
 
         return view ( 'dashboard.masterdata.supplier.supplier', [ 

@@ -83,14 +83,22 @@ class MasterDataSparepartController extends Controller
             ->orderBy ( "id", "desc" )
             ->get ();
 
+        // Clone the query before pagination
+        $queryForUniqueValues = clone $query;
+
+        // Get unique values from the filtered query
         $uniqueValues = [ 
-            'nama'        => MasterDataSparepart::whereNotNull ( 'nama' )->distinct ()->pluck ( 'nama' ),
-            'part_number' => MasterDataSparepart::whereNotNull ( 'part_number' )->distinct ()->pluck ( 'part_number' ),
-            'merk'        => MasterDataSparepart::whereNotNull ( 'merk' )->distinct ()->pluck ( 'merk' ),
-            'kode'        => KategoriSparepart::whereNotNull ( 'kode' )->distinct ()->pluck ( 'kode' ),
-            'jenis'       => KategoriSparepart::whereNotNull ( 'jenis' )->distinct ()->pluck ( 'jenis' )->sort (),
-            'sub_jenis'   => KategoriSparepart::whereNotNull ( 'sub_jenis' )->distinct ()->pluck ( 'sub_jenis' )->sort ()->values (),
-            'kategori'    => KategoriSparepart::whereNotNull ( 'nama' )->distinct ()->pluck ( 'nama' ),
+            'nama'        => $queryForUniqueValues->get ()->pluck ( 'nama' )->unique ()->values (),
+            'part_number' => $queryForUniqueValues->get ()->pluck ( 'part_number' )->unique ()->values (),
+            'merk'        => $queryForUniqueValues->get ()->pluck ( 'merk' )->unique ()->values (),
+            'kode'        => KategoriSparepart::whereIn ( 'id', $queryForUniqueValues->get ()->pluck ( 'id_kategori_sparepart' ) )
+                ->pluck ( 'kode' )->unique ()->values (),
+            'jenis'       => KategoriSparepart::whereIn ( 'id', $queryForUniqueValues->get ()->pluck ( 'id_kategori_sparepart' ) )
+                ->pluck ( 'jenis' )->unique ()->sort ()->values (),
+            'sub_jenis'   => KategoriSparepart::whereIn ( 'id', $queryForUniqueValues->get ()->pluck ( 'id_kategori_sparepart' ) )
+                ->pluck ( 'sub_jenis' )->unique ()->sort ()->values (),
+            'kategori'    => KategoriSparepart::whereIn ( 'id', $queryForUniqueValues->get ()->pluck ( 'id_kategori_sparepart' ) )
+                ->pluck ( 'nama' )->unique ()->values (),
         ];
 
         $TableData = $query->orderBy ( 'updated_at', 'desc' )

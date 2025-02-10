@@ -79,14 +79,17 @@ class MasterDataAlatController extends Controller
         // Use the filtered query for pagination
         $TableData = $query->paginate ( $perPage )->withQueryString ();
 
-        // Get unique values for filters
+        // Clone the query before pagination to get unique values
+        $queryForUniqueValues = clone $query;
+
+        // Get unique values from the filtered query
         $uniqueValues = [ 
-            'jenis'  => MasterDataAlat::distinct ()->pluck ( 'jenis_alat' ),
-            'merek'  => MasterDataAlat::distinct ()->pluck ( 'merek_alat' ),
-            'kode'   => MasterDataAlat::distinct ()->pluck ( 'kode_alat' ),
-            'tipe'   => MasterDataAlat::distinct ()->pluck ( 'tipe_alat' ),
-            'serial' => MasterDataAlat::distinct ()->pluck ( 'serial_number' ),
-            'proyek' => Proyek::distinct ()->pluck ( 'nama' ),
+            'jenis'  => $queryForUniqueValues->get ()->pluck ( 'jenis_alat' )->unique ()->values (),
+            'merek'  => $queryForUniqueValues->get ()->pluck ( 'merek_alat' )->unique ()->values (),
+            'kode'   => $queryForUniqueValues->get ()->pluck ( 'kode_alat' )->unique ()->values (),
+            'tipe'   => $queryForUniqueValues->get ()->pluck ( 'tipe_alat' )->unique ()->values (),
+            'serial' => $queryForUniqueValues->get ()->pluck ( 'serial_number' )->unique ()->values (),
+            'proyek' => $proyeks->pluck ( 'nama' ),
         ];
 
         return view ( 'dashboard.masterdata.alat.alat', [ 

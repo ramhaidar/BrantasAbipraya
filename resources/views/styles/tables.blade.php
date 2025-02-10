@@ -32,6 +32,7 @@
 
     .checkbox-list {
         padding: 5px;
+        padding-right: 15px;
         max-height: 200px;
         overflow-y: auto;
     }

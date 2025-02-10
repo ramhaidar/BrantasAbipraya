@@ -129,6 +129,10 @@ class MasterDataAlatController extends Controller
         if ( $request->filled ( 'selected_jenis' ) )
         {
             $jenis = explode ( ',', $request->selected_jenis );
+            $jenis = array_map ( function ($val)
+            {
+                return $val === 'null' ? $val : base64_decode ( $val );
+            }, $jenis );
             if ( in_array ( 'null', $jenis ) )
             {
                 $nonNullValues = array_filter ( $jenis, fn ( $value ) => $value !== 'null' );
@@ -151,6 +155,10 @@ class MasterDataAlatController extends Controller
         if ( $request->filled ( 'selected_merek' ) )
         {
             $merek = explode ( ',', $request->selected_merek );
+            $merek = array_map ( function ($val)
+            {
+                return $val === 'null' ? $val : base64_decode ( $val );
+            }, $merek );
             if ( in_array ( 'null', $merek ) )
             {
                 $nonNullValues = array_filter ( $merek, fn ( $value ) => $value !== 'null' );
@@ -173,6 +181,10 @@ class MasterDataAlatController extends Controller
         if ( $request->filled ( 'selected_kode' ) )
         {
             $kode = explode ( ',', $request->selected_kode );
+            $kode = array_map ( function ($val)
+            {
+                return $val === 'null' ? $val : base64_decode ( $val );
+            }, $kode );
             if ( in_array ( 'null', $kode ) )
             {
                 $nonNullValues = array_filter ( $kode, fn ( $value ) => $value !== 'null' );
@@ -195,6 +207,10 @@ class MasterDataAlatController extends Controller
         if ( $request->filled ( 'selected_tipe' ) )
         {
             $tipe = explode ( ',', $request->selected_tipe );
+            $tipe = array_map ( function ($val)
+            {
+                return $val === 'null' ? $val : base64_decode ( $val );
+            }, $tipe );
             if ( in_array ( 'null', $tipe ) )
             {
                 $nonNullValues = array_filter ( $tipe, fn ( $value ) => $value !== 'null' );
@@ -217,6 +233,10 @@ class MasterDataAlatController extends Controller
         if ( $request->filled ( 'selected_serial' ) )
         {
             $serial = explode ( ',', $request->selected_serial );
+            $serial = array_map ( function ($val)
+            {
+                return $val === 'null' ? $val : base64_decode ( $val );
+            }, $serial );
             if ( in_array ( 'null', $serial ) )
             {
                 $nonNullValues = array_filter ( $serial, fn ( $value ) => $value !== 'null' );
@@ -239,6 +259,10 @@ class MasterDataAlatController extends Controller
         if ( $request->filled ( 'selected_proyek' ) )
         {
             $proyek = explode ( ',', $request->selected_proyek );
+            $proyek = array_map ( function ($val)
+            {
+                return $val === 'null' ? $val : base64_decode ( $val );
+            }, $proyek );
             if ( in_array ( 'null', $proyek ) )
             {
                 $nonNullValues = array_filter ( $proyek, fn ( $value ) => $value !== 'null' );

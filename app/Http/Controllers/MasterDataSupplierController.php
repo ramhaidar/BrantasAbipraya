@@ -146,6 +146,10 @@ class MasterDataSupplierController extends Controller
         if ( $request->filled ( 'selected_nama' ) )
         {
             $nama = explode ( ',', $request->selected_nama );
+            $nama = array_map ( function ($val)
+            {
+                return $val === 'null' ? $val : base64_decode ( $val );
+            }, $nama );
             if ( in_array ( 'null', $nama ) )
             {
                 $nonNullValues = array_filter ( $nama, fn ( $value ) => $value !== 'null' );
@@ -168,6 +172,10 @@ class MasterDataSupplierController extends Controller
         if ( $request->filled ( 'selected_alamat' ) )
         {
             $alamat = explode ( ',', $request->selected_alamat );
+            $alamat = array_map ( function ($val)
+            {
+                return $val === 'null' ? $val : base64_decode ( $val );
+            }, $alamat );
             if ( in_array ( 'null', $alamat ) )
             {
                 $nonNullValues = array_filter ( $alamat, fn ( $value ) => $value !== 'null' );
@@ -190,6 +198,10 @@ class MasterDataSupplierController extends Controller
         if ( $request->filled ( 'selected_contact_person' ) )
         {
             $contactPerson = explode ( ',', $request->selected_contact_person );
+            $contactPerson = array_map ( function ($val)
+            {
+                return $val === 'null' ? $val : base64_decode ( $val );
+            }, $contactPerson );
             if ( in_array ( 'null', $contactPerson ) )
             {
                 $nonNullValues = array_filter ( $contactPerson, fn ( $value ) => $value !== 'null' );

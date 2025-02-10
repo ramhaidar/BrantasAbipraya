@@ -30,6 +30,12 @@ class ProyekController extends Controller
         if ( $request->filled ( 'selected_nama' ) )
         {
             $nama = explode ( ',', $request->selected_nama );
+            // Decode base64 values
+            $nama = array_map ( function ($val)
+            {
+                return $val === 'null' ? $val : base64_decode ( $val );
+            }, $nama );
+
             if ( in_array ( 'null', $nama ) )
             {
                 $nonNullValues = array_filter ( $nama, fn ( $value ) => $value !== 'null' );

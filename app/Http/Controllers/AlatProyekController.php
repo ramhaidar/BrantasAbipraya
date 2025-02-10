@@ -172,12 +172,29 @@ class AlatProyekController extends Controller
         ];
     }
 
+    private function decodeBase64Filter ( $encodedValue )
+    {
+        if ( ! $encodedValue ) return [];
+        try
+        {
+            $decoded = base64_decode ( $encodedValue );
+            return $decoded ? explode ( ',', $decoded ) : [];
+        }
+        catch ( \Exception $e )
+        {
+            return [];
+        }
+    }
+
     private function handleJenisAlatFilter ( Request $request, $query )
     {
         if ( $request->filled ( 'selected_jenis_alat' ) )
         {
-            $jenisAlat = explode ( ',', $request->selected_jenis_alat );
-            $this->applyFilter ( $query, 'jenis_alat', $jenisAlat );
+            $jenisAlat = $this->decodeBase64Filter ( $request->selected_jenis_alat );
+            if ( ! empty ( $jenisAlat ) )
+            {
+                $this->applyFilter ( $query, 'jenis_alat', $jenisAlat );
+            }
         }
     }
 
@@ -185,8 +202,11 @@ class AlatProyekController extends Controller
     {
         if ( $request->filled ( 'selected_kode_alat' ) )
         {
-            $kodeAlat = explode ( ',', $request->selected_kode_alat );
-            $this->applyFilter ( $query, 'kode_alat', $kodeAlat );
+            $kodeAlat = $this->decodeBase64Filter ( $request->selected_kode_alat );
+            if ( ! empty ( $kodeAlat ) )
+            {
+                $this->applyFilter ( $query, 'kode_alat', $kodeAlat );
+            }
         }
     }
 
@@ -194,8 +214,11 @@ class AlatProyekController extends Controller
     {
         if ( $request->filled ( 'selected_merek_alat' ) )
         {
-            $merekAlat = explode ( ',', $request->selected_merek_alat );
-            $this->applyFilter ( $query, 'merek_alat', $merekAlat );
+            $merekAlat = $this->decodeBase64Filter ( $request->selected_merek_alat );
+            if ( ! empty ( $merekAlat ) )
+            {
+                $this->applyFilter ( $query, 'merek_alat', $merekAlat );
+            }
         }
     }
 
@@ -203,8 +226,11 @@ class AlatProyekController extends Controller
     {
         if ( $request->filled ( 'selected_tipe_alat' ) )
         {
-            $tipeAlat = explode ( ',', $request->selected_tipe_alat );
-            $this->applyFilter ( $query, 'tipe_alat', $tipeAlat );
+            $tipeAlat = $this->decodeBase64Filter ( $request->selected_tipe_alat );
+            if ( ! empty ( $tipeAlat ) )
+            {
+                $this->applyFilter ( $query, 'tipe_alat', $tipeAlat );
+            }
         }
     }
 
@@ -212,8 +238,11 @@ class AlatProyekController extends Controller
     {
         if ( $request->filled ( 'selected_serial_number' ) )
         {
-            $serialNumber = explode ( ',', $request->selected_serial_number );
-            $this->applyFilter ( $query, 'serial_number', $serialNumber );
+            $serialNumber = $this->decodeBase64Filter ( $request->selected_serial_number );
+            if ( ! empty ( $serialNumber ) )
+            {
+                $this->applyFilter ( $query, 'serial_number', $serialNumber );
+            }
         }
     }
 

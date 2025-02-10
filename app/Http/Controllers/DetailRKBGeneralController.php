@@ -18,8 +18,9 @@ class DetailRKBGeneralController extends Controller
 {
     public function index ( Request $request, $id )
     {
-        $perPage = $this->getPerPage($request);
-        if ($perPage instanceof \Illuminate\Http\RedirectResponse) {
+        $perPage = $this->getPerPage ( $request );
+        if ( $perPage instanceof \Illuminate\Http\RedirectResponse )
+        {
             return $perPage;
         }
 
@@ -185,6 +186,12 @@ class DetailRKBGeneralController extends Controller
         if ( $request->filled ( "selected_{$paramName}" ) )
         {
             $values = explode ( ',', $request->get ( "selected_{$paramName}" ) );
+            // Decode base64 values
+            $values = array_map ( function ($val)
+            {
+                return $val === 'null' ? $val : base64_decode ( $val );
+            }, $values );
+
             if ( in_array ( 'null', $values ) )
             {
                 $nonNullValues = array_filter ( $values, fn ( $value ) => $value !== 'null' );

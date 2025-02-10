@@ -77,6 +77,10 @@ class EvaluasiRKBGeneralController extends Controller
         if ( $request->filled ( 'selected_nomor' ) )
         {
             $nomor = explode ( ',', $request->selected_nomor );
+            $nomor = array_map ( function ($val)
+            {
+                return $val === 'null' ? $val : base64_decode ( $val );
+            }, $nomor );
             if ( in_array ( 'null', $nomor ) )
             {
                 $nonNullValues = array_filter ( $nomor, fn ( $value ) => $value !== 'null' );
@@ -101,6 +105,10 @@ class EvaluasiRKBGeneralController extends Controller
         if ( $request->filled ( 'selected_proyek' ) )
         {
             $proyekNames = explode ( ',', $request->selected_proyek );
+            $proyekNames = array_map ( function ($val)
+            {
+                return $val === 'null' ? $val : base64_decode ( $val );
+            }, $proyekNames );
             if ( in_array ( 'null', $proyekNames ) )
             {
                 $nonNullValues = array_filter ( $proyekNames, fn ( $value ) => $value !== 'null' );
@@ -128,6 +136,10 @@ class EvaluasiRKBGeneralController extends Controller
         if ( $request->filled ( 'selected_periode' ) )
         {
             $periodeValues = explode ( ',', $request->selected_periode );
+            $periodeValues = array_map ( function ($val)
+            {
+                return $val === 'null' ? $val : base64_decode ( $val );
+            }, $periodeValues );
             if ( in_array ( 'null', $periodeValues ) )
             {
                 $nonNullValues = array_filter ( $periodeValues, fn ( $value ) => $value !== 'null' );

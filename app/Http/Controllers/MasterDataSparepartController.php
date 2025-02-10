@@ -160,6 +160,10 @@ class MasterDataSparepartController extends Controller
         if ( $request->filled ( 'selected_nama' ) )
         {
             $nama = explode ( ',', $request->selected_nama );
+            $nama = array_map ( function ($val)
+            {
+                return $val === 'null' ? $val : base64_decode ( $val );
+            }, $nama );
             if ( in_array ( 'null', $nama ) )
             {
                 $nonNullValues = array_filter ( $nama, fn ( $value ) => $value !== 'null' );
@@ -182,6 +186,10 @@ class MasterDataSparepartController extends Controller
         if ( $request->filled ( 'selected_part_number' ) )
         {
             $partNumber = explode ( ',', $request->selected_part_number );
+            $partNumber = array_map ( function ($val)
+            {
+                return $val === 'null' ? $val : base64_decode ( $val );
+            }, $partNumber );
             if ( in_array ( 'null', $partNumber ) )
             {
                 $nonNullValues = array_filter ( $partNumber, fn ( $value ) => $value !== 'null' );
@@ -204,6 +212,10 @@ class MasterDataSparepartController extends Controller
         if ( $request->filled ( 'selected_merk' ) )
         {
             $merk = explode ( ',', $request->selected_merk );
+            $merk = array_map ( function ($val)
+            {
+                return $val === 'null' ? $val : base64_decode ( $val );
+            }, $merk );
             if ( in_array ( 'null', $merk ) )
             {
                 $nonNullValues = array_filter ( $merk, fn ( $value ) => $value !== 'null' );
@@ -226,6 +238,10 @@ class MasterDataSparepartController extends Controller
         if ( $request->filled ( 'selected_kategori' ) )
         {
             $kategori = explode ( ',', $request->selected_kategori );
+            $kategori = array_map ( function ($val)
+            {
+                return $val === 'null' ? $val : base64_decode ( $val );
+            }, $kategori );
             if ( in_array ( 'null', $kategori ) )
             {
                 $nonNullValues = array_filter ( $kategori, fn ( $value ) => $value !== 'null' );
@@ -253,6 +269,10 @@ class MasterDataSparepartController extends Controller
         if ( $request->filled ( 'selected_kode' ) )
         {
             $kode = explode ( ',', $request->selected_kode );
+            $kode = array_map ( function ($val)
+            {
+                return $val === 'null' ? $val : base64_decode ( $val );
+            }, $kode );
             if ( in_array ( 'null', $kode ) )
             {
                 $nonNullValues = array_filter ( $kode, fn ( $value ) => $value !== 'null' );
@@ -280,6 +300,10 @@ class MasterDataSparepartController extends Controller
         if ( $request->filled ( 'selected_jenis' ) )
         {
             $jenis = explode ( ',', $request->selected_jenis );
+            $jenis = array_map ( function ($val)
+            {
+                return $val === 'null' ? $val : base64_decode ( $val );
+            }, $jenis );
             if ( in_array ( 'null', $jenis ) )
             {
                 $nonNullValues = array_filter ( $jenis, fn ( $value ) => $value !== 'null' );
@@ -307,6 +331,10 @@ class MasterDataSparepartController extends Controller
         if ( $request->filled ( 'selected_sub_jenis' ) )
         {
             $subJenis = explode ( ',', $request->selected_sub_jenis );
+            $subJenis = array_map ( function ($val)
+            {
+                return $val === 'null' ? $val : base64_decode ( $val );
+            }, $subJenis );
             if ( in_array ( 'null', $subJenis ) )
             {
                 $nonNullValues = array_filter ( $subJenis, fn ( $value ) => $value !== 'null' );

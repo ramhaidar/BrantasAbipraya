@@ -17,10 +17,14 @@ class TimelineRKBUrgentController extends Controller
         $query = TimelineRKBUrgent::query ()
             ->where ( 'id_link_alat_detail_rkb', $id );
 
-        // Handle uraian filter
+        // Handle uraian filter with base64 decode
         if ( $request->filled ( 'selected_uraian' ) )
         {
             $uraian = explode ( ',', $request->selected_uraian );
+            $uraian = array_map ( function ($val)
+            {
+                return $val === 'null' ? $val : base64_decode ( $val );
+            }, $uraian );
             if ( in_array ( 'null', $uraian ) )
             {
                 $nonNullValues = array_filter ( $uraian, fn ( $value ) => $value !== 'null' );
@@ -47,100 +51,61 @@ class TimelineRKBUrgentController extends Controller
             $query->whereIn ( 'is_done', $status );
         }
 
-        // New filters
-        if ( $request->filled ( 'selected_durasi_rencana' ) )
+        // Handle other date filters with base64 decode
+        $dateFields = [ 'tanggal_awal_rencana', 'tanggal_akhir_rencana', 'tanggal_awal_actual', 'tanggal_akhir_actual' ];
+        foreach ( $dateFields as $field )
         {
-            $durasi = explode ( ',', $request->selected_durasi_rencana );
-            if ( in_array ( 'null', $durasi ) )
+            if ( $request->filled ( "selected_{$field}" ) )
             {
-                $nonNullValues = array_filter ( $durasi, fn ( $value ) => $value !== 'null' );
-                $query->where ( function ($q) use ($nonNullValues)
+                $dates = explode ( ',', $request->get ( "selected_{$field}" ) );
+                $dates = array_map ( function ($val)
                 {
-                    $q->whereNull ( 'tanggal_awal_rencana' )
-                        ->orWhereNull ( 'tanggal_akhir_rencana' )
-                        ->orWhereRaw ( 'EXTRACT(DAY FROM (tanggal_akhir_rencana::timestamp - tanggal_awal_rencana::timestamp))::integer = ANY(?)', [ "{" . implode ( ',', $nonNullValues ) . "}" ] );
-                } );
-            }
-            else
-            {
-                $query->whereRaw ( 'EXTRACT(DAY FROM (tanggal_akhir_rencana::timestamp - tanggal_awal_rencana::timestamp))::integer = ANY(?)', [ "{" . implode ( ',', $durasi ) . "}" ] );
-            }
-        }
-
-        if ( $request->filled ( 'selected_tanggal_awal_rencana' ) )
-        {
-            $dates = explode ( ',', $request->selected_tanggal_awal_rencana );
-            if ( in_array ( 'null', $dates ) )
-            {
-                $nonNullDates = array_filter ( $dates, fn ( $date ) => $date !== 'null' );
-                $query->where ( function ($q) use ($nonNullDates)
+                    return $val === 'null' ? $val : base64_decode ( $val );
+                }, $dates );
+                if ( in_array ( 'null', $dates ) )
                 {
-                    $q->whereNull ( 'tanggal_awal_rencana' )
-                        ->when ( count ( $nonNullDates ) > 0, function ($q) use ($nonNullDates)
-                        {
-                            $q->orWhereIn ( \DB::raw ( 'DATE(tanggal_awal_rencana)' ), $nonNullDates );
-                        } );
-                } );
-            }
-            else
-            {
-                $query->whereIn ( \DB::raw ( 'DATE(tanggal_awal_rencana)' ), $dates );
-            }
-        }
-
-        if ( $request->filled ( 'selected_tanggal_akhir_rencana' ) )
-        {
-            $dates = explode ( ',', $request->selected_tanggal_akhir_rencana );
-            $query->whereIn ( \DB::raw ( 'DATE(tanggal_akhir_rencana)' ), $dates );
-        }
-
-        if ( $request->filled ( 'selected_durasi_actual' ) )
-        {
-            $durasi = explode ( ',', $request->selected_durasi_actual );
-            $query->whereRaw ( 'EXTRACT(DAY FROM (tanggal_akhir_actual::timestamp - tanggal_awal_actual::timestamp))::integer = ANY(?)', [ "{" . implode ( ',', $durasi ) . "}" ] );
-        }
-
-        // Fix tanggal_awal_actual filter
-        if ( $request->filled ( 'selected_tanggal_awal_actual' ) )
-        {
-            $dates = explode ( ',', $request->selected_tanggal_awal_actual );
-            if ( in_array ( 'null', $dates ) )
-            {
-                $nonNullDates = array_filter ( $dates, fn ( $date ) => $date !== 'null' );
-                $query->where ( function ($q) use ($nonNullDates)
+                    $nonNullDates = array_filter ( $dates, fn ( $date ) => $date !== 'null' );
+                    $query->where ( function ($q) use ($nonNullDates, $field)
+                    {
+                        $q->whereNull ( $field )
+                            ->when ( count ( $nonNullDates ) > 0, function ($q) use ($nonNullDates, $field)
+                            {
+                                $q->orWhereIn ( \DB::raw ( "DATE({$field})" ), $nonNullDates );
+                            } );
+                    } );
+                }
+                else
                 {
-                    $q->whereNull ( 'tanggal_awal_actual' )
-                        ->when ( count ( $nonNullDates ) > 0, function ($q) use ($nonNullDates)
-                        {
-                            $q->orWhereIn ( \DB::raw ( 'DATE(tanggal_awal_actual)' ), $nonNullDates );
-                        } );
-                } );
-            }
-            else
-            {
-                $query->whereIn ( \DB::raw ( 'DATE(tanggal_awal_actual)' ), $dates );
+                    $query->whereIn ( \DB::raw ( "DATE({$field})" ), $dates );
+                }
             }
         }
 
-        // Fix tanggal_akhir_actual filter
-        if ( $request->filled ( 'selected_tanggal_akhir_actual' ) )
+        // Handle durasi filters with base64 decode
+        $durasiFields = [ 'durasi_rencana', 'durasi_actual' ];
+        foreach ( $durasiFields as $field )
         {
-            $dates = explode ( ',', $request->selected_tanggal_akhir_actual );
-            if ( in_array ( 'null', $dates ) )
+            if ( $request->filled ( "selected_{$field}" ) )
             {
-                $nonNullDates = array_filter ( $dates, fn ( $date ) => $date !== 'null' );
-                $query->where ( function ($q) use ($nonNullDates)
+                $durasi = explode ( ',', $request->get ( "selected_{$field}" ) );
+                $durasi = array_map ( function ($val)
                 {
-                    $q->whereNull ( 'tanggal_akhir_actual' )
-                        ->when ( count ( $nonNullDates ) > 0, function ($q) use ($nonNullDates)
-                        {
-                            $q->orWhereIn ( \DB::raw ( 'DATE(tanggal_akhir_actual)' ), $nonNullDates );
-                        } );
-                } );
-            }
-            else
-            {
-                $query->whereIn ( \DB::raw ( 'DATE(tanggal_akhir_actual)' ), $dates );
+                    return $val === 'null' ? $val : base64_decode ( $val );
+                }, $durasi );
+                if ( in_array ( 'null', $durasi ) )
+                {
+                    $nonNullValues = array_filter ( $durasi, fn ( $value ) => $value !== 'null' );
+                    $query->where ( function ($q) use ($nonNullValues, $field)
+                    {
+                        $q->whereNull ( 'tanggal_awal_rencana' )
+                            ->orWhereNull ( 'tanggal_akhir_rencana' )
+                            ->orWhereRaw ( 'EXTRACT(DAY FROM (tanggal_akhir_rencana::timestamp - tanggal_awal_rencana::timestamp))::integer = ANY(?)', [ "{" . implode ( ',', $nonNullValues ) . "}" ] );
+                    } );
+                }
+                else
+                {
+                    $query->whereRaw ( 'EXTRACT(DAY FROM (tanggal_akhir_rencana::timestamp - tanggal_awal_rencana::timestamp))::integer = ANY(?)', [ "{" . implode ( ',', $durasi ) . "}" ] );
+                }
             }
         }
 
@@ -190,7 +155,7 @@ class TimelineRKBUrgentController extends Controller
     {
         if ( $request->get ( 'per_page' ) != -1 )
         {
-            $parameters               = $request->except ( 'per_page' );
+            $parameters             = $request->except ( 'per_page' );
             $parameters[ 'per_page' ] = -1;
 
             return redirect ()->to ( $request->url () . '?' . http_build_query ( $parameters ) );
@@ -349,7 +314,6 @@ class TimelineRKBUrgentController extends Controller
             'page'         => 'Timeline Detail RKB Urgent [' . $data->rkb->nomor . ' | ' . $data->masterDataAlat->jenis_alat . ' : ' . $data->masterDataAlat->kode_alat . ']',
             'uniqueValues' => $uniqueValues,
         ] );
-
     }
 
     public function show ( $id )

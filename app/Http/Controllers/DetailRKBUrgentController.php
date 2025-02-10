@@ -114,11 +114,10 @@ class DetailRKBUrgentController extends Controller
         if ( $request->filled ( "selected_{$paramName}" ) )
         {
             $values = explode ( ',', $request->get ( "selected_{$paramName}" ) );
-
-            // Decode base64 values for all columns
-            $values = array_map ( function ($value)
+            // Decode base64 values
+            $values = array_map ( function ($val)
             {
-                return $value === 'null' ? $value : base64_decode ( $value );
+                return $val === 'null' ? $val : base64_decode ( $val );
             }, $values );
 
             if ( in_array ( 'null', $values ) )

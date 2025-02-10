@@ -87,6 +87,10 @@ class UserController extends Controller
         if ( $request->filled ( 'selected_name' ) )
         {
             $name = explode ( ',', $request->selected_name );
+            $name = array_map ( function ($val)
+            {
+                return $val === 'null' ? $val : base64_decode ( $val );
+            }, $name );
             if ( in_array ( 'null', $name ) )
             {
                 $nonNullValues = array_filter ( $name, fn ( $value ) => $value !== 'null' );
@@ -109,6 +113,10 @@ class UserController extends Controller
         if ( $request->filled ( 'selected_username' ) )
         {
             $username = explode ( ',', $request->selected_username );
+            $username = array_map ( function ($val)
+            {
+                return $val === 'null' ? $val : base64_decode ( $val );
+            }, $username );
             if ( in_array ( 'null', $username ) )
             {
                 $nonNullValues = array_filter ( $username, fn ( $value ) => $value !== 'null' );
@@ -131,6 +139,10 @@ class UserController extends Controller
         if ( $request->filled ( 'selected_sex' ) )
         {
             $sex = explode ( ',', $request->selected_sex );
+            $sex = array_map ( function ($val)
+            {
+                return $val === 'null' ? $val : base64_decode ( $val );
+            }, $sex );
             if ( in_array ( 'null', $sex ) )
             {
                 $nonNullValues = array_filter ( $sex, fn ( $value ) => $value !== 'null' );
@@ -153,6 +165,10 @@ class UserController extends Controller
         if ( $request->filled ( 'selected_role' ) )
         {
             $role = explode ( ',', $request->selected_role );
+            $role = array_map ( function ($val)
+            {
+                return $val === 'null' ? $val : base64_decode ( $val );
+            }, $role );
             if ( in_array ( 'null', $role ) )
             {
                 $nonNullValues = array_filter ( $role, fn ( $value ) => $value !== 'null' );
@@ -175,6 +191,10 @@ class UserController extends Controller
         if ( $request->filled ( 'selected_phone' ) )
         {
             $phone = explode ( ',', $request->selected_phone );
+            $phone = array_map ( function ($val)
+            {
+                return $val === 'null' ? $val : base64_decode ( $val );
+            }, $phone );
             if ( in_array ( 'null', $phone ) )
             {
                 $nonNullValues = array_filter ( $phone, fn ( $value ) => $value !== 'null' );
@@ -197,6 +217,10 @@ class UserController extends Controller
         if ( $request->filled ( 'selected_email' ) )
         {
             $email = explode ( ',', $request->selected_email );
+            $email = array_map ( function ($val)
+            {
+                return $val === 'null' ? $val : base64_decode ( $val );
+            }, $email );
             if ( in_array ( 'null', $email ) )
             {
                 $nonNullValues = array_filter ( $email, fn ( $value ) => $value !== 'null' );

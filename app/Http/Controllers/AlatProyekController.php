@@ -17,8 +17,8 @@ class AlatProyekController extends Controller
         $proyek  = Proyek::with ( "users" )->findOrFail ( $request->id_proyek );
         $query   = $this->buildQuery ( $request, $proyek->id );
 
-        // Get unique values from the filtered data
-        $uniqueValues = $this->getUniqueValues ( $proyek->id );
+        // Pass request to getUniqueValues
+        $uniqueValues = $this->getUniqueValues ( $proyek->id, $request );
 
         $TableData     = $this->getTableData ( $query, $perPage );
         $proyeks       = $this->getProyeks ();
@@ -106,20 +106,69 @@ class AlatProyekController extends Controller
         } )->get ();
     }
 
-    private function getUniqueValues ( $proyekId )
+    private function getUniqueValues ( $proyekId, Request $request = null )
     {
         $alatIds = AlatProyek::where ( 'id_proyek', $proyekId )
-            ->whereNull ( 'removed_at' )
-            ->pluck ( 'id_master_data_alat' );
+            ->whereNull ( 'removed_at' );
 
-        $query = MasterDataAlat::whereIn ( 'id', $alatIds );
+        // Apply filters to base query
+        if ( $request )
+        {
+            if ( $request->filled ( 'selected_jenis_alat' ) )
+            {
+                $this->handleJenisAlatFilter ( $request, $alatIds );
+            }
+            if ( $request->filled ( 'selected_kode_alat' ) )
+            {
+                $this->handleKodeAlatFilter ( $request, $alatIds );
+            }
+            if ( $request->filled ( 'selected_merek_alat' ) )
+            {
+                $this->handleMerekAlatFilter ( $request, $alatIds );
+            }
+            if ( $request->filled ( 'selected_tipe_alat' ) )
+            {
+                $this->handleTipeAlatFilter ( $request, $alatIds );
+            }
+            if ( $request->filled ( 'selected_serial_number' ) )
+            {
+                $this->handleSerialNumberFilter ( $request, $alatIds );
+            }
+        }
+
+        $alatIds = $alatIds->pluck ( 'id_master_data_alat' );
+
+        // Create separate queries for each unique value
+        $baseQuery = MasterDataAlat::whereIn ( 'id', $alatIds );
+
+        // Clone queries for each filter
+        $jenisQuery  = clone $baseQuery;
+        $kodeQuery   = clone $baseQuery;
+        $merekQuery  = clone $baseQuery;
+        $tipeQuery   = clone $baseQuery;
+        $serialQuery = clone $baseQuery;
+
+        // Apply other active filters to each query
+        if ( $request )
+        {
+            if ( $request->filled ( 'selected_jenis_alat' ) )
+            {
+                $values = explode ( ',', $request->selected_jenis_alat );
+                $this->applyFilterToQuery ( $kodeQuery, 'jenis_alat', $values );
+                $this->applyFilterToQuery ( $merekQuery, 'jenis_alat', $values );
+                $this->applyFilterToQuery ( $tipeQuery, 'jenis_alat', $values );
+                $this->applyFilterToQuery ( $serialQuery, 'jenis_alat', $values );
+            }
+            // Similar for other filters
+            // ...add other filter applications here
+        }
 
         return [ 
-            'jenis_alat'    => $query->clone ()->whereNotNull ( 'jenis_alat' )->distinct ()->pluck ( 'jenis_alat' ),
-            'kode_alat'     => $query->clone ()->whereNotNull ( 'kode_alat' )->distinct ()->pluck ( 'kode_alat' ),
-            'merek_alat'    => $query->clone ()->whereNotNull ( 'merek_alat' )->distinct ()->pluck ( 'merek_alat' ),
-            'tipe_alat'     => $query->clone ()->whereNotNull ( 'tipe_alat' )->distinct ()->pluck ( 'tipe_alat' ),
-            'serial_number' => $query->clone ()->whereNotNull ( 'serial_number' )->distinct ()->pluck ( 'serial_number' ),
+            'jenis_alat'    => $jenisQuery->whereNotNull ( 'jenis_alat' )->distinct ()->pluck ( 'jenis_alat' ),
+            'kode_alat'     => $kodeQuery->whereNotNull ( 'kode_alat' )->distinct ()->pluck ( 'kode_alat' ),
+            'merek_alat'    => $merekQuery->whereNotNull ( 'merek_alat' )->distinct ()->pluck ( 'merek_alat' ),
+            'tipe_alat'     => $tipeQuery->whereNotNull ( 'tipe_alat' )->distinct ()->pluck ( 'tipe_alat' ),
+            'serial_number' => $serialQuery->whereNotNull ( 'serial_number' )->distinct ()->pluck ( 'serial_number' ),
         ];
     }
 
@@ -187,6 +236,25 @@ class AlatProyekController extends Controller
                 $q->whereIn ( $field, $values );
             } );
         }
+    }
+
+    private function applyFilterToQuery ( $query, $field, $values )
+    {
+        if ( in_array ( 'null', $values ) )
+        {
+            $nonNullValues = array_filter ( $values, fn ( $value ) => $value !== 'null' );
+            $query->where ( function ($q) use ($field, $nonNullValues)
+            {
+                $q->whereNull ( $field )
+                    ->orWhere ( $field, '-' )
+                    ->orWhereIn ( $field, $nonNullValues );
+            } );
+        }
+        else
+        {
+            $query->whereIn ( $field, $values );
+        }
+        return $query;
     }
 
     public function store ( Request $request )

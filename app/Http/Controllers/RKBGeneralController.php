@@ -17,12 +17,31 @@ class RKBGeneralController extends Controller
 {
     public function index ( Request $request )
     {
+        $perPage      = $this->getPerPage ( $request );
+        $user         = Auth::user ();
+        $proyeks      = $this->getProyeks ( $user );
+        $query        = $this->buildQuery ( $request, $user, $proyeks );
+        $uniqueValues = $this->getUniqueValues ();
+
+        $TableData = $this->getTableData ( $query, $perPage );
+
+        return view ( 'dashboard.rkb.general.general', [ 
+            'headerPage'   => 'RKB General',
+            'page'         => 'Data RKB General',
+            'proyeks'      => $proyeks,
+            'TableData'    => $TableData,
+            'uniqueValues' => $uniqueValues,
+        ] );
+    }
+
+    private function getPerPage ( Request $request )
+    {
         $allowedPerPage = [ 10, 25, 50, 100 ];
-        $perPage        = in_array ( (int) $request->get ( 'per_page' ), $allowedPerPage ) ? (int) $request->get ( 'per_page' ) : 10;
+        return in_array ( (int) $request->get ( 'per_page' ), $allowedPerPage ) ? (int) $request->get ( 'per_page' ) : 10;
+    }
 
-        $user = Auth::user ();
-
-        // Filter projects based on user role
+    private function getProyeks ( $user )
+    {
         $proyeksQuery = Proyek::with ( "users" );
         if ( $user->role === 'koordinator_proyek' )
         {
@@ -32,11 +51,14 @@ class RKBGeneralController extends Controller
             } );
         }
 
-        $proyeks = $proyeksQuery
+        return $proyeksQuery
             ->orderBy ( "updated_at", "desc" )
             ->orderBy ( "id", "desc" )
             ->get ();
+    }
 
+    private function buildQuery ( Request $request, $user, $proyeks )
+    {
         $query = RKB::query ()
             ->with ( [ 'proyek', 'linkAlatDetailRkbs' ] )
             ->where ( 'tipe', 'general' );
@@ -48,6 +70,137 @@ class RKBGeneralController extends Controller
             $query->whereIn ( 'id_proyek', $proyekIds );
         }
 
+        $this->applyFilters ( $request, $query );
+        $this->applySearch ( $request, $query );
+
+        return $query;
+    }
+
+    private function applyFilters ( Request $request, $query )
+    {
+        $this->handleNomorFilter ( $request, $query );
+        $this->handleProyekFilter ( $request, $query );
+        $this->handlePeriodeFilter ( $request, $query );
+        $this->handleStatusFilter ( $request, $query );
+    }
+
+    private function handleNomorFilter ( Request $request, $query )
+    {
+        if ( $request->filled ( 'selected_nomor' ) )
+        {
+            $nomor = explode ( ',', $request->selected_nomor );
+            if ( in_array ( 'null', $nomor ) )
+            {
+                $nonNullValues = array_filter ( $nomor, fn ( $value ) => $value !== 'null' );
+                $query->where ( function ($q) use ($nonNullValues)
+                {
+                    $q->whereNull ( 'nomor' )
+                        ->orWhere ( 'nomor', '-' )
+                        ->orWhereIn ( 'nomor', $nonNullValues );
+                } );
+            }
+            else
+            {
+                $query->whereIn ( 'nomor', $nomor );
+            }
+        }
+    }
+
+    private function handleProyekFilter ( Request $request, $query )
+    {
+        if ( $request->filled ( 'selected_proyek' ) )
+        {
+            $proyekNames = explode ( ',', $request->selected_proyek );
+            if ( in_array ( 'null', $proyekNames ) )
+            {
+                $nonNullValues = array_filter ( $proyekNames, fn ( $value ) => $value !== 'null' );
+                $query->whereHas ( 'proyek', function ($q) use ($nonNullValues)
+                {
+                    $q->whereIn ( 'nama', $nonNullValues );
+                }, '<=', count ( $nonNullValues ) )
+                    ->orWhereDoesntHave ( 'proyek' );
+            }
+            else
+            {
+                $query->whereHas ( 'proyek', function ($q) use ($proyekNames)
+                {
+                    $q->whereIn ( 'nama', $proyekNames );
+                } );
+            }
+        }
+    }
+
+    private function handlePeriodeFilter ( Request $request, $query )
+    {
+        if ( $request->filled ( 'selected_periode' ) )
+        {
+            $periodeValues = explode ( ',', $request->selected_periode );
+            if ( in_array ( 'null', $periodeValues ) )
+            {
+                $nonNullValues = array_filter ( $periodeValues, fn ( $value ) => $value !== 'null' );
+                $query->where ( function ($q) use ($nonNullValues)
+                {
+                    $q->whereNull ( 'periode' )
+                        ->orWhereIn ( 'periode', $nonNullValues );
+                } );
+            }
+            else
+            {
+                $query->whereIn ( 'periode', $periodeValues );
+            }
+        }
+    }
+
+    private function handleStatusFilter ( Request $request, $query )
+    {
+        if ( $request->filled ( 'selected_status' ) )
+        {
+            $statusValues = explode ( ',', $request->selected_status );
+            $query->where ( function ($q) use ($statusValues)
+            {
+                foreach ( $statusValues as $status )
+                {
+                    $q->orWhere ( function ($subQ) use ($status)
+                    {
+                        $this->getStatusQuery ( $subQ, $status );
+                    } );
+                }
+            } );
+        }
+    }
+
+    private function getUniqueValues ()
+    {
+        return [ 
+            'nomor'   => RKB::where ( 'tipe', 'general' )
+                ->whereNotNull ( 'nomor' )
+                ->distinct ()
+                ->pluck ( 'nomor' ),
+            'proyek'  => Proyek::whereHas ( 'rkbs', function ($q)
+            {
+                $q->where ( 'tipe', 'general' );
+            } )
+                ->orderBy ( 'nama' )
+                ->pluck ( 'nama' ),
+            'periode' => RKB::where ( 'tipe', 'general' )
+                ->orderBy ( 'periode', 'desc' )
+                ->distinct ()
+                ->pluck ( 'periode' )
+        ];
+    }
+
+    private function getTableData ( $query, $perPage )
+    {
+        return $query
+            ->orderBy ( 'periode', 'desc' )
+            ->orderBy ( 'updated_at', 'desc' )
+            ->orderBy ( 'id', 'desc' )
+            ->paginate ( $perPage )
+            ->withQueryString ();
+    }
+
+    private function applySearch ( Request $request, $query )
+    {
         if ( $request->has ( 'search' ) )
         {
             $search = $request->get ( 'search' );
@@ -98,20 +251,6 @@ class RKBGeneralController extends Controller
                     } );
             } );
         }
-
-        $TableData = $query
-            ->orderBy ( 'periode', 'desc' )
-            ->orderBy ( 'updated_at', 'desc' )
-            ->orderBy ( 'id', 'desc' )
-            ->paginate ( $perPage )
-            ->withQueryString ();
-
-        return view ( 'dashboard.rkb.general.general', [ 
-            'headerPage' => 'RKB General',
-            'page'       => 'Data RKB General',
-            'proyeks'    => $proyeks,
-            'TableData'  => $TableData,
-        ] );
     }
 
     /**

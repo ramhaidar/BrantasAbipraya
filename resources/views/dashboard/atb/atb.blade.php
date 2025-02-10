@@ -15,10 +15,15 @@
                         <a class="btn btn-warning btn-sm" href="{{ route('export.atb', ['id' => $proyek->id]) }}">
                             <i class="fa-solid fa-file-excel"></i> <span class="ms-2">Export</span>
                         </a>
-                        @if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin')
-                            @if ($tipe !== 'mutasi-proyek')
+                        @if ($tipe !== 'mutasi-proyek')
+                            @if (in_array(Auth::user()->role, ['koordinator_proyek', 'superadmin']))
                                 <a class="btn btn-primary btn-sm btn-hide-text-mobile" data-bs-toggle="modal" data-bs-target="#modalForAdd">
                                     <i class="fa fa-plus"></i> <span class="ms-2">Tambah Data ATB</span>
+                                </a>
+                            @endif
+                            @if (in_array(Auth::user()->role, ['admin_divisi', 'vp', 'svp', 'superadmin']) && $tipe === 'hutang-unit-alat')
+                                <a class="btn btn-primary btn-sm btn-hide-text-mobile" data-bs-toggle="modal" data-bs-target="#modalForAddBypass">
+                                    <i class="fa fa-plus"></i> <span class="ms-2">Tambah Data ATB [Bypass]</span>
                                 </a>
                             @endif
                         @endif
@@ -81,7 +86,7 @@
 
     @include('dashboard.atb.partials.modal-dokumentasi')
 
-    @if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin')
+    @if (in_array(Auth::user()->role, ['koordinator_proyek', 'superadmin']))
         @if ($tipe === 'hutang-unit-alat')
             <!-- Modal for Adding Data -->
             @include('dashboard.atb.partials.hutang-unit-alat.modal-add')
@@ -89,6 +94,10 @@
             <!-- Modal for Adding Data -->
             @include('dashboard.atb.partials.panjar-unit-alat_panjar_proyek.modal-add')
         @endif
+    @endif
+    @if (in_array(Auth::user()->role, ['admin_divisi', 'vp', 'svp', 'superadmin']) && $tipe === 'hutang-unit-alat')
+        <!-- Modal for Adding Data with Bypass -->
+        @include('dashboard.atb.partials.hutang-unit-alat.modal-add-bypass')
     @endif
 
     @if ($tipe === 'hutang-unit-alat')

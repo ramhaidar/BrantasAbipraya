@@ -303,10 +303,16 @@ class SaldoController extends Controller
             ];
 
             // Add fields based on type
-            if ( $data[ 'tipe' ] === 'hutang-unit-alat' )
+            if ( $data[ 'tipe' ] === 'hutang-unit-alat' || $data[ 'tipe' ] === 'hutang-unit-alat-bypass' )
             {
-                $saldoData[ 'id_spb' ] = $data[ 'id_spb' ];
+                // For both normal and bypass types
                 $saldoData[ 'satuan' ] = $data[ 'satuan' ];
+
+                // Only add id_spb for normal type
+                if ( $data[ 'tipe' ] === 'hutang-unit-alat' && isset ( $data[ 'id_spb' ] ) )
+                {
+                    $saldoData[ 'id_spb' ] = $data[ 'id_spb' ];
+                }
             }
             else if ( $data[ 'tipe' ] === 'mutasi-proyek' )
             {

@@ -53,8 +53,8 @@
             <tbody>
                 @forelse ($TableData as $item)
                     <tr>
-                        <td class="spb-number" data-spb="{{ $item->spb->nomor }}" data-id="{{ $item->id }}" data-stt="{{ $item->surat_tanda_terima }}">
-                            {{ $item->spb->nomor }}
+                        <td class="spb-number" data-spb="{{ $item->spb->nomor ?? '-' }}" data-id="{{ $item->id }}" data-stt="{{ $item->surat_tanda_terima }}">
+                            {{ $item->spb->nomor ?? '-' }}
                         </td>
                         <td>{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('l, d F Y') }}</td>
                         <td>{{ $item->masterDataSparepart->kategoriSparepart->kode }}: {{ $item->masterDataSparepart->kategoriSparepart->nama }}</td>
@@ -63,15 +63,21 @@
                         <td>{{ $item->masterDataSparepart->merk }}</td>
                         <td>{{ $item->masterDataSparepart->part_number }}</td>
                         <td>{{ $item->quantity }}</td>
-                        <td>{{ $item->detailSpb->satuan ?? '-' }}</td>
+                        <td>{{ $item->detailSpb->satuan ?? ($item->saldo->satuan ?? '-') }}</td>
                         <td class="currency-value">{{ formatRibuan($item->harga) }}</td>
                         <td class="currency-value">{{ formatRibuan($item->quantity * $item->harga) }}</td>
                         <td class="currency-value">{{ formatRibuan($item->quantity * $item->harga * 0.11) }}</td>
                         <td class="currency-value">{{ formatRibuan($item->quantity * $item->harga * 1.11) }}</td>
                         <td class="text-center stt-cell">
-                            <button class="btn btn-primary mx-1 sttBtn" onclick="showSTTModal('{{ $item->id }}')">
-                                <i class="bi bi-file-earmark-pdf"></i>
-                            </button>
+                            @if ($item->surat_tanda_terima)
+                                <button class="btn btn-primary mx-1 sttBtn" onclick="showSTTModal('{{ $item->id }}')">
+                                    <i class="bi bi-file-earmark-pdf"></i>
+                                </button>
+                            @else
+                                <button class="btn btn-secondary mx-1" disabled>
+                                    <i class="bi bi-file-earmark-pdf"></i>
+                                </button>
+                            @endif
                         </td>
                         <td class="text-center doc-cell" data-id="{{ $item->id }}">
                             @php

@@ -28,7 +28,7 @@
                 <button class="btn-close" data-bs-dismiss="modal" type="button" aria-label="Close"></button>
             </div>
             <hr class="p-0 m-0 border border-secondary-subtle border-2 opacity-50">
-            <form class="w-100 align-items-center flex-column gap-0 overflow-auto" id="addDataForm" method="POST" action="{{ route('atb.post.store') }}" enctype="multipart/form-data">
+            <form class="w-100 align-items-center flex-column gap-0 overflow-auto" id="addDataFormNormal" method="POST" action="{{ route('atb.post.store') }}" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body">
                     <div class="row g-3">
@@ -84,8 +84,8 @@
             </form>
 
             <div class="modal-footer d-flex w-100 justify-content-end">
-                <button class="btn btn-secondary me-2 w-25" id="resetButton" type="button">Reset</button>
-                <button class="btn btn-success w-25" id="submitButton" type="button">Tambah Data</button>
+                <button class="btn btn-secondary me-2 w-25" id="resetButtonNormal" type="button">Reset</button>
+                <button class="btn btn-success w-25" id="submitButtonNormal" type="button">Tambah Data</button>
             </div>
 
         </div>
@@ -215,10 +215,13 @@
     <script>
         $(document).ready(function() {
             // Reset form and clear table on reset button click
-            $('#resetButton').on('click', function() {
-                $('#addDataForm')[0].reset();
+            $('#resetButtonNormal').on('click', function() {
+                $('#addDataFormNormal')[0].reset();
                 $('#tableContainer').empty();
                 $('#id_spb').val(null).trigger('change');
+                // Remove validation classes on reset
+                $('.is-invalid').removeClass('is-invalid');
+                $('.was-validated').removeClass('was-validated');
             });
         });
     </script>
@@ -242,11 +245,11 @@
         }
 
         $(document).ready(function() {
-            $('#submitButton').on('click', function() {
-                if ($('#addDataForm')[0].checkValidity() && validateSelect2()) {
-                    $('#addDataForm').submit();
+            $('#submitButtonNormal').on('click', function() {
+                if ($('#addDataFormNormal')[0].checkValidity() && validateSelect2()) {
+                    $('#addDataFormNormal').submit();
                 } else {
-                    $('#addDataForm').addClass('was-validated');
+                    $('#addDataFormNormal').addClass('was-validated');
                 }
             });
 
@@ -263,24 +266,10 @@
 
     <script>
         $(document).ready(function() {
-            // Alert and set value to max if quantity_diterima exceeds max
-            $(document).on('blur', '.quantity-input', function() {
-                const max = $(this).attr('max');
-                const value = $(this).val();
-                if (parseInt(value) > parseInt(max)) {
-                    alert('Quantity diterima tidak boleh melebihi Quantity Belum Diterima.');
-                    $(this).val(max);
-                }
-            });
-        });
-    </script>
-
-    <script>
-        $(document).ready(function() {
             const suratTandaTerimaInput = $('#surat_tanda_terima');
             const pdfPreviewContainer = $('#pdfPreviewContainer');
             const pdfPreview = $('#pdfPreview');
-            const resetButton = $('#resetButton');
+            const resetButton = $('#resetButtonNormal');
 
             suratTandaTerimaInput.on('change', function() {
                 const file = this.files[0];
@@ -335,7 +324,7 @@
     <script>
         function validateForm() {
             let isValid = true;
-            const form = $('#addDataForm');
+            const form = $('#addDataFormNormal');
 
             // Reset previous validation states
             $('.is-invalid').removeClass('is-invalid');
@@ -397,9 +386,9 @@
 
         $(document).ready(function() {
             // Replace the existing submit button click handler
-            $('#submitButton').on('click', function() {
+            $('#submitButtonNormal').on('click', function() {
                 if (validateForm()) {
-                    $('#addDataForm').submit();
+                    $('#addDataFormNormal').submit();
                 }
             });
 
@@ -431,6 +420,26 @@
                 fotoInput.prop('required', false);
                 fotoInput.removeClass('is-invalid');
             }
+        });
+    </script>
+
+    <script>
+        $(document).ready(function() {
+            // Replace multiple validation handlers with a single submit handler
+            $('#submitButtonNormal').on('click', function(e) {
+                e.preventDefault();
+                const form = $('#addDataFormNormal');
+
+                // Add Bootstrap's validation class
+                form.addClass('was-validated');
+
+                if (validateForm() && validateSelect2()) {
+                    form.submit();
+                }
+            });
+
+            // Remove all input/change validation handlers
+            // Keep only the basic reset and init functionality
         });
     </script>
 @endpush

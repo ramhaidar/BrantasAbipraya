@@ -319,6 +319,12 @@ class ATBController extends Controller
                 ->orderByDesc ( 'updated_at' )
                 ->get ();
         }
+        elseif ( $tipe === 'hutang-unit-alat' && in_array ( Auth::user ()->role, [ 'admin_divisi', 'vp', 'svp', 'superadmin' ] ) )
+        {
+            $spareparts = MasterDataSparepart::with ( 'KategoriSparepart' )
+                ->orderByDesc ( 'updated_at' )
+                ->get ();
+        }
 
         // Get common data
         $kategoriSpareparts  = KategoriSparepart::all ();
@@ -365,7 +371,47 @@ class ATBController extends Controller
         {
             DB::beginTransaction ();
 
-            if ( $request->tipe === "hutang-unit-alat" )
+            if ( $request->tipe === "hutang-unit-alat-bypass" )
+            {
+                // Validate request for bypass type
+                $validated = $request->validate ( [ 
+                    'tipe'                     => 'required|string',
+                    'tanggal'                  => 'required|date',
+                    'id_proyek'                => 'required|exists:proyek,id',
+                    'id_master_data_supplier'  => 'required|exists:master_data_supplier,id',
+                    'id_master_data_sparepart' => 'required|exists:master_data_sparepart,id',
+                    'quantity'                 => 'required|integer|min:1',
+                    'harga'                    => 'required|numeric|min:0',
+                    'satuan'                   => 'required|string'
+                ] );
+
+                // Create ATB record for bypass type
+                $atb = ATB::create ( [ 
+                    'tipe'                     => 'hutang-unit-alat',
+                    'tanggal'                  => $request->tanggal,
+                    'quantity'                 => $request->quantity,
+                    'harga'                    => $request->harga,
+                    'id_proyek'                => $request->id_proyek,
+                    'id_master_data_sparepart' => $request->id_master_data_sparepart,
+                    'id_master_data_supplier'  => $request->id_master_data_supplier,
+                    'satuan'                   => $request->satuan
+                ] );
+
+                // Create corresponding Saldo record
+                $saldoController = new SaldoController();
+                $saldoController->store ( [ 
+                    'tipe'                     => 'hutang-unit-alat',
+                    'quantity'                 => $request->quantity,
+                    'harga'                    => $request->harga,
+                    'id_proyek'                => $request->id_proyek,
+                    'id_master_data_sparepart' => $request->id_master_data_sparepart,
+                    'id_master_data_supplier'  => $request->id_master_data_supplier,
+                    'id_atb'                   => $atb->id,
+                    'satuan'                   => $request->satuan
+                ] );
+
+            }
+            elseif ( $request->tipe === "hutang-unit-alat" )
             {
 
                 // Update validation rule for quantity

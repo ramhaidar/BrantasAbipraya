@@ -9,6 +9,11 @@
                 popup.css('width', ''); // Reset width only on first open
                 popup.data('originalWidth', popup.outerWidth()); // Store original width
             }
+
+            // Sort checkboxes when opening popup
+            const type = id.replace('-filter', '').replace('-', '_');
+            filterCheckboxes(type);
+
             positionPopup(popup, button);
             popup.toggle();
             popup.find('input[type="text"]').focus(); // Add focus to search input
@@ -86,10 +91,30 @@
     function filterCheckboxes(type) {
         const searchText = $(event.target).val().toLowerCase();
         const selector = `.${type}-checkbox`;
+
+        // Filter items based on search text
         $(selector).each(function() {
             const label = $(this).next('label').text().toLowerCase();
             $(this).parent().toggle(label.includes(searchText));
         });
+
+        // Sort checkboxes - checked items first
+        const container = $(selector).first().closest('.checkbox-list');
+        const items = container.children('.form-check').get();
+
+        items.sort((a, b) => {
+            const isCheckedA = $(a).find('input[type="checkbox"]').prop('checked');
+            const isCheckedB = $(b).find('input[type="checkbox"]').prop('checked');
+
+            if (isCheckedA === isCheckedB) {
+                // If check status is same, maintain original order
+                return 0;
+            }
+            return isCheckedA ? -1 : 1;
+        });
+
+        // Reappend sorted items
+        container.append(items);
     }
 
     function applyFilter(type) {
@@ -171,6 +196,12 @@
         // Clear stored widths when filters are cleared
         $('.filter-popup').on('hide', function() {
             $(this).removeData('originalWidth');
+        });
+
+        // Sort checkboxes initially
+        $('.filter-popup').each(function() {
+            const type = $(this).attr('id').replace('-filter', '').replace('-', '_');
+            filterCheckboxes(type);
         });
     });
 </script>

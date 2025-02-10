@@ -200,14 +200,16 @@
                                     <input class="form-control form-control-sm mb-2" type="text" placeholder="Search sub jenis..." onkeyup="filterCheckboxes('sub_jenis')">
                                     <div class="checkbox-list text-start">
                                         <div class="form-check">
-                                            <input class="form-check-input sub_jenis-checkbox" type="checkbox" value="null" style="cursor: pointer" {{ in_array('null', explode(',', request('selected_sub_jenis', ''))) ? 'checked' : '' }}>
+                                            <input class="form-check-input sub_jenis-checkbox" type="checkbox" value="null" style="cursor: pointer" {{ request('selected_sub_jenis') && in_array('null', explode(',', request('selected_sub_jenis'))) ? 'checked' : '' }}>
                                             <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">Empty/Null</label>
                                         </div>
                                         @foreach ($uniqueValues['sub_jenis'] as $subJenis)
-                                            <div class="form-check">
-                                                <input class="form-check-input sub_jenis-checkbox" type="checkbox" value="{{ $subJenis }}" style="cursor: pointer" {{ in_array($subJenis, explode(',', request('selected_sub_jenis', ''))) ? 'checked' : '' }}>
-                                                <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">{{ $subJenis }}</label>
-                                            </div>
+                                            @if (!empty($subJenis))
+                                                <div class="form-check">
+                                                    <input class="form-check-input sub_jenis-checkbox" type="checkbox" value="{{ $subJenis }}" style="cursor: pointer" {{ request('selected_sub_jenis') && in_array($subJenis, explode(',', request('selected_sub_jenis'))) ? 'checked' : '' }}>
+                                                    <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">{{ $subJenis }}</label>
+                                                </div>
+                                            @endif
                                         @endforeach
                                     </div>
                                     <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('sub_jenis')"><i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span></button>

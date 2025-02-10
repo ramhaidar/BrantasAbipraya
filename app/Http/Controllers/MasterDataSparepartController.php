@@ -96,7 +96,10 @@ class MasterDataSparepartController extends Controller
             'jenis'       => KategoriSparepart::whereIn ( 'id', $queryForUniqueValues->get ()->pluck ( 'id_kategori_sparepart' ) )
                 ->pluck ( 'jenis' )->unique ()->sort ()->values (),
             'sub_jenis'   => KategoriSparepart::whereIn ( 'id', $queryForUniqueValues->get ()->pluck ( 'id_kategori_sparepart' ) )
-                ->pluck ( 'sub_jenis' )->unique ()->sort ()->values (),
+                ->pluck ( 'sub_jenis' )
+                ->unique ()  // Hapus filter() agar nilai null tetap ada
+                ->sort ()
+                ->values (),
             'kategori'    => KategoriSparepart::whereIn ( 'id', $queryForUniqueValues->get ()->pluck ( 'id_kategori_sparepart' ) )
                 ->pluck ( 'nama' )->unique ()->values (),
         ];
@@ -272,17 +275,16 @@ class MasterDataSparepartController extends Controller
             if ( in_array ( 'null', $subJenis ) )
             {
                 $nonNullValues = array_filter ( $subJenis, fn ( $value ) => $value !== 'null' );
-                $query->where ( function ($q) use ($nonNullValues)
+                $query->whereHas ( 'kategoriSparepart', function ($q) use ($nonNullValues)
                 {
-                    $q->whereDoesntHave ( 'kategoriSparepart' )
-                        ->orWhereHas ( 'kategoriSparepart', function ($sq) use ($nonNullValues)
-                        {
-                            $sq->whereNull ( 'sub_jenis' )
-                                ->when ( ! empty ( $nonNullValues ), function ($q) use ($nonNullValues)
-                                {
-                                    $q->orWhereIn ( 'sub_jenis', $nonNullValues );
-                                } );
-                        } );
+                    if ( ! empty ( $nonNullValues ) )
+                    {
+                        $q->whereNull ( 'sub_jenis' )->orWhereIn ( 'sub_jenis', $nonNullValues );
+                    }
+                    else
+                    {
+                        $q->whereNull ( 'sub_jenis' );
+                    }
                 } );
             }
             else

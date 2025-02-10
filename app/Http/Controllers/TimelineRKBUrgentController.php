@@ -21,7 +21,23 @@ class TimelineRKBUrgentController extends Controller
         if ( $request->filled ( 'selected_uraian' ) )
         {
             $uraian = explode ( ',', $request->selected_uraian );
-            $query->whereIn ( 'nama_rencana', $uraian );
+            if ( in_array ( 'null', $uraian ) )
+            {
+                $nonNullValues = array_filter ( $uraian, fn ( $value ) => $value !== 'null' );
+                $query->where ( function ($q) use ($nonNullValues)
+                {
+                    $q->whereNull ( 'nama_rencana' )
+                        ->orWhere ( 'nama_rencana', '' )
+                        ->when ( count ( $nonNullValues ) > 0, function ($q) use ($nonNullValues)
+                        {
+                            $q->orWhereIn ( 'nama_rencana', $nonNullValues );
+                        } );
+                } );
+            }
+            else
+            {
+                $query->whereIn ( 'nama_rencana', $uraian );
+            }
         }
 
         // Handle status filter
@@ -84,16 +100,48 @@ class TimelineRKBUrgentController extends Controller
             $query->whereRaw ( 'EXTRACT(DAY FROM (tanggal_akhir_actual::timestamp - tanggal_awal_actual::timestamp))::integer = ANY(?)', [ "{" . implode ( ',', $durasi ) . "}" ] );
         }
 
+        // Fix tanggal_awal_actual filter
         if ( $request->filled ( 'selected_tanggal_awal_actual' ) )
         {
             $dates = explode ( ',', $request->selected_tanggal_awal_actual );
-            $query->whereIn ( \DB::raw ( 'DATE(tanggal_awal_actual)' ), $dates );
+            if ( in_array ( 'null', $dates ) )
+            {
+                $nonNullDates = array_filter ( $dates, fn ( $date ) => $date !== 'null' );
+                $query->where ( function ($q) use ($nonNullDates)
+                {
+                    $q->whereNull ( 'tanggal_awal_actual' )
+                        ->when ( count ( $nonNullDates ) > 0, function ($q) use ($nonNullDates)
+                        {
+                            $q->orWhereIn ( \DB::raw ( 'DATE(tanggal_awal_actual)' ), $nonNullDates );
+                        } );
+                } );
+            }
+            else
+            {
+                $query->whereIn ( \DB::raw ( 'DATE(tanggal_awal_actual)' ), $dates );
+            }
         }
 
+        // Fix tanggal_akhir_actual filter
         if ( $request->filled ( 'selected_tanggal_akhir_actual' ) )
         {
             $dates = explode ( ',', $request->selected_tanggal_akhir_actual );
-            $query->whereIn ( \DB::raw ( 'DATE(tanggal_akhir_actual)' ), $dates );
+            if ( in_array ( 'null', $dates ) )
+            {
+                $nonNullDates = array_filter ( $dates, fn ( $date ) => $date !== 'null' );
+                $query->where ( function ($q) use ($nonNullDates)
+                {
+                    $q->whereNull ( 'tanggal_akhir_actual' )
+                        ->when ( count ( $nonNullDates ) > 0, function ($q) use ($nonNullDates)
+                        {
+                            $q->orWhereIn ( \DB::raw ( 'DATE(tanggal_akhir_actual)' ), $nonNullDates );
+                        } );
+                } );
+            }
+            else
+            {
+                $query->whereIn ( \DB::raw ( 'DATE(tanggal_akhir_actual)' ), $dates );
+            }
         }
 
         return $query;

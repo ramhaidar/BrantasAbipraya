@@ -34,6 +34,10 @@
                                 <div class="p-2">
                                     <input class="form-control form-control-sm mb-2" type="text" placeholder="Search uraian..." onkeyup="filterCheckboxes('uraian')">
                                     <div class="checkbox-list text-start">
+                                        <div class="form-check">
+                                            <input class="form-check-input uraian-checkbox" type="checkbox" value="null" style="cursor: pointer" {{ in_array('null', explode(',', request('selected_uraian', ''))) ? 'checked' : '' }}>
+                                            <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">Empty/Null</label>
+                                        </div>
                                         @foreach ($uniqueValues['uraian'] as $uraian)
                                             <div class="form-check">
                                                 <input class="form-check-input uraian-checkbox" type="checkbox" value="{{ $uraian }}" style="cursor: pointer" {{ in_array($uraian, explode(',', request('selected_uraian', ''))) ? 'checked' : '' }}>

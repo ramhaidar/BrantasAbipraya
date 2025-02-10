@@ -18,7 +18,11 @@ class DetailRKBGeneralController extends Controller
 {
     public function index ( Request $request, $id )
     {
-        $perPage        = $this->getPerPage ( $request );
+        $perPage = $this->getPerPage($request);
+        if ($perPage instanceof \Illuminate\Http\RedirectResponse) {
+            return $perPage;
+        }
+
         $rkb            = RKB::with ( [ 'proyek' ] )->find ( $id );
         $query          = $this->buildQuery ( $request, $id );
         $uniqueValues   = $this->getUniqueValues ( $query );
@@ -41,13 +45,16 @@ class DetailRKBGeneralController extends Controller
 
     private function getPerPage ( Request $request )
     {
-        if ( $request->get ( 'per_page' ) != -1 )
+        // If per_page parameter doesn't exist or not -1, redirect with per_page=-1
+        if ( ! $request->has ( 'per_page' ) || $request->get ( 'per_page' ) != -1 )
         {
-            $parameters             = $request->except ( 'per_page' );
+            $parameters               = $request->all ();
             $parameters[ 'per_page' ] = -1;
-            return redirect ()->to ( $request->url () . '?' . http_build_query ( $parameters ) );
+            $redirectUrl              = $request->url () . '?' . http_build_query ( $parameters );
+            return redirect ()->to ( $redirectUrl );
         }
-        return (int) $request->per_page;
+
+        return false; // Return false instead of number to indicate we want all records
     }
 
     private function buildQuery ( Request $request, $id )
@@ -117,13 +124,15 @@ class DetailRKBGeneralController extends Controller
 
     private function getTableData ( $query, $perPage )
     {
-        return $perPage === -1
-            ? $query->orderBy ( 'detail_rkb_general.updated_at', 'desc' )
-                ->orderBy ( 'detail_rkb_general.id', 'desc' )
-                ->paginate ( $query->count () )
-            : $query->orderBy ( 'detail_rkb_general.updated_at', 'desc' )
-                ->orderBy ( 'detail_rkb_general.id', 'desc' )
-                ->paginate ( $perPage );
+        // If $perPage is false (meaning show all), get total count first
+        if ( $perPage === false )
+        {
+            $perPage = $query->count ();
+        }
+
+        return $query->orderBy ( 'detail_rkb_general.updated_at', 'desc' )
+            ->orderBy ( 'detail_rkb_general.id', 'desc' )
+            ->paginate ( $perPage );
     }
 
     private function getProyeks ()

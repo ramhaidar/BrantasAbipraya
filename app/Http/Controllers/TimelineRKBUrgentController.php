@@ -12,6 +12,132 @@ use Illuminate\Support\Facades\Auth;
 
 class TimelineRKBUrgentController extends Controller
 {
+    private function buildQuery ( $request, $id )
+    {
+        $query = TimelineRKBUrgent::query ()
+            ->where ( 'id_link_alat_detail_rkb', $id );
+
+        // Handle uraian filter
+        if ( $request->filled ( 'selected_uraian' ) )
+        {
+            $uraian = explode ( ',', $request->selected_uraian );
+            $query->whereIn ( 'nama_rencana', $uraian );
+        }
+
+        // Handle status filter
+        if ( $request->filled ( 'selected_status' ) )
+        {
+            $status = explode ( ',', $request->selected_status );
+            $query->whereIn ( 'is_done', $status );
+        }
+
+        // New filters
+        if ( $request->filled ( 'selected_durasi_rencana' ) )
+        {
+            $durasi = explode ( ',', $request->selected_durasi_rencana );
+            if ( in_array ( 'null', $durasi ) )
+            {
+                $nonNullValues = array_filter ( $durasi, fn ( $value ) => $value !== 'null' );
+                $query->where ( function ($q) use ($nonNullValues)
+                {
+                    $q->whereNull ( 'tanggal_awal_rencana' )
+                        ->orWhereNull ( 'tanggal_akhir_rencana' )
+                        ->orWhereRaw ( 'EXTRACT(DAY FROM (tanggal_akhir_rencana::timestamp - tanggal_awal_rencana::timestamp))::integer = ANY(?)', [ "{" . implode ( ',', $nonNullValues ) . "}" ] );
+                } );
+            }
+            else
+            {
+                $query->whereRaw ( 'EXTRACT(DAY FROM (tanggal_akhir_rencana::timestamp - tanggal_awal_rencana::timestamp))::integer = ANY(?)', [ "{" . implode ( ',', $durasi ) . "}" ] );
+            }
+        }
+
+        if ( $request->filled ( 'selected_tanggal_awal_rencana' ) )
+        {
+            $dates = explode ( ',', $request->selected_tanggal_awal_rencana );
+            if ( in_array ( 'null', $dates ) )
+            {
+                $nonNullDates = array_filter ( $dates, fn ( $date ) => $date !== 'null' );
+                $query->where ( function ($q) use ($nonNullDates)
+                {
+                    $q->whereNull ( 'tanggal_awal_rencana' )
+                        ->when ( count ( $nonNullDates ) > 0, function ($q) use ($nonNullDates)
+                        {
+                            $q->orWhereIn ( \DB::raw ( 'DATE(tanggal_awal_rencana)' ), $nonNullDates );
+                        } );
+                } );
+            }
+            else
+            {
+                $query->whereIn ( \DB::raw ( 'DATE(tanggal_awal_rencana)' ), $dates );
+            }
+        }
+
+        if ( $request->filled ( 'selected_tanggal_akhir_rencana' ) )
+        {
+            $dates = explode ( ',', $request->selected_tanggal_akhir_rencana );
+            $query->whereIn ( \DB::raw ( 'DATE(tanggal_akhir_rencana)' ), $dates );
+        }
+
+        if ( $request->filled ( 'selected_durasi_actual' ) )
+        {
+            $durasi = explode ( ',', $request->selected_durasi_actual );
+            $query->whereRaw ( 'EXTRACT(DAY FROM (tanggal_akhir_actual::timestamp - tanggal_awal_actual::timestamp))::integer = ANY(?)', [ "{" . implode ( ',', $durasi ) . "}" ] );
+        }
+
+        if ( $request->filled ( 'selected_tanggal_awal_actual' ) )
+        {
+            $dates = explode ( ',', $request->selected_tanggal_awal_actual );
+            $query->whereIn ( \DB::raw ( 'DATE(tanggal_awal_actual)' ), $dates );
+        }
+
+        if ( $request->filled ( 'selected_tanggal_akhir_actual' ) )
+        {
+            $dates = explode ( ',', $request->selected_tanggal_akhir_actual );
+            $query->whereIn ( \DB::raw ( 'DATE(tanggal_akhir_actual)' ), $dates );
+        }
+
+        return $query;
+    }
+
+    private function getUniqueValues ( $id )
+    {
+        $timelines = TimelineRKBUrgent::where ( 'id_link_alat_detail_rkb', $id );
+
+        return [ 
+            'uraian'                => $timelines->clone ()->distinct ()->pluck ( 'nama_rencana' ),
+            'durasi_rencana'        => $timelines->clone ()
+                ->whereNotNull ( 'tanggal_awal_rencana' )
+                ->whereNotNull ( 'tanggal_akhir_rencana' )
+                ->selectRaw ( 'DISTINCT EXTRACT(DAY FROM (tanggal_akhir_rencana::timestamp - tanggal_awal_rencana::timestamp))::integer as days' )
+                ->pluck ( 'days' ),
+            'tanggal_awal_rencana'  => $timelines->clone ()
+                ->whereNotNull ( 'tanggal_awal_rencana' )
+                ->distinct ()
+                ->pluck ( 'tanggal_awal_rencana' )
+                ->map ( fn ( $date ) => $date->format ( 'Y-m-d' ) ),
+            'tanggal_akhir_rencana' => $timelines->clone ()
+                ->whereNotNull ( 'tanggal_akhir_rencana' )
+                ->distinct ()
+                ->pluck ( 'tanggal_akhir_rencana' )
+                ->map ( fn ( $date ) => $date->format ( 'Y-m-d' ) ),
+            'durasi_actual'         => $timelines->clone ()
+                ->whereNotNull ( 'tanggal_awal_actual' )
+                ->whereNotNull ( 'tanggal_akhir_actual' )
+                ->selectRaw ( 'DISTINCT EXTRACT(DAY FROM (tanggal_akhir_actual::timestamp - tanggal_awal_actual::timestamp))::integer as days' )
+                ->pluck ( 'days' ),
+            'tanggal_awal_actual'   => $timelines->clone ()
+                ->whereNotNull ( 'tanggal_awal_actual' )
+                ->distinct ()
+                ->pluck ( 'tanggal_awal_actual' )
+                ->map ( fn ( $date ) => $date->format ( 'Y-m-d' ) ),
+            'tanggal_akhir_actual'  => $timelines->clone ()
+                ->whereNotNull ( 'tanggal_akhir_actual' )
+                ->distinct ()
+                ->pluck ( 'tanggal_akhir_actual' )
+                ->map ( fn ( $date ) => $date->format ( 'Y-m-d' ) ),
+        ];
+    }
+
     public function index ( Request $request, $id )
     {
         if ( $request->get ( 'per_page' ) != -1 )
@@ -27,8 +153,8 @@ class TimelineRKBUrgentController extends Controller
         // Get RKB data
         $rkb = Proyek::find ( $id );
 
-        $query = TimelineRKBUrgent::query ()
-            ->where ( 'id_link_alat_detail_rkb', $id );
+        $query        = $this->buildQuery ( $request, $id );
+        $uniqueValues = $this->getUniqueValues ( $id );
 
         if ( $request->has ( 'search' ) )
         {
@@ -166,13 +292,14 @@ class TimelineRKBUrgentController extends Controller
         }
 
         return view ( 'dashboard.rkb.urgent.detail.timeline.timeline', [ 
-            'rkb'         => $rkb,
-            'data'        => $data,
-            'proyeks'     => $proyeks,
-            'TableData'   => $TableData,
-            'headerPage'  => 'RKB Urgent',
-            'menuContext' => 'rkb_urgent', // Specific to Urgent
-            'page'        => 'Timeline Detail RKB Urgent [' . $data->rkb->nomor . ' | ' . $data->masterDataAlat->jenis_alat . ' : ' . $data->masterDataAlat->kode_alat . ']',
+            'rkb'          => $rkb,
+            'data'         => $data,
+            'proyeks'      => $proyeks,
+            'TableData'    => $TableData,
+            'headerPage'   => 'RKB Urgent',
+            'menuContext'  => 'rkb_urgent', // Specific to Urgent
+            'page'         => 'Timeline Detail RKB Urgent [' . $data->rkb->nomor . ' | ' . $data->masterDataAlat->jenis_alat . ' : ' . $data->masterDataAlat->kode_alat . ']',
+            'uniqueValues' => $uniqueValues,
         ] );
 
     }

@@ -136,7 +136,9 @@
         }
 
         if (selected.length > 0) {
-            urlParams.set(`selected_${type}`, selected.join(','));
+            // Encode the selected values using base64
+            const encodedValue = btoa(selected.join(','));
+            urlParams.set(`selected_${type}`, encodedValue);
         } else {
             urlParams.delete(`selected_${type}`);
         }
@@ -153,9 +155,14 @@
         }
 
         if (type === 'price') {
-            urlParams.delete('price_min');
-            urlParams.delete('price_max');
-            urlParams.delete('price_exact');
+            // For price filters, encode the values if they exist
+            const priceMin = urlParams.get('price_min');
+            const priceMax = urlParams.get('price_max');
+            const priceExact = urlParams.get('price_exact');
+
+            if (priceMin) urlParams.delete('price_min');
+            if (priceMax) urlParams.delete('price_max');
+            if (priceExact) urlParams.delete('price_exact');
         } else {
             urlParams.delete(`selected_${type}`);
         }
@@ -182,7 +189,6 @@
             }
         });
 
-        // Redirect dengan parameter yang tersisa
         window.location.href = `${window.location.pathname}?${urlParams.toString()}`;
     }
 

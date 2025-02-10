@@ -79,4 +79,9 @@ class Proyek extends Model
     {
         return $this->hasMany ( Saldo::class, 'id_asal_proyek' );
     }
+
+    public function rkbs () : HasMany
+    {
+        return $this->hasMany ( RKB::class, 'id_proyek' );
+    }
 }

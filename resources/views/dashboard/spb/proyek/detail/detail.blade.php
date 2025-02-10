@@ -9,8 +9,8 @@
             <div class="ibox">
                 <div class="ibox-head pe-0 ps-0">
                     <div class="ibox-title d-flex align-items-center gap-3">
-                        <a class="btn btn-outline-primary btn-sm" href="{{ route('spb.proyek.index') }}">
-                            <i class="fa fa-arrow-left pe-1"></i> Kembali
+                        <a class="btn btn-outline-primary btn-sm btn-hide-text-mobile" href="{{ route('spb.proyek.index') }}">
+                            <i class="fa fa-arrow-left pe-1"></i> <span class="ms-2">Kembali</span>
                         </a>
                         <h5 class="fw-medium">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}</h5>
                     </div>

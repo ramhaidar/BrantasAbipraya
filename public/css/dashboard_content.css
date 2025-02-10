@@ -1,18 +1,13 @@
-td {
-    white-space: nowrap;
-}
-
-.alert-custom-css {
-    max-width: 400px;
-    width: 90%;
-}
-
-#form-group {
-    width: 90%;
-}
-
+td,
+#table-data th,
 .space-nowrap {
     white-space: nowrap;
+}
+
+.alert-custom-css,
+#form-group {
+    max-width: 400px;
+    width: 90%;
 }
 
 .center {
@@ -32,14 +27,12 @@ td {
     justify-content: space-between;
 }
 
-
-
 .ibox {
     position: relative;
     margin-bottom: 25px;
-    padding: 20px 20px 0px 20px;
+    padding: 20px 20px 0;
     background-color: #fff;
-    box-shadow: 0px 0px 10px 5px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.2);
 }
 
 .ibox .ibox-head {
@@ -51,7 +44,7 @@ td {
 }
 
 .ibox .ibox-body {
-    padding: 15px 20px 20px 20px;
+    padding: 15px 20px 20px;
 }
 
 #table-data_wrapper {
@@ -63,25 +56,17 @@ td {
 }
 
 #table-data {
-    padding-left: 20px;
-    padding-right: 20px;
+    padding: 0 20px;
 }
 
-#table-data th {
-    white-space: nowrap;
-}
-
-.dataTables_length {
-    display: flex;
-}
-
-#table-data_filter {
-    display: flex;
-    justify-content: flex-end;
-}
-
+.dataTables_length,
+#table-data_filter,
 .pagination {
     display: flex;
+}
+
+#table-data_filter,
+.pagination {
     justify-content: flex-end;
 }
 
@@ -95,7 +80,8 @@ td {
     overflow-x: hidden;
 }
 
-.table-responsive .row:first-child {
+.table-responsive .row:first-child,
+.table-responsive .row:nth-child(3) {
     width: calc(100% + 22px);
     position: sticky;
     top: 0;
@@ -109,20 +95,11 @@ td {
 }
 
 .table-responsive .row:nth-child(2) .col-sm-12 {
-    padding-left: 0px;
-    padding-right: 0px;
-}
-
-.table-responsive .row:nth-child(3) {
-    width: calc(100% + 22px);
-    position: sticky;
-    top: 0;
-    background-color: white;
-    z-index: 2;
+    padding: 0;
 }
 
 #table-data_wrapper .row:first-child:first-child .col-sm-12.col-md-6:first-child {
-    padding: 0px;
+    padding: 0;
 }
 
 @media only screen and (max-width: 768px) {
@@ -141,12 +118,12 @@ td {
 
     .col-sm-12.col-md-6:nth-child(2) {
         min-width: 280px;
-        padding-left: 0px;
+        padding-left: 0;
     }
 
     .col-sm-12.col-md-6 {
         width: 45%;
-        padding-right: 0px;
+        padding-right: 0;
     }
 
     #table-data_filter {
@@ -160,7 +137,7 @@ td {
     }
 }
 
-@media screen and (max-width: 1234px) {
+@media screen and (max-width: 1500px) {
     .btn-hide-text-mobile span {
         display: none;
     }
@@ -168,39 +145,15 @@ td {
     .btn-hide-text-mobile {
         font-size: 20px;
     }
-}
-
-/* CSS to hide the button text on small screens (mobile devices) */
-@media (max-width: 1234px) {
-    .btn-hide-text-mobile span {
-        display: none;
-        /* Hide the text inside the span */
-    }
 
     .btn-hide-text-mobile i {
         margin-right: 0;
-        /* Remove the margin if the icon is too spaced */
     }
 }
 
-/* CSS for required asterisk */
 .form-label.required::after {
     content: " *";
     color: red;
     font-weight: bold;
     margin-left: 2px;
 }
-
-
-/* Center the modal dialog with a fit-content max-width */
-/* .modal-dialog {
-    max-width: fit-content;
-} */
-
-/* .modal-body {
-    text-align: center;
-}
-
-.modal-content h1 {
-    text-align: center;
-} */

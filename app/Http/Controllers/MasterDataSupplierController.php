@@ -14,13 +14,47 @@ class MasterDataSupplierController extends Controller
 {
     public function index ( Request $request )
     {
-        $allowedPerPage = [ 10, 25, 50, 100 ];
-        $perPage        = in_array ( (int) $request->get ( 'per_page' ), $allowedPerPage ) ? (int) $request->get ( 'per_page' ) : 10;
+        $perPage = $this->getPerPage ( $request );
+        $query   = $this->buildQuery ( $request );
 
+        $uniqueValues = $this->getUniqueValues ( clone $query );
+        $suppliers    = $this->getTableData ( $query, $perPage );
+        $spareparts   = $this->getSpareparts ();
+        $proyeks      = $this->getProyeks ();
+        $TableData    = $this->getPaginatedData ( $perPage );
+
+        return view ( 'dashboard.masterdata.supplier.supplier', [ 
+            'headerPage'   => "Master Data Supplier",
+            'page'         => 'Data Supplier',
+            'proyeks'      => $proyeks,
+            'TableData'    => $TableData,
+            'suppliers'    => $suppliers,
+            'spareparts'   => $spareparts,
+            'uniqueValues' => $uniqueValues,
+        ] );
+    }
+
+    private function getPerPage ( Request $request )
+    {
+        $allowedPerPage = [ 10, 25, 50, 100 ];
+        return in_array ( (int) $request->get ( 'per_page' ), $allowedPerPage ) ? (int) $request->get ( 'per_page' ) : 10;
+    }
+
+    private function buildQuery ( Request $request )
+    {
         $query = MasterDataSupplier::query ()
             ->with ( [ 'masterDataSpareparts' ] )
             ->orderBy ( $request->get ( 'sort', 'updated_at' ), $request->get ( 'direction', 'desc' ) );
 
+        $this->applySearchFilter ( $request, $query );
+        $this->applyUserRoleFilter ( $query );
+        $this->applyColumnFilters ( $request, $query );
+
+        return $query;
+    }
+
+    private function applySearchFilter ( Request $request, $query )
+    {
         if ( $request->has ( 'search' ) )
         {
             $search = $request->get ( 'search' );
@@ -37,34 +71,54 @@ class MasterDataSupplierController extends Controller
                     } );
             } );
         }
+    }
 
+    private function applyUserRoleFilter ( $query )
+    {
         $user = Auth::user ();
-
         if ( $user->role === 'Pegawai' )
         {
             $query->where ( 'id_user', $user->id );
         }
         elseif ( $user->role === 'Boss' )
         {
-            $proyeks       = $user->proyek ()
-                ->with ( "users" )
-                ->get ();
+            $proyeks       = $user->proyek ()->with ( "users" )->get ();
             $usersInProyek = $proyeks->pluck ( 'users.*.id' )->flatten ();
             $query->whereIn ( 'id_user', $usersInProyek );
         }
+    }
 
+    private function applyColumnFilters ( Request $request, $query )
+    {
         $this->handleNamaFilter ( $request, $query );
         $this->handleAlamatFilter ( $request, $query );
         $this->handleContactPersonFilter ( $request, $query );
+    }
 
-        $suppliers = $query->paginate ( $perPage )
-            ->withQueryString ();
+    private function getUniqueValues ( $query )
+    {
+        return [ 
+            'nama'           => $query->get ()->pluck ( 'nama' )->unique ()->values (),
+            'alamat'         => $query->get ()->pluck ( 'alamat' )->unique ()->values (),
+            'contact_person' => $query->get ()->pluck ( 'contact_person' )->unique ()->values (),
+        ];
+    }
 
-        $spareparts = MasterDataSparepart::all ();
+    private function getTableData ( $query, $perPage )
+    {
+        return $query->paginate ( $perPage )->withQueryString ();
+    }
 
-        // Filter projects based on user role
+    private function getSpareparts ()
+    {
+        return MasterDataSparepart::all ();
+    }
+
+    private function getProyeks ()
+    {
         $user         = Auth::user ();
         $proyeksQuery = Proyek::with ( "users" );
+
         if ( $user->role === 'koordinator_proyek' )
         {
             $proyeksQuery->whereHas ( 'users', function ($query) use ($user)
@@ -73,36 +127,18 @@ class MasterDataSupplierController extends Controller
             } );
         }
 
-        $proyeks = $proyeksQuery
-            ->orderBy ( "updated_at", "desc" )
+        return $proyeksQuery->orderBy ( "updated_at", "desc" )
             ->orderBy ( "id", "desc" )
             ->get ();
+    }
 
-        $TableData = MasterDataSupplier::query ()
+    private function getPaginatedData ( $perPage )
+    {
+        return MasterDataSupplier::query ()
             ->orderBy ( 'updated_at', 'desc' )
             ->orderBy ( 'id', 'desc' )
             ->paginate ( $perPage )
             ->withQueryString ();
-
-        // Clone the query before pagination to get unique values
-        $queryForUniqueValues = clone $query;
-
-        $uniqueValues = [ 
-            'nama'           => $queryForUniqueValues->get ()->pluck ( 'nama' )->unique ()->values (),
-            'alamat'         => $queryForUniqueValues->get ()->pluck ( 'alamat' )->unique ()->values (),
-            'contact_person' => $queryForUniqueValues->get ()->pluck ( 'contact_person' )->unique ()->values (),
-        ];
-
-        return view ( 'dashboard.masterdata.supplier.supplier', [ 
-            'headerPage'   => "Master Data Supplier",
-            'page'         => 'Data Supplier',
-
-            'proyeks'      => $proyeks,
-            'TableData'    => $TableData,
-            'suppliers'    => $suppliers,
-            'spareparts'   => $spareparts,
-            'uniqueValues' => $uniqueValues,
-        ] );
     }
 
     private function handleNamaFilter ( Request $request, $query )

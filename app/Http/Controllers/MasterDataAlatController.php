@@ -11,15 +11,39 @@ class MasterDataAlatController extends Controller
 {
     public function index ( Request $request )
     {
-        // Validate and set perPage to allowed values only
+        $perPage = $this->getPerPage ( $request );
+        $query   = $this->buildBaseQuery ( $request );
+
+        $this->applySearchFilter ( $request, $query );
+        $this->applyAllFilters ( $request, $query );
+
+        $proyeks      = $this->getProyeks ();
+        $TableData    = $this->getTableData ( $query, $perPage );
+        $uniqueValues = $this->getUniqueValues ( $query, $proyeks );
+
+        return view ( 'dashboard.masterdata.alat.alat', [ 
+            'headerPage'   => "Master Data Alat",
+            'page'         => 'Data Alat',
+            'proyeks'      => $proyeks,
+            'TableData'    => $TableData,
+            'uniqueValues' => $uniqueValues,
+        ] );
+    }
+
+    private function getPerPage ( Request $request )
+    {
         $allowedPerPage = [ 10, 25, 50, 100 ];
-        $perPage        = in_array ( (int) $request->get ( 'per_page' ), $allowedPerPage ) ? (int) $request->get ( 'per_page' ) : 10;
+        return in_array ( (int) $request->get ( 'per_page' ), $allowedPerPage ) ? (int) $request->get ( 'per_page' ) : 10;
+    }
 
-        // Build base query
-        $query = MasterDataAlat::with ( 'proyekCurrent' )
+    private function buildBaseQuery ( Request $request )
+    {
+        return MasterDataAlat::with ( 'proyekCurrent' )
             ->orderBy ( $request->get ( 'sort', 'updated_at' ), $request->get ( 'direction', 'desc' ) );
+    }
 
-        // Apply search filter if search parameter exists
+    private function applySearchFilter ( Request $request, $query )
+    {
         if ( $request->has ( 'search' ) && ! empty ( $request->get ( 'search' ) ) )
         {
             $search = $request->get ( 'search' );
@@ -40,7 +64,6 @@ class MasterDataAlatController extends Controller
                     } )
                     ->orWhere ( function ($sq) use ($search)
                     {
-                        // Jika search term mengandung "belum ditugaskan"
                         if ( str_contains ( strtolower ( $search ), 'belum ditugaskan' ) )
                         {
                             $sq->whereDoesntHave ( 'alatProyek', function ($aq)
@@ -51,18 +74,23 @@ class MasterDataAlatController extends Controller
                     } );
             } );
         }
+    }
 
-        // Apply filters
+    private function applyAllFilters ( Request $request, $query )
+    {
         $this->handleJenisFilter ( $request, $query );
         $this->handleMerekFilter ( $request, $query );
         $this->handleKodeFilter ( $request, $query );
         $this->handleTipeFilter ( $request, $query );
         $this->handleSerialFilter ( $request, $query );
         $this->handleProyekFilter ( $request, $query );
+    }
 
-        // Filter projects based on user role
+    private function getProyeks ()
+    {
         $user         = Auth::user ();
         $proyeksQuery = Proyek::with ( "users" );
+
         if ( $user->role === 'koordinator_proyek' )
         {
             $proyeksQuery->whereHas ( 'users', function ($query) use ($user)
@@ -71,34 +99,29 @@ class MasterDataAlatController extends Controller
             } );
         }
 
-        $proyeks = $proyeksQuery
-            ->orderBy ( "updated_at", "desc" )
+        return $proyeksQuery->orderBy ( "updated_at", "desc" )
             ->orderBy ( "id", "desc" )
             ->get ();
+    }
 
-        // Use the filtered query for pagination
-        $TableData = $query->paginate ( $perPage )->withQueryString ();
+    private function getTableData ( $query, $perPage )
+    {
+        return $query->paginate ( $perPage )->withQueryString ();
+    }
 
-        // Clone the query before pagination to get unique values
+    private function getUniqueValues ( $query, $proyeks )
+    {
         $queryForUniqueValues = clone $query;
+        $results              = $queryForUniqueValues->get ();
 
-        // Get unique values from the filtered query
-        $uniqueValues = [ 
-            'jenis'  => $queryForUniqueValues->get ()->pluck ( 'jenis_alat' )->unique ()->values (),
-            'merek'  => $queryForUniqueValues->get ()->pluck ( 'merek_alat' )->unique ()->values (),
-            'kode'   => $queryForUniqueValues->get ()->pluck ( 'kode_alat' )->unique ()->values (),
-            'tipe'   => $queryForUniqueValues->get ()->pluck ( 'tipe_alat' )->unique ()->values (),
-            'serial' => $queryForUniqueValues->get ()->pluck ( 'serial_number' )->unique ()->values (),
+        return [ 
+            'jenis'  => $results->pluck ( 'jenis_alat' )->unique ()->values (),
+            'merek'  => $results->pluck ( 'merek_alat' )->unique ()->values (),
+            'kode'   => $results->pluck ( 'kode_alat' )->unique ()->values (),
+            'tipe'   => $results->pluck ( 'tipe_alat' )->unique ()->values (),
+            'serial' => $results->pluck ( 'serial_number' )->unique ()->values (),
             'proyek' => $proyeks->pluck ( 'nama' ),
         ];
-
-        return view ( 'dashboard.masterdata.alat.alat', [ 
-            'headerPage'   => "Master Data Alat",
-            'page'         => 'Data Alat',
-            'proyeks'      => $proyeks,
-            'TableData'    => $TableData,
-            'uniqueValues' => $uniqueValues,
-        ] );
     }
 
     private function handleJenisFilter ( Request $request, $query )
@@ -221,7 +244,6 @@ class MasterDataAlatController extends Controller
                 $nonNullValues = array_filter ( $proyek, fn ( $value ) => $value !== 'null' );
                 if ( empty ( $nonNullValues ) )
                 {
-                    // Jika hanya memilih "Belum Ditugaskan"
                     $query->whereDoesntHave ( 'alatProyek', function ($q)
                     {
                         $q->whereNull ( 'removed_at' );
@@ -229,7 +251,6 @@ class MasterDataAlatController extends Controller
                 }
                 else
                 {
-                    // Jika memilih "Belum Ditugaskan" dan proyek lain
                     $query->where ( function ($q) use ($nonNullValues)
                     {
                         $q->whereDoesntHave ( 'alatProyek', function ($sub)
@@ -248,7 +269,6 @@ class MasterDataAlatController extends Controller
             }
             else
             {
-                // Jika hanya memilih proyek (tanpa "Belum Ditugaskan")
                 $query->whereHas ( 'alatProyek', function ($q) use ($proyek)
                 {
                     $q->whereNull ( 'removed_at' )
@@ -330,5 +350,4 @@ class MasterDataAlatController extends Controller
                 ->get ()
         );
     }
-
 }

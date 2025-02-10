@@ -14,13 +14,45 @@ class MasterDataSparepartController extends Controller
 {
     public function index ( Request $request )
     {
-        $allowedPerPage = [ 10, 25, 50, 100 ];
-        $perPage        = in_array ( (int) $request->get ( 'per_page' ), $allowedPerPage ) ? (int) $request->get ( 'per_page' ) : 10;
+        $perPage = $this->getPerPage ( $request );
+        $query   = $this->buildBaseQuery ( $request );
 
-        $query = MasterDataSparepart::query ()
+        $this->applySearchFilter ( $request, $query );
+        $this->applyAllFilters ( $request, $query );
+        $this->applyUserRoleFilter ( $query );
+
+        $suppliers    = $this->getSuppliers ();
+        $kategori     = $this->getKategori ();
+        $proyeks      = $this->getProyeks ();
+        $uniqueValues = $this->getUniqueValues ( $query );
+        $TableData    = $this->getTableData ( $query, $perPage );
+
+        return view ( 'dashboard.masterdata.sparepart.sparepart', [ 
+            'headerPage'   => "Master Data Sparepart",
+            'page'         => 'Data Sparepart',
+            'proyeks'      => $proyeks,
+            'TableData'    => $TableData,
+            'suppliers'    => $suppliers,
+            'categories'   => $kategori,
+            'uniqueValues' => $uniqueValues,
+        ] );
+    }
+
+    private function getPerPage ( Request $request )
+    {
+        $allowedPerPage = [ 10, 25, 50, 100 ];
+        return in_array ( (int) $request->get ( 'per_page' ), $allowedPerPage ) ? (int) $request->get ( 'per_page' ) : 10;
+    }
+
+    private function buildBaseQuery ( Request $request )
+    {
+        return MasterDataSparepart::query ()
             ->with ( [ 'kategoriSparepart', 'masterDataSuppliers' ] )
             ->orderBy ( $request->get ( 'sort', 'updated_at' ), $request->get ( 'direction', 'desc' ) );
+    }
 
+    private function applySearchFilter ( Request $request, $query )
+    {
         if ( $request->has ( 'search' ) )
         {
             $search = $request->get ( 'search' );
@@ -41,7 +73,10 @@ class MasterDataSparepartController extends Controller
                     } );
             } );
         }
+    }
 
+    private function applyAllFilters ( Request $request, $query )
+    {
         $this->handleNamaFilter ( $request, $query );
         $this->handlePartNumberFilter ( $request, $query );
         $this->handleMerkFilter ( $request, $query );
@@ -49,7 +84,10 @@ class MasterDataSparepartController extends Controller
         $this->handleJenisFilter ( $request, $query );
         $this->handleSubJenisFilter ( $request, $query );
         $this->handleKategoriFilter ( $request, $query );
+    }
 
+    private function applyUserRoleFilter ( $query )
+    {
         $user = Auth::user ();
 
         if ( $user->role === 'Pegawai' )
@@ -58,18 +96,27 @@ class MasterDataSparepartController extends Controller
         }
         elseif ( $user->role === 'Boss' )
         {
-            $proyeks       = $user->proyek ()
-                ->with ( "users" )
-                ->get ();
+            $proyeks       = $user->proyek ()->with ( "users" )->get ();
             $usersInProyek = $proyeks->pluck ( 'users.*.id' )->flatten ();
             $query->whereIn ( 'id_user', $usersInProyek );
         }
+    }
 
-        $suppliers = MasterDataSupplier::all ();
-        $kategori  = KategoriSparepart::all ();
+    private function getSuppliers ()
+    {
+        return MasterDataSupplier::all ();
+    }
 
+    private function getKategori ()
+    {
+        return KategoriSparepart::all ();
+    }
+
+    private function getProyeks ()
+    {
         $user         = Auth::user ();
         $proyeksQuery = Proyek::with ( "users" );
+
         if ( $user->role === 'koordinator_proyek' )
         {
             $proyeksQuery->whereHas ( 'users', function ($query) use ($user)
@@ -78,46 +125,34 @@ class MasterDataSparepartController extends Controller
             } );
         }
 
-        $proyeks = $proyeksQuery
-            ->orderBy ( "updated_at", "desc" )
+        return $proyeksQuery->orderBy ( "updated_at", "desc" )
             ->orderBy ( "id", "desc" )
             ->get ();
+    }
 
-        // Clone the query before pagination
-        $queryForUniqueValues = clone $query;
-
-        // Get unique values from the filtered query
-        $uniqueValues = [ 
-            'nama'        => $queryForUniqueValues->get ()->pluck ( 'nama' )->unique ()->values (),
-            'part_number' => $queryForUniqueValues->get ()->pluck ( 'part_number' )->unique ()->values (),
-            'merk'        => $queryForUniqueValues->get ()->pluck ( 'merk' )->unique ()->values (),
-            'kode'        => KategoriSparepart::whereIn ( 'id', $queryForUniqueValues->get ()->pluck ( 'id_kategori_sparepart' ) )
-                ->pluck ( 'kode' )->unique ()->values (),
-            'jenis'       => KategoriSparepart::whereIn ( 'id', $queryForUniqueValues->get ()->pluck ( 'id_kategori_sparepart' ) )
-                ->pluck ( 'jenis' )->unique ()->sort ()->values (),
-            'sub_jenis'   => KategoriSparepart::whereIn ( 'id', $queryForUniqueValues->get ()->pluck ( 'id_kategori_sparepart' ) )
-                ->pluck ( 'sub_jenis' )
-                ->unique ()  // Hapus filter() agar nilai null tetap ada
-                ->sort ()
-                ->values (),
-            'kategori'    => KategoriSparepart::whereIn ( 'id', $queryForUniqueValues->get ()->pluck ( 'id_kategori_sparepart' ) )
-                ->pluck ( 'nama' )->unique ()->values (),
-        ];
-
-        $TableData = $query->orderBy ( 'updated_at', 'desc' )
+    private function getTableData ( $query, $perPage )
+    {
+        return $query->orderBy ( 'updated_at', 'desc' )
             ->orderBy ( 'id', 'desc' )
             ->paginate ( $perPage )
             ->withQueryString ();
+    }
 
-        return view ( 'dashboard.masterdata.sparepart.sparepart', [ 
-            'headerPage'   => "Master Data Sparepart",
-            'page'         => 'Data Sparepart',
-            'proyeks'      => $proyeks,
-            'TableData'    => $TableData,
-            'suppliers'    => $suppliers,
-            'categories'   => $kategori,
-            'uniqueValues' => $uniqueValues,
-        ] );
+    private function getUniqueValues ( $query )
+    {
+        $queryForUniqueValues = clone $query;
+        $results              = $queryForUniqueValues->get ();
+        $kategoriIds          = $results->pluck ( 'id_kategori_sparepart' );
+
+        return [ 
+            'nama'        => $results->pluck ( 'nama' )->unique ()->values (),
+            'part_number' => $results->pluck ( 'part_number' )->unique ()->values (),
+            'merk'        => $results->pluck ( 'merk' )->unique ()->values (),
+            'kode'        => KategoriSparepart::whereIn ( 'id', $kategoriIds )->pluck ( 'kode' )->unique ()->values (),
+            'jenis'       => KategoriSparepart::whereIn ( 'id', $kategoriIds )->pluck ( 'jenis' )->unique ()->sort ()->values (),
+            'sub_jenis'   => KategoriSparepart::whereIn ( 'id', $kategoriIds )->pluck ( 'sub_jenis' )->unique ()->sort ()->values (),
+            'kategori'    => KategoriSparepart::whereIn ( 'id', $kategoriIds )->pluck ( 'nama' )->unique ()->values (),
+        ];
     }
 
     private function handleNamaFilter ( Request $request, $query )

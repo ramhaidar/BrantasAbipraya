@@ -18,19 +18,40 @@ class DetailRKBGeneralController extends Controller
 {
     public function index ( Request $request, $id )
     {
+        $perPage        = $this->getPerPage ( $request );
+        $rkb            = RKB::with ( [ 'proyek' ] )->find ( $id );
+        $query          = $this->buildQuery ( $request, $id );
+        $uniqueValues   = $this->getUniqueValues ( $query );
+        $TableData      = $this->getTableData ( $query, $perPage );
+        $available_alat = $this->getAlatAvailable ( $rkb );
+        $proyeks        = $this->getProyeks ();
+
+        return view ( 'dashboard.rkb.general.detail.detail', [ 
+            'headerPage'            => "RKB General",
+            'page'                  => 'Detail RKB General [' . $rkb->proyek->nama . ' | ' . $rkb->nomor . ']',
+            'proyeks'               => $proyeks,
+            'rkb'                   => $rkb,
+            'available_alat'        => $available_alat,
+            'master_data_sparepart' => MasterDataSparepart::all (),
+            'kategori_sparepart'    => KategoriSparepart::all (),
+            'TableData'             => $TableData,
+            'uniqueValues'          => $uniqueValues,
+        ] );
+    }
+
+    private function getPerPage ( Request $request )
+    {
         if ( $request->get ( 'per_page' ) != -1 )
         {
-            $parameters               = $request->except ( 'per_page' );
+            $parameters             = $request->except ( 'per_page' );
             $parameters[ 'per_page' ] = -1;
-
             return redirect ()->to ( $request->url () . '?' . http_build_query ( $parameters ) );
         }
+        return (int) $request->per_page;
+    }
 
-        $perPage = (int) $request->per_page;
-
-        $rkb = RKB::with ( [ 'proyek' ] )->find ( $id );
-
-        // Modified query with proper joins and select
+    private function buildQuery ( Request $request, $id )
+    {
         $query = DetailRKBGeneral::query ()
             ->select ( [ 
                 'detail_rkb_general.*',
@@ -49,6 +70,14 @@ class DetailRKBGeneralController extends Controller
             ->join ( 'master_data_sparepart', 'detail_rkb_general.id_master_data_sparepart', '=', 'master_data_sparepart.id' )
             ->where ( 'link_alat_detail_rkb.id_rkb', $id );
 
+        $this->applySearch ( $query, $request );
+        $this->applyFilters ( $query, $request );
+
+        return $query;
+    }
+
+    private function applySearch ( $query, Request $request )
+    {
         if ( $request->has ( 'search' ) )
         {
             $search = $request->get ( 'search' );
@@ -64,34 +93,44 @@ class DetailRKBGeneralController extends Controller
                     ->orWhere ( 'master_data_sparepart.merk', 'ilike', "%{$search}%" );
             } );
         }
+    }
 
-        // Add filter handlers for each column
-        $this->applyColumnFilter ( $query, $request, 'jenis_alat', 'master_data_alat.jenis_alat' );
-        $this->applyColumnFilter ( $query, $request, 'kode_alat', 'master_data_alat.kode_alat' );
-        $this->applyColumnFilter ( $query, $request, 'kategori_sparepart', 'kategori_sparepart.nama' );
-        $this->applyColumnFilter ( $query, $request, 'sparepart', 'master_data_sparepart.nama' );
-        $this->applyColumnFilter ( $query, $request, 'part_number', 'master_data_sparepart.part_number' );
-        $this->applyColumnFilter ( $query, $request, 'merk', 'master_data_sparepart.merk' );
-        $this->applyColumnFilter ( $query, $request, 'satuan', 'detail_rkb_general.satuan' );
+    private function applyFilters ( $query, Request $request )
+    {
+        $filterColumns = [ 
+            'jenis_alat'         => 'master_data_alat.jenis_alat',
+            'kode_alat'          => 'master_data_alat.kode_alat',
+            'kategori_sparepart' => 'kategori_sparepart.nama',
+            'sparepart'          => 'master_data_sparepart.nama',
+            'part_number'        => 'master_data_sparepart.part_number',
+            'merk'               => 'master_data_sparepart.merk',
+            'satuan'             => 'detail_rkb_general.satuan',
+            'quantity_requested' => 'detail_rkb_general.quantity_requested',
+            'quantity_approved'  => 'detail_rkb_general.quantity_approved'
+        ];
 
-        $available_alat = MasterDataAlat::whereHas ( 'alatProyek', function ($query) use ($rkb)
+        foreach ( $filterColumns as $paramName => $columnName )
         {
-            $query->where ( 'id_proyek', $rkb->id_proyek )
-                ->whereNull ( 'removed_at' );
-        } )->get ();
+            $this->applyColumnFilter ( $query, $request, $paramName, $columnName );
+        }
+    }
 
-        // Modified TableData to fix ambiguous column issue
-        $TableData = $perPage === -1
+    private function getTableData ( $query, $perPage )
+    {
+        return $perPage === -1
             ? $query->orderBy ( 'detail_rkb_general.updated_at', 'desc' )
                 ->orderBy ( 'detail_rkb_general.id', 'desc' )
                 ->paginate ( $query->count () )
             : $query->orderBy ( 'detail_rkb_general.updated_at', 'desc' )
                 ->orderBy ( 'detail_rkb_general.id', 'desc' )
                 ->paginate ( $perPage );
+    }
 
-        // Filter projects based on user role
+    private function getProyeks ()
+    {
         $user         = Auth::user ();
         $proyeksQuery = Proyek::with ( "users" );
+
         if ( $user->role === 'koordinator_proyek' )
         {
             $proyeksQuery->whereHas ( 'users', function ($query) use ($user)
@@ -100,34 +139,62 @@ class DetailRKBGeneralController extends Controller
             } );
         }
 
-        $proyeks = $proyeksQuery
-            ->orderBy ( "updated_at", "desc" )
+        return $proyeksQuery->orderBy ( "updated_at", "desc" )
             ->orderBy ( "id", "desc" )
             ->get ();
+    }
 
-        // Collect unique values for filters
-        $uniqueValues = [ 
-            'jenis_alat'         => $TableData->pluck ( 'jenis_alat' )->unique ()->filter ()->sort ()->values (),
-            'kode_alat'          => $TableData->pluck ( 'kode_alat' )->unique ()->filter ()->sort ()->values (),
-            'kategori_sparepart' => $TableData->pluck ( 'kategori_nama' )->unique ()->filter ()->sort ()->values (),
-            'sparepart'          => $TableData->pluck ( 'sparepart_nama' )->unique ()->filter ()->sort ()->values (),
-            'part_number'        => $TableData->pluck ( 'part_number' )->unique ()->filter ()->sort ()->values (),
-            'merk'               => $TableData->pluck ( 'merk' )->unique ()->filter ()->sort ()->values (),
-            'satuan'             => $TableData->pluck ( 'satuan' )->unique ()->filter ()->sort ()->values ()
+    private function getAlatAvailable ( $rkb )
+    {
+        return MasterDataAlat::whereHas ( 'alatProyek', function ($query) use ($rkb)
+        {
+            $query->where ( 'id_proyek', $rkb->id_proyek )
+                ->whereNull ( 'removed_at' );
+        } )->get ();
+    }
+
+    private function getUniqueValues ( $query )
+    {
+        $result = clone $query;
+        $data   = $result->get ();
+
+        return [ 
+            'jenis_alat'         => $data->pluck ( 'jenis_alat' )->unique ()->filter ()->sort ()->values (),
+            'kode_alat'          => $data->pluck ( 'kode_alat' )->unique ()->filter ()->sort ()->values (),
+            'kategori_sparepart' => $data->pluck ( 'kategori_nama' )->unique ()->filter ()->sort ()->values (),
+            'sparepart'          => $data->pluck ( 'sparepart_nama' )->unique ()->filter ()->sort ()->values (),
+            'part_number'        => $data->pluck ( 'part_number' )->unique ()->filter ()->sort ()->values (),
+            'merk'               => $data->pluck ( 'merk' )->unique ()->filter ()->sort ()->values (),
+            'satuan'             => $data->pluck ( 'satuan' )->unique ()->filter ()->sort ()->values (),
+            'quantity_requested' => $data->pluck ( 'quantity_requested' )->unique ()->filter ()->sort ()->values (),
+            'quantity_approved'  => $data->pluck ( 'quantity_approved' )->unique ()->filter ()->sort ()->values (),
         ];
+    }
 
-        return view ( 'dashboard.rkb.general.detail.detail', [ 
-            'headerPage'            => "RKB General",
-            'page'                  => 'Detail RKB General [' . $rkb->proyek->nama . ' | ' . $rkb->nomor . ']',
-
-            'proyeks'               => $proyeks,
-            'rkb'                   => $rkb,
-            'available_alat'        => $available_alat,
-            'master_data_sparepart' => MasterDataSparepart::all (),
-            'kategori_sparepart'    => KategoriSparepart::all (),
-            'TableData'             => $TableData,
-            'uniqueValues'          => $uniqueValues, // Add this line
-        ] );
+    private function applyColumnFilter ( $query, Request $request, $paramName, $columnName )
+    {
+        if ( $request->filled ( "selected_{$paramName}" ) )
+        {
+            $values = explode ( ',', $request->get ( "selected_{$paramName}" ) );
+            if ( in_array ( 'null', $values ) )
+            {
+                $nonNullValues = array_filter ( $values, fn ( $value ) => $value !== 'null' );
+                $query->where ( function ($q) use ($columnName, $nonNullValues)
+                {
+                    $q->whereNull ( $columnName )
+                        ->orWhere ( $columnName, '' )
+                        ->orWhere ( $columnName, '-' )
+                        ->when ( count ( $nonNullValues ) > 0, function ($subQ) use ($columnName, $nonNullValues)
+                        {
+                            $subQ->orWhereIn ( $columnName, $nonNullValues );
+                        } );
+                } );
+            }
+            else
+            {
+                $query->whereIn ( $columnName, $values );
+            }
+        }
     }
 
     // Store a new DetailRKBGeneral
@@ -341,32 +408,6 @@ class DetailRKBGeneralController extends Controller
             return redirect ()->back ()->withErrors ( [ 
                 'error' => 'Failed to delete Detail RKB General: ' . $e->getMessage (),
             ] );
-        }
-    }
-
-    private function applyColumnFilter ( $query, Request $request, $paramName, $columnName )
-    {
-        if ( $request->filled ( "selected_{$paramName}" ) )
-        {
-            $values = explode ( ',', $request->get ( "selected_{$paramName}" ) );
-            if ( in_array ( 'null', $values ) )
-            {
-                $nonNullValues = array_filter ( $values, fn ( $value ) => $value !== 'null' );
-                $query->where ( function ($q) use ($columnName, $nonNullValues)
-                {
-                    $q->whereNull ( $columnName )
-                        ->orWhere ( $columnName, '' )
-                        ->orWhere ( $columnName, '-' )
-                        ->when ( count ( $nonNullValues ) > 0, function ($subQ) use ($columnName, $nonNullValues)
-                        {
-                            $subQ->orWhereIn ( $columnName, $nonNullValues );
-                        } );
-                } );
-            }
-            else
-            {
-                $query->whereIn ( $columnName, $values );
-            }
         }
     }
 }

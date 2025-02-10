@@ -5,7 +5,7 @@
 <div class="ibox-body ms-0 ps-0">
     <form class="mb-3" id="filter-form" method="GET">
         <div class="mb-3 d-flex justify-content-end">
-            @if (request('selected_jenis_alat') || request('selected_kode_alat') || request('selected_kategori_sparepart') || request('selected_sparepart') || request('selected_part_number') || request('selected_merk') || request('selected_satuan'))
+            @if (request('selected_jenis_alat') || request('selected_kode_alat') || request('selected_kategori_sparepart') || request('selected_sparepart') || request('selected_part_number') || request('selected_merk') || request('selected_satuan') || request('selected_quantity_requested') || request('selected_quantity_approved'))
                 <a class="btn btn-danger btn-sm btn-hide-text-mobile" href="{{ request()->url() . (request('search') ? '?search=' . request('search') : '') }}">
                     <i class="bi bi-x-circle"></i> <span class="ms-2">Hapus Semua Filter</span>
                 </a>
@@ -214,8 +214,72 @@
                                 </div>
                             </div>
                         </th>
-                        <th>Quantity Requested</th>
-                        <th>Quantity Approved</th>
+                        <th>
+                            <div class="d-flex align-items-center gap-2 justify-content-center">
+                                Quantity Requested
+                                <div class="btn-group">
+                                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="toggleFilter('quantity-requested-filter')">
+                                        <i class="bi bi-funnel-fill"></i>
+                                    </button>
+                                    @if (request('selected_quantity_requested'))
+                                        <button class="btn btn-outline-danger btn-sm" type="button" onclick="clearFilter('quantity_requested')">
+                                            <i class="bi bi-x-circle"></i>
+                                        </button>
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="filter-popup" id="quantity-requested-filter" style="display: none;">
+                                <div class="p-2">
+                                    <input class="form-control form-control-sm mb-2" type="text" placeholder="Search quantity..." onkeyup="filterCheckboxes('quantity_requested', event)">
+                                    <div class="checkbox-list text-start">
+                                        <div class="form-check">
+                                            <input class="form-check-input quantity_requested-checkbox" type="checkbox" value="null" style="cursor: pointer" {{ in_array('null', explode(',', request('selected_quantity_requested', ''))) ? 'checked' : '' }}>
+                                            <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">Empty/Null</label>
+                                        </div>
+                                        @foreach ($uniqueValues['quantity_requested'] as $quantity)
+                                            <div class="form-check">
+                                                <input class="form-check-input quantity_requested-checkbox" type="checkbox" value="{{ $quantity }}" style="cursor: pointer" {{ in_array($quantity, explode(',', request('selected_quantity_requested', ''))) ? 'checked' : '' }}>
+                                                <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">{{ $quantity }}</label>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('quantity_requested')"><i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span></button>
+                                </div>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="d-flex align-items-center gap-2 justify-content-center">
+                                Quantity Approved
+                                <div class="btn-group">
+                                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="toggleFilter('quantity-approved-filter')">
+                                        <i class="bi bi-funnel-fill"></i>
+                                    </button>
+                                    @if (request('selected_quantity_approved'))
+                                        <button class="btn btn-outline-danger btn-sm" type="button" onclick="clearFilter('quantity_approved')">
+                                            <i class="bi bi-x-circle"></i>
+                                        </button>
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="filter-popup" id="quantity-approved-filter" style="display: none;">
+                                <div class="p-2">
+                                    <input class="form-control form-control-sm mb-2" type="text" placeholder="Search quantity..." onkeyup="filterCheckboxes('quantity_approved', event)">
+                                    <div class="checkbox-list text-start">
+                                        <div class="form-check">
+                                            <input class="form-check-input quantity_approved-checkbox" type="checkbox" value="null" style="cursor: pointer" {{ in_array('null', explode(',', request('selected_quantity_approved', ''))) ? 'checked' : '' }}>
+                                            <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">Empty/Null</label>
+                                        </div>
+                                        @foreach ($uniqueValues['quantity_approved'] as $quantity)
+                                            <div class="form-check">
+                                                <input class="form-check-input quantity_approved-checkbox" type="checkbox" value="{{ $quantity }}" style="cursor: pointer" {{ in_array($quantity, explode(',', request('selected_quantity_approved', ''))) ? 'checked' : '' }}>
+                                                <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">{{ $quantity }}</label>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('quantity_approved')"><i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span></button>
+                                </div>
+                            </div>
+                        </th>
                         <th>
                             <div class="d-flex align-items-center gap-2 justify-content-center">
                                 Satuan
@@ -305,6 +369,8 @@
         <input id="selected-part-number" name="selected_part_number" type="hidden" value="{{ request('selected_part_number') }}">
         <input id="selected-merk" name="selected_merk" type="hidden" value="{{ request('selected_merk') }}">
         <input id="selected-satuan" name="selected_satuan" type="hidden" value="{{ request('selected_satuan') }}">
+        <input id="selected-quantity-requested" name="selected_quantity_requested" type="hidden" value="{{ request('selected_quantity_requested') }}">
+        <input id="selected-quantity-approved" name="selected_quantity_approved" type="hidden" value="{{ request('selected_quantity_approved') }}">
     </form>
 </div>
 

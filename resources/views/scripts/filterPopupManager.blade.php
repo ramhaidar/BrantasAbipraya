@@ -5,19 +5,41 @@
         const button = $(`button[onclick="toggleFilter('${id}')"]`);
 
         if (popup.is(':hidden')) {
+            if (!popup.data('originalWidth')) {
+                popup.css('width', ''); // Reset width only on first open
+                popup.data('originalWidth', popup.outerWidth()); // Store original width
+            }
             positionPopup(popup, button);
+            popup.toggle();
+            popup.find('input[type="text"]').focus(); // Add focus to search input
+        } else {
+            popup.toggle();
         }
-        popup.toggle();
     }
 
     function positionPopup(popup, button) {
         const buttonRect = button[0].getBoundingClientRect();
         const windowWidth = $(window).width();
         const windowHeight = $(window).height();
-        const popupWidth = popup.outerWidth();
         const popupHeight = popup.outerHeight();
-        const safetyMargin = 25; // Increased safety margin from edges
-        const verticalGap = 10; // Gap between button and popup
+        const safetyMargin = 40; // Increased margin from 25 to 40px
+        const verticalGap = 10;
+
+        // Gunakan lebar yang tersimpan atau hitung ulang jika belum ada
+        const originalWidth = popup.data('originalWidth');
+
+        // Ensure popup width doesn't exceed viewport
+        const maxWidth = windowWidth - (safetyMargin * 2);
+        popup.css({
+            'width': Math.min(originalWidth, maxWidth) + 'px',
+            'max-width': `${maxWidth}px`
+        });
+
+        // Force content to wrap if needed
+        popup.find('.checkbox-list').css({
+            'word-break': 'break-word',
+            'overflow-x': 'hidden'
+        });
 
         // Calculate vertical position
         let top = buttonRect.bottom + verticalGap;
@@ -34,8 +56,8 @@
         let left = buttonRect.left;
 
         // Check if popup would go off right edge
-        if (left + popupWidth > windowWidth - safetyMargin) {
-            left = windowWidth - popupWidth - safetyMargin;
+        if (left + originalWidth > windowWidth - safetyMargin) {
+            left = windowWidth - originalWidth - safetyMargin;
             popup.addClass('right-aligned');
         } else {
             popup.removeClass('right-aligned');
@@ -144,6 +166,11 @@
 
         $(document).on('click', '.form-check-label', function(event) {
             event.stopPropagation();
+        });
+
+        // Clear stored widths when filters are cleared
+        $('.filter-popup').on('hide', function() {
+            $(this).removeData('originalWidth');
         });
     });
 </script>

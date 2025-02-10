@@ -88,8 +88,8 @@
         });
     });
 
-    function filterCheckboxes(type) {
-        const searchText = $(event.target).val().toLowerCase();
+    function filterCheckboxes(type, event) {
+        const searchText = event ? $(event.target).val().toLowerCase() : '';
         const selector = `.${type}-checkbox`;
 
         // Filter items based on search text
@@ -107,7 +107,6 @@
             const isCheckedB = $(b).find('input[type="checkbox"]').prop('checked');
 
             if (isCheckedA === isCheckedB) {
-                // If check status is same, maintain original order
                 return 0;
             }
             return isCheckedA ? -1 : 1;

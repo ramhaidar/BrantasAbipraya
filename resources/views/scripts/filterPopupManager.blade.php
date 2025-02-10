@@ -98,18 +98,26 @@
             $(this).parent().toggle(label.includes(searchText));
         });
 
-        // Sort checkboxes - checked items first
+        // Sort checkboxes - checked items first, then alphabetically
         const container = $(selector).first().closest('.checkbox-list');
         const items = container.children('.form-check').get();
 
         items.sort((a, b) => {
             const isCheckedA = $(a).find('input[type="checkbox"]').prop('checked');
             const isCheckedB = $(b).find('input[type="checkbox"]').prop('checked');
+            const labelA = $(a).find('label').text().toLowerCase();
+            const labelB = $(b).find('label').text().toLowerCase();
 
-            if (isCheckedA === isCheckedB) {
-                return 0;
+            // First sort by checked status
+            if (isCheckedA !== isCheckedB) {
+                return isCheckedA ? -1 : 1;
             }
-            return isCheckedA ? -1 : 1;
+
+            // If both have same checked status, sort alphabetically
+            // Special handling for "Empty/Null" to always be first
+            if (labelA === "empty/null") return -1;
+            if (labelB === "empty/null") return 1;
+            return labelA.localeCompare(labelB);
         });
 
         // Reappend sorted items

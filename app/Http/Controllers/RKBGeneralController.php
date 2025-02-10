@@ -21,7 +21,7 @@ class RKBGeneralController extends Controller
         $user         = Auth::user ();
         $proyeks      = $this->getProyeks ( $user );
         $query        = $this->buildQuery ( $request, $user, $proyeks );
-        $uniqueValues = $this->getUniqueValues ();
+        $uniqueValues = $this->getUniqueValues ( $request, $query );
 
         $TableData = $this->getTableData ( $query, $perPage );
 
@@ -104,6 +104,7 @@ class RKBGeneralController extends Controller
                 $query->whereIn ( 'nomor', $nomor );
             }
         }
+        return $query;
     }
 
     private function handleProyekFilter ( Request $request, $query )
@@ -128,6 +129,7 @@ class RKBGeneralController extends Controller
                 } );
             }
         }
+        return $query;
     }
 
     private function handlePeriodeFilter ( Request $request, $query )
@@ -149,6 +151,7 @@ class RKBGeneralController extends Controller
                 $query->whereIn ( 'periode', $periodeValues );
             }
         }
+        return $query;
     }
 
     private function handleStatusFilter ( Request $request, $query )
@@ -167,22 +170,55 @@ class RKBGeneralController extends Controller
                 }
             } );
         }
+        return $query;
     }
 
-    private function getUniqueValues ()
+    private function getUniqueValues ( Request $request = null, $baseQuery = null )
     {
+        if ( ! $baseQuery )
+        {
+            $baseQuery = RKB::where ( 'tipe', 'general' );
+        }
+
+        // Clone the base query for each unique value
+        $nomorQuery   = clone $baseQuery;
+        $proyekQuery  = clone $baseQuery;
+        $periodeQuery = clone $baseQuery;
+
+        // Apply existing filters except for the one being queried
+        if ( $request )
+        {
+            if ( $request->filled ( 'selected_proyek' ) )
+            {
+                $nomorQuery   = $this->handleProyekFilter ( $request, $nomorQuery );
+                $periodeQuery = $this->handleProyekFilter ( $request, $periodeQuery );
+            }
+            if ( $request->filled ( 'selected_nomor' ) )
+            {
+                $proyekQuery  = $this->handleNomorFilter ( $request, $proyekQuery );
+                $periodeQuery = $this->handleNomorFilter ( $request, $periodeQuery );
+            }
+            if ( $request->filled ( 'selected_periode' ) )
+            {
+                $nomorQuery  = $this->handlePeriodeFilter ( $request, $nomorQuery );
+                $proyekQuery = $this->handlePeriodeFilter ( $request, $proyekQuery );
+            }
+            if ( $request->filled ( 'selected_status' ) )
+            {
+                $nomorQuery   = $this->handleStatusFilter ( $request, $nomorQuery );
+                $proyekQuery  = $this->handleStatusFilter ( $request, $proyekQuery );
+                $periodeQuery = $this->handleStatusFilter ( $request, $periodeQuery );
+            }
+        }
+
         return [ 
-            'nomor'   => RKB::where ( 'tipe', 'general' )
-                ->whereNotNull ( 'nomor' )
+            'nomor'   => $nomorQuery->whereNotNull ( 'nomor' )
                 ->distinct ()
                 ->pluck ( 'nomor' ),
-            'proyek'  => Proyek::whereHas ( 'rkbs', function ($q)
-            {
-                $q->where ( 'tipe', 'general' );
-            } )
+            'proyek'  => Proyek::whereIn ( 'id', $proyekQuery->select ( 'id_proyek' )->distinct () )
                 ->orderBy ( 'nama' )
                 ->pluck ( 'nama' ),
-            'periode' => RKB::where ( 'tipe', 'general' )
+            'periode' => $periodeQuery
                 ->orderBy ( 'periode', 'desc' )
                 ->distinct ()
                 ->pluck ( 'periode' )

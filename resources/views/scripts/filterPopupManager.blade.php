@@ -91,37 +91,35 @@
     function filterCheckboxes(type, event) {
         const searchText = event ? $(event.target).val().toLowerCase() : '';
         const selector = `.${type}-checkbox`;
+        const container = $(selector).first().closest('.checkbox-list');
 
         // Filter items based on search text
-        $(selector).each(function() {
-            const label = $(this).next('label').text().toLowerCase();
-            $(this).parent().toggle(label.includes(searchText));
+        container.find('.form-check').each(function() {
+            const label = $(this).find('label').text().toLowerCase();
+            $(this).toggle(label.includes(searchText));
         });
 
-        // Sort checkboxes - checked items first, then alphabetically
-        const container = $(selector).first().closest('.checkbox-list');
-        const items = container.children('.form-check').get();
+        // Only sort if there's no search text
+        if (!searchText) {
+            const items = container.children('.form-check').get();
 
-        items.sort((a, b) => {
-            const isCheckedA = $(a).find('input[type="checkbox"]').prop('checked');
-            const isCheckedB = $(b).find('input[type="checkbox"]').prop('checked');
-            const labelA = $(a).find('label').text().toLowerCase();
-            const labelB = $(b).find('label').text().toLowerCase();
+            items.sort((a, b) => {
+                const isCheckedA = $(a).find('input[type="checkbox"]').prop('checked');
+                const isCheckedB = $(b).find('input[type="checkbox"]').prop('checked');
+                const labelA = $(a).find('label').text().toLowerCase();
+                const labelB = $(b).find('label').text().toLowerCase();
 
-            // First sort by checked status
-            if (isCheckedA !== isCheckedB) {
-                return isCheckedA ? -1 : 1;
-            }
+                if (isCheckedA !== isCheckedB) {
+                    return isCheckedA ? -1 : 1;
+                }
 
-            // If both have same checked status, sort alphabetically
-            // Special handling for "Empty/Null" to always be first
-            if (labelA === "empty/null") return -1;
-            if (labelB === "empty/null") return 1;
-            return labelA.localeCompare(labelB);
-        });
+                if (labelA === "empty/null") return -1;
+                if (labelB === "empty/null") return 1;
+                return labelA.localeCompare(labelB);
+            });
 
-        // Reappend sorted items
-        container.append(items);
+            container.append(items);
+        }
     }
 
     function applyFilter(type) {
@@ -216,6 +214,21 @@
         });
 
         // Sort checkboxes initially
+        $('.filter-popup').each(function() {
+            const type = $(this).attr('id').replace('-filter', '').replace('-', '_');
+            filterCheckboxes(type);
+        });
+
+        // Add event listener for search inputs
+        $('.filter-popup input[type="text"]').on('input', function() {
+            const popupId = $(this).closest('.filter-popup').attr('id');
+            const type = popupId.replace('-filter', '').replace('-', '_');
+            filterCheckboxes(type, {
+                target: this
+            });
+        });
+
+        // Initial sort for checkboxes
         $('.filter-popup').each(function() {
             const type = $(this).attr('id').replace('-filter', '').replace('-', '_');
             filterCheckboxes(type);

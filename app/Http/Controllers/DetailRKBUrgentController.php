@@ -20,37 +20,141 @@ class DetailRKBUrgentController extends Controller
 {
     public function index ( Request $request, $id )
     {
+        $perPage        = $this->getPerPage ( $request );
+        $rkb            = RKB::with ( [ 'proyek' ] )->find ( $id );
+        $query          = $this->buildQuery ( $request, $id );
+        $uniqueValues   = $this->getUniqueValues ( $query );
+        $TableData      = $this->getTableData ( $query, $perPage );
+        $available_alat = $this->getAlatAvailable ( $rkb );
+        $proyeks        = $this->getProyeks ();
+
+        return view ( 'dashboard.rkb.urgent.detail.detail', [ 
+            'headerPage'            => "RKB Urgent",
+            'page'                  => 'Detail RKB Urgent [' . $rkb->proyek->nama . ' | ' . $rkb->nomor . ']',
+            'proyeks'               => $proyeks,
+            'rkb'                   => $rkb,
+            'available_alat'        => $available_alat,
+            'master_data_sparepart' => MasterDataSparepart::all (),
+            'kategori_sparepart'    => KategoriSparepart::all (),
+            'TableData'             => $TableData,
+            'uniqueValues'          => $uniqueValues,
+            'menuContext'           => 'rkb_urgent',
+        ] );
+    }
+
+    private function getPerPage ( Request $request )
+    {
         if ( $request->get ( 'per_page' ) != -1 )
         {
             $parameters               = $request->except ( 'per_page' );
             $parameters[ 'per_page' ] = -1;
-
             return redirect ()->to ( $request->url () . '?' . http_build_query ( $parameters ) );
         }
+        return (int) $request->per_page;
+    }
 
-        $perPage = (int) $request->per_page;
-
-        $rkb = RKB::with ( [ 'proyek' ] )->find ( $id );
-
-        // Modified query with proper joins
+    private function buildQuery ( Request $request, $id )
+    {
         $query = DetailRKBUrgent::query ()
+            ->select ( [ 
+                'detail_rkb_urgent.*',
+                'master_data_alat.jenis_alat',
+                'master_data_alat.kode_alat',
+                'kategori_sparepart.kode as kategori_kode',
+                'kategori_sparepart.nama as kategori_nama',
+                'master_data_sparepart.nama as sparepart_nama',
+                'master_data_sparepart.part_number',
+                'master_data_sparepart.merk',
+                'link_alat_detail_rkb.nama_koordinator' // Add this line
+            ] )
             ->join ( 'link_rkb_detail', 'detail_rkb_urgent.id', '=', 'link_rkb_detail.id_detail_rkb_urgent' )
             ->join ( 'link_alat_detail_rkb', 'link_rkb_detail.id_link_alat_detail_rkb', '=', 'link_alat_detail_rkb.id' )
             ->join ( 'master_data_alat', 'link_alat_detail_rkb.id_master_data_alat', '=', 'master_data_alat.id' )
             ->join ( 'kategori_sparepart', 'detail_rkb_urgent.id_kategori_sparepart_sparepart', '=', 'kategori_sparepart.id' )
             ->join ( 'master_data_sparepart', 'detail_rkb_urgent.id_master_data_sparepart', '=', 'master_data_sparepart.id' )
-            ->where ( 'link_alat_detail_rkb.id_rkb', $id )
-            ->select ( [ 
-                'detail_rkb_urgent.*',
-                'master_data_alat.jenis_alat',
-                'master_data_alat.kode_alat',
-                'kategori_sparepart.kode',
-                'kategori_sparepart.nama',
-                'master_data_sparepart.nama',
-                'master_data_sparepart.part_number',
-                'master_data_sparepart.merk'
-            ] );
+            ->where ( 'link_alat_detail_rkb.id_rkb', $id );
 
+        $this->applySearch ( $query, $request );
+        $this->applyFilters ( $query, $request );
+
+        return $query;
+    }
+
+    private function applyFilters ( $query, Request $request )
+    {
+        $filterColumns = [ 
+            'jenis_alat'         => 'master_data_alat.jenis_alat',
+            'kode_alat'          => 'master_data_alat.kode_alat',
+            'kategori_sparepart' => 'kategori_sparepart.nama',
+            'sparepart'          => 'master_data_sparepart.nama',
+            'part_number'        => 'master_data_sparepart.part_number',
+            'merk'               => 'master_data_sparepart.merk',
+            'nama_koordinator'   => 'link_alat_detail_rkb.nama_koordinator', // Add this line
+            'satuan'             => 'detail_rkb_urgent.satuan',
+            'quantity_requested' => 'detail_rkb_urgent.quantity_requested',
+            'quantity_approved'  => 'detail_rkb_urgent.quantity_approved'
+        ];
+
+        foreach ( $filterColumns as $paramName => $columnName )
+        {
+            $this->applyColumnFilter ( $query, $request, $paramName, $columnName );
+        }
+    }
+
+    private function applyColumnFilter ( $query, Request $request, $paramName, $columnName )
+    {
+        if ( $request->filled ( "selected_{$paramName}" ) )
+        {
+            $values = explode ( ',', $request->get ( "selected_{$paramName}" ) );
+
+            // Decode base64 values for all columns
+            $values = array_map ( function ($value)
+            {
+                return $value === 'null' ? $value : base64_decode ( $value );
+            }, $values );
+
+            if ( in_array ( 'null', $values ) )
+            {
+                $nonNullValues = array_filter ( $values, fn ( $value ) => $value !== 'null' );
+                $query->where ( function ($q) use ($columnName, $nonNullValues)
+                {
+                    $q->whereNull ( $columnName )
+                        ->orWhere ( $columnName, '' )
+                        ->orWhere ( $columnName, '-' )
+                        ->when ( count ( $nonNullValues ) > 0, function ($subQ) use ($columnName, $nonNullValues)
+                        {
+                            $subQ->orWhereIn ( $columnName, $nonNullValues );
+                        } );
+                } );
+            }
+            else
+            {
+                $query->whereIn ( $columnName, $values );
+            }
+        }
+    }
+
+    private function getUniqueValues ( $query )
+    {
+        $result = clone $query;
+        $data   = $result->get ();
+
+        return [ 
+            'jenis_alat'         => $data->pluck ( 'jenis_alat' )->unique ()->filter ()->sort ()->values (),
+            'kode_alat'          => $data->pluck ( 'kode_alat' )->unique ()->filter ()->sort ()->values (),
+            'kategori_sparepart' => $data->pluck ( 'kategori_nama' )->unique ()->filter ()->sort ()->values (),
+            'sparepart'          => $data->pluck ( 'sparepart_nama' )->unique ()->filter ()->sort ()->values (),
+            'part_number'        => $data->pluck ( 'part_number' )->unique ()->filter ()->sort ()->values (),
+            'merk'               => $data->pluck ( 'merk' )->unique ()->filter ()->sort ()->values (),
+            'nama_koordinator'   => $data->pluck ( 'nama_koordinator' )->unique ()->filter ()->sort ()->values (), // Add this line
+            'satuan'             => $data->pluck ( 'satuan' )->unique ()->filter ()->sort ()->values (),
+            'quantity_requested' => $data->pluck ( 'quantity_requested' )->unique ()->filter ()->sort ()->values (),
+            'quantity_approved'  => $data->pluck ( 'quantity_approved' )->unique ()->filter ()->sort ()->values (),
+        ];
+    }
+
+    private function applySearch ( $query, Request $request )
+    {
         if ( $request->has ( 'search' ) )
         {
             $search = $request->get ( 'search' );
@@ -64,30 +168,36 @@ class DetailRKBUrgentController extends Controller
                     ->orWhere ( 'master_data_sparepart.nama', 'ilike', "%{$search}%" )
                     ->orWhere ( 'master_data_sparepart.part_number', 'ilike', "%{$search}%" )
                     ->orWhere ( 'master_data_sparepart.merk', 'ilike', "%{$search}%" )
-                    ->orWhere ( 'link_alat_detail_rkb.nama_koordinator', 'ilike', "%{$search}%" ); // Added this line
+                    ->orWhere ( 'link_alat_detail_rkb.nama_koordinator', 'ilike', "%{$search}%" );
             } );
         }
+    }
 
-        $available_alat = MasterDataAlat::whereHas ( 'alatProyek', function ($query) use ($rkb)
+    private function getTableData ( $query, $perPage )
+    {
+        return $perPage === -1
+            ? $query->orderBy ( 'updated_at', 'desc' )
+                ->orderBy ( 'id', 'desc' )
+                ->paginate ( $query->count () )
+            : $query->orderBy ( 'updated_at', 'desc' )
+                ->orderBy ( 'id', 'desc' )
+                ->paginate ( $perPage );
+    }
+
+    private function getAlatAvailable ( $rkb )
+    {
+        return MasterDataAlat::whereHas ( 'alatProyek', function ($query) use ($rkb)
         {
             $query->where ( 'id_proyek', $rkb->id_proyek )
                 ->whereNull ( 'removed_at' );
         } )->get ();
+    }
 
-        // Modified TableData to include ordering by master_data_alat.id
-        $TableData = $perPage === -1
-            ? $query->orderBy ( 'master_data_alat.id', 'asc' )
-                ->orderBy ( 'updated_at', 'desc' )
-                ->orderBy ( 'id', 'desc' )
-                ->paginate ( $query->count () )
-            : $query->orderBy ( 'master_data_alat.id', 'asc' )
-                ->orderBy ( 'updated_at', 'desc' )
-                ->orderBy ( 'id', 'desc' )
-                ->paginate ( $perPage );
-
-        // Filter projects based on user role
+    private function getProyeks ()
+    {
         $user         = Auth::user ();
         $proyeksQuery = Proyek::with ( "users" );
+
         if ( $user->role === 'koordinator_proyek' )
         {
             $proyeksQuery->whereHas ( 'users', function ($query) use ($user)
@@ -96,25 +206,9 @@ class DetailRKBUrgentController extends Controller
             } );
         }
 
-        $proyeks = $proyeksQuery
-            ->orderBy ( "updated_at", "desc" )
+        return $proyeksQuery->orderBy ( "updated_at", "desc" )
             ->orderBy ( "id", "desc" )
             ->get ();
-
-        return view ( 'dashboard.rkb.urgent.detail.detail', [ 
-            'headerPage'            => "RKB Urgent",
-            'page'                  => 'Detail RKB Urgent [' . $rkb->proyek->nama . ' | ' . $rkb->nomor . ']',
-
-            'proyeks'               => $proyeks,
-            'rkb'                   => $rkb,
-            'available_alat'        => $available_alat,
-            'master_data_sparepart' => MasterDataSparepart::all (),
-            'kategori_sparepart'    => KategoriSparepart::all (),
-            'TableData'             => $TableData,
-
-            'menuContext'           => 'rkb_urgent',  // Ensure this flag is passed for detail pages
-        ] );
-
     }
 
     // Store a new DetailRKBUrgent

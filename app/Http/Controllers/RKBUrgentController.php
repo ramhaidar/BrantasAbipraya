@@ -430,41 +430,9 @@ class RKBUrgentController extends Controller
             ], 404 );
         }
 
-        // Format data untuk respons JSON
-        $formattedData = [ 
-            'id'      => $rkb->id,
-            'nomor'   => $rkb->nomor,
-            'periode' => Carbon::parse ( $rkb->periode )->format ( 'Y-m' ), // Format periode ke 'YYYY-MM'
-            'proyek'  => [ 
-                'id'   => $rkb->proyek->id ?? null,
-                'nama' => $rkb->proyek->nama ?? '-'
-            ],
-            'details' => $rkb->linkAlatDetailRkbs->flatMap ( function ($linkAlat)
-            {
-                return $linkAlat->linkRkbDetails->map ( function ($detail)
-                {
-                    $urgent = $detail->detailRkbGeneral;
-                    return [ 
-                        'quantity_requested' => $urgent->quantity_requested ?? null,
-                        'quantity_approved'  => $urgent->quantity_approved ?? null,
-                        'satuan'             => $urgent->satuan ?? null,
-                        'kategori_sparepart' => [ 
-                            'id'   => $urgent->kategoriSparepart->id ?? null,
-                            'nama' => $urgent->kategoriSparepart->nama ?? '-',
-                        ],
-                        'sparepart'          => [ 
-                            'id'          => $urgent->masterDataSparepart->id ?? null,
-                            'nama'        => $urgent->masterDataSparepart->nama ?? '-',
-                            'part_number' => $urgent->masterDataSparepart->part_number ?? null,
-                        ]
-                    ];
-                } );
-            } )
-        ];
-
         return response ()->json ( [ 
             'success' => true,
-            'data'    => $formattedData
+            'data'    => $rkb
         ] );
     }
 

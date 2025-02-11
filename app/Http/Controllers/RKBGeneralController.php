@@ -40,11 +40,9 @@ class RKBGeneralController extends Controller
             return $this->notFoundResponse ();
         }
 
-        $formattedData = $this->formatRKBData ( $rkb );
-
         return response ()->json ( [ 
             'success' => true,
-            'data'    => $formattedData
+            'data'    => $rkb
         ] );
     }
 
@@ -440,45 +438,6 @@ class RKBGeneralController extends Controller
             'success' => false,
             'message' => 'RKB Tidak Ditemukan.'
         ], 404 );
-    }
-
-    private function formatRKBData ( $rkb )
-    {
-        $formattedData = [ 
-            'id'      => $rkb->id,
-            'nomor'   => $rkb->nomor,
-            'periode' => Carbon::parse ( $rkb->periode )->format ( 'Y-m' ), // Format periode ke 'YYYY-MM'
-            'proyek'  => [ 
-                'id'   => $rkb->proyek->id ?? null,
-                'nama' => $rkb->proyek->nama ?? '-'
-            ],
-            'details' => $rkb->linkAlatDetailRkbs->flatMap ( function ($linkAlat)
-            {
-                return $linkAlat->linkRkbDetails->map ( function ($detail)
-                {
-                    $general = $detail->detailRkbGeneral;
-                    return [ 
-                        'quantity_requested' => $general->quantity_requested ?? null,
-                        'quantity_approved'  => $general->quantity_approved ?? null,
-                        'satuan'             => $general->satuan ?? null,
-                        'kategori_sparepart' => [ 
-                            'id'   => $general->kategoriSparepart->id ?? null,
-                            'nama' => $general->kategoriSparepart->nama ?? '-',
-                        ],
-                        'sparepart'          => [ 
-                            'id'          => $general->masterDataSparepart->id ?? null,
-                            'nama'        => $general->masterDataSparepart->nama ?? '-',
-                            'part_number' => $general->masterDataSparepart->part_number ?? null,
-                        ]
-                    ];
-                } );
-            } )
-        ];
-
-        return response ()->json ( [ 
-            'success' => true,
-            'data'    => $formattedData
-        ] );
     }
 
     private function getProyeks ( $user )

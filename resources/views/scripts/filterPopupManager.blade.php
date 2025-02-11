@@ -12,6 +12,36 @@
         };
     }
 
+    function decodeParameterValue(value) {
+        if (!value) return '';
+
+        try {
+            // Try to decode as base64
+            return atob(value);
+        } catch (e) {
+            // If decoding fails, assume it's already decoded
+            return value;
+        }
+    }
+
+    function getSelectedValues(paramValue) {
+        if (!paramValue) return [];
+
+        try {
+            // Try base64 decode first
+            const decoded = atob(paramValue);
+            return decoded.split(',');
+        } catch (e) {
+            // If not base64, split directly
+            return paramValue.split(',');
+        }
+    }
+
+    function sanitizeValue(value) {
+        // Remove any non-UTF8 characters
+        return value.replace(/[^\x00-\x7F]/g, "");
+    }
+
     function toggleFilter(id) {
         $('.filter-popup').not(`#${id}`).hide();
         const popup = $(`#${id}`);
@@ -23,27 +53,24 @@
                 popup.data('originalWidth', popup.outerWidth());
             }
 
-            // Set checked state berdasarkan URL parameter
             const type = id.replace('-filter', '').replace('-', '_');
             const urlParams = new URLSearchParams(window.location.search);
             const encodedSelected = urlParams.get(`selected_${type}`);
 
-            // Reset semua checkbox
-            $(`.${type}-checkbox`).prop('checked', false);
-
-            // Jika ada parameter yang ter-encode
             if (encodedSelected) {
                 try {
-                    const selectedValues = atob(encodedSelected).split(',');
-                    selectedValues.forEach(value => {
-                        $(`.${type}-checkbox[value="${value}"]`).prop('checked', true);
+                    const decodedValues = atob(encodedSelected).split(',');
+                    decodedValues.forEach(value => {
+                        const cleanValue = value.trim();
+                        const checkbox = $(`.${type}-checkbox[value="${cleanValue}"]`);
+                        if (checkbox.length) {
+                            checkbox.prop('checked', true);
+                        }
                     });
                 } catch (e) {
-                    console.error('Error decoding base64:', e);
+                    console.error('Base64 decode error:', e);
                 }
             }
-
-            filterCheckboxes(type);
 
             positionPopup(popup, button);
             popup.toggle();
@@ -110,68 +137,18 @@
     function filterCheckboxes(type, searchEvent) {
         const selector = `.${type}-checkbox`;
         const container = $(selector).first().closest('.checkbox-list');
+        const searchText = searchEvent ? $(searchEvent.target).val().toLowerCase() : '';
 
-        // Store search text in data attribute to prevent loss
-        if (searchEvent) {
-            container.data('searchText', $(searchEvent.target).val().toLowerCase());
-        }
-
-        const searchText = container.data('searchText') || '';
-
-        // Store original items if not already stored
-        if (!container.data('originalItems')) {
-            container.data('originalItems', container.html());
-        }
-
-        // Restore original items before filtering
-        if (!searchText) {
-            container.html(container.data('originalItems'));
-        }
-
-        const items = container.children('.form-check').get();
-
-        // First hide/show based on search
-        items.forEach(item => {
-            const $item = $(item);
-            const label = $item.find('label').text().toLowerCase();
-            const isChecked = $item.find('input[type="checkbox"]').prop('checked');
+        container.children('.form-check').each(function() {
+            const label = $(this).find('label').text().toLowerCase();
+            const isChecked = $(this).find('input[type="checkbox"]').prop('checked');
 
             if (isChecked || !searchText || label.includes(searchText)) {
-                $item.show();
+                $(this).show();
             } else {
-                $item.hide();
+                $(this).hide();
             }
         });
-
-        // Then sort visible items
-        const visibleItems = items.filter(item => $(item).is(':visible'));
-        visibleItems.sort((a, b) => {
-            const isCheckedA = $(a).find('input[type="checkbox"]').prop('checked');
-            const isCheckedB = $(b).find('input[type="checkbox"]').prop('checked');
-
-            if (isCheckedA !== isCheckedB) {
-                return isCheckedB ? 1 : -1;
-            }
-
-            const labelA = $(a).find('label').text().toLowerCase();
-            const labelB = $(b).find('label').text().toLowerCase();
-
-            if (labelA === "empty/null") return -1;
-            if (labelB === "empty/null") return 1;
-
-            return labelA.localeCompare(labelB);
-        });
-
-        // Detach items from DOM
-        const $items = $(items);
-        $items.detach();
-
-        // Append sorted visible items
-        container.append(visibleItems);
-
-        // Append hidden items to preserve them
-        const hiddenItems = items.filter(item => !$(item).is(':visible'));
-        container.append(hiddenItems);
     }
 
     function applyFilter(type) {
@@ -187,7 +164,7 @@
         }
 
         if (selected.length > 0) {
-
+            // Always use base64 for new filter values
             const encodedValue = btoa(selected.join(','));
             urlParams.set(`selected_${type}`, encodedValue);
         } else {
@@ -261,22 +238,6 @@
             event.stopPropagation();
         });
 
-        $('.filter-popup').on('hide', function() {
-            const container = $(this).find('.checkbox-list');
-            if (container.data('originalItems')) {
-                container.html(container.data('originalItems'));
-            }
-            container.removeData('originalItems');
-            container.removeData('searchText');
-            $(this).removeData('originalWidth');
-            $(this).find('input[type="text"]').val('');
-        });
-
-        $('.filter-popup').each(function() {
-            const type = $(this).attr('id').replace('-filter', '').replace('-', '_');
-            filterCheckboxes(type);
-        });
-
         // Replace the search event handler with debounced version
         const debouncedFilter = debounce((event) => {
             const popupId = $(event.target).closest('.filter-popup').attr('id');
@@ -285,11 +246,5 @@
         }, 300);
 
         $('.filter-popup input[type="text"]').on('input', debouncedFilter);
-
-        // Clear search text when popup is closed
-        $('.filter-popup').on('hide', function() {
-            $(this).find('.checkbox-list').removeData('searchText');
-            $(this).find('input[type="text"]').val('');
-        });
     });
 </script>

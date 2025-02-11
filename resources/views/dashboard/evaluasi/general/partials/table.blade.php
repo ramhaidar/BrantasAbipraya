@@ -169,8 +169,8 @@
                                 @endif
                             </td>
                             <td class="text-center">
-                                <a class="btn {{ !$rkb->is_finalized ? 'btn-secondary' : 'btn-primary' }} mx-1 detailBtn {{ !$rkb->is_finalized ? 'disabled' : '' }}" href="{{ route('evaluasi_rkb_general.detail.index', ['id' => $rkb->id]) }}">
-                                    <i class="fa-solid {{ $rkb->is_finalized && !$rkb->is_evaluated ? 'fa-stamp' : 'fa-eye' }}"></i>
+                                <a class="btn {{ !$rkb->is_finalized ? 'btn-secondary' : ($rkb->is_finalized && !$rkb->is_evaluated ? 'btn-warning' : 'btn-primary') }} mx-1 detailBtn {{ !$rkb->is_finalized ? 'disabled' : '' }}" href="{{ route('evaluasi_rkb_general.detail.index', ['id' => $rkb->id]) }}">
+                                    <i class="fa-solid {{ !$rkb->is_finalized ? 'fa-eye-slash' : ($rkb->is_finalized && !$rkb->is_evaluated ? 'fa-stamp' : 'fa-eye') }}"></i>
                                 </a>
                             </td>
                         </tr>

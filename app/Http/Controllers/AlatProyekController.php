@@ -126,89 +126,74 @@ class AlatProyekController extends Controller
 
         if ( $request )
         {
-            // Handle each filter separately
+            // Handle each filter separately and apply to ALL queries including the current field's query
             if ( $request->filled ( 'selected_jenis_alat' ) )
             {
                 $values = $this->decodeBase64Filter ( $request->selected_jenis_alat );
-                foreach ( $queries as $field => $query )
+                foreach ( $queries as $query )
                 {
-                    if ( $field !== 'jenis_alat' )
-                    {
-                        $query->whereIn ( 'jenis_alat', array_filter ( $values, fn ( $v ) => $v !== 'null' ) )
-                            ->when ( in_array ( 'null', $values ), function ($q)
-                            {
-                                $q->orWhereNull ( 'jenis_alat' )
-                                    ->orWhere ( 'jenis_alat', '-' );
-                            } );
-                    }
+                    $query->whereIn ( 'jenis_alat', array_filter ( $values, fn ( $v ) => $v !== 'null' ) )
+                        ->when ( in_array ( 'null', $values ), function ($q)
+                        {
+                            $q->orWhereNull ( 'jenis_alat' )
+                                ->orWhere ( 'jenis_alat', '-' );
+                        } );
                 }
             }
 
             if ( $request->filled ( 'selected_kode_alat' ) )
             {
                 $values = $this->decodeBase64Filter ( $request->selected_kode_alat );
-                foreach ( $queries as $field => $query )
+                foreach ( $queries as $query )
                 {
-                    if ( $field !== 'kode_alat' )
-                    {
-                        $query->whereIn ( 'kode_alat', array_filter ( $values, fn ( $v ) => $v !== 'null' ) )
-                            ->when ( in_array ( 'null', $values ), function ($q)
-                            {
-                                $q->orWhereNull ( 'kode_alat' )
-                                    ->orWhere ( 'kode_alat', '-' );
-                            } );
-                    }
+                    $query->whereIn ( 'kode_alat', array_filter ( $values, fn ( $v ) => $v !== 'null' ) )
+                        ->when ( in_array ( 'null', $values ), function ($q)
+                        {
+                            $q->orWhereNull ( 'kode_alat' )
+                                ->orWhere ( 'kode_alat', '-' );
+                        } );
                 }
             }
 
             if ( $request->filled ( 'selected_merek_alat' ) )
             {
                 $values = $this->decodeBase64Filter ( $request->selected_merek_alat );
-                foreach ( $queries as $field => $query )
+                foreach ( $queries as $query )
                 {
-                    if ( $field !== 'merek_alat' )
-                    {
-                        $query->whereIn ( 'merek_alat', array_filter ( $values, fn ( $v ) => $v !== 'null' ) )
-                            ->when ( in_array ( 'null', $values ), function ($q)
-                            {
-                                $q->orWhereNull ( 'merek_alat' )
-                                    ->orWhere ( 'merek_alat', '-' );
-                            } );
-                    }
+                    $query->whereIn ( 'merek_alat', array_filter ( $values, fn ( $v ) => $v !== 'null' ) )
+                        ->when ( in_array ( 'null', $values ), function ($q)
+                        {
+                            $q->orWhereNull ( 'merek_alat' )
+                                ->orWhere ( 'merek_alat', '-' );
+                        } );
                 }
             }
 
             if ( $request->filled ( 'selected_tipe_alat' ) )
             {
                 $values = $this->decodeBase64Filter ( $request->selected_tipe_alat );
-                foreach ( $queries as $field => $query )
+                foreach ( $queries as $query )
                 {
-                    if ( $field !== 'tipe_alat' )
-                    {
-                        $query->whereIn ( 'tipe_alat', array_filter ( $values, fn ( $v ) => $v !== 'null' ) )
-                            ->when ( in_array ( 'null', $values ), function ($q)
-                            {
-                                $q->orWhereNull ( 'tipe_alat' )
-                                    ->orWhere ( 'tipe_alat', '-' );
-                            } );
-                    }
+                    $query->whereIn ( 'tipe_alat', array_filter ( $values, fn ( $v ) => $v !== 'null' ) )
+                        ->when ( in_array ( 'null', $values ), function ($q)
+                        {
+                            $q->orWhereNull ( 'tipe_alat' )
+                                ->orWhere ( 'tipe_alat', '-' );
+                        } );
                 }
             }
 
             if ( $request->filled ( 'selected_serial_number' ) )
             {
                 $values = $this->decodeBase64Filter ( $request->selected_serial_number );
-                foreach ( $queries as $field => $query )
+                foreach ( $queries as $query )
                 {
-                    if ( $field !== 'serial_number' )
-                    {
-                        $query->whereIn ( 'serial_number', array_filter ( $values, fn ( $v ) => $v !== 'null' ) )
-                            ->when ( in_array ( 'null', $values ), function ($q)
-                            {
-                                $q->orWhereNull ( 'serial_number' )
-                                    ->orWhere ( 'serial_number', '-' );
-                            } );
-                    }
+                    $query->whereIn ( 'serial_number', array_filter ( $values, fn ( $v ) => $v !== 'null' ) )
+                        ->when ( in_array ( 'null', $values ), function ($q)
+                        {
+                            $q->orWhereNull ( 'serial_number' )
+                                ->orWhere ( 'serial_number', '-' );
+                        } );
                 }
             }
         }

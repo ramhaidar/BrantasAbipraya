@@ -159,24 +159,27 @@ class MasterDataSparepartController extends Controller
     {
         if ( $request->filled ( 'selected_nama' ) )
         {
-            $nama = explode ( ',', $request->selected_nama );
-            $nama = array_map ( function ($val)
+            try
             {
-                return $val === 'null' ? $val : base64_decode ( $val );
-            }, $nama );
-            if ( in_array ( 'null', $nama ) )
-            {
-                $nonNullValues = array_filter ( $nama, fn ( $value ) => $value !== 'null' );
-                $query->where ( function ($q) use ($nonNullValues)
+                $nama = $this->getSelectedValues ( $request->selected_nama );
+                if ( in_array ( 'null', $nama ) )
                 {
-                    $q->whereNull ( 'nama' )
-                        ->orWhere ( 'nama', '-' )
-                        ->orWhereIn ( 'nama', $nonNullValues );
-                } );
+                    $nonNullValues = array_filter ( $nama, fn ( $value ) => $value !== 'null' );
+                    $query->where ( function ($q) use ($nonNullValues)
+                    {
+                        $q->whereNull ( 'nama' )
+                            ->orWhere ( 'nama', '-' )
+                            ->orWhereIn ( 'nama', $nonNullValues );
+                    } );
+                }
+                else
+                {
+                    $query->whereIn ( 'nama', $nama );
+                }
             }
-            else
+            catch ( \Exception $e )
             {
-                $query->whereIn ( 'nama', $nama );
+                \Log::error ( 'Error in nama filter: ' . $e->getMessage () );
             }
         }
     }
@@ -185,24 +188,27 @@ class MasterDataSparepartController extends Controller
     {
         if ( $request->filled ( 'selected_part_number' ) )
         {
-            $partNumber = explode ( ',', $request->selected_part_number );
-            $partNumber = array_map ( function ($val)
+            try
             {
-                return $val === 'null' ? $val : base64_decode ( $val );
-            }, $partNumber );
-            if ( in_array ( 'null', $partNumber ) )
-            {
-                $nonNullValues = array_filter ( $partNumber, fn ( $value ) => $value !== 'null' );
-                $query->where ( function ($q) use ($nonNullValues)
+                $partNumber = $this->getSelectedValues ( $request->selected_part_number );
+                if ( in_array ( 'null', $partNumber ) )
                 {
-                    $q->whereNull ( 'part_number' )
-                        ->orWhere ( 'part_number', '-' )
-                        ->orWhereIn ( 'part_number', $nonNullValues );
-                } );
+                    $nonNullValues = array_filter ( $partNumber, fn ( $value ) => $value !== 'null' );
+                    $query->where ( function ($q) use ($nonNullValues)
+                    {
+                        $q->whereNull ( 'part_number' )
+                            ->orWhere ( 'part_number', '-' )
+                            ->orWhereIn ( 'part_number', $nonNullValues );
+                    } );
+                }
+                else
+                {
+                    $query->whereIn ( 'part_number', $partNumber );
+                }
             }
-            else
+            catch ( \Exception $e )
             {
-                $query->whereIn ( 'part_number', $partNumber );
+                \Log::error ( 'Error in part number filter: ' . $e->getMessage () );
             }
         }
     }
@@ -211,55 +217,27 @@ class MasterDataSparepartController extends Controller
     {
         if ( $request->filled ( 'selected_merk' ) )
         {
-            $merk = explode ( ',', $request->selected_merk );
-            $merk = array_map ( function ($val)
+            try
             {
-                return $val === 'null' ? $val : base64_decode ( $val );
-            }, $merk );
-            if ( in_array ( 'null', $merk ) )
-            {
-                $nonNullValues = array_filter ( $merk, fn ( $value ) => $value !== 'null' );
-                $query->where ( function ($q) use ($nonNullValues)
+                $merk = $this->getSelectedValues ( $request->selected_merk );
+                if ( in_array ( 'null', $merk ) )
                 {
-                    $q->whereNull ( 'merk' )
-                        ->orWhere ( 'merk', '-' )
-                        ->orWhereIn ( 'merk', $nonNullValues );
-                } );
-            }
-            else
-            {
-                $query->whereIn ( 'merk', $merk );
-            }
-        }
-    }
-
-    private function handleKategoriFilter ( Request $request, $query )
-    {
-        if ( $request->filled ( 'selected_kategori' ) )
-        {
-            $kategori = explode ( ',', $request->selected_kategori );
-            $kategori = array_map ( function ($val)
-            {
-                return $val === 'null' ? $val : base64_decode ( $val );
-            }, $kategori );
-            if ( in_array ( 'null', $kategori ) )
-            {
-                $nonNullValues = array_filter ( $kategori, fn ( $value ) => $value !== 'null' );
-                $query->where ( function ($q) use ($nonNullValues)
+                    $nonNullValues = array_filter ( $merk, fn ( $value ) => $value !== 'null' );
+                    $query->where ( function ($q) use ($nonNullValues)
+                    {
+                        $q->whereNull ( 'merk' )
+                            ->orWhere ( 'merk', '-' )
+                            ->orWhereIn ( 'merk', $nonNullValues );
+                    } );
+                }
+                else
                 {
-                    $q->whereDoesntHave ( 'kategoriSparepart' )
-                        ->orWhereHas ( 'kategoriSparepart', function ($sq) use ($nonNullValues)
-                        {
-                            $sq->whereIn ( 'nama', $nonNullValues );
-                        } );
-                } );
+                    $query->whereIn ( 'merk', $merk );
+                }
             }
-            else
+            catch ( \Exception $e )
             {
-                $query->whereHas ( 'kategoriSparepart', function ($q) use ($kategori)
-                {
-                    $q->whereIn ( 'nama', $kategori );
-                } );
+                \Log::error ( 'Error in merk filter: ' . $e->getMessage () );
             }
         }
     }
@@ -268,29 +246,35 @@ class MasterDataSparepartController extends Controller
     {
         if ( $request->filled ( 'selected_kode' ) )
         {
-            $kode = explode ( ',', $request->selected_kode );
-            $kode = array_map ( function ($val)
+            try
             {
-                return $val === 'null' ? $val : base64_decode ( $val );
-            }, $kode );
-            if ( in_array ( 'null', $kode ) )
-            {
-                $nonNullValues = array_filter ( $kode, fn ( $value ) => $value !== 'null' );
-                $query->where ( function ($q) use ($nonNullValues)
+                $kode = $this->getSelectedValues ( $request->selected_kode );
+                if ( in_array ( 'null', $kode ) )
                 {
-                    $q->whereDoesntHave ( 'kategoriSparepart' )
-                        ->orWhereHas ( 'kategoriSparepart', function ($sq) use ($nonNullValues)
-                        {
-                            $sq->whereIn ( 'kode', $nonNullValues );
-                        } );
-                } );
+                    $nonNullValues = array_filter ( $kode, fn ( $value ) => $value !== 'null' );
+                    $query->where ( function ($q) use ($nonNullValues)
+                    {
+                        $q->whereDoesntHave ( 'kategoriSparepart' )
+                            ->orWhereHas ( 'kategoriSparepart', function ($sq) use ($nonNullValues)
+                            {
+                                if ( ! empty ( $nonNullValues ) )
+                                {
+                                    $sq->whereIn ( 'kode', $nonNullValues );
+                                }
+                            } );
+                    } );
+                }
+                else
+                {
+                    $query->whereHas ( 'kategoriSparepart', function ($q) use ($kode)
+                    {
+                        $q->whereIn ( 'kode', $kode );
+                    } );
+                }
             }
-            else
+            catch ( \Exception $e )
             {
-                $query->whereHas ( 'kategoriSparepart', function ($q) use ($kode)
-                {
-                    $q->whereIn ( 'kode', $kode );
-                } );
+                \Log::error ( 'Error in kode filter: ' . $e->getMessage () );
             }
         }
     }
@@ -299,29 +283,35 @@ class MasterDataSparepartController extends Controller
     {
         if ( $request->filled ( 'selected_jenis' ) )
         {
-            $jenis = explode ( ',', $request->selected_jenis );
-            $jenis = array_map ( function ($val)
+            try
             {
-                return $val === 'null' ? $val : base64_decode ( $val );
-            }, $jenis );
-            if ( in_array ( 'null', $jenis ) )
-            {
-                $nonNullValues = array_filter ( $jenis, fn ( $value ) => $value !== 'null' );
-                $query->where ( function ($q) use ($nonNullValues)
+                $jenis = $this->getSelectedValues ( $request->selected_jenis );
+                if ( in_array ( 'null', $jenis ) )
                 {
-                    $q->whereDoesntHave ( 'kategoriSparepart' )
-                        ->orWhereHas ( 'kategoriSparepart', function ($sq) use ($nonNullValues)
-                        {
-                            $sq->whereIn ( 'jenis', $nonNullValues );
-                        } );
-                } );
+                    $nonNullValues = array_filter ( $jenis, fn ( $value ) => $value !== 'null' );
+                    $query->where ( function ($q) use ($nonNullValues)
+                    {
+                        $q->whereDoesntHave ( 'kategoriSparepart' )
+                            ->orWhereHas ( 'kategoriSparepart', function ($sq) use ($nonNullValues)
+                            {
+                                if ( ! empty ( $nonNullValues ) )
+                                {
+                                    $sq->whereIn ( 'jenis', $nonNullValues );
+                                }
+                            } );
+                    } );
+                }
+                else
+                {
+                    $query->whereHas ( 'kategoriSparepart', function ($q) use ($jenis)
+                    {
+                        $q->whereIn ( 'jenis', $jenis );
+                    } );
+                }
             }
-            else
+            catch ( \Exception $e )
             {
-                $query->whereHas ( 'kategoriSparepart', function ($q) use ($jenis)
-                {
-                    $q->whereIn ( 'jenis', $jenis );
-                } );
+                \Log::error ( 'Error in jenis filter: ' . $e->getMessage () );
             }
         }
     }
@@ -330,33 +320,90 @@ class MasterDataSparepartController extends Controller
     {
         if ( $request->filled ( 'selected_sub_jenis' ) )
         {
-            $subJenis = explode ( ',', $request->selected_sub_jenis );
-            $subJenis = array_map ( function ($val)
+            try
             {
-                return $val === 'null' ? $val : base64_decode ( $val );
-            }, $subJenis );
-            if ( in_array ( 'null', $subJenis ) )
-            {
-                $nonNullValues = array_filter ( $subJenis, fn ( $value ) => $value !== 'null' );
-                $query->whereHas ( 'kategoriSparepart', function ($q) use ($nonNullValues)
+                $subJenis = $this->getSelectedValues ( $request->selected_sub_jenis );
+                if ( in_array ( 'null', $subJenis ) )
                 {
-                    if ( ! empty ( $nonNullValues ) )
+                    $nonNullValues = array_filter ( $subJenis, fn ( $value ) => $value !== 'null' );
+                    $query->whereHas ( 'kategoriSparepart', function ($q) use ($nonNullValues)
                     {
-                        $q->whereNull ( 'sub_jenis' )->orWhereIn ( 'sub_jenis', $nonNullValues );
-                    }
-                    else
-                    {
-                        $q->whereNull ( 'sub_jenis' );
-                    }
-                } );
-            }
-            else
-            {
-                $query->whereHas ( 'kategoriSparepart', function ($q) use ($subJenis)
+                        $q->where ( function ($sq) use ($nonNullValues)
+                        {
+                            $sq->whereNull ( 'sub_jenis' )
+                                ->orWhere ( 'sub_jenis', '-' );
+                            if ( ! empty ( $nonNullValues ) )
+                            {
+                                $sq->orWhereIn ( 'sub_jenis', $nonNullValues );
+                            }
+                        } );
+                    } );
+                }
+                else
                 {
-                    $q->whereIn ( 'sub_jenis', $subJenis );
-                } );
+                    $query->whereHas ( 'kategoriSparepart', function ($q) use ($subJenis)
+                    {
+                        $q->whereIn ( 'sub_jenis', $subJenis );
+                    } );
+                }
             }
+            catch ( \Exception $e )
+            {
+                \Log::error ( 'Error in sub jenis filter: ' . $e->getMessage () );
+            }
+        }
+    }
+
+    private function handleKategoriFilter ( Request $request, $query )
+    {
+        if ( $request->filled ( 'selected_kategori' ) )
+        {
+            try
+            {
+                $kategori = $this->getSelectedValues ( $request->selected_kategori );
+                if ( in_array ( 'null', $kategori ) )
+                {
+                    $nonNullValues = array_filter ( $kategori, fn ( $value ) => $value !== 'null' );
+                    $query->where ( function ($q) use ($nonNullValues)
+                    {
+                        $q->whereDoesntHave ( 'kategoriSparepart' )
+                            ->orWhereHas ( 'kategoriSparepart', function ($sq) use ($nonNullValues)
+                            {
+                                if ( ! empty ( $nonNullValues ) )
+                                {
+                                    $sq->whereIn ( 'nama', $nonNullValues );
+                                }
+                            } );
+                    } );
+                }
+                else
+                {
+                    $query->whereHas ( 'kategoriSparepart', function ($q) use ($kategori)
+                    {
+                        $q->whereIn ( 'nama', $kategori );
+                    } );
+                }
+            }
+            catch ( \Exception $e )
+            {
+                \Log::error ( 'Error in kategori filter: ' . $e->getMessage () );
+            }
+        }
+    }
+
+    // Helper function untuk decode selected values
+    private function getSelectedValues ( $paramValue )
+    {
+        if ( ! $paramValue ) return [];
+
+        try
+        {
+            return explode ( '||', base64_decode ( $paramValue ) );
+        }
+        catch ( \Exception $e )
+        {
+            \Log::error ( 'Error decoding parameter value: ' . $e->getMessage () );
+            return [];
         }
     }
 

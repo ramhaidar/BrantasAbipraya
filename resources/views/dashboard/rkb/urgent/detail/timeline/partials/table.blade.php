@@ -295,10 +295,10 @@
                             <td class="text-center"><span class="badge {{ $item->is_done ? 'bg-success' : 'bg-warning' }} w-100">{{ $item->is_done ? 'Sudah Selesai' : 'Belum Selesai' }}</span></td>
                             @if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin')
                                 <td class="text-center">
-                                    <button class="btn btn-warning mx-1 editBtn" data-id="{{ $item->id }}">
+                                    <button class="btn btn-warning mx-1 editBtn" data-id="{{ $item->id }}" type="button">
                                         <i class="bi bi-pencil-square"></i>
                                     </button>
-                                    <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item->id }}">
+                                    <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item->id }}" type="button">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </td>

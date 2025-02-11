@@ -333,10 +333,10 @@
                                 <td class="text-center">{{ $item->satuan }}</td>
                                 @if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin')
                                     <td class="text-center">
-                                        <button class="btn btn-warning mx-1 ubahBtn" data-id="{{ $item->id }}" {{ $detail->linkAlatDetailRkb->rkb->is_finalized ? 'disabled' : '' }} onclick="fillFormEditDetailRKB({{ $item->id }})">
+                                        <button class="btn btn-warning mx-1 ubahBtn" data-id="{{ $item->id }}" type="button" {{ $detail->linkAlatDetailRkb->rkb->is_finalized ? 'disabled' : '' }} onclick="fillFormEditDetailRKB({{ $item->id }})">
                                             <i class="bi bi-pencil-square"></i>
                                         </button>
-                                        <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item->id }}" {{ $detail->linkAlatDetailRkb->rkb->is_finalized ? 'disabled' : '' }}>
+                                        <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item->id }}" type="button" {{ $detail->linkAlatDetailRkb->rkb->is_finalized ? 'disabled' : '' }}>
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </td>

@@ -230,16 +230,16 @@
                             <td>{{ $item->serial_number }}</td>
                             <td>{{ isset($item->current_project) ? $item->current_project->nama : 'Belum Ditugaskan' }}</td>
                             <td>
-                                <button class="btn btn-info historyBtn" data-id="{{ $item->id }}" title="Lihat Riwayat">
+                                <button class="btn btn-info historyBtn" data-id="{{ $item->id }}" type="button" title="Lihat Riwayat">
                                     <i class="bi bi-clock-history"></i>
                                 </button>
                             </td>
                             @if (auth()->user()->role == 'admin_divisi' || auth()->user()->role == 'superadmin')
                                 <td class="text-center">
-                                    <button class="btn btn-warning mx-1 ubahBtn" data-id="{{ $item->id }}" onclick="fillFormEdit({{ $item->id }})">
+                                    <button class="btn btn-warning mx-1 ubahBtn" data-id="{{ $item->id }}" type="button" onclick="fillFormEdit({{ $item->id }})">
                                         <i class="bi bi-pencil-square"></i>
                                     </button>
-                                    <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item->id }}">
+                                    <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item->id }}" type="button">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </td>

@@ -174,10 +174,10 @@
                             </td>
                             @if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin')
                                 <td class="text-center">
-                                    <button class="btn btn-warning mx-1 ubahBtn" {{ $rkb->is_finalized ? 'disabled' : '' }} onclick="fillFormEditRKB({{ $rkb->id }})">
+                                    <button class="btn btn-warning mx-1 ubahBtn" type="button" {{ $rkb->is_finalized ? 'disabled' : '' }} onclick="fillFormEditRKB({{ $rkb->id }})">
                                         <i class="bi bi-pencil-square"></i>
                                     </button>
-                                    <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $rkb->id }}" {{ $rkb->is_finalized ? 'disabled' : '' }}>
+                                    <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $rkb->id }}" type="button" {{ $rkb->is_finalized ? 'disabled' : '' }}>
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </td>

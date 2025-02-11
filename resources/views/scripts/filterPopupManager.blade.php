@@ -1,3 +1,18 @@
+@php
+    function getSelectedValues($paramValue)
+    {
+        if (!$paramValue) {
+            return [];
+        }
+
+        try {
+            return explode('||', base64_decode($paramValue));
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+@endphp
+
 <script>
     /**
      * Debounce function to limit how often a function can be called
@@ -84,16 +99,15 @@
             positionPopup(popup, button);
 
             // Extract filter type from ID and handle URL parameters
-            const type = id.replace('-filter', '').replace('-', '_');
+            // Fix: Ubah semua dash menjadi underscore untuk parameter URL
+            const type = id.replace('-filter', '').replaceAll('-', '_');
             const urlParams = new URLSearchParams(window.location.search);
             const encodedSelected = urlParams.get(`selected_${type}`);
 
-            // Restore previously selected checkboxes
             if (encodedSelected) {
                 try {
                     const selectedValues = atob(encodedSelected).split('||').map(value => value.trim());
                     selectedValues.forEach(value => {
-                        // Use exact value matching by finding the checkbox with the same value
                         const checkbox = Array.from(document.querySelectorAll(`.${type}-checkbox`))
                             .find(cb => cb.value === value);
                         if (checkbox) {

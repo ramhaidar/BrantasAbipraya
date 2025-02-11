@@ -58,24 +58,27 @@ class EvaluasiRKBUrgentController extends Controller
     {
         if ( $request->filled ( 'selected_nomor' ) )
         {
-            $nomor = explode ( ',', $request->selected_nomor );
-            $nomor = array_map ( function ($val)
+            try
             {
-                return $val === 'null' ? $val : base64_decode ( $val );
-            }, $nomor );
-            if ( in_array ( 'null', $nomor ) )
-            {
-                $nonNullValues = array_filter ( $nomor, fn ( $value ) => $value !== 'null' );
-                $query->where ( function ($q) use ($nonNullValues)
+                $nomor = $this->getSelectedValues ( $request->selected_nomor );
+                if ( in_array ( 'null', $nomor ) )
                 {
-                    $q->whereNull ( 'nomor' )
-                        ->orWhere ( 'nomor', '-' )
-                        ->orWhereIn ( 'nomor', $nonNullValues );
-                } );
+                    $nonNullValues = array_filter ( $nomor, fn ( $value ) => $value !== 'null' );
+                    $query->where ( function ($q) use ($nonNullValues)
+                    {
+                        $q->whereNull ( 'nomor' )
+                            ->orWhere ( 'nomor', '-' )
+                            ->orWhereIn ( 'nomor', $nonNullValues );
+                    } );
+                }
+                else
+                {
+                    $query->whereIn ( 'nomor', $nomor );
+                }
             }
-            else
+            catch ( \Exception $e )
             {
-                $query->whereIn ( 'nomor', $nomor );
+                \Log::error ( 'Error in nomor filter: ' . $e->getMessage () );
             }
         }
         return $query;
@@ -85,28 +88,32 @@ class EvaluasiRKBUrgentController extends Controller
     {
         if ( $request->filled ( 'selected_proyek' ) )
         {
-            $proyekNames = explode ( ',', $request->selected_proyek );
-            $proyekNames = array_map ( function ($val)
+            try
             {
-                return $val === 'null' ? $val : base64_decode ( $val );
-            }, $proyekNames );
-            if ( in_array ( 'null', $proyekNames ) )
-            {
-                $nonNullValues = array_filter ( $proyekNames, fn ( $value ) => $value !== 'null' );
-                $query->where ( function ($q) use ($nonNullValues)
+                $proyekNames = $this->getSelectedValues ( $request->selected_proyek );
+                if ( in_array ( 'null', $proyekNames ) )
                 {
-                    $q->whereHas ( 'proyek', function ($sq) use ($nonNullValues)
+                    $nonNullValues = array_filter ( $proyekNames, fn ( $value ) => $value !== 'null' );
+                    $query->where ( function ($q) use ($nonNullValues)
                     {
-                        $sq->whereIn ( 'nama', $nonNullValues );
-                    } )->orWhereDoesntHave ( 'proyek' );
-                } );
-            }
-            else
-            {
-                $query->whereHas ( 'proyek', function ($q) use ($proyekNames)
+                        $q->whereDoesntHave ( 'proyek' )
+                            ->orWhereHas ( 'proyek', function ($sq) use ($nonNullValues)
+                            {
+                                $sq->whereIn ( 'nama', $nonNullValues );
+                            } );
+                    } );
+                }
+                else
                 {
-                    $q->whereIn ( 'nama', $proyekNames );
-                } );
+                    $query->whereHas ( 'proyek', function ($q) use ($proyekNames)
+                    {
+                        $q->whereIn ( 'nama', $proyekNames );
+                    } );
+                }
+            }
+            catch ( \Exception $e )
+            {
+                \Log::error ( 'Error in proyek filter: ' . $e->getMessage () );
             }
         }
         return $query;
@@ -116,23 +123,26 @@ class EvaluasiRKBUrgentController extends Controller
     {
         if ( $request->filled ( 'selected_periode' ) )
         {
-            $periodeValues = explode ( ',', $request->selected_periode );
-            $periodeValues = array_map ( function ($val)
+            try
             {
-                return $val === 'null' ? $val : base64_decode ( $val );
-            }, $periodeValues );
-            if ( in_array ( 'null', $periodeValues ) )
-            {
-                $nonNullValues = array_filter ( $periodeValues, fn ( $value ) => $value !== 'null' );
-                $query->where ( function ($q) use ($nonNullValues)
+                $periodeValues = $this->getSelectedValues ( $request->selected_periode );
+                if ( in_array ( 'null', $periodeValues ) )
                 {
-                    $q->whereNull ( 'periode' )
-                        ->orWhereIn ( 'periode', $nonNullValues );
-                } );
+                    $nonNullValues = array_filter ( $periodeValues, fn ( $value ) => $value !== 'null' );
+                    $query->where ( function ($q) use ($nonNullValues)
+                    {
+                        $q->whereNull ( 'periode' )
+                            ->orWhereIn ( 'periode', $nonNullValues );
+                    } );
+                }
+                else
+                {
+                    $query->whereIn ( 'periode', $periodeValues );
+                }
             }
-            else
+            catch ( \Exception $e )
             {
-                $query->whereIn ( 'periode', $periodeValues );
+                \Log::error ( 'Error in periode filter: ' . $e->getMessage () );
             }
         }
         return $query;
@@ -615,5 +625,21 @@ class EvaluasiRKBUrgentController extends Controller
                 } ),
             default => $query
         };
+    }
+
+    // Add helper method to decode base64 values
+    private function getSelectedValues ( $paramValue )
+    {
+        if ( ! $paramValue ) return [];
+
+        try
+        {
+            return explode ( '||', base64_decode ( $paramValue ) );
+        }
+        catch ( \Exception $e )
+        {
+            \Log::error ( 'Error decoding parameter value: ' . $e->getMessage () );
+            return [];
+        }
     }
 }

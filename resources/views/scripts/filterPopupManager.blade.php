@@ -81,6 +81,9 @@
                 popup.data('originalWidth', popup.outerWidth());
             }
 
+            // Position popup
+            positionPopup(popup, button);
+
             // Extract filter type from ID and handle URL parameters
             const type = id.replace('-filter', '').replace('-', '_');
             const urlParams = new URLSearchParams(window.location.search);
@@ -102,11 +105,11 @@
                 }
             }
 
-            // Position and show the popup
-            positionPopup(popup, button);
-            popup.toggle();
+            // Show popup and focus search input
+            popup.show();
+            popup.find('input[type="text"]').focus();
         } else {
-            popup.toggle();
+            popup.hide();
         }
     }
 

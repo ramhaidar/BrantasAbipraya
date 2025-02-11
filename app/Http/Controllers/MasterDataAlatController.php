@@ -148,24 +148,27 @@ class MasterDataAlatController extends Controller
     {
         if ( $request->filled ( 'selected_jenis' ) )
         {
-            $jenis = explode ( ',', $request->selected_jenis );
-            $jenis = array_map ( function ($val)
+            try
             {
-                return $val === 'null' ? $val : base64_decode ( $val );
-            }, $jenis );
-            if ( in_array ( 'null', $jenis ) )
-            {
-                $nonNullValues = array_filter ( $jenis, fn ( $value ) => $value !== 'null' );
-                $query->where ( function ($q) use ($nonNullValues)
+                $jenis = $this->getSelectedValues ( $request->selected_jenis );
+                if ( in_array ( 'null', $jenis ) )
                 {
-                    $q->whereNull ( 'jenis_alat' )
-                        ->orWhere ( 'jenis_alat', '-' )
-                        ->orWhereIn ( 'jenis_alat', $nonNullValues );
-                } );
+                    $nonNullValues = array_filter ( $jenis, fn ( $value ) => $value !== 'null' );
+                    $query->where ( function ($q) use ($nonNullValues)
+                    {
+                        $q->whereNull ( 'jenis_alat' )
+                            ->orWhere ( 'jenis_alat', '-' )
+                            ->orWhereIn ( 'jenis_alat', $nonNullValues );
+                    } );
+                }
+                else
+                {
+                    $query->whereIn ( 'jenis_alat', $jenis );
+                }
             }
-            else
+            catch ( \Exception $e )
             {
-                $query->whereIn ( 'jenis_alat', $jenis );
+                \Log::error ( 'Error in jenis filter: ' . $e->getMessage () );
             }
         }
     }
@@ -174,24 +177,27 @@ class MasterDataAlatController extends Controller
     {
         if ( $request->filled ( 'selected_merek' ) )
         {
-            $merek = explode ( ',', $request->selected_merek );
-            $merek = array_map ( function ($val)
+            try
             {
-                return $val === 'null' ? $val : base64_decode ( $val );
-            }, $merek );
-            if ( in_array ( 'null', $merek ) )
-            {
-                $nonNullValues = array_filter ( $merek, fn ( $value ) => $value !== 'null' );
-                $query->where ( function ($q) use ($nonNullValues)
+                $merek = $this->getSelectedValues ( $request->selected_merek );
+                if ( in_array ( 'null', $merek ) )
                 {
-                    $q->whereNull ( 'merek_alat' )
-                        ->orWhere ( 'merek_alat', '-' )
-                        ->orWhereIn ( 'merek_alat', $nonNullValues );
-                } );
+                    $nonNullValues = array_filter ( $merek, fn ( $value ) => $value !== 'null' );
+                    $query->where ( function ($q) use ($nonNullValues)
+                    {
+                        $q->whereNull ( 'merek_alat' )
+                            ->orWhere ( 'merek_alat', '-' )
+                            ->orWhereIn ( 'merek_alat', $nonNullValues );
+                    } );
+                }
+                else
+                {
+                    $query->whereIn ( 'merek_alat', $merek );
+                }
             }
-            else
+            catch ( \Exception $e )
             {
-                $query->whereIn ( 'merek_alat', $merek );
+                \Log::error ( 'Error in merek filter: ' . $e->getMessage () );
             }
         }
     }
@@ -200,24 +206,27 @@ class MasterDataAlatController extends Controller
     {
         if ( $request->filled ( 'selected_kode' ) )
         {
-            $kode = explode ( ',', $request->selected_kode );
-            $kode = array_map ( function ($val)
+            try
             {
-                return $val === 'null' ? $val : base64_decode ( $val );
-            }, $kode );
-            if ( in_array ( 'null', $kode ) )
-            {
-                $nonNullValues = array_filter ( $kode, fn ( $value ) => $value !== 'null' );
-                $query->where ( function ($q) use ($nonNullValues)
+                $kode = $this->getSelectedValues ( $request->selected_kode );
+                if ( in_array ( 'null', $kode ) )
                 {
-                    $q->whereNull ( 'kode_alat' )
-                        ->orWhere ( 'kode_alat', '-' )
-                        ->orWhereIn ( 'kode_alat', $nonNullValues );
-                } );
+                    $nonNullValues = array_filter ( $kode, fn ( $value ) => $value !== 'null' );
+                    $query->where ( function ($q) use ($nonNullValues)
+                    {
+                        $q->whereNull ( 'kode_alat' )
+                            ->orWhere ( 'kode_alat', '-' )
+                            ->orWhereIn ( 'kode_alat', $nonNullValues );
+                    } );
+                }
+                else
+                {
+                    $query->whereIn ( 'kode_alat', $kode );
+                }
             }
-            else
+            catch ( \Exception $e )
             {
-                $query->whereIn ( 'kode_alat', $kode );
+                \Log::error ( 'Error in kode filter: ' . $e->getMessage () );
             }
         }
     }
@@ -226,24 +235,27 @@ class MasterDataAlatController extends Controller
     {
         if ( $request->filled ( 'selected_tipe' ) )
         {
-            $tipe = explode ( ',', $request->selected_tipe );
-            $tipe = array_map ( function ($val)
+            try
             {
-                return $val === 'null' ? $val : base64_decode ( $val );
-            }, $tipe );
-            if ( in_array ( 'null', $tipe ) )
-            {
-                $nonNullValues = array_filter ( $tipe, fn ( $value ) => $value !== 'null' );
-                $query->where ( function ($q) use ($nonNullValues)
+                $tipe = $this->getSelectedValues ( $request->selected_tipe );
+                if ( in_array ( 'null', $tipe ) )
                 {
-                    $q->whereNull ( 'tipe_alat' )
-                        ->orWhere ( 'tipe_alat', '-' )
-                        ->orWhereIn ( 'tipe_alat', $nonNullValues );
-                } );
+                    $nonNullValues = array_filter ( $tipe, fn ( $value ) => $value !== 'null' );
+                    $query->where ( function ($q) use ($nonNullValues)
+                    {
+                        $q->whereNull ( 'tipe_alat' )
+                            ->orWhere ( 'tipe_alat', '-' )
+                            ->orWhereIn ( 'tipe_alat', $nonNullValues );
+                    } );
+                }
+                else
+                {
+                    $query->whereIn ( 'tipe_alat', $tipe );
+                }
             }
-            else
+            catch ( \Exception $e )
             {
-                $query->whereIn ( 'tipe_alat', $tipe );
+                \Log::error ( 'Error in tipe filter: ' . $e->getMessage () );
             }
         }
     }
@@ -252,24 +264,27 @@ class MasterDataAlatController extends Controller
     {
         if ( $request->filled ( 'selected_serial' ) )
         {
-            $serial = explode ( ',', $request->selected_serial );
-            $serial = array_map ( function ($val)
+            try
             {
-                return $val === 'null' ? $val : base64_decode ( $val );
-            }, $serial );
-            if ( in_array ( 'null', $serial ) )
-            {
-                $nonNullValues = array_filter ( $serial, fn ( $value ) => $value !== 'null' );
-                $query->where ( function ($q) use ($nonNullValues)
+                $serial = $this->getSelectedValues ( $request->selected_serial );
+                if ( in_array ( 'null', $serial ) )
                 {
-                    $q->whereNull ( 'serial_number' )
-                        ->orWhere ( 'serial_number', '-' )
-                        ->orWhereIn ( 'serial_number', $nonNullValues );
-                } );
+                    $nonNullValues = array_filter ( $serial, fn ( $value ) => $value !== 'null' );
+                    $query->where ( function ($q) use ($nonNullValues)
+                    {
+                        $q->whereNull ( 'serial_number' )
+                            ->orWhere ( 'serial_number', '-' )
+                            ->orWhereIn ( 'serial_number', $nonNullValues );
+                    } );
+                }
+                else
+                {
+                    $query->whereIn ( 'serial_number', $serial );
+                }
             }
-            else
+            catch ( \Exception $e )
             {
-                $query->whereIn ( 'serial_number', $serial );
+                \Log::error ( 'Error in serial filter: ' . $e->getMessage () );
             }
         }
     }
@@ -278,50 +293,69 @@ class MasterDataAlatController extends Controller
     {
         if ( $request->filled ( 'selected_proyek' ) )
         {
-            $proyek = explode ( ',', $request->selected_proyek );
-            $proyek = array_map ( function ($val)
+            try
             {
-                return $val === 'null' ? $val : base64_decode ( $val );
-            }, $proyek );
-            if ( in_array ( 'null', $proyek ) )
-            {
-                $nonNullValues = array_filter ( $proyek, fn ( $value ) => $value !== 'null' );
-                if ( empty ( $nonNullValues ) )
+                $proyek = $this->getSelectedValues ( $request->selected_proyek );
+                if ( in_array ( 'null', $proyek ) )
                 {
-                    $query->whereDoesntHave ( 'alatProyek', function ($q)
+                    $nonNullValues = array_filter ( $proyek, fn ( $value ) => $value !== 'null' );
+                    if ( empty ( $nonNullValues ) )
                     {
-                        $q->whereNull ( 'removed_at' );
-                    } );
+                        $query->whereDoesntHave ( 'alatProyek', function ($q)
+                        {
+                            $q->whereNull ( 'removed_at' );
+                        } );
+                    }
+                    else
+                    {
+                        $query->where ( function ($q) use ($nonNullValues)
+                        {
+                            $q->whereDoesntHave ( 'alatProyek', function ($sub)
+                            {
+                                $sub->whereNull ( 'removed_at' );
+                            } )->orWhereHas ( 'alatProyek', function ($sub) use ($nonNullValues)
+                            {
+                                $sub->whereNull ( 'removed_at' )
+                                    ->whereHas ( 'proyek', function ($p) use ($nonNullValues)
+                                    {
+                                        $p->whereIn ( 'nama', $nonNullValues );
+                                    } );
+                            } );
+                        } );
+                    }
                 }
                 else
                 {
-                    $query->where ( function ($q) use ($nonNullValues)
+                    $query->whereHas ( 'alatProyek', function ($q) use ($proyek)
                     {
-                        $q->whereDoesntHave ( 'alatProyek', function ($sub)
-                        {
-                            $sub->whereNull ( 'removed_at' );
-                        } )->orWhereHas ( 'alatProyek', function ($sub) use ($nonNullValues)
-                        {
-                            $sub->whereNull ( 'removed_at' )
-                                ->whereHas ( 'proyek', function ($p) use ($nonNullValues)
-                                {
-                                    $p->whereIn ( 'nama', $nonNullValues );
-                                } );
-                        } );
+                        $q->whereNull ( 'removed_at' )
+                            ->whereHas ( 'proyek', function ($p) use ($proyek)
+                            {
+                                $p->whereIn ( 'nama', $proyek );
+                            } );
                     } );
                 }
             }
-            else
+            catch ( \Exception $e )
             {
-                $query->whereHas ( 'alatProyek', function ($q) use ($proyek)
-                {
-                    $q->whereNull ( 'removed_at' )
-                        ->whereHas ( 'proyek', function ($p) use ($proyek)
-                        {
-                            $p->whereIn ( 'nama', $proyek );
-                        } );
-                } );
+                \Log::error ( 'Error in proyek filter: ' . $e->getMessage () );
             }
+        }
+    }
+
+    // Helper function to decode selected values
+    private function getSelectedValues ( $paramValue )
+    {
+        if ( ! $paramValue ) return [];
+
+        try
+        {
+            return explode ( '||', base64_decode ( $paramValue ) );
+        }
+        catch ( \Exception $e )
+        {
+            \Log::error ( 'Error decoding parameter value: ' . $e->getMessage () );
+            return [];
         }
     }
 

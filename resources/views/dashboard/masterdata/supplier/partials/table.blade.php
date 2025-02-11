@@ -6,7 +6,7 @@
     <form class="mb-3" id="filter-form" method="GET">
         <div class="mb-3 d-flex justify-content-end">
             @if (request('selected_nama') || request('selected_alamat') || request('selected_contact_person'))
-                <a class="btn btn-danger btn-sm btn-hide-text-mobile" href="{{ request()->url() . (request('search') ? '?search=' . request('search') . '&id_proyek=' . request('id_proyek') : '?id_proyek=' . request('id_proyek')) }}">
+                <a class="btn btn-danger btn-sm btn-hide-text-mobile" href="{{ request()->url() }}{{ request()->hasAny(['search', 'id_proyek']) ? '?' . http_build_query(request()->only(['search', 'id_proyek'])) : '' }}">
                     <i class="bi bi-x-circle"></i> <span class="ms-2">Hapus Semua Filter</span>
                 </a>
             @endif

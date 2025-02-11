@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Alat;
 use App\Models\Proyek;
 use Illuminate\Http\Request;
 use App\Models\MasterDataSupplier;
@@ -15,20 +14,22 @@ class MasterDataSupplierController extends Controller
     public function index ( Request $request )
     {
         $perPage = $this->getPerPage ( $request );
-        $query   = $this->buildQuery ( $request );
+        $query   = $this->buildBaseQuery ( $request );
 
-        $uniqueValues = $this->getUniqueValues ( clone $query );
-        $suppliers    = $this->getTableData ( $query, $perPage );
+        $this->applySearchFilter ( $request, $query );
+        $this->applyAllFilters ( $request, $query );
+
         $spareparts   = $this->getSpareparts ();
         $proyeks      = $this->getProyeks ();
-        $TableData    = $this->getPaginatedData ( $perPage );
+        $TableData    = $this->getTableData ( $query, $perPage );
+        $uniqueValues = $this->getUniqueValues ( $query );
 
         return view ( 'dashboard.masterdata.supplier.supplier', [ 
             'headerPage'   => "Master Data Supplier",
             'page'         => 'Data Supplier',
             'proyeks'      => $proyeks,
             'TableData'    => $TableData,
-            'suppliers'    => $suppliers,
+            'suppliers'    => $TableData,
             'spareparts'   => $spareparts,
             'uniqueValues' => $uniqueValues,
         ] );
@@ -40,22 +41,16 @@ class MasterDataSupplierController extends Controller
         return in_array ( (int) $request->get ( 'per_page' ), $allowedPerPage ) ? (int) $request->get ( 'per_page' ) : 10;
     }
 
-    private function buildQuery ( Request $request )
+    private function buildBaseQuery ( Request $request )
     {
-        $query = MasterDataSupplier::query ()
+        return MasterDataSupplier::query ()
             ->with ( [ 'masterDataSpareparts' ] )
             ->orderBy ( $request->get ( 'sort', 'updated_at' ), $request->get ( 'direction', 'desc' ) );
-
-        $this->applySearchFilter ( $request, $query );
-        $this->applyUserRoleFilter ( $query );
-        $this->applyColumnFilters ( $request, $query );
-
-        return $query;
     }
 
     private function applySearchFilter ( Request $request, $query )
     {
-        if ( $request->has ( 'search' ) )
+        if ( $request->has ( 'search' ) && ! empty ( $request->get ( 'search' ) ) )
         {
             $search = $request->get ( 'search' );
             $query->where ( function ($q) use ($search)
@@ -65,34 +60,119 @@ class MasterDataSupplierController extends Controller
                     ->orWhere ( 'contact_person', 'ilike', "%{$search}%" )
                     ->orWhereHas ( 'masterDataSpareparts', function ($query) use ($search)
                     {
-                        $query->where ( 'nama', 'ilike', "%{$search}%" )
-                            ->orWhere ( 'part_number', 'ilike', "%{$search}%" )
-                            ->orWhere ( 'merk', 'ilike', "%{$search}%" );
+                        $query->where ( 'nama', 'ilike', "%{$search}%" );
                     } );
             } );
         }
     }
 
-    private function applyUserRoleFilter ( $query )
-    {
-        $user = Auth::user ();
-        if ( $user->role === 'Pegawai' )
-        {
-            $query->where ( 'id_user', $user->id );
-        }
-        elseif ( $user->role === 'Boss' )
-        {
-            $proyeks       = $user->proyek ()->with ( "users" )->get ();
-            $usersInProyek = $proyeks->pluck ( 'users.*.id' )->flatten ();
-            $query->whereIn ( 'id_user', $usersInProyek );
-        }
-    }
-
-    private function applyColumnFilters ( Request $request, $query )
+    private function applyAllFilters ( Request $request, $query )
     {
         $this->handleNamaFilter ( $request, $query );
         $this->handleAlamatFilter ( $request, $query );
         $this->handleContactPersonFilter ( $request, $query );
+    }
+
+    private function getSelectedValues ( $paramValue )
+    {
+        if ( ! $paramValue ) return [];
+
+        try
+        {
+            return explode ( '||', base64_decode ( $paramValue ) );
+        }
+        catch ( \Exception $e )
+        {
+            \Log::error ( 'Error decoding parameter value: ' . $e->getMessage () );
+            return [];
+        }
+    }
+
+    private function handleNamaFilter ( Request $request, $query )
+    {
+        if ( $request->filled ( 'selected_nama' ) )
+        {
+            try
+            {
+                $nama = $this->getSelectedValues ( $request->selected_nama );
+                if ( in_array ( 'null', $nama ) )
+                {
+                    $nonNullValues = array_filter ( $nama, fn ( $value ) => $value !== 'null' );
+                    $query->where ( function ($q) use ($nonNullValues)
+                    {
+                        $q->whereNull ( 'nama' )
+                            ->orWhere ( 'nama', '-' )
+                            ->orWhereIn ( 'nama', $nonNullValues );
+                    } );
+                }
+                else
+                {
+                    $query->whereIn ( 'nama', $nama );
+                }
+            }
+            catch ( \Exception $e )
+            {
+                \Log::error ( 'Error in nama filter: ' . $e->getMessage () );
+            }
+        }
+    }
+
+    private function handleAlamatFilter ( Request $request, $query )
+    {
+        if ( $request->filled ( 'selected_alamat' ) )
+        {
+            try
+            {
+                $alamat = $this->getSelectedValues ( $request->selected_alamat );
+                if ( in_array ( 'null', $alamat ) )
+                {
+                    $nonNullValues = array_filter ( $alamat, fn ( $value ) => $value !== 'null' );
+                    $query->where ( function ($q) use ($nonNullValues)
+                    {
+                        $q->whereNull ( 'alamat' )
+                            ->orWhere ( 'alamat', '-' )
+                            ->orWhereIn ( 'alamat', $nonNullValues );
+                    } );
+                }
+                else
+                {
+                    $query->whereIn ( 'alamat', $alamat );
+                }
+            }
+            catch ( \Exception $e )
+            {
+                \Log::error ( 'Error in alamat filter: ' . $e->getMessage () );
+            }
+        }
+    }
+
+    private function handleContactPersonFilter ( Request $request, $query )
+    {
+        if ( $request->filled ( 'selected_contact_person' ) )
+        {
+            try
+            {
+                $contactPerson = $this->getSelectedValues ( $request->selected_contact_person );
+                if ( in_array ( 'null', $contactPerson ) )
+                {
+                    $nonNullValues = array_filter ( $contactPerson, fn ( $value ) => $value !== 'null' );
+                    $query->where ( function ($q) use ($nonNullValues)
+                    {
+                        $q->whereNull ( 'contact_person' )
+                            ->orWhere ( 'contact_person', '-' )
+                            ->orWhereIn ( 'contact_person', $nonNullValues );
+                    } );
+                }
+                else
+                {
+                    $query->whereIn ( 'contact_person', $contactPerson );
+                }
+            }
+            catch ( \Exception $e )
+            {
+                \Log::error ( 'Error in contact person filter: ' . $e->getMessage () );
+            }
+        }
     }
 
     private function getUniqueValues ( $query )
@@ -130,93 +210,6 @@ class MasterDataSupplierController extends Controller
         return $proyeksQuery->orderBy ( "updated_at", "desc" )
             ->orderBy ( "id", "desc" )
             ->get ();
-    }
-
-    private function getPaginatedData ( $perPage )
-    {
-        return MasterDataSupplier::query ()
-            ->orderBy ( 'updated_at', 'desc' )
-            ->orderBy ( 'id', 'desc' )
-            ->paginate ( $perPage )
-            ->withQueryString ();
-    }
-
-    private function handleNamaFilter ( Request $request, $query )
-    {
-        if ( $request->filled ( 'selected_nama' ) )
-        {
-            $nama = explode ( ',', $request->selected_nama );
-            $nama = array_map ( function ($val)
-            {
-                return $val === 'null' ? $val : base64_decode ( $val );
-            }, $nama );
-            if ( in_array ( 'null', $nama ) )
-            {
-                $nonNullValues = array_filter ( $nama, fn ( $value ) => $value !== 'null' );
-                $query->where ( function ($q) use ($nonNullValues)
-                {
-                    $q->whereNull ( 'nama' )
-                        ->orWhere ( 'nama', '-' )
-                        ->orWhereIn ( 'nama', $nonNullValues );
-                } );
-            }
-            else
-            {
-                $query->whereIn ( 'nama', $nama );
-            }
-        }
-    }
-
-    private function handleAlamatFilter ( Request $request, $query )
-    {
-        if ( $request->filled ( 'selected_alamat' ) )
-        {
-            $alamat = explode ( ',', $request->selected_alamat );
-            $alamat = array_map ( function ($val)
-            {
-                return $val === 'null' ? $val : base64_decode ( $val );
-            }, $alamat );
-            if ( in_array ( 'null', $alamat ) )
-            {
-                $nonNullValues = array_filter ( $alamat, fn ( $value ) => $value !== 'null' );
-                $query->where ( function ($q) use ($nonNullValues)
-                {
-                    $q->whereNull ( 'alamat' )
-                        ->orWhere ( 'alamat', '-' )
-                        ->orWhereIn ( 'alamat', $nonNullValues );
-                } );
-            }
-            else
-            {
-                $query->whereIn ( 'alamat', $alamat );
-            }
-        }
-    }
-
-    private function handleContactPersonFilter ( Request $request, $query )
-    {
-        if ( $request->filled ( 'selected_contact_person' ) )
-        {
-            $contactPerson = explode ( ',', $request->selected_contact_person );
-            $contactPerson = array_map ( function ($val)
-            {
-                return $val === 'null' ? $val : base64_decode ( $val );
-            }, $contactPerson );
-            if ( in_array ( 'null', $contactPerson ) )
-            {
-                $nonNullValues = array_filter ( $contactPerson, fn ( $value ) => $value !== 'null' );
-                $query->where ( function ($q) use ($nonNullValues)
-                {
-                    $q->whereNull ( 'contact_person' )
-                        ->orWhere ( 'contact_person', '-' )
-                        ->orWhereIn ( 'contact_person', $nonNullValues );
-                } );
-            }
-            else
-            {
-                $query->whereIn ( 'contact_person', $contactPerson );
-            }
-        }
     }
 
     public function show ( $id )

@@ -114,13 +114,32 @@ class MasterDataAlatController extends Controller
         $queryForUniqueValues = clone $query;
         $results              = $queryForUniqueValues->get ();
 
+        // Get all active alat records with their current projects
+        $activeAlatWithProjects = $results->map(function($alat) {
+            return [
+                'jenis_alat' => $alat->jenis_alat,
+                'merek_alat' => $alat->merek_alat,
+                'kode_alat' => $alat->kode_alat,
+                'tipe_alat' => $alat->tipe_alat,
+                'serial_number' => $alat->serial_number,
+                'proyek_name' => $alat->current_project ? $alat->current_project->nama : null
+            ];
+        });
+
+        // Get unique values
+        $uniqueProyeks = collect($activeAlatWithProjects)
+            ->pluck('proyek_name')
+            ->filter()
+            ->unique()
+            ->values();
+
         return [ 
             'jenis'  => $results->pluck ( 'jenis_alat' )->unique ()->values (),
             'merek'  => $results->pluck ( 'merek_alat' )->unique ()->values (),
             'kode'   => $results->pluck ( 'kode_alat' )->unique ()->values (),
             'tipe'   => $results->pluck ( 'tipe_alat' )->unique ()->values (),
             'serial' => $results->pluck ( 'serial_number' )->unique ()->values (),
-            'proyek' => $proyeks->pluck ( 'nama' ),
+            'proyek' => $uniqueProyeks
         ];
     }
 

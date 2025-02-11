@@ -1,4 +1,17 @@
 <script>
+    // Add debounce function at the top
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
     function toggleFilter(id) {
         $('.filter-popup').not(`#${id}`).hide();
         const popup = $(`#${id}`);
@@ -94,12 +107,45 @@
         });
     });
 
-    function filterCheckboxes(type) {
+    function filterCheckboxes(type, searchEvent) {
         const selector = `.${type}-checkbox`;
         const container = $(selector).first().closest('.checkbox-list');
 
+        // Store search text in data attribute to prevent loss
+        if (searchEvent) {
+            container.data('searchText', $(searchEvent.target).val().toLowerCase());
+        }
+
+        const searchText = container.data('searchText') || '';
+
+        // Store original items if not already stored
+        if (!container.data('originalItems')) {
+            container.data('originalItems', container.html());
+        }
+
+        // Restore original items before filtering
+        if (!searchText) {
+            container.html(container.data('originalItems'));
+        }
+
         const items = container.children('.form-check').get();
-        items.sort((a, b) => {
+
+        // First hide/show based on search
+        items.forEach(item => {
+            const $item = $(item);
+            const label = $item.find('label').text().toLowerCase();
+            const isChecked = $item.find('input[type="checkbox"]').prop('checked');
+
+            if (isChecked || !searchText || label.includes(searchText)) {
+                $item.show();
+            } else {
+                $item.hide();
+            }
+        });
+
+        // Then sort visible items
+        const visibleItems = items.filter(item => $(item).is(':visible'));
+        visibleItems.sort((a, b) => {
             const isCheckedA = $(a).find('input[type="checkbox"]').prop('checked');
             const isCheckedB = $(b).find('input[type="checkbox"]').prop('checked');
 
@@ -116,7 +162,16 @@
             return labelA.localeCompare(labelB);
         });
 
-        container.append(items);
+        // Detach items from DOM
+        const $items = $(items);
+        $items.detach();
+
+        // Append sorted visible items
+        container.append(visibleItems);
+
+        // Append hidden items to preserve them
+        const hiddenItems = items.filter(item => !$(item).is(':visible'));
+        container.append(hiddenItems);
     }
 
     function applyFilter(type) {
@@ -207,13 +262,34 @@
         });
 
         $('.filter-popup').on('hide', function() {
+            const container = $(this).find('.checkbox-list');
+            if (container.data('originalItems')) {
+                container.html(container.data('originalItems'));
+            }
+            container.removeData('originalItems');
+            container.removeData('searchText');
             $(this).removeData('originalWidth');
-            $(this).find('.checkbox-list').removeData('originalItems');
+            $(this).find('input[type="text"]').val('');
         });
 
         $('.filter-popup').each(function() {
             const type = $(this).attr('id').replace('-filter', '').replace('-', '_');
             filterCheckboxes(type);
+        });
+
+        // Replace the search event handler with debounced version
+        const debouncedFilter = debounce((event) => {
+            const popupId = $(event.target).closest('.filter-popup').attr('id');
+            const type = popupId.replace('-filter', '').replace('-', '_');
+            filterCheckboxes(type, event);
+        }, 300);
+
+        $('.filter-popup input[type="text"]').on('input', debouncedFilter);
+
+        // Clear search text when popup is closed
+        $('.filter-popup').on('hide', function() {
+            $(this).find('.checkbox-list').removeData('searchText');
+            $(this).find('input[type="text"]').val('');
         });
     });
 </script>

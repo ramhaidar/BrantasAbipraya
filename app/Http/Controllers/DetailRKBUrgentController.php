@@ -111,33 +111,55 @@ class DetailRKBUrgentController extends Controller
 
     private function applyColumnFilter ( $query, Request $request, $paramName, $columnName )
     {
-        if ( $request->filled ( "selected_{$paramName}" ) )
-        {
-            $values = explode ( ',', $request->get ( "selected_{$paramName}" ) );
-            // Decode base64 values
-            $values = array_map ( function ($val)
-            {
-                return $val === 'null' ? $val : base64_decode ( $val );
-            }, $values );
+        $selectedParam = "selected_{$paramName}";
 
-            if ( in_array ( 'null', $values ) )
+        if ( $request->filled ( $selectedParam ) )
+        {
+            try
             {
-                $nonNullValues = array_filter ( $values, fn ( $value ) => $value !== 'null' );
-                $query->where ( function ($q) use ($columnName, $nonNullValues)
+                $values = $this->getSelectedValues ( $request->get ( $selectedParam ) );
+
+                if ( in_array ( 'null', $values ) )
                 {
-                    $q->whereNull ( $columnName )
-                        ->orWhere ( $columnName, '' )
-                        ->orWhere ( $columnName, '-' )
-                        ->when ( count ( $nonNullValues ) > 0, function ($subQ) use ($columnName, $nonNullValues)
-                        {
-                            $subQ->orWhereIn ( $columnName, $nonNullValues );
-                        } );
-                } );
+                    $nonNullValues = array_filter ( $values, fn ( $value ) => $value !== 'null' );
+                    $query->where ( function ($q) use ($columnName, $nonNullValues)
+                    {
+                        $q->whereNull ( $columnName )
+                            ->orWhere ( $columnName, '-' )
+                            ->orWhere ( $columnName, '' )
+                            ->when ( ! empty ( $nonNullValues ), function ($subQ) use ($columnName, $nonNullValues)
+                            {
+                                $decodedValues = array_map ( 'base64_decode', $nonNullValues );
+                                $subQ->orWhereIn ( $columnName, $decodedValues );
+                            } );
+                    } );
+                }
+                else
+                {
+                    $decodedValues = array_map ( 'base64_decode', $values );
+                    $query->whereIn ( $columnName, $decodedValues );
+                }
             }
-            else
+            catch ( \Exception $e )
             {
-                $query->whereIn ( $columnName, $values );
+                \Log::error ( "Error in {$paramName} filter: " . $e->getMessage () );
             }
+        }
+    }
+
+    // Add this new helper method
+    private function getSelectedValues ( $paramValue )
+    {
+        if ( ! $paramValue ) return [];
+
+        try
+        {
+            return explode ( '||', base64_decode ( $paramValue ) );
+        }
+        catch ( \Exception $e )
+        {
+            \Log::error ( 'Error decoding parameter value: ' . $e->getMessage () );
+            return [];
         }
     }
 

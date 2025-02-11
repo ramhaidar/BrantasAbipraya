@@ -6,17 +6,34 @@
 
         if (popup.is(':hidden')) {
             if (!popup.data('originalWidth')) {
-                popup.css('width', ''); // Reset width only on first open
-                popup.data('originalWidth', popup.outerWidth()); // Store original width
+                popup.css('width', '');
+                popup.data('originalWidth', popup.outerWidth());
             }
 
-            // Sort checkboxes when opening popup
+            // Set checked state berdasarkan URL parameter
             const type = id.replace('-filter', '').replace('-', '_');
+            const urlParams = new URLSearchParams(window.location.search);
+            const encodedSelected = urlParams.get(`selected_${type}`);
+
+            // Reset semua checkbox
+            $(`.${type}-checkbox`).prop('checked', false);
+
+            // Jika ada parameter yang ter-encode
+            if (encodedSelected) {
+                try {
+                    const selectedValues = atob(encodedSelected).split(',');
+                    selectedValues.forEach(value => {
+                        $(`.${type}-checkbox[value="${value}"]`).prop('checked', true);
+                    });
+                } catch (e) {
+                    console.error('Error decoding base64:', e);
+                }
+            }
+
             filterCheckboxes(type);
 
             positionPopup(popup, button);
             popup.toggle();
-            popup.find('input[type="text"]').focus(); // Add focus to search input
         } else {
             popup.toggle();
         }
@@ -27,40 +44,32 @@
         const windowWidth = $(window).width();
         const windowHeight = $(window).height();
         const popupHeight = popup.outerHeight();
-        const safetyMargin = 40; // Increased margin from 25 to 40px
+        const safetyMargin = 40;
         const verticalGap = 10;
 
-        // Gunakan lebar yang tersimpan atau hitung ulang jika belum ada
         const originalWidth = popup.data('originalWidth');
 
-        // Ensure popup width doesn't exceed viewport
         const maxWidth = windowWidth - (safetyMargin * 2);
         popup.css({
             'width': Math.min(originalWidth, maxWidth) + 'px',
             'max-width': `${maxWidth}px`
         });
 
-        // Force content to wrap if needed
         popup.find('.checkbox-list').css({
             'word-break': 'break-word',
             'overflow-x': 'hidden'
         });
 
-        // Calculate vertical position
         let top = buttonRect.bottom + verticalGap;
 
-        // Check if popup would go below viewport
         if (top + popupHeight > windowHeight - safetyMargin) {
             top = buttonRect.top - popupHeight - verticalGap;
         }
 
-        // Ensure top is not negative and has minimum margin from top
         top = Math.max(safetyMargin, top);
 
-        // Calculate horizontal position
         let left = buttonRect.left;
 
-        // Check if popup would go off right edge
         if (left + originalWidth > windowWidth - safetyMargin) {
             left = windowWidth - originalWidth - safetyMargin;
             popup.addClass('right-aligned');
@@ -68,18 +77,15 @@
             popup.removeClass('right-aligned');
         }
 
-        // Ensure left is not negative and has minimum margin from left
         left = Math.max(safetyMargin, left);
 
-        // Set the position with smooth transition
         popup.css({
             top: `${top}px`,
             left: `${left}px`,
-            transition: 'left 0.2s, top 0.2s' // Optional: adds smooth movement
+            transition: 'left 0.2s, top 0.2s'
         });
     }
 
-    // Update popup positions on window resize
     $(window).on('resize', function() {
         $('.filter-popup:visible').each(function() {
             const id = $(this).attr('id');
@@ -88,38 +94,29 @@
         });
     });
 
-    function filterCheckboxes(type, event) {
-        const searchText = event ? $(event.target).val().toLowerCase() : '';
+    function filterCheckboxes(type) {
         const selector = `.${type}-checkbox`;
         const container = $(selector).first().closest('.checkbox-list');
 
-        // Filter items based on search text
-        container.find('.form-check').each(function() {
-            const label = $(this).find('label').text().toLowerCase();
-            $(this).toggle(label.includes(searchText));
+        const items = container.children('.form-check').get();
+        items.sort((a, b) => {
+            const isCheckedA = $(a).find('input[type="checkbox"]').prop('checked');
+            const isCheckedB = $(b).find('input[type="checkbox"]').prop('checked');
+
+            if (isCheckedA !== isCheckedB) {
+                return isCheckedB ? 1 : -1;
+            }
+
+            const labelA = $(a).find('label').text().toLowerCase();
+            const labelB = $(b).find('label').text().toLowerCase();
+
+            if (labelA === "empty/null") return -1;
+            if (labelB === "empty/null") return 1;
+
+            return labelA.localeCompare(labelB);
         });
 
-        // Only sort if there's no search text
-        if (!searchText) {
-            const items = container.children('.form-check').get();
-
-            items.sort((a, b) => {
-                const isCheckedA = $(a).find('input[type="checkbox"]').prop('checked');
-                const isCheckedB = $(b).find('input[type="checkbox"]').prop('checked');
-                const labelA = $(a).find('label').text().toLowerCase();
-                const labelB = $(b).find('label').text().toLowerCase();
-
-                if (isCheckedA !== isCheckedB) {
-                    return isCheckedA ? -1 : 1;
-                }
-
-                if (labelA === "empty/null") return -1;
-                if (labelB === "empty/null") return 1;
-                return labelA.localeCompare(labelB);
-            });
-
-            container.append(items);
-        }
+        container.append(items);
     }
 
     function applyFilter(type) {
@@ -130,13 +127,12 @@
 
         const urlParams = new URLSearchParams(window.location.search);
 
-        // Reset page parameter ke 1
         if (urlParams.has('page')) {
             urlParams.set('page', '1');
         }
 
         if (selected.length > 0) {
-            // Encode the selected values using base64
+
             const encodedValue = btoa(selected.join(','));
             urlParams.set(`selected_${type}`, encodedValue);
         } else {
@@ -149,13 +145,12 @@
     function clearFilter(type) {
         const urlParams = new URLSearchParams(window.location.search);
 
-        // Reset page parameter ke 1
         if (urlParams.has('page')) {
             urlParams.set('page', '1');
         }
 
         if (type === 'price') {
-            // For price filters, encode the values if they exist
+
             const priceMin = urlParams.get('price_min');
             const priceMax = urlParams.get('price_max');
             const priceExact = urlParams.get('price_exact');
@@ -170,16 +165,13 @@
         window.location.href = `${window.location.pathname}?${urlParams.toString()}`;
     }
 
-    // Handler untuk tombol "Clear All Filters"
     function clearAllFilters() {
         const urlParams = new URLSearchParams(window.location.search);
 
-        // Reset page parameter ke 1
         if (urlParams.has('page')) {
             urlParams.set('page', '1');
         }
 
-        // Hapus semua parameter filter tapi pertahankan parameter lain
         const paramsToKeep = ['search', 'per_page', 'id_proyek'];
         const currentParams = Array.from(urlParams.keys());
 
@@ -214,27 +206,11 @@
             event.stopPropagation();
         });
 
-        // Clear stored widths when filters are cleared
         $('.filter-popup').on('hide', function() {
             $(this).removeData('originalWidth');
+            $(this).find('.checkbox-list').removeData('originalItems');
         });
 
-        // Sort checkboxes initially
-        $('.filter-popup').each(function() {
-            const type = $(this).attr('id').replace('-filter', '').replace('-', '_');
-            filterCheckboxes(type);
-        });
-
-        // Add event listener for search inputs
-        $('.filter-popup input[type="text"]').on('input', function() {
-            const popupId = $(this).closest('.filter-popup').attr('id');
-            const type = popupId.replace('-filter', '').replace('-', '_');
-            filterCheckboxes(type, {
-                target: this
-            });
-        });
-
-        // Initial sort for checkboxes
         $('.filter-popup').each(function() {
             const type = $(this).attr('id').replace('-filter', '').replace('-', '_');
             filterCheckboxes(type);

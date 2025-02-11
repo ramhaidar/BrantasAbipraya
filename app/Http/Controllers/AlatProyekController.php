@@ -108,67 +108,118 @@ class AlatProyekController extends Controller
 
     private function getUniqueValues ( $proyekId, Request $request = null )
     {
-        $alatIds = AlatProyek::where ( 'id_proyek', $proyekId )
+        // Base query for alat proyek with the specified project
+        $baseQuery = AlatProyek::where ( 'id_proyek', $proyekId )
             ->whereNull ( 'removed_at' );
 
-        // Apply filters to base query
+        // Get the base set of master data alat IDs for this project
+        $masterDataAlatIds = $baseQuery->pluck ( 'id_master_data_alat' );
+
+        // Initialize separate queries for each filter
+        $queries = [ 
+            'jenis_alat'    => MasterDataAlat::whereIn ( 'id', $masterDataAlatIds ),
+            'kode_alat'     => MasterDataAlat::whereIn ( 'id', $masterDataAlatIds ),
+            'merek_alat'    => MasterDataAlat::whereIn ( 'id', $masterDataAlatIds ),
+            'tipe_alat'     => MasterDataAlat::whereIn ( 'id', $masterDataAlatIds ),
+            'serial_number' => MasterDataAlat::whereIn ( 'id', $masterDataAlatIds )
+        ];
+
         if ( $request )
         {
+            // Handle each filter separately
             if ( $request->filled ( 'selected_jenis_alat' ) )
             {
-                $this->handleJenisAlatFilter ( $request, $alatIds );
+                $values = $this->decodeBase64Filter ( $request->selected_jenis_alat );
+                foreach ( $queries as $field => $query )
+                {
+                    if ( $field !== 'jenis_alat' )
+                    {
+                        $query->whereIn ( 'jenis_alat', array_filter ( $values, fn ( $v ) => $v !== 'null' ) )
+                            ->when ( in_array ( 'null', $values ), function ($q)
+                            {
+                                $q->orWhereNull ( 'jenis_alat' )
+                                    ->orWhere ( 'jenis_alat', '-' );
+                            } );
+                    }
+                }
             }
+
             if ( $request->filled ( 'selected_kode_alat' ) )
             {
-                $this->handleKodeAlatFilter ( $request, $alatIds );
+                $values = $this->decodeBase64Filter ( $request->selected_kode_alat );
+                foreach ( $queries as $field => $query )
+                {
+                    if ( $field !== 'kode_alat' )
+                    {
+                        $query->whereIn ( 'kode_alat', array_filter ( $values, fn ( $v ) => $v !== 'null' ) )
+                            ->when ( in_array ( 'null', $values ), function ($q)
+                            {
+                                $q->orWhereNull ( 'kode_alat' )
+                                    ->orWhere ( 'kode_alat', '-' );
+                            } );
+                    }
+                }
             }
+
             if ( $request->filled ( 'selected_merek_alat' ) )
             {
-                $this->handleMerekAlatFilter ( $request, $alatIds );
+                $values = $this->decodeBase64Filter ( $request->selected_merek_alat );
+                foreach ( $queries as $field => $query )
+                {
+                    if ( $field !== 'merek_alat' )
+                    {
+                        $query->whereIn ( 'merek_alat', array_filter ( $values, fn ( $v ) => $v !== 'null' ) )
+                            ->when ( in_array ( 'null', $values ), function ($q)
+                            {
+                                $q->orWhereNull ( 'merek_alat' )
+                                    ->orWhere ( 'merek_alat', '-' );
+                            } );
+                    }
+                }
             }
+
             if ( $request->filled ( 'selected_tipe_alat' ) )
             {
-                $this->handleTipeAlatFilter ( $request, $alatIds );
+                $values = $this->decodeBase64Filter ( $request->selected_tipe_alat );
+                foreach ( $queries as $field => $query )
+                {
+                    if ( $field !== 'tipe_alat' )
+                    {
+                        $query->whereIn ( 'tipe_alat', array_filter ( $values, fn ( $v ) => $v !== 'null' ) )
+                            ->when ( in_array ( 'null', $values ), function ($q)
+                            {
+                                $q->orWhereNull ( 'tipe_alat' )
+                                    ->orWhere ( 'tipe_alat', '-' );
+                            } );
+                    }
+                }
             }
+
             if ( $request->filled ( 'selected_serial_number' ) )
             {
-                $this->handleSerialNumberFilter ( $request, $alatIds );
+                $values = $this->decodeBase64Filter ( $request->selected_serial_number );
+                foreach ( $queries as $field => $query )
+                {
+                    if ( $field !== 'serial_number' )
+                    {
+                        $query->whereIn ( 'serial_number', array_filter ( $values, fn ( $v ) => $v !== 'null' ) )
+                            ->when ( in_array ( 'null', $values ), function ($q)
+                            {
+                                $q->orWhereNull ( 'serial_number' )
+                                    ->orWhere ( 'serial_number', '-' );
+                            } );
+                    }
+                }
             }
         }
 
-        $alatIds = $alatIds->pluck ( 'id_master_data_alat' );
-
-        // Create separate queries for each unique value
-        $baseQuery = MasterDataAlat::whereIn ( 'id', $alatIds );
-
-        // Clone queries for each filter
-        $jenisQuery  = clone $baseQuery;
-        $kodeQuery   = clone $baseQuery;
-        $merekQuery  = clone $baseQuery;
-        $tipeQuery   = clone $baseQuery;
-        $serialQuery = clone $baseQuery;
-
-        // Apply other active filters to each query
-        if ( $request )
-        {
-            if ( $request->filled ( 'selected_jenis_alat' ) )
-            {
-                $values = explode ( ',', $request->selected_jenis_alat );
-                $this->applyFilterToQuery ( $kodeQuery, 'jenis_alat', $values );
-                $this->applyFilterToQuery ( $merekQuery, 'jenis_alat', $values );
-                $this->applyFilterToQuery ( $tipeQuery, 'jenis_alat', $values );
-                $this->applyFilterToQuery ( $serialQuery, 'jenis_alat', $values );
-            }
-            // Similar for other filters
-            // ...add other filter applications here
-        }
-
+        // Get distinct values for each field
         return [ 
-            'jenis_alat'    => $jenisQuery->whereNotNull ( 'jenis_alat' )->distinct ()->pluck ( 'jenis_alat' ),
-            'kode_alat'     => $kodeQuery->whereNotNull ( 'kode_alat' )->distinct ()->pluck ( 'kode_alat' ),
-            'merek_alat'    => $merekQuery->whereNotNull ( 'merek_alat' )->distinct ()->pluck ( 'merek_alat' ),
-            'tipe_alat'     => $tipeQuery->whereNotNull ( 'tipe_alat' )->distinct ()->pluck ( 'tipe_alat' ),
-            'serial_number' => $serialQuery->whereNotNull ( 'serial_number' )->distinct ()->pluck ( 'serial_number' ),
+            'jenis_alat'    => $queries[ 'jenis_alat' ]->whereNotNull ( 'jenis_alat' )->distinct ()->pluck ( 'jenis_alat' ),
+            'kode_alat'     => $queries[ 'kode_alat' ]->whereNotNull ( 'kode_alat' )->distinct ()->pluck ( 'kode_alat' ),
+            'merek_alat'    => $queries[ 'merek_alat' ]->whereNotNull ( 'merek_alat' )->distinct ()->pluck ( 'merek_alat' ),
+            'tipe_alat'     => $queries[ 'tipe_alat' ]->whereNotNull ( 'tipe_alat' )->distinct ()->pluck ( 'tipe_alat' ),
+            'serial_number' => $queries[ 'serial_number' ]->whereNotNull ( 'serial_number' )->distinct ()->pluck ( 'serial_number' ),
         ];
     }
 

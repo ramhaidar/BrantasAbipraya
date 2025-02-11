@@ -45,12 +45,11 @@
         if (!paramValue) return [];
 
         try {
-            // Try to decode base64 and split into array
-            const decoded = atob(paramValue);
-            return decoded.split(',');
+            // Use a special delimiter that's unlikely to appear in values
+            return atob(paramValue).split('||').map(value => value.trim());
         } catch (e) {
-            // If not base64 encoded, split the original value
-            return paramValue.split(',');
+            console.error('Error decoding parameter value:', e);
+            return [];
         }
     }
 
@@ -92,16 +91,17 @@
             // Restore previously selected checkboxes
             if (encodedSelected) {
                 try {
-                    const decodedValues = atob(encodedSelected).split(',');
-                    decodedValues.forEach(value => {
-                        const cleanValue = value.trim();
-                        const checkbox = $(`.${type}-checkbox[value="${cleanValue}"]`);
-                        if (checkbox.length) {
-                            checkbox.prop('checked', true);
+                    const selectedValues = atob(encodedSelected).split('||').map(value => value.trim());
+                    selectedValues.forEach(value => {
+                        // Use exact value matching by finding the checkbox with the same value
+                        const checkbox = Array.from(document.querySelectorAll(`.${type}-checkbox`))
+                            .find(cb => cb.value === value);
+                        if (checkbox) {
+                            checkbox.checked = true;
                         }
                     });
                 } catch (e) {
-                    console.error('Base64 decode error:', e);
+                    console.error('Error restoring checkbox states:', e);
                 }
             }
 
@@ -226,7 +226,8 @@
 
         // Update URL parameters
         if (selected.length > 0) {
-            const encodedValue = btoa(selected.join(','));
+            // Use special delimiter instead of comma
+            const encodedValue = btoa(selected.join('||'));
             urlParams.set(`selected_${type}`, encodedValue);
         } else {
             urlParams.delete(`selected_${type}`);

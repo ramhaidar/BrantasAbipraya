@@ -246,6 +246,280 @@ class ATBController extends Controller
             } );
         }
 
+        // Apply filters if any exist
+        if ( request ()->has ( 'selected_nomor_spb' ) )
+        {
+            $selectedValues = $this->getSelectedValues ( request ( 'selected_nomor_spb' ) );
+            if ( in_array ( 'null', $selectedValues ) )
+            {
+                $nonNullValues = array_filter ( $selectedValues, fn ( $value ) => $value !== 'null' );
+                $query->where ( function ($q) use ($nonNullValues)
+                {
+                    $q->whereHas ( 'spb', function ($sq) use ($nonNullValues)
+                    {
+                        $sq->whereIn ( 'nomor', $nonNullValues );
+                    } )->orWhereDoesntHave ( 'spb' );
+                } );
+            }
+            else
+            {
+                $query->whereHas ( 'spb', function ($q) use ($selectedValues)
+                {
+                    $q->whereIn ( 'nomor', $selectedValues );
+                } );
+            }
+        }
+
+        if ( request ()->has ( 'selected_tanggal' ) )
+        {
+            $selectedValues = $this->getSelectedValues ( request ( 'selected_tanggal' ) );
+            $query->whereIn ( 'tanggal', $selectedValues );
+        }
+
+        if ( request ()->has ( 'selected_kode' ) )
+        {
+            $selectedValues = $this->getSelectedValues ( request ( 'selected_kode' ) );
+            if ( in_array ( 'null', $selectedValues ) )
+            {
+                $nonNullValues = array_filter ( $selectedValues, fn ( $value ) => $value !== 'null' );
+                $query->where ( function ($q) use ($nonNullValues)
+                {
+                    $q->whereHas ( 'masterDataSparepart.kategoriSparepart', function ($sq) use ($nonNullValues)
+                    {
+                        $sq->whereIn ( 'kode', $nonNullValues );
+                    } )->orWhereDoesntHave ( 'masterDataSparepart.kategoriSparepart' );
+                } );
+            }
+            else
+            {
+                $query->whereHas ( 'masterDataSparepart.kategoriSparepart', function ($q) use ($selectedValues)
+                {
+                    $q->whereIn ( 'kode', $selectedValues );
+                } );
+            }
+        }
+
+        if ( request ()->has ( 'selected_supplier' ) )
+        {
+            $selectedValues = $this->getSelectedValues ( request ( 'selected_supplier' ) );
+            if ( in_array ( 'null', $selectedValues ) )
+            {
+                $nonNullValues = array_filter ( $selectedValues, fn ( $value ) => $value !== 'null' );
+                $query->where ( function ($q) use ($nonNullValues)
+                {
+                    $q->whereHas ( 'masterDataSupplier', function ($sq) use ($nonNullValues)
+                    {
+                        $sq->whereIn ( 'nama', $nonNullValues );
+                    } )->orWhereDoesntHave ( 'masterDataSupplier' );
+                } );
+            }
+            else
+            {
+                $query->whereHas ( 'masterDataSupplier', function ($q) use ($selectedValues)
+                {
+                    $q->whereIn ( 'nama', $selectedValues );
+                } );
+            }
+        }
+
+        if ( request ()->has ( 'selected_sparepart' ) )
+        {
+            $selectedValues = $this->getSelectedValues ( request ( 'selected_sparepart' ) );
+            if ( in_array ( 'null', $selectedValues ) )
+            {
+                $nonNullValues = array_filter ( $selectedValues, fn ( $value ) => $value !== 'null' );
+                $query->where ( function ($q) use ($nonNullValues)
+                {
+                    $q->whereHas ( 'masterDataSparepart', function ($sq) use ($nonNullValues)
+                    {
+                        $sq->whereIn ( 'nama', $nonNullValues );
+                    } )->orWhereDoesntHave ( 'masterDataSparepart' );
+                } );
+            }
+            else
+            {
+                $query->whereHas ( 'masterDataSparepart', function ($q) use ($selectedValues)
+                {
+                    $q->whereIn ( 'nama', $selectedValues );
+                } );
+            }
+        }
+
+        if ( request ()->has ( 'selected_merk' ) )
+        {
+            $selectedValues = $this->getSelectedValues ( request ( 'selected_merk' ) );
+            if ( in_array ( 'null', $selectedValues ) )
+            {
+                $nonNullValues = array_filter ( $selectedValues, fn ( $value ) => $value !== 'null' );
+                $query->where ( function ($q) use ($nonNullValues)
+                {
+                    $q->whereHas ( 'masterDataSparepart', function ($sq) use ($nonNullValues)
+                    {
+                        $sq->whereIn ( 'merk', $nonNullValues );
+                    } )->orWhereDoesntHave ( 'masterDataSparepart' );
+                } );
+            }
+            else
+            {
+                $query->whereHas ( 'masterDataSparepart', function ($q) use ($selectedValues)
+                {
+                    $q->whereIn ( 'merk', $selectedValues );
+                } );
+            }
+        }
+
+        if ( request ()->has ( 'selected_part_number' ) )
+        {
+            $selectedValues = $this->getSelectedValues ( request ( 'selected_part_number' ) );
+            if ( in_array ( 'null', $selectedValues ) )
+            {
+                $nonNullValues = array_filter ( $selectedValues, fn ( $value ) => $value !== 'null' );
+                $query->where ( function ($q) use ($nonNullValues)
+                {
+                    $q->whereHas ( 'masterDataSparepart', function ($sq) use ($nonNullValues)
+                    {
+                        $sq->whereIn ( 'part_number', $nonNullValues );
+                    } )->orWhereDoesntHave ( 'masterDataSparepart' );
+                } );
+            }
+            else
+            {
+                $query->whereHas ( 'masterDataSparepart', function ($q) use ($selectedValues)
+                {
+                    $q->whereIn ( 'part_number', $selectedValues );
+                } );
+            }
+        }
+
+        if ( request ()->has ( 'selected_quantity' ) )
+        {
+            $selectedValues = $this->getSelectedValues ( request ( 'selected_quantity' ) );
+            if ( in_array ( 'null', $selectedValues ) )
+            {
+                $nonNullValues = array_filter ( $selectedValues, fn ( $value ) => $value !== 'null' );
+                $query->where ( function ($q) use ($nonNullValues)
+                {
+                    $q->whereIn ( 'quantity', $nonNullValues )
+                        ->orWhereNull ( 'quantity' );
+                } );
+            }
+            else
+            {
+                $query->whereIn ( 'quantity', $selectedValues );
+            }
+        }
+
+        if ( request ()->has ( 'selected_satuan' ) )
+        {
+            $selectedValues = $this->getSelectedValues ( request ( 'selected_satuan' ) );
+            if ( in_array ( 'null', $selectedValues ) )
+            {
+                $nonNullValues = array_filter ( $selectedValues, fn ( $value ) => $value !== 'null' );
+                $query->where ( function ($q) use ($nonNullValues)
+                {
+                    $q->whereHas ( 'detailSpb', function ($sq) use ($nonNullValues)
+                    {
+                        $sq->whereIn ( 'satuan', $nonNullValues );
+                    } )->orWhereHas ( 'saldo', function ($sq) use ($nonNullValues)
+                    {
+                        $sq->whereIn ( 'satuan', $nonNullValues );
+                    } )->orWhereDoesntHave ( 'detailSpb' )
+                        ->orWhereDoesntHave ( 'saldo' );
+                } );
+            }
+            else
+            {
+                $query->where ( function ($q) use ($selectedValues)
+                {
+                    $q->whereHas ( 'detailSpb', function ($sq) use ($selectedValues)
+                    {
+                        $sq->whereIn ( 'satuan', $selectedValues );
+                    } )->orWhereHas ( 'saldo', function ($sq) use ($selectedValues)
+                    {
+                        $sq->whereIn ( 'satuan', $selectedValues );
+                    } );
+                } );
+            }
+        }
+
+        if ( request ()->has ( 'selected_harga' ) )
+        {
+            $selectedValues = $this->getSelectedValues ( request ( 'selected_harga' ) );
+            if ( in_array ( 'null', $selectedValues ) )
+            {
+                $nonNullValues = array_filter ( $selectedValues, fn ( $value ) => $value !== 'null' );
+                $query->where ( function ($q) use ($nonNullValues)
+                {
+                    $q->whereIn ( 'harga', $nonNullValues )
+                        ->orWhereNull ( 'harga' );
+                } );
+            }
+            else
+            {
+                $query->whereIn ( 'harga', $selectedValues );
+            }
+        }
+
+        if ( request ()->has ( 'selected_jumlah_harga' ) )
+        {
+            $selectedValues = $this->getSelectedValues ( request ( 'selected_jumlah_harga' ) );
+            if ( in_array ( 'null', $selectedValues ) )
+            {
+                $nonNullValues = array_filter ( $selectedValues, fn ( $value ) => $value !== 'null' );
+                $query->where ( function ($q) use ($nonNullValues)
+                {
+                    $q->whereIn ( DB::raw ( '(quantity * harga)' ), $nonNullValues )
+                        ->orWhereNull ( 'quantity' )
+                        ->orWhereNull ( 'harga' );
+                } );
+            }
+            else
+            {
+                $query->whereRaw ( '(quantity * harga) IN (?)', [ implode ( ',', $selectedValues ) ] );
+            }
+        }
+
+        if ( request ()->has ( 'selected_ppn' ) )
+        {
+            $selectedValues = $this->getSelectedValues ( request ( 'selected_ppn' ) );
+            if ( in_array ( 'null', $selectedValues ) )
+            {
+                $nonNullValues = array_filter ( $selectedValues, fn ( $value ) => $value !== 'null' );
+                $query->where ( function ($q) use ($nonNullValues)
+                {
+                    $q->whereIn ( DB::raw ( 'CAST((quantity * harga * 0.11) AS DECIMAL(15,2))' ), $nonNullValues )
+                        ->orWhereNull ( 'quantity' )
+                        ->orWhereNull ( 'harga' );
+                } );
+            }
+            else
+            {
+                $query->whereRaw ( 'CAST((quantity * harga * 0.11) AS DECIMAL(15,2)) IN (?)', [ implode ( ',', $selectedValues ) ] );
+            }
+        }
+
+        if ( request ()->has ( 'selected_bruto' ) )
+        {
+            $selectedValues = $this->getSelectedValues ( request ( 'selected_bruto' ) );
+            if ( in_array ( 'null', $selectedValues ) )
+            {
+                $nonNullValues = array_filter ( $selectedValues, fn ( $value ) => $value !== 'null' );
+                $query->where ( function ($q) use ($nonNullValues)
+                {
+                    $q->whereIn ( DB::raw ( 'CAST((quantity * harga * 1.11) AS DECIMAL(15,2))' ), $nonNullValues )
+                        ->orWhereNull ( 'quantity' )
+                        ->orWhereNull ( 'harga' );
+                } );
+            }
+            else
+            {
+                $query->whereRaw ( 'CAST((quantity * harga * 1.11) AS DECIMAL(15,2)) IN (?)', [ implode ( ',', $selectedValues ) ] );
+            }
+        }
+
+        // Get unique values for filters
+        $uniqueValues = $this->getUniqueValues ( $query );
+
         // Calculate total amounts for all records before pagination
         $totalQuery = clone $query;
         $totals     = $totalQuery->selectRaw ( '
@@ -330,6 +604,9 @@ class ATBController extends Controller
         $kategoriSpareparts  = KategoriSparepart::all ();
         $masterDataSuppliers = MasterDataSupplier::all ();
 
+        // Get selected values for filters
+        $selectedValues = $this->getSelectedValues ( request ( 'selected_nomor_spb' ) );
+
         return view ( "dashboard.atb.atb", [ 
             "proyek"             => $proyek,
             "proyeks"            => $proyeks,
@@ -341,8 +618,80 @@ class ATBController extends Controller
             "kategoriSpareparts" => $kategoriSpareparts,
             "headerPage"         => $proyek->nama,
             "page"               => $pageTitle,
-            "search"             => $search
+            "search"             => $search,
+            "uniqueValues"       => $uniqueValues,
+            "selectedValues"     => $selectedValues,
         ] );
+    }
+
+    private function getSelectedValues ( $paramValue )
+    {
+        if ( ! $paramValue ) return [];
+
+        try
+        {
+            return explode ( '||', base64_decode ( $paramValue ) );
+        }
+        catch ( \Exception $e )
+        {
+            \Log::error ( 'Error decoding parameter value: ' . $e->getMessage () );
+            return [];
+        }
+    }
+
+    private function getUniqueValues ( $query )
+    {
+        // Clone the query to avoid modifying the original
+        $baseQuery = clone $query;
+
+        // Remove existing selects to avoid conflicts
+        $baseQuery->getQuery ()->selects = null;
+
+        // Get unique values for SPB numbers
+        $results = $baseQuery->with ( 'spb' )->get ();
+
+        return [ 
+            'nomor_spb'    => $results->pluck ( 'spb.nomor' )->filter ()->unique ()->values (),
+            'tanggal'      => $results->pluck ( 'tanggal' )->filter ()->unique ()->values (),
+            'kode'         => $results->map ( function ($item)
+            {
+                return $item->masterDataSparepart->kategoriSparepart->kode ?? null;
+            } )->filter ()->unique ()->values (),
+            'supplier'     => $results->map ( function ($item)
+            {
+                return $item->masterDataSupplier->nama ?? null;
+            } )->filter ()->unique ()->values (),
+            'sparepart'    => $results->map ( function ($item)
+            {
+                return $item->masterDataSparepart->nama ?? null;
+            } )->filter ()->unique ()->values (),
+            'merk'         => $results->map ( function ($item)
+            {
+                return $item->masterDataSparepart->merk ?? null;
+            } )->filter ()->unique ()->values (),
+            'part_number'  => $results->map ( function ($item)
+            {
+                return $item->masterDataSparepart->part_number ?? null;
+            } )->filter ()->unique ()->values (),
+            'quantity'     => $results->pluck ( 'quantity' )->filter ()->unique ()->sort ()->values (),
+            'satuan'       => $results->map ( function ($item)
+            {
+                return $item->detailSpb->satuan ?? ( $item->saldo->satuan ?? null );
+            } )->filter ()->unique ()->values (),
+            'harga'        => $results->pluck ( 'harga' )->filter ()->unique ()->sort ()->values (),
+            'jumlah_harga' => $results->map ( function ($item)
+            {
+                return $item->quantity * $item->harga;
+            } )->filter ()->unique ()->sort ()->values (),
+            'ppn'          => $results->map ( function ($item)
+            {
+                return $item->quantity * $item->harga * 0.11;
+            } )->filter ()->unique ()->sort ()->values (),
+            'bruto'        => $results->map ( function ($item)
+            {
+                return $item->quantity * $item->harga * 1.11;
+            } )->filter ()->unique ()->sort ()->values (),
+        ];
     }
 
     public function getlinkSpbDetailSpbs ( $id )

@@ -11,6 +11,219 @@ use Illuminate\Support\Facades\Auth;
 
 class TimelineEvaluasiUrgentController extends Controller
 {
+    private function getSelectedValues ( $paramValue )
+    {
+        if ( ! $paramValue ) return [];
+
+        try
+        {
+            return explode ( '||', base64_decode ( $paramValue ) );
+        }
+        catch ( \Exception $e )
+        {
+            \Log::error ( 'Error decoding parameter value: ' . $e->getMessage () );
+            return [];
+        }
+    }
+
+    private function buildQuery ( $request, $id )
+    {
+        $query = TimelineRKBUrgent::query ()
+            ->where ( 'id_link_alat_detail_rkb', $id );
+
+        // Handle uraian filter
+        if ( $request->filled ( 'selected_uraian' ) )
+        {
+            try
+            {
+                $uraian = $this->getSelectedValues ( $request->selected_uraian );
+                if ( in_array ( 'null', $uraian ) )
+                {
+                    $nonNullValues = array_filter ( $uraian, fn ( $value ) => $value !== 'null' );
+                    $query->where ( function ($q) use ($nonNullValues)
+                    {
+                        $q->whereNull ( 'nama_rencana' )
+                            ->orWhere ( 'nama_rencana', '' )
+                            ->when ( count ( $nonNullValues ) > 0, function ($q) use ($nonNullValues)
+                            {
+                                $q->orWhereIn ( 'nama_rencana', $nonNullValues );
+                            } );
+                    } );
+                }
+                else
+                {
+                    $query->whereIn ( 'nama_rencana', $uraian );
+                }
+            }
+            catch ( \Exception $e )
+            {
+                \Log::error ( 'Error in uraian filter: ' . $e->getMessage () );
+            }
+        }
+
+        // Handle status filter
+        if ( $request->filled ( 'selected_status' ) )
+        {
+            try
+            {
+                $status = $this->getSelectedValues ( $request->selected_status );
+                $query->whereIn ( 'is_done', $status );
+            }
+            catch ( \Exception $e )
+            {
+                \Log::error ( 'Error in status filter: ' . $e->getMessage () );
+            }
+        }
+
+        // Handle date fields
+        $dateFields = [ 
+            'tanggal_awal_rencana',
+            'tanggal_akhir_rencana',
+            'tanggal_awal_actual',
+            'tanggal_akhir_actual'
+        ];
+
+        foreach ( $dateFields as $field )
+        {
+            if ( $request->filled ( "selected_{$field}" ) )
+            {
+                try
+                {
+                    $dates = $this->getSelectedValues ( $request->get ( "selected_{$field}" ) );
+                    if ( in_array ( 'null', $dates ) )
+                    {
+                        $nonNullDates = array_filter ( $dates, fn ( $date ) => $date !== 'null' );
+                        $query->where ( function ($q) use ($nonNullDates, $field)
+                        {
+                            $q->whereNull ( $field )
+                                ->when ( count ( $nonNullDates ) > 0, function ($q) use ($nonNullDates, $field)
+                                {
+                                    $q->orWhereIn ( \DB::raw ( "DATE({$field})" ), $nonNullDates );
+                                } );
+                        } );
+                    }
+                    else
+                    {
+                        $query->whereIn ( \DB::raw ( "DATE({$field})" ), $dates );
+                    }
+                }
+                catch ( \Exception $e )
+                {
+                    \Log::error ( "Error in {$field} filter: " . $e->getMessage () );
+                }
+            }
+        }
+
+        // Handle durasi fields
+        $durasiFields = [ 'durasi_rencana', 'durasi_actual' ];
+        foreach ( $durasiFields as $field )
+        {
+            if ( $request->filled ( "selected_{$field}" ) )
+            {
+                try
+                {
+                    $durasi = $this->getSelectedValues ( $request->get ( "selected_{$field}" ) );
+                    if ( in_array ( 'null', $durasi ) )
+                    {
+                        $nonNullValues = array_filter ( $durasi, fn ( $value ) => $value !== 'null' );
+                        if ( $field === 'durasi_actual' )
+                        {
+                            $query->where ( function ($q) use ($nonNullValues)
+                            {
+                                $q->whereNull ( 'tanggal_awal_actual' )
+                                    ->orWhereNull ( 'tanggal_akhir_actual' )
+                                    ->when ( count ( $nonNullValues ) > 0, function ($q) use ($nonNullValues)
+                                    {
+                                        $q->orWhereRaw (
+                                            'EXTRACT(DAY FROM (tanggal_akhir_actual::timestamp - tanggal_awal_actual::timestamp))::integer = ANY(?)',
+                                            [ "{" . implode ( ',', $nonNullValues ) . "}" ]
+                                        );
+                                    } );
+                            } );
+                        }
+                        else
+                        {
+                            $query->where ( function ($q) use ($nonNullValues)
+                            {
+                                $q->whereNull ( 'tanggal_awal_rencana' )
+                                    ->orWhereNull ( 'tanggal_akhir_rencana' )
+                                    ->when ( count ( $nonNullValues ) > 0, function ($q) use ($nonNullValues)
+                                    {
+                                        $q->orWhereRaw (
+                                            'EXTRACT(DAY FROM (tanggal_akhir_rencana::timestamp - tanggal_awal_rencana::timestamp))::integer = ANY(?)',
+                                            [ "{" . implode ( ',', $nonNullValues ) . "}" ]
+                                        );
+                                    } );
+                            } );
+                        }
+                    }
+                    else
+                    {
+                        if ( $field === 'durasi_actual' )
+                        {
+                            $query->whereRaw (
+                                'EXTRACT(DAY FROM (tanggal_akhir_actual::timestamp - tanggal_awal_actual::timestamp))::integer = ANY(?)',
+                                [ "{" . implode ( ',', $durasi ) . "}" ]
+                            );
+                        }
+                        else
+                        {
+                            $query->whereRaw (
+                                'EXTRACT(DAY FROM (tanggal_akhir_rencana::timestamp - tanggal_awal_rencana::timestamp))::integer = ANY(?)',
+                                [ "{" . implode ( ',', $durasi ) . "}" ]
+                            );
+                        }
+                    }
+                }
+                catch ( \Exception $e )
+                {
+                    \Log::error ( "Error in {$field} filter: " . $e->getMessage () );
+                }
+            }
+        }
+
+        return $query;
+    }
+
+    private function getUniqueValues ( $id )
+    {
+        $timelines = TimelineRKBUrgent::where ( 'id_link_alat_detail_rkb', $id );
+
+        return [ 
+            'uraian'                => $timelines->clone ()->distinct ()->pluck ( 'nama_rencana' ),
+            'durasi_rencana'        => $timelines->clone ()
+                ->whereNotNull ( 'tanggal_awal_rencana' )
+                ->whereNotNull ( 'tanggal_akhir_rencana' )
+                ->selectRaw ( 'DISTINCT EXTRACT(DAY FROM (tanggal_akhir_rencana::timestamp - tanggal_awal_rencana::timestamp))::integer as days' )
+                ->pluck ( 'days' ),
+            'tanggal_awal_rencana'  => $timelines->clone ()
+                ->whereNotNull ( 'tanggal_awal_rencana' )
+                ->distinct ()
+                ->pluck ( 'tanggal_awal_rencana' )
+                ->map ( fn ( $date ) => $date->format ( 'Y-m-d' ) ),
+            'tanggal_akhir_rencana' => $timelines->clone ()
+                ->whereNotNull ( 'tanggal_akhir_rencana' )
+                ->distinct ()
+                ->pluck ( 'tanggal_akhir_rencana' )
+                ->map ( fn ( $date ) => $date->format ( 'Y-m-d' ) ),
+            'durasi_actual'         => $timelines->clone ()
+                ->whereNotNull ( 'tanggal_awal_actual' )
+                ->whereNotNull ( 'tanggal_akhir_actual' )
+                ->selectRaw ( 'DISTINCT EXTRACT(DAY FROM (tanggal_akhir_actual::timestamp - tanggal_awal_actual::timestamp))::integer as days' )
+                ->pluck ( 'days' ),
+            'tanggal_awal_actual'   => $timelines->clone ()
+                ->whereNotNull ( 'tanggal_awal_actual' )
+                ->distinct ()
+                ->pluck ( 'tanggal_awal_actual' )
+                ->map ( fn ( $date ) => $date->format ( 'Y-m-d' ) ),
+            'tanggal_akhir_actual'  => $timelines->clone ()
+                ->whereNotNull ( 'tanggal_akhir_actual' )
+                ->distinct ()
+                ->pluck ( 'tanggal_akhir_actual' )
+                ->map ( fn ( $date ) => $date->format ( 'Y-m-d' ) ),
+        ];
+    }
+
     public function index ( Request $request, $id )
     {
         if ( $request->get ( 'per_page' ) != -1 )
@@ -25,8 +238,8 @@ class TimelineEvaluasiUrgentController extends Controller
 
         $proyek = Proyek::find ( $id );
 
-        $query = TimelineRKBUrgent::query ()
-            ->where ( 'id_link_alat_detail_rkb', $id );
+        $query        = $this->buildQuery ( $request, $id );
+        $uniqueValues = $this->getUniqueValues ( $id );
 
         if ( $request->has ( 'search' ) )
         {
@@ -159,13 +372,14 @@ class TimelineEvaluasiUrgentController extends Controller
             ->get ();
 
         return view ( 'dashboard.evaluasi.urgent.detail.timeline.timeline', [ 
-            'proyek'      => $proyek,
-            'proyeks'     => $proyeks,
-            'data'        => $data,
-            'TableData'   => $TableData,
-            'headerPage'  => "Evaluasi Urgent",
-            'menuContext' => 'evaluasi_urgent',
-            'page'        => 'Timeline Detail RKB Urgent [' . $data->rkb->proyek->nama . ' | ' . $data->rkb->nomor . ']',
+            'proyek'       => $proyek,
+            'proyeks'      => $proyeks,
+            'data'         => $data,
+            'TableData'    => $TableData,
+            'headerPage'   => "Evaluasi Urgent",
+            'menuContext'  => 'evaluasi_urgent',
+            'page'         => 'Timeline Detail RKB Urgent [' . $data->rkb->proyek->nama . ' | ' . $data->rkb->nomor . ']',
+            'uniqueValues' => $uniqueValues,
         ] );
     }
 

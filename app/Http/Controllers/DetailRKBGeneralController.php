@@ -211,9 +211,9 @@ class DetailRKBGeneralController extends Controller
                         $query->whereIn ( $columnName, $values );
                     }
                 }
-                // Regular handling for text columns
                 else
                 {
+                    // Original logic for non-numeric columns
                     if ( in_array ( 'null', $values ) )
                     {
                         $nonNullValues = array_filter ( $values, fn ( $value ) => $value !== 'null' );

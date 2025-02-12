@@ -12,7 +12,6 @@ class UserController extends Controller
 {
     public function index ( Request $request )
     {
-        // Validate and set perPage to allowed values only
         $allowedPerPage = [ 10, 25, 50, 100 ];
         $perPage        = in_array ( (int) $request->get ( 'per_page' ), $allowedPerPage ) ? (int) $request->get ( 'per_page' ) : 10;
 
@@ -20,6 +19,7 @@ class UserController extends Controller
             ->with ( 'proyek' )
             ->orderBy ( $request->get ( 'sort', 'updated_at' ), $request->get ( 'direction', 'desc' ) );
 
+        // Apply search filter
         if ( $request->has ( 'search' ) )
         {
             $search = $request->get ( 'search' );
@@ -35,19 +35,16 @@ class UserController extends Controller
             } );
         }
 
-        $this->handleNameFilter ( $request, $query );
-        $this->handleUsernameFilter ( $request, $query );
-        $this->handleSexFilter ( $request, $query );
-        $this->handleRoleFilter ( $request, $query );
-        $this->handlePhoneFilter ( $request, $query );
-        $this->handleEmailFilter ( $request, $query );
+        // Apply all filters
+        $this->applyAllFilters ( $request, $query );
 
+        // Get data
         $TableData = $query->orderBy ( 'updated_at', 'desc' )
             ->orderBy ( 'id', 'desc' )
             ->paginate ( $perPage )
             ->withQueryString ();
 
-        // Filter projects based on user role
+        // Get projects based on user role
         $user         = Auth::user ();
         $proyeksQuery = Proyek::with ( "users" );
         if ( $user->role === 'koordinator_proyek' )
@@ -75,165 +72,53 @@ class UserController extends Controller
         return view ( 'dashboard.users.user', [ 
             'headerPage'   => 'User',
             'page'         => 'Data User',
-
             'proyeks'      => $proyeks,
             'TableData'    => $TableData,
             'uniqueValues' => $uniqueValues,
         ] );
     }
 
-    private function handleNameFilter ( Request $request, $query )
+    private function applyAllFilters ( Request $request, $query )
     {
-        if ( $request->filled ( 'selected_name' ) )
+        $filterFields = [ 'name', 'username', 'sex', 'role', 'phone', 'email' ];
+
+        foreach ( $filterFields as $field )
         {
-            $name = explode ( ',', $request->selected_name );
-            $name = array_map ( function ($val)
-            {
-                return $val === 'null' ? $val : base64_decode ( $val );
-            }, $name );
-            if ( in_array ( 'null', $name ) )
-            {
-                $nonNullValues = array_filter ( $name, fn ( $value ) => $value !== 'null' );
-                $query->where ( function ($q) use ($nonNullValues)
-                {
-                    $q->whereNull ( 'name' )
-                        ->orWhere ( 'name', '-' )
-                        ->orWhereIn ( 'name', $nonNullValues );
-                } );
-            }
-            else
-            {
-                $query->whereIn ( 'name', $name );
-            }
+            $this->applyFilter ( $request, $query, $field );
         }
     }
 
-    private function handleUsernameFilter ( Request $request, $query )
+    private function applyFilter ( Request $request, $query, $field )
     {
-        if ( $request->filled ( 'selected_username' ) )
+        $selectedValues = $request->get ( "selected_{$field}" );
+        if ( ! empty ( $selectedValues ) )
         {
-            $username = explode ( ',', $request->selected_username );
-            $username = array_map ( function ($val)
+            try
             {
-                return $val === 'null' ? $val : base64_decode ( $val );
-            }, $username );
-            if ( in_array ( 'null', $username ) )
-            {
-                $nonNullValues = array_filter ( $username, fn ( $value ) => $value !== 'null' );
-                $query->where ( function ($q) use ($nonNullValues)
-                {
-                    $q->whereNull ( 'username' )
-                        ->orWhere ( 'username', '-' )
-                        ->orWhereIn ( 'username', $nonNullValues );
-                } );
-            }
-            else
-            {
-                $query->whereIn ( 'username', $username );
-            }
-        }
-    }
+                // Mengubah pemisah array dari koma menjadi ||
+                $values = explode ( '||', base64_decode ( $selectedValues ) );
 
-    private function handleSexFilter ( Request $request, $query )
-    {
-        if ( $request->filled ( 'selected_sex' ) )
-        {
-            $sex = explode ( ',', $request->selected_sex );
-            $sex = array_map ( function ($val)
-            {
-                return $val === 'null' ? $val : base64_decode ( $val );
-            }, $sex );
-            if ( in_array ( 'null', $sex ) )
-            {
-                $nonNullValues = array_filter ( $sex, fn ( $value ) => $value !== 'null' );
-                $query->where ( function ($q) use ($nonNullValues)
-                {
-                    $q->whereNull ( 'sex' )
-                        ->orWhere ( 'sex', '-' )
-                        ->orWhereIn ( 'sex', $nonNullValues );
-                } );
-            }
-            else
-            {
-                $query->whereIn ( 'sex', $sex );
-            }
-        }
-    }
+                // Filter out empty values
+                $values = array_filter ( $values, fn ( $value ) => $value !== '' );
 
-    private function handleRoleFilter ( Request $request, $query )
-    {
-        if ( $request->filled ( 'selected_role' ) )
-        {
-            $role = explode ( ',', $request->selected_role );
-            $role = array_map ( function ($val)
-            {
-                return $val === 'null' ? $val : base64_decode ( $val );
-            }, $role );
-            if ( in_array ( 'null', $role ) )
-            {
-                $nonNullValues = array_filter ( $role, fn ( $value ) => $value !== 'null' );
-                $query->where ( function ($q) use ($nonNullValues)
+                if ( in_array ( 'null', $values, true ) )
                 {
-                    $q->whereNull ( 'role' )
-                        ->orWhere ( 'role', '-' )
-                        ->orWhereIn ( 'role', $nonNullValues );
-                } );
-            }
-            else
-            {
-                $query->whereIn ( 'role', $role );
-            }
-        }
-    }
-
-    private function handlePhoneFilter ( Request $request, $query )
-    {
-        if ( $request->filled ( 'selected_phone' ) )
-        {
-            $phone = explode ( ',', $request->selected_phone );
-            $phone = array_map ( function ($val)
-            {
-                return $val === 'null' ? $val : base64_decode ( $val );
-            }, $phone );
-            if ( in_array ( 'null', $phone ) )
-            {
-                $nonNullValues = array_filter ( $phone, fn ( $value ) => $value !== 'null' );
-                $query->where ( function ($q) use ($nonNullValues)
+                    $nonNullValues = array_filter ( $values, fn ( $value ) => $value !== 'null' );
+                    $query->where ( function ($q) use ($field, $nonNullValues)
+                    {
+                        $q->whereNull ( $field )
+                            ->orWhere ( $field, '-' )
+                            ->orWhereIn ( $field, $nonNullValues );
+                    } );
+                }
+                else
                 {
-                    $q->whereNull ( 'phone' )
-                        ->orWhere ( 'phone', '-' )
-                        ->orWhereIn ( 'phone', $nonNullValues );
-                } );
+                    $query->whereIn ( $field, $values );
+                }
             }
-            else
+            catch ( \Exception $e )
             {
-                $query->whereIn ( 'phone', $phone );
-            }
-        }
-    }
-
-    private function handleEmailFilter ( Request $request, $query )
-    {
-        if ( $request->filled ( 'selected_email' ) )
-        {
-            $email = explode ( ',', $request->selected_email );
-            $email = array_map ( function ($val)
-            {
-                return $val === 'null' ? $val : base64_decode ( $val );
-            }, $email );
-            if ( in_array ( 'null', $email ) )
-            {
-                $nonNullValues = array_filter ( $email, fn ( $value ) => $value !== 'null' );
-                $query->where ( function ($q) use ($nonNullValues)
-                {
-                    $q->whereNull ( 'email' )
-                        ->orWhere ( 'email', '-' )
-                        ->orWhereIn ( 'email', $nonNullValues );
-                } );
-            }
-            else
-            {
-                $query->whereIn ( 'email', $email );
+                \Log::error ( "Error in {$field} filter: " . $e->getMessage () );
             }
         }
     }

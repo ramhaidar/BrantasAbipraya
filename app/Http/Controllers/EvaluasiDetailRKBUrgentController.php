@@ -181,6 +181,29 @@ class EvaluasiDetailRKBUrgentController extends Controller
             {
                 $values = $this->getSelectedValues ( $request->get ( $selectedParam ) );
 
+                // Special handling for numeric columns
+                if ( in_array ( $paramName, [ 'quantity_requested', 'stock_quantity' ] ) )
+                {
+                    if ( in_array ( 'null', $values ) )
+                    {
+                        $nonNullValues = array_filter ( $values, fn ( $value ) => $value !== 'null' );
+                        $query->where ( function ($q) use ($columnName, $nonNullValues)
+                        {
+                            $q->whereNull ( $columnName )
+                                ->when ( ! empty ( $nonNullValues ), function ($subQ) use ($columnName, $nonNullValues)
+                                {
+                                    $subQ->orWhereIn ( $columnName, array_map ( 'intval', $nonNullValues ) );
+                                } );
+                        } );
+                    }
+                    else
+                    {
+                        $query->whereIn ( $columnName, array_map ( 'intval', $values ) );
+                    }
+                    return;
+                }
+
+                // Original handling for non-numeric columns
                 if ( in_array ( 'null', $values ) )
                 {
                     $nonNullValues = array_filter ( $values, fn ( $value ) => $value !== 'null' );

@@ -181,12 +181,21 @@ class EvaluasiDetailRKBGeneralController extends Controller
             'satuan'             => 'detail_rkb_general.satuan'
         ];
 
+        // Get stock quantities first
+        $stockQuantities = Saldo::where ( 'id_proyek', $this->rkb->id_proyek )
+            ->get ()
+            ->groupBy ( 'id_master_data_sparepart' )
+            ->map ( function ($items)
+            {
+                return $items->sum ( 'quantity' );
+            } );
+
         foreach ( $filterColumns as $paramName => $columnName )
         {
             // Special handling for stock quantity to include nulls
             if ( $paramName === 'stock_quantity' )
             {
-                $this->applyStockQuantityFilter ( $query, $request );
+                $this->applyStockQuantityFilter ( $query, $request, $stockQuantities );
             }
             else
             {

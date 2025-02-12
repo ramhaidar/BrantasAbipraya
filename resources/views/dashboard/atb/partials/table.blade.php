@@ -2,22 +2,22 @@
     @include('styles.tables')
 @endpush
 
-<?php
-if (!function_exists('formatRibuan')) {
-    function formatRibuan($number)
-    {
-        return number_format($number, 0, ',', '.');
+@php
+    if (!function_exists('formatRibuan')) {
+        function formatRibuan($number)
+        {
+            return number_format($number, 0, ',', '.');
+        }
     }
-}
 
-if (!function_exists('formatTanggal')) {
-    function formatTanggal($date)
-    {
-        setlocale(LC_TIME, 'id_ID');
-        return \Carbon\Carbon::parse($date)->translatedFormat('l, d F Y');
+    if (!function_exists('formatTanggal')) {
+        function formatTanggal($date)
+        {
+            setlocale(LC_TIME, 'id_ID');
+            return \Carbon\Carbon::parse($date)->translatedFormat('l, d F Y');
+        }
     }
-}
-?>
+@endphp
 
 <div class="ibox-body ms-0 ps-0">
     <div class="mb-3 d-flex justify-content-end">

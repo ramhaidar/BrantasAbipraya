@@ -16,10 +16,10 @@
                     </div>
 
                     <div class="d-flex justify-content-end gap-2">
-                        <a class="btn btn-danger btn-sm" href="{{ route('spb.detail.riwayat.export-pdf', ['id' => $TableData->first()->id]) }}">
+                        <a class="btn btn-danger btn-sm btn-hide-text-mobile" href="{{ route('spb.detail.riwayat.export-pdf', ['id' => $TableData->first()->id]) }}">
                             <i class="fa-solid fa-file-pdf"></i> <span class="ms-2">Export PDF</span>
                         </a>
-                        <a class="btn btn-success btn-sm" href="{{ route('export.spb', ['id' => $TableData->first()->id]) }}">
+                        <a class="btn btn-success btn-sm btn-hide-text-mobile" href="{{ route('export.spb', ['id' => $TableData->first()->id]) }}">
                             <i class="fa-solid fa-file-excel"></i> <span class="ms-2">Export Excel</span>
                         </a>
                     </div>

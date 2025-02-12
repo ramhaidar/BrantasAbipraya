@@ -15,12 +15,12 @@
                         <h5 class="fw-medium">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}</h5>
                     </div>
                     <div class="d-flex justify-content-end gap-2">
-                        <button class="btn btn-warning btn-sm" id="riwayat-spb-button" data-bs-toggle="modal" data-bs-target="#modalRiwayatSPB">
+                        <button class="btn btn-warning btn-sm btn-hide-text-mobile" id="riwayat-spb-button" data-bs-toggle="modal" data-bs-target="#modalRiwayatSPB">
                             <i class="fa fa-save"></i> <span class="ms-2">Riwayat Pembuatan SPB</span>
                         </button>
 
                         @if (Auth::user()->role === 'admin_divisi' || Auth::user()->role === 'superadmin')
-                            <button class="btn btn-success btn-sm" id="save-spb-button" data-bs-toggle="modal" data-bs-target="#modalForSaveSPB" {{ $totalItems === 0 ? 'disabled' : '' }}>
+                            <button class="btn btn-success btn-sm btn-hide-text-mobile" id="save-spb-button" data-bs-toggle="modal" data-bs-target="#modalForSaveSPB" {{ $totalItems === 0 ? 'disabled' : '' }}>
                                 <i class="fa fa-add"></i> <span class="ms-2">Buat SPB</span>
                             </button>
                         @endif

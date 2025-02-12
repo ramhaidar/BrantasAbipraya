@@ -191,23 +191,47 @@ class DetailRKBGeneralController extends Controller
             {
                 $values = $this->getSelectedValues ( $request->get ( $selectedParam ) );
 
-                if ( in_array ( 'null', $values ) )
+                // Special handling for numeric columns
+                if ( in_array ( $paramName, [ 'quantity_requested', 'quantity_approved' ] ) )
                 {
-                    $nonNullValues = array_filter ( $values, fn ( $value ) => $value !== 'null' );
-                    $query->where ( function ($q) use ($columnName, $nonNullValues)
+                    if ( in_array ( 'null', $values ) )
                     {
-                        $q->whereNull ( $columnName )
-                            ->orWhere ( $columnName, '-' )
-                            ->orWhere ( $columnName, '' )
-                            ->when ( ! empty ( $nonNullValues ), function ($subQ) use ($columnName, $nonNullValues)
-                            {
-                                $subQ->orWhereIn ( $columnName, $nonNullValues );
-                            } );
-                    } );
+                        $nonNullValues = array_filter ( $values, fn ( $value ) => $value !== 'null' );
+                        $query->where ( function ($q) use ($columnName, $nonNullValues)
+                        {
+                            $q->whereNull ( $columnName )
+                                ->when ( ! empty ( $nonNullValues ), function ($subQ) use ($columnName, $nonNullValues)
+                                {
+                                    $subQ->orWhereIn ( $columnName, $nonNullValues );
+                                } );
+                        } );
+                    }
+                    else
+                    {
+                        $query->whereIn ( $columnName, $values );
+                    }
                 }
+                // Regular handling for text columns
                 else
                 {
-                    $query->whereIn ( $columnName, $values );
+                    if ( in_array ( 'null', $values ) )
+                    {
+                        $nonNullValues = array_filter ( $values, fn ( $value ) => $value !== 'null' );
+                        $query->where ( function ($q) use ($columnName, $nonNullValues)
+                        {
+                            $q->whereNull ( $columnName )
+                                ->orWhere ( $columnName, '-' )
+                                ->orWhere ( $columnName, '' )
+                                ->when ( ! empty ( $nonNullValues ), function ($subQ) use ($columnName, $nonNullValues)
+                                {
+                                    $subQ->orWhereIn ( $columnName, $nonNullValues );
+                                } );
+                        } );
+                    }
+                    else
+                    {
+                        $query->whereIn ( $columnName, $values );
+                    }
                 }
             }
             catch ( \Exception $e )

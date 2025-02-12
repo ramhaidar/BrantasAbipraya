@@ -320,68 +320,78 @@
                 </thead>
                 <tbody>
                     @php
-                        // Group items by part number
-                        $groupedItems = $TableData->groupBy(function ($item) {
+                        // Group items by part number first for stock quantities
+                        $groupedByPartNumber = $TableData->groupBy(function ($item) {
                             return $item->masterDataSparepart->part_number;
+                        });
+
+                        // Then group by part number AND equipment details
+                        $groupedItems = $TableData->groupBy(function ($item) {
+                            $detail = $item->linkRkbDetails->first();
+                            return $item->masterDataSparepart->part_number . '|' . $detail->linkAlatDetailRkb->masterDataAlat->jenis_alat . '|' . $detail->linkAlatDetailRkb->masterDataAlat->kode_alat;
                         });
                     @endphp
 
-                    @forelse ($groupedItems as $partNumber => $items)
+                    @forelse ($groupedByPartNumber as $partNumber => $partNumberGroup)
                         @php
-                            $firstItem = $items->first();
-                            $rowspan = $items->count();
+                            $firstItemInGroup = $partNumberGroup->first();
+                            $rowspanCount = $groupedItems->filter(function($items, $key) use ($partNumber) {
+                                return explode('|', $key)[0] === $partNumber;
+                            })->count();
                         @endphp
-
-                        @foreach ($items as $index => $item)
-                            @forelse ($item->linkRkbDetails as $detail)
-                                <tr>
-                                    <td class="text-center">{{ $detail->linkAlatDetailRkb->masterDataAlat->jenis_alat ?? '-' }}</td>
-                                    <td class="text-center">{{ $detail->linkAlatDetailRkb->masterDataAlat->kode_alat ?? '-' }}</td>
-                                    <td class="text-center">{{ $item->kategoriSparepart->kode ?? '-' }}:
-                                        {{ $item->kategoriSparepart->nama ?? '-' }}</td>
-                                    <td class="text-center">{{ $item->masterDataSparepart->nama ?? '-' }}</td>
-                                    <td class="text-center">{{ $partNumber ?? '-' }}</td>
-                                    <td class="text-center">{{ $item->masterDataSparepart->merk ?? '-' }}</td>
-                                    <td class="text-center">{{ $item->quantity_requested }}</td>
-                                    <td class="text-center">
-                                        <input class="form-control text-center
-@if ($rkb->is_approved_svp) bg-primary-subtle
-@elseif ($rkb->is_approved_vp) bg-info-subtle
-@elseif($rkb->is_evaluated) bg-success-subtle 
-@else bg-warning-subtle @endif" name="quantity_approved[{{ $item->id }}]" type="number" value="{{ $item->quantity_approved ?? $item->quantity_requested }}" min="0" {{ $rkb->is_evaluated ? 'disabled' : '' }}>
-                                    </td>
-                                    @if ($index === 0)
-                                        <td class="text-center" rowspan="{{ $rowspan }}">
-                                            {{ $stockQuantities[$item->masterDataSparepart->id] ?? 0 }}</td>
-                                    @endif
-                                    <td class="text-center">{{ $item->satuan }}</td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td class="text-center py-3 text-muted" colspan="10">
-                                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                                        No RKB details found
-                                    </td>
-                                </tr>
-                            @endforelse
-                        @endforeach
-                        @empty
+                        
+                        @foreach ($groupedItems->filter(function($items, $key) use ($partNumber) {
+                            return explode('|', $key)[0] === $partNumber;
+                        }) as $index => $group)
+                            @php
+                                $firstItem = $group->first();
+                                $detail = $firstItem->linkRkbDetails->first();
+                            @endphp
                             <tr>
-                                <td class="text-center py-3 text-muted" colspan="10">
-                                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                                    No data found
+                                <td class="text-center">{{ $detail->linkAlatDetailRkb->masterDataAlat->jenis_alat ?? '-' }}</td>
+                                <td class="text-center">{{ $detail->linkAlatDetailRkb->masterDataAlat->kode_alat ?? '-' }}</td>
+                                <td class="text-center">{{ $firstItem->kategoriSparepart->kode ?? '-' }}: {{ $firstItem->kategoriSparepart->nama ?? '-' }}</td>
+                                <td class="text-center">{{ $firstItem->masterDataSparepart->nama ?? '-' }}</td>
+                                <td class="text-center">{{ $firstItem->masterDataSparepart->part_number ?? '-' }}</td>
+                                <td class="text-center">{{ $firstItem->masterDataSparepart->merk ?? '-' }}</td>
+                                <td class="text-center">{{ $firstItem->quantity_requested }}</td>
+                                <td class="text-center">
+                                    <input class="form-control text-center
+                                        @if ($rkb->is_approved_svp) bg-primary-subtle
+                                        @elseif ($rkb->is_approved_vp) bg-info-subtle
+                                        @elseif($rkb->is_evaluated) bg-success-subtle 
+                                        @else bg-warning-subtle @endif" 
+                                        name="quantity_approved[{{ $firstItem->id }}]" 
+                                        type="number" 
+                                        value="{{ $firstItem->quantity_approved ?? $firstItem->quantity_requested }}" 
+                                        min="0" 
+                                        {{ $rkb->is_evaluated ? 'disabled' : '' }}>
                                 </td>
+                                @if ($loop->first)
+                                    <td class="text-center" rowspan="{{ $rowspanCount }}">
+                                        {{ $stockQuantities[$firstItem->masterDataSparepart->id] ?? 0 }}
+                                    </td>
+                                @endif
+                                <td class="text-center">{{ $firstItem->satuan }}</td>
                             </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+                        @endforeach
+                    @empty
+                        <tr>
+                            <td class="text-center py-3 text-muted" colspan="10">
+                                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                No data found
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
+    </div>
 
-        <button class="btn btn-success btn-sm approveBtn" id="hiddenApproveRkbButton" type="submit" hidden></button>
-    </form>
+    <button class="btn btn-success btn-sm approveBtn" id="hiddenApproveRkbButton" type="submit" hidden></button>
+</form>
 
-    @push('scripts_3')
-        @include('scripts.adjustTableColumnWidthByHeaderText')
-        @include('scripts.filterPopupManager')
-    @endpush
+@push('scripts_3')
+    @include('scripts.adjustTableColumnWidthByHeaderText')
+    @include('scripts.filterPopupManager')
+@endpush

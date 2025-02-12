@@ -339,14 +339,17 @@
                 $('.filter-popup').hide();
             } else if (event.key === 'Enter' && visiblePopup.length) {
                 const popupId = visiblePopup.attr('id');
-                const type = popupId.replace('-filter', '').replace('-', '_');
+                const type = popupId.replace('-filter', '').replaceAll('-', '_');
                 applyFilter(type);
                 event.preventDefault();
             } else if (event.key === 'a' && event.ctrlKey && visiblePopup.length) {
-                const popupId = visiblePopup.attr('id');
-                const type = popupId.replace('-filter', '').replace('-', '_');
-                toggleAllFilters(type);
+                // Prevent default select all behavior
                 event.preventDefault();
+                // Get popup type and toggle all checkboxes
+                const popupId = visiblePopup.attr('id');
+                const type = popupId.replace('-filter', '').replaceAll('-', '_');
+                toggleAllFilters(type);
+                return false;
             }
         });
 

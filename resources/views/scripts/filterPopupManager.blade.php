@@ -320,10 +320,17 @@
             }
         });
 
-        // Close popup when pressing Escape key
+        // Close popup when pressing Escape key or apply filter when pressing Enter
         $(document).on('keydown', function(event) {
+            const visiblePopup = $('.filter-popup:visible');
+
             if (event.key === 'Escape') {
                 $('.filter-popup').hide();
+            } else if (event.key === 'Enter' && visiblePopup.length) {
+                const popupId = visiblePopup.attr('id');
+                const type = popupId.replace('-filter', '').replace('-', '_');
+                applyFilter(type);
+                event.preventDefault();
             }
         });
 

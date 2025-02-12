@@ -16,6 +16,14 @@
 @endphp
 
 <div class="ibox-body ms-0 ps-0">
+    <div class="mb-3 d-flex justify-content-end">
+        @if (request('selected_tanggal') || request('selected_kode') || request('selected_supplier') || request('selected_sparepart') || request('selected_merk') || request('selected_part_number') || request('selected_quantity') || request('selected_satuan') || request('selected_harga') || request('selected_jumlah_harga'))
+            <a class="btn btn-danger btn-sm btn-hide-text-mobile" href="{{ request()->url() }}{{ request()->hasAny(['search', 'id_proyek']) ? '?' . http_build_query(request()->only(['search', 'id_proyek'])) : '' }}">
+                <i class="bi bi-x-circle"></i> <span class="ms-2">Hapus Semua Filter</span>
+            </a>
+        @endif
+    </div>
+
     <div class="table-responsive">
         <table class="m-0 table table-bordered table-hover" id="table-data">
             <thead class="table-primary">

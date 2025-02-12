@@ -17,6 +17,8 @@ use Illuminate\Support\Facades\Storage;
 
 class EvaluasiDetailRKBUrgentController extends Controller
 {
+    private $rkb;  // Add this class property
+
     public function index ( Request $request, $id )
     {
         if ( $request->get ( 'per_page' ) != -1 )
@@ -29,113 +31,70 @@ class EvaluasiDetailRKBUrgentController extends Controller
 
         $perPage = (int) $request->per_page;
 
-        $rkb = RKB::with ( [ 'proyek' ] )->find ( $id );
+        $this->rkb = RKB::with ( [ 'proyek' ] )->find ( $id );
 
-        // Get RKB details with relationships and ordering
-        $query = DetailRKBUrgent::with ( [ 
-            'linkRkbDetails.linkAlatDetailRkb.masterDataAlat',
-            'linkRkbDetails.linkAlatDetailRkb.timelineRkbUrgents',
-            'linkRkbDetails.linkAlatDetailRkb.lampiranRkbUrgent',
-            'kategoriSparepart',
-            'masterDataSparepart'
-        ] )
-            ->leftJoin ( 'master_data_sparepart', 'detail_rkb_urgent.id_master_data_sparepart', '=', 'master_data_sparepart.id' )
-            ->whereHas ( 'linkRkbDetails.linkAlatDetailRkb', function ($query) use ($id)
+        // Build and filter query
+        $query = $this->buildQuery ( $request, $id );
+
+        // Apply search and filters
+        $this->applySearch ( $query, $request );
+        $this->applyNonStockFilters ( $query, $request );
+
+        // Clone query for stock quantities with current filters
+        $currentQuery         = clone $query;
+        $filteredSparepartIds = $currentQuery->pluck ( 'master_data_sparepart.id' )->unique ();
+
+        // Get ALL stock quantities for the project, not just filtered ones
+        $stockQuantities = Saldo::where ( 'id_proyek', $this->rkb->id_proyek )
+            ->whereIn ( 'id_master_data_sparepart', function ($query)
             {
-                $query->where ( 'id_rkb', $id );
+                $query->select ( 'id_master_data_sparepart' )
+                    ->from ( 'detail_rkb_urgent' )
+                    ->join ( 'link_rkb_detail', 'detail_rkb_urgent.id', '=', 'link_rkb_detail.id_detail_rkb_urgent' )
+                    ->join ( 'link_alat_detail_rkb', 'link_rkb_detail.id_link_alat_detail_rkb', '=', 'link_alat_detail_rkb.id' )
+                    ->where ( 'link_alat_detail_rkb.id_rkb', $this->rkb->id );
             } )
-            ->select ( [ 
-                'detail_rkb_urgent.*',
-                'master_data_sparepart.part_number'
-            ] )
-            ->orderByRaw ( 'CAST(master_data_sparepart.part_number AS CHAR) DESC' );
-
-        // Add search functionality
-        if ( $request->has ( 'search' ) )
-        {
-            $search = $request->get ( 'search' );
-            $query->where ( function ($q) use ($search)
+            ->selectRaw ( 'id_master_data_sparepart, SUM(quantity) as total_quantity' )
+            ->groupBy ( 'id_master_data_sparepart' )
+            ->get ()
+            ->pluck ( 'total_quantity', 'id_master_data_sparepart' )
+            ->filter ( function ($value)
             {
-                $q->where ( 'satuan', 'ilike', "%{$search}%" )
-                    ->orWhere ( 'nama_koordinator', 'ilike', "%{$search}%" )
-                    ->orWhereHas ( 'masterDataSparepart', function ($q) use ($search)
-                    {
-                        $q->where ( 'nama', 'ilike', "%{$search}%" )
-                            ->orWhere ( 'part_number', 'ilike', "%{$search}%" )
-                            ->orWhere ( 'merk', 'ilike', "%{$search}%" );
-                    } )
-                    ->orWhereHas ( 'kategoriSparepart', function ($q) use ($search)
-                    {
-                        $q->where ( 'kode', 'ilike', "%{$search}%" )
-                            ->orWhere ( 'nama', 'ilike', "%{$search}%" );
-                    } )
-                    ->orWhereHas ( 'linkRkbDetails.linkAlatDetailRkb.masterDataAlat', function ($q) use ($search)
-                    {
-                        $q->where ( 'jenis_alat', 'ilike', "%{$search}%" )
-                            ->orWhere ( 'kode_alat', 'ilike', "%{$search}%" );
-                    } );
+                return $value !== null && $value !== '';
             } );
+
+        // Apply stock quantity filter
+        if ( $request->filled ( 'selected_stock_quantity' ) )
+        {
+            $this->applyStockQuantityFilter ( $query, $request, $stockQuantities );
         }
 
-        // Rest of the code remains the same
-        $available_alat = MasterDataAlat::whereHas ( 'alatProyek', function ($query) use ($rkb)
+        // Get filtered data
+        $finalFilteredQuery = clone $query;
+        $finalFilteredData  = $finalFilteredQuery->get ();
+
+        // Get unique values from filtered data
+        $uniqueValues = [ 
+            'jenis_alat'         => $finalFilteredData->pluck ( 'jenis_alat' )->unique ()->filter ()->sort ()->values (),
+            'kode_alat'          => $finalFilteredData->pluck ( 'kode_alat' )->unique ()->filter ()->sort ()->values (),
+            'kategori_sparepart' => $finalFilteredData->pluck ( 'kategori_nama' )->unique ()->filter ()->sort ()->values (),
+            'sparepart'          => $finalFilteredData->pluck ( 'sparepart_nama' )->unique ()->filter ()->sort ()->values (),
+            'part_number'        => $finalFilteredData->pluck ( 'part_number' )->unique ()->filter ()->sort ()->values (),
+            'merk'               => $finalFilteredData->pluck ( 'merk' )->unique ()->filter ()->sort ()->values (),
+            'nama_koordinator'   => $finalFilteredData->pluck ( 'nama_koordinator' )->unique ()->filter ()->sort ()->values (),
+            'quantity_requested' => $finalFilteredData->pluck ( 'quantity_requested' )->unique ()->filter ()->sort ()->values (),
+            'stock_quantity'     => $stockQuantities->values ()->unique ()->sort ()->values (),
+            'satuan'             => $finalFilteredData->pluck ( 'satuan' )->unique ()->filter ()->sort ()->values (),
+        ];
+
+        // Get stock quantities and table data
+        $TableData = $this->getTableData ( $query, $perPage );
+
+        $available_alat = MasterDataAlat::whereHas ( 'alatProyek', function ($query)
         {
-            $query->where ( 'id_proyek', $rkb->id_proyek )
+            $query->where ( 'id_proyek', $this->rkb->id_proyek )
                 ->whereNull ( 'removed_at' );
         } )->get ();
-
-        $stockQuantities = Saldo::where ( 'id_proyek', $rkb->id_proyek )
-            ->get ()
-            ->groupBy ( 'id_master_data_sparepart' )
-            ->map ( function ($items)
-            {
-                return $items->sum ( 'quantity' );
-            } );
-
-        // Handle pagination
-        if ( $perPage === -1 )
-        {
-            $TableData = $query->get (); // Get all records without pagination
-
-            // Handle empty results
-            if ( $TableData->isEmpty () )
-            {
-                $TableData = new \Illuminate\Pagination\LengthAwarePaginator(
-                    collect ( [] ), // Empty collection
-                    0, // Total
-                    1, // Per page
-                    1 // Current page
-                );
-            }
-            else
-            {
-                // Convert collection to LengthAwarePaginator
-                $TableData = new \Illuminate\Pagination\LengthAwarePaginator(
-                    $TableData,
-                    $TableData->count (),
-                    max ( $TableData->count (), 1 ), // Ensure perPage is at least 1
-                    1
-                );
-            }
-        }
-        else
-        {
-            // Regular pagination with error handling
-            $total = $query->count ();
-            if ( $total === 0 )
-            {
-                $TableData = new \Illuminate\Pagination\LengthAwarePaginator(
-                    collect ( [] ), // Empty collection
-                    0, // Total
-                    $perPage,
-                    1 // Current page
-                );
-            }
-            else
-            {
-                $TableData = $query->paginate ( $perPage );
-            }
-        }
 
         // Filter projects based on user role
         $user         = Auth::user ();
@@ -155,17 +114,213 @@ class EvaluasiDetailRKBUrgentController extends Controller
 
         return view ( 'dashboard.evaluasi.urgent.detail.detail', [ 
             'headerPage'            => "Evaluasi Urgent",
-            'page'                  => 'Detail Evaluasi Urgent [' . $rkb->proyek->nama . ' | ' . $rkb->nomor . ']',
+            'page'                  => 'Detail Evaluasi Urgent [' . $this->rkb->proyek->nama . ' | ' . $this->rkb->nomor . ']',
             'menuContext'           => 'evaluasi_urgent',
 
             'proyeks'               => $proyeks,
-            'rkb'                   => $rkb,
+            'rkb'                   => $this->rkb,
             'available_alat'        => $available_alat,
             'master_data_sparepart' => MasterDataSparepart::all (),
             'kategori_sparepart'    => KategoriSparepart::all (),
             'TableData'             => $TableData,
             'stockQuantities'       => $stockQuantities,
+            'uniqueValues'          => $uniqueValues,
         ] );
+    }
+
+    private function buildQuery ( $request, $id )
+    {
+        return DetailRKBUrgent::query ()
+            ->select ( [ 
+                'detail_rkb_urgent.*',
+                'master_data_alat.jenis_alat',
+                'master_data_alat.kode_alat',
+                'kategori_sparepart.kode as kategori_kode',
+                'kategori_sparepart.nama as kategori_nama',
+                'master_data_sparepart.nama as sparepart_nama',
+                'master_data_sparepart.part_number',
+                'master_data_sparepart.merk',
+                'master_data_sparepart.id as sparepart_id'
+            ] )
+            ->join ( 'link_rkb_detail', 'detail_rkb_urgent.id', '=', 'link_rkb_detail.id_detail_rkb_urgent' )
+            ->join ( 'link_alat_detail_rkb', 'link_rkb_detail.id_link_alat_detail_rkb', '=', 'link_alat_detail_rkb.id' )
+            ->join ( 'master_data_alat', 'link_alat_detail_rkb.id_master_data_alat', '=', 'master_data_alat.id' )
+            ->join ( 'kategori_sparepart', 'detail_rkb_urgent.id_kategori_sparepart_sparepart', '=', 'kategori_sparepart.id' ) // Fixed column name
+            ->join ( 'master_data_sparepart', 'detail_rkb_urgent.id_master_data_sparepart', '=', 'master_data_sparepart.id' )
+            ->where ( 'link_alat_detail_rkb.id_rkb', $id )
+            ->orderBy ( 'master_data_sparepart.part_number' );
+    }
+
+    private function applyNonStockFilters ( $query, Request $request )
+    {
+        $filterColumns = [ 
+            'jenis_alat'         => 'master_data_alat.jenis_alat',
+            'kode_alat'          => 'master_data_alat.kode_alat',
+            'kategori_sparepart' => 'kategori_sparepart.nama',
+            'sparepart'          => 'master_data_sparepart.nama',
+            'part_number'        => 'master_data_sparepart.part_number',
+            'merk'               => 'master_data_sparepart.merk',
+            'nama_koordinator'   => 'link_alat_detail_rkb.nama_koordinator',
+            'quantity_requested' => 'detail_rkb_urgent.quantity_requested',
+            'satuan'             => 'detail_rkb_urgent.satuan',
+        ];
+
+        foreach ( $filterColumns as $paramName => $columnName )
+        {
+            $this->applyColumnFilter ( $query, $request, $paramName, $columnName );
+        }
+    }
+
+    private function applyColumnFilter ( $query, Request $request, $paramName, $columnName )
+    {
+        $selectedParam = "selected_{$paramName}";
+
+        if ( $request->filled ( $selectedParam ) )
+        {
+            try
+            {
+                $values = $this->getSelectedValues ( $request->get ( $selectedParam ) );
+
+                if ( in_array ( 'null', $values ) )
+                {
+                    $nonNullValues = array_filter ( $values, fn ( $value ) => $value !== 'null' );
+                    $query->where ( function ($q) use ($columnName, $nonNullValues)
+                    {
+                        $q->whereNull ( $columnName )
+                            ->orWhere ( $columnName, '-' )
+                            ->orWhere ( $columnName, '' )
+                            ->when ( ! empty ( $nonNullValues ), function ($subQ) use ($columnName, $nonNullValues)
+                            {
+                                $subQ->orWhereIn ( $columnName, $nonNullValues );
+                            } );
+                    } );
+                }
+                else
+                {
+                    $query->whereIn ( $columnName, $values );
+                }
+            }
+            catch ( \Exception $e )
+            {
+                \Log::error ( "Error in {$paramName} filter: " . $e->getMessage () );
+            }
+        }
+    }
+
+    private function getSelectedValues ( $paramValue )
+    {
+        if ( ! $paramValue ) return [];
+
+        try
+        {
+            return explode ( '||', base64_decode ( $paramValue ) );
+        }
+        catch ( \Exception $e )
+        {
+            \Log::error ( 'Error decoding parameter value: ' . $e->getMessage () );
+            return [];
+        }
+    }
+
+    private function applyStockQuantityFilter ( $query, Request $request, $stockQuantities )
+    {
+        $selectedParam = "selected_stock_quantity";
+
+        if ( $request->filled ( $selectedParam ) )
+        {
+            try
+            {
+                $values = $this->getSelectedValues ( $request->get ( $selectedParam ) );
+                if ( empty ( $values ) )
+                {
+                    return;
+                }
+
+                $intValues     = array_map ( 'intval', array_filter ( $values, fn ( $v ) => $v !== 'null' ) );
+                $hasNullFilter = in_array ( 'null', $values );
+
+                // Get all sparepart IDs that match any of the selected quantities
+                $matchingSparepartIds = $stockQuantities
+                    ->filter ( function ($quantity) use ($intValues)
+                    {
+                        return ! empty ( $intValues ) && in_array ( (int) $quantity, $intValues );
+                    } )
+                    ->keys ()
+                    ->toArray ();
+
+                $query->where ( function ($q) use ($matchingSparepartIds, $hasNullFilter)
+                {
+                    if ( ! empty ( $matchingSparepartIds ) )
+                    {
+                        $q->whereIn ( 'master_data_sparepart.id', $matchingSparepartIds );
+                    }
+
+                    if ( $hasNullFilter )
+                    {
+                        $q->orWhereDoesntHave ( 'masterDataSparepart.saldos', function ($query)
+                        {
+                            $query->where ( 'id_proyek', $this->rkb->id_proyek );
+                        } )
+                            ->orWhereHas ( 'masterDataSparepart.saldos', function ($query)
+                            {
+                                $query->where ( 'id_proyek', $this->rkb->id_proyek )
+                                    ->where ( 'quantity', 0 );
+                            } );
+                    }
+                } );
+            }
+            catch ( \Exception $e )
+            {
+                \Log::error ( "Error in stock_quantity filter: " . $e->getMessage () );
+            }
+        }
+    }
+
+    private function getStockQuantities ( $projectId )
+    {
+        return Saldo::where ( 'id_proyek', $projectId )
+            ->get ()
+            ->groupBy ( 'id_master_data_sparepart' )
+            ->map ( function ($items)
+            {
+                return $items->sum ( 'quantity' );
+            } );
+    }
+
+    private function getTableData ( $query, $perPage )
+    {
+        if ( $perPage === -1 )
+        {
+            $data = $query->get ();
+            return new \Illuminate\Pagination\LengthAwarePaginator(
+                $data,
+                $data->count (),
+                max ( $data->count (), 1 ),
+                1
+            );
+        }
+
+        return $query->paginate ( $perPage );
+    }
+
+    private function applySearch ( $query, Request $request )
+    {
+        if ( $request->has ( 'search' ) )
+        {
+            $search = $request->get ( 'search' );
+            $query->where ( function ($q) use ($search)
+            {
+                $q->where ( 'detail_rkb_urgent.satuan', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'link_alat_detail_rkb.nama_koordinator', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'master_data_alat.jenis_alat', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'master_data_alat.kode_alat', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'kategori_sparepart.kode', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'kategori_sparepart.nama', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'master_data_sparepart.nama', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'master_data_sparepart.part_number', 'ilike', "%{$search}%" )
+                    ->orWhere ( 'master_data_sparepart.merk', 'ilike', "%{$search}%" );
+            } );
+        }
     }
 
     public function getDokumentasi ( $id )

@@ -10,6 +10,22 @@ use Illuminate\Support\Facades\Auth;
 
 class SaldoController extends Controller
 {
+    // Helper function to decode selected values
+    private function getSelectedValues ( $paramValue )
+    {
+        if ( ! $paramValue ) return [];
+
+        try
+        {
+            return explode ( '||', base64_decode ( $paramValue ) );
+        }
+        catch ( \Exception $e )
+        {
+            \Log::error ( 'Error decoding parameter value: ' . $e->getMessage () );
+            return [];
+        }
+    }
+
     public function hutang_unit_alat ( Request $request )
     {
         return $this->showSaldoPage (
@@ -44,6 +60,119 @@ class SaldoController extends Controller
             "Data Saldo EX Panjar Proyek",
             $request->id_proyek
         );
+    }
+
+    private function applyBaseJoins ( $query )
+    {
+        return $query->join ( 'atb', 'saldo.id_atb', '=', 'atb.id' )
+            ->join ( 'master_data_sparepart', 'saldo.id_master_data_sparepart', '=', 'master_data_sparepart.id' )
+            ->join ( 'kategori_sparepart', 'master_data_sparepart.id_kategori_sparepart', '=', 'kategori_sparepart.id' )
+            ->leftJoin ( 'master_data_supplier', 'saldo.id_master_data_supplier', '=', 'master_data_supplier.id' );
+    }
+
+    private function getUniqueValues ( $query )
+    {
+        // Clone the query to avoid modifying the original
+        $baseQuery = clone $query;
+
+        // Remove existing selects to avoid conflicts
+        $baseQuery->getQuery ()->selects = null;
+
+        // Apply joins if not already present
+        if ( ! $baseQuery->getQuery ()->joins )
+        {
+            $baseQuery = $this->applyBaseJoins ( $baseQuery );
+        }
+
+        // Add specific select columns
+        $results = $baseQuery->select (
+            'atb.tanggal',
+            'kategori_sparepart.kode',
+            'master_data_supplier.nama as supplier_nama',
+            'master_data_sparepart.nama as sparepart_nama',
+            'master_data_sparepart.merk',
+            'master_data_sparepart.part_number',
+            'saldo.satuan',
+            'saldo.quantity', // Add this line
+            'saldo.harga',
+            \DB::raw ( '(saldo.quantity * saldo.harga) as jumlah_harga' )
+        )->get ();
+
+        return [ 
+            'tanggal'      => $results->pluck ( 'tanggal' )->filter ()->unique ()->values (),
+            'kode'         => $results->pluck ( 'kode' )->filter ()->unique ()->values (),
+            'supplier'     => $results->pluck ( 'supplier_nama' )->filter ()->unique ()->values (),
+            'sparepart'    => $results->pluck ( 'sparepart_nama' )->filter ()->unique ()->values (),
+            'merk'         => $results->pluck ( 'merk' )->filter ()->unique ()->values (),
+            'part_number'  => $results->pluck ( 'part_number' )->filter ()->unique ()->values (),
+            'satuan'       => $results->pluck ( 'satuan' )->filter ()->unique ()->values (),
+            'quantity'     => $results->pluck ( 'quantity' )->filter ()->unique ()->values (), // Add this line
+            'harga'        => $results->pluck ( 'harga' )->filter ()->unique ()->sort ()->values (),
+            'jumlah_harga' => $results->pluck ( 'jumlah_harga' )->filter ()->unique ()->sort ()->values (),
+        ];
+    }
+
+    private function applyFilters ( $query, $request )
+    {
+        if (
+            ! $request->hasAny ( [ 
+                'selected_tanggal',
+                'selected_kode',
+                'selected_supplier',
+                'selected_sparepart',
+                'selected_merk',
+                'selected_part_number',
+                'selected_satuan',
+                'selected_harga',
+                'selected_jumlah_harga'
+            ] )
+        )
+        {
+            return $query;
+        }
+
+        // Check if joins already exist
+        if ( ! $query->getQuery ()->joins )
+        {
+            $query = $this->applyBaseJoins ( $query );
+        }
+
+        $filters = [ 
+            'tanggal'      => 'atb.tanggal',
+            'kode'         => 'kategori_sparepart.kode',
+            'supplier'     => 'master_data_supplier.nama',
+            'sparepart'    => 'master_data_sparepart.nama',
+            'merk'         => 'master_data_sparepart.merk',
+            'part_number'  => 'master_data_sparepart.part_number',
+            'satuan'       => 'saldo.satuan',
+            'harga'        => 'saldo.harga',
+            'jumlah_harga' => \DB::raw ( '(saldo.quantity * saldo.harga)' ),
+        ];
+
+        foreach ( $filters as $param => $column )
+        {
+            if ( $request->filled ( "selected_$param" ) )
+            {
+                $selectedValues = $this->getSelectedValues ( $request->get ( "selected_$param" ) );
+                if ( in_array ( 'null', $selectedValues ) )
+                {
+                    $nonNullValues = array_filter ( $selectedValues, fn ( $value ) => $value !== 'null' );
+                    $query->where ( function ($q) use ($column, $nonNullValues)
+                    {
+                        $q->whereNull ( $column )
+                            ->orWhere ( $column, '-' )
+                            ->orWhereIn ( $column, $nonNullValues );
+                    } );
+                }
+                else
+                {
+                    $query->whereIn ( $column, $selectedValues );
+                }
+            }
+        }
+
+        // Make sure to select only saldo fields to avoid duplicate columns
+        return $query->select ( 'saldo.*' );
     }
 
     private function showSaldoPage ( $tipe, $pageTitle, $id_proyek )
@@ -242,14 +371,23 @@ class SaldoController extends Controller
             } );
         }
 
-        // Calculate total amount for all records
-        // Clone the query before adding pagination to get accurate total
-        $totalQuery  = clone $query;
-        $totalAmount = $totalQuery->sum ( \DB::raw ( 'saldo.quantity * saldo.harga' ) );
+        // Apply filters to query if any filter is active
+        $query = $this->applyFilters ( $query, request () );
 
-        // Get paginated results with proper perPage value
-        $TableData = $query->join ( 'atb', 'saldo.id_atb', '=', 'atb.id' )
-            ->select ( 'saldo.*' )
+        // Get unique values for filters
+        $uniqueValues = $this->getUniqueValues ( $query );
+
+        // Calculate total amount
+        $totalAmount = $query->sum ( \DB::raw ( 'saldo.quantity * saldo.harga' ) );
+
+        // Ensure we have required joins for final query
+        if ( ! $query->getQuery ()->joins )
+        {
+            $query = $this->applyBaseJoins ( $query );
+        }
+
+        // Get paginated results
+        $TableData = $query->select ( 'saldo.*' )
             ->orderBy ( 'atb.tanggal', 'desc' )
             ->orderBy ( 'saldo.updated_at', 'desc' )
             ->orderBy ( 'saldo.id', 'desc' )
@@ -285,7 +423,8 @@ class SaldoController extends Controller
             "page"           => $pageTitle,
             "search"         => $search,
             "allowedPerPage" => $allowedPerPage, // Add this to view
-            "perPage"        => $perPage // Add this to view
+            "perPage"        => $perPage, // Add this to view
+            "uniqueValues"   => $uniqueValues, // Add this to view
         ] );
     }
 

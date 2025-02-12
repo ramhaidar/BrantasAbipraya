@@ -12,7 +12,7 @@
                         <h5 class="fw-medium">{{ $page ?? 'Buat variabel $page di controller sesuai nama halaman' }}</h5>
                     </div>
                     <div class="d-flex justify-content-end gap-2">
-                        <a class="btn btn-warning btn-sm" href="{{ route('export.apb', ['id' => $proyek->id]) }}">
+                        <a class="btn btn-warning btn-sm btn-hide-text-mobile" href="{{ route('export.apb', ['id' => $proyek->id]) }}">
                             <i class="fa-solid fa-file-excel"></i> <span class="ms-2">Export</span>
                         </a>
                         @if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin')

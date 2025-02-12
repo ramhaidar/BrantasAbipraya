@@ -16,7 +16,7 @@
                     </div>
 
                     <div class="d-flex justify-content-end gap-2">
-                        <a class="btn btn-warning btn-sm" href="{{ route('export.spb_proyek', ['id' => $rkb->id]) }}">
+                        <a class="btn btn-warning btn-sm btn-hide-text-mobile" href="{{ route('export.spb_proyek', ['id' => $rkb->id]) }}">
                             <i class="fa-solid fa-file-excel"></i> <span class="ms-2">Export</span>
                         </a>
                     </div>

@@ -1516,6 +1516,11 @@ Route::prefix ( 'export' )
         )->name ( 'export.evaluasi_rkb_urgent' );
 
         Route::get (
+            '/evaluasi-timeline-rkb-urgent',
+            [ ExportExcelController::class, 'evaluasi_timeline_rkb_urgent' ]
+        )->name ( 'export.evaluasi_timeline_rkb_urgent' );
+
+        Route::get (
             '/spb',
             [ ExportExcelController::class, 'spb' ]
         )->name ( 'export.spb' );

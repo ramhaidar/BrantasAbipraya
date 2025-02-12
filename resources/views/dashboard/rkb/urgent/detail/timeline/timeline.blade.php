@@ -17,6 +17,9 @@
                         </div>
                     </div>
                     <div class="d-flex justify-content-end gap-2">
+                        <a class="btn btn-warning btn-sm btn-hide-text-mobile" href="{{ route('export.timeline_rkb_urgent', ['id' => $data->id]) }}">
+                            <i class="fa-solid fa-file-excel"></i> <span class="ms-2">Export</span>
+                        </a>
                         @if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin')
                             <a class="btn btn-primary btn-sm btn-hide-text-mobile {{ $rkb->is_finalized ? 'disabled' : '' }}" data-bs-toggle="modal" data-bs-target="#modalForAdd">
                                 <i class="fa fa-plus"></i> <span class="ms-2">Tambah Data</span>

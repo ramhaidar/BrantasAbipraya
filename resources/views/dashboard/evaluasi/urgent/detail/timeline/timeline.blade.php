@@ -16,9 +16,9 @@
                     </div>
                     <div class="d-flex justify-content-end gap-2">
                         <!-- Button Placeholder -->
-                        {{-- <a class="btn btn-success btn-sm btn-hide-text-mobile finalizeBtn {{ $rkb->is_finalized ? 'disabled' : '' }}" data-bs-toggle="modal" data-id="{{ $rkb->id }}" data-bs-target="#modalForFinalize">
-                            <i class="fa fa-check"></i> <span class="ms-2">Finalisasi Data</span>
-                        </a> --}}
+                        <a class="btn btn-warning btn-sm btn-hide-text-mobile" href="{{ route('export.evaluasi_timeline_rkb_urgent', ['id' => $data->id]) }}">
+                            <i class="fa-solid fa-file-excel"></i> <span class="ms-2">Export</span>
+                        </a>
                     </div>
                 </div>
 

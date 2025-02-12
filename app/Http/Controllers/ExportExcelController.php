@@ -15,21 +15,23 @@ class ExportExcelController extends Controller
         // Dummy function for exporting RKB General
     }
 
-    public function detail_rkb_general (Request $request)
+    public function detail_rkb_general ( Request $request )
     {
         // Ambil data RKB berdasarkan parameter ID atau data lainnya
-        $rkb = RKB::find($request->id);
+        $rkb = RKB::find ( $request->id );
 
-        if (!$rkb) {
-            return redirect()->back()->withErrors(['error' => 'RKB tidak ditemukan']);
+        if ( ! $rkb )
+        {
+            return redirect ()->back ()->withErrors ( [ 'error' => 'RKB tidak ditemukan' ] );
         }
 
-        $periode = Carbon::parse($rkb->periode)->locale('id')->translatedFormat('F Y');
+        $periode = Carbon::parse ( $rkb->periode )->locale ( 'id' )->translatedFormat ( 'F Y' );
 
         $fileName = "{$rkb->nomor}-{$rkb->proyek->nama}-{$periode}.xlsx";
 
         // Generate dan unduh file Excel
-        return Excel::download(new DetailRKBGeneralExport, $fileName);;
+        return Excel::download ( new DetailRKBGeneralExport, $fileName );
+        ;
     }
 
     public function rkb_urgent ( Request $request )
@@ -43,8 +45,10 @@ class ExportExcelController extends Controller
         // Dummy function for exporting Detail RKB Urgent
     }
 
-    public function timeline_rkb_urgent ()
+    public function timeline_rkb_urgent ( Request $request )
     {
+        dd ( $request->all () );
+
         // Dummy function for exporting Timeline RKB Urgent
     }
 
@@ -58,6 +62,13 @@ class ExportExcelController extends Controller
     {
         dd ( $request->all () );
         // Dummy function for exporting Evaluasi RKB Urgent
+    }
+
+    public function evaluasi_timeline_rkb_urgent ( Request $request )
+    {
+        dd ( $request->all () );
+
+        // Dummy function for exporting Timeline RKB Urgent
     }
 
     public function spb ( Request $request )

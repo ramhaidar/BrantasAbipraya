@@ -311,6 +311,17 @@
         checkbox.prop('checked', !checkbox.prop('checked'));
     }
 
+    /**
+     * Toggles all checkboxes in a filter popup
+     * If all are checked, unchecks all. Otherwise, checks all.
+     * @param {string} type - The type of filter
+     */
+    function toggleAllFilters(type) {
+        const checkboxes = $(`.${type}-checkbox`);
+        const allChecked = checkboxes.length === checkboxes.filter(':checked').length;
+        checkboxes.prop('checked', !allChecked);
+    }
+
     // Document ready event handler
     $(document).ready(function() {
         // Close popup when clicking outside
@@ -320,7 +331,7 @@
             }
         });
 
-        // Close popup when pressing Escape key or apply filter when pressing Enter
+        // Handle keyboard shortcuts
         $(document).on('keydown', function(event) {
             const visiblePopup = $('.filter-popup:visible');
 
@@ -330,6 +341,11 @@
                 const popupId = visiblePopup.attr('id');
                 const type = popupId.replace('-filter', '').replace('-', '_');
                 applyFilter(type);
+                event.preventDefault();
+            } else if (event.key === 'a' && event.ctrlKey && visiblePopup.length) {
+                const popupId = visiblePopup.attr('id');
+                const type = popupId.replace('-filter', '').replace('-', '_');
+                toggleAllFilters(type);
                 event.preventDefault();
             }
         });

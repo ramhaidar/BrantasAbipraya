@@ -335,14 +335,16 @@
                     @forelse ($groupedByPartNumber as $partNumber => $partNumberGroup)
                         @php
                             $firstItemInGroup = $partNumberGroup->first();
-                            $rowspanCount = $groupedItems->filter(function($items, $key) use ($partNumber) {
-                                return explode('|', $key)[0] === $partNumber;
-                            })->count();
+                            $rowspanCount = $groupedItems
+                                ->filter(function ($items, $key) use ($partNumber) {
+                                    return explode('|', $key)[0] === $partNumber;
+                                })
+                                ->count();
                         @endphp
-                        
-                        @foreach ($groupedItems->filter(function($items, $key) use ($partNumber) {
-                            return explode('|', $key)[0] === $partNumber;
-                        }) as $index => $group)
+
+                        @foreach ($groupedItems->filter(function ($items, $key) use ($partNumber) {
+        return explode('|', $key)[0] === $partNumber;
+    }) as $index => $group)
                             @php
                                 $firstItem = $group->first();
                                 $detail = $firstItem->linkRkbDetails->first();
@@ -360,12 +362,7 @@
                                         @if ($rkb->is_approved_svp) bg-primary-subtle
                                         @elseif ($rkb->is_approved_vp) bg-info-subtle
                                         @elseif($rkb->is_evaluated) bg-success-subtle 
-                                        @else bg-warning-subtle @endif" 
-                                        name="quantity_approved[{{ $firstItem->id }}]" 
-                                        type="number" 
-                                        value="{{ $firstItem->quantity_approved ?? $firstItem->quantity_requested }}" 
-                                        min="0" 
-                                        {{ $rkb->is_evaluated ? 'disabled' : '' }}>
+                                        @else bg-warning-subtle @endif" name="quantity_approved[{{ $firstItem->id }}]" type="number" value="{{ $firstItem->quantity_approved ?? $firstItem->quantity_requested }}" min="0" {{ $rkb->is_evaluated ? 'disabled' : '' }}>
                                 </td>
                                 @if ($loop->first)
                                     <td class="text-center" rowspan="{{ $rowspanCount }}">

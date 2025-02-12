@@ -16,6 +16,23 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class DetailSPBController extends Controller
 {
+    private function getSelectedValues ( $paramValue )
+    {
+        if ( ! $paramValue )
+        {
+            return [];
+        }
+
+        try
+        {
+            return explode ( '||', base64_decode ( $paramValue ) );
+        }
+        catch ( \Exception $e )
+        {
+            return [];
+        }
+    }
+
     public function index ( $id )
     {
         // Get single RKB record with relationships
@@ -31,12 +48,198 @@ class DetailSPBController extends Controller
             "spbs"
         ] )->findOrFail ( $id );
 
-        // Create paginator manually from single RKB, with sorting applied to collection
+        // Get selected filter values
+        $selectedJenisAlat = $this->getSelectedValues ( request ( 'selected_jenis_alat' ) );
+        $selectedKodeAlat  = $this->getSelectedValues ( request ( 'selected_kode_alat' ) );
+        $selectedKategori  = $this->getSelectedValues ( request ( 'selected_kategori' ) ); // Move this here
+
+        // Create collection from RKB
+        $collection = collect ( [ $rkb ] );
+
+        // Get unique values from original collection (before filtering)
+        $uniqueJenisAlat = collect ( [ $rkb ] )->flatMap ( function ($item)
+        {
+            return $item->linkAlatDetailRkbs->map ( function ($detail)
+            {
+                return $detail->masterDataAlat->jenis_alat;
+            } );
+        } )->unique ()->filter ()->sort ()->values ();
+
+        $uniqueKodeAlat = collect ( [ $rkb ] )->flatMap ( function ($item)
+        {
+            return $item->linkAlatDetailRkbs->map ( function ($detail)
+            {
+                return $detail->masterDataAlat->kode_alat;
+            } );
+        } )->unique ()->filter ()->sort ()->values ();
+
+        $uniqueKategori = collect ( [ $rkb ] )->flatMap ( function ($item)
+        {
+            return $item->linkAlatDetailRkbs->flatMap ( function ($detail)
+            {
+                // Each LinkAlatDetailRKB has many LinkRKBDetails
+                return $detail->linkRkbDetails->map ( function ($rkbDetail)
+                {
+                    // Each LinkRKBDetail belongs to either DetailRKBGeneral or DetailRKBUrgent
+                    if ( $rkbDetail->detailRkbGeneral )
+                    {
+                        $kategori = $rkbDetail->detailRkbGeneral->kategoriSparepart;
+                    }
+                    elseif ( $rkbDetail->detailRkbUrgent )
+                    {
+                        $kategori = $rkbDetail->detailRkbUrgent->kategoriSparepart;
+                    }
+                    else
+                    {
+                        $kategori = null;
+                    }
+                    return $kategori ? $kategori->kode . ': ' . $kategori->nama : null;
+                } );
+            } );
+        } )->unique ()->filter ()->sort ()->values ();
+
+        $uniqueSpareparts = collect ( [ $rkb ] )->flatMap ( function ($item)
+        {
+            return $item->linkAlatDetailRkbs->flatMap ( function ($detail)
+            {
+                return $detail->linkRkbDetails->map ( function ($rkbDetail)
+                {
+                    $sparepart = $rkbDetail->detailRkbGeneral?->masterDataSparepart ??
+                        $rkbDetail->detailRkbUrgent?->masterDataSparepart;
+                    if ( $sparepart )
+                    {
+                        return $sparepart->nama . ' - ' . ( $sparepart->part_number ?? '-' ) . ' - ' . ( $sparepart->merk ?? '-' );
+                    }
+                    return null;
+                } );
+            } );
+        } )->unique ()->filter ()->sort ()->values ();
+
+        // Get unique quantity values
+        $uniqueQuantities = collect ( [ $rkb ] )->flatMap ( function ($item)
+        {
+            return $item->linkAlatDetailRkbs->flatMap ( function ($detail)
+            {
+                return $detail->linkRkbDetails->map ( function ($rkbDetail)
+                {
+                    return $rkbDetail->detailRkbUrgent?->quantity_remainder ??
+                        $rkbDetail->detailRkbGeneral?->quantity_remainder ?? 0;
+                } );
+            } );
+        } )->unique ()->sort ()->values ();
+
+        // Get unique satuan values
+        $uniqueSatuan = collect ( [ $rkb ] )->flatMap ( function ($item)
+        {
+            return $item->linkAlatDetailRkbs->flatMap ( function ($detail)
+            {
+                return $detail->linkRkbDetails->map ( function ($rkbDetail)
+                {
+                    return $rkbDetail->detailRkbUrgent?->satuan ??
+                        $rkbDetail->detailRkbGeneral?->satuan ?? null;
+                } );
+            } );
+        } )->unique ()->filter ()->sort ()->values ();
+
+        // Get selected sparepart filter
+        $selectedSparepart = $this->getSelectedValues ( request ( 'selected_sparepart' ) );
+
+        // Get selected quantity filter
+        $selectedQuantity = $this->getSelectedValues ( request ( 'selected_quantity' ) );
+
+        // Get selected satuan filter
+        $selectedSatuan = $this->getSelectedValues ( request ( 'selected_satuan' ) );
+
+        // Apply filters if selected
+        if ( ! empty ( $selectedJenisAlat ) || ! empty ( $selectedKodeAlat ) || ! empty ( $selectedKategori ) || ! empty ( $selectedSparepart ) || ! empty ( $selectedQuantity ) || ! empty ( $selectedSatuan ) )
+        {
+            $collection = $collection->map ( function ($item) use ($selectedJenisAlat, $selectedKodeAlat, $selectedKategori, $selectedSparepart, $selectedQuantity, $selectedSatuan)
+            {
+                $filtered = clone $item;
+
+                $filtered->linkAlatDetailRkbs = $filtered->linkAlatDetailRkbs->map ( function ($detail) use ($selectedJenisAlat, $selectedKodeAlat, $selectedKategori, $selectedSparepart, $selectedQuantity, $selectedSatuan)
+                {
+                    $jenisAlatMatch = empty ( $selectedJenisAlat ) ||
+                        in_array ( $detail->masterDataAlat->jenis_alat, $selectedJenisAlat ) ||
+                        ( in_array ( 'null', $selectedJenisAlat ) && empty ( $detail->masterDataAlat->jenis_alat ) );
+
+                    $kodeAlatMatch = empty ( $selectedKodeAlat ) ||
+                        in_array ( $detail->masterDataAlat->kode_alat, $selectedKodeAlat ) ||
+                        ( in_array ( 'null', $selectedKodeAlat ) && empty ( $detail->masterDataAlat->kode_alat ) );
+
+                    // Clone the detail to avoid modifying original
+                    $detailClone = clone $detail;
+
+                    // Filter linkRkbDetails based on kategori
+                    $detailClone->linkRkbDetails = $detail->linkRkbDetails->filter ( function ($rkbDetail) use ($selectedKategori, $selectedSparepart, $selectedQuantity, $selectedSatuan)
+                    {
+                        $kategoriMatch = true;
+                        if ( ! empty ( $selectedKategori ) )
+                        {
+                            $kategori = $rkbDetail->detailRkbGeneral?->kategoriSparepart ??
+                                $rkbDetail->detailRkbUrgent?->kategoriSparepart;
+
+                            $kategoriValue = $kategori ? $kategori->kode . ': ' . $kategori->nama : null;
+
+                            $kategoriMatch = in_array ( $kategoriValue, $selectedKategori ) ||
+                                ( in_array ( 'null', $selectedKategori ) && empty ( $kategoriValue ) );
+                        }
+
+                        $sparepartMatch = true;
+                        if ( ! empty ( $selectedSparepart ) )
+                        {
+                            $sparepart = $rkbDetail->detailRkbGeneral?->masterDataSparepart ??
+                                $rkbDetail->detailRkbUrgent?->masterDataSparepart;
+
+                            $sparepartValue = $sparepart ?
+                                $sparepart->nama . ' - ' . ( $sparepart->part_number ?? '-' ) . ' - ' . ( $sparepart->merk ?? '-' ) :
+                                null;
+
+                            $sparepartMatch = in_array ( $sparepartValue, $selectedSparepart ) ||
+                                ( in_array ( 'null', $selectedSparepart ) && empty ( $sparepartValue ) );
+                        }
+
+                        $quantityMatch = true;
+                        if ( ! empty ( $selectedQuantity ) )
+                        {
+                            $quantity = $rkbDetail->detailRkbUrgent?->quantity_remainder ??
+                                $rkbDetail->detailRkbGeneral?->quantity_remainder ?? null;
+
+                            $quantityMatch = in_array ( (string) $quantity, $selectedQuantity ) ||
+                                ( in_array ( 'null', $selectedQuantity ) && $quantity === null );
+                        }
+
+                        $satuanMatch = true;
+                        if ( ! empty ( $selectedSatuan ) )
+                        {
+                            $satuan = $rkbDetail->detailRkbUrgent?->satuan ??
+                                $rkbDetail->detailRkbGeneral?->satuan ?? null;
+
+                            $satuanMatch = in_array ( $satuan, $selectedSatuan ) ||
+                                ( in_array ( 'null', $selectedSatuan ) && $satuan === null );
+                        }
+
+                        return $kategoriMatch && $sparepartMatch && $quantityMatch && $satuanMatch;
+                    } );
+
+                    // Only keep this alat if it matches alat filters and has any matching spareparts
+                    if ( ( $jenisAlatMatch && $kodeAlatMatch ) && $detailClone->linkRkbDetails->isNotEmpty () )
+                    {
+                        return $detailClone;
+                    }
+                    return null;
+                } )->filter (); // Remove null entries
+
+                return $filtered;
+            } );
+        }
+
+        // Create paginator from filtered collection
         $TableData = new LengthAwarePaginator(
-            collect ( [ $rkb ] ),  // sorted items
-            1,                // total
-            1,                // per page
-            1                 // current page
+            $collection,
+            1,
+            1,
+            1
         );
 
         // Calculate total items for SPB creation
@@ -44,8 +247,7 @@ class DetailSPBController extends Controller
         {
             return $detail1->linkRkbDetails->sum ( function ($detail2)
             {
-                $remainder = $detail2->detailRkbUrgent?->quantity_remainder ??
-                    $detail2->detailRkbGeneral?->quantity_remainder ?? 0;
+                $remainder = $detail2->detailRkbUrgent?->quantity_remainder ?? $detail2->detailRkbGeneral?->quantity_remainder ?? 0;
                 return $remainder > 0 ? 1 : 0;
             } );
         } );
@@ -93,15 +295,27 @@ class DetailSPBController extends Controller
             ->sortByDesc ( 'id' );
 
         return view ( 'dashboard.spb.detail.detail', [ 
-            'proyeks'       => $proyeks,
-            'rkb'           => $rkb, // Keep original RKB for detail form
-            'TableData'     => $TableData, // Paginated data for consistency
-            'supplier'      => MasterDataSupplier::all (),
-            'totalItems'    => $totalItems,
-            'riwayatSpb'    => $riwayatSpb,
-            'spbAddendumEd' => $spbAddendumEd,
-            'headerPage'    => "SPB Supplier",
-            'page'          => 'Detail SPB Supplier' . ' [' . $rkb->proyek->nama . ' | ' . $rkb->nomor . ' ]',
+            'proyeks'           => $proyeks,
+            'rkb'               => $rkb, // Keep original RKB for detail form
+            'TableData'         => $TableData, // Paginated data for consistency
+            'supplier'          => MasterDataSupplier::all (),
+            'totalItems'        => $totalItems,
+            'riwayatSpb'        => $riwayatSpb,
+            'spbAddendumEd'     => $spbAddendumEd,
+            'headerPage'        => "SPB Supplier",
+            'page'              => 'Detail SPB Supplier' . ' [' . $rkb->proyek->nama . ' | ' . $rkb->nomor . ' ]',
+            'selectedJenisAlat' => $selectedJenisAlat,
+            'selectedKodeAlat'  => $selectedKodeAlat,
+            'selectedKategori'  => $selectedKategori, // Now this will always be defined
+            'uniqueJenisAlat'   => $uniqueJenisAlat,
+            'uniqueKodeAlat'    => $uniqueKodeAlat,
+            'uniqueKategori'    => $uniqueKategori,
+            'selectedSparepart' => $selectedSparepart,
+            'uniqueSpareparts'  => $uniqueSpareparts,
+            'selectedQuantity'  => $selectedQuantity,
+            'uniqueQuantities'  => $uniqueQuantities,
+            'selectedSatuan'    => $selectedSatuan,
+            'uniqueSatuan'      => $uniqueSatuan,
         ] );
     }
 
@@ -137,7 +351,6 @@ class DetailSPBController extends Controller
             'alat_detail_id.*'     => 'required|exists:link_alat_detail_rkb,id',
             'link_rkb_detail_id'   => 'required|array',
             'link_rkb_detail_id.*' => 'required|exists:link_rkb_detail,id',
-
             'spb_addendum_id'      => [ 'string', 'nullable' ],
         ] );
 

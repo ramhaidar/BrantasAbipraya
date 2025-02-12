@@ -1,40 +1,13 @@
 @push('styles_3')
+    @include('styles.tables')
+
     <style>
-        #table-data {
-            font-size: 0.9em;
-            white-space: nowrap;
-        }
-
-        #table-data td,
-        #table-data th {
-            vertical-align: middle;
-            text-align: center;
-        }
-
         #table-data th:nth-child(9),
         #table-data th:nth-child(10),
         #table-data td:nth-child(9),
         #table-data td:nth-child(10) {
             min-width: 10dvw;
             width: 10dvw;
-        }
-
-        .currency-value {
-            text-align: right !important;
-            padding-right: 10px !important;
-        }
-
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
         }
     </style>
 @endpush
@@ -44,6 +17,12 @@
         @csrf
         <input name="id_rkb" type="hidden" value="{{ $TableData->first()->id }}">
         <input id="spb_addendum_input" name="spb_addendum_id" type="hidden">
+        <input id="selected-jenis-alat" name="selected_jenis_alat" type="hidden" value="{{ request('selected_jenis_alat') }}">
+        <input id="selected-kode-alat" name="selected_kode_alat" type="hidden" value="{{ request('selected_kode_alat') }}">
+        <input id="selected-kategori" name="selected_kategori" type="hidden" value="{{ request('selected_kategori') }}">
+        <input id="selected-sparepart" name="selected_sparepart" type="hidden" value="{{ request('selected_sparepart') }}">
+        <input id="selected-quantity" name="selected_quantity" type="hidden" value="{{ request('selected_quantity') }}">
+        <input id="selected-satuan" name="selected_satuan" type="hidden" value="{{ request('selected_satuan') }}">
 
         @php
             $sparepartGroups = [];
@@ -105,14 +84,210 @@
             <table class="m-0 table table-bordered table-hover" id="table-data">
                 <thead class="table-primary">
                     <tr>
-                        <th class="text-center">Nama Alat</th>
-                        <th class="text-center">Kode Alat</th>
-                        <th class="text-center">Kategori</th>
-                        <th class="text-center">Sparepart Requested</th>
+                        <th class="text-center">
+                            <div class="d-flex align-items-center gap-2 justify-content-center">
+                                Nama Alat
+                                <div class="btn-group">
+                                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="toggleFilter('jenis-alat-filter')">
+                                        <i class="bi bi-funnel-fill"></i>
+                                    </button>
+                                    @if (request('selected_jenis_alat'))
+                                        <button class="btn btn-outline-danger btn-sm" type="button" onclick="clearFilter('jenis_alat')">
+                                            <i class="bi bi-x-circle"></i>
+                                        </button>
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="filter-popup" id="jenis-alat-filter" style="display: none;">
+                                <div class="p-2">
+                                    <input class="form-control form-control-sm mb-2" type="text" placeholder="Search jenis alat..." onkeyup="filterCheckboxes('jenis_alat', event)">
+                                    <div class="checkbox-list text-start">
+                                        <div class="form-check">
+                                            <input class="form-check-input jenis_alat-checkbox" type="checkbox" value="null" style="cursor: pointer" {{ in_array('null', $selectedJenisAlat) ? 'checked' : '' }}>
+                                            <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">Empty/Null</label>
+                                        </div>
+                                        @foreach ($uniqueJenisAlat as $jenisAlat)
+                                            <div class="form-check">
+                                                <input class="form-check-input jenis_alat-checkbox" type="checkbox" value="{{ $jenisAlat }}" style="cursor: pointer" {{ in_array($jenisAlat, $selectedJenisAlat) ? 'checked' : '' }}>
+                                                <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">{{ $jenisAlat }}</label>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('jenis_alat')"><i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span></button>
+                                </div>
+                            </div>
+                        </th>
+                        <th class="text-center">
+                            <div class="d-flex align-items-center gap-2 justify-content-center">
+                                Kode Alat
+                                <div class="btn-group">
+                                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="toggleFilter('kode-alat-filter')">
+                                        <i class="bi bi-funnel-fill"></i>
+                                    </button>
+                                    @if (request('selected_kode_alat'))
+                                        <button class="btn btn-outline-danger btn-sm" type="button" onclick="clearFilter('kode_alat')">
+                                            <i class="bi bi-x-circle"></i>
+                                        </button>
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="filter-popup" id="kode-alat-filter" style="display: none;">
+                                <div class="p-2">
+                                    <input class="form-control form-control-sm mb-2" type="text" placeholder="Search kode alat..." onkeyup="filterCheckboxes('kode_alat', event)">
+                                    <div class="checkbox-list text-start">
+                                        <div class="form-check">
+                                            <input class="form-check-input kode_alat-checkbox" type="checkbox" value="null" style="cursor: pointer" {{ in_array('null', $selectedKodeAlat) ? 'checked' : '' }}>
+                                            <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">Empty/Null</label>
+                                        </div>
+                                        @foreach ($uniqueKodeAlat as $kodeAlat)
+                                            <div class="form-check">
+                                                <input class="form-check-input kode_alat-checkbox" type="checkbox" value="{{ $kodeAlat }}" style="cursor: pointer" {{ in_array($kodeAlat, $selectedKodeAlat) ? 'checked' : '' }}>
+                                                <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">{{ $kodeAlat }}</label>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('kode_alat')"><i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span></button>
+                                </div>
+                            </div>
+                        </th>
+                        <th class="text-center">
+                            <div class="d-flex align-items-center gap-2 justify-content-center">
+                                Kategori
+                                <div class="btn-group">
+                                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="toggleFilter('kategori-filter')">
+                                        <i class="bi bi-funnel-fill"></i>
+                                    </button>
+                                    @if (request('selected_kategori'))
+                                        <button class="btn btn-outline-danger btn-sm" type="button" onclick="clearFilter('kategori')">
+                                            <i class="bi bi-x-circle"></i>
+                                        </button>
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="filter-popup" id="kategori-filter" style="display: none;">
+                                <div class="p-2">
+                                    <input class="form-control form-control-sm mb-2" type="text" placeholder="Search kategori..." onkeyup="filterCheckboxes('kategori', event)">
+                                    <div class="checkbox-list text-start">
+                                        <div class="form-check">
+                                            <input class="form-check-input kategori-checkbox" type="checkbox" value="null" style="cursor: pointer" {{ in_array('null', $selectedKategori) ? 'checked' : '' }}>
+                                            <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">Empty/Null</label>
+                                        </div>
+                                        @foreach ($uniqueKategori as $kategori)
+                                            <div class="form-check">
+                                                <input class="form-check-input kategori-checkbox" type="checkbox" value="{{ $kategori }}" style="cursor: pointer" {{ in_array($kategori, $selectedKategori) ? 'checked' : '' }}>
+                                                <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">{{ $kategori }}</label>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('kategori')"><i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span></button>
+                                </div>
+                            </div>
+                        </th>
+                        <th class="text-center">
+                            <div class="d-flex align-items-center gap-2 justify-content-center">
+                                Sparepart Requested
+                                <div class="btn-group">
+                                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="toggleFilter('sparepart-filter')">
+                                        <i class="bi bi-funnel-fill"></i>
+                                    </button>
+                                    @if (request('selected_sparepart'))
+                                        <button class="btn btn-outline-danger btn-sm" type="button" onclick="clearFilter('sparepart')">
+                                            <i class="bi bi-x-circle"></i>
+                                        </button>
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="filter-popup" id="sparepart-filter" style="display: none;">
+                                <div class="p-2">
+                                    <input class="form-control form-control-sm mb-2" type="text" placeholder="Search sparepart..." onkeyup="filterCheckboxes('sparepart', event)">
+                                    <div class="checkbox-list text-start">
+                                        <div class="form-check">
+                                            <input class="form-check-input sparepart-checkbox" type="checkbox" value="null" style="cursor: pointer" {{ in_array('null', $selectedSparepart) ? 'checked' : '' }}>
+                                            <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">Empty/Null</label>
+                                        </div>
+                                        @foreach ($uniqueSpareparts as $sparepart)
+                                            <div class="form-check">
+                                                <input class="form-check-input sparepart-checkbox" type="checkbox" value="{{ $sparepart }}" style="cursor: pointer" {{ in_array($sparepart, $selectedSparepart) ? 'checked' : '' }}>
+                                                <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">{{ $sparepart }}</label>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('sparepart')"><i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span></button>
+                                </div>
+                            </div>
+                        </th>
                         <th class="text-center">Sparepart PO</th>
-                        <th class="text-center">Quantity<br>Sisa</th>
+                        <th class="text-center">
+                            <div class="d-flex align-items-center gap-2 justify-content-center">
+                                Quantity<br>Sisa
+                                <div class="btn-group">
+                                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="toggleFilter('quantity-filter')">
+                                        <i class="bi bi-funnel-fill"></i>
+                                    </button>
+                                    @if (request('selected_quantity'))
+                                        <button class="btn btn-outline-danger btn-sm" type="button" onclick="clearFilter('quantity')">
+                                            <i class="bi bi-x-circle"></i>
+                                        </button>
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="filter-popup" id="quantity-filter" style="display: none;">
+                                <div class="p-2">
+                                    <input class="form-control form-control-sm mb-2" type="text" placeholder="Search quantity..." onkeyup="filterCheckboxes('quantity', event)">
+                                    <div class="checkbox-list text-start">
+                                        <div class="form-check">
+                                            <input class="form-check-input quantity-checkbox" type="checkbox" value="null" style="cursor: pointer" {{ in_array('null', $selectedQuantity) ? 'checked' : '' }}>
+                                            <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">Empty/Null</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input quantity-checkbox" type="checkbox" value="0" style="cursor: pointer" {{ in_array('0', $selectedQuantity) ? 'checked' : '' }}>
+                                            <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">0</label>
+                                        </div>
+                                        @foreach ($uniqueQuantities->filter(fn($q) => $q > 0) as $quantity)
+                                            <div class="form-check">
+                                                <input class="form-check-input quantity-checkbox" type="checkbox" value="{{ $quantity }}" style="cursor: pointer" {{ in_array((string) $quantity, $selectedQuantity) ? 'checked' : '' }}>
+                                                <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">{{ $quantity }}</label>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('quantity')"><i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span></button>
+                                </div>
+                            </div>
+                        </th>
                         <th class="text-center">Quantity<br>PO</th>
-                        <th class="text-center">Satuan</th>
+                        <th class="text-center">
+                            <div class="d-flex align-items-center gap-2 justify-content-center">
+                                Satuan
+                                <div class="btn-group">
+                                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="toggleFilter('satuan-filter')">
+                                        <i class="bi bi-funnel-fill"></i>
+                                    </button>
+                                    @if (request('selected_satuan'))
+                                        <button class="btn btn-outline-danger btn-sm" type="button" onclick="clearFilter('satuan')">
+                                            <i class="bi bi-x-circle"></i>
+                                        </button>
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="filter-popup" id="satuan-filter" style="display: none;">
+                                <div class="p-2">
+                                    <input class="form-control form-control-sm mb-2" type="text" placeholder="Search satuan..." onkeyup="filterCheckboxes('satuan', event)">
+                                    <div class="checkbox-list text-start">
+                                        <div class="form-check">
+                                            <input class="form-check-input satuan-checkbox" type="checkbox" value="null" style="cursor: pointer" {{ in_array('null', $selectedSatuan) ? 'checked' : '' }}>
+                                            <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">Empty/Null</label>
+                                        </div>
+                                        @foreach ($uniqueSatuan as $satuan)
+                                            <div class="form-check">
+                                                <input class="form-check-input satuan-checkbox" type="checkbox" value="{{ $satuan }}" style="cursor: pointer" {{ in_array($satuan, $selectedSatuan) ? 'checked' : '' }}>
+                                                <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">{{ $satuan }}</label>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('satuan')"><i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span></button>
+                                </div>
+                            </div>
+                        </th>
                         <th class="text-center">Harga</th>
                         <th class="text-center">Jumlah Harga</th>
                     </tr>
@@ -381,4 +556,5 @@
     </script>
 
     @include('scripts.adjustTableColumnWidthByHeaderText')
+    @include('scripts.filterPopupManager')
 @endpush

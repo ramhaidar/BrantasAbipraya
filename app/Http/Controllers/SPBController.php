@@ -222,9 +222,8 @@ class SPBController extends Controller
             'proyek'  => Proyek::whereIn ( 'id', function ($subquery) use ($query)
             {
                 $subquery->select ( 'id_proyek' )
-                    ->from ( 'rkb' )
+                    ->fromSub ( $query->clone ()->select ( 'id_proyek' ), 'filtered_rkb' )
                     ->whereNotNull ( 'id_proyek' )
-                    ->where ( 'is_approved_svp', true )
                     ->distinct ();
             } )
                 ->orderBy ( 'nama' )

@@ -109,6 +109,14 @@ class DetailRKBUrgentController extends Controller
         }
     }
 
+    private function isNumericColumn ( $columnName )
+    {
+        return in_array ( $columnName, [ 
+            'detail_rkb_urgent.quantity_requested',
+            'detail_rkb_urgent.quantity_approved'
+        ] );
+    }
+
     private function applyColumnFilter ( $query, Request $request, $paramName, $columnName )
     {
         $selectedParam = "selected_{$paramName}";
@@ -124,19 +132,40 @@ class DetailRKBUrgentController extends Controller
                     $nonNullValues = array_filter ( $values, fn ( $value ) => $value !== 'null' );
                     $query->where ( function ($q) use ($columnName, $nonNullValues)
                     {
-                        $q->whereNull ( $columnName )
-                            ->orWhere ( $columnName, '-' )
-                            ->orWhere ( $columnName, '' )
-                            ->when ( ! empty ( $nonNullValues ), function ($subQ) use ($columnName, $nonNullValues)
+                        // For numeric columns, only check for NULL
+                        if ( $this->isNumericColumn ( $columnName ) )
+                        {
+                            $q->whereNull ( $columnName );
+                            if ( ! empty ( $nonNullValues ) )
                             {
                                 $decodedValues = array_map ( 'base64_decode', $nonNullValues );
-                                $subQ->orWhereIn ( $columnName, $decodedValues );
-                            } );
+                                // Convert values to integers for numeric columns
+                                $numericValues = array_map ( 'intval', $decodedValues );
+                                $q->orWhereIn ( $columnName, $numericValues );
+                            }
+                        }
+                        else
+                        {
+                            // For non-numeric columns, keep existing logic
+                            $q->whereNull ( $columnName )
+                                ->orWhere ( $columnName, '-' )
+                                ->orWhere ( $columnName, '' )
+                                ->when ( ! empty ( $nonNullValues ), function ($subQ) use ($columnName, $nonNullValues)
+                                {
+                                    $decodedValues = array_map ( 'base64_decode', $nonNullValues );
+                                    $subQ->orWhereIn ( $columnName, $decodedValues );
+                                } );
+                        }
                     } );
                 }
                 else
                 {
                     $decodedValues = array_map ( 'base64_decode', $values );
+                    // Convert values to integers for numeric columns
+                    if ( $this->isNumericColumn ( $columnName ) )
+                    {
+                        $decodedValues = array_map ( 'intval', $decodedValues );
+                    }
                     $query->whereIn ( $columnName, $decodedValues );
                 }
             }

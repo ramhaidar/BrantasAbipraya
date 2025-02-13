@@ -273,7 +273,19 @@ class ATBController extends Controller
         if ( request ()->has ( 'selected_tanggal' ) )
         {
             $selectedValues = $this->getSelectedValues ( request ( 'selected_tanggal' ) );
-            $query->whereIn ( 'tanggal', $selectedValues );
+            if ( in_array ( 'null', $selectedValues ) )
+            {
+                $nonNullValues = array_filter ( $selectedValues, fn ( $value ) => $value !== 'null' );
+                $query->where ( function ($q) use ($nonNullValues)
+                {
+                    $q->whereIn ( 'tanggal', $nonNullValues )
+                        ->orWhereNull ( 'tanggal' );
+                } );
+            }
+            else
+            {
+                $query->whereIn ( 'tanggal', $selectedValues );
+            }
         }
 
         if ( request ()->has ( 'selected_kode' ) )

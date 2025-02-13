@@ -70,41 +70,43 @@
             <div class="filter-popup" id="{{ $filterId }}-filter" style="display: none;">
                 <div class="p-2">
                     <input class="form-control form-control-sm mb-2" type="text" placeholder="Search {{ strtolower($title) }}..." onkeyup="filterCheckboxes('{{ $paramName }}', event)">
-                    <div class="checkbox-list text-start">
-                        <div class="form-check">
-                            <input class="form-check-input {{ $paramName }}-checkbox" type="checkbox" value="null" style="cursor: pointer" {{ in_array('null', explode(',', request("selected_$paramName", ''))) ? 'checked' : '' }}>
-                            <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">Empty/Null</label>
+                    @if (isset($uniqueValues[(string) $paramName]) || isset($customUniqueValues))
+                        <div class="checkbox-list text-start">
+                            <div class="form-check">
+                                <input class="form-check-input {{ $paramName }}-checkbox" type="checkbox" value="Empty/Null" style="cursor: pointer" {{ in_array('Empty/Null', explode(',', request("selected_$paramName", ''))) ? 'checked' : '' }}>
+                                <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">Empty/Null</label>
+                            </div>
+                            @if (isset($customUniqueValues))
+                                @foreach ($customUniqueValues as $value)
+                                    <div class="form-check">
+                                        <input class="form-check-input {{ $paramName }}-checkbox" type="checkbox" value="{{ $value }}" style="cursor: pointer" {{ in_array($value, explode(',', request("selected_$paramName", ''))) ? 'checked' : '' }}>
+                                        <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">{{ $value }}</label>
+                                    </div>
+                                @endforeach
+                            @else
+                                @foreach ($uniqueValues[(string) $paramName] as $key => $value)
+                                    <div class="form-check">
+                                        <input class="form-check-input {{ $paramName }}-checkbox" type="checkbox" value="{{ $value }}" style="cursor: pointer" {{ in_array((string) $value, explode(',', request("selected_$paramName", ''))) ? 'checked' : '' }}>
+                                        <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">
+                                            @if ($paramName === 'periode')
+                                                {{ $formattedValues[$key] }}
+                                            @elseif ($paramName === 'tanggal')
+                                                {{ $formattedValues[$key] }}
+                                            @elseif ($paramName === 'tipe')
+                                                {{ $formattedValues[$key] }}
+                                            @elseif (in_array($paramName, ['durasi_rencana', 'durasi_actual']))
+                                                {{ $formattedValues[$key] }}
+                                            @elseif (in_array($paramName, ['harga', 'jumlah_harga', 'ppn', 'bruto']))
+                                                {{ $formattedValues[$key] }}
+                                            @else
+                                                {{ $value }}
+                                            @endif
+                                        </label>
+                                    </div>
+                                @endforeach
+                            @endif
                         </div>
-                        @if (isset($customUniqueValues))
-                            @foreach ($customUniqueValues as $value)
-                                <div class="form-check">
-                                    <input class="form-check-input {{ $paramName }}-checkbox" type="checkbox" value="{{ $value }}" style="cursor: pointer" {{ in_array($value, explode(',', request("selected_$paramName", ''))) ? 'checked' : '' }}>
-                                    <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">{{ $value }}</label>
-                                </div>
-                            @endforeach
-                        @else
-                            @foreach ($uniqueValues[(string) $paramName] as $key => $value)
-                                <div class="form-check">
-                                    <input class="form-check-input {{ $paramName }}-checkbox" type="checkbox" value="{{ $value }}" style="cursor: pointer" {{ in_array((string) $value, explode(',', request("selected_$paramName", ''))) ? 'checked' : '' }}>
-                                    <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">
-                                        @if ($paramName === 'periode')
-                                            {{ $formattedValues[$key] }}
-                                        @elseif ($paramName === 'tanggal')
-                                            {{ $formattedValues[$key] }}
-                                        @elseif ($paramName === 'tipe')
-                                            {{ $formattedValues[$key] }}
-                                        @elseif (in_array($paramName, ['durasi_rencana', 'durasi_actual']))
-                                            {{ $formattedValues[$key] }}
-                                        @elseif (in_array($paramName, ['harga', 'jumlah_harga', 'ppn', 'bruto']))
-                                            {{ $formattedValues[$key] }}
-                                        @else
-                                            {{ $value }}
-                                        @endif
-                                    </label>
-                                </div>
-                            @endforeach
-                        @endif
-                    </div>
+                    @endif
                     <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('{{ $paramName }}')"><i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span></button>
                 </div>
             </div>

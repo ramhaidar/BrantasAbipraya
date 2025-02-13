@@ -143,8 +143,10 @@ class DetailSPBController extends Controller
             } );
         }
 
-        // Now collect unique values from filtered collection
-        $uniqueJenisAlat = $collection->flatMap ( function ($item)
+        // Collect all unique values into single array
+        $uniqueValues = [];
+
+        $uniqueValues[ 'jenis_alat' ] = $collection->flatMap ( function ($item)
         {
             return $item->linkAlatDetailRkbs->map ( function ($detail)
             {
@@ -152,7 +154,7 @@ class DetailSPBController extends Controller
             } );
         } )->unique ()->filter ()->sort ()->values ();
 
-        $uniqueKodeAlat = $collection->flatMap ( function ($item)
+        $uniqueValues[ 'kode_alat' ] = $collection->flatMap ( function ($item)
         {
             return $item->linkAlatDetailRkbs->map ( function ($detail)
             {
@@ -160,7 +162,7 @@ class DetailSPBController extends Controller
             } );
         } )->unique ()->filter ()->sort ()->values ();
 
-        $uniqueKategori = $collection->flatMap ( function ($item)
+        $uniqueValues[ 'kategori' ] = $collection->flatMap ( function ($item)
         {
             return $item->linkAlatDetailRkbs->flatMap ( function ($detail)
             {
@@ -183,7 +185,7 @@ class DetailSPBController extends Controller
             } );
         } )->unique ()->filter ()->sort ()->values ();
 
-        $uniqueSpareparts = $collection->flatMap ( function ($item)
+        $uniqueValues[ 'sparepart' ] = $collection->flatMap ( function ($item)
         {
             return $item->linkAlatDetailRkbs->flatMap ( function ($detail)
             {
@@ -200,7 +202,7 @@ class DetailSPBController extends Controller
             } );
         } )->unique ()->filter ()->sort ()->values ();
 
-        $uniqueQuantities = $collection->flatMap ( function ($item)
+        $uniqueValues[ 'quantity' ] = $collection->flatMap ( function ($item)
         {
             return $item->linkAlatDetailRkbs->flatMap ( function ($detail)
             {
@@ -212,7 +214,7 @@ class DetailSPBController extends Controller
             } );
         } )->unique ()->sort ()->values ();
 
-        $uniqueSatuan = $collection->flatMap ( function ($item)
+        $uniqueValues[ 'satuan' ] = $collection->flatMap ( function ($item)
         {
             return $item->linkAlatDetailRkbs->flatMap ( function ($detail)
             {
@@ -297,15 +299,10 @@ class DetailSPBController extends Controller
             'selectedJenisAlat' => $selectedJenisAlat,
             'selectedKodeAlat'  => $selectedKodeAlat,
             'selectedKategori'  => $selectedKategori, // Now this will always be defined
-            'uniqueJenisAlat'   => $uniqueJenisAlat,
-            'uniqueKodeAlat'    => $uniqueKodeAlat,
-            'uniqueKategori'    => $uniqueKategori,
             'selectedSparepart' => $selectedSparepart,
-            'uniqueSpareparts'  => $uniqueSpareparts,
             'selectedQuantity'  => $selectedQuantity,
-            'uniqueQuantities'  => $uniqueQuantities,
             'selectedSatuan'    => $selectedSatuan,
-            'uniqueSatuan'      => $uniqueSatuan,
+            'uniqueValues'      => $uniqueValues,
         ] );
     }
 

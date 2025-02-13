@@ -19,15 +19,19 @@
 @endpush
 
 @php
-    function formatRibuan($number)
-    {
-        return number_format($number, 0, ',', '.');
+    if (!function_exists('formatRibuan')) {
+        function formatRibuan($number)
+        {
+            return number_format($number, 0, ',', '.');
+        }
     }
 
-    function formatTanggal($date)
-    {
-        setlocale(LC_TIME, 'id_ID');
-        return \Carbon\Carbon::parse($date)->translatedFormat('l, d F Y');
+    if (!function_exists('formatTanggal')) {
+        function formatTanggal($date)
+        {
+            setlocale(LC_TIME, 'id_ID');
+            return \Carbon\Carbon::parse($date)->translatedFormat('l, d F Y');
+        }
     }
 @endphp
 

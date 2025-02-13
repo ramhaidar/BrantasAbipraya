@@ -17,6 +17,14 @@
                 return \Carbon\Carbon::parse($periode)->isoFormat('MMMM Y');
             })
             ->toArray();
+    } elseif ($paramName === 'tanggal' && isset($uniqueValues['tanggal'])) {
+        // Format tanggal values to Indonesian format
+        $formattedValues = collect($uniqueValues['tanggal'])
+            ->map(function ($tanggal) {
+                setlocale(LC_TIME, 'id_ID');
+                return \Carbon\Carbon::parse($tanggal)->translatedFormat('l, d F Y');
+            })
+            ->toArray();
     } elseif ($paramName === 'tipe' && isset($uniqueValues['tipe'])) {
         // Format tipe values
         $formattedValues = collect($uniqueValues['tipe'])
@@ -31,8 +39,8 @@
                 return $value . ' Hari';
             })
             ->toArray();
-    } elseif (in_array($paramName, ['harga', 'jumlah_harga']) && isset($uniqueValues[$paramName])) {
-        // Format currency values
+    } elseif (in_array($paramName, ['harga', 'jumlah_harga', 'ppn', 'bruto']) && isset($uniqueValues[$paramName])) {
+        // Format currency values including ppn and bruto
         $formattedValues = collect($uniqueValues[$paramName])
             ->map(function ($value) {
                 return number_format($value, 0, ',', '.');
@@ -81,11 +89,13 @@
                                     <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">
                                         @if ($paramName === 'periode')
                                             {{ $formattedValues[$key] }}
+                                        @elseif ($paramName === 'tanggal')
+                                            {{ $formattedValues[$key] }}
                                         @elseif ($paramName === 'tipe')
                                             {{ $formattedValues[$key] }}
                                         @elseif (in_array($paramName, ['durasi_rencana', 'durasi_actual']))
                                             {{ $formattedValues[$key] }}
-                                        @elseif (in_array($paramName, ['harga', 'jumlah_harga']))
+                                        @elseif (in_array($paramName, ['harga', 'jumlah_harga', 'ppn', 'bruto']))
                                             {{ $formattedValues[$key] }}
                                         @else
                                             {{ $value }}

@@ -143,22 +143,34 @@ class DetailSPBController extends Controller
             } );
         }
 
-        // Collect all unique values into single array
+        // Collect all unique values into single array - modified to only include items with remaining quantity > 0
         $uniqueValues = [];
 
         $uniqueValues[ 'jenis_alat' ] = $collection->flatMap ( function ($item)
         {
-            return $item->linkAlatDetailRkbs->map ( function ($detail)
+            return $item->linkAlatDetailRkbs->flatMap ( function ($detail)
             {
-                return $detail->masterDataAlat->jenis_alat;
+                $hasValidQuantity = $detail->linkRkbDetails->some ( function ($rkbDetail)
+                {
+                    $remainder = $rkbDetail->detailRkbUrgent?->quantity_remainder ??
+                        $rkbDetail->detailRkbGeneral?->quantity_remainder ?? 0;
+                    return $remainder > 0;
+                } );
+                return $hasValidQuantity ? [ $detail->masterDataAlat->jenis_alat ] : [];
             } );
         } )->unique ()->filter ()->sort ()->values ();
 
         $uniqueValues[ 'kode_alat' ] = $collection->flatMap ( function ($item)
         {
-            return $item->linkAlatDetailRkbs->map ( function ($detail)
+            return $item->linkAlatDetailRkbs->flatMap ( function ($detail)
             {
-                return $detail->masterDataAlat->kode_alat;
+                $hasValidQuantity = $detail->linkRkbDetails->some ( function ($rkbDetail)
+                {
+                    $remainder = $rkbDetail->detailRkbUrgent?->quantity_remainder ??
+                        $rkbDetail->detailRkbGeneral?->quantity_remainder ?? 0;
+                    return $remainder > 0;
+                } );
+                return $hasValidQuantity ? [ $detail->masterDataAlat->kode_alat ] : [];
             } );
         } )->unique ()->filter ()->sort ()->values ();
 
@@ -166,20 +178,15 @@ class DetailSPBController extends Controller
         {
             return $item->linkAlatDetailRkbs->flatMap ( function ($detail)
             {
-                return $detail->linkRkbDetails->map ( function ($rkbDetail)
+                return $detail->linkRkbDetails->filter ( function ($rkbDetail)
                 {
-                    if ( $rkbDetail->detailRkbGeneral )
-                    {
-                        $kategori = $rkbDetail->detailRkbGeneral->kategoriSparepart;
-                    }
-                    elseif ( $rkbDetail->detailRkbUrgent )
-                    {
-                        $kategori = $rkbDetail->detailRkbUrgent->kategoriSparepart;
-                    }
-                    else
-                    {
-                        $kategori = null;
-                    }
+                    $remainder = $rkbDetail->detailRkbUrgent?->quantity_remainder ??
+                        $rkbDetail->detailRkbGeneral?->quantity_remainder ?? 0;
+                    return $remainder > 0;
+                } )->map ( function ($rkbDetail)
+                {
+                    $kategori = $rkbDetail->detailRkbUrgent?->kategoriSparepart ??
+                        $rkbDetail->detailRkbGeneral?->kategoriSparepart;
                     return $kategori ? $kategori->kode . ': ' . $kategori->nama : null;
                 } );
             } );
@@ -189,15 +196,16 @@ class DetailSPBController extends Controller
         {
             return $item->linkAlatDetailRkbs->flatMap ( function ($detail)
             {
-                return $detail->linkRkbDetails->map ( function ($rkbDetail)
+                return $detail->linkRkbDetails->filter ( function ($rkbDetail)
                 {
-                    $sparepart = $rkbDetail->detailRkbGeneral?->masterDataSparepart ??
-                        $rkbDetail->detailRkbUrgent?->masterDataSparepart;
-                    if ( $sparepart )
-                    {
-                        return $sparepart->nama . ' - ' . ( $sparepart->part_number ?? '-' ) . ' - ' . ( $sparepart->merk ?? '-' );
-                    }
-                    return null;
+                    $remainder = $rkbDetail->detailRkbUrgent?->quantity_remainder ??
+                        $rkbDetail->detailRkbGeneral?->quantity_remainder ?? 0;
+                    return $remainder > 0;
+                } )->map ( function ($rkbDetail)
+                {
+                    $sparepart = $rkbDetail->detailRkbUrgent?->masterDataSparepart ??
+                        $rkbDetail->detailRkbGeneral?->masterDataSparepart;
+                    return $sparepart ? $sparepart->nama . ' - ' . ( $sparepart->part_number ?? '-' ) . ' - ' . ( $sparepart->merk ?? '-' ) : null;
                 } );
             } );
         } )->unique ()->filter ()->sort ()->values ();
@@ -208,17 +216,23 @@ class DetailSPBController extends Controller
             {
                 return $detail->linkRkbDetails->map ( function ($rkbDetail)
                 {
-                    return $rkbDetail->detailRkbUrgent?->quantity_remainder ??
+                    $remainder = $rkbDetail->detailRkbUrgent?->quantity_remainder ??
                         $rkbDetail->detailRkbGeneral?->quantity_remainder ?? 0;
+                    return $remainder > 0 ? $remainder : null;
                 } );
             } );
-        } )->unique ()->sort ()->values ();
+        } )->unique ()->filter ()->sort ()->values ();
 
         $uniqueValues[ 'satuan' ] = $collection->flatMap ( function ($item)
         {
             return $item->linkAlatDetailRkbs->flatMap ( function ($detail)
             {
-                return $detail->linkRkbDetails->map ( function ($rkbDetail)
+                return $detail->linkRkbDetails->filter ( function ($rkbDetail)
+                {
+                    $remainder = $rkbDetail->detailRkbUrgent?->quantity_remainder ??
+                        $rkbDetail->detailRkbGeneral?->quantity_remainder ?? 0;
+                    return $remainder > 0;
+                } )->map ( function ($rkbDetail)
                 {
                     return $rkbDetail->detailRkbUrgent?->satuan ??
                         $rkbDetail->detailRkbGeneral?->satuan ?? null;

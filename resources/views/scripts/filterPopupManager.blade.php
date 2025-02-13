@@ -1,18 +1,3 @@
-@php
-    function getSelectedValues($paramValue)
-    {
-        if (!$paramValue) {
-            return [];
-        }
-
-        try {
-            return explode('||', base64_decode($paramValue));
-        } catch (\Exception $e) {
-            return [];
-        }
-    }
-@endphp
-
 <script>
     /**
      * Debounce function to limit how often a function can be called
@@ -99,11 +84,43 @@
             positionPopup(popup, button);
 
             // Extract filter type from ID and handle URL parameters
-            // Fix: Ubah semua dash menjadi underscore untuk parameter URL
             const type = id.replace('-filter', '').replaceAll('-', '_');
             const urlParams = new URLSearchParams(window.location.search);
             const encodedSelected = urlParams.get(`selected_${type}`);
 
+            // Sort items initially when popup opens
+            const container = popup.find('.checkbox-list');
+            const items = [];
+
+            // Collect all items with their data
+            container.children('.form-check').each(function() {
+                const item = $(this);
+                const label = item.find('label').text();
+                const labelLower = label.toLowerCase();
+                const priority = getItemPriority(label);
+                items.push({
+                    item,
+                    label,
+                    labelLower,
+                    priority
+                });
+            });
+
+            // Sort items with priority
+            items.sort((a, b) => {
+                if (a.priority !== b.priority) {
+                    return a.priority - b.priority;
+                }
+                return a.labelLower.localeCompare(b.labelLower);
+            });
+
+            // Clear and re-append sorted items
+            container.empty();
+            items.forEach(({
+                item
+            }) => container.append(item));
+
+            // Now restore checked states from URL
             if (encodedSelected) {
                 try {
                     const selectedValues = atob(encodedSelected).split('||').map(value => value.trim());
@@ -114,6 +131,8 @@
                             checkbox.checked = true;
                         }
                     });
+                    // After restoring checked states, run filterCheckboxes to ensure proper ordering
+                    filterCheckboxes(type);
                 } catch (e) {
                     console.error('Error restoring checkbox states:', e);
                 }
@@ -208,16 +227,74 @@
         const container = $(selector).first().closest('.checkbox-list');
         const searchText = searchEvent ? $(searchEvent.target).val().toLowerCase() : '';
 
-        container.children('.form-check').each(function() {
-            const label = $(this).find('label').text().toLowerCase();
-            const isChecked = $(this).find('input[type="checkbox"]').prop('checked');
+        const checkedItems = [];
+        const uncheckedItems = [];
 
-            // Show item if it's checked or matches search
-            if (isChecked || !searchText || label.includes(searchText)) {
-                $(this).show();
+        // Custom function to determine item priority
+        const getItemPriority = (label) => {
+            const trimmedLabel = label.trim();
+            if (trimmedLabel === 'Empty/Null') return 1;
+            if (trimmedLabel === '-') return 2;
+            return 3;
+        };
+
+        container.children('.form-check').each(function() {
+            const item = $(this);
+            const label = item.find('label').text();
+            const labelLower = label.toLowerCase();
+            const isChecked = item.find('input[type="checkbox"]').prop('checked');
+            const matchesSearch = !searchText || labelLower.includes(searchText);
+            const priority = getItemPriority(label);
+
+            // Store item with all necessary information
+            const itemData = {
+                item,
+                label,
+                labelLower,
+                priority,
+                visible: matchesSearch
+            };
+
+            if (isChecked) {
+                checkedItems.push(itemData);
             } else {
-                $(this).hide();
+                uncheckedItems.push(itemData);
             }
+        });
+
+        // Custom sort function that handles priorities
+        const sortItems = (a, b) => {
+            // First sort by priority
+            if (a.priority !== b.priority) {
+                return a.priority - b.priority;
+            }
+            // Then by alphabetical order for same priority items
+            return a.labelLower.localeCompare(b.labelLower);
+        };
+
+        // Sort both arrays
+        checkedItems.sort(sortItems);
+        uncheckedItems.sort(sortItems);
+
+        // Clear container before re-adding items
+        container.empty();
+
+        // Add checked items first (they stay at top)
+        checkedItems.forEach(({
+            item,
+            visible
+        }) => {
+            item.toggle(visible);
+            container.append(item);
+        });
+
+        // Add unchecked items
+        uncheckedItems.forEach(({
+            item,
+            visible
+        }) => {
+            item.toggle(visible);
+            container.append(item);
         });
     }
 
@@ -312,14 +389,31 @@
     }
 
     /**
-     * Toggles all checkboxes in a filter popup
-     * If all are checked, unchecks all. Otherwise, checks all.
+     * Toggles all visible checkboxes in a filter popup
+     * If all visible are checked, unchecks all visible. Otherwise, checks all visible.
      * @param {string} type - The type of filter
      */
     function toggleAllFilters(type) {
-        const checkboxes = $(`.${type}-checkbox`);
-        const allChecked = checkboxes.length === checkboxes.filter(':checked').length;
-        checkboxes.prop('checked', !allChecked);
+        const container = $(`.${type}-checkbox`).first().closest('.checkbox-list');
+        const searchInput = container.closest('.filter-popup').find('input[type="text"]');
+        const searchText = searchInput.val().toLowerCase();
+
+        // Only work with items that match the current search
+        const visibleCheckboxes = container.find(`.${type}-checkbox`).filter(function() {
+            const label = $(this).closest('.form-check').find('label').text().toLowerCase();
+            return !searchText || label.includes(searchText);
+        });
+
+        // Check if all currently visible checkboxes are checked
+        const allVisibleChecked = visibleCheckboxes.length === visibleCheckboxes.filter(':checked').length;
+
+        // Toggle only visible checkboxes
+        visibleCheckboxes.prop('checked', !allVisibleChecked);
+
+        // Re-run the filter to maintain current search and ordering
+        filterCheckboxes(type, {
+            target: searchInput[0]
+        });
     }
 
     // Document ready event handler
@@ -334,15 +428,19 @@
         // Handle keyboard shortcuts
         $(document).on('keydown', function(event) {
             const visiblePopup = $('.filter-popup:visible');
+            const activeElement = document.activeElement;
+
+            // Check if the active element is an input inside the popup
+            const isInputFocused = $(activeElement).is('.filter-popup input[type="text"]');
 
             if (event.key === 'Escape') {
                 $('.filter-popup').hide();
-            } else if (event.key === 'Enter' && visiblePopup.length) {
+            } else if (event.key === 'Enter' && visiblePopup.length && isInputFocused) {
                 const popupId = visiblePopup.attr('id');
                 const type = popupId.replace('-filter', '').replaceAll('-', '_');
                 applyFilter(type);
                 event.preventDefault();
-            } else if (event.key === 'a' && event.ctrlKey && visiblePopup.length) {
+            } else if (event.key === 'a' && event.ctrlKey && visiblePopup.length && isInputFocused) {
                 // Prevent default select all behavior
                 event.preventDefault();
                 // Get popup type and toggle all checkboxes
@@ -367,5 +465,37 @@
 
         // Attach debounced filter to search inputs
         $('.filter-popup input[type="text"]').on('input', debouncedFilter);
+
+        // Apply filter if search input already has value on document ready
+        $('.filter-popup input[type="text"]').each(function() {
+            if ($(this).val()) {
+                const popupId = $(this).closest('.filter-popup').attr('id');
+                const type = popupId.replace('-filter', '').replace('-', '_');
+                filterCheckboxes(type, {
+                    target: this
+                });
+            }
+        });
+
+        // Set interval to check and apply filter every second if input has value
+        setInterval(() => {
+            $('.filter-popup input[type="text"]').each(function() {
+                if ($(this).val()) {
+                    const popupId = $(this).closest('.filter-popup').attr('id');
+                    const type = popupId.replace('-filter', '').replace('-', '_');
+                    filterCheckboxes(type, {
+                        target: this
+                    });
+                }
+            });
+        }, 60);
     });
+
+    // Custom function to determine item priority
+    function getItemPriority(label) {
+        const trimmedLabel = label.trim();
+        if (trimmedLabel === "Empty/Null") return 1;
+        if (trimmedLabel === "-") return 2;
+        return 3;
+    }
 </script>

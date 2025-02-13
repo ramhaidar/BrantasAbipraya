@@ -3,21 +3,38 @@
     if (isset($roles)) {
         $showHeader = in_array(auth()->user()->role, $roles);
     }
+
+    // Ensure $paramName is defined with a default value if not set
+    $paramName = $paramName ?? '';
+
+    // Format values for different types of filters
+    $formattedValues = [];
+
+    if ($paramName === 'periode' && isset($uniqueValues['periode'])) {
+        // Format periode values
+        $formattedValues = collect($uniqueValues['periode'])
+            ->map(function ($periode) {
+                return \Carbon\Carbon::parse($periode)->isoFormat('MMMM Y');
+            })
+            ->toArray();
+    } elseif ($paramName === 'tipe' && isset($uniqueValues['tipe'])) {
+        // Format tipe values
+        $formattedValues = collect($uniqueValues['tipe'])
+            ->map(function ($tipe) {
+                return ucwords($tipe);
+            })
+            ->toArray();
+    } elseif (in_array($paramName, ['durasi_rencana', 'durasi_actual']) && isset($uniqueValues[$paramName])) {
+        // Format duration values by adding 'Hari' suffix
+        $formattedValues = collect($uniqueValues[$paramName])
+            ->map(function ($value) {
+                return $value . ' Hari';
+            })
+            ->toArray();
+    }
 @endphp
 
 @if ($showHeader)
-    @php
-        // Format values if this is a periode filter
-        $formattedPeriodes = [];
-        if (($paramName ?? '') === 'periode' && isset($uniqueValues['periode'])) {
-            $formattedPeriodes = collect($uniqueValues['periode'])
-                ->map(function ($periode) {
-                    return \Carbon\Carbon::parse($periode)->isoFormat('MMMM Y');
-                })
-                ->toArray();
-        }
-    @endphp
-
     <th>
         <div class="d-flex align-items-center gap-2 justify-content-center">
             {{ $title }}
@@ -53,10 +70,14 @@
                         @else
                             @foreach ($uniqueValues[(string) $paramName] as $key => $value)
                                 <div class="form-check">
-                                    <input class="form-check-input {{ $paramName }}-checkbox" type="checkbox" value="{{ $value }}" style="cursor: pointer" {{ in_array($value, explode(',', request("selected_$paramName", ''))) ? 'checked' : '' }}>
+                                    <input class="form-check-input {{ $paramName }}-checkbox" type="checkbox" value="{{ $value }}" style="cursor: pointer" {{ in_array((string) $value, explode(',', request("selected_$paramName", ''))) ? 'checked' : '' }}>
                                     <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">
                                         @if ($paramName === 'periode')
-                                            {{ $formattedPeriodes[$key] }}
+                                            {{ $formattedValues[$key] }}
+                                        @elseif ($paramName === 'tipe')
+                                            {{ $formattedValues[$key] }}
+                                        @elseif (in_array($paramName, ['durasi_rencana', 'durasi_actual']))
+                                            {{ $formattedValues[$key] }}
                                         @else
                                             {{ $value }}
                                         @endif

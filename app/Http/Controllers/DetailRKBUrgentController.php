@@ -197,6 +197,23 @@ class DetailRKBUrgentController extends Controller
         $result = clone $query;
         $data   = $result->get ();
 
+        $formatQuantityValues = function ($column) use ($data)
+        {
+            return $data->pluck ( $column )
+                ->filter ( function ($value)
+                {
+                    // Only return non-null values since null will be handled by the view's "Empty/Null" option
+                    return $value !== null;
+                } )
+                ->unique ()
+                ->map ( function ($value)
+                {
+                    return (string) $value;
+                } )
+                ->sort ()
+                ->values ();
+        };
+
         return [ 
             'jenis_alat'         => $data->pluck ( 'jenis_alat' )->unique ()->filter ()->sort ()->values (),
             'kode_alat'          => $data->pluck ( 'kode_alat' )->unique ()->filter ()->sort ()->values (),
@@ -206,8 +223,8 @@ class DetailRKBUrgentController extends Controller
             'merk'               => $data->pluck ( 'merk' )->unique ()->filter ()->sort ()->values (),
             'nama_koordinator'   => $data->pluck ( 'nama_koordinator' )->unique ()->filter ()->sort ()->values (), // Add this line
             'satuan'             => $data->pluck ( 'satuan' )->unique ()->filter ()->sort ()->values (),
-            'quantity_requested' => $data->pluck ( 'quantity_requested' )->unique ()->filter ()->sort ()->values (),
-            'quantity_approved'  => $data->pluck ( 'quantity_approved' )->unique ()->filter ()->sort ()->values (),
+            'quantity_requested' => $formatQuantityValues ( 'quantity_requested' ),
+            'quantity_approved'  => $formatQuantityValues ( 'quantity_approved' ),
         ];
     }
 

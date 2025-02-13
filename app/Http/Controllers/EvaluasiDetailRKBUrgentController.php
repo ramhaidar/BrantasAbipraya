@@ -74,18 +74,7 @@ class EvaluasiDetailRKBUrgentController extends Controller
         $finalFilteredData  = $finalFilteredQuery->get ();
 
         // Get unique values from filtered data
-        $uniqueValues = [ 
-            'jenis_alat'         => $finalFilteredData->pluck ( 'jenis_alat' )->unique ()->filter ()->sort ()->values (),
-            'kode_alat'          => $finalFilteredData->pluck ( 'kode_alat' )->unique ()->filter ()->sort ()->values (),
-            'kategori_sparepart' => $finalFilteredData->pluck ( 'kategori_nama' )->unique ()->filter ()->sort ()->values (),
-            'sparepart'          => $finalFilteredData->pluck ( 'sparepart_nama' )->unique ()->filter ()->sort ()->values (),
-            'part_number'        => $finalFilteredData->pluck ( 'part_number' )->unique ()->filter ()->sort ()->values (),
-            'merk'               => $finalFilteredData->pluck ( 'merk' )->unique ()->filter ()->sort ()->values (),
-            'nama_koordinator'   => $finalFilteredData->pluck ( 'nama_koordinator' )->unique ()->filter ()->sort ()->values (),
-            'quantity_requested' => $finalFilteredData->pluck ( 'quantity_requested' )->unique ()->filter ()->sort ()->values (),
-            'stock_quantity'     => $stockQuantities->values ()->unique ()->sort ()->values (),
-            'satuan'             => $finalFilteredData->pluck ( 'satuan' )->unique ()->filter ()->sort ()->values (),
-        ];
+        $uniqueValues = $this->getUniqueValues($finalFilteredQuery);
 
         // Get stock quantities and table data
         $TableData = $this->getTableData ( $query, $perPage );
@@ -344,6 +333,52 @@ class EvaluasiDetailRKBUrgentController extends Controller
                     ->orWhere ( 'master_data_sparepart.merk', 'ilike', "%{$search}%" );
             } );
         }
+    }
+
+    private function getUniqueValues($query)
+    {
+        $result = clone $query;
+        $data = $result->get();
+
+        $formatQuantityValues = function($column) use ($data) {
+            return $data->pluck($column)
+                ->reject(function($value) {
+                    // Only reject null values, keep 0
+                    return $value === null;
+                })
+                ->unique()
+                ->map(function($value) {
+                    return (string)$value;
+                })
+                ->sort()
+                ->values();
+        };
+
+        // Format stock quantities separately
+        $stockQuantities = $data->pluck('stock_quantity')
+            ->reject(function($value) {
+                // Only reject null values, keep 0
+                return $value === null;
+            })
+            ->unique()
+            ->map(function($value) {
+                return (string)$value;
+            })
+            ->sort()
+            ->values();
+
+        return [
+            'jenis_alat'         => $data->pluck ( 'jenis_alat' )->unique ()->filter ()->sort ()->values (),
+            'kode_alat'          => $data->pluck ( 'kode_alat' )->unique ()->filter ()->sort ()->values (),
+            'kategori_sparepart' => $data->pluck ( 'kategori_nama' )->unique ()->filter ()->sort ()->values (),
+            'sparepart'          => $data->pluck ( 'sparepart_nama' )->unique ()->filter ()->sort ()->values (),
+            'part_number'        => $data->pluck ( 'part_number' )->unique ()->filter ()->sort ()->values (),
+            'merk'               => $data->pluck ( 'merk' )->unique ()->filter ()->sort ()->values (),
+            'nama_koordinator'   => $data->pluck ( 'nama_koordinator' )->unique ()->filter ()->sort ()->values (),
+            'quantity_requested' => $formatQuantityValues('quantity_requested'),
+            'stock_quantity'     => $stockQuantities,
+            'satuan'             => $data->pluck ( 'satuan' )->unique ()->filter ()->sort ()->values (),
+        ];
     }
 
     public function getDokumentasi ( $id )

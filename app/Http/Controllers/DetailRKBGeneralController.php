@@ -168,6 +168,23 @@ class DetailRKBGeneralController extends Controller
         $result = clone $query;
         $data   = $result->get ();
 
+        $formatQuantityValues = function ($column) use ($data)
+        {
+            return $data->pluck ( $column )
+                ->filter ( function ($value)
+                {
+                    // Only return non-null values since null will be handled by the view's "Empty/Null" option
+                    return $value !== null;
+                } )
+                ->unique ()
+                ->map ( function ($value)
+                {
+                    return (string) $value;
+                } )
+                ->sort ()
+                ->values ();
+        };
+
         return [ 
             'jenis_alat'         => $data->pluck ( 'jenis_alat' )->unique ()->filter ()->sort ()->values (),
             'kode_alat'          => $data->pluck ( 'kode_alat' )->unique ()->filter ()->sort ()->values (),
@@ -176,8 +193,8 @@ class DetailRKBGeneralController extends Controller
             'part_number'        => $data->pluck ( 'part_number' )->unique ()->filter ()->sort ()->values (),
             'merk'               => $data->pluck ( 'merk' )->unique ()->filter ()->sort ()->values (),
             'satuan'             => $data->pluck ( 'satuan' )->unique ()->filter ()->sort ()->values (),
-            'quantity_requested' => $data->pluck ( 'quantity_requested' )->unique ()->filter ()->sort ()->values (),
-            'quantity_approved'  => $data->pluck ( 'quantity_approved' )->unique ()->filter ()->sort ()->values (),
+            'quantity_requested' => $formatQuantityValues ( 'quantity_requested' ),
+            'quantity_approved'  => $formatQuantityValues ( 'quantity_approved' ),
         ];
     }
 
@@ -191,25 +208,23 @@ class DetailRKBGeneralController extends Controller
             {
                 $values = $this->getSelectedValues ( $request->get ( $selectedParam ) );
 
-                // Special handling for numeric columns
+                // Special handling for quantity columns
                 if ( in_array ( $paramName, [ 'quantity_requested', 'quantity_approved' ] ) )
                 {
-                    if ( in_array ( 'null', $values ) )
+                    $query->where ( function ($q) use ($columnName, $values)
                     {
-                        $nonNullValues = array_filter ( $values, fn ( $value ) => $value !== 'null' );
-                        $query->where ( function ($q) use ($columnName, $nonNullValues)
+                        foreach ( $values as $value )
                         {
-                            $q->whereNull ( $columnName )
-                                ->when ( ! empty ( $nonNullValues ), function ($subQ) use ($columnName, $nonNullValues)
-                                {
-                                    $subQ->orWhereIn ( $columnName, $nonNullValues );
-                                } );
-                        } );
-                    }
-                    else
-                    {
-                        $query->whereIn ( $columnName, $values );
-                    }
+                            if ( $value === 'null' )
+                            {
+                                $q->orWhereNull ( $columnName );
+                            }
+                            else
+                            {
+                                $q->orWhere ( $columnName, '=', (int) $value );
+                            }
+                        }
+                    } );
                 }
                 else
                 {

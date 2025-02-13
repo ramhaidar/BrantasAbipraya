@@ -336,7 +336,40 @@ class EvaluasiDetailRKBGeneralController extends Controller
 
     private function getUniqueValues ( $query )
     {
-        $data = $query->get ();
+        $result = clone $query;
+        $data   = $result->get ();
+
+        $formatQuantityValues = function ($column) use ($data)
+        {
+            return $data->pluck ( $column )
+                ->reject ( function ($value)
+                {
+                    // Only reject null values, keep 0
+                    return $value === null;
+                } )
+                ->unique ()
+                ->map ( function ($value)
+                {
+                    return (string) $value;
+                } )
+                ->sort ()
+                ->values ();
+        };
+
+        // Format stock quantities separately since they come from a different source
+        $stockQuantities = $data->pluck ( 'stock_quantity' )
+            ->reject ( function ($value)
+            {
+                // Only reject null values, keep 0
+                return $value === null;
+            } )
+            ->unique ()
+            ->map ( function ($value)
+            {
+                return (string) $value;
+            } )
+            ->sort ()
+            ->values ();
 
         return [ 
             'jenis_alat'         => $data->pluck ( 'jenis_alat' )->unique ()->filter ()->sort ()->values (),
@@ -345,9 +378,9 @@ class EvaluasiDetailRKBGeneralController extends Controller
             'sparepart'          => $data->pluck ( 'sparepart_nama' )->unique ()->filter ()->sort ()->values (),
             'part_number'        => $data->pluck ( 'part_number' )->unique ()->filter ()->sort ()->values (),
             'merk'               => $data->pluck ( 'merk' )->unique ()->filter ()->sort ()->values (),
-            'quantity_requested' => $data->pluck ( 'quantity_requested' )->unique ()->filter ()->sort ()->values (),
-            'stock_quantity'     => $data->pluck ( 'stock_quantity' )->unique ()->filter ()->sort ()->values (),
             'satuan'             => $data->pluck ( 'satuan' )->unique ()->filter ()->sort ()->values (),
+            'quantity_requested' => $formatQuantityValues ( 'quantity_requested' ),
+            'stock_quantity'     => $stockQuantities,
         ];
     }
 

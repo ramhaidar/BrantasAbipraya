@@ -74,7 +74,7 @@ class EvaluasiDetailRKBUrgentController extends Controller
         $finalFilteredData  = $finalFilteredQuery->get ();
 
         // Get unique values from filtered data
-        $uniqueValues = $this->getUniqueValues($finalFilteredQuery);
+        $uniqueValues = $this->getUniqueValues ( $finalFilteredQuery );
 
         // Get stock quantities and table data
         $TableData = $this->getTableData ( $query, $perPage );
@@ -335,39 +335,55 @@ class EvaluasiDetailRKBUrgentController extends Controller
         }
     }
 
-    private function getUniqueValues($query)
+    private function getUniqueValues ( $query )
     {
         $result = clone $query;
-        $data = $result->get();
+        $data   = $result->get ();
 
-        $formatQuantityValues = function($column) use ($data) {
-            return $data->pluck($column)
-                ->reject(function($value) {
+        $formatQuantityValues = function ($column) use ($data)
+        {
+            return $data->pluck ( $column )
+                ->reject ( function ($value)
+                {
                     // Only reject null values, keep 0
                     return $value === null;
-                })
-                ->unique()
-                ->map(function($value) {
-                    return (string)$value;
-                })
-                ->sort()
-                ->values();
+                } )
+                ->unique ()
+                ->map ( function ($value)
+                {
+                    return (string) $value;
+                } )
+                ->sort ()
+                ->values ();
         };
 
-        // Format stock quantities separately
-        $stockQuantities = $data->pluck('stock_quantity')
-            ->reject(function($value) {
-                // Only reject null values, keep 0
+        // Get stock quantities from saldo table
+        $stockQuantities = Saldo::where ( 'id_proyek', $this->rkb->id_proyek )
+            ->whereIn ( 'id_master_data_sparepart', function ($query)
+            {
+                $query->select ( 'id_master_data_sparepart' )
+                    ->from ( 'detail_rkb_urgent' )
+                    ->join ( 'link_rkb_detail', 'detail_rkb_urgent.id', '=', 'link_rkb_detail.id_detail_rkb_urgent' )
+                    ->join ( 'link_alat_detail_rkb', 'link_rkb_detail.id_link_alat_detail_rkb', '=', 'link_alat_detail_rkb.id' )
+                    ->where ( 'link_alat_detail_rkb.id_rkb', $this->rkb->id );
+            } )
+            ->selectRaw ( 'id_master_data_sparepart, SUM(quantity) as total_quantity' )
+            ->groupBy ( 'id_master_data_sparepart' )
+            ->get ()
+            ->pluck ( 'total_quantity' )
+            ->reject ( function ($value)
+            {
                 return $value === null;
-            })
-            ->unique()
-            ->map(function($value) {
-                return (string)$value;
-            })
-            ->sort()
-            ->values();
+            } )
+            ->unique ()
+            ->map ( function ($value)
+            {
+                return (string) $value;
+            } )
+            ->sort ()
+            ->values ();
 
-        return [
+        return [ 
             'jenis_alat'         => $data->pluck ( 'jenis_alat' )->unique ()->filter ()->sort ()->values (),
             'kode_alat'          => $data->pluck ( 'kode_alat' )->unique ()->filter ()->sort ()->values (),
             'kategori_sparepart' => $data->pluck ( 'kategori_nama' )->unique ()->filter ()->sort ()->values (),
@@ -375,7 +391,7 @@ class EvaluasiDetailRKBUrgentController extends Controller
             'part_number'        => $data->pluck ( 'part_number' )->unique ()->filter ()->sort ()->values (),
             'merk'               => $data->pluck ( 'merk' )->unique ()->filter ()->sort ()->values (),
             'nama_koordinator'   => $data->pluck ( 'nama_koordinator' )->unique ()->filter ()->sort ()->values (),
-            'quantity_requested' => $formatQuantityValues('quantity_requested'),
+            'quantity_requested' => $formatQuantityValues ( 'quantity_requested' ),
             'stock_quantity'     => $stockQuantities,
             'satuan'             => $data->pluck ( 'satuan' )->unique ()->filter ()->sort ()->values (),
         ];

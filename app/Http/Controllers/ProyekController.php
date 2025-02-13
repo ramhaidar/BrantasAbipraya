@@ -9,6 +9,21 @@ use Illuminate\Support\Facades\Auth;
 
 class ProyekController extends Controller
 {
+    private function getSelectedValues ( $paramValue )
+    {
+        if ( ! $paramValue ) return [];
+
+        try
+        {
+            return explode ( '||', base64_decode ( $paramValue ) );
+        }
+        catch ( \Exception $e )
+        {
+            \Log::error ( 'Error decoding parameter value: ' . $e->getMessage () );
+            return [];
+        }
+    }
+
     public function index ( Request $request )
     {
         // Validate and set perPage to allowed values only
@@ -29,31 +44,43 @@ class ProyekController extends Controller
 
         if ( $request->filled ( 'selected_nama' ) )
         {
-            $nama = explode ( ',', $request->selected_nama );
-            // Decode base64 values
-            $nama = array_map ( function ($val)
+            try
             {
-                return $val === 'null' ? $val : base64_decode ( $val );
-            }, $nama );
-
-            if ( in_array ( 'null', $nama ) )
-            {
-                $nonNullValues = array_filter ( $nama, fn ( $value ) => $value !== 'null' );
-                $query->where ( function ($q) use ($nonNullValues)
+                $nama = $this->getSelectedValues ( $request->selected_nama );
+                if ( in_array ( 'null', $nama ) )
                 {
-                    $q->whereNull ( 'nama' )
-                        ->orWhere ( 'nama', '-' )
-                        ->orWhereIn ( 'nama', $nonNullValues );
-                } );
+                    $nonNullValues = array_filter ( $nama, fn ( $value ) => $value !== 'null' );
+                    $query->where ( function ($q) use ($nonNullValues)
+                    {
+                        $q->whereNull ( 'nama' )
+                            ->orWhere ( 'nama', '' )
+                            ->orWhere ( 'nama', '-' );
+
+                        if ( ! empty ( $nonNullValues ) )
+                        {
+                            $q->orWhereIn ( 'nama', $nonNullValues );
+                        }
+                    } );
+                }
+                else
+                {
+                    $query->whereIn ( 'nama', $nama );
+                }
             }
-            else
+            catch ( \Exception $e )
             {
-                $query->whereIn ( 'nama', $nama );
+                \Log::error ( 'Error in nama filter: ' . $e->getMessage () );
             }
         }
 
         $uniqueValues = [ 
-            'nama' => Proyek::whereNotNull ( 'nama' )->distinct ()->pluck ( 'nama' ),
+            'nama' => Proyek::whereNotNull ( 'nama' )
+                ->where ( 'nama', '<>', '' )
+                ->where ( 'nama', '<>', '-' )
+                ->distinct ()
+                ->pluck ( 'nama' )
+                ->sort ()
+                ->values (),
         ];
 
         // Filter projects based on user role

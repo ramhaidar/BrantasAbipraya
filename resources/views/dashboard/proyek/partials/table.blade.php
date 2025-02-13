@@ -2,11 +2,44 @@
     @include('styles.tables')
 @endpush
 
+@php
+    $headers = [
+        [
+            'title' => 'Nama Proyek',
+            'filterId' => 'nama',
+            'paramName' => 'nama',
+            'filter' => true,
+        ],
+        [
+            'title' => 'Detail',
+            'filter' => false,
+        ],
+        [
+            'title' => 'Aksi',
+            'filter' => false,
+        ],
+    ];
+
+    $appliedFilters = false;
+    foreach ($headers as $header) {
+        if ($header['filter'] && request("selected_{$header['paramName']}")) {
+            $appliedFilters = true;
+            break;
+        }
+    }
+
+    $resetUrl = request()->url();
+    $queryParams = '';
+    if (request()->hasAny(['search', 'id_proyek'])) {
+        $queryParams = '?' . http_build_query(request()->only(['search', 'id_proyek']));
+    }
+@endphp
+
 <div class="ibox-body ms-0 ps-0">
     <form class="mb-3" id="filter-form" method="GET">
         <div class="mb-3 d-flex justify-content-end">
-            @if (request('selected_nama'))
-                <a class="btn btn-danger btn-sm btn-hide-text-mobile" href="{{ request()->url() }}{{ request()->hasAny(['search', 'id_proyek']) ? '?' . http_build_query(request()->only(['search', 'id_proyek'])) : '' }}">
+            @if ($appliedFilters)
+                <a class="btn btn-danger btn-sm btn-hide-text-mobile" href="{{ $resetUrl . $queryParams }}">
                     <i class="bi bi-x-circle"></i> <span class="ms-2">Hapus Semua Filter</span>
                 </a>
             @endif
@@ -16,43 +49,13 @@
             <table class="m-0 table table-bordered table-hover" id="table-data">
                 <thead class="table-primary">
                     <tr>
-                        <th>
-                            <div class="d-flex align-items-center gap-2 justify-content-center">
-                                Nama Proyek
-                                <div class="btn-group">
-                                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="toggleFilter('nama-filter')">
-                                        <i class="bi bi-funnel-fill"></i>
-                                    </button>
-                                    @if (request('selected_nama'))
-                                        <button class="btn btn-outline-danger btn-sm" type="button" onclick="clearFilter('nama')">
-                                            <i class="bi bi-x-circle"></i>
-                                        </button>
-                                    @endif
-                                </div>
-                            </div>
-                            <div class="filter-popup" id="nama-filter" style="display: none;">
-                                <div class="p-2">
-                                    <input class="form-control form-control-sm mb-2" type="text" placeholder="Search nama..." onkeyup="filterCheckboxes('nama')">
-                                    <div class="checkbox-list text-start">
-                                        <div class="form-check">
-                                            <input class="form-check-input nama-checkbox" type="checkbox" value="null" style="cursor: pointer" {{ in_array('null', explode(',', request('selected_nama', ''))) ? 'checked' : '' }}>
-                                            <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">Empty/Null</label>
-                                        </div>
-                                        @foreach ($uniqueValues['nama'] as $nama)
-                                            <div class="form-check">
-                                                <input class="form-check-input nama-checkbox" type="checkbox" value="{{ $nama }}" style="cursor: pointer" {{ in_array($nama, explode(',', request('selected_nama', ''))) ? 'checked' : '' }}>
-                                                <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">{{ $nama }}</label>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('nama')">
-                                        <i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </th>
-                        <th>Detail</th>
-                        <th>Aksi</th>
+                        @foreach ($headers as $header)
+                            @include(
+                                'components.table-header-filter',
+                                array_merge($header, [
+                                    'uniqueValues' => $uniqueValues ?? [],
+                                ]))
+                        @endforeach
                     </tr>
                 </thead>
                 <tbody>
@@ -75,7 +78,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td class="text-center py-3 text-muted" colspan="7">
+                            <td class="text-center py-3 text-muted" colspan="3">
                                 <i class="bi bi-inbox fs-1 d-block mb-2"></i>
                                 No projects found
                             </td>

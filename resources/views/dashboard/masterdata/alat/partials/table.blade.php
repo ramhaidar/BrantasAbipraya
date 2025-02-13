@@ -2,11 +2,78 @@
     @include('styles.tables')
 @endpush
 
+@php
+    // Step 1: Define table headers in a clean and structured way
+    $headers = [
+        [
+            'title' => 'Jenis Alat',
+            'filterId' => 'jenis',
+            'paramName' => 'jenis',
+            'filter' => true,
+        ],
+        [
+            'title' => 'Kode Alat',
+            'filterId' => 'kode',
+            'paramName' => 'kode',
+            'filter' => true,
+        ],
+        [
+            'title' => 'Merek Alat',
+            'filterId' => 'merek',
+            'paramName' => 'merek',
+            'filter' => true,
+        ],
+        [
+            'title' => 'Tipe Alat',
+            'filterId' => 'tipe',
+            'paramName' => 'tipe',
+            'filter' => true,
+        ],
+        [
+            'title' => 'Serial Number',
+            'filterId' => 'serial',
+            'paramName' => 'serial',
+            'filter' => true,
+        ],
+        [
+            'title' => 'Lokasi Proyek',
+            'filterId' => 'proyek',
+            'paramName' => 'proyek',
+            'filter' => true,
+        ],
+        [
+            'title' => 'Riwayat',
+            'filter' => false,
+        ],
+        [
+            'title' => 'Aksi',
+            'filter' => false,
+            'roles' => ['admin_divisi', 'superadmin'],
+        ],
+    ];
+
+    // Step 2: Check if any filter is applied
+    $appliedFilters = false;
+    foreach ($headers as $header) {
+        if ($header['filter'] && request("selected_{$header['paramName']}")) {
+            $appliedFilters = true;
+            break;
+        }
+    }
+
+    // Step 3: Build query parameters for resetting filters
+    $resetUrl = request()->url();
+    $queryParams = '';
+    if (request()->hasAny(['search', 'id_proyek'])) {
+        $queryParams = '?' . http_build_query(request()->only(['search', 'id_proyek']));
+    }
+@endphp
+
 <div class="ibox-body ms-0 ps-0">
     <form class="mb-3" id="filter-form" method="GET">
         <div class="mb-3 d-flex justify-content-end">
-            @if (request('selected_jenis') || request('selected_merek') || request('selected_kode') || request('selected_tipe') || request('selected_serial') || request('selected_proyek'))
-                <a class="btn btn-danger btn-sm btn-hide-text-mobile" href="{{ request()->url() }}{{ request()->hasAny(['search', 'id_proyek']) ? '?' . http_build_query(request()->only(['search', 'id_proyek'])) : '' }}">
+            @if ($appliedFilters)
+                <a class="btn btn-danger btn-sm btn-hide-text-mobile" href="{{ $resetUrl . $queryParams }}">
                     <i class="bi bi-x-circle"></i> <span class="ms-2">Hapus Semua Filter</span>
                 </a>
             @endif
@@ -16,208 +83,13 @@
             <table class="m-0 table table-bordered table-hover" id="table-data">
                 <thead class="table-primary">
                     <tr>
-                        <th>
-                            <div class="d-flex align-items-center gap-2 justify-content-center">
-                                Jenis Alat
-                                <div class="btn-group">
-                                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="toggleFilter('jenis-filter')">
-                                        <i class="bi bi-funnel-fill"></i>
-                                    </button>
-                                    @if (request('selected_jenis'))
-                                        <button class="btn btn-outline-danger btn-sm" type="button" onclick="clearFilter('jenis')">
-                                            <i class="bi bi-x-circle"></i>
-                                        </button>
-                                    @endif
-                                </div>
-                            </div>
-                            <div class="filter-popup" id="jenis-filter" style="display: none;">
-                                <div class="p-2">
-                                    <input class="form-control form-control-sm mb-2" type="text" placeholder="Search jenis..." onkeyup="filterCheckboxes('jenis')">
-                                    <div class="checkbox-list text-start">
-                                        <div class="form-check">
-                                            <input class="form-check-input jenis-checkbox" type="checkbox" value="null" style="cursor: pointer" {{ in_array('null', explode(',', request('selected_jenis', ''))) ? 'checked' : '' }}>
-                                            <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">Empty/Null</label>
-                                        </div>
-                                        @foreach ($uniqueValues['jenis'] as $jenis)
-                                            <div class="form-check">
-                                                <input class="form-check-input jenis-checkbox" type="checkbox" value="{{ $jenis }}" style="cursor: pointer" {{ in_array($jenis, explode(',', request('selected_jenis', ''))) ? 'checked' : '' }}>
-                                                <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">{{ $jenis }}</label>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('jenis')"><i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span></button>
-                                </div>
-                            </div>
-                        </th>
-                        <th>
-                            <div class="d-flex align-items-center gap-2 justify-content-center">
-                                Kode Alat
-                                <div class="btn-group">
-                                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="toggleFilter('kode-filter')">
-                                        <i class="bi bi-funnel-fill"></i>
-                                    </button>
-                                    @if (request('selected_kode'))
-                                        <button class="btn btn-outline-danger btn-sm" type="button" onclick="clearFilter('kode')">
-                                            <i class="bi bi-x-circle"></i>
-                                        </button>
-                                    @endif
-                                </div>
-                            </div>
-                            <div class="filter-popup" id="kode-filter" style="display: none;">
-                                <div class="p-2">
-                                    <input class="form-control form-control-sm mb-2" type="text" placeholder="Search kode..." onkeyup="filterCheckboxes('kode')">
-                                    <div class="checkbox-list text-start">
-                                        <div class="form-check">
-                                            <input class="form-check-input kode-checkbox" type="checkbox" value="null" style="cursor: pointer" {{ in_array('null', explode(',', request('selected_kode', ''))) ? 'checked' : '' }}>
-                                            <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">Empty/Null</label>
-                                        </div>
-                                        @foreach ($uniqueValues['kode'] as $kode)
-                                            <div class="form-check">
-                                                <input class="form-check-input kode-checkbox" type="checkbox" value="{{ $kode }}" style="cursor: pointer" {{ in_array($kode, explode(',', request('selected_kode', ''))) ? 'checked' : '' }}>
-                                                <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">{{ $kode }}</label>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('kode')"><i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span></button>
-                                </div>
-                            </div>
-                        </th>
-                        <th>
-                            <div class="d-flex align-items-center gap-2 justify-content-center">
-                                Merek Alat
-                                <div class="btn-group">
-                                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="toggleFilter('merek-filter')">
-                                        <i class="bi bi-funnel-fill"></i>
-                                    </button>
-                                    @if (request('selected_merek'))
-                                        <button class="btn btn-outline-danger btn-sm" type="button" onclick="clearFilter('merek')">
-                                            <i class="bi bi-x-circle"></i>
-                                        </button>
-                                    @endif
-                                </div>
-                            </div>
-                            <div class="filter-popup" id="merek-filter" style="display: none;">
-                                <div class="p-2">
-                                    <input class="form-control form-control-sm mb-2" type="text" placeholder="Search merek..." onkeyup="filterCheckboxes('merek')">
-                                    <div class="checkbox-list text-start">
-                                        <div class="form-check">
-                                            <input class="form-check-input merek-checkbox" type="checkbox" value="null" style="cursor: pointer" {{ in_array('null', explode(',', request('selected_merek', ''))) ? 'checked' : '' }}>
-                                            <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">Empty/Null</label>
-                                        </div>
-                                        @foreach ($uniqueValues['merek'] as $merek)
-                                            <div class="form-check">
-                                                <input class="form-check-input merek-checkbox" type="checkbox" value="{{ $merek }}" style="cursor: pointer" {{ in_array($merek, explode(',', request('selected_merek', ''))) ? 'checked' : '' }}>
-                                                <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">{{ $merek }}</label>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('merek')"><i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span></button>
-                                </div>
-                            </div>
-                        </th>
-                        <th>
-                            <div class="d-flex align-items-center gap-2 justify-content-center">
-                                Tipe Alat
-                                <div class="btn-group">
-                                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="toggleFilter('tipe-filter')">
-                                        <i class="bi bi-funnel-fill"></i>
-                                    </button>
-                                    @if (request('selected_tipe'))
-                                        <button class="btn btn-outline-danger btn-sm" type="button" onclick="clearFilter('tipe')">
-                                            <i class="bi bi-x-circle"></i>
-                                        </button>
-                                    @endif
-                                </div>
-                            </div>
-                            <div class="filter-popup" id="tipe-filter" style="display: none;">
-                                <div class="p-2">
-                                    <input class="form-control form-control-sm mb-2" type="text" placeholder="Search tipe..." onkeyup="filterCheckboxes('tipe')">
-                                    <div class="checkbox-list text-start">
-                                        <div class="form-check">
-                                            <input class="form-check-input tipe-checkbox" type="checkbox" value="null" style="cursor: pointer" {{ in_array('null', explode(',', request('selected_tipe', ''))) ? 'checked' : '' }}>
-                                            <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">Empty/Null</label>
-                                        </div>
-                                        @foreach ($uniqueValues['tipe'] as $tipe)
-                                            <div class="form-check">
-                                                <input class="form-check-input tipe-checkbox" type="checkbox" value="{{ $tipe }}" style="cursor: pointer" {{ in_array($tipe, explode(',', request('selected_tipe', ''))) ? 'checked' : '' }}>
-                                                <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">{{ $tipe }}</label>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('tipe')"><i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span></button>
-                                </div>
-                            </div>
-                        </th>
-                        <th>
-                            <div class="d-flex align-items-center gap-2 justify-content-center">
-                                Serial Number
-                                <div class="btn-group">
-                                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="toggleFilter('serial-filter')">
-                                        <i class="bi bi-funnel-fill"></i>
-                                    </button>
-                                    @if (request('selected_serial'))
-                                        <button class="btn btn-outline-danger btn-sm" type="button" onclick="clearFilter('serial')">
-                                            <i class="bi bi-x-circle"></i>
-                                        </button>
-                                    @endif
-                                </div>
-                            </div>
-                            <div class="filter-popup" id="serial-filter" style="display: none;">
-                                <div class="p-2">
-                                    <input class="form-control form-control-sm mb-2" type="text" placeholder="Search serial..." onkeyup="filterCheckboxes('serial')">
-                                    <div class="checkbox-list text-start">
-                                        <div class="form-check">
-                                            <input class="form-check-input serial-checkbox" type="checkbox" value="null" style="cursor: pointer" {{ in_array('null', explode(',', request('selected_serial', ''))) ? 'checked' : '' }}>
-                                            <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">Empty/Null</label>
-                                        </div>
-                                        @foreach ($uniqueValues['serial'] as $serial)
-                                            <div class="form-check">
-                                                <input class="form-check-input serial-checkbox" type="checkbox" value="{{ $serial }}" style="cursor: pointer" {{ in_array($serial, explode(',', request('selected_serial', ''))) ? 'checked' : '' }}>
-                                                <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">{{ $serial }}</label>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('serial')"><i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span></button>
-                                </div>
-                            </div>
-                        </th>
-                        <th>
-                            <div class="d-flex align-items-center gap-2 justify-content-center">
-                                Lokasi Proyek
-                                <div class="btn-group">
-                                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="toggleFilter('proyek-filter')">
-                                        <i class="bi bi-funnel-fill"></i>
-                                    </button>
-                                    @if (request('selected_proyek'))
-                                        <button class="btn btn-outline-danger btn-sm" type="button" onclick="clearFilter('proyek')">
-                                            <i class="bi bi-x-circle"></i>
-                                        </button>
-                                    @endif
-                                </div>
-                            </div>
-                            <div class="filter-popup" id="proyek-filter" style="display: none;">
-                                <div class="p-2">
-                                    <input class="form-control form-control-sm mb-2" type="text" placeholder="Search proyek..." onkeyup="filterCheckboxes('proyek')">
-                                    <div class="checkbox-list text-start">
-                                        <div class="form-check">
-                                            <input class="form-check-input proyek-checkbox" type="checkbox" value="null" style="cursor: pointer" {{ in_array('null', explode(',', request('selected_proyek', ''))) ? 'checked' : '' }}>
-                                            <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">Belum Ditugaskan</label>
-                                        </div>
-                                        @foreach ($uniqueValues['proyek'] as $proyek)
-                                            <div class="form-check">
-                                                <input class="form-check-input proyek-checkbox" type="checkbox" value="{{ $proyek }}" style="cursor: pointer" {{ in_array($proyek, explode(',', request('selected_proyek', ''))) ? 'checked' : '' }}>
-                                                <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">{{ $proyek }}</label>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('proyek')"><i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span></button>
-                                </div>
-                            </div>
-                        </th>
-                        <th>Riwayat</th>
-                        @if (auth()->user()->role == 'admin_divisi' || auth()->user()->role == 'superadmin')
-                            <th>Aksi</th>
-                        @endif
+                        @foreach ($headers as $header)
+                            @include(
+                                'components.table-header-filter',
+                                array_merge($header, [
+                                    'uniqueValues' => $uniqueValues ?? [],
+                                ]))
+                        @endforeach
                     </tr>
                 </thead>
                 <tbody>
@@ -247,7 +119,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td class="text-center py-3 text-muted" colspan="{{ auth()->user()->role == 'admin_divisi' || auth()->user()->role == 'superadmin' ? '8' : '6' }}">
+                            <td class="text-center py-3 text-muted" colspan="{{ auth()->user()->role == 'admin_divisi' || auth()->user()->role == 'superadmin' ? '8' : '7' }}">
                                 <i class="bi bi-inbox fs-1 d-block mb-2"></i>
                                 Tidak Ada Data Master Data Alat
                             </td>

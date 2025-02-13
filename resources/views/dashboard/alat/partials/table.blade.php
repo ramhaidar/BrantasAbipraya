@@ -3,7 +3,7 @@
 @endpush
 
 @php
-    // Define table headers in a clean and structured way
+    // Step 1: Define table headers in a clean and structured way
     $headers = [
         [
             'title' => 'Jenis Alat',
@@ -41,14 +41,21 @@
         ],
     ];
 
-    // Determine if any filter is applied dynamically from the headers
-    $appliedFilters = collect($headers)
-        ->filter(fn($header) => $header['filter']) // Only check headers with filters
-        ->some(fn($header) => request("selected_{$header['paramName']}"));
+    // Step 2: Check if any filter is applied
+    $appliedFilters = false;
+    foreach ($headers as $header) {
+        if ($header['filter'] && request("selected_{$header['paramName']}")) {
+            $appliedFilters = true;
+            break;
+        }
+    }
 
-    // Build query parameters for resetting filters
+    // Step 3: Build query parameters for resetting filters
     $resetUrl = request()->url();
-    $queryParams = request()->hasAny(['search', 'id_proyek']) ? '?' . http_build_query(request()->only(['search', 'id_proyek'])) : '';
+    $queryParams = '';
+    if (request()->hasAny(['search', 'id_proyek'])) {
+        $queryParams = '?' . http_build_query(request()->only(['search', 'id_proyek']));
+    }
 @endphp
 
 <div class="ibox-body ms-0 ps-0">

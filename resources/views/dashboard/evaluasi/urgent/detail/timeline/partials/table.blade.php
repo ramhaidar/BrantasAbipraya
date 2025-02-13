@@ -2,11 +2,79 @@
     @include('styles.tables')
 @endpush
 
+@php
+    $headers = [
+        [
+            'title' => 'Uraian Pekerjaan',
+            'filterId' => 'uraian',
+            'paramName' => 'uraian',
+            'filter' => true,
+        ],
+        [
+            'title' => 'Waktu Penyelesaian (Rencana)',
+            'filterId' => 'durasi-rencana',
+            'paramName' => 'durasi_rencana',
+            'filter' => true,
+        ],
+        [
+            'title' => 'Tanggal Awal Rencana',
+            'filterId' => 'tanggal-awal-rencana',
+            'paramName' => 'tanggal_awal_rencana',
+            'filter' => true,
+        ],
+        [
+            'title' => 'Tanggal Akhir Rencana',
+            'filterId' => 'tanggal-akhir-rencana',
+            'paramName' => 'tanggal_akhir_rencana',
+            'filter' => true,
+        ],
+        [
+            'title' => 'Waktu Penyelesaian (Actual)',
+            'filterId' => 'durasi-actual',
+            'paramName' => 'durasi_actual',
+            'filter' => true,
+        ],
+        [
+            'title' => 'Tanggal Awal Actual',
+            'filterId' => 'tanggal-awal-actual',
+            'paramName' => 'tanggal_awal_actual',
+            'filter' => true,
+        ],
+        [
+            'title' => 'Tanggal Akhir Actual',
+            'filterId' => 'tanggal-akhir-actual',
+            'paramName' => 'tanggal_akhir_actual',
+            'filter' => true,
+        ],
+        [
+            'title' => 'Status',
+            'filterId' => 'status',
+            'paramName' => 'status',
+            'filter' => true,
+            'customUniqueValues' => ['Sudah Selesai', 'Belum Selesai'],
+        ],
+    ];
+
+    $appliedFilters = false;
+    foreach ($headers as $header) {
+        if ($header['filter'] && request("selected_{$header['paramName']}")) {
+            $appliedFilters = true;
+            break;
+        }
+    }
+
+    $resetUrl = request()->url();
+    $queryParams = '';
+    if (request()->hasAny(['search'])) {
+        $queryParams = '?' . http_build_query(request()->only(['search']));
+    }
+@endphp
+
 <div class="ibox-body ms-0 ps-0">
     <form class="mb-3" id="filter-form" method="GET">
         <div class="mb-3 d-flex justify-content-end">
-            @if (request('selected_uraian') || request('selected_status'))
-                <a class="btn btn-danger btn-sm btn-hide-text-mobile" href="{{ request()->url() . (request('search') ? '?search=' . request('search') : '') }}">
+            @if ($appliedFilters)
+                <a class="btn btn-danger btn-sm btn-hide-text-mobile" href="{{ $resetUrl . $queryParams }}">
                     <i class="bi bi-x-circle"></i> <span class="ms-2">Hapus Semua Filter</span>
                 </a>
             @endif
@@ -16,267 +84,13 @@
             <table class="m-0 table table-bordered table-hover" id="table-data">
                 <thead class="table-primary">
                     <tr>
-                        <th>
-                            <div class="d-flex align-items-center gap-2 justify-content-center">
-                                Uraian Pekerjaan
-                                <div class="btn-group">
-                                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="toggleFilter('uraian-filter')">
-                                        <i class="bi bi-funnel-fill"></i>
-                                    </button>
-                                    @if (request('selected_uraian'))
-                                        <button class="btn btn-outline-danger btn-sm" type="button" onclick="clearFilter('uraian')">
-                                            <i class="bi bi-x-circle"></i>
-                                        </button>
-                                    @endif
-                                </div>
-                            </div>
-                            <div class="filter-popup" id="uraian-filter" style="display: none;">
-                                <div class="p-2">
-                                    <input class="form-control form-control-sm mb-2" type="text" placeholder="Search uraian..." onkeyup="filterCheckboxes('uraian')">
-                                    <div class="checkbox-list text-start">
-                                        <div class="form-check">
-                                            <input class="form-check-input uraian-checkbox" type="checkbox" value="null" style="cursor: pointer" {{ in_array('null', explode(',', request('selected_uraian', ''))) ? 'checked' : '' }}>
-                                            <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">Empty/Null</label>
-                                        </div>
-                                        @foreach ($uniqueValues['uraian'] as $uraian)
-                                            <div class="form-check">
-                                                <input class="form-check-input uraian-checkbox" type="checkbox" value="{{ $uraian }}" style="cursor: pointer" {{ in_array($uraian, explode(',', request('selected_uraian', ''))) ? 'checked' : '' }}>
-                                                <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">{{ $uraian }}</label>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('uraian')"><i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span></button>
-                                </div>
-                            </div>
-                        </th>
-                        <th>
-                            <div class="d-flex align-items-center gap-2 justify-content-center">
-                                Waktu Penyelesaian (Rencana)
-                                <div class="btn-group">
-                                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="toggleFilter('durasi-rencana-filter')">
-                                        <i class="bi bi-funnel-fill"></i>
-                                    </button>
-                                    @if (request('selected_durasi_rencana'))
-                                        <button class="btn btn-outline-danger btn-sm" type="button" onclick="clearFilter('durasi_rencana')">
-                                            <i class="bi bi-x-circle"></i>
-                                        </button>
-                                    @endif
-                                </div>
-                            </div>
-                            <div class="filter-popup" id="durasi-rencana-filter" style="display: none;">
-                                <div class="p-2">
-                                    <input class="form-control form-control-sm mb-2" type="text" placeholder="Search durasi..." onkeyup="filterCheckboxes('durasi_rencana')">
-                                    <div class="checkbox-list text-start">
-                                        <div class="form-check">
-                                            <input class="form-check-input durasi_rencana-checkbox" type="checkbox" value="null" style="cursor: pointer" {{ in_array('null', explode(',', request('selected_durasi_rencana', ''))) ? 'checked' : '' }}>
-                                            <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">Empty/Null</label>
-                                        </div>
-                                        @foreach ($uniqueValues['durasi_rencana'] as $durasi)
-                                            <div class="form-check">
-                                                <input class="form-check-input durasi_rencana-checkbox" type="checkbox" value="{{ $durasi }}" style="cursor: pointer" {{ in_array($durasi, explode(',', request('selected_durasi_rencana', ''))) ? 'checked' : '' }}>
-                                                <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">{{ $durasi }} Hari</label>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('durasi_rencana')"><i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span></button>
-                                </div>
-                            </div>
-                        </th>
-                        <th>
-                            <div class="d-flex align-items-center gap-2 justify-content-center">
-                                Tanggal Awal Rencana
-                                <div class="btn-group">
-                                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="toggleFilter('tanggal-awal-rencana-filter')">
-                                        <i class="bi bi-funnel-fill"></i>
-                                    </button>
-                                    @if (request('selected_tanggal_awal_rencana'))
-                                        <button class="btn btn-outline-danger btn-sm" type="button" onclick="clearFilter('tanggal_awal_rencana')">
-                                            <i class="bi bi-x-circle"></i>
-                                        </button>
-                                    @endif
-                                </div>
-                            </div>
-                            <div class="filter-popup" id="tanggal-awal-rencana-filter" style="display: none;">
-                                <div class="p-2">
-                                    <input class="form-control form-control-sm mb-2" type="text" placeholder="Search tanggal..." onkeyup="filterCheckboxes('tanggal_awal_rencana')">
-                                    <div class="checkbox-list text-start">
-                                        <div class="form-check">
-                                            <input class="form-check-input tanggal_awal_rencana-checkbox" type="checkbox" value="null" style="cursor: pointer" {{ in_array('null', explode(',', request('selected_tanggal_awal_rencana', ''))) ? 'checked' : '' }}>
-                                            <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">Empty/Null</label>
-                                        </div>
-                                        @foreach ($uniqueValues['tanggal_awal_rencana'] as $tanggal)
-                                            <div class="form-check">
-                                                <input class="form-check-input tanggal_awal_rencana-checkbox" type="checkbox" value="{{ $tanggal }}" style="cursor: pointer" {{ in_array($tanggal, explode(',', request('selected_tanggal_awal_rencana', ''))) ? 'checked' : '' }}>
-                                                <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">{{ $tanggal }}</label>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('tanggal_awal_rencana')"><i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span></button>
-                                </div>
-                            </div>
-                        </th>
-                        <th>
-                            <div class="d-flex align-items-center gap-2 justify-content-center">
-                                Tanggal Akhir Rencana
-                                <div class="btn-group">
-                                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="toggleFilter('tanggal-akhir-rencana-filter')">
-                                        <i class="bi bi-funnel-fill"></i>
-                                    </button>
-                                    @if (request('selected_tanggal_akhir_rencana'))
-                                        <button class="btn btn-outline-danger btn-sm" type="button" onclick="clearFilter('tanggal_akhir_rencana')">
-                                            <i class="bi bi-x-circle"></i>
-                                        </button>
-                                    @endif
-                                </div>
-                            </div>
-                            <div class="filter-popup" id="tanggal-akhir-rencana-filter" style="display: none;">
-                                <div class="p-2">
-                                    <input class="form-control form-control-sm mb-2" type="text" placeholder="Search tanggal..." onkeyup="filterCheckboxes('tanggal_akhir_rencana')">
-                                    <div class="checkbox-list text-start">
-                                        <div class="form-check">
-                                            <input class="form-check-input tanggal_akhir_rencana-checkbox" type="checkbox" value="null" style="cursor: pointer" {{ in_array('null', explode(',', request('selected_tanggal_akhir_rencana', ''))) ? 'checked' : '' }}>
-                                            <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">Empty/Null</label>
-                                        </div>
-                                        @foreach ($uniqueValues['tanggal_akhir_rencana'] as $tanggal)
-                                            <div class="form-check">
-                                                <input class="form-check-input tanggal_akhir_rencana-checkbox" type="checkbox" value="{{ $tanggal }}" style="cursor: pointer" {{ in_array($tanggal, explode(',', request('selected_tanggal_akhir_rencana', ''))) ? 'checked' : '' }}>
-                                                <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">{{ $tanggal }}</label>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('tanggal_akhir_rencana')"><i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span></button>
-                                </div>
-                            </div>
-                        </th>
-                        <th>
-                            <div class="d-flex align-items-center gap-2 justify-content-center">
-                                Waktu Penyelesaian (Actual)
-                                <div class="btn-group">
-                                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="toggleFilter('durasi-actual-filter')">
-                                        <i class="bi bi-funnel-fill"></i>
-                                    </button>
-                                    @if (request('selected_durasi_actual'))
-                                        <button class="btn btn-outline-danger btn-sm" type="button" onclick="clearFilter('durasi_actual')">
-                                            <i class="bi bi-x-circle"></i>
-                                        </button>
-                                    @endif
-                                </div>
-                            </div>
-                            <div class="filter-popup" id="durasi-actual-filter" style="display: none;">
-                                <div class="p-2">
-                                    <input class="form-control form-control-sm mb-2" type="text" placeholder="Search durasi..." onkeyup="filterCheckboxes('durasi_actual')">
-                                    <div class="checkbox-list text-start">
-                                        <div class="form-check">
-                                            <input class="form-check-input durasi_actual-checkbox" type="checkbox" value="null" style="cursor: pointer" {{ in_array('null', explode(',', request('selected_durasi_actual', ''))) ? 'checked' : '' }}>
-                                            <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">Empty/Null</label>
-                                        </div>
-                                        @foreach ($uniqueValues['durasi_actual'] as $durasi)
-                                            <div class="form-check">
-                                                <input class="form-check-input durasi_actual-checkbox" type="checkbox" value="{{ $durasi }}" style="cursor: pointer" {{ in_array($durasi, explode(',', request('selected_durasi_actual', ''))) ? 'checked' : '' }}>
-                                                <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">{{ $durasi }} Hari</label>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('durasi_actual')"><i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span></button>
-                                </div>
-                            </div>
-                        </th>
-                        <th>
-                            <div class="d-flex align-items-center gap-2 justify-content-center">
-                                Tanggal Awal Actual
-                                <div class="btn-group">
-                                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="toggleFilter('tanggal-awal-actual-filter')">
-                                        <i class="bi bi-funnel-fill"></i>
-                                    </button>
-                                    @if (request('selected_tanggal_awal_actual'))
-                                        <button class="btn btn-outline-danger btn-sm" type="button" onclick="clearFilter('tanggal_awal_actual')">
-                                            <i class="bi bi-x-circle"></i>
-                                        </button>
-                                    @endif
-                                </div>
-                            </div>
-                            <div class="filter-popup" id="tanggal-awal-actual-filter" style="display: none;">
-                                <div class="p-2">
-                                    <input class="form-control form-control-sm mb-2" type="text" placeholder="Search tanggal..." onkeyup="filterCheckboxes('tanggal_awal_actual')">
-                                    <div class="checkbox-list text-start">
-                                        <div class="form-check">
-                                            <input class="form-check-input tanggal_awal_actual-checkbox" type="checkbox" value="null" style="cursor: pointer" {{ in_array('null', explode(',', request('selected_tanggal_awal_actual', ''))) ? 'checked' : '' }}>
-                                            <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">Empty/Null</label>
-                                        </div>
-                                        @foreach ($uniqueValues['tanggal_awal_actual'] as $tanggal)
-                                            <div class="form-check">
-                                                <input class="form-check-input tanggal_awal_actual-checkbox" type="checkbox" value="{{ $tanggal }}" style="cursor: pointer" {{ in_array($tanggal, explode(',', request('selected_tanggal_awal_actual', ''))) ? 'checked' : '' }}>
-                                                <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">{{ $tanggal }}</label>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('tanggal_awal_actual')"><i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span></button>
-                                </div>
-                            </div>
-                        </th>
-                        <th>
-                            <div class="d-flex align-items-center gap-2 justify-content-center">
-                                Tanggal Akhir Actual
-                                <div class="btn-group">
-                                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="toggleFilter('tanggal-akhir-actual-filter')">
-                                        <i class="bi bi-funnel-fill"></i>
-                                    </button>
-                                    @if (request('selected_tanggal_akhir_actual'))
-                                        <button class="btn btn-outline-danger btn-sm" type="button" onclick="clearFilter('tanggal_akhir_actual')">
-                                            <i class="bi bi-x-circle"></i>
-                                        </button>
-                                    @endif
-                                </div>
-                            </div>
-                            <div class="filter-popup" id="tanggal-akhir-actual-filter" style="display: none;">
-                                <div class="p-2">
-                                    <input class="form-control form-control-sm mb-2" type="text" placeholder="Search tanggal..." onkeyup="filterCheckboxes('tanggal_akhir_actual')">
-                                    <div class="checkbox-list text-start">
-                                        <div class="form-check">
-                                            <input class="form-check-input tanggal_akhir_actual-checkbox" type="checkbox" value="null" style="cursor: pointer" {{ in_array('null', explode(',', request('selected_tanggal_akhir_actual', ''))) ? 'checked' : '' }}>
-                                            <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">Empty/Null</label>
-                                        </div>
-                                        @foreach ($uniqueValues['tanggal_akhir_actual'] as $tanggal)
-                                            <div class="form-check">
-                                                <input class="form-check-input tanggal_akhir_actual-checkbox" type="checkbox" value="{{ $tanggal }}" style="cursor: pointer" {{ in_array($tanggal, explode(',', request('selected_tanggal_akhir_actual', ''))) ? 'checked' : '' }}>
-                                                <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">{{ $tanggal }}</label>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('tanggal_akhir_actual')"><i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span></button>
-                                </div>
-                            </div>
-                        </th>
-                        <th>
-                            <div class="d-flex align-items-center gap-2 justify-content-center">
-                                Status
-                                <div class="btn-group">
-                                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="toggleFilter('status-filter')">
-                                        <i class="bi bi-funnel-fill"></i>
-                                    </button>
-                                    @if (request('selected_status'))
-                                        <button class="btn btn-outline-danger btn-sm" type="button" onclick="clearFilter('status')">
-                                            <i class="bi bi-x-circle"></i>
-                                        </button>
-                                    @endif
-                                </div>
-                            </div>
-                            <div class="filter-popup" id="status-filter" style="display: none;">
-                                <div class="p-2">
-                                    <div class="checkbox-list text-start">
-                                        <div class="form-check">
-                                            <input class="form-check-input status-checkbox" type="checkbox" value="1" style="cursor: pointer" {{ in_array('1', explode(',', request('selected_status', ''))) ? 'checked' : '' }}>
-                                            <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">Sudah Selesai</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input status-checkbox" type="checkbox" value="0" style="cursor: pointer" {{ in_array('0', explode(',', request('selected_status', ''))) ? 'checked' : '' }}>
-                                            <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">Belum Selesai</label>
-                                        </div>
-                                    </div>
-                                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('status')"><i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span></button>
-                                </div>
-                            </div>
-                        </th>
+                        @foreach ($headers as $header)
+                            @include(
+                                'components.table-header-filter',
+                                array_merge($header, [
+                                    'uniqueValues' => $uniqueValues ?? [],
+                                ]))
+                        @endforeach
                     </tr>
                 </thead>
                 <tbody>
@@ -303,14 +117,9 @@
             </table>
         </div>
 
-        <input id="selected-uraian" name="selected_uraian" type="hidden" value="{{ request('selected_uraian') }}">
-        <input id="selected-status" name="selected_status" type="hidden" value="{{ request('selected_status') }}">
-        <input id="selected-durasi-rencana" name="selected_durasi_rencana" type="hidden" value="{{ request('selected_durasi_rencana') }}">
-        <input id="selected-tanggal-awal-rencana" name="selected_tanggal_awal_rencana" type="hidden" value="{{ request('selected_tanggal_awal_rencana') }}">
-        <input id="selected-tanggal-akhir-rencana" name="selected_tanggal_akhir_rencana" type="hidden" value="{{ request('selected_tanggal_akhir_rencana') }}">
-        <input id="selected-durasi-actual" name="selected_durasi_actual" type="hidden" value="{{ request('selected_durasi_actual') }}">
-        <input id="selected-tanggal-awal-actual" name="selected_tanggal_awal_actual" type="hidden" value="{{ request('selected_tanggal_awal_actual') }}">
-        <input id="selected-tanggal-akhir-actual" name="selected_tanggal_akhir_actual" type="hidden" value="{{ request('selected_tanggal_akhir_actual') }}">
+        @foreach ($headers as $header)
+            <input id="selected-{{ $header['paramName'] }}" name="selected_{{ $header['paramName'] }}" type="hidden" value="{{ request('selected_' . $header['paramName']) }}">
+        @endforeach
     </form>
 </div>
 

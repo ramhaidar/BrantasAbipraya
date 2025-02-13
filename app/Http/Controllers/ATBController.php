@@ -517,6 +517,29 @@ class ATBController extends Controller
             }
         }
 
+        if ( request ()->has ( 'selected_asal_proyek' ) )
+        {
+            $selectedValues = $this->getSelectedValues ( request ( 'selected_asal_proyek' ) );
+            if ( in_array ( 'null', $selectedValues ) )
+            {
+                $nonNullValues = array_filter ( $selectedValues, fn ( $value ) => $value !== 'null' );
+                $query->where ( function ($q) use ($nonNullValues)
+                {
+                    $q->whereHas ( 'asalProyek', function ($sq) use ($nonNullValues)
+                    {
+                        $sq->whereIn ( 'nama', $nonNullValues );
+                    } )->orWhereDoesntHave ( 'asalProyek' );
+                } );
+            }
+            else
+            {
+                $query->whereHas ( 'asalProyek', function ($q) use ($selectedValues)
+                {
+                    $q->whereIn ( 'nama', $selectedValues );
+                } );
+            }
+        }
+
         // Get unique values for filters
         $uniqueValues = $this->getUniqueValues ( $query );
 
@@ -651,45 +674,57 @@ class ATBController extends Controller
         $results = $baseQuery->with ( 'spb' )->get ();
 
         return [ 
-            'nomor_spb'    => $results->pluck ( 'spb.nomor' )->filter ()->unique ()->values (),
-            'tanggal'      => $results->pluck ( 'tanggal' )->filter ()->unique ()->values (),
-            'kode'         => $results->map ( function ($item)
+            'nomor_spb'         => $results->pluck ( 'spb.nomor' )->filter ()->unique ()->values (),
+            'tanggal'           => $results->pluck ( 'tanggal' )->filter ()->unique ()->values (),
+            'kode'              => $results->map ( function ($item)
             {
                 return $item->masterDataSparepart->kategoriSparepart->kode ?? null;
             } )->filter ()->unique ()->values (),
-            'supplier'     => $results->map ( function ($item)
+            'supplier'          => $results->map ( function ($item)
             {
                 return $item->masterDataSupplier->nama ?? null;
             } )->filter ()->unique ()->values (),
-            'sparepart'    => $results->map ( function ($item)
+            'sparepart'         => $results->map ( function ($item)
             {
                 return $item->masterDataSparepart->nama ?? null;
             } )->filter ()->unique ()->values (),
-            'merk'         => $results->map ( function ($item)
+            'merk'              => $results->map ( function ($item)
             {
                 return $item->masterDataSparepart->merk ?? null;
             } )->filter ()->unique ()->values (),
-            'part_number'  => $results->map ( function ($item)
+            'part_number'       => $results->map ( function ($item)
             {
                 return $item->masterDataSparepart->part_number ?? null;
             } )->filter ()->unique ()->values (),
-            'quantity'     => $results->pluck ( 'quantity' )->filter ()->unique ()->sort ()->values (),
-            'satuan'       => $results->map ( function ($item)
+            'quantity'          => $results->pluck ( 'quantity' )->filter ()->unique ()->sort ()->values (),
+            'satuan'            => $results->map ( function ($item)
             {
                 return $item->detailSpb->satuan ?? ( $item->saldo->satuan ?? null );
             } )->filter ()->unique ()->values (),
-            'harga'        => $results->pluck ( 'harga' )->filter ()->unique ()->sort ()->values (),
-            'jumlah_harga' => $results->map ( function ($item)
+            'harga'             => $results->pluck ( 'harga' )->filter ()->unique ()->sort ()->values (),
+            'jumlah_harga'      => $results->map ( function ($item)
             {
                 return $item->quantity * $item->harga;
             } )->filter ()->unique ()->sort ()->values (),
-            'ppn'          => $results->map ( function ($item)
+            'ppn'               => $results->map ( function ($item)
             {
                 return $item->quantity * $item->harga * 0.11;
             } )->filter ()->unique ()->sort ()->values (),
-            'bruto'        => $results->map ( function ($item)
+            'bruto'             => $results->map ( function ($item)
             {
                 return $item->quantity * $item->harga * 1.11;
+            } )->filter ()->unique ()->sort ()->values (),
+            'asal_proyek'       => $results->map ( function ($item)
+            {
+                return $item->asalProyek->nama ?? null;
+            } )->filter ()->unique ()->values (),
+            'quantity_dikirim'  => $results->map ( function ($item)
+            {
+                return $item->apbMutasi->quantity ?? null;
+            } )->filter ()->unique ()->sort ()->values (),
+            'quantity_diterima' => $results->map ( function ($item)
+            {
+                return $item->quantity;
             } )->filter ()->unique ()->sort ()->values (),
         ];
     }

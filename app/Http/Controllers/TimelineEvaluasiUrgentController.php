@@ -66,8 +66,23 @@ class TimelineEvaluasiUrgentController extends Controller
         {
             try
             {
-                $status = $this->getSelectedValues ( $request->selected_status );
-                $query->whereIn ( 'is_done', $status );
+                $status        = $this->getSelectedValues ( $request->selected_status );
+                $booleanValues = array_map ( function ($value)
+                {
+                    return $value === 'Sudah Selesai' ? true :
+                        ( $value === 'Belum Selesai' ? false : null );
+                }, $status );
+
+                // Filter out any null values that might have been created
+                $booleanValues = array_filter ( $booleanValues, function ($value)
+                {
+                    return $value !== null;
+                } );
+
+                if ( ! empty ( $booleanValues ) )
+                {
+                    $query->whereIn ( 'is_done', $booleanValues );
+                }
             }
             catch ( \Exception $e )
             {
@@ -185,42 +200,65 @@ class TimelineEvaluasiUrgentController extends Controller
         return $query;
     }
 
-    private function getUniqueValues ( $id )
+    private function getUniqueValues ( $id, $filteredQuery = null )
     {
-        $timelines = TimelineRKBUrgent::where ( 'id_link_alat_detail_rkb', $id );
+        // If no filtered query is provided, create a base query
+        if ( ! $filteredQuery )
+        {
+            $filteredQuery = TimelineRKBUrgent::where ( 'id_link_alat_detail_rkb', $id );
+        }
+
+        // Get filtered results
+        $filteredResults = $filteredQuery->get ();
 
         return [ 
-            'uraian'                => $timelines->clone ()->distinct ()->pluck ( 'nama_rencana' ),
-            'durasi_rencana'        => $timelines->clone ()
+            'uraian'                => $filteredResults->pluck ( 'nama_rencana' )->unique ()->values (),
+            'durasi_rencana'        => $filteredResults
                 ->whereNotNull ( 'tanggal_awal_rencana' )
                 ->whereNotNull ( 'tanggal_akhir_rencana' )
-                ->selectRaw ( 'DISTINCT EXTRACT(DAY FROM (tanggal_akhir_rencana::timestamp - tanggal_awal_rencana::timestamp))::integer as days' )
-                ->pluck ( 'days' ),
-            'tanggal_awal_rencana'  => $timelines->clone ()
+                ->map ( function ($item)
+                {
+                    // Take absolute value of the difference for positive duration
+                    return abs ( $item->tanggal_akhir_rencana->diffInDays ( $item->tanggal_awal_rencana ) );
+                } )
+                ->unique ()
+                ->sort () // Sort the durations numerically
+                ->values (),
+            'tanggal_awal_rencana'  => $filteredResults
                 ->whereNotNull ( 'tanggal_awal_rencana' )
-                ->distinct ()
                 ->pluck ( 'tanggal_awal_rencana' )
-                ->map ( fn ( $date ) => $date->format ( 'Y-m-d' ) ),
-            'tanggal_akhir_rencana' => $timelines->clone ()
+                ->map ( fn ( $date ) => $date->format ( 'Y-m-d' ) )
+                ->unique ()
+                ->values (),
+            'tanggal_akhir_rencana' => $filteredResults
                 ->whereNotNull ( 'tanggal_akhir_rencana' )
-                ->distinct ()
                 ->pluck ( 'tanggal_akhir_rencana' )
-                ->map ( fn ( $date ) => $date->format ( 'Y-m-d' ) ),
-            'durasi_actual'         => $timelines->clone ()
+                ->map ( fn ( $date ) => $date->format ( 'Y-m-d' ) )
+                ->unique ()
+                ->values (),
+            'durasi_actual'         => $filteredResults
                 ->whereNotNull ( 'tanggal_awal_actual' )
                 ->whereNotNull ( 'tanggal_akhir_actual' )
-                ->selectRaw ( 'DISTINCT EXTRACT(DAY FROM (tanggal_akhir_actual::timestamp - tanggal_awal_actual::timestamp))::integer as days' )
-                ->pluck ( 'days' ),
-            'tanggal_awal_actual'   => $timelines->clone ()
+                ->map ( function ($item)
+                {
+                    // Take absolute value of the difference for positive duration
+                    return abs ( $item->tanggal_akhir_actual->diffInDays ( $item->tanggal_awal_actual ) );
+                } )
+                ->unique ()
+                ->sort () // Sort the durations numerically
+                ->values (),
+            'tanggal_awal_actual'   => $filteredResults
                 ->whereNotNull ( 'tanggal_awal_actual' )
-                ->distinct ()
                 ->pluck ( 'tanggal_awal_actual' )
-                ->map ( fn ( $date ) => $date->format ( 'Y-m-d' ) ),
-            'tanggal_akhir_actual'  => $timelines->clone ()
+                ->map ( fn ( $date ) => $date->format ( 'Y-m-d' ) )
+                ->unique ()
+                ->values (),
+            'tanggal_akhir_actual'  => $filteredResults
                 ->whereNotNull ( 'tanggal_akhir_actual' )
-                ->distinct ()
                 ->pluck ( 'tanggal_akhir_actual' )
-                ->map ( fn ( $date ) => $date->format ( 'Y-m-d' ) ),
+                ->map ( fn ( $date ) => $date->format ( 'Y-m-d' ) )
+                ->unique ()
+                ->values (),
         ];
     }
 
@@ -238,8 +276,7 @@ class TimelineEvaluasiUrgentController extends Controller
 
         $proyek = Proyek::find ( $id );
 
-        $query        = $this->buildQuery ( $request, $id );
-        $uniqueValues = $this->getUniqueValues ( $id );
+        $query = $this->buildQuery ( $request, $id );
 
         if ( $request->has ( 'search' ) )
         {
@@ -303,6 +340,8 @@ class TimelineEvaluasiUrgentController extends Controller
                     } );
             } );
         }
+
+        $uniqueValues = $this->getUniqueValues ( $id, clone $query );
 
         $data = LinkAlatDetailRKB::with ( [ 
             'rkb',
@@ -378,7 +417,7 @@ class TimelineEvaluasiUrgentController extends Controller
             'TableData'    => $TableData,
             'headerPage'   => "Evaluasi Urgent",
             'menuContext'  => 'evaluasi_urgent',
-            'page'         => 'Timeline Detail RKB Urgent [' . $data->rkb->proyek->nama . ' | ' . $data->rkb->nomor . ']',
+            'page'         => 'Evaluasi Timeline Detail RKB Urgent [' . $data->rkb->proyek->nama . ' | ' . $data->rkb->nomor . ']',
             'uniqueValues' => $uniqueValues,
         ] );
     }

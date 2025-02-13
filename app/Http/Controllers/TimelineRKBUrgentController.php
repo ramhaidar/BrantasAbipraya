@@ -67,8 +67,20 @@ class TimelineRKBUrgentController extends Controller
         {
             try
             {
-                $status = $this->getSelectedValues ( $request->selected_status );
-                $query->whereIn ( 'is_done', $status );
+                $status        = $this->getSelectedValues ( $request->selected_status );
+                $statusMap     = [ 
+                    'Sudah Selesai' => true,
+                    'Belum Selesai' => false
+                ];
+                $booleanValues = array_map ( function ($s) use ($statusMap)
+                {
+                    return $statusMap[ $s ] ?? null;
+                }, $status );
+
+                $query->whereIn ( 'is_done', array_filter ( $booleanValues, function ($value)
+                {
+                    return $value !== null;
+                } ) );
             }
             catch ( \Exception $e )
             {

@@ -150,7 +150,13 @@ class MasterDataSparepartController extends Controller
             'merk'        => $results->pluck ( 'merk' )->unique ()->values (),
             'kode'        => KategoriSparepart::whereIn ( 'id', $kategoriIds )->pluck ( 'kode' )->unique ()->values (),
             'jenis'       => KategoriSparepart::whereIn ( 'id', $kategoriIds )->pluck ( 'jenis' )->unique ()->sort ()->values (),
-            'sub_jenis'   => KategoriSparepart::whereIn ( 'id', $kategoriIds )->pluck ( 'sub_jenis' )->unique ()->sort ()->values (),
+            'sub_jenis'   => KategoriSparepart::whereIn ( 'id', $kategoriIds )
+                ->whereNotNull ( 'sub_jenis' )
+                ->where ( 'sub_jenis', '!=', '' )
+                ->pluck ( 'sub_jenis' )
+                ->unique ()
+                ->sort ()
+                ->values (),
             'kategori'    => KategoriSparepart::whereIn ( 'id', $kategoriIds )->pluck ( 'nama' )->unique ()->values (),
         ];
     }

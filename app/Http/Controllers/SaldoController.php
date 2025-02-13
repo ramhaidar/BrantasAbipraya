@@ -138,35 +138,101 @@ class SaldoController extends Controller
         }
 
         $filters = [ 
-            'tanggal'      => 'atb.tanggal',
+            'tanggal'      => function ($q, $values)
+            {
+                $q->whereHas ( 'atb', function ($subQ) use ($values)
+                {
+                    if ( in_array ( 'Empty/Null', $values ) )
+                    {
+                        $nonNullValues = array_filter ( $values, fn ( $value ) => $value !== 'Empty/Null' );
+                        $subQ->whereNull ( 'tanggal' )
+                            ->when ( ! empty ( $nonNullValues ), function ($query) use ($nonNullValues)
+                            {
+                                $query->orWhereIn ( 'tanggal', $nonNullValues );
+                            } );
+                    }
+                    else
+                    {
+                        $subQ->whereIn ( 'tanggal', $values );
+                    }
+                } );
+            },
             'kode'         => 'kategori_sparepart.kode',
             'supplier'     => 'master_data_supplier.nama',
             'sparepart'    => 'master_data_sparepart.nama',
             'merk'         => 'master_data_sparepart.merk',
             'part_number'  => 'master_data_sparepart.part_number',
             'satuan'       => 'saldo.satuan',
-            'harga'        => 'saldo.harga',
-            'jumlah_harga' => \DB::raw ( '(saldo.quantity * saldo.harga)' ),
+            'harga'        => function ($q, $values)
+            {
+                if ( in_array ( 'Empty/Null', $values ) )
+                {
+                    $nonNullValues = array_filter ( $values, fn ( $value ) => $value !== 'Empty/Null' );
+                    $q->whereNull ( 'saldo.harga' )
+                        ->orWhere ( 'saldo.harga', 0 )
+                        ->when ( ! empty ( $nonNullValues ), function ($query) use ($nonNullValues)
+                        {
+                            $query->orWhereIn ( 'saldo.harga', $nonNullValues );
+                        } );
+                }
+                else
+                {
+                    $q->whereIn ( 'saldo.harga', $values );
+                }
+            },
+            'jumlah_harga' => function ($q, $values)
+            {
+                if ( in_array ( 'Empty/Null', $values ) )
+                {
+                    $nonNullValues = array_filter ( $values, fn ( $value ) => $value !== 'Empty/Null' );
+                    $q->whereRaw ( '(saldo.quantity * saldo.harga) IS NULL' )
+                        ->orWhereRaw ( '(saldo.quantity * saldo.harga) = 0' )
+                        ->when ( ! empty ( $nonNullValues ), function ($query) use ($nonNullValues)
+                        {
+                            $query->orWhereRaw ( '(saldo.quantity * saldo.harga) IN (' . implode ( ',', $nonNullValues ) . ')' );
+                        } );
+                }
+                else
+                {
+                    $q->whereRaw ( '(saldo.quantity * saldo.harga) IN (' . implode ( ',', $values ) . ')' );
+                }
+            },
         ];
 
-        foreach ( $filters as $param => $column )
+        foreach ( $filters as $param => $filter )
         {
             if ( $request->filled ( "selected_$param" ) )
             {
                 $selectedValues = $this->getSelectedValues ( $request->get ( "selected_$param" ) );
-                if ( in_array ( 'null', $selectedValues ) )
+
+                if ( is_callable ( $filter ) )
                 {
-                    $nonNullValues = array_filter ( $selectedValues, fn ( $value ) => $value !== 'null' );
-                    $query->where ( function ($q) use ($column, $nonNullValues)
+                    // For tanggal which has custom filter logic
+                    $query->where ( function ($q) use ($filter, $selectedValues)
                     {
-                        $q->whereNull ( $column )
-                            ->orWhere ( $column, '-' )
-                            ->orWhereIn ( $column, $nonNullValues );
+                        $filter ( $q, $selectedValues );
                     } );
                 }
                 else
                 {
-                    $query->whereIn ( $column, $selectedValues );
+                    // For other fields
+                    if ( in_array ( 'null', $selectedValues ) )
+                    {
+                        $nonNullValues = array_filter ( $selectedValues, fn ( $value ) => $value !== 'null' );
+                        $query->where ( function ($q) use ($filter, $nonNullValues)
+                        {
+                            $q->whereNull ( $filter )
+                                ->orWhere ( $filter, '-' )
+                                ->when ( ! empty ( $nonNullValues ), function ($q) use ($filter, $nonNullValues)
+                                {
+                                    $q->orWhereIn ( $filter, $nonNullValues );
+                                } );
+                        } );
+                    }
+                    else
+                    {
+                        $query->whereIn ( $filter, $selectedValues );
+                    }
                 }
             }
         }

@@ -43,14 +43,51 @@ class APBController extends Controller
                 $item->jumlah_harga = ( $item->saldo->harga ?? 0 ) * $item->quantity;
                 return $item;
             } );
-        return [ 'tanggal' => $results->pluck ( 'tanggal' )->filter ()->unique ()->values (), 'tujuan_proyek' => $results->pluck ( 'tujuanProyek.nama' )->filter ()->unique ()->values (), 'jenis_alat' => $results->pluck ( 'alatProyek.masterDataAlat.jenis_alat' )->filter ()->unique ()->values (), 'kode_alat' => $results->pluck ( 'alatProyek.masterDataAlat.kode_alat' )->filter ()->unique ()->values (), 'merek_alat' => $results->pluck ( 'alatProyek.masterDataAlat.merek_alat' )->filter ()->unique ()->values (), 'tipe_alat' => $results->pluck ( 'alatProyek.masterDataAlat.tipe_alat' )->filter ()->unique ()->values (), 'serial_number' => $results->pluck ( 'alatProyek.masterDataAlat.serial_number' )->filter ()->unique ()->values (), 'kode' => $results->pluck ( 'masterDataSparepart.kategoriSparepart.kode' )->filter ()->unique ()->values (), 'supplier' => $results->pluck ( 'masterDataSupplier.nama' )->filter ()->unique ()->values (), 'sparepart' => $results->pluck ( 'masterDataSparepart.nama' )->filter ()->unique ()->values (), 'merk' => $results->pluck ( 'masterDataSparepart.merk' )->filter ()->unique ()->values (), 'part_number' => $results->pluck ( 'masterDataSparepart.part_number' )->filter ()->unique ()->values (), 'satuan' => $results->pluck ( 'saldo.satuan' )->filter ()->unique ()->values (), 'quantity' => $results->pluck ( 'quantity' )->filter ()->unique ()->values (), 'harga' => $results->pluck ( 'saldo.harga' )->filter ()->unique ()->sort ()->values (), 'jumlah_harga' => $results->pluck ( 'jumlah_harga' )->filter ()->unique ()->sort ()->values (), 'mekanik' => $results->pluck ( 'mekanik' )->filter ()->unique ()->values (), 'status' => collect ( [ 'pending', 'accepted', 'rejected' ] )->values (),];
+        return [ 'tanggal' => $results->pluck ( 'tanggal' )->filter ()->unique ()->values (), 'tujuan_proyek' => $results->pluck ( 'tujuanProyek.nama' )->filter ()->unique ()->values (), 'jenis_alat' => $results->pluck ( 'alatProyek.masterDataAlat.jenis_alat' )->filter ()->unique ()->values (), 'kode_alat' => $results->pluck ( 'alatProyek.masterDataAlat.kode_alat' )->filter ()->unique ()->values (), 'merek_alat' => $results->pluck ( 'alatProyek.masterDataAlat.merek_alat' )->filter ()->unique ()->values (), 'tipe_alat' => $results->pluck ( 'alatProyek.masterDataAlat.tipe_alat' )->filter ()->unique ()->values (), 'serial_number' => $results->pluck ( 'alatProyek.masterDataAlat.serial_number' )->filter ()->unique ()->values (), 'kode' => $results->pluck ( 'masterDataSparepart.kategoriSparepart.kode' )->filter ()->unique ()->values (), 'supplier' => $results->pluck ( 'masterDataSupplier.nama' )->filter ()->unique ()->values (), 'sparepart' => $results->pluck ( 'masterDataSparepart.nama' )->filter ()->unique ()->values (), 'merk' => $results->pluck ( 'masterDataSparepart.merk' )->filter ()->unique ()->values (), 'part_number' => $results->pluck ( 'masterDataSparepart.part_number' )->filter ()->unique ()->values (), 'satuan' => $results->pluck ( 'saldo.satuan' )->filter ()->unique ()->values (), 'quantity' => $results->pluck ( 'quantity' )->filter ()->unique ()->values (), 'harga' => $results->pluck ( 'saldo.harga' )->filter ()->unique ()->sort ()->values (), 'jumlah_harga' => $results->pluck ( 'jumlah_harga' )->filter ()->unique ()->sort ()->values (), 'mekanik' => $results->pluck ( 'mekanik' )->filter ()->unique ()->values (), 'status' => collect ( [ 'pending', 'accepted', 'rejected' ] )->values (), 'quantity_dikirim' => $results->filter ( function ($item)
+        {
+            return $item->status !== null; } )->pluck ( 'quantity' )->filter ()->unique ()->values (), 'quantity_diterima' => $results->filter ( function ($item)
+            {
+                return $item->status !== null; } )->pluck ( 'atbMutasi.quantity' )->filter ()->unique ()->values (), 'quantity_digunakan' => $results->filter ( function ($item)
+                {
+                    return $item->status === null; } )->pluck ( 'quantity' )->filter ()->unique ()->values (),];
     }
     private function applyFilters ( $query, $request )
     {
         if ( $request->filled ( 'selected_tanggal' ) )
         {
             $selectedValues = $this->getSelectedValues ( $request->get ( 'selected_tanggal' ) );
-            $query->whereIn ( 'tanggal', $selectedValues );
+            $query->where ( function ($q) use ($selectedValues)
+            {
+                if ( in_array ( 'Empty/Null', $selectedValues ) || in_array ( 'null', $selectedValues ) )
+                {
+                    $q->whereNull ( 'tanggal' );
+
+                    // Filter out 'Empty/Null', 'null', and empty strings, then get valid dates
+                    $validDates = array_filter ( $selectedValues, function ($value)
+                    {
+                        return ! in_array ( $value, [ 'Empty/Null', 'null', '' ] )
+                            && strtotime ( $value ) !== false;
+                    } );
+
+                    if ( ! empty ( $validDates ) )
+                    {
+                        $q->orWhereIn ( 'tanggal', $validDates );
+                    }
+                }
+                else
+                {
+                    // Filter out any empty strings and invalid dates
+                    $validDates = array_filter ( $selectedValues, function ($value)
+                    {
+                        return ! empty ( $value ) && strtotime ( $value ) !== false;
+                    } );
+
+                    if ( ! empty ( $validDates ) )
+                    {
+                        $q->whereIn ( 'tanggal', $validDates );
+                    }
+                }
+            } );
         }
         if ( $request->filled ( 'selected_jenis_alat' ) )
         {

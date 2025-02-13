@@ -31,6 +31,13 @@
                 return $value . ' Hari';
             })
             ->toArray();
+    } elseif (in_array($paramName, ['harga', 'jumlah_harga']) && isset($uniqueValues[$paramName])) {
+        // Format currency values
+        $formattedValues = collect($uniqueValues[$paramName])
+            ->map(function ($value) {
+                return number_format($value, 0, ',', '.');
+            })
+            ->toArray();
     }
 @endphp
 
@@ -77,6 +84,8 @@
                                         @elseif ($paramName === 'tipe')
                                             {{ $formattedValues[$key] }}
                                         @elseif (in_array($paramName, ['durasi_rencana', 'durasi_actual']))
+                                            {{ $formattedValues[$key] }}
+                                        @elseif (in_array($paramName, ['harga', 'jumlah_harga']))
                                             {{ $formattedValues[$key] }}
                                         @else
                                             {{ $value }}

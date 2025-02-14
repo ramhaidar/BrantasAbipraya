@@ -303,38 +303,36 @@ class TimelineRKBUrgentController extends Controller
         return $query;
     }
 
-    private function getUniqueValues ( $id )
+    private function getUniqueValues ( $query )
     {
-        $timelines = TimelineRKBUrgent::where ( 'id_link_alat_detail_rkb', $id );
-
         return [ 
-            'uraian'                => $timelines->clone ()->distinct ()->pluck ( 'nama_rencana' ),
-            'durasi_rencana'        => $timelines->clone ()
+            'uraian'                => $query->clone ()->distinct ()->pluck ( 'nama_rencana' ),
+            'durasi_rencana'        => $query->clone ()
                 ->whereNotNull ( 'tanggal_awal_rencana' )
                 ->whereNotNull ( 'tanggal_akhir_rencana' )
                 ->selectRaw ( 'DISTINCT EXTRACT(DAY FROM (tanggal_akhir_rencana::timestamp - tanggal_awal_rencana::timestamp))::integer as days' )
                 ->pluck ( 'days' ),
-            'tanggal_awal_rencana'  => $timelines->clone ()
+            'tanggal_awal_rencana'  => $query->clone ()
                 ->whereNotNull ( 'tanggal_awal_rencana' )
                 ->distinct ()
                 ->pluck ( 'tanggal_awal_rencana' )
                 ->map ( fn ( $date ) => $date->format ( 'Y-m-d' ) ),
-            'tanggal_akhir_rencana' => $timelines->clone ()
+            'tanggal_akhir_rencana' => $query->clone ()
                 ->whereNotNull ( 'tanggal_akhir_rencana' )
                 ->distinct ()
                 ->pluck ( 'tanggal_akhir_rencana' )
                 ->map ( fn ( $date ) => $date->format ( 'Y-m-d' ) ),
-            'durasi_actual'         => $timelines->clone ()
+            'durasi_actual'         => $query->clone ()
                 ->whereNotNull ( 'tanggal_awal_actual' )
                 ->whereNotNull ( 'tanggal_akhir_actual' )
                 ->selectRaw ( 'DISTINCT EXTRACT(DAY FROM (tanggal_akhir_actual::timestamp - tanggal_awal_actual::timestamp))::integer as days' )
                 ->pluck ( 'days' ),
-            'tanggal_awal_actual'   => $timelines->clone ()
+            'tanggal_awal_actual'   => $query->clone ()
                 ->whereNotNull ( 'tanggal_awal_actual' )
                 ->distinct ()
                 ->pluck ( 'tanggal_awal_actual' )
                 ->map ( fn ( $date ) => $date->format ( 'Y-m-d' ) ),
-            'tanggal_akhir_actual'  => $timelines->clone ()
+            'tanggal_akhir_actual'  => $query->clone ()
                 ->whereNotNull ( 'tanggal_akhir_actual' )
                 ->distinct ()
                 ->pluck ( 'tanggal_akhir_actual' )
@@ -358,7 +356,7 @@ class TimelineRKBUrgentController extends Controller
         $rkb = Proyek::find ( $id );
 
         $query        = $this->buildQuery ( $request, $id );
-        $uniqueValues = $this->getUniqueValues ( $id );
+        $uniqueValues = $this->getUniqueValues ( $query );
 
         if ( $request->has ( 'search' ) )
         {

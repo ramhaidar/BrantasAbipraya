@@ -208,20 +208,52 @@ class DetailRKBGeneralController extends Controller
             {
                 $values = $this->getSelectedValues ( $request->get ( $selectedParam ) );
 
-                // Special handling for quantity columns
+                // Special handling for numeric columns
                 if ( in_array ( $paramName, [ 'quantity_requested', 'quantity_approved' ] ) )
                 {
                     $query->where ( function ($q) use ($columnName, $values)
                     {
+                        $exactValues = [];
+                        $gtValue     = null;
+                        $ltValue     = null;
+
                         foreach ( $values as $value )
                         {
                             if ( $value === 'null' )
                             {
                                 $q->orWhereNull ( $columnName );
                             }
-                            else
+                            elseif ( strpos ( $value, 'exact:' ) === 0 )
                             {
-                                $q->orWhere ( $columnName, '=', (int) $value );
+                                $exactValues[] = (int) substr ( $value, 6 );
+                            }
+                            elseif ( strpos ( $value, 'gt:' ) === 0 )
+                            {
+                                $gtValue = (int) substr ( $value, 3 );
+                            }
+                            elseif ( strpos ( $value, 'lt:' ) === 0 )
+                            {
+                                $ltValue = (int) substr ( $value, 3 );
+                            }
+                        }
+
+                        if ( ! empty ( $exactValues ) )
+                        {
+                            $q->orWhereIn ( $columnName, $exactValues );
+                        }
+                        else
+                        {
+                            if ( $gtValue !== null && $ltValue !== null )
+                            {
+                                $q->orWhereBetween ( $columnName, [ $gtValue, $ltValue ] );
+                            }
+                            elseif ( $gtValue !== null )
+                            {
+                                $q->orWhere ( $columnName, '>=', $gtValue );
+                            }
+                            elseif ( $ltValue !== null )
+                            {
+                                $q->orWhere ( $columnName, '<=', $ltValue );
                             }
                         }
                     } );
@@ -256,14 +288,37 @@ class DetailRKBGeneralController extends Controller
         }
     }
 
-    // Add this new helper method
     private function getSelectedValues ( $paramValue )
     {
         if ( ! $paramValue ) return [];
 
         try
         {
-            return explode ( '||', base64_decode ( $paramValue ) );
+            // Decode base64 and split by custom separator
+            $decodedValue = base64_decode ( $paramValue );
+
+            // Split by || for regular values and preserve special numeric filters
+            $values = [];
+            $parts  = explode ( '||', $decodedValue );
+
+            foreach ( $parts as $part )
+            {
+                if (
+                    strpos ( $part, 'exact:' ) === 0 ||
+                    strpos ( $part, 'gt:' ) === 0 ||
+                    strpos ( $part, 'lt:' ) === 0 ||
+                    $part === 'null'
+                )
+                {
+                    $values[] = $part;
+                }
+                else
+                {
+                    $values[] = trim ( $part );
+                }
+            }
+
+            return $values;
         }
         catch ( \Exception $e )
         {

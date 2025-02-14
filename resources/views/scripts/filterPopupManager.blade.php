@@ -491,10 +491,10 @@
         }, 60);
 
         // Add event listeners to clear other inputs when one changes
-        const numericInputs = document.querySelectorAll('input[type="number"]');
-        numericInputs.forEach(input => {
-            input.addEventListener('input', function() {
-                const paramName = this.id.split('-')[0]; // Extract parameter name from input ID
+        const inputs = document.querySelectorAll('input[type="number"], .datepicker');
+        inputs.forEach(input => {
+            input.addEventListener('change', function() {
+                const paramName = this.id.split('-')[0];
                 if (this.id.endsWith('-exact')) {
                     document.getElementById(`${paramName}-gt`).value = '';
                     document.getElementById(`${paramName}-lt`).value = '';
@@ -504,12 +504,12 @@
             });
         });
 
-        // Add keypress event listener for numeric inputs
-        numericInputs.forEach(input => {
+        // Add keypress event listener for inputs
+        inputs.forEach(input => {
             input.addEventListener('keypress', function(event) {
                 if (event.key === 'Enter') {
                     event.preventDefault();
-                    const paramName = this.id.split('-')[0]; // Extract parameter name from input ID
+                    const paramName = this.id.split('-')[0];
                     applyFilter(paramName);
                 }
             });
@@ -539,12 +539,12 @@
         const checkboxes = document.querySelectorAll(`.${paramName}-checkbox:checked`);
         let values = Array.from(checkboxes).map(cb => cb.value);
 
-        // Handle numeric filters if they exist
+        // Handle numeric and date filters
         const exactInput = document.getElementById(`${paramName}-exact`);
         const gtInput = document.getElementById(`${paramName}-gt`);
         const ltInput = document.getElementById(`${paramName}-lt`);
 
-        // Only add numeric values if they exist and are not empty
+        // Only add values if they exist and are not empty
         if (exactInput && exactInput.value.trim()) {
             values.push(`exact:${exactInput.value.trim()}`);
         } else {

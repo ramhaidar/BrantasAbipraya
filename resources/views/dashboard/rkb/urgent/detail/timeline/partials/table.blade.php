@@ -15,6 +15,7 @@
             'filterId' => 'durasi-rencana',
             'paramName' => 'durasi_rencana',
             'filter' => true,
+            'type' => 'number_of_days', // Add type attribute
         ],
         [
             'title' => 'Tanggal Awal Rencana',
@@ -33,6 +34,7 @@
             'filterId' => 'durasi-actual',
             'paramName' => 'durasi_actual',
             'filter' => true,
+            'type' => 'number_of_days', // Add type attribute
         ],
         [
             'title' => 'Tanggal Awal Actual',

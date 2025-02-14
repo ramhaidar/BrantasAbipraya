@@ -18,7 +18,31 @@ class TimelineRKBUrgentController extends Controller
 
         try
         {
-            return explode ( '||', base64_decode ( $paramValue ) );
+            // Decode base64 and split by custom separator
+            $decodedValue = base64_decode ( $paramValue );
+
+            // Split by || for regular values and preserve special numeric filters
+            $values = [];
+            $parts  = explode ( '||', $decodedValue );
+
+            foreach ( $parts as $part )
+            {
+                if (
+                    strpos ( $part, 'exact:' ) === 0 ||
+                    strpos ( $part, 'gt:' ) === 0 ||
+                    strpos ( $part, 'lt:' ) === 0 ||
+                    $part === 'null'
+                )
+                {
+                    $values[] = $part;
+                }
+                else
+                {
+                    $values[] = trim ( $part );
+                }
+            }
+
+            return $values;
         }
         catch ( \Exception $e )
         {
@@ -127,7 +151,7 @@ class TimelineRKBUrgentController extends Controller
             }
         }
 
-        // Handle durasi fields
+        // Handle durasi fields with numeric filtering
         $durasiFields = [ 'durasi_rencana', 'durasi_actual' ];
         foreach ( $durasiFields as $field )
         {
@@ -135,58 +159,104 @@ class TimelineRKBUrgentController extends Controller
             {
                 try
                 {
-                    $durasi = $this->getSelectedValues ( $request->get ( "selected_{$field}" ) );
-                    if ( in_array ( 'null', $durasi ) )
+                    $values = $this->getSelectedValues ( $request->get ( "selected_{$field}" ) );
+
+                    $query->where ( function ($q) use ($values, $field)
                     {
-                        $nonNullValues = array_filter ( $durasi, fn ( $value ) => $value !== 'null' );
+                        $exactValues = [];
+                        $gtValue     = null;
+                        $ltValue     = null;
+                        $hasNull     = false;
+
+                        foreach ( $values as $value )
+                        {
+                            if ( $value === 'Empty/Null' || $value === 'null' )
+                            {
+                                $hasNull = true;
+                            }
+                            elseif ( strpos ( $value, 'exact:' ) === 0 )
+                            {
+                                $exactValues[] = (int) substr ( $value, 6 );
+                            }
+                            elseif ( strpos ( $value, 'gt:' ) === 0 )
+                            {
+                                $gtValue = (int) substr ( $value, 3 );
+                            }
+                            elseif ( strpos ( $value, 'lt:' ) === 0 )
+                            {
+                                $ltValue = (int) substr ( $value, 3 );
+                            }
+                        }
+
                         if ( $field === 'durasi_actual' )
                         {
-                            $query->where ( function ($q) use ($nonNullValues)
+                            if ( $hasNull )
                             {
-                                $q->whereNull ( 'tanggal_awal_actual' )
+                                $q->orWhereNull ( 'tanggal_awal_actual' )
                                     ->orWhereNull ( 'tanggal_akhir_actual' )
-                                    ->when ( count ( $nonNullValues ) > 0, function ($q) use ($nonNullValues)
-                                    {
-                                        $q->orWhereRaw (
-                                            'EXTRACT(DAY FROM (tanggal_akhir_actual::timestamp - tanggal_awal_actual::timestamp))::integer = ANY(?)',
-                                            [ "{" . implode ( ',', $nonNullValues ) . "}" ]
-                                        );
-                                    } );
-                            } );
-                        }
-                        else
-                        {
-                            $query->where ( function ($q) use ($nonNullValues)
+                                    ->orWhereRaw ( 'tanggal_awal_actual = tanggal_akhir_actual' );
+                            }
+
+                            if ( ! empty ( $exactValues ) )
                             {
-                                $q->whereNull ( 'tanggal_awal_rencana' )
-                                    ->orWhereNull ( 'tanggal_akhir_rencana' )
-                                    ->when ( count ( $nonNullValues ) > 0, function ($q) use ($nonNullValues)
-                                    {
-                                        $q->orWhereRaw (
-                                            'EXTRACT(DAY FROM (tanggal_akhir_rencana::timestamp - tanggal_awal_rencana::timestamp))::integer = ANY(?)',
-                                            [ "{" . implode ( ',', $nonNullValues ) . "}" ]
-                                        );
-                                    } );
-                            } );
-                        }
-                    }
-                    else
-                    {
-                        if ( $field === 'durasi_actual' )
-                        {
-                            $query->whereRaw (
-                                'EXTRACT(DAY FROM (tanggal_akhir_actual::timestamp - tanggal_awal_actual::timestamp))::integer = ANY(?)',
-                                [ "{" . implode ( ',', $durasi ) . "}" ]
-                            );
+                                foreach ( $exactValues as $value )
+                                {
+                                    $q->orWhereRaw (
+                                        'EXTRACT(DAY FROM (tanggal_akhir_actual::timestamp - tanggal_awal_actual::timestamp))::integer = ?',
+                                        [ $value ]
+                                    );
+                                }
+                            }
+                            if ( $gtValue !== null )
+                            {
+                                $q->orWhereRaw (
+                                    'EXTRACT(DAY FROM (tanggal_akhir_actual::timestamp - tanggal_awal_actual::timestamp))::integer >= ?',
+                                    [ $gtValue ]
+                                );
+                            }
+                            if ( $ltValue !== null )
+                            {
+                                $q->orWhereRaw (
+                                    'EXTRACT(DAY FROM (tanggal_akhir_actual::timestamp - tanggal_awal_actual::timestamp))::integer <= ?',
+                                    [ $ltValue ]
+                                );
+                            }
                         }
                         else
                         {
-                            $query->whereRaw (
-                                'EXTRACT(DAY FROM (tanggal_akhir_rencana::timestamp - tanggal_awal_rencana::timestamp))::integer = ANY(?)',
-                                [ "{" . implode ( ',', $durasi ) . "}" ]
-                            );
+                            if ( $hasNull )
+                            {
+                                $q->orWhereNull ( 'tanggal_awal_rencana' )
+                                    ->orWhereNull ( 'tanggal_akhir_rencana' )
+                                    ->orWhereRaw ( 'tanggal_awal_rencana = tanggal_akhir_rencana' );
+                            }
+
+                            if ( ! empty ( $exactValues ) )
+                            {
+                                foreach ( $exactValues as $value )
+                                {
+                                    $q->orWhereRaw (
+                                        'EXTRACT(DAY FROM (tanggal_akhir_rencana::timestamp - tanggal_awal_rencana::timestamp))::integer = ?',
+                                        [ $value ]
+                                    );
+                                }
+                            }
+                            if ( $gtValue !== null )
+                            {
+                                $q->orWhereRaw (
+                                    'EXTRACT(DAY FROM (tanggal_akhir_rencana::timestamp - tanggal_awal_rencana::timestamp))::integer >= ?',
+                                    [ $gtValue ]
+                                );
+                            }
+                            if ( $ltValue !== null )
+                            {
+                                $q->orWhereRaw (
+                                    'EXTRACT(DAY FROM (tanggal_akhir_rencana::timestamp - tanggal_awal_rencana::timestamp))::integer <= ?',
+                                    [ $ltValue ]
+                                );
+                            }
                         }
-                    }
+                    } );
                 }
                 catch ( \Exception $e )
                 {

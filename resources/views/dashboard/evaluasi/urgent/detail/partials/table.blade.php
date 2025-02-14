@@ -123,59 +123,80 @@
                 </thead>
                 <tbody>
                     @php
-                        // Group items by part number for stock quantities
-                        $groupedByPartNumber =
+                        // First group by linkAlatDetailRkb
+                        $groupedByAlat =
                             $TableData instanceof \Illuminate\Pagination\LengthAwarePaginator
                                 ? collect($TableData->items())->groupBy(function ($item) {
-                                    return optional($item->masterDataSparepart)->part_number;
+                                    return $item->linkRkbDetails->first()->linkAlatDetailRkb->id;
                                 })
                                 : collect($TableData)->groupBy(function ($item) {
-                                    return optional($item->masterDataSparepart)->part_number;
+                                    return $item->linkRkbDetails->first()->linkAlatDetailRkb->id;
                                 });
+
+                        // Prepare a collection to track part numbers we've seen
+                        $processedPartNumbers = collect();
                     @endphp
 
-                    @forelse ($groupedByPartNumber as $partNumber => $items)
-                        @foreach ($items as $item)
-                            @php
-                                $detail = $item->linkRkbDetails->first();
-                                $alat = $detail->linkAlatDetailRkb;
-                            @endphp
-                            <tr>
-                                <td>{{ $alat->masterDataAlat->jenis_alat ?? '-' }}</td>
-                                <td>{{ $alat->masterDataAlat->kode_alat ?? '-' }}</td>
-                                <td>{{ $item->kategoriSparepart->kode ?? '-' }}: {{ $item->kategoriSparepart->nama ?? '-' }}</td>
-                                <td>{{ $item->masterDataSparepart->nama ?? '-' }}</td>
-                                <td>{{ $item->masterDataSparepart->part_number ?? '-' }}</td>
-                                <td>{{ $item->masterDataSparepart->merk ?? '-' }}</td>
-                                <td>{{ $alat->nama_koordinator ?? '-' }}</td>
-                                <td>
-                                    <button class="btn {{ $item->dokumentasi ? 'btn-warning' : 'btn-primary' }}" data-id="{{ $item->id ?? '-' }}" type="button" onclick="event.preventDefault(); event.stopPropagation(); showDokumentasi({{ $item->id ?? '-' }});">
-                                        <i class="bi bi-file-earmark-text"></i>
-                                    </button>
-                                </td>
-                                <td>
-                                    <a class="btn {{ $alat->timelineRkbUrgents->count() > 0 ? 'btn-warning' : 'btn-primary' }}" href="{{ route('evaluasi_rkb_urgent.detail.timeline.index', ['id' => $alat->id ?? '-']) }}" onclick="event.stopPropagation();">
-                                        <i class="bi bi-hourglass-split"></i>
-                                    </a>
-                                </td>
-                                <td>
-                                    <button class="btn {{ $alat->lampiranRkbUrgent ? 'btn-warning' : 'btn-primary' }} lampiranBtn" data-bs-toggle="modal" data-bs-target="{{ $alat->lampiranRkbUrgent ? '#modalForLampiranExist' : '#modalForLampiranNew' }}" data-id-linkalatdetail="{{ $alat->id ?? '-' }}" data-id-lampiran="{{ $alat->lampiranRkbUrgent ? $alat->lampiranRkbUrgent->id : '-' }}" type="button" onclick="event.stopPropagation();">
-                                        <i class="bi bi-paperclip"></i>
-                                    </button>
-                                </td>
-                                <td>{{ $item->quantity_requested ?? '-' }}</td>
-                                <td>
-                                    <input class="form-control text-center 
-                                    @if ($rkb->is_approved_svp) bg-primary-subtle
-                                    @elseif ($rkb->is_approved_vp) bg-info-subtle
-                                    @elseif($rkb->is_evaluated) bg-success-subtle 
-                                    @else bg-warning-subtle @endif" name="quantity_approved[{{ $item->id ?? '-' }}]" type="number" value="{{ $item->quantity_approved ?? ($item->quantity_requested ?? '-') }}" min="0" {{ $rkb->is_evaluated ? 'disabled' : '' }}>
-                                </td>
-                                @if ($loop->first)
-                                    <td rowspan="{{ $items->count() }}">{{ $stockQuantities[$item->id_master_data_sparepart] ?? '-' }}</td>
-                                @endif
-                                <td>{{ $item->satuan ?? '-' }}</td>
-                            </tr>
+                    @forelse ($groupedByAlat as $alatId => $alatItems)
+                        @php
+                            $groupedByPartNumber = $alatItems->groupBy(function ($item) {
+                                return optional($item->masterDataSparepart)->part_number;
+                            });
+
+                            $firstItem = $alatItems->first();
+                            $detail = $firstItem->linkRkbDetails->first();
+                            $alat = $detail->linkAlatDetailRkb;
+                        @endphp
+
+                        @foreach ($groupedByPartNumber as $partNumber => $items)
+                            @foreach ($items as $item)
+                                <tr>
+                                    <td>{{ $alat->masterDataAlat->jenis_alat ?? '-' }}</td>
+                                    <td>{{ $alat->masterDataAlat->kode_alat ?? '-' }}</td>
+                                    <td>{{ $item->kategoriSparepart->kode ?? '-' }}: {{ $item->kategoriSparepart->nama ?? '-' }}</td>
+                                    <td>{{ $item->masterDataSparepart->nama ?? '-' }}</td>
+                                    <td>{{ $item->masterDataSparepart->part_number ?? '-' }}</td>
+                                    <td>{{ $item->masterDataSparepart->merk ?? '-' }}</td>
+                                    <td>{{ $alat->nama_koordinator ?? '-' }}</td>
+                                    <td>
+                                        <button class="btn {{ $item->dokumentasi ? 'btn-warning' : 'btn-primary' }}" data-id="{{ $item->id ?? '-' }}" type="button" onclick="event.preventDefault(); event.stopPropagation(); showDokumentasi({{ $item->id ?? '-' }});">
+                                            <i class="bi bi-file-earmark-text"></i>
+                                        </button>
+                                    </td>
+                                    @if ($loop->parent->first && $loop->first)
+                                        <td rowspan="{{ $alatItems->count() }}">
+                                            <a class="btn {{ $alat->timelineRkbUrgents->count() > 0 ? 'btn-warning' : 'btn-primary' }}" href="{{ route('evaluasi_rkb_urgent.detail.timeline.index', ['id' => $alat->id]) }}">
+                                                <i class="bi bi-hourglass-split"></i>
+                                            </a>
+                                        </td>
+                                        <td rowspan="{{ $alatItems->count() }}">
+                                            <button class="btn {{ $alat->lampiranRkbUrgent ? 'btn-warning' : 'btn-primary' }} lampiranBtn" data-bs-toggle="modal" data-bs-target="{{ $alat->lampiranRkbUrgent ? '#modalForLampiranExist' : '#modalForLampiranNew' }}" data-id-linkalatdetail="{{ $alat->id }}" data-id-lampiran="{{ $alat->lampiranRkbUrgent ? $alat->lampiranRkbUrgent->id : null }}" type="button">
+                                                <i class="bi bi-paperclip"></i>
+                                            </button>
+                                        </td>
+                                    @endif
+                                    <td>{{ $item->quantity_requested ?? '-' }}</td>
+                                    <td>
+                                        <input class="form-control text-center 
+                                        @if ($rkb->is_approved_svp) bg-primary-subtle
+                                        @elseif ($rkb->is_approved_vp) bg-info-subtle
+                                        @elseif($rkb->is_evaluated) bg-success-subtle 
+                                        @else bg-warning-subtle @endif" name="quantity_approved[{{ $item->id ?? '-' }}]" type="number" value="{{ $item->quantity_approved ?? ($item->quantity_requested ?? '-') }}" min="0" {{ $rkb->is_evaluated ? 'disabled' : '' }}>
+                                    </td>
+                                    @if (!$processedPartNumbers->has($partNumber))
+                                        @php
+                                            $samePartNumberItems = collect($TableData instanceof \Illuminate\Pagination\LengthAwarePaginator ? $TableData->items() : $TableData)->filter(function ($tableItem) use ($partNumber) {
+                                                return optional($tableItem->masterDataSparepart)->part_number === $partNumber;
+                                            });
+                                            $processedPartNumbers->put($partNumber, true);
+                                        @endphp
+                                        <td rowspan="{{ $samePartNumberItems->count() }}">
+                                            {{ $stockQuantities[$item->id_master_data_sparepart] ?? '-' }}
+                                        </td>
+                                    @endif
+                                    <td>{{ $item->satuan ?? '-' }}</td>
+                                </tr>
+                            @endforeach
                         @endforeach
                     @empty
                         <tr>

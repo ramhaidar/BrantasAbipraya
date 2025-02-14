@@ -61,9 +61,9 @@ class TimelineEvaluasiUrgentController extends Controller
             try
             {
                 $uraian = $this->getSelectedValues ( $request->selected_uraian );
-                if ( in_array ( 'null', $uraian ) )
+                if ( in_array ( 'Empty/Null', $uraian ) )
                 {
-                    $nonNullValues = array_filter ( $uraian, fn ( $value ) => $value !== 'null' );
+                    $nonNullValues = array_filter ( $uraian, fn ( $value ) => $value !== 'Empty/Null' );
                     $query->where ( function ($q) use ($nonNullValues)
                     {
                         $q->whereNull ( 'nama_rencana' )
@@ -91,22 +91,19 @@ class TimelineEvaluasiUrgentController extends Controller
             try
             {
                 $status        = $this->getSelectedValues ( $request->selected_status );
-                $booleanValues = array_map ( function ($value)
+                $statusMap     = [ 
+                    'Sudah Selesai' => true,
+                    'Belum Selesai' => false
+                ];
+                $booleanValues = array_map ( function ($s) use ($statusMap)
                 {
-                    return $value === 'Sudah Selesai' ? true :
-                        ( $value === 'Belum Selesai' ? false : null );
+                    return $statusMap[ $s ] ?? null;
                 }, $status );
 
-                // Filter out any null values that might have been created
-                $booleanValues = array_filter ( $booleanValues, function ($value)
+                $query->whereIn ( 'is_done', array_filter ( $booleanValues, function ($value)
                 {
                     return $value !== null;
-                } );
-
-                if ( ! empty ( $booleanValues ) )
-                {
-                    $query->whereIn ( 'is_done', $booleanValues );
-                }
+                } ) );
             }
             catch ( \Exception $e )
             {
@@ -128,23 +125,54 @@ class TimelineEvaluasiUrgentController extends Controller
             {
                 try
                 {
-                    $dates = $this->getSelectedValues ( $request->get ( "selected_{$field}" ) );
-                    if ( in_array ( 'null', $dates ) )
+                    $dateValues = $this->getSelectedValues ( $request->get ( "selected_{$field}" ) );
+
+                    $query->where ( function ($q) use ($dateValues, $field)
                     {
-                        $nonNullDates = array_filter ( $dates, fn ( $date ) => $date !== 'null' );
-                        $query->where ( function ($q) use ($nonNullDates, $field)
+                        $hasRange = false;
+                        $gtDate   = null;
+                        $ltDate   = null;
+
+                        foreach ( $dateValues as $value )
                         {
-                            $q->whereNull ( $field )
-                                ->when ( count ( $nonNullDates ) > 0, function ($q) use ($nonNullDates, $field)
-                                {
-                                    $q->orWhereIn ( \DB::raw ( "DATE({$field})" ), $nonNullDates );
-                                } );
-                        } );
-                    }
-                    else
-                    {
-                        $query->whereIn ( \DB::raw ( "DATE({$field})" ), $dates );
-                    }
+                            if ( $value === 'Empty/Null' )
+                            {
+                                $q->orWhereNull ( $field );
+                            }
+                            elseif ( strpos ( $value, 'exact:' ) === 0 )
+                            {
+                                $date = substr ( $value, 6 );
+                                $q->orWhereDate ( $field, '=', $date );
+                            }
+                            elseif ( strpos ( $value, 'gt:' ) === 0 )
+                            {
+                                $gtDate   = substr ( $value, 3 );
+                                $hasRange = true;
+                            }
+                            elseif ( strpos ( $value, 'lt:' ) === 0 )
+                            {
+                                $ltDate   = substr ( $value, 3 );
+                                $hasRange = true;
+                            }
+                        }
+
+                        // Handle date range if present
+                        if ( $hasRange )
+                        {
+                            if ( $gtDate && $ltDate )
+                            {
+                                $q->orWhereBetween ( $field, [ $gtDate, $ltDate ] );
+                            }
+                            elseif ( $gtDate )
+                            {
+                                $q->orWhereDate ( $field, '>=', $gtDate );
+                            }
+                            elseif ( $ltDate )
+                            {
+                                $q->orWhereDate ( $field, '<=', $ltDate );
+                            }
+                        }
+                    } );
                 }
                 catch ( \Exception $e )
                 {
@@ -209,14 +237,21 @@ class TimelineEvaluasiUrgentController extends Controller
                                     );
                                 }
                             }
-                            if ( $gtValue !== null )
+                            if ( $gtValue !== null && $ltValue !== null )
+                            {
+                                $q->orWhereRaw (
+                                    'EXTRACT(DAY FROM (tanggal_akhir_actual::timestamp - tanggal_awal_actual::timestamp))::integer BETWEEN ? AND ?',
+                                    [ $gtValue, $ltValue ]
+                                );
+                            }
+                            elseif ( $gtValue !== null )
                             {
                                 $q->orWhereRaw (
                                     'EXTRACT(DAY FROM (tanggal_akhir_actual::timestamp - tanggal_awal_actual::timestamp))::integer >= ?',
                                     [ $gtValue ]
                                 );
                             }
-                            if ( $ltValue !== null )
+                            elseif ( $ltValue !== null )
                             {
                                 $q->orWhereRaw (
                                     'EXTRACT(DAY FROM (tanggal_akhir_actual::timestamp - tanggal_awal_actual::timestamp))::integer <= ?',
@@ -243,17 +278,24 @@ class TimelineEvaluasiUrgentController extends Controller
                                     );
                                 }
                             }
-                            if ( $gtValue !== null )
+                            if ( $gtValue !== null && $ltValue !== null )
+                            {
+                                $q->orWhereRaw (
+                                    'EXTRACT(DAY FROM (tanggal_akhir_rencana::timestamp - tanggal_awal_rencana::timestamp))::integer BETWEEN ? AND ?',
+                                    [ $gtValue, $ltValue ]
+                                );
+                            }
+                            elseif ( $gtValue !== null )
                             {
                                 $q->orWhereRaw (
                                     'EXTRACT(DAY FROM (tanggal_akhir_rencana::timestamp - tanggal_awal_rencana::timestamp))::integer >= ?',
                                     [ $gtValue ]
                                 );
                             }
-                            if ( $ltValue !== null )
+                            elseif ( $ltValue !== null )
                             {
                                 $q->orWhereRaw (
-                                    'EXTRACT(DAY FROM (tanggal_akhir_rencana::timestamp - tanggal_awal_rencana::timestamp))::integer <= ?',
+                                    'EXTRACT(DAY FROM (tanggal_akhir_rencana::timestamp - tanggal_akhir_rencana::timestamp))::integer <= ?',
                                     [ $ltValue ]
                                 );
                             }

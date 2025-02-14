@@ -35,44 +35,9 @@ class RiwayatSPBController extends Controller
             'masterDataSupplier',
         ] )->findOrFail ( $id );
 
-        // Get unique values for filtering
-        $uniqueValues = [ 
-            'jenis_barang' => $spb->linkSpbDetailSpb
-                ->pluck ( 'detailSpb.masterDataSparepart.nama' )
-                ->unique ()
-                ->values (),
-            'merk'         => $spb->linkSpbDetailSpb
-                ->pluck ( 'detailSpb.masterDataSparepart.merk' )
-                ->unique ()
-                ->values (),
-            'spesifikasi'  => $spb->linkSpbDetailSpb
-                ->pluck ( 'detailSpb.masterDataSparepart.part_number' )
-                ->unique ()
-                ->values (),
-            'quantity'     => $spb->linkSpbDetailSpb
-                ->pluck ( 'detailSpb.quantity_po' )
-                ->unique ()
-                ->values (),
-            'satuan'       => $spb->linkSpbDetailSpb
-                ->pluck ( 'detailSpb.satuan' )
-                ->unique ()
-                ->values (),
-            'harga'        => $spb->linkSpbDetailSpb
-                ->pluck ( 'detailSpb.harga' )
-                ->unique ()
-                ->sort ()
-                ->values (),
-            'jumlah_harga' => $spb->linkSpbDetailSpb
-                ->map ( function ($item)
-                {
-                    return $item->detailSpb->quantity_po * $item->detailSpb->harga;
-                } )
-                ->unique ()
-                ->sort ()
-                ->values (),
-        ];
+        $items = $spb->linkSpbDetailSpb; // New variable holding initial items
 
-        // Get selected values for each filter
+        // Get selected values for each filter from request
         $selectedValues = [ 
             'jenis_barang' => $this->getSelectedValues ( request ( 'selected_jenis_barang' ) ),
             'merk'         => $this->getSelectedValues ( request ( 'selected_merk' ) ),
@@ -86,44 +51,30 @@ class RiwayatSPBController extends Controller
         // Apply filters if present
         if ( request ()->hasAny ( [ 'selected_jenis_barang', 'selected_merk', 'selected_spesifikasi', 'selected_quantity', 'selected_satuan', 'selected_harga', 'selected_jumlah_harga' ] ) )
         {
-            $filteredItems = $spb->linkSpbDetailSpb->filter ( function ($item) use ($selectedValues)
+            $filteredItems = $items->filter ( function ($item) use ($selectedValues)
             {
-                // Helper function to check if a field matches the filter
                 $checkField = function ($value, $selectedValues)
                 {
-                    // If no filter values selected, show all
                     if ( empty ( $selectedValues ) )
                     {
                         return true;
                     }
-
-                    // Check if value is empty/null
                     $isValueEmpty = empty ( $value ) || $value === '-' || $value === '';
-
-                    // If 'null' is selected in filter
                     if ( in_array ( 'null', $selectedValues ) )
                     {
-                        // Only return true if value is actually empty/null
                         if ( $isValueEmpty )
                         {
                             return true;
                         }
                     }
-
-                    // Remove 'null' from selected values for non-empty value checking
                     $nonNullValues = array_filter ( $selectedValues, fn ( $v ) => $v !== 'null' );
-
-                    // If there are non-null values selected, check if value matches any of them
                     if ( ! empty ( $nonNullValues ) )
                     {
                         return in_array ( (string) $value, $nonNullValues );
                     }
-
-                    // If only 'null' was selected and value is not empty, return false
                     return false;
                 };
 
-                // Check each field against its filter
                 $matchesJenisBarang = $checkField (
                     $item->detailSpb->masterDataSparepart->nama,
                     $selectedValues[ 'jenis_barang' ] ?? []
@@ -164,11 +115,41 @@ class RiwayatSPBController extends Controller
                     $matchesQuantity && $matchesSatuan && $matchesHarga && $matchesJumlahHarga;
             } );
 
-            // Create a new SPB instance with filtered items
             $filteredSpb = clone $spb;
             $filteredSpb->setRelation ( 'linkSpbDetailSpb', $filteredItems );
-            $spb = $filteredSpb;
+            $spb   = $filteredSpb;
+            $items = $filteredItems; // Update items with filtered data
         }
+
+        // Recalculate unique values based on $items now (filtered or full)
+        $uniqueValues = [ 
+            'jenis_barang' => $items->pluck ( 'detailSpb.masterDataSparepart.nama' )
+                ->unique ()
+                ->values (),
+            'merk'         => $items->pluck ( 'detailSpb.masterDataSparepart.merk' )
+                ->unique ()
+                ->values (),
+            'spesifikasi'  => $items->pluck ( 'detailSpb.masterDataSparepart.part_number' )
+                ->unique ()
+                ->values (),
+            'quantity'     => $items->pluck ( 'detailSpb.quantity_po' )
+                ->unique ()
+                ->values (),
+            'satuan'       => $items->pluck ( 'detailSpb.satuan' )
+                ->unique ()
+                ->values (),
+            'harga'        => $items->pluck ( 'detailSpb.harga' )
+                ->unique ()
+                ->sort ()
+                ->values (),
+            'jumlah_harga' => $items->map ( function ($item)
+            {
+                return $item->detailSpb->quantity_po * $item->detailSpb->harga;
+            } )
+                ->unique ()
+                ->sort ()
+                ->values (),
+        ];
 
         // Filter projects based on user role
         $user         = Auth::user ();

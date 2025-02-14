@@ -78,7 +78,7 @@
         @if ($filter ?? true)
             <div class="filter-popup" id="{{ $filterId }}-filter" style="display: none;">
                 <div class="p-2">
-                    @if (isset($type) && $type === 'number')
+                    @if (isset($type) && in_array($type, ['number', 'number_of_days']))
                         <div class="mb-2">
                             <label class="form-label small">Sama Dengan "="</label>
                             <input class="form-control form-control-sm" id="{{ $paramName }}-exact" type="number" value="{{ $exactValue }}" placeholder="Masukkan nilai tepat">
@@ -86,11 +86,11 @@
                         <hr>
                         <div class="mb-2">
                             <label class="form-label small">Lebih Besar Dari Sama Dengan ">="</label>
-                            <input class="form-control form-control-sm" id="{{ $paramName }}-gt" type="number" value="{{ $gtValue }}" placeholder="Lebih besar dari...">
+        <input class="form-control form-control-sm" id="{{ $paramName }}-gt" type="number" value="{{ $gtValue }}" placeholder="Lebih besar dari...">
                         </div>
                         <div class="mb-2">
                             <label class="form-label small">Lebih Kecil Dari Sama Dengan "<="</label>
-                            <input class="form-control form-control-sm" id="{{ $paramName }}-lt" type="number" value="{{ $ltValue }}" placeholder="Lebih kecil dari...">
+        <input class="form-control form-control-sm" id="{{ $paramName }}-lt" type="number" value="{{ $ltValue }}" placeholder="Lebih kecil dari...">
                         </div>
                         <hr>
                     @endif

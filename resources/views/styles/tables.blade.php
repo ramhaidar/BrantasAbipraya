@@ -19,7 +19,7 @@
         padding: 7px;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         z-index: 3000;
-        max-height: 300px;
+        max-height: 100%;
         min-width: 200px;
     }
 

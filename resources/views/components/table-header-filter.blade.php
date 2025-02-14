@@ -129,12 +129,24 @@
                         changeYear: true,
                         regional: 'id',
                         autoOpen: false,
-                        showOn: false
+                        showOn: false,
+                        beforeShow: function(input, inst) {
+                            // Prevent the filter popup from closing when datepicker opens
+                            inst.dpDiv.on('click', function(e) {
+                                e.stopPropagation();
+                            });
+                            return true;
+                        }
                     };
 
                     // Initialize datepickers
                     $('.datepicker').each(function() {
                         $(this).datepicker(options);
+                    });
+
+                    // Add click handler to prevent popup closing
+                    $(document).on('click', '.ui-datepicker, .ui-datepicker *', function(e) {
+                        e.stopPropagation();
                     });
 
                     // Set regional settings

@@ -420,7 +420,8 @@
     $(document).ready(function() {
         // Close popup when clicking outside
         $(document).on('click', function(event) {
-            if (!$(event.target).closest('.filter-popup, button').length) {
+            // Tambahkan pengecekan untuk datepicker
+            if (!$(event.target).closest('.filter-popup, button, .ui-datepicker, .ui-datepicker *').length) {
                 $('.filter-popup').hide();
             }
         });

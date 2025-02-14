@@ -440,7 +440,7 @@
                 const type = popupId.replace('-filter', '').replaceAll('-', '_');
                 applyFilter(type);
                 event.preventDefault();
-            } else if (event.key === 'a' && event.ctrlKey && visiblePopup.length && isInputFocused) {
+            } else if (event.key === 'a' && event.ctrlKey && visiblePopup.length) {
                 // Prevent default select all behavior
                 event.preventDefault();
                 // Get popup type and toggle all checkboxes
@@ -489,6 +489,42 @@
                 }
             });
         }, 60);
+
+        // Add event listeners to clear other inputs when one changes
+        const numericInputs = document.querySelectorAll('input[type="number"]');
+        numericInputs.forEach(input => {
+            input.addEventListener('input', function() {
+                const paramName = this.id.split('-')[0]; // Extract parameter name from input ID
+                if (this.id.endsWith('-exact')) {
+                    document.getElementById(`${paramName}-gt`).value = '';
+                    document.getElementById(`${paramName}-lt`).value = '';
+                } else {
+                    document.getElementById(`${paramName}-exact`).value = '';
+                }
+            });
+        });
+
+        // Add keypress event listener for numeric inputs
+        numericInputs.forEach(input => {
+            input.addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    const paramName = this.id.split('-')[0]; // Extract parameter name from input ID
+                    applyFilter(paramName);
+                }
+            });
+        });
+
+        // Ensure Apply button works for numeric filters
+        document.querySelectorAll('.filter-popup').forEach(popup => {
+            const applyButton = popup.querySelector('button[type="button"]');
+            if (applyButton) {
+                applyButton.addEventListener('click', function(event) {
+                    const paramName = popup.id.replace('-filter', '').replace(/-/g, '_');
+                    applyFilter(paramName);
+                });
+            }
+        });
     });
 
     // Custom function to determine item priority
@@ -497,5 +533,55 @@
         if (trimmedLabel === "Empty/Null") return 1;
         if (trimmedLabel === "-") return 2;
         return 3;
+    }
+
+    function applyFilter(paramName) {
+        const checkboxes = document.querySelectorAll(`.${paramName}-checkbox:checked`);
+        let values = Array.from(checkboxes).map(cb => cb.value);
+
+        // Handle numeric filters if they exist
+        const exactInput = document.getElementById(`${paramName}-exact`);
+        const gtInput = document.getElementById(`${paramName}-gt`);
+        const ltInput = document.getElementById(`${paramName}-lt`);
+
+        // Only add numeric values if they exist and are not empty
+        if (exactInput && exactInput.value.trim()) {
+            values.push(`exact:${exactInput.value.trim()}`);
+        } else {
+            if (gtInput && gtInput.value.trim()) {
+                values.push(`gt:${gtInput.value.trim()}`);
+            }
+            if (ltInput && ltInput.value.trim()) {
+                values.push(`lt:${ltInput.value.trim()}`);
+            }
+        }
+
+        if (values.length > 0) {
+            // Encode the values
+            const encodedValue = btoa(values.join('||'));
+
+            // Update the hidden input
+            const hiddenInput = document.getElementById(`selected-${paramName}`);
+            if (hiddenInput) {
+                hiddenInput.value = encodedValue;
+            }
+        } else {
+            // Clear the hidden input if no values are selected
+            const hiddenInput = document.getElementById(`selected-${paramName}`);
+            if (hiddenInput) {
+                hiddenInput.value = '';
+            }
+        }
+
+        // Update the URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        if (values.length > 0) {
+            urlParams.set(`selected_${paramName}`, btoa(values.join('||')));
+        } else {
+            urlParams.delete(`selected_${paramName}`);
+        }
+
+        // Navigate to updated URL
+        window.location.href = `${window.location.pathname}?${urlParams.toString()}`;
     }
 </script>

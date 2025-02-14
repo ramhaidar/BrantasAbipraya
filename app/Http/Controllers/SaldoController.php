@@ -123,6 +123,7 @@ class SaldoController extends Controller
                 'selected_merk',
                 'selected_part_number',
                 'selected_satuan',
+                'selected_quantity',
                 'selected_harga',
                 'selected_jumlah_harga'
             ] )
@@ -200,39 +201,149 @@ class SaldoController extends Controller
             'merk'         => 'master_data_sparepart.merk',
             'part_number'  => 'master_data_sparepart.part_number',
             'satuan'       => 'saldo.satuan',
+            'quantity'     => function ($q, $values)
+            {
+                $q->where ( function ($subQ) use ($values)
+                {
+                    $hasRange = false;
+                    $gtValue = null;
+                    $ltValue = null;
+
+                    foreach ( $values as $value )
+                    {
+                        if ( $value === 'Empty/Null' )
+                        {
+                            $subQ->orWhereNull ( 'saldo.quantity' )
+                                ->orWhere ( 'saldo.quantity', 0 );
+                        }
+                        elseif ( strpos ( $value, 'exact:' ) === 0 )
+                        {
+                            $exactValue = substr ( $value, 6 );
+                            $subQ->orWhere ( 'saldo.quantity', '=', $exactValue );
+                        }
+                        elseif ( strpos ( $value, 'gt:' ) === 0 )
+                        {
+                            $gtValue  = substr ( $value, 3 );
+                            $hasRange = true;
+                        }
+                        elseif ( strpos ( $value, 'lt:' ) === 0 )
+                        {
+                            $ltValue  = substr ( $value, 3 );
+                            $hasRange = true;
+                        }
+                    }
+
+                    if ( $hasRange )
+                    {
+                        $subQ->orWhere ( function ($rangeQ) use ($gtValue, $ltValue)
+                        {
+                            if ( $gtValue )
+                            {
+                                $rangeQ->where ( 'saldo.quantity', '>=', $gtValue );
+                            }
+                            if ( $ltValue )
+                            {
+                                $rangeQ->where ( 'saldo.quantity', '<=', $ltValue );
+                            }
+                        } );
+                    }
+                } );
+            },
             'harga'        => function ($q, $values)
             {
-                if ( in_array ( 'Empty/Null', $values ) )
+                $q->where ( function ($subQ) use ($values)
                 {
-                    $nonNullValues = array_filter ( $values, fn ( $value ) => $value !== 'Empty/Null' );
-                    $q->whereNull ( 'saldo.harga' )
-                        ->orWhere ( 'saldo.harga', 0 )
-                        ->when ( ! empty ( $nonNullValues ), function ($query) use ($nonNullValues)
+                    $hasRange = false;
+                    $gtValue = null;
+                    $ltValue = null;
+
+                    foreach ( $values as $value )
+                    {
+                        if ( $value === 'Empty/Null' )
                         {
-                            $query->orWhereIn ( 'saldo.harga', $nonNullValues );
+                            $subQ->orWhereNull ( 'saldo.harga' )
+                                ->orWhere ( 'saldo.harga', 0 );
+                        }
+                        elseif ( strpos ( $value, 'exact:' ) === 0 )
+                        {
+                            $exactValue = substr ( $value, 6 );
+                            $subQ->orWhere ( 'saldo.harga', '=', $exactValue );
+                        }
+                        elseif ( strpos ( $value, 'gt:' ) === 0 )
+                        {
+                            $gtValue  = substr ( $value, 3 );
+                            $hasRange = true;
+                        }
+                        elseif ( strpos ( $value, 'lt:' ) === 0 )
+                        {
+                            $ltValue  = substr ( $value, 3 );
+                            $hasRange = true;
+                        }
+                    }
+
+                    if ( $hasRange )
+                    {
+                        $subQ->orWhere ( function ($rangeQ) use ($gtValue, $ltValue)
+                        {
+                            if ( $gtValue )
+                            {
+                                $rangeQ->where ( 'saldo.harga', '>=', $gtValue );
+                            }
+                            if ( $ltValue )
+                            {
+                                $rangeQ->where ( 'saldo.harga', '<=', $ltValue );
+                            }
                         } );
-                }
-                else
-                {
-                    $q->whereIn ( 'saldo.harga', $values );
-                }
+                    }
+                } );
             },
             'jumlah_harga' => function ($q, $values)
             {
-                if ( in_array ( 'Empty/Null', $values ) )
+                $q->where ( function ($subQ) use ($values)
                 {
-                    $nonNullValues = array_filter ( $values, fn ( $value ) => $value !== 'Empty/Null' );
-                    $q->whereRaw ( '(saldo.quantity * saldo.harga) IS NULL' )
-                        ->orWhereRaw ( '(saldo.quantity * saldo.harga) = 0' )
-                        ->when ( ! empty ( $nonNullValues ), function ($query) use ($nonNullValues)
+                    $hasRange = false;
+                    $gtValue = null;
+                    $ltValue = null;
+
+                    foreach ( $values as $value )
+                    {
+                        if ( $value === 'Empty/Null' )
                         {
-                            $query->orWhereRaw ( '(saldo.quantity * saldo.harga) IN (' . implode ( ',', $nonNullValues ) . ')' );
+                            $subQ->orWhereRaw ( '(saldo.quantity * saldo.harga) IS NULL' )
+                                ->orWhereRaw ( '(saldo.quantity * saldo.harga) = 0' );
+                        }
+                        elseif ( strpos ( $value, 'exact:' ) === 0 )
+                        {
+                            $exactValue = substr ( $value, 6 );
+                            $subQ->orWhereRaw ( '(saldo.quantity * saldo.harga) = ?', [ $exactValue ] );
+                        }
+                        elseif ( strpos ( $value, 'gt:' ) === 0 )
+                        {
+                            $gtValue  = substr ( $value, 3 );
+                            $hasRange = true;
+                        }
+                        elseif ( strpos ( $value, 'lt:' ) === 0 )
+                        {
+                            $ltValue  = substr ( $value, 3 );
+                            $hasRange = true;
+                        }
+                    }
+
+                    if ( $hasRange )
+                    {
+                        $subQ->orWhere ( function ($rangeQ) use ($gtValue, $ltValue)
+                        {
+                            if ( $gtValue )
+                            {
+                                $rangeQ->whereRaw ( '(saldo.quantity * saldo.harga) >= ?', [ $gtValue ] );
+                            }
+                            if ( $ltValue )
+                            {
+                                $rangeQ->whereRaw ( '(saldo.quantity * saldo.harga) <= ?', [ $ltValue ] );
+                            }
                         } );
-                }
-                else
-                {
-                    $q->whereRaw ( '(saldo.quantity * saldo.harga) IN (' . implode ( ',', $values ) . ')' );
-                }
+                    }
+                } );
             },
         ];
 

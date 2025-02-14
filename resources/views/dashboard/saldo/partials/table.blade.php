@@ -61,6 +61,7 @@
             'filterId' => 'quantity',
             'paramName' => 'quantity',
             'filter' => true,
+            'type' => 'number',
         ],
         [
             'title' => 'Satuan',
@@ -73,12 +74,14 @@
             'filterId' => 'harga',
             'paramName' => 'harga',
             'filter' => true,
+            'type' => 'number',
         ],
         [
             'title' => 'Jumlah Harga',
             'filterId' => 'jumlah-harga',
             'paramName' => 'jumlah_harga',
             'filter' => true,
+            'type' => 'number',
         ],
     ];
 

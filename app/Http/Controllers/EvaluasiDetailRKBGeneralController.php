@@ -217,29 +217,73 @@ class EvaluasiDetailRKBGeneralController extends Controller
                 // Special handling for numeric columns
                 if ( in_array ( $paramName, [ 'quantity_requested', 'stock_quantity' ] ) )
                 {
-                    if ( in_array ( 'null', $values ) )
+                    $query->where ( function ($q) use ($columnName, $values)
                     {
-                        $nonNullValues = array_filter ( $values, fn ( $value ) => $value !== 'null' );
-                        $query->where ( function ($q) use ($columnName, $nonNullValues)
+                        $hasGtFilter = false;
+                        $hasLtFilter = false;
+                        $gtValue     = null;
+                        $ltValue     = null;
+
+                        // First pass to collect range values
+                        foreach ( $values as $value )
                         {
-                            $q->whereNull ( $columnName )
-                                ->when ( ! empty ( $nonNullValues ), function ($subQ) use ($columnName, $nonNullValues)
+                            if ( strpos ( $value, 'gt:' ) === 0 )
+                            {
+                                $hasGtFilter = true;
+                                $gtValue     = substr ( $value, 3 );
+                            }
+                            elseif ( strpos ( $value, 'lt:' ) === 0 )
+                            {
+                                $hasLtFilter = true;
+                                $ltValue     = substr ( $value, 3 );
+                            }
+                        }
+
+                        // If we have both gt and lt, treat as range
+                        if ( $hasGtFilter && $hasLtFilter )
+                        {
+                            $q->whereBetween ( $columnName, [ $gtValue, $ltValue ] );
+                        }
+                        else
+                        {
+                            // Handle individual conditions
+                            foreach ( $values as $value )
+                            {
+                                if ( strpos ( $value, 'exact:' ) === 0 )
                                 {
-                                    $subQ->orWhereIn ( $columnName, array_map ( 'intval', $nonNullValues ) );
-                                } );
-                        } );
-                    }
-                    else
-                    {
-                        $query->whereIn ( $columnName, array_map ( 'intval', $values ) );
-                    }
+                                    $exactValue = substr ( $value, 6 );
+                                    $q->orWhere ( $columnName, '=', $exactValue );
+                                }
+                                elseif ( strpos ( $value, 'gt:' ) === 0 && ! $hasLtFilter )
+                                {
+                                    $gtValue = substr ( $value, 3 );
+                                    $q->orWhere ( $columnName, '>=', $gtValue );
+                                }
+                                elseif ( strpos ( $value, 'lt:' ) === 0 && ! $hasGtFilter )
+                                {
+                                    $ltValue = substr ( $value, 3 );
+                                    $q->orWhere ( $columnName, '<=', $ltValue );
+                                }
+                                elseif ( $value === 'Empty/Null' )
+                                {
+                                    $q->orWhereNull ( $columnName )
+                                        ->orWhere ( $columnName, '0' )
+                                        ->orWhere ( $columnName, '' );
+                                }
+                                else
+                                {
+                                    $q->orWhere ( $columnName, $value );
+                                }
+                            }
+                        }
+                    } );
                 }
                 // Default handling for non-numeric columns
                 else
                 {
-                    if ( in_array ( 'null', $values ) )
+                    if ( in_array ( 'Empty/Null', $values ) )
                     {
-                        $nonNullValues = array_filter ( $values, fn ( $value ) => $value !== 'null' );
+                        $nonNullValues = array_filter ( $values, fn ( $value ) => $value !== 'Empty/Null' );
                         $query->where ( function ($q) use ($columnName, $nonNullValues)
                         {
                             $q->whereNull ( $columnName )
@@ -278,39 +322,83 @@ class EvaluasiDetailRKBGeneralController extends Controller
                     return;
                 }
 
-                $intValues     = array_map ( 'intval', array_filter ( $values, fn ( $v ) => $v !== 'null' ) );
-                $hasNullFilter = in_array ( 'null', $values );
+                $hasGtFilter = false;
+                $hasLtFilter = false;
+                $gtValue     = null;
+                $ltValue     = null;
 
-                // Get all sparepart IDs that match any of the selected quantities
-                $matchingSparepartIds = $stockQuantities
-                    ->filter ( function ($quantity) use ($intValues)
-                    {
-                        return ! empty ( $intValues ) && in_array ( (int) $quantity, $intValues );
-                    } )
-                    ->keys ()
-                    ->toArray ();
-
-                $query->where ( function ($q) use ($matchingSparepartIds, $hasNullFilter)
+                // First pass to collect range values
+                foreach ( $values as $value )
                 {
-                    if ( ! empty ( $matchingSparepartIds ) )
+                    if ( strpos ( $value, 'gt:' ) === 0 )
                     {
-                        $q->whereIn ( 'master_data_sparepart.id', $matchingSparepartIds );
+                        $hasGtFilter = true;
+                        $gtValue     = substr ( $value, 3 );
                     }
-
-                    if ( $hasNullFilter )
+                    elseif ( strpos ( $value, 'lt:' ) === 0 )
                     {
-                        $q->orWhereDoesntHave ( 'masterDataSparepart.saldos', function ($query)
+                        $hasLtFilter = true;
+                        $ltValue     = substr ( $value, 3 );
+                    }
+                }
+
+                $query->where ( function ($q) use ($values, $stockQuantities, $hasGtFilter, $hasLtFilter, $gtValue, $ltValue)
+                {
+                    // If we have both gt and lt, treat as range
+                    if ( $hasGtFilter && $hasLtFilter )
+                    {
+                        $matchingIds = $stockQuantities->filter ( function ($qty) use ($gtValue, $ltValue)
                         {
-                            $query->where ( 'id_proyek', $this->rkb->id_proyek );
-                        } )
-                            ->orWhereHas ( 'masterDataSparepart.saldos', function ($query)
+                            return $qty >= $gtValue && $qty <= $ltValue;
+                        } )->keys ();
+                        $q->whereIn ( 'master_data_sparepart.id', $matchingIds );
+                    }
+                    else
+                    {
+                        // Handle individual conditions
+                        foreach ( $values as $value )
+                        {
+                            if ( strpos ( $value, 'exact:' ) === 0 )
                             {
-                                $query->where ( 'id_proyek', $this->rkb->id_proyek )
-                                    ->where ( 'quantity', 0 );
-                            } );
+                                $exactValue  = substr ( $value, 6 );
+                                $matchingIds = $stockQuantities->filter ( function ($qty) use ($exactValue)
+                                {
+                                    return $qty == $exactValue;
+                                } )->keys ();
+                                $q->orWhereIn ( 'master_data_sparepart.id', $matchingIds );
+                            }
+                            elseif ( strpos ( $value, 'gt:' ) === 0 && ! $hasLtFilter )
+                            {
+                                $gtValue     = substr ( $value, 3 );
+                                $matchingIds = $stockQuantities->filter ( function ($qty) use ($gtValue)
+                                {
+                                    return $qty >= $gtValue;
+                                } )->keys ();
+                                $q->orWhereIn ( 'master_data_sparepart.id', $matchingIds );
+                            }
+                            elseif ( strpos ( $value, 'lt:' ) === 0 && ! $hasGtFilter )
+                            {
+                                $ltValue     = substr ( $value, 3 );
+                                $matchingIds = $stockQuantities->filter ( function ($qty) use ($ltValue)
+                                {
+                                    return $qty <= $ltValue;
+                                } )->keys ();
+                                $q->orWhereIn ( 'master_data_sparepart.id', $matchingIds );
+                            }
+                            elseif ( $value === 'Empty/Null' )
+                            {
+                                $q->orWhereDoesntHave ( 'masterDataSparepart.saldos', function ($query)
+                                {
+                                    $query->where ( 'id_proyek', $this->rkb->id_proyek );
+                                } )->orWhereHas ( 'masterDataSparepart.saldos', function ($query)
+                                {
+                                    $query->where ( 'id_proyek', $this->rkb->id_proyek )
+                                        ->where ( 'quantity', 0 );
+                                } );
+                            }
+                        }
                     }
                 } );
-
             }
             catch ( \Exception $e )
             {

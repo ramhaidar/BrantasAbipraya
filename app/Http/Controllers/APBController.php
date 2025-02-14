@@ -480,31 +480,52 @@ class APBController extends Controller
             $selectedValues = $this->getSelectedValues ( $request->get ( 'selected_quantity' ) );
             $query->where ( function ($q) use ($selectedValues)
             {
-                // Handle Empty/Null case
-                if ( in_array ( 'Empty/Null', $selectedValues ) )
+                // Track range conditions
+                $rangeConditions = [ 
+                    'gt' => null,
+                    'lt' => null
+                ];
+
+                // Process each value
+                foreach ( $selectedValues as $value )
                 {
-                    $q->whereNull ( 'quantity' )
-                        ->orWhere ( 'quantity', 0 );
-
-                    // Remove 'Empty/Null' from array and filter out non-numeric values
-                    $numericValues = array_filter (
-                        array_diff ( $selectedValues, [ 'Empty/Null' ] ),
-                        'is_numeric'
-                    );
-
-                    if ( ! empty ( $numericValues ) )
+                    if ( $value === 'Empty/Null' )
                     {
-                        $q->orWhereIn ( 'quantity', $numericValues );
+                        $q->orWhereNull ( 'quantity' )
+                            ->orWhere ( 'quantity', 0 );
+                    }
+                    elseif ( strpos ( $value, 'exact:' ) === 0 )
+                    {
+                        $exactValue = substr ( $value, 6 );
+                        if ( is_numeric ( $exactValue ) )
+                        {
+                            $q->orWhere ( 'quantity', $exactValue );
+                        }
+                    }
+                    elseif ( strpos ( $value, 'gt:' ) === 0 )
+                    {
+                        $rangeConditions[ 'gt' ] = substr ( $value, 3 );
+                    }
+                    elseif ( strpos ( $value, 'lt:' ) === 0 )
+                    {
+                        $rangeConditions[ 'lt' ] = substr ( $value, 3 );
                     }
                 }
-                else
+
+                // Apply range conditions if they exist
+                if ( $rangeConditions[ 'gt' ] || $rangeConditions[ 'lt' ] )
                 {
-                    // If no Empty/Null selected, just filter by numeric values
-                    $numericValues = array_filter ( $selectedValues, 'is_numeric' );
-                    if ( ! empty ( $numericValues ) )
+                    $q->orWhere ( function ($rangeQ) use ($rangeConditions)
                     {
-                        $q->whereIn ( 'quantity', $numericValues );
-                    }
+                        if ( $rangeConditions[ 'gt' ] )
+                        {
+                            $rangeQ->where ( 'quantity', '>=', $rangeConditions[ 'gt' ] );
+                        }
+                        if ( $rangeConditions[ 'lt' ] )
+                        {
+                            $rangeQ->where ( 'quantity', '<=', $rangeConditions[ 'lt' ] );
+                        }
+                    } );
                 }
             } );
         }
@@ -514,29 +535,213 @@ class APBController extends Controller
             $selectedValues = $this->getSelectedValues ( $request->get ( 'selected_quantity_dikirim' ) );
             $query->where ( function ($q) use ($selectedValues)
             {
-                if ( in_array ( 'Empty/Null', $selectedValues ) )
-                {
-                    $q->where ( function ($sq)
-                    {
-                        $sq->whereNull ( 'status' )  // Records that are "penggunaan"
-                            ->orWhere ( 'quantity', '0' )
-                            ->orWhere ( 'quantity', null );
-                    } );
+                // Track range conditions
+                $rangeConditions = [ 
+                    'gt' => null,
+                    'lt' => null
+                ];
 
-                    $otherValues = array_diff ( $selectedValues, [ 'Empty/Null' ] );
-                    if ( ! empty ( $otherValues ) )
+                // Process each value
+                foreach ( $selectedValues as $value )
+                {
+                    if ( $value === 'Empty/Null' )
                     {
-                        $q->orWhere ( function ($sq) use ($otherValues)
+                        $q->where ( function ($sq)
                         {
-                            $sq->whereNotNull ( 'status' )  // Only for records with status (mutasi)
-                                ->whereIn ( 'quantity', $otherValues );
+                            $sq->whereNull ( 'status' )  // Not a mutasi record
+                                ->orWhere ( 'quantity', '0' )
+                                ->orWhere ( 'quantity', null );
                         } );
                     }
+                    elseif ( strpos ( $value, 'exact:' ) === 0 )
+                    {
+                        $exactValue = substr ( $value, 6 );
+                        if ( is_numeric ( $exactValue ) )
+                        {
+                            $q->orWhere ( function ($sq) use ($exactValue)
+                            {
+                                $sq->whereNotNull ( 'status' )  // Only for records with status (mutasi)
+                                    ->where ( 'quantity', $exactValue );
+                            } );
+                        }
+                    }
+                    elseif ( strpos ( $value, 'gt:' ) === 0 )
+                    {
+                        $rangeConditions[ 'gt' ] = substr ( $value, 3 );
+                    }
+                    elseif ( strpos ( $value, 'lt:' ) === 0 )
+                    {
+                        $rangeConditions[ 'lt' ] = substr ( $value, 3 );
+                    }
                 }
-                else
+
+                // Apply range conditions if they exist
+                if ( $rangeConditions[ 'gt' ] || $rangeConditions[ 'lt' ] )
                 {
-                    $q->whereNotNull ( 'status' )  // Only for records with status (mutasi)
-                        ->whereIn ( 'quantity', $selectedValues );
+                    $q->orWhere ( function ($rangeQ) use ($rangeConditions)
+                    {
+                        $rangeQ->whereNotNull ( 'status' ); // Only for records with status (mutasi)
+                        if ( $rangeConditions[ 'gt' ] )
+                        {
+                            $rangeQ->where ( 'quantity', '>=', $rangeConditions[ 'gt' ] );
+                        }
+                        if ( $rangeConditions[ 'lt' ] )
+                        {
+                            $rangeQ->where ( 'quantity', '<=', $rangeConditions[ 'lt' ] );
+                        }
+                    } );
+                }
+            } );
+        }
+
+        if ( $request->filled ( 'selected_quantity_diterima' ) )
+        {
+            $selectedValues = $this->getSelectedValues ( $request->get ( 'selected_quantity_diterima' ) );
+            $query->where ( function ($q) use ($selectedValues)
+            {
+                // Track range conditions
+                $rangeConditions = [ 
+                    'gt' => null,
+                    'lt' => null
+                ];
+
+                // First handle Empty/Null case
+                $hasEmptyNull = false;
+                $exactValues  = [];
+                $otherValues  = [];
+
+                foreach ( $selectedValues as $value )
+                {
+                    if ( $value === 'Empty/Null' )
+                    {
+                        $hasEmptyNull = true;
+                    }
+                    elseif ( strpos ( $value, 'exact:' ) === 0 )
+                    {
+                        $exactValues[] = (int) substr ( $value, 6 );
+                    }
+                    elseif ( strpos ( $value, 'gt:' ) === 0 )
+                    {
+                        $rangeConditions[ 'gt' ] = (int) substr ( $value, 3 );
+                    }
+                    elseif ( strpos ( $value, 'lt:' ) === 0 )
+                    {
+                        $rangeConditions[ 'lt' ] = (int) substr ( $value, 3 );
+                    }
+                }
+
+                // Handle Empty/Null case if present
+                if ( $hasEmptyNull )
+                {
+                    $q->orWhere ( function ($sq)
+                    {
+                        $sq->whereNull ( 'status' )
+                            ->orWhereDoesntHave ( 'atbMutasi' )
+                            ->orWhereHas ( 'atbMutasi', function ($ssq)
+                            {
+                                $ssq->whereNull ( 'quantity' )
+                                    ->orWhere ( 'quantity', '0' );
+                            } );
+                    } );
+                }
+
+                // Apply range conditions if they exist
+                if ( $rangeConditions[ 'gt' ] || $rangeConditions[ 'lt' ] )
+                {
+                    $q->orWhereHas ( 'atbMutasi', function ($rangeQ) use ($rangeConditions)
+                    {
+                        if ( $rangeConditions[ 'gt' ] )
+                        {
+                            $rangeQ->where ( 'quantity', '>=', $rangeConditions[ 'gt' ] );
+                        }
+                        if ( $rangeConditions[ 'lt' ] )
+                        {
+                            $rangeQ->where ( 'quantity', '<=', $rangeConditions[ 'lt' ] );
+                        }
+                    } );
+                }
+
+                // Apply exact values if they exist
+                if ( ! empty ( $exactValues ) )
+                {
+                    $q->orWhereHas ( 'atbMutasi', function ($sq) use ($exactValues)
+                    {
+                        $sq->whereIn ( 'quantity', $exactValues );
+                    } );
+                }
+            } );
+        }
+
+        if ( $request->filled ( 'selected_quantity_digunakan' ) )
+        {
+            $selectedValues = $this->getSelectedValues ( $request->get ( 'selected_quantity_digunakan' ) );
+            $query->where ( function ($q) use ($selectedValues)
+            {
+                // Track range conditions and exact values
+                $rangeConditions = [ 
+                    'gt' => null,
+                    'lt' => null
+                ];
+                $hasEmptyNull    = false;
+                $exactValues     = [];
+
+                // Process each value
+                foreach ( $selectedValues as $value )
+                {
+                    if ( $value === 'Empty/Null' )
+                    {
+                        $hasEmptyNull = true;
+                    }
+                    elseif ( strpos ( $value, 'exact:' ) === 0 )
+                    {
+                        $exactValues[] = (int) substr ( $value, 6 );
+                    }
+                    elseif ( strpos ( $value, 'gt:' ) === 0 )
+                    {
+                        $rangeConditions[ 'gt' ] = (int) substr ( $value, 3 );
+                    }
+                    elseif ( strpos ( $value, 'lt:' ) === 0 )
+                    {
+                        $rangeConditions[ 'lt' ] = (int) substr ( $value, 3 );
+                    }
+                }
+
+                // Handle Empty/Null case
+                if ( $hasEmptyNull )
+                {
+                    $q->orWhere ( function ($sq)
+                    {
+                        $sq->whereNotNull ( 'status' )
+                            ->orWhere ( 'quantity', '0' )
+                            ->orWhereNull ( 'quantity' );
+                    } );
+                }
+
+                // Handle exact values
+                if ( ! empty ( $exactValues ) )
+                {
+                    $q->orWhere ( function ($sq) use ($exactValues)
+                    {
+                        $sq->whereNull ( 'status' )
+                            ->whereIn ( 'quantity', $exactValues );
+                    } );
+                }
+
+                // Handle range conditions
+                if ( $rangeConditions[ 'gt' ] || $rangeConditions[ 'lt' ] )
+                {
+                    $q->orWhere ( function ($sq) use ($rangeConditions)
+                    {
+                        $sq->whereNull ( 'status' );
+                        if ( $rangeConditions[ 'gt' ] )
+                        {
+                            $sq->where ( 'quantity', '>=', $rangeConditions[ 'gt' ] );
+                        }
+                        if ( $rangeConditions[ 'lt' ] )
+                        {
+                            $sq->where ( 'quantity', '<=', $rangeConditions[ 'lt' ] );
+                        }
+                    } );
                 }
             } );
         }
@@ -580,56 +785,64 @@ class APBController extends Controller
             $selectedValues = $this->getSelectedValues ( $request->get ( 'selected_jumlah_harga' ) );
             $query->where ( function ($q) use ($selectedValues)
             {
-                if ( in_array ( 'Empty/Null', $selectedValues ) )
+                // Track range conditions
+                $rangeConditions = [ 
+                    'gt' => null,
+                    'lt' => null
+                ];
+
+                // Process each value
+                foreach ( $selectedValues as $value )
                 {
-                    $q->where ( function ($sq)
+                    if ( $value === 'Empty/Null' )
                     {
-                        $sq->whereNull ( 'quantity' )
-                            ->orWhere ( 'quantity', 0 )
-                            ->orWhereDoesntHave ( 'saldo' )
-                            ->orWhereHas ( 'saldo', function ($ssq)
-                            {
-                                $ssq->whereNull ( 'harga' )
-                                    ->orWhere ( 'harga', 0 );
-                            } );
-                    } );
-
-                    $otherValues = array_filter (
-                        array_diff ( $selectedValues, [ 'Empty/Null' ] ),
-                        function ($value)
+                        $q->where ( function ($sq)
                         {
-                            return is_numeric ( $value ) && $value !== '';
-                        }
-                    );
-
-                    if ( ! empty ( $otherValues ) )
-                    {
-                        $q->orWhereHas ( 'saldo', function ($sq) use ($otherValues)
-                        {
-                            foreach ( $otherValues as $value )
-                            {
-                                $sq->orWhereRaw ( '(saldo.harga * apb.quantity) = ?', [ $value ] );
-                            }
+                            $sq->whereNull ( 'quantity' )
+                                ->orWhere ( 'quantity', 0 )
+                                ->orWhereDoesntHave ( 'saldo' )
+                                ->orWhereHas ( 'saldo', function ($ssq)
+                                {
+                                    $ssq->whereNull ( 'harga' )
+                                        ->orWhere ( 'harga', 0 );
+                                } );
                         } );
+                    }
+                    elseif ( strpos ( $value, 'exact:' ) === 0 )
+                    {
+                        $exactValue = substr ( $value, 6 );
+                        if ( is_numeric ( $exactValue ) )
+                        {
+                            $q->orWhereHas ( 'saldo', function ($sq) use ($exactValue)
+                            {
+                                $sq->whereRaw ( '(saldo.harga * apb.quantity) = ?', [ $exactValue ] );
+                            } );
+                        }
+                    }
+                    elseif ( strpos ( $value, 'gt:' ) === 0 )
+                    {
+                        $rangeConditions[ 'gt' ] = substr ( $value, 3 );
+                    }
+                    elseif ( strpos ( $value, 'lt:' ) === 0 )
+                    {
+                        $rangeConditions[ 'lt' ] = substr ( $value, 3 );
                     }
                 }
-                else
-                {
-                    $numericValues = array_filter ( $selectedValues, function ($value)
-                    {
-                        return is_numeric ( $value ) && $value !== '';
-                    } );
 
-                    if ( ! empty ( $numericValues ) )
+                // Apply range conditions if they exist
+                if ( $rangeConditions[ 'gt' ] || $rangeConditions[ 'lt' ] )
+                {
+                    $q->orWhereHas ( 'saldo', function ($rangeQ) use ($rangeConditions)
                     {
-                        $q->whereHas ( 'saldo', function ($sq) use ($numericValues)
+                        if ( $rangeConditions[ 'gt' ] )
                         {
-                            foreach ( $numericValues as $value )
-                            {
-                                $sq->orWhereRaw ( '(saldo.harga * apb.quantity) = ?', [ $value ] );
-                            }
-                        } );
-                    }
+                            $rangeQ->whereRaw ( '(saldo.harga * apb.quantity) >= ?', [ $rangeConditions[ 'gt' ] ] );
+                        }
+                        if ( $rangeConditions[ 'lt' ] )
+                        {
+                            $rangeQ->whereRaw ( '(saldo.harga * apb.quantity) <= ?', [ $rangeConditions[ 'lt' ] ] );
+                        }
+                    } );
                 }
             } );
         }
@@ -639,45 +852,59 @@ class APBController extends Controller
             $selectedValues = $this->getSelectedValues ( $request->get ( 'selected_harga' ) );
             $query->where ( function ($q) use ($selectedValues)
             {
-                if ( in_array ( 'Empty/Null', $selectedValues ) )
+                // Track range conditions
+                $rangeConditions = [ 
+                    'gt' => null,
+                    'lt' => null
+                ];
+
+                // Process each value
+                foreach ( $selectedValues as $value )
                 {
-                    $q->whereDoesntHave ( 'saldo' )
-                        ->orWhereHas ( 'saldo', function ($sq)
-                        {
-                            $sq->whereNull ( 'harga' )
-                                ->orWhere ( 'harga', '0' );
-                        } );
-
-                    $otherValues = array_filter (
-                        array_diff ( $selectedValues, [ 'Empty/Null' ] ),
-                        function ($value)
-                        {
-                            return is_numeric ( $value ) && $value !== '';
-                        }
-                    );
-
-                    if ( ! empty ( $otherValues ) )
+                    if ( $value === 'Empty/Null' )
                     {
-                        $q->orWhereHas ( 'saldo', function ($sq) use ($otherValues)
+                        $q->orWhereDoesntHave ( 'saldo' )
+                            ->orWhereHas ( 'saldo', function ($sq)
+                            {
+                                $sq->whereNull ( 'harga' )
+                                    ->orWhere ( 'harga', 0 );
+                            } );
+                    }
+                    elseif ( strpos ( $value, 'exact:' ) === 0 )
+                    {
+                        $exactValue = substr ( $value, 6 );
+                        if ( is_numeric ( $exactValue ) )
                         {
-                            $sq->whereIn ( 'harga', $otherValues );
-                        } );
+                            $q->orWhereHas ( 'saldo', function ($sq) use ($exactValue)
+                            {
+                                $sq->where ( 'harga', $exactValue );
+                            } );
+                        }
+                    }
+                    elseif ( strpos ( $value, 'gt:' ) === 0 )
+                    {
+                        $rangeConditions[ 'gt' ] = substr ( $value, 3 );
+                    }
+                    elseif ( strpos ( $value, 'lt:' ) === 0 )
+                    {
+                        $rangeConditions[ 'lt' ] = substr ( $value, 3 );
                     }
                 }
-                else
-                {
-                    $numericValues = array_filter ( $selectedValues, function ($value)
-                    {
-                        return is_numeric ( $value ) && $value !== '';
-                    } );
 
-                    if ( ! empty ( $numericValues ) )
+                // Apply range conditions if they exist
+                if ( $rangeConditions[ 'gt' ] || $rangeConditions[ 'lt' ] )
+                {
+                    $q->orWhereHas ( 'saldo', function ($rangeQ) use ($rangeConditions)
                     {
-                        $q->whereHas ( 'saldo', function ($sq) use ($numericValues)
+                        if ( $rangeConditions[ 'gt' ] )
                         {
-                            $sq->whereIn ( 'harga', $numericValues );
-                        } );
-                    }
+                            $rangeQ->where ( 'harga', '>=', $rangeConditions[ 'gt' ] );
+                        }
+                        if ( $rangeConditions[ 'lt' ] )
+                        {
+                            $rangeQ->where ( 'harga', '<=', $rangeConditions[ 'lt' ] );
+                        }
+                    } );
                 }
             } );
         }
@@ -743,33 +970,74 @@ class APBController extends Controller
             $selectedValues = $this->getSelectedValues ( $request->get ( 'selected_quantity_diterima' ) );
             $query->where ( function ($q) use ($selectedValues)
             {
-                if ( in_array ( 'Empty/Null', $selectedValues ) )
+                // Track range conditions
+                $rangeConditions = [ 
+                    'gt' => null,
+                    'lt' => null
+                ];
+
+                // First handle Empty/Null case
+                $hasEmptyNull = false;
+                $exactValues  = [];
+                $otherValues  = [];
+
+                foreach ( $selectedValues as $value )
                 {
-                    $q->where ( function ($sq)
+                    if ( $value === 'Empty/Null' )
                     {
-                        $sq->whereNull ( 'status' ) // Not a mutasi record
-                            ->orWhereDoesntHave ( 'atbMutasi' ) // No ATB record
+                        $hasEmptyNull = true;
+                    }
+                    elseif ( strpos ( $value, 'exact:' ) === 0 )
+                    {
+                        $exactValues[] = (int) substr ( $value, 6 );
+                    }
+                    elseif ( strpos ( $value, 'gt:' ) === 0 )
+                    {
+                        $rangeConditions[ 'gt' ] = (int) substr ( $value, 3 );
+                    }
+                    elseif ( strpos ( $value, 'lt:' ) === 0 )
+                    {
+                        $rangeConditions[ 'lt' ] = (int) substr ( $value, 3 );
+                    }
+                }
+
+                // Handle Empty/Null case if present
+                if ( $hasEmptyNull )
+                {
+                    $q->orWhere ( function ($sq)
+                    {
+                        $sq->whereNull ( 'status' )
+                            ->orWhereDoesntHave ( 'atbMutasi' )
                             ->orWhereHas ( 'atbMutasi', function ($ssq)
                             {
                                 $ssq->whereNull ( 'quantity' )
                                     ->orWhere ( 'quantity', '0' );
                             } );
                     } );
-
-                    $otherValues = array_diff ( $selectedValues, [ 'Empty/Null' ] );
-                    if ( ! empty ( $otherValues ) )
-                    {
-                        $q->orWhereHas ( 'atbMutasi', function ($sq) use ($otherValues)
-                        {
-                            $sq->whereIn ( 'quantity', $otherValues );
-                        } );
-                    }
                 }
-                else
+
+                // Apply range conditions if they exist
+                if ( $rangeConditions[ 'gt' ] || $rangeConditions[ 'lt' ] )
                 {
-                    $q->whereHas ( 'atbMutasi', function ($sq) use ($selectedValues)
+                    $q->orWhereHas ( 'atbMutasi', function ($rangeQ) use ($rangeConditions)
                     {
-                        $sq->whereIn ( 'quantity', $selectedValues );
+                        if ( $rangeConditions[ 'gt' ] )
+                        {
+                            $rangeQ->where ( 'quantity', '>=', $rangeConditions[ 'gt' ] );
+                        }
+                        if ( $rangeConditions[ 'lt' ] )
+                        {
+                            $rangeQ->where ( 'quantity', '<=', $rangeConditions[ 'lt' ] );
+                        }
+                    } );
+                }
+
+                // Apply exact values if they exist
+                if ( ! empty ( $exactValues ) )
+                {
+                    $q->orWhereHas ( 'atbMutasi', function ($sq) use ($exactValues)
+                    {
+                        $sq->whereIn ( 'quantity', $exactValues );
                     } );
                 }
             } );
@@ -780,29 +1048,71 @@ class APBController extends Controller
             $selectedValues = $this->getSelectedValues ( $request->get ( 'selected_quantity_digunakan' ) );
             $query->where ( function ($q) use ($selectedValues)
             {
-                if ( in_array ( 'Empty/Null', $selectedValues ) )
-                {
-                    $q->where ( function ($sq)
-                    {
-                        $sq->whereNotNull ( 'status' ) // Is a mutasi record
-                            ->orWhere ( 'quantity', '0' )
-                            ->orWhere ( 'quantity', null );
-                    } );
+                // Track range conditions and exact values
+                $rangeConditions = [ 
+                    'gt' => null,
+                    'lt' => null
+                ];
+                $hasEmptyNull    = false;
+                $exactValues     = [];
 
-                    $otherValues = array_diff ( $selectedValues, [ 'Empty/Null' ] );
-                    if ( ! empty ( $otherValues ) )
+                // Process each value
+                foreach ( $selectedValues as $value )
+                {
+                    if ( $value === 'Empty/Null' )
                     {
-                        $q->orWhere ( function ($sq) use ($otherValues)
-                        {
-                            $sq->whereNull ( 'status' ) // Only penggunaan records
-                                ->whereIn ( 'quantity', $otherValues );
-                        } );
+                        $hasEmptyNull = true;
+                    }
+                    elseif ( strpos ( $value, 'exact:' ) === 0 )
+                    {
+                        $exactValues[] = (int) substr ( $value, 6 );
+                    }
+                    elseif ( strpos ( $value, 'gt:' ) === 0 )
+                    {
+                        $rangeConditions[ 'gt' ] = (int) substr ( $value, 3 );
+                    }
+                    elseif ( strpos ( $value, 'lt:' ) === 0 )
+                    {
+                        $rangeConditions[ 'lt' ] = (int) substr ( $value, 3 );
                     }
                 }
-                else
+
+                // Handle Empty/Null case
+                if ( $hasEmptyNull )
                 {
-                    $q->whereNull ( 'status' ) // Only penggunaan records
-                        ->whereIn ( 'quantity', $selectedValues );
+                    $q->orWhere ( function ($sq)
+                    {
+                        $sq->whereNotNull ( 'status' )
+                            ->orWhere ( 'quantity', '0' )
+                            ->orWhereNull ( 'quantity' );
+                    } );
+                }
+
+                // Handle exact values
+                if ( ! empty ( $exactValues ) )
+                {
+                    $q->orWhere ( function ($sq) use ($exactValues)
+                    {
+                        $sq->whereNull ( 'status' )
+                            ->whereIn ( 'quantity', $exactValues );
+                    } );
+                }
+
+                // Handle range conditions
+                if ( $rangeConditions[ 'gt' ] || $rangeConditions[ 'lt' ] )
+                {
+                    $q->orWhere ( function ($sq) use ($rangeConditions)
+                    {
+                        $sq->whereNull ( 'status' );
+                        if ( $rangeConditions[ 'gt' ] )
+                        {
+                            $sq->where ( 'quantity', '>=', $rangeConditions[ 'gt' ] );
+                        }
+                        if ( $rangeConditions[ 'lt' ] )
+                        {
+                            $sq->where ( 'quantity', '<=', $rangeConditions[ 'lt' ] );
+                        }
+                    } );
                 }
             } );
         }

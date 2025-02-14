@@ -30,51 +30,157 @@ class APBController extends Controller
     {
         return $this->showApbPage ( "Panjar Proyek", "Data APB EX Panjar Proyek", $request->id_proyek );
     }
+    private function getBaseFilteredQuery ( $query, $excludeParam = null )
+    {
+        $request   = request ();
+        $allParams = $request->all ();
+
+        foreach ( $allParams as $param => $value )
+        {
+            // Only process selected_* parameters and skip the excluded one
+            if ( strpos ( $param, 'selected_' ) === 0 && $param !== 'selected_' . $excludeParam )
+            {
+                // Clone the query and apply all filters except for the current parameter
+                $tempRequest = new Request( $request->except ( $param ) );
+                $query       = $this->applyFilters ( $query, $tempRequest );
+            }
+        }
+
+        return $query;
+    }
     private function getUniqueValues ( $query )
     {
-        $id_proyek                       = request ( 'id_proyek' );
-        $tipe                            = strtolower ( str_replace ( ' ', '-', request ( 'tipe', '' ) ) );
-        $baseQuery                       = clone $query;
-        $baseQuery->getQuery ()->selects = null;
-        $results                         = $baseQuery->with ( [ 'alatProyek.masterDataAlat', 'masterDataSparepart.kategoriSparepart', 'masterDataSupplier', 'saldo', 'tujuanProyek' ] )->get ()
-            ->map ( function ($item)
-            {
-                // Calculate jumlah_harga for each item
-                $item->jumlah_harga = ( $item->saldo->harga ?? 0 ) * $item->quantity;
-                return $item;
-            } );
-        return [ 
-            'tanggal'            => $results->pluck ( 'tanggal' )->filter ()->unique ()->values (),
-            'tujuan_proyek'      => $results->pluck ( 'tujuanProyek.nama' )->filter ()->unique ()->values (),
-            'jenis_alat'         => $results->pluck ( 'alatProyek.masterDataAlat.jenis_alat' )->filter ()->unique ()->values (),
-            'kode_alat'          => $results->pluck ( 'alatProyek.masterDataAlat.kode_alat' )->filter ()->unique ()->values (),
-            'merek_alat'         => $results->pluck ( 'alatProyek.masterDataAlat.merek_alat' )->filter ()->unique ()->values (),
-            'tipe_alat'          => $results->pluck ( 'alatProyek.masterDataAlat.tipe_alat' )->filter ()->unique ()->values (),
-            'serial_number'      => $results->pluck ( 'alatProyek.masterDataAlat.serial_number' )->filter ()->unique ()->values (),
-            'kode'               => $results->pluck ( 'masterDataSparepart.kategoriSparepart.kode' )->filter ()->unique ()->values (),
-            'supplier'           => $results->pluck ( 'masterDataSupplier.nama' )->filter ()->unique ()->values (),
-            'sparepart'          => $results->pluck ( 'masterDataSparepart.nama' )->filter ()->unique ()->values (),
-            'merk'               => $results->pluck ( 'masterDataSparepart.merk' )->filter ()->unique ()->values (),
-            'part_number'        => $results->pluck ( 'masterDataSparepart.part_number' )->filter ()->unique ()->values (),
-            'satuan'             => $results->pluck ( 'saldo.satuan' )->filter ()->unique ()->values (),
-            'quantity'           => $results->pluck ( 'quantity' )->filter ()->unique ()->values (),
-            'harga'              => $results->pluck ( 'saldo.harga' )->filter ()->unique ()->sort ()->values (),
-            'jumlah_harga'       => $results->pluck ( 'jumlah_harga' )->filter ()->unique ()->sort ()->values (),
-            'mekanik'            => $results->pluck ( 'mekanik' )->filter ()->unique ()->values (),
-            'status'             => collect ( [ 'pending', 'accepted', 'rejected' ] )->values (),
-            'quantity_dikirim'   => $results->filter ( function ($item)
-            {
-                return $item->status !== null;
-            } )->pluck ( 'quantity' )->filter ()->unique ()->values (),
-            'quantity_diterima'  => $results->filter ( function ($item)
-            {
-                return $item->status !== null;
-            } )->pluck ( 'atbMutasi.quantity' )->filter ()->unique ()->values (),
-            'quantity_digunakan' => $results->filter ( function ($item)
-            {
-                return $item->status === null;
-            } )->pluck ( 'quantity' )->filter ()->unique ()->values (),
+        $id_proyek = request ( 'id_proyek' );
+        $tipe      = strtolower ( str_replace ( ' ', '-', request ( 'tipe', '' ) ) );
+
+        // Get all filter parameters
+        $filterParams = [ 
+            'tanggal',
+            'jenis_alat',
+            'kode_alat',
+            'merek_alat',
+            'tipe_alat',
+            'serial_number',
+            'kode',
+            'supplier',
+            'sparepart',
+            'merk',
+            'part_number',
+            'satuan',
+            'quantity',
+            'harga',
+            'jumlah_harga',
+            'mekanik',
+            'status',
+            'quantity_dikirim',
+            'quantity_diterima',
+            'quantity_digunakan',
+            'tujuan_proyek'
         ];
+
+        $uniqueValues = [];
+        
+        // First, get the base filtered query by applying all filters
+        $baseFilteredQuery = clone $query;
+        foreach ($filterParams as $param) {
+            $paramValue = request('selected_' . $param);
+            if ($paramValue) {
+                // Apply each active filter to base query
+                $baseFilteredQuery = $this->applyFilters($baseFilteredQuery, new Request(['selected_' . $param => $paramValue]));
+            }
+        }
+        
+        // Then for each parameter, get its unique values based on current filters
+        foreach ($filterParams as $param) {
+            $tempQuery = clone $baseFilteredQuery;
+            
+            // For the current parameter, remove its filter if it exists
+            if (request('selected_' . $param)) {
+                $tempQuery = clone $query; // Start fresh for this parameter
+                
+                // Apply all other active filters except current one
+                foreach ($filterParams as $otherParam) {
+                    if ($otherParam !== $param) {
+                        $otherParamValue = request('selected_' . $otherParam);
+                        if ($otherParamValue) {
+                            $tempQuery = $this->applyFilters($tempQuery, new Request(['selected_' . $otherParam => $otherParamValue]));
+                        }
+                    }
+                }
+            }
+
+            // Get results with eager loading
+            $results = $tempQuery->with([
+                'alatProyek.masterDataAlat',
+                'masterDataSparepart.kategoriSparepart',
+                'masterDataSupplier',
+                'saldo',
+                'tujuanProyek',
+                'atbMutasi'
+            ])->get();
+
+            // Calculate unique values based on the parameter
+            switch ($param) {
+                case 'tanggal':
+                    $uniqueValues['tanggal'] = $results->pluck('tanggal')->filter()->unique()->values();
+                    break;
+                case 'jenis_alat':
+                    $uniqueValues['jenis_alat'] = $results->pluck('alatProyek.masterDataAlat.jenis_alat')->filter()->unique()->values();
+                    break;
+                case 'kode_alat':
+                    $uniqueValues['kode_alat'] = $results->pluck('alatProyek.masterDataAlat.kode_alat')->filter()->unique()->values();
+                    break;
+                case 'merek_alat':
+                    $uniqueValues['merek_alat'] = $results->pluck('alatProyek.masterDataAlat.merek_alat')->filter()->unique()->values();
+                    break;
+                case 'tipe_alat':
+                    $uniqueValues['tipe_alat'] = $results->pluck('alatProyek.masterDataAlat.tipe_alat')->filter()->unique()->values();
+                    break;
+                case 'serial_number':
+                    $uniqueValues['serial_number'] = $results->pluck('alatProyek.masterDataAlat.serial_number')->filter()->unique()->values();
+                    break;
+                case 'kode':
+                    $uniqueValues['kode'] = $results->pluck('masterDataSparepart.kategoriSparepart.kode')->filter()->unique()->values();
+                    break;
+                case 'supplier':
+                    $uniqueValues['supplier'] = $results->pluck('masterDataSupplier.nama')->filter()->unique()->values();
+                    break;
+                case 'sparepart':
+                    $uniqueValues['sparepart'] = $results->pluck('masterDataSparepart.nama')->filter()->unique()->values();
+                    break;
+                case 'merk':
+                    $uniqueValues['merk'] = $results->pluck('masterDataSparepart.merk')->filter()->unique()->values();
+                    break;
+                case 'part_number':
+                    $uniqueValues['part_number'] = $results->pluck('masterDataSparepart.part_number')->filter()->unique()->values();
+                    break;
+                case 'satuan':
+                    $uniqueValues['satuan'] = $results->pluck('saldo.satuan')->filter()->unique()->values();
+                    break;
+                case 'quantity':
+                case 'quantity_dikirim':
+                case 'quantity_diterima':
+                case 'quantity_digunakan':
+                    $uniqueValues[$param] = $results->pluck('quantity')->filter()->unique()->values();
+                    break;
+                case 'harga':
+                    $uniqueValues['harga'] = $results->pluck('saldo.harga')->filter()->unique()->values();
+                    break;
+                case 'jumlah_harga':
+                    $uniqueValues['jumlah_harga'] = $results->map(function ($item) {
+                        return ($item->saldo->harga ?? 0) * $item->quantity;
+                    })->filter()->unique()->values();
+                    break;
+                case 'mekanik':
+                    $uniqueValues['mekanik'] = $results->pluck('mekanik')->filter()->unique()->values();
+                    break;
+                case 'tujuan_proyek':
+                    $uniqueValues['tujuan_proyek'] = $results->pluck('tujuanProyek.nama')->filter()->unique()->values();
+                    break;
+            }
+        }
+
+        return $uniqueValues;
     }
     private function applyFilters ( $query, $request )
     {

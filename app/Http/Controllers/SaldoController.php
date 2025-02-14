@@ -142,19 +142,56 @@ class SaldoController extends Controller
             {
                 $q->whereHas ( 'atb', function ($subQ) use ($values)
                 {
-                    if ( in_array ( 'Empty/Null', $values ) )
+                    // Start with a new query scope
+                    $subQ->where ( function ($dateQ) use ($values)
                     {
-                        $nonNullValues = array_filter ( $values, fn ( $value ) => $value !== 'Empty/Null' );
-                        $subQ->whereNull ( 'tanggal' )
-                            ->when ( ! empty ( $nonNullValues ), function ($query) use ($nonNullValues)
+                        $hasRange = false;
+                        $gtDate = null;
+                        $ltDate = null;
+
+                        foreach ( $values as $value )
+                        {
+                            if ( $value === 'Empty/Null' || $value === 'null' )
                             {
-                                $query->orWhereIn ( 'tanggal', $nonNullValues );
+                                $dateQ->orWhereNull ( 'tanggal' );
+                            }
+                            elseif ( strpos ( $value, 'exact:' ) === 0 )
+                            {
+                                $date = substr ( $value, 6 );
+                                // Use proper date comparison
+                                $dateQ->orWhere ( function ($exactQ) use ($date)
+                                {
+                                    $exactQ->whereRaw ( 'DATE(tanggal) = ?', [ $date ] );
+                                } );
+                            }
+                            elseif ( strpos ( $value, 'gt:' ) === 0 )
+                            {
+                                $gtDate   = substr ( $value, 3 );
+                                $hasRange = true;
+                            }
+                            elseif ( strpos ( $value, 'lt:' ) === 0 )
+                            {
+                                $ltDate   = substr ( $value, 3 );
+                                $hasRange = true;
+                            }
+                        }
+
+                        // Handle date range if present
+                        if ( $hasRange )
+                        {
+                            $dateQ->orWhere ( function ($rangeQ) use ($gtDate, $ltDate)
+                            {
+                                if ( $gtDate )
+                                {
+                                    $rangeQ->whereRaw ( 'DATE(tanggal) >= ?', [ $gtDate ] );
+                                }
+                                if ( $ltDate )
+                                {
+                                    $rangeQ->whereRaw ( 'DATE(tanggal) <= ?', [ $ltDate ] );
+                                }
                             } );
-                    }
-                    else
-                    {
-                        $subQ->whereIn ( 'tanggal', $values );
-                    }
+                        }
+                    } );
                 } );
             },
             'kode'         => 'kategori_sparepart.kode',

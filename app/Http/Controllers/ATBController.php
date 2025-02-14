@@ -273,6 +273,15 @@ class ATBController extends Controller
         if ( request ()->has ( 'selected_tanggal' ) )
         {
             $selectedValues = $this->getSelectedValues ( request ( 'selected_tanggal' ) );
+            // Remove "exact:" prefix from each selected date value
+            $selectedValues = array_map ( function ($value)
+            {
+                if ( strpos ( $value, 'exact:' ) === 0 )
+                {
+                    return substr ( $value, 6 );
+                }
+                return $value;
+            }, $selectedValues );
             if ( in_array ( 'null', $selectedValues ) )
             {
                 $nonNullValues = array_filter ( $selectedValues, fn ( $value ) => $value !== 'null' );

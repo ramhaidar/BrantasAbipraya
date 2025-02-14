@@ -24,6 +24,7 @@
             'filterId' => 'tanggal',
             'paramName' => 'tanggal',
             'filter' => true,
+            'type' => 'date',
         ],
         [
             'title' => 'Tujuan Proyek',

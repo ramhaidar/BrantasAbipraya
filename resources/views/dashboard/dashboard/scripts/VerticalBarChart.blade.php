@@ -45,7 +45,7 @@
                 bottom: 60,
                 left: 100
             };
-            const width = 600 - margin.left - margin.right;
+            const width = 500 - margin.left - margin.right;
             const height = 400 - margin.top - margin.bottom;
 
             // Create SVG container

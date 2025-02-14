@@ -69,6 +69,22 @@
         @if ($filter ?? true)
             <div class="filter-popup" id="{{ $filterId }}-filter" style="display: none;">
                 <div class="p-2">
+                    @if (isset($type) && $type === 'number')
+                        <div class="mb-2">
+                            <label class="form-label small">Sama Dengan "="</label>
+                            <input class="form-control form-control-sm" id="{{ $paramName }}-exact" type="number" placeholder="Masukkan nilai tepat">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small">Lebih Besar Dari Sama Dengan ">="</label>
+                            <input class="form-control form-control-sm" id="{{ $paramName }}-gt" type="number" placeholder="Lebih besar dari...">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small">Lebih Kecil Dari Sama Dengan "<="</label>
+                            <input class="form-control form-control-sm" id="{{ $paramName }}-lt" type="number" placeholder="Lebih kecil dari...">
+                        </div>
+                        <hr>
+                    @endif
+
                     <input class="form-control form-control-sm mb-2" type="text" placeholder="Search {{ strtolower($title) }}..." onkeyup="filterCheckboxes('{{ $paramName }}', event)">
                     @if (isset($uniqueValues[(string) $paramName]) || isset($customUniqueValues))
                         <div class="checkbox-list text-start">

@@ -47,6 +47,15 @@
             })
             ->toArray();
     }
+
+    // Get previously selected numeric values
+    $exactValue = request("selected_{$paramName}") ? collect(explode('||', base64_decode(request("selected_{$paramName}"))))->first(fn($value) => strpos($value, 'exact:') === 0) : null;
+    $gtValue = request("selected_{$paramName}") ? collect(explode('||', base64_decode(request("selected_{$paramName}"))))->first(fn($value) => strpos($value, 'gt:') === 0) : null;
+    $ltValue = request("selected_{$paramName}") ? collect(explode('||', base64_decode(request("selected_{$paramName}"))))->first(fn($value) => strpos($value, 'lt:') === 0) : null;
+
+    $exactValue = $exactValue ? substr($exactValue, 6) : '';
+    $gtValue = $gtValue ? substr($gtValue, 3) : '';
+    $ltValue = $ltValue ? substr($ltValue, 3) : '';
 @endphp
 
 @if ($showHeader)
@@ -72,20 +81,21 @@
                     @if (isset($type) && $type === 'number')
                         <div class="mb-2">
                             <label class="form-label small">Sama Dengan "="</label>
-                            <input class="form-control form-control-sm" id="{{ $paramName }}-exact" type="number" placeholder="Masukkan nilai tepat">
+                            <input class="form-control form-control-sm" id="{{ $paramName }}-exact" type="number" value="{{ $exactValue }}" placeholder="Masukkan nilai tepat">
                         </div>
+                        <hr>
                         <div class="mb-2">
                             <label class="form-label small">Lebih Besar Dari Sama Dengan ">="</label>
-                            <input class="form-control form-control-sm" id="{{ $paramName }}-gt" type="number" placeholder="Lebih besar dari...">
+                            <input class="form-control form-control-sm" id="{{ $paramName }}-gt" type="number" value="{{ $gtValue }}" placeholder="Lebih besar dari...">
                         </div>
                         <div class="mb-2">
                             <label class="form-label small">Lebih Kecil Dari Sama Dengan "<="</label>
-                            <input class="form-control form-control-sm" id="{{ $paramName }}-lt" type="number" placeholder="Lebih kecil dari...">
+                            <input class="form-control form-control-sm" id="{{ $paramName }}-lt" type="number" value="{{ $ltValue }}" placeholder="Lebih kecil dari...">
                         </div>
                         <hr>
                     @endif
 
-                    <input class="form-control form-control-sm mb-2" type="text" placeholder="Search {{ strtolower($title) }}..." onkeyup="filterCheckboxes('{{ $paramName }}', event)">
+                    <input class="form-control form-control-sm mb-2" type="text" placeholder="Cari {{ strtolower($title) }}..." onkeyup="filterCheckboxes('{{ $paramName }}', event)">
                     @if (isset($uniqueValues[(string) $paramName]) || isset($customUniqueValues))
                         <div class="checkbox-list text-start">
                             <div class="form-check">

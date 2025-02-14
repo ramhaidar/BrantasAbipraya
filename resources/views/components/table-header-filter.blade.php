@@ -86,11 +86,11 @@
                         <hr>
                         <div class="mb-2">
                             <label class="form-label small">Lebih Besar Dari Sama Dengan ">="</label>
-        <input class="form-control form-control-sm" id="{{ $paramName }}-gt" type="number" value="{{ $gtValue }}" placeholder="Lebih besar dari...">
+                            <input class="form-control form-control-sm" id="{{ $paramName }}-gt" type="number" value="{{ $gtValue }}" placeholder="Lebih besar dari...">
                         </div>
                         <div class="mb-2">
-                            <label class="form-label small">Lebih Kecil Dari Sama Dengan "<="</label>
-        <input class="form-control form-control-sm" id="{{ $paramName }}-lt" type="number" value="{{ $ltValue }}" placeholder="Lebih kecil dari...">
+                            <label class="form-label small">Lebih Kecil Dari Sama Dengan "<="< /label>
+                            <input class="form-control form-control-sm" id="{{ $paramName }}-lt" type="number" value="{{ $ltValue }}" placeholder="Lebih kecil dari...">
                         </div>
                         <hr>
                     @endif

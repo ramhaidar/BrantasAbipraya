@@ -44,6 +44,50 @@ class UserController extends Controller
             ->paginate ( $perPage )
             ->withQueryString ();
 
+        // Compute uniqueValues which respect filters on other columns.
+        $filterFields = [ 'name', 'username', 'sex', 'role', 'phone', 'email' ];
+        $uniqueValues = [];
+        foreach ( $filterFields as $field )
+        {
+            // Create a fresh query for each field.
+            $uniqueQuery = User::query ();
+            foreach ( $filterFields as $otherField )
+            {
+                if ( $otherField === $field )
+                {
+                    continue;
+                }
+                $selectedValues = $request->get ( "selected_{$otherField}" );
+                if ( ! empty ( $selectedValues ) )
+                {
+                    try
+                    {
+                        $values = explode ( '||', base64_decode ( $selectedValues ) );
+                        $values = array_filter ( $values, fn ( $value ) => $value !== '' );
+                        if ( in_array ( 'null', $values, true ) )
+                        {
+                            $nonNullValues = array_filter ( $values, fn ( $value ) => $value !== 'null' );
+                            $uniqueQuery->where ( function ($q) use ($otherField, $nonNullValues)
+                            {
+                                $q->whereNull ( $otherField )
+                                    ->orWhere ( $otherField, '-' )
+                                    ->orWhereIn ( $otherField, $nonNullValues );
+                            } );
+                        }
+                        else
+                        {
+                            $uniqueQuery->whereIn ( $otherField, $values );
+                        }
+                    }
+                    catch ( \Exception $e )
+                    {
+                        \Log::error ( "Error in {$otherField} filter for uniqueValues: " . $e->getMessage () );
+                    }
+                }
+            }
+            $uniqueValues[ $field ] = $uniqueQuery->whereNotNull ( $field )->distinct ()->pluck ( $field );
+        }
+
         // Get projects based on user role
         $user         = Auth::user ();
         $proyeksQuery = Proyek::with ( "users" );
@@ -59,15 +103,6 @@ class UserController extends Controller
             ->orderBy ( "updated_at", "desc" )
             ->orderBy ( "id", "desc" )
             ->get ();
-
-        $uniqueValues = [ 
-            'name'     => User::whereNotNull ( 'name' )->distinct ()->pluck ( 'name' ),
-            'username' => User::whereNotNull ( 'username' )->distinct ()->pluck ( 'username' ),
-            'sex'      => User::whereNotNull ( 'sex' )->distinct ()->pluck ( 'sex' ),
-            'role'     => User::whereNotNull ( 'role' )->distinct ()->pluck ( 'role' ),
-            'phone'    => User::whereNotNull ( 'phone' )->distinct ()->pluck ( 'phone' ),
-            'email'    => User::whereNotNull ( 'email' )->distinct ()->pluck ( 'email' ),
-        ];
 
         return view ( 'dashboard.users.user', [ 
             'headerPage'   => 'User',

@@ -18,11 +18,94 @@
         }
     }
 
-    $appliedFilters = false;
-    $filterFields = ['tanggal', 'asal_proyek', 'kode', 'supplier', 'sparepart', 'merk', 'part_number', 'quantity_dikirim', 'quantity_diterima', 'satuan', 'harga', 'jumlah_harga'];
+    $headers = [
+        [
+            'title' => 'Tanggal',
+            'filterId' => 'tanggal',
+            'paramName' => 'tanggal',
+            'filter' => true,
+            'type' => 'date',
+        ],
+        [
+            'title' => 'Asal Proyek',
+            'filterId' => 'asal-proyek',
+            'paramName' => 'asal_proyek',
+            'filter' => true,
+        ],
+        [
+            'title' => 'Kode',
+            'filterId' => 'kode',
+            'paramName' => 'kode',
+            'filter' => true,
+        ],
+        [
+            'title' => 'Supplier',
+            'filterId' => 'supplier',
+            'paramName' => 'supplier',
+            'filter' => true,
+        ],
+        [
+            'title' => 'Sparepart',
+            'filterId' => 'sparepart',
+            'paramName' => 'sparepart',
+            'filter' => true,
+        ],
+        [
+            'title' => 'Merk',
+            'filterId' => 'merk',
+            'paramName' => 'merk',
+            'filter' => true,
+        ],
+        [
+            'title' => 'Part Number',
+            'filterId' => 'part-number',
+            'paramName' => 'part_number',
+            'filter' => true,
+        ],
+        [
+            'title' => 'Quantity Dikirim',
+            'filterId' => 'quantity-dikirim',
+            'paramName' => 'quantity_dikirim',
+            'filter' => true,
+        ],
+        [
+            'title' => 'Quantity Diterima',
+            'filterId' => 'quantity-diterima',
+            'paramName' => 'quantity_diterima',
+            'filter' => true,
+        ],
+        [
+            'title' => 'Satuan',
+            'filterId' => 'satuan',
+            'paramName' => 'satuan',
+            'filter' => true,
+        ],
+        [
+            'title' => 'Harga',
+            'filterId' => 'harga',
+            'paramName' => 'harga',
+            'filter' => true,
+        ],
+        [
+            'title' => 'Jumlah Harga',
+            'filterId' => 'jumlah-harga',
+            'paramName' => 'jumlah_harga',
+            'filter' => true,
+        ],
+        [
+            'title' => 'Dokumentasi',
+            'filter' => false,
+        ],
+        [
+            'title' => 'Aksi',
+            'filter' => false,
+            'role' => ['koordinator_proyek', 'superadmin'],
+        ],
+    ];
 
-    foreach ($filterFields as $field) {
-        if (request("selected_$field")) {
+    $appliedFilters = false;
+    foreach ($headers as $header) {
+        if ($header['filter'] && request("selected_{$header['paramName']}")) {
             $appliedFilters = true;
             break;
         }
@@ -48,82 +131,9 @@
         <table class="m-0 table table-bordered table-hover" id="table-data">
             <thead class="table-primary">
                 <tr>
-                    @include('components.table-header-filter', [
-                        'title' => 'Tanggal',
-                        'filterId' => 'tanggal',
-                        'paramName' => 'tanggal',
-                    ])
-
-                    @include('components.table-header-filter', [
-                        'title' => 'Asal Proyek',
-                        'filterId' => 'asal-proyek',
-                        'paramName' => 'asal_proyek',
-                    ])
-
-                    @include('components.table-header-filter', [
-                        'title' => 'Kode',
-                        'filterId' => 'kode',
-                        'paramName' => 'kode',
-                    ])
-
-                    @include('components.table-header-filter', [
-                        'title' => 'Supplier',
-                        'filterId' => 'supplier',
-                        'paramName' => 'supplier',
-                    ])
-
-                    @include('components.table-header-filter', [
-                        'title' => 'Sparepart',
-                        'filterId' => 'sparepart',
-                        'paramName' => 'sparepart',
-                    ])
-
-                    @include('components.table-header-filter', [
-                        'title' => 'Merk',
-                        'filterId' => 'merk',
-                        'paramName' => 'merk',
-                    ])
-
-                    @include('components.table-header-filter', [
-                        'title' => 'Part Number',
-                        'filterId' => 'part-number',
-                        'paramName' => 'part_number',
-                    ])
-
-                    @include('components.table-header-filter', [
-                        'title' => 'Quantity Dikirim',
-                        'filterId' => 'quantity-dikirim',
-                        'paramName' => 'quantity_dikirim',
-                    ])
-
-                    @include('components.table-header-filter', [
-                        'title' => 'Quantity Diterima',
-                        'filterId' => 'quantity-diterima',
-                        'paramName' => 'quantity_diterima',
-                    ])
-
-                    @include('components.table-header-filter', [
-                        'title' => 'Satuan',
-                        'filterId' => 'satuan',
-                        'paramName' => 'satuan',
-                    ])
-
-                    @include('components.table-header-filter', [
-                        'title' => 'Harga',
-                        'filterId' => 'harga',
-                        'paramName' => 'harga',
-                    ])
-
-                    @include('components.table-header-filter', [
-                        'title' => 'Jumlah Harga',
-                        'filterId' => 'jumlah-harga',
-                        'paramName' => 'jumlah_harga',
-                    ])
-
-                    <th class="text-center">Dokumentasi</th>
-                    @if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin')
-                        <th class="text-center">Aksi</th>
-                    @endif
+                    @foreach ($headers as $header)
+                        @include('components.table-header-filter', array_merge($header, ['uniqueValues' => $uniqueValues ?? []]))
+                    @endforeach
                 </tr>
             </thead>
             <tbody>
@@ -201,8 +211,10 @@
     </div>
 
     <form id="filter-form" method="GET">
-        @foreach ($filterFields as $field)
-            <input id="selected-{{ str_replace('_', '-', $field) }}" name="selected_{{ $field }}" type="hidden" value="{{ request("selected_$field") }}">
+        @foreach ($headers as $header)
+            @if ($header['filter'])
+                <input id="selected-{{ $header['filterId'] }}" name="selected_{{ $header['paramName'] }}" type="hidden" value="{{ request("selected_{$header['paramName']}") }}">
+            @endif
         @endforeach
     </form>
 </div>

@@ -273,28 +273,56 @@ class ATBController extends Controller
         if ( request ()->has ( 'selected_tanggal' ) )
         {
             $selectedValues = $this->getSelectedValues ( request ( 'selected_tanggal' ) );
-            // Remove "exact:" prefix from each selected date value
-            $selectedValues = array_map ( function ($value)
+            $query->where ( function ($q) use ($selectedValues)
             {
-                if ( strpos ( $value, 'exact:' ) === 0 )
+                // Create a tracking array for range conditions
+                $rangeConditions = [ 
+                    'gt' => null,
+                    'lt' => null
+                ];
+
+                // First pass - collect all conditions
+                foreach ( $selectedValues as $value )
                 {
-                    return substr ( $value, 6 );
+                    if ( $value === 'Empty/Null' || $value === 'null' )
+                    {
+                        $q->orWhereNull ( 'tanggal' );
+                    }
+                    elseif ( strpos ( $value, 'exact:' ) === 0 )
+                    {
+                        $date = substr ( $value, 6 );
+                        $q->orWhereRaw ( "DATE(atb.tanggal) = ?", [ $date ] );
+                    }
+                    elseif ( strpos ( $value, 'gt:' ) === 0 )
+                    {
+                        $rangeConditions[ 'gt' ] = substr ( $value, 3 );
+                    }
+                    elseif ( strpos ( $value, 'lt:' ) === 0 )
+                    {
+                        $rangeConditions[ 'lt' ] = substr ( $value, 3 );
+                    }
+                    elseif ( preg_match ( '/^(\d{4}-\d{2}-\d{2})\.\.(\d{4}-\d{2}-\d{2})$/', $value, $matches ) )
+                    {
+                        $q->orWhereBetween ( 'tanggal', [ $matches[ 1 ], $matches[ 2 ] ] );
+                    }
                 }
-                return $value;
-            }, $selectedValues );
-            if ( in_array ( 'null', $selectedValues ) )
-            {
-                $nonNullValues = array_filter ( $selectedValues, fn ( $value ) => $value !== 'null' );
-                $query->where ( function ($q) use ($nonNullValues)
+
+                // Handle date range as a single condition if either gt or lt exist
+                if ( $rangeConditions[ 'gt' ] || $rangeConditions[ 'lt' ] )
                 {
-                    $q->whereIn ( 'tanggal', $nonNullValues )
-                        ->orWhereNull ( 'tanggal' );
-                } );
-            }
-            else
-            {
-                $query->whereIn ( 'tanggal', $selectedValues );
-            }
+                    $q->orWhere ( function ($rangeQ) use ($rangeConditions)
+                    {
+                        if ( $rangeConditions[ 'gt' ] )
+                        {
+                            $rangeQ->whereRaw ( "DATE(atb.tanggal) >= ?", [ $rangeConditions[ 'gt' ] ] );
+                        }
+                        if ( $rangeConditions[ 'lt' ] )
+                        {
+                            $rangeQ->whereRaw ( "DATE(atb.tanggal) <= ?", [ $rangeConditions[ 'lt' ] ] );
+                        }
+                    } );
+                }
+            } );
         }
 
         if ( request ()->has ( 'selected_kode' ) )

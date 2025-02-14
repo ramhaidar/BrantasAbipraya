@@ -66,6 +66,7 @@
             'filterId' => 'quantity-requested',
             'paramName' => 'quantity_requested',
             'filter' => true,
+            'type' => 'number',
         ],
         [
             'title' => 'Quantity Approved',
@@ -76,6 +77,7 @@
             'filterId' => 'stock-quantity',
             'paramName' => 'stock_quantity',
             'filter' => true,
+            'type' => 'number',
         ],
         [
             'title' => 'Satuan',

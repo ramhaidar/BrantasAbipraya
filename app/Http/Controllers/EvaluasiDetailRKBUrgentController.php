@@ -170,25 +170,10 @@ class EvaluasiDetailRKBUrgentController extends Controller
             {
                 $values = $this->getSelectedValues ( $request->get ( $selectedParam ) );
 
-                // Special handling for numeric columns
+                // Handle numeric columns (quantity_requested and stock_quantity)
                 if ( in_array ( $paramName, [ 'quantity_requested', 'stock_quantity' ] ) )
                 {
-                    if ( in_array ( 'null', $values ) )
-                    {
-                        $nonNullValues = array_filter ( $values, fn ( $value ) => $value !== 'null' );
-                        $query->where ( function ($q) use ($columnName, $nonNullValues)
-                        {
-                            $q->whereNull ( $columnName )
-                                ->when ( ! empty ( $nonNullValues ), function ($subQ) use ($columnName, $nonNullValues)
-                                {
-                                    $subQ->orWhereIn ( $columnName, array_map ( 'intval', $nonNullValues ) );
-                                } );
-                        } );
-                    }
-                    else
-                    {
-                        $query->whereIn ( $columnName, array_map ( 'intval', $values ) );
-                    }
+                    $this->applyNumericFilter ( $query, $columnName, $values );
                     return;
                 }
 
@@ -225,13 +210,77 @@ class EvaluasiDetailRKBUrgentController extends Controller
 
         try
         {
-            return explode ( '||', base64_decode ( $paramValue ) );
+            $decoded = base64_decode ( $paramValue );
+            if ( ! $decoded ) return [];
+
+            return explode ( '||', $decoded );
         }
         catch ( \Exception $e )
         {
             \Log::error ( 'Error decoding parameter value: ' . $e->getMessage () );
             return [];
         }
+    }
+
+    private function applyNumericFilter ( $query, $columnName, $values )
+    {
+        $query->where ( function ($q) use ($columnName, $values)
+        {
+            $hasCondition = false;
+            $gtValue      = null;
+            null;
+            $ltValue      = null;
+            null;
+
+            foreach ( $values as $value )
+            {
+                if ( $value === 'Empty/Null' )
+                {
+                    $q->orWhereNull ( $columnName )
+                        ->orWhere ( $columnName, '' );
+                    $hasCondition = true;
+                    continue;
+                }
+
+                if ( strpos ( $value, 'exact:' ) === 0 )
+                {
+                    $exactValue = (int) substr ( $value, 6 );
+                    $q->orWhere ( $columnName, $exactValue );
+                    $hasCondition = true;
+                }
+                elseif ( strpos ( $value, 'gt:' ) === 0 )
+                {
+                    $gtValue = (int) substr ( $value, 3 );
+                }
+                elseif ( strpos ( $value, 'lt:' ) === 0 )
+                {
+                    $ltValue = (int) substr ( $value, 3 );
+                }
+            }
+
+            // Handle between case when both gt and lt are present
+            if ( $gtValue !== null && $ltValue !== null )
+            {
+                $q->orWhereBetween ( $columnName, [ $gtValue, $ltValue ] );
+                $hasCondition = true;
+            }
+            elseif ( $gtValue !== null )
+            {
+                $q->orWhere ( $columnName, '>=', $gtValue );
+                $hasCondition = true;
+            }
+            elseif ( $ltValue !== null )
+            {
+                $q->orWhere ( $columnName, '<=', $ltValue );
+                $hasCondition = true;
+            }
+
+            // If no valid conditions were added, ensure the query returns no results
+            if ( ! $hasCondition )
+            {
+                $q->where ( $columnName, '=', null );
+            }
+        } );
     }
 
     private function applyStockQuantityFilter ( $query, Request $request, $stockQuantities )
@@ -248,36 +297,79 @@ class EvaluasiDetailRKBUrgentController extends Controller
                     return;
                 }
 
-                $intValues     = array_map ( 'intval', array_filter ( $values, fn ( $v ) => $v !== 'null' ) );
-                $hasNullFilter = in_array ( 'null', $values );
-
-                // Get all sparepart IDs that match any of the selected quantities
-                $matchingSparepartIds = $stockQuantities
-                    ->filter ( function ($quantity) use ($intValues)
-                    {
-                        return ! empty ( $intValues ) && in_array ( (int) $quantity, $intValues );
-                    } )
-                    ->keys ()
-                    ->toArray ();
-
-                $query->where ( function ($q) use ($matchingSparepartIds, $hasNullFilter)
+                $query->where ( function ($q) use ($values, $stockQuantities)
                 {
-                    if ( ! empty ( $matchingSparepartIds ) )
-                    {
-                        $q->whereIn ( 'master_data_sparepart.id', $matchingSparepartIds );
-                    }
+                    $hasCondition = false;
+                    $gtValue      = null;
+                    $ltValue      = null;
 
-                    if ( $hasNullFilter )
+                    foreach ( $values as $value )
                     {
-                        $q->orWhereDoesntHave ( 'masterDataSparepart.saldos', function ($query)
+                        if ( $value === 'Empty/Null' )
                         {
-                            $query->where ( 'id_proyek', $this->rkb->id_proyek );
-                        } )
-                            ->orWhereHas ( 'masterDataSparepart.saldos', function ($query)
+                            $q->orWhereDoesntHave ( 'masterDataSparepart.saldos', function ($query)
+                            {
+                                $query->where ( 'id_proyek', $this->rkb->id_proyek );
+                            } )->orWhereHas ( 'masterDataSparepart.saldos', function ($query)
                             {
                                 $query->where ( 'id_proyek', $this->rkb->id_proyek )
                                     ->where ( 'quantity', 0 );
                             } );
+                            $hasCondition = true;
+                        }
+                        elseif ( strpos ( $value, 'exact:' ) === 0 )
+                        {
+                            $exactValue   = (int) substr ( $value, 6 );
+                            $sparepartIds = $stockQuantities->filter ( fn ( $qty ) => $qty == $exactValue )->keys ();
+                            if ( $sparepartIds->isNotEmpty () )
+                            {
+                                $q->orWhereIn ( 'master_data_sparepart.id', $sparepartIds );
+                                $hasCondition = true;
+                            }
+                        }
+                        elseif ( strpos ( $value, 'gt:' ) === 0 )
+                        {
+                            $gtValue = (int) substr ( $value, 3 );
+                        }
+                        elseif ( strpos ( $value, 'lt:' ) === 0 )
+                        {
+                            $ltValue = (int) substr ( $value, 3 );
+                        }
+                    }
+
+                    // Handle between case when both gt and lt are present
+                    if ( $gtValue !== null && $ltValue !== null )
+                    {
+                        $sparepartIds = $stockQuantities->filter ( fn ( $qty ) => $qty >= $gtValue && $qty <= $ltValue )->keys ();
+                        if ( $sparepartIds->isNotEmpty () )
+                        {
+                            $q->orWhereIn ( 'master_data_sparepart.id', $sparepartIds );
+                        }
+                        $hasCondition = true;
+                    }
+                    elseif ( $gtValue !== null )
+                    {
+                        $sparepartIds = $stockQuantities->filter ( fn ( $qty ) => $qty >= $gtValue )->keys ();
+                        if ( $sparepartIds->isNotEmpty () )
+                        {
+                            $q->orWhereIn ( 'master_data_sparepart.id', $sparepartIds );
+                        }
+                        $hasCondition = true;
+                    }
+                    elseif ( $ltValue !== null )
+                    {
+                        $sparepartIds = $stockQuantities->filter ( fn ( $qty ) => $qty <= $ltValue )->keys ();
+                        if ( $sparepartIds->isNotEmpty () )
+                        {
+                            $q->orWhereIn ( 'master_data_sparepart.id', $sparepartIds );
+                        }
+                        $hasCondition = true;
+                    }
+
+                    // If no valid conditions were added, ensure the query returns no results
+                    if ( ! $hasCondition )
+                    {
+                        $q->where ( 'master_data_sparepart.id', '=', null );
                     }
                 } );
             }

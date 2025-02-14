@@ -112,7 +112,7 @@ class TimelineRKBUrgentController extends Controller
             }
         }
 
-        // Handle date fields
+        // Handle date fields with additional range logic
         $dateFields = [ 
             'tanggal_awal_rencana',
             'tanggal_akhir_rencana',
@@ -126,23 +126,58 @@ class TimelineRKBUrgentController extends Controller
             {
                 try
                 {
-                    $dates = $this->getSelectedValues ( $request->get ( "selected_{$field}" ) );
-                    if ( in_array ( 'null', $dates ) )
+                    $dateValues = $this->getSelectedValues ( $request->get ( "selected_{$field}" ) );
+
+                    $query->where ( function ($q) use ($dateValues, $field)
                     {
-                        $nonNullDates = array_filter ( $dates, fn ( $date ) => $date !== 'null' );
-                        $query->where ( function ($q) use ($nonNullDates, $field)
+                        $hasRange = false;
+                        $gtDate   = null;
+                        $ltDate   = null;
+
+                        foreach ( $dateValues as $value )
                         {
-                            $q->whereNull ( $field )
-                                ->when ( count ( $nonNullDates ) > 0, function ($q) use ($nonNullDates, $field)
+                            if ( $value === 'Empty/Null' || $value === 'null' )
+                            {
+                                $q->orWhereNull ( $field );
+                            }
+                            elseif ( strpos ( $value, 'exact:' ) === 0 )
+                            {
+                                $date = substr ( $value, 6 );
+                                $q->orWhereDate ( $field, '=', $date );
+                            }
+                            elseif ( strpos ( $value, 'gt:' ) === 0 )
+                            {
+                                $gtDate   = substr ( $value, 3 );
+                                $hasRange = true;
+                            }
+                            elseif ( strpos ( $value, 'lt:' ) === 0 )
+                            {
+                                $ltDate   = substr ( $value, 3 );
+                                $hasRange = true;
+                            }
+                            else
+                            {
+                                // Handle regular date values if any
+                                $q->orWhereDate ( $field, '=', $value );
+                            }
+                        }
+
+                        // Handle date range if both gt and lt are present
+                        if ( $hasRange )
+                        {
+                            $rangeQuery = $q->orWhere ( function ($query) use ($field, $gtDate, $ltDate)
+                            {
+                                if ( $gtDate )
                                 {
-                                    $q->orWhereIn ( \DB::raw ( "DATE({$field})" ), $nonNullDates );
-                                } );
-                        } );
-                    }
-                    else
-                    {
-                        $query->whereIn ( \DB::raw ( "DATE({$field})" ), $dates );
-                    }
+                                    $query->whereDate ( $field, '>=', $gtDate );
+                                }
+                                if ( $ltDate )
+                                {
+                                    $query->whereDate ( $field, '<=', $ltDate );
+                                }
+                            } );
+                        }
+                    } );
                 }
                 catch ( \Exception $e )
                 {

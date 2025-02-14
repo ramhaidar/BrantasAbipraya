@@ -127,46 +127,77 @@ class DetailRKBUrgentController extends Controller
             {
                 $values = $this->getSelectedValues ( $request->get ( $selectedParam ) );
 
-                if ( in_array ( 'null', $values ) )
+                // Special handling for numeric columns
+                if ( in_array ( $paramName, [ 'quantity_requested', 'quantity_approved' ] ) )
                 {
-                    $nonNullValues = array_filter ( $values, fn ( $value ) => $value !== 'null' );
-                    $query->where ( function ($q) use ($columnName, $nonNullValues)
+                    $query->where ( function ($q) use ($columnName, $values)
                     {
-                        // For numeric columns, only check for NULL
-                        if ( $this->isNumericColumn ( $columnName ) )
+                        $exactValues = [];
+                        $gtValue     = null;
+                        $ltValue     = null;
+
+                        foreach ( $values as $value )
                         {
-                            $q->whereNull ( $columnName );
-                            if ( ! empty ( $nonNullValues ) )
+                            if ( $value === 'null' )
                             {
-                                $decodedValues = array_map ( 'base64_decode', $nonNullValues );
-                                // Convert values to integers for numeric columns
-                                $numericValues = array_map ( 'intval', $decodedValues );
-                                $q->orWhereIn ( $columnName, $numericValues );
+                                $q->orWhereNull ( $columnName );
                             }
+                            elseif ( strpos ( $value, 'exact:' ) === 0 )
+                            {
+                                $exactValues[] = (int) substr ( $value, 6 );
+                            }
+                            elseif ( strpos ( $value, 'gt:' ) === 0 )
+                            {
+                                $gtValue = (int) substr ( $value, 3 );
+                            }
+                            elseif ( strpos ( $value, 'lt:' ) === 0 )
+                            {
+                                $ltValue = (int) substr ( $value, 3 );
+                            }
+                        }
+
+                        if ( ! empty ( $exactValues ) )
+                        {
+                            $q->orWhereIn ( $columnName, $exactValues );
                         }
                         else
                         {
-                            // For non-numeric columns, keep existing logic
-                            $q->whereNull ( $columnName )
-                                ->orWhere ( $columnName, '-' )
-                                ->orWhere ( $columnName, '' )
-                                ->when ( ! empty ( $nonNullValues ), function ($subQ) use ($columnName, $nonNullValues)
-                                {
-                                    $decodedValues = array_map ( 'base64_decode', $nonNullValues );
-                                    $subQ->orWhereIn ( $columnName, $decodedValues );
-                                } );
+                            if ( $gtValue !== null && $ltValue !== null )
+                            {
+                                $q->orWhereBetween ( $columnName, [ $gtValue, $ltValue ] );
+                            }
+                            elseif ( $gtValue !== null )
+                            {
+                                $q->orWhere ( $columnName, '>=', $gtValue );
+                            }
+                            elseif ( $ltValue !== null )
+                            {
+                                $q->orWhere ( $columnName, '<=', $ltValue );
+                            }
                         }
                     } );
                 }
                 else
                 {
-                    $decodedValues = array_map ( 'base64_decode', $values );
-                    // Convert values to integers for numeric columns
-                    if ( $this->isNumericColumn ( $columnName ) )
+                    // Original logic for non-numeric columns
+                    if ( in_array ( 'null', $values ) )
                     {
-                        $decodedValues = array_map ( 'intval', $decodedValues );
+                        $nonNullValues = array_filter ( $values, fn ( $value ) => $value !== 'null' );
+                        $query->where ( function ($q) use ($columnName, $nonNullValues)
+                        {
+                            $q->whereNull ( $columnName )
+                                ->orWhere ( $columnName, '-' )
+                                ->orWhere ( $columnName, '' )
+                                ->when ( ! empty ( $nonNullValues ), function ($subQ) use ($columnName, $nonNullValues)
+                                {
+                                    $subQ->orWhereIn ( $columnName, $nonNullValues );
+                                } );
+                        } );
                     }
-                    $query->whereIn ( $columnName, $decodedValues );
+                    else
+                    {
+                        $query->whereIn ( $columnName, $values );
+                    }
                 }
             }
             catch ( \Exception $e )

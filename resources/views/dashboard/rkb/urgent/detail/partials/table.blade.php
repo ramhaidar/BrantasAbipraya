@@ -66,12 +66,14 @@
             'filterId' => 'quantity-requested',
             'paramName' => 'quantity_requested',
             'filter' => true,
+            'type' => 'number',
         ],
         [
             'title' => 'Quantity Approved',
             'filterId' => 'quantity-approved',
             'paramName' => 'quantity_approved',
             'filter' => true,
+            'type' => 'number',
         ],
         [
             'title' => 'Satuan',

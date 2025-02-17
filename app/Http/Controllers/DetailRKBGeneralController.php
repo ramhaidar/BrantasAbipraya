@@ -217,12 +217,13 @@ class DetailRKBGeneralController extends Controller
                         $gtValue        = null;
                         $ltValue        = null;
                         $checkboxValues = [];
+                        $hasNullFilter  = false;
 
                         foreach ( $values as $value )
                         {
-                            if ( $value === 'null' )
+                            if ( $value === 'Empty/Null' )
                             {
-                                $q->orWhereNull ( $columnName );
+                                $hasNullFilter = true;
                             }
                             elseif ( strpos ( $value, 'exact:' ) === 0 )
                             {
@@ -238,12 +239,17 @@ class DetailRKBGeneralController extends Controller
                             }
                             elseif ( is_numeric ( $value ) )
                             {
-                                // Handle checkbox values
                                 $checkboxValues[] = (int) $value;
                             }
                         }
 
-                        // Handle checkbox values first
+                        // Handle null values if Empty/Null is selected
+                        if ( $hasNullFilter )
+                        {
+                            $q->orWhereNull ( $columnName );
+                        }
+
+                        // Handle checkbox values
                         if ( ! empty ( $checkboxValues ) )
                         {
                             $q->orWhereIn ( $columnName, $checkboxValues );

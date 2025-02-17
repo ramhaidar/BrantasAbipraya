@@ -198,10 +198,11 @@ class TimelineRKBUrgentController extends Controller
 
                     $query->where ( function ($q) use ($values, $field)
                     {
-                        $exactValues = [];
-                        $gtValue     = null;
-                        $ltValue     = null;
-                        $hasNull     = false;
+                        $exactValues    = [];
+                        $gtValue        = null;
+                        $ltValue        = null;
+                        $checkboxValues = [];
+                        $hasNull        = false;
 
                         foreach ( $values as $value )
                         {
@@ -221,75 +222,20 @@ class TimelineRKBUrgentController extends Controller
                             {
                                 $ltValue = (int) substr ( $value, 3 );
                             }
+                            elseif ( is_numeric ( str_replace ( ' Hari', '', $value ) ) )
+                            {
+                                // Handle checkbox values (removing 'Hari' suffix if present)
+                                $checkboxValues[] = (int) str_replace ( ' Hari', '', $value );
+                            }
                         }
 
                         if ( $field === 'durasi_actual' )
                         {
-                            if ( $hasNull )
-                            {
-                                $q->orWhereNull ( 'tanggal_awal_actual' )
-                                    ->orWhereNull ( 'tanggal_akhir_actual' )
-                                    ->orWhereRaw ( 'tanggal_awal_actual = tanggal_akhir_actual' );
-                            }
-
-                            if ( ! empty ( $exactValues ) )
-                            {
-                                foreach ( $exactValues as $value )
-                                {
-                                    $q->orWhereRaw (
-                                        'EXTRACT(DAY FROM (tanggal_akhir_actual::timestamp - tanggal_awal_actual::timestamp))::integer = ?',
-                                        [ $value ]
-                                    );
-                                }
-                            }
-                            if ( $gtValue !== null )
-                            {
-                                $q->orWhereRaw (
-                                    'EXTRACT(DAY FROM (tanggal_akhir_actual::timestamp - tanggal_awal_actual::timestamp))::integer >= ?',
-                                    [ $gtValue ]
-                                );
-                            }
-                            if ( $ltValue !== null )
-                            {
-                                $q->orWhereRaw (
-                                    'EXTRACT(DAY FROM (tanggal_akhir_actual::timestamp - tanggal_awal_actual::timestamp))::integer <= ?',
-                                    [ $ltValue ]
-                                );
-                            }
+                            $this->applyDurationFilter ( $q, 'tanggal_awal_actual', 'tanggal_akhir_actual', $hasNull, $exactValues, $gtValue, $ltValue, $checkboxValues );
                         }
                         else
                         {
-                            if ( $hasNull )
-                            {
-                                $q->orWhereNull ( 'tanggal_awal_rencana' )
-                                    ->orWhereNull ( 'tanggal_akhir_rencana' )
-                                    ->orWhereRaw ( 'tanggal_awal_rencana = tanggal_akhir_rencana' );
-                            }
-
-                            if ( ! empty ( $exactValues ) )
-                            {
-                                foreach ( $exactValues as $value )
-                                {
-                                    $q->orWhereRaw (
-                                        'EXTRACT(DAY FROM (tanggal_akhir_rencana::timestamp - tanggal_awal_rencana::timestamp))::integer = ?',
-                                        [ $value ]
-                                    );
-                                }
-                            }
-                            if ( $gtValue !== null )
-                            {
-                                $q->orWhereRaw (
-                                    'EXTRACT(DAY FROM (tanggal_akhir_rencana::timestamp - tanggal_awal_rencana::timestamp))::integer >= ?',
-                                    [ $gtValue ]
-                                );
-                            }
-                            if ( $ltValue !== null )
-                            {
-                                $q->orWhereRaw (
-                                    'EXTRACT(DAY FROM (tanggal_akhir_rencana::timestamp - tanggal_awal_rencana::timestamp))::integer <= ?',
-                                    [ $ltValue ]
-                                );
-                            }
+                            $this->applyDurationFilter ( $q, 'tanggal_awal_rencana', 'tanggal_akhir_rencana', $hasNull, $exactValues, $gtValue, $ltValue, $checkboxValues );
                         }
                     } );
                 }
@@ -301,6 +247,54 @@ class TimelineRKBUrgentController extends Controller
         }
 
         return $query;
+    }
+
+    private function applyDurationFilter ( $query, $startField, $endField, $hasNull, $exactValues, $gtValue, $ltValue, $checkboxValues )
+    {
+        if ( $hasNull )
+        {
+            $query->orWhereNull ( $startField )
+                ->orWhereNull ( $endField )
+                ->orWhereRaw ( "$startField = $endField" );
+        }
+
+        if ( ! empty ( $checkboxValues ) )
+        {
+            foreach ( $checkboxValues as $value )
+            {
+                $query->orWhereRaw (
+                    "EXTRACT(DAY FROM ($endField::timestamp - $startField::timestamp))::integer = ?",
+                    [ $value ]
+                );
+            }
+        }
+
+        if ( ! empty ( $exactValues ) )
+        {
+            foreach ( $exactValues as $value )
+            {
+                $query->orWhereRaw (
+                    "EXTRACT(DAY FROM ($endField::timestamp - $startField::timestamp))::integer = ?",
+                    [ $value ]
+                );
+            }
+        }
+
+        if ( $gtValue !== null )
+        {
+            $query->orWhereRaw (
+                "EXTRACT(DAY FROM ($endField::timestamp - $startField::timestamp))::integer >= ?",
+                [ $gtValue ]
+            );
+        }
+
+        if ( $ltValue !== null )
+        {
+            $query->orWhereRaw (
+                "EXTRACT(DAY FROM ($endField::timestamp - $startField::timestamp))::integer <= ?",
+                [ $ltValue ]
+            );
+        }
     }
 
     private function getUniqueValues ( $query )

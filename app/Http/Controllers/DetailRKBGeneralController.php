@@ -213,9 +213,10 @@ class DetailRKBGeneralController extends Controller
                 {
                     $query->where ( function ($q) use ($columnName, $values)
                     {
-                        $exactValues = [];
-                        $gtValue     = null;
-                        $ltValue     = null;
+                        $exactValues    = [];
+                        $gtValue        = null;
+                        $ltValue        = null;
+                        $checkboxValues = [];
 
                         foreach ( $values as $value )
                         {
@@ -235,12 +236,25 @@ class DetailRKBGeneralController extends Controller
                             {
                                 $ltValue = (int) substr ( $value, 3 );
                             }
+                            elseif ( is_numeric ( $value ) )
+                            {
+                                // Handle checkbox values
+                                $checkboxValues[] = (int) $value;
+                            }
                         }
 
+                        // Handle checkbox values first
+                        if ( ! empty ( $checkboxValues ) )
+                        {
+                            $q->orWhereIn ( $columnName, $checkboxValues );
+                        }
+
+                        // Handle exact values
                         if ( ! empty ( $exactValues ) )
                         {
                             $q->orWhereIn ( $columnName, $exactValues );
                         }
+                        // Handle range values
                         else
                         {
                             if ( $gtValue !== null && $ltValue !== null )

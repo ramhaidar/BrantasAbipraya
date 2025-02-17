@@ -132,9 +132,10 @@ class DetailRKBUrgentController extends Controller
                 {
                     $query->where ( function ($q) use ($columnName, $values)
                     {
-                        $exactValues = [];
-                        $gtValue     = null;
-                        $ltValue     = null;
+                        $exactValues    = [];
+                        $gtValue        = null;
+                        $ltValue        = null;
+                        $checkboxValues = [];
 
                         foreach ( $values as $value )
                         {
@@ -154,26 +155,38 @@ class DetailRKBUrgentController extends Controller
                             {
                                 $ltValue = (int) substr ( $value, 3 );
                             }
+                            else
+                            {
+                                // This is a checkbox value
+                                $checkboxValues[] = (int) $value;
+                            }
                         }
 
-                        if ( ! empty ( $exactValues ) )
+                        // Handle exact values (including checkbox values)
+                        if ( ! empty ( $exactValues ) || ! empty ( $checkboxValues ) )
                         {
-                            $q->orWhereIn ( $columnName, $exactValues );
+                            $allExactValues = array_merge ( $exactValues, $checkboxValues );
+                            $q->orWhereIn ( $columnName, $allExactValues );
                         }
-                        else
+
+                        // Handle range values
+                        if ( $gtValue !== null || $ltValue !== null )
                         {
-                            if ( $gtValue !== null && $ltValue !== null )
+                            $q->orWhere ( function ($rangeQuery) use ($columnName, $gtValue, $ltValue)
                             {
-                                $q->orWhereBetween ( $columnName, [ $gtValue, $ltValue ] );
-                            }
-                            elseif ( $gtValue !== null )
-                            {
-                                $q->orWhere ( $columnName, '>=', $gtValue );
-                            }
-                            elseif ( $ltValue !== null )
-                            {
-                                $q->orWhere ( $columnName, '<=', $ltValue );
-                            }
+                                if ( $gtValue !== null && $ltValue !== null )
+                                {
+                                    $rangeQuery->whereBetween ( $columnName, [ $gtValue, $ltValue ] );
+                                }
+                                elseif ( $gtValue !== null )
+                                {
+                                    $rangeQuery->where ( $columnName, '>=', $gtValue );
+                                }
+                                elseif ( $ltValue !== null )
+                                {
+                                    $rangeQuery->where ( $columnName, '<=', $ltValue );
+                                }
+                            } );
                         }
                     } );
                 }
@@ -241,7 +254,11 @@ class DetailRKBUrgentController extends Controller
                 {
                     return (string) $value;
                 } )
-                ->sort ()
+                ->sort ( function ($a, $b)
+                {
+                    // Custom sort to ensure numeric order
+                    return (int) $a - (int) $b;
+                } )
                 ->values ();
         };
 

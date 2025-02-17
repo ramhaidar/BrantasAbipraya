@@ -47,6 +47,11 @@
         z-index: 9999;
     }
 
+    .spinner-border {
+        width: 3rem;
+        height: 3rem;
+    }
+
     .table-responsive {
         overflow-x: visible !important;
     }

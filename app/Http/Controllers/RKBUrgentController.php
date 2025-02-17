@@ -68,20 +68,27 @@ class RKBUrgentController extends Controller
     {
         if ( $request->filled ( 'selected_nomor' ) )
         {
-            try {
-                $nomor = $this->getSelectedValues($request->selected_nomor);
-                if (in_array('null', $nomor)) {
-                    $nonNullValues = array_filter($nomor, fn($value) => $value !== 'null');
-                    $query->where(function ($q) use ($nonNullValues) {
-                        $q->whereNull('nomor')
-                            ->orWhere('nomor', '-')
-                            ->orWhereIn('nomor', $nonNullValues);
-                    });
-                } else {
-                    $query->whereIn('nomor', $nomor);
+            try
+            {
+                $nomor = $this->getSelectedValues ( $request->selected_nomor );
+                if ( in_array ( 'null', $nomor ) )
+                {
+                    $nonNullValues = array_filter ( $nomor, fn ( $value ) => $value !== 'null' );
+                    $query->where ( function ($q) use ($nonNullValues)
+                    {
+                        $q->whereNull ( 'nomor' )
+                            ->orWhere ( 'nomor', '-' )
+                            ->orWhereIn ( 'nomor', $nonNullValues );
+                    } );
                 }
-            } catch (\Exception $e) {
-                \Log::error('Error in nomor filter: ' . $e->getMessage());
+                else
+                {
+                    $query->whereIn ( 'nomor', $nomor );
+                }
+            }
+            catch ( \Exception $e )
+            {
+                \Log::error ( 'Error in nomor filter: ' . $e->getMessage () );
             }
         }
         return $query;
@@ -91,23 +98,32 @@ class RKBUrgentController extends Controller
     {
         if ( $request->filled ( 'selected_proyek' ) )
         {
-            try {
-                $proyekNames = $this->getSelectedValues($request->selected_proyek);
-                if (in_array('null', $proyekNames)) {
-                    $nonNullValues = array_filter($proyekNames, fn($value) => $value !== 'null');
-                    $query->where(function ($q) use ($nonNullValues) {
-                        $q->whereDoesntHave('proyek')
-                            ->orWhereHas('proyek', function ($sq) use ($nonNullValues) {
-                                $sq->whereIn('nama', $nonNullValues);
-                            });
-                    });
-                } else {
-                    $query->whereHas('proyek', function ($q) use ($proyekNames) {
-                        $q->whereIn('nama', $proyekNames);
-                    });
+            try
+            {
+                $proyekNames = $this->getSelectedValues ( $request->selected_proyek );
+                if ( in_array ( 'null', $proyekNames ) )
+                {
+                    $nonNullValues = array_filter ( $proyekNames, fn ( $value ) => $value !== 'null' );
+                    $query->where ( function ($q) use ($nonNullValues)
+                    {
+                        $q->whereDoesntHave ( 'proyek' )
+                            ->orWhereHas ( 'proyek', function ($sq) use ($nonNullValues)
+                            {
+                                $sq->whereIn ( 'nama', $nonNullValues );
+                            } );
+                    } );
                 }
-            } catch (\Exception $e) {
-                \Log::error('Error in proyek filter: ' . $e->getMessage());
+                else
+                {
+                    $query->whereHas ( 'proyek', function ($q) use ($proyekNames)
+                    {
+                        $q->whereIn ( 'nama', $proyekNames );
+                    } );
+                }
+            }
+            catch ( \Exception $e )
+            {
+                \Log::error ( 'Error in proyek filter: ' . $e->getMessage () );
             }
         }
         return $query;
@@ -117,19 +133,26 @@ class RKBUrgentController extends Controller
     {
         if ( $request->filled ( 'selected_periode' ) )
         {
-            try {
-                $periodeValues = $this->getSelectedValues($request->selected_periode);
-                if (in_array('null', $periodeValues)) {
-                    $nonNullValues = array_filter($periodeValues, fn($value) => $value !== 'null');
-                    $query->where(function ($q) use ($nonNullValues) {
-                        $q->whereNull('periode')
-                            ->orWhereIn('periode', $nonNullValues);
-                    });
-                } else {
-                    $query->whereIn('periode', $periodeValues);
+            try
+            {
+                $periodeValues = $this->getSelectedValues ( $request->selected_periode );
+                if ( in_array ( 'null', $periodeValues ) )
+                {
+                    $nonNullValues = array_filter ( $periodeValues, fn ( $value ) => $value !== 'null' );
+                    $query->where ( function ($q) use ($nonNullValues)
+                    {
+                        $q->whereNull ( 'periode' )
+                            ->orWhereIn ( 'periode', $nonNullValues );
+                    } );
                 }
-            } catch (\Exception $e) {
-                \Log::error('Error in periode filter: ' . $e->getMessage());
+                else
+                {
+                    $query->whereIn ( 'periode', $periodeValues );
+                }
+            }
+            catch ( \Exception $e )
+            {
+                \Log::error ( 'Error in periode filter: ' . $e->getMessage () );
             }
         }
         return $query;
@@ -139,17 +162,54 @@ class RKBUrgentController extends Controller
     {
         if ( $request->filled ( 'selected_status' ) )
         {
-            $statusValues = explode ( ',', $request->selected_status );
-            $query->where ( function ($q) use ($statusValues)
+            try
             {
-                foreach ( $statusValues as $status )
+                $statusValues = $this->getSelectedValues ( $request->selected_status );
+                $query->where ( function ($q) use ($statusValues)
                 {
-                    $q->orWhere ( function ($subQ) use ($status)
+                    foreach ( $statusValues as $status )
                     {
-                        $this->getStatusQuery ( $subQ, $status );
-                    } );
-                }
-            } );
+                        $q->orWhere ( function ($subQ) use ($status)
+                        {
+                            switch (strtolower ( trim ( $status ) ))
+                            {
+                                case 'pengajuan':
+                                    $subQ->where ( 'is_finalized', false )
+                                        ->where ( 'is_evaluated', false )
+                                        ->where ( 'is_approved_vp', false )
+                                        ->where ( 'is_approved_svp', false );
+                                    break;
+                                case 'evaluasi':
+                                    $subQ->where ( 'is_finalized', true )
+                                        ->where ( 'is_approved_svp', false );
+                                    break;
+                                case 'disetujui':
+                                    $subQ->where ( 'is_finalized', true )
+                                        ->where ( 'is_evaluated', true )
+                                        ->where ( 'is_approved_vp', true )
+                                        ->where ( 'is_approved_svp', true );
+                                    break;
+                                case 'tidak diketahui':
+                                case 'empty/null':
+                                    // Handle status that doesn't match any defined condition
+                                    $subQ->where ( function ($q)
+                                    {
+                                        $q->whereRaw ( 'NOT (
+                                            (is_finalized = false AND is_evaluated = false AND is_approved_vp = false AND is_approved_svp = false) OR
+                                            (is_finalized = true AND is_approved_svp = false) OR
+                                            (is_finalized = true AND is_evaluated = true AND is_approved_vp = true AND is_approved_svp = true)
+                                        )' );
+                                    } );
+                                    break;
+                            }
+                        } );
+                    }
+                } );
+            }
+            catch ( \Exception $e )
+            {
+                \Log::error ( 'Error in status filter: ' . $e->getMessage () );
+            }
         }
         return $query;
     }
@@ -388,42 +448,40 @@ class RKBUrgentController extends Controller
                 } ),
             'tidak diketahui' => $query->where ( function ($q)
                 {
-                    $q->whereNot ( function ($subQ)
-                    {
-                        // Not Pengajuan
-                        $subQ->where ( 'is_finalized', false )
-                        ->where ( 'is_evaluated', false )
-                        ->where ( 'is_approved_vp', false )
-                        ->where ( 'is_approved_svp', false );
-                    } )->whereNot ( function ($subQ)
-                    {
-                        // Not Evaluasi
-                        $subQ->where ( 'is_finalized', true )
-                        ->where ( 'is_approved_svp', false );
-                    } )->whereNot ( function ($subQ)
-                    {
-                        // Not Disetujui
-                        $subQ->where ( 'is_finalized', true )
-                        ->where ( 'is_evaluated', true )
-                        ->where ( 'is_approved_vp', true )
-                        ->where ( 'is_approved_svp', true );
-                    } );
+                    $q->whereRaw ( 'NOT (
+                    (is_finalized = false AND is_evaluated = false AND is_approved_vp = false AND is_approved_svp = false) OR
+                    (is_finalized = true AND is_approved_svp = false) OR
+                    (is_finalized = true AND is_evaluated = true AND is_approved_vp = true AND is_approved_svp = true)
+                )' );
                 } ),
             default => $query
         };
     }
 
     // Add this new helper method
-    private function getSelectedValues($paramValue)
+    private function getSelectedValues ( $paramValue )
     {
-        if (!$paramValue) return [];
+        if ( ! $paramValue ) return [];
 
-        try {
-            return explode('||', base64_decode($paramValue));
-        } catch (\Exception $e) {
-            \Log::error('Error decoding parameter value: ' . $e->getMessage());
+        try
+        {
+            return explode ( '||', base64_decode ( $paramValue ) );
+        }
+        catch ( \Exception $e )
+        {
+            \Log::error ( 'Error decoding parameter value: ' . $e->getMessage () );
             return [];
         }
+    }
+
+    private function getAllStatusOptions ()
+    {
+        return collect ( [ 
+            'pengajuan',
+            'evaluasi',
+            'disetujui',
+            'tidak diketahui'
+        ] );
     }
 
     public function show ( $id )

@@ -211,17 +211,54 @@ class RKBGeneralController extends Controller
     {
         if ( $request->filled ( 'selected_status' ) )
         {
-            $statusValues = explode ( ',', $request->selected_status );
-            $query->where ( function ($q) use ($statusValues)
+            try
             {
-                foreach ( $statusValues as $status )
+                $statusValues = $this->getSelectedValues ( $request->selected_status );
+                $query->where ( function ($q) use ($statusValues)
                 {
-                    $q->orWhere ( function ($subQ) use ($status)
+                    foreach ( $statusValues as $status )
                     {
-                        $this->getStatusQuery ( $subQ, $status );
-                    } );
-                }
-            } );
+                        $q->orWhere ( function ($subQ) use ($status)
+                        {
+                            switch (strtolower ( trim ( $status ) ))
+                            {
+                                case 'pengajuan':
+                                    $subQ->where ( 'is_finalized', false )
+                                        ->where ( 'is_evaluated', false )
+                                        ->where ( 'is_approved_vp', false )
+                                        ->where ( 'is_approved_svp', false );
+                                    break;
+                                case 'evaluasi':
+                                    $subQ->where ( 'is_finalized', true )
+                                        ->where ( 'is_approved_svp', false );
+                                    break;
+                                case 'disetujui':
+                                    $subQ->where ( 'is_finalized', true )
+                                        ->where ( 'is_evaluated', true )
+                                        ->where ( 'is_approved_vp', true )
+                                        ->where ( 'is_approved_svp', true );
+                                    break;
+                                case 'tidak diketahui':
+                                case 'empty/null':
+                                    // Handle status that doesn't match any defined condition
+                                    $subQ->where ( function ($q)
+                                    {
+                                        $q->whereRaw ( 'NOT (
+                                            (is_finalized = false AND is_evaluated = false AND is_approved_vp = false AND is_approved_svp = false) OR
+                                            (is_finalized = true AND is_approved_svp = false) OR
+                                            (is_finalized = true AND is_evaluated = true AND is_approved_vp = true AND is_approved_svp = true)
+                                        )' );
+                                    } );
+                                    break;
+                            }
+                        } );
+                    }
+                } );
+            }
+            catch ( \Exception $e )
+            {
+                \Log::error ( 'Error in status filter: ' . $e->getMessage () );
+            }
         }
         return $query;
     }
@@ -385,33 +422,11 @@ class RKBGeneralController extends Controller
                 } ),
             'tidak diketahui' => $query->where ( function ($q)
                 {
-                    $q->whereNotIn ( 'id', function ($sub)
-                    {
-                        $sub->select ( 'id' )
-                        ->from ( 'rkb' )
-                        ->where ( function ($q1)
-                        {
-                            // Pengajuan condition
-                            $q1->where ( 'is_finalized', false )
-                            ->where ( 'is_evaluated', false )
-                            ->where ( 'is_approved_vp', false )
-                            ->where ( 'is_approved_svp', false );
-                        } )
-                        ->orWhere ( function ($q2)
-                        {
-                            // Evaluasi condition
-                            $q2->where ( 'is_finalized', true )
-                            ->where ( 'is_approved_svp', false );
-                        } )
-                        ->orWhere ( function ($q3)
-                        {
-                            // Disetujui condition
-                            $q3->where ( 'is_finalized', true )
-                            ->where ( 'is_evaluated', true )
-                            ->where ( 'is_approved_vp', true )
-                            ->where ( 'is_approved_svp', true );
-                        } );
-                    } );
+                    $q->whereRaw ( 'NOT (
+                    (is_finalized = false AND is_evaluated = false AND is_approved_vp = false AND is_approved_svp = false) OR
+                    (is_finalized = true AND is_approved_svp = false) OR
+                    (is_finalized = true AND is_evaluated = true AND is_approved_vp = true AND is_approved_svp = true)
+                )' );
                 } ),
             default => $query
         };

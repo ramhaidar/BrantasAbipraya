@@ -37,16 +37,8 @@ class EvaluasiDetailRKBGeneralController extends Controller
         // Modified query with proper joins
         $query = $this->buildQuery ( $request, $id );
 
-        // Apply search and non-stock filters first
-        $this->applySearch ( $query, $request );
-        $this->applyNonStockFilters ( $query, $request );
-
-        // Clone query for stock quantities with current filters
-        $currentQuery         = clone $query;
-        $filteredSparepartIds = $currentQuery->pluck ( 'master_data_sparepart.id' )->unique ();
-
-        // Get ALL stock quantities for the project, not just filtered ones
-        $stockQuantities = Saldo::where ( 'id_proyek', $this->rkb->id_proyek )
+        // Get ALL stock quantities for the project first, with proper summing
+        $allStockQuantities = Saldo::where ( 'id_proyek', $this->rkb->id_proyek )
             ->whereIn ( 'id_master_data_sparepart', function ($query)
             {
                 $query->select ( 'id_master_data_sparepart' )
@@ -58,46 +50,75 @@ class EvaluasiDetailRKBGeneralController extends Controller
             ->selectRaw ( 'id_master_data_sparepart, SUM(quantity) as total_quantity' )
             ->groupBy ( 'id_master_data_sparepart' )
             ->get ()
-            ->pluck ( 'total_quantity', 'id_master_data_sparepart' )
-            ->filter ( function ($value)
-            {
-                return $value !== null && $value !== '';
-            } );
+            ->pluck ( 'total_quantity', 'id_master_data_sparepart' );
 
-        // Apply stock quantity filter
+        // Apply search and non-stock filters first
+        $this->applySearch ( $query, $request );
+        $this->applyNonStockFilters ( $query, $request );
+
+        // Get filtered data after applying non-stock filters
+        $filteredQuery = clone $query;
+        $filteredData  = $filteredQuery->get ();
+
+        // Get the summed stock quantities that exist in the filtered data
+        $filteredStockQuantities = $filteredData->map ( function ($item)
+        {
+            return $item->masterDataSparepart->saldos
+                ->where ( 'id_proyek', $this->rkb->id_proyek )
+                ->sum ( 'quantity' );
+        } )
+            ->reject ( function ($value)
+            {
+                return $value === null;
+            } )
+            ->unique ()
+            ->sort ()
+            ->values ();
+
+        // Apply stock quantity filter if selected
         if ( $request->filled ( 'selected_stock_quantity' ) )
         {
-            $this->applyStockQuantityFilter ( $query, $request, $stockQuantities );
+            $this->applyStockQuantityFilter ( $query, $request, $allStockQuantities );
         }
 
-        // Get filtered stock quantities that match the currently selected value
-        $selectedStockQty = $request->filled ( 'selected_stock_quantity' )
-            ? $this->getSelectedValues ( $request->get ( 'selected_stock_quantity' ) )
-            : [];
-
-        if ( ! empty ( $selectedStockQty ) )
-        {
-            $stockQuantities = $stockQuantities->filter ( function ($qty) use ($selectedStockQty)
-            {
-                return in_array ( $qty, $selectedStockQty );
-            } );
-        }
-
-        // Get final filtered data for displaying
+        // Get final filtered data
         $finalFilteredQuery = clone $query;
         $finalFilteredData  = $finalFilteredQuery->get ();
 
-        // Get unique values from the final filtered data
+        // Get all stock quantities for each sparepart, including nulls
+        $stockQuantityValues = collect ();
+        $finalFilteredData->each ( function ($item) use ($stockQuantityValues)
+        {
+            $saldos = $item->masterDataSparepart->saldos
+                ->where ( 'id_proyek', $this->rkb->id_proyek );
+
+            if ( $saldos->isEmpty () )
+            {
+                // If no saldo records exist, it's NULL (not 0)
+                $stockQuantityValues->push ( null );
+            }
+            else
+            {
+                // If saldo records exist, get the sum
+                $sum = $saldos->sum ( 'quantity' );
+                $stockQuantityValues->push ( $sum );
+            }
+        } );
+
+        // Get unique values for filters
         $uniqueValues = [ 
-            'jenis_alat'         => $finalFilteredData->pluck ( 'jenis_alat' )->unique ()->filter ()->sort ()->values (),
-            'kode_alat'          => $finalFilteredData->pluck ( 'kode_alat' )->unique ()->filter ()->sort ()->values (),
-            'kategori_sparepart' => $finalFilteredData->pluck ( 'kategori_nama' )->unique ()->filter ()->sort ()->values (),
-            'sparepart'          => $finalFilteredData->pluck ( 'sparepart_nama' )->unique ()->filter ()->sort ()->values (),
-            'part_number'        => $finalFilteredData->pluck ( 'part_number' )->unique ()->filter ()->sort ()->values (),
-            'merk'               => $finalFilteredData->pluck ( 'merk' )->unique ()->filter ()->sort ()->values (),
-            'quantity_requested' => $finalFilteredData->pluck ( 'quantity_requested' )->unique ()->filter ()->sort ()->values (),
-            'stock_quantity'     => $stockQuantities->values ()->unique ()->sort ()->values (),
-            'satuan'             => $finalFilteredData->pluck ( 'satuan' )->unique ()->filter ()->sort ()->values (),
+            'jenis_alat'         => $finalFilteredData->pluck ( 'jenis_alat' )->filter ()->unique ()->sort ()->values (),
+            'kode_alat'          => $finalFilteredData->pluck ( 'kode_alat' )->filter ()->unique ()->sort ()->values (),
+            'kategori_sparepart' => $finalFilteredData->pluck ( 'kategori_nama' )->filter ()->unique ()->sort ()->values (),
+            'sparepart'          => $finalFilteredData->pluck ( 'sparepart_nama' )->filter ()->unique ()->sort ()->values (),
+            'part_number'        => $finalFilteredData->pluck ( 'part_number' )->filter ()->unique ()->sort ()->values (),
+            'merk'               => $finalFilteredData->pluck ( 'merk' )->filter ()->unique ()->sort ()->values (),
+            'quantity_requested' => $finalFilteredData->pluck ( 'quantity_requested' )->filter ()->unique ()->sort ()->values (),
+            'stock_quantity'     => $stockQuantityValues->filter ()->unique ()->sortBy ( function ($value)
+            {
+                return $value;
+            } )->values (),
+            'satuan'             => $finalFilteredData->pluck ( 'satuan' )->filter ()->unique ()->sort ()->values (),
         ];
 
         // Get paginated data
@@ -219,15 +240,20 @@ class EvaluasiDetailRKBGeneralController extends Controller
                 {
                     $query->where ( function ($q) use ($columnName, $values)
                     {
-                        $hasGtFilter = false;
-                        $hasLtFilter = false;
-                        $gtValue     = null;
-                        $ltValue     = null;
+                        $hasGtFilter        = false;
+                        $hasLtFilter        = false;
+                        $gtValue            = null;
+                        $ltValue            = null;
+                        $hasEmptyNullFilter = false;
 
-                        // First pass to collect range values
+                        // First pass to collect range values and check for Empty/Null
                         foreach ( $values as $value )
                         {
-                            if ( strpos ( $value, 'gt:' ) === 0 )
+                            if ( $value === 'Empty/Null' )
+                            {
+                                $hasEmptyNullFilter = true;
+                            }
+                            elseif ( strpos ( $value, 'gt:' ) === 0 )
                             {
                                 $hasGtFilter = true;
                                 $gtValue     = substr ( $value, 3 );
@@ -242,7 +268,15 @@ class EvaluasiDetailRKBGeneralController extends Controller
                         // If we have both gt and lt, treat as range
                         if ( $hasGtFilter && $hasLtFilter )
                         {
-                            $q->whereBetween ( $columnName, [ $gtValue, $ltValue ] );
+                            $q->where ( function ($subQ) use ($columnName, $gtValue, $ltValue, $hasEmptyNullFilter)
+                            {
+                                $subQ->whereBetween ( $columnName, [ $gtValue, $ltValue ] );
+                                if ( $hasEmptyNullFilter )
+                                {
+                                    $subQ->orWhereNull ( $columnName )
+                                        ->orWhere ( $columnName, '=', 0 );
+                                }
+                            } );
                         }
                         else
                         {
@@ -266,13 +300,13 @@ class EvaluasiDetailRKBGeneralController extends Controller
                                 }
                                 elseif ( $value === 'Empty/Null' )
                                 {
+                                    // Modified this part to handle empty/null values correctly
                                     $q->orWhereNull ( $columnName )
-                                        ->orWhere ( $columnName, '0' )
-                                        ->orWhere ( $columnName, '' );
+                                        ->orWhere ( $columnName, '=', 0 );
                                 }
-                                else
+                                elseif ( ! $hasGtFilter && ! $hasLtFilter && is_numeric ( $value ) )
                                 {
-                                    $q->orWhere ( $columnName, $value );
+                                    $q->orWhere ( $columnName, '=', $value );
                                 }
                             }
                         }
@@ -322,12 +356,15 @@ class EvaluasiDetailRKBGeneralController extends Controller
                     return;
                 }
 
-                $hasGtFilter = false;
-                $hasLtFilter = false;
-                $gtValue     = null;
-                $ltValue     = null;
+                // Initialize flags for range filtering
+                $hasGtFilter        = false;
+                $hasLtFilter        = false;
+                $gtValue            = null;
+                $ltValue            = null;
+                $exactValues        = [];
+                $hasEmptyNullFilter = false;
 
-                // First pass to collect range values
+                // First pass to categorize values
                 foreach ( $values as $value )
                 {
                     if ( strpos ( $value, 'gt:' ) === 0 )
@@ -340,63 +377,92 @@ class EvaluasiDetailRKBGeneralController extends Controller
                         $hasLtFilter = true;
                         $ltValue     = substr ( $value, 3 );
                     }
+                    elseif ( strpos ( $value, 'exact:' ) === 0 )
+                    {
+                        $exactValues[] = substr ( $value, 6 );
+                    }
+                    elseif ( $value === 'Empty/Null' )
+                    {
+                        $hasEmptyNullFilter = true;
+                    }
+                    elseif ( is_numeric ( $value ) )
+                    {
+                        // Direct numeric values from checkboxes
+                        $exactValues[] = $value;
+                    }
                 }
 
-                $query->where ( function ($q) use ($values, $stockQuantities, $hasGtFilter, $hasLtFilter, $gtValue, $ltValue)
+                $query->where ( function ($q) use ($values, $stockQuantities, $hasGtFilter, $hasLtFilter, $gtValue, $ltValue, $exactValues, $hasEmptyNullFilter)
                 {
-                    // If we have both gt and lt, treat as range
+                    // Handle range filter (gt AND lt)
                     if ( $hasGtFilter && $hasLtFilter )
                     {
                         $matchingIds = $stockQuantities->filter ( function ($qty) use ($gtValue, $ltValue)
                         {
                             return $qty >= $gtValue && $qty <= $ltValue;
                         } )->keys ();
-                        $q->whereIn ( 'master_data_sparepart.id', $matchingIds );
-                    }
-                    else
-                    {
-                        // Handle individual conditions
-                        foreach ( $values as $value )
+                        if ( ! empty ( $matchingIds ) )
                         {
-                            if ( strpos ( $value, 'exact:' ) === 0 )
+                            $q->whereIn ( 'master_data_sparepart.id', $matchingIds );
+                        }
+                    }
+
+                    // Handle exact values from both input and checkboxes
+                    if ( ! empty ( $exactValues ) )
+                    {
+                        foreach ( $exactValues as $exactValue )
+                        {
+                            $matchingIds = $stockQuantities->filter ( function ($qty) use ($exactValue)
                             {
-                                $exactValue  = substr ( $value, 6 );
-                                $matchingIds = $stockQuantities->filter ( function ($qty) use ($exactValue)
-                                {
-                                    return $qty == $exactValue;
-                                } )->keys ();
+                                return (float) $qty === (float) $exactValue;
+                            } )->keys ();
+                            if ( ! empty ( $matchingIds ) )
+                            {
                                 $q->orWhereIn ( 'master_data_sparepart.id', $matchingIds );
-                            }
-                            elseif ( strpos ( $value, 'gt:' ) === 0 && ! $hasLtFilter )
-                            {
-                                $gtValue     = substr ( $value, 3 );
-                                $matchingIds = $stockQuantities->filter ( function ($qty) use ($gtValue)
-                                {
-                                    return $qty >= $gtValue;
-                                } )->keys ();
-                                $q->orWhereIn ( 'master_data_sparepart.id', $matchingIds );
-                            }
-                            elseif ( strpos ( $value, 'lt:' ) === 0 && ! $hasGtFilter )
-                            {
-                                $ltValue     = substr ( $value, 3 );
-                                $matchingIds = $stockQuantities->filter ( function ($qty) use ($ltValue)
-                                {
-                                    return $qty <= $ltValue;
-                                } )->keys ();
-                                $q->orWhereIn ( 'master_data_sparepart.id', $matchingIds );
-                            }
-                            elseif ( $value === 'Empty/Null' )
-                            {
-                                $q->orWhereDoesntHave ( 'masterDataSparepart.saldos', function ($query)
-                                {
-                                    $query->where ( 'id_proyek', $this->rkb->id_proyek );
-                                } )->orWhereHas ( 'masterDataSparepart.saldos', function ($query)
-                                {
-                                    $query->where ( 'id_proyek', $this->rkb->id_proyek )
-                                        ->where ( 'quantity', 0 );
-                                } );
                             }
                         }
+                    }
+
+                    // Handle individual gt filter
+                    if ( $hasGtFilter && ! $hasLtFilter )
+                    {
+                        $matchingIds = $stockQuantities->filter ( function ($qty) use ($gtValue)
+                        {
+                            return $qty >= $gtValue;
+                        } )->keys ();
+                        if ( ! empty ( $matchingIds ) )
+                        {
+                            $q->orWhereIn ( 'master_data_sparepart.id', $matchingIds );
+                        }
+                    }
+
+                    // Handle individual lt filter
+                    if ( $hasLtFilter && ! $hasGtFilter )
+                    {
+                        $matchingIds = $stockQuantities->filter ( function ($qty) use ($ltValue)
+                        {
+                            return $qty <= $ltValue;
+                        } )->keys ();
+                        if ( ! empty ( $matchingIds ) )
+                        {
+                            $q->orWhereIn ( 'master_data_sparepart.id', $matchingIds );
+                        }
+                    }
+
+                    // Handle Empty/Null filter
+                    if ( $hasEmptyNullFilter )
+                    {
+                        $q->orWhere ( function ($subQ)
+                        {
+                            $subQ->whereDoesntHave ( 'masterDataSparepart.saldos', function ($saldoQuery)
+                            {
+                                $saldoQuery->where ( 'id_proyek', $this->rkb->id_proyek );
+                            } )->orWhereHas ( 'masterDataSparepart.saldos', function ($saldoQuery)
+                            {
+                                $saldoQuery->where ( 'id_proyek', $this->rkb->id_proyek )
+                                    ->where ( 'quantity', 0 );
+                            } );
+                        } );
                     }
                 } );
             }

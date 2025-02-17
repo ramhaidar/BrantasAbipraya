@@ -224,7 +224,7 @@
                     reader.onload = function(e) {
                         const previewElement = document.createElement('div');
                         previewElement.classList.add('d-flex', 'flex-column', 'align-items-center', 'me-2', 'mb-2');
-                        
+
                         const img = document.createElement('img');
                         img.src = e.target.result;
                         img.alt = file.name;

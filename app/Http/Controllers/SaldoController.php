@@ -205,9 +205,10 @@ class SaldoController extends Controller
             {
                 $q->where ( function ($subQ) use ($values)
                 {
-                    $hasRange = false;
-                    $gtValue = null;
-                    $ltValue = null;
+                    $hasRange    = false;
+                    $gtValue     = null;
+                    $ltValue     = null;
+                    $exactValues = [];
 
                     foreach ( $values as $value )
                     {
@@ -231,8 +232,19 @@ class SaldoController extends Controller
                             $ltValue  = substr ( $value, 3 );
                             $hasRange = true;
                         }
+                        elseif ( is_numeric ( $value ) ) // Handle checkbox values
+                        {
+                            $exactValues[] = $value;
+                        }
                     }
 
+                    // Apply checkbox values if any exist
+                    if ( ! empty ( $exactValues ) )
+                    {
+                        $subQ->orWhereIn ( 'saldo.quantity', $exactValues );
+                    }
+
+                    // Apply range if exists
                     if ( $hasRange )
                     {
                         $subQ->orWhere ( function ($rangeQ) use ($gtValue, $ltValue)
@@ -253,9 +265,10 @@ class SaldoController extends Controller
             {
                 $q->where ( function ($subQ) use ($values)
                 {
-                    $hasRange = false;
-                    $gtValue = null;
-                    $ltValue = null;
+                    $hasRange    = false;
+                    $gtValue     = null;
+                    $ltValue     = null;
+                    $exactValues = [];
 
                     foreach ( $values as $value )
                     {
@@ -279,8 +292,19 @@ class SaldoController extends Controller
                             $ltValue  = substr ( $value, 3 );
                             $hasRange = true;
                         }
+                        elseif ( is_numeric ( $value ) ) // Handle checkbox values
+                        {
+                            $exactValues[] = $value;
+                        }
                     }
 
+                    // Apply checkbox values if any exist
+                    if ( ! empty ( $exactValues ) )
+                    {
+                        $subQ->orWhereIn ( 'saldo.harga', $exactValues );
+                    }
+
+                    // Apply range if exists
                     if ( $hasRange )
                     {
                         $subQ->orWhere ( function ($rangeQ) use ($gtValue, $ltValue)
@@ -301,9 +325,10 @@ class SaldoController extends Controller
             {
                 $q->where ( function ($subQ) use ($values)
                 {
-                    $hasRange = false;
-                    $gtValue = null;
-                    $ltValue = null;
+                    $hasRange    = false;
+                    $gtValue     = null;
+                    $ltValue     = null;
+                    $exactValues = [];
 
                     foreach ( $values as $value )
                     {
@@ -327,8 +352,25 @@ class SaldoController extends Controller
                             $ltValue  = substr ( $value, 3 );
                             $hasRange = true;
                         }
+                        elseif ( is_numeric ( $value ) ) // Handle checkbox values
+                        {
+                            $exactValues[] = $value;
+                        }
                     }
 
+                    // Apply checkbox values if any exist
+                    if ( ! empty ( $exactValues ) )
+                    {
+                        $subQ->orWhere ( function ($checkboxQ) use ($exactValues)
+                        {
+                            foreach ( $exactValues as $value )
+                            {
+                                $checkboxQ->orWhereRaw ( '(saldo.quantity * saldo.harga) = ?', [ $value ] );
+                            }
+                        } );
+                    }
+
+                    // Apply range if exists
                     if ( $hasRange )
                     {
                         $subQ->orWhere ( function ($rangeQ) use ($gtValue, $ltValue)

@@ -6,23 +6,22 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up () : void
+    public function up(): void
     {
-        Schema::create ( 'link_alat_detail_rkb', function (Blueprint $table)
-        {
-            $table->id (); // PK
-            $table->string ( 'nama_koordinator' )->nullable ();
+        Schema::create('link_alat_detail_rkb', function (Blueprint $table) {
+            $table->id(); // PK
+            // $table->string ( 'nama_koordinator' )->nullable ();
 
-            $table->unsignedBigInteger ( 'id_rkb' )->nullable ();
-            $table->unsignedBigInteger ( 'id_master_data_alat' )->nullable ();
-            $table->unsignedBigInteger ( 'id_lampiran_rkb_urgent' )->nullable ();
+            $table->unsignedBigInteger('id_rkb')->nullable();
+            $table->unsignedBigInteger('id_master_data_alat')->nullable();
+            $table->unsignedBigInteger('id_lampiran_rkb_urgent')->nullable();
 
-            $table->timestamps ();
-        } );
+            $table->timestamps();
+        });
     }
 
-    public function down () : void
+    public function down(): void
     {
-        Schema::dropIfExists ( 'link_alat_detail_rkb' );
+        Schema::dropIfExists('link_alat_detail_rkb');
     }
 };

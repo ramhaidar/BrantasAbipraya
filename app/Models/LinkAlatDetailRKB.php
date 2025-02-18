@@ -17,16 +17,14 @@ class LinkAlatDetailRKB extends Model
 
     protected $table = 'link_alat_detail_rkb';
 
-    protected $fillable = [ 
-        'nama_koordinator',
+    protected $fillable = [
         'id_rkb',
         'id_master_data_alat',
         'id_lampiran_rkb_urgent',
     ];
 
-    protected $casts = [ 
+    protected $casts = [
         'id'                     => 'integer',
-        'nama_koordinator'       => 'string',
         'id_rkb'                 => 'integer',
         'id_master_data_alat'    => 'integer',
         'id_lampiran_rkb_urgent' => 'integer',
@@ -34,29 +32,28 @@ class LinkAlatDetailRKB extends Model
         'updated_at'             => 'datetime',
     ];
 
-    public function rkb () : BelongsTo
+    public function rkb(): BelongsTo
     {
-        return $this->belongsTo ( RKB::class, 'id_rkb' );
+        return $this->belongsTo(RKB::class, 'id_rkb');
     }
 
-    public function masterDataAlat () : BelongsTo
+    public function masterDataAlat(): BelongsTo
     {
-        return $this->belongsTo ( MasterDataAlat::class, 'id_master_data_alat' );
+        return $this->belongsTo(MasterDataAlat::class, 'id_master_data_alat');
     }
 
-    public function linkRkbDetails () : HasMany
+    public function linkRkbDetails(): HasMany
     {
-        return $this->hasMany ( LinkRkbDetail::class, 'id_link_alat_detail_rkb' );
+        return $this->hasMany(LinkRkbDetail::class, 'id_link_alat_detail_rkb');
     }
 
-    public function timelineRkbUrgents () : HasMany
+    public function timelineRkbUrgents(): HasMany
     {
-        return $this->hasMany ( TimelineRKBUrgent::class, 'id_link_alat_detail_rkb' );
+        return $this->hasMany(TimelineRKBUrgent::class, 'id_link_alat_detail_rkb');
     }
 
-    public function lampiranRkbUrgent () : HasOne
+    public function lampiranRkbUrgent(): HasOne
     {
-        return $this->hasOne ( LampiranRKBUrgent::class, 'id', 'id_lampiran_rkb_urgent' );
+        return $this->hasOne(LampiranRKBUrgent::class, 'id', 'id_lampiran_rkb_urgent');
     }
-
 }

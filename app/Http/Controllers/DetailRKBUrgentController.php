@@ -427,7 +427,6 @@ class DetailRKBUrgentController extends Controller
     // Return the data in json for a specific DetailRKBUrgent
     public function show ( $id )
     {
-        // Ambil data DetailRKBUrgent dengan relasi terkait
         $detailRKBUrgent = DetailRKBUrgent::with ( [ 
             'kategoriSparepart:id,kode,nama',
             'masterDataSparepart:id,nama,part_number,merk',
@@ -441,7 +440,21 @@ class DetailRKBUrgentController extends Controller
             ], 404 );
         }
 
-        // Format respons
+        // Get dokumentasi files
+        $dokumentasi = [];
+        if ( $detailRKBUrgent->dokumentasi && Storage::disk ( 'public' )->exists ( $detailRKBUrgent->dokumentasi ) )
+        {
+            $files       = Storage::disk ( 'public' )->files ( $detailRKBUrgent->dokumentasi );
+            $dokumentasi = array_map ( function ($file)
+            {
+                return [ 
+                    'name' => basename ( $file ),
+                    'url'  => Storage::url ( $file )
+                ];
+            }, $files );
+        }
+
+        // Format response
         return response ()->json ( [ 
             'data' => [ 
                 'id'                              => $detailRKBUrgent->id,
@@ -452,6 +465,7 @@ class DetailRKBUrgentController extends Controller
                 'satuan'                          => $detailRKBUrgent->satuan,
                 'nama_koordinator'                => $detailRKBUrgent->nama_koordinator,  // Add this line
                 'kronologi'                       => $detailRKBUrgent->kronologi,  // Add this line
+                'dokumentasi'                     => $dokumentasi,
                 'master_data_sparepart'           => [ 
                     'id'      => $detailRKBUrgent->masterDataSparepart->id ?? null,
                     'name'    => $detailRKBUrgent->masterDataSparepart->nama ?? null,

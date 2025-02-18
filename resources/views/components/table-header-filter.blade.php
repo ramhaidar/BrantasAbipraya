@@ -79,11 +79,17 @@
                                     <span class="input-group-text" style="cursor: pointer;" onclick="showDatepicker('{{ $paramName }}-{{ $key }}')">
                                         <i class="fa fa-calendar"></i>
                                     </span>
+                                    @if (${$key . 'Value'})
+                                        <span class="input-group-text clear-input" data-input-id="{{ $paramName }}-{{ $key }}" role="button">
+                                            <i class="bi bi-x"></i>
+                                        </span>
+                                    @endif
                                 </div>
                             </div>
+                            @if ($key === 'exact' || $key === 'lt')
+                                <hr>
+                            @endif
                         @endforeach
-
-                        <hr>
 
                         <script>
                             document.addEventListener('DOMContentLoaded', function() {
@@ -126,15 +132,28 @@
                         @foreach (['exact' => 'Sama Dengan "="', 'gt' => 'Lebih Besar Dari Sama Dengan ">="', 'lt' => 'Lebih Kecil Dari Sama Dengan "<="'] as $key => $label)
                             <div class="mb-2">
                                 <label class="form-label small">{{ $label }}</label>
-                                <input class="form-control form-control-sm" id="{{ $paramName }}-{{ $key }}" type="number" value="{{ ${$key . 'Value'} }}" placeholder="{{ $key === 'exact' ? 'Masukkan nilai tepat' : ($key === 'gt' ? 'Lebih besar dari...' : 'Lebih kecil dari...') }}">
+                                <div class="input-group input-group-sm">
+                                    <input class="form-control form-control-sm" id="{{ $paramName }}-{{ $key }}" type="number" value="{{ ${$key . 'Value'} }}" placeholder="{{ $key === 'exact' ? 'Masukkan nilai tepat' : ($key === 'gt' ? 'Lebih besar dari...' : 'Lebih kecil dari...') }}">
+                                    @if (${$key . 'Value'})
+                                        <span class="input-group-text clear-input" data-input-id="{{ $paramName }}-{{ $key }}" role="button">
+                                            <i class="bi bi-x"></i>
+                                        </span>
+                                    @endif
+                                </div>
                             </div>
+                            @if ($key === 'exact' || $key === 'lt')
+                                <hr>
+                            @endif
                         @endforeach
-
-                        <hr>
                     @endif
 
                     {{-- Search and Checkbox Section --}}
-                    <input class="form-control form-control-sm mb-2" type="text" placeholder="Cari {{ strtolower($title) }}..." onkeyup="filterCheckboxes('{{ $paramName }}', event)">
+                    <div class="input-group input-group-sm mb-2">
+                        <input class="form-control form-control-sm" id="search-{{ $paramName }}" type="text" placeholder="Cari {{ strtolower($title) }}..." onkeyup="filterCheckboxes('{{ $paramName }}', event)">
+                        <span class="input-group-text clear-input" data-input-id="search-{{ $paramName }}" role="button" style="display: none;">
+                            <i class="bi bi-x"></i>
+                        </span>
+                    </div>
 
                     @if (isset($uniqueValues[(string) $paramName]) || isset($customUniqueValues))
                         <div class="checkbox-list text-start">
@@ -169,13 +188,130 @@
 @endif
 
 <script>
+    // Add this new function
+    function clearInput(inputId, event) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        $('#' + inputId).val('');
+        $('#' + inputId).trigger('change');
+        updateClearButtonVisibility(inputId);
+    }
+
+    // Add this new function
+    function updateClearButtonVisibility(inputId) {
+        const input = $('#' + inputId);
+        const clearButton = input.siblings('.clear-input');
+        clearButton.toggle(input.val() !== '');
+    }
+
+    // Update clearRelatedFields function
     function clearRelatedFields(paramName, type) {
         if (type === 'exact') {
+            // If exact input has value, clear gt and lt inputs
             if ($('#' + paramName + '-exact').val()) {
-                $('#' + paramName + '-gt, #' + paramName + '-lt').val('');
+                $('#' + paramName + '-gt').val('');
+                $('#' + paramName + '-lt').val('');
+                updateClearButtonVisibility(paramName + '-gt');
+                updateClearButtonVisibility(paramName + '-lt');
             }
         } else {
-            $('#' + paramName + '-exact').val('');
+            // If either gt or lt inputs have value, clear exact input
+            if ($('#' + paramName + '-gt').val() || $('#' + paramName + '-lt').val()) {
+                $('#' + paramName + '-exact').val('');
+                updateClearButtonVisibility(paramName + '-exact');
+            }
         }
     }
+
+    // Add input event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add input event listeners for number and date inputs
+        $('input[type="number"], .datepicker').on('input change', function() {
+            updateClearButtonVisibility(this.id);
+        });
+
+        // Clear input handler
+        $(document).on('click', '.clear-input', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const inputId = $(this).data('input-id');
+            const input = $('#' + inputId);
+            input.val('').trigger('change');
+            $(this).hide();
+
+            // Handle related fields
+            const paramName = inputId.split('-')[0];
+            const type = inputId.split('-')[1];
+            clearRelatedFields(paramName, type);
+        });
+
+        // Show/hide clear button on input
+        $('input[type="number"], .datepicker').on('input change', function() {
+            const clearBtn = $(this).siblings('.clear-input');
+            if (this.value) {
+                if (clearBtn.length === 0) {
+                    const span = $('<span class="input-group-text clear-input" role="button" data-input-id="' + this.id + '"><i class="bi bi-x"></i></span>');
+                    $(this).closest('.input-group').append(span);
+                } else {
+                    clearBtn.show();
+                }
+            } else {
+                clearBtn.hide();
+            }
+        });
+
+        // Add immediate input event listeners for number and date inputs
+        $('input[type="number"], .datepicker').on('input keyup', function(e) {
+            const paramName = this.id.split('-')[0];
+            const type = this.id.split('-')[1];
+            clearRelatedFields(paramName, type);
+            updateClearButtonVisibility(this.id);
+        });
+
+        // Add search input clear button functionality
+        $('.filter-popup input[type="text"]').on('input keyup', function() {
+            const clearBtn = $(this).siblings('.clear-input');
+            clearBtn.toggle(this.value !== '');
+        });
+
+        // Clear search input handler
+        $(document).on('click', '.clear-input[data-input-id^="search-"]', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const inputId = $(this).data('input-id');
+            const input = $('#' + inputId);
+            input.val('').trigger('keyup'); // Trigger keyup to update the filter
+            $(this).hide();
+        });
+
+        // Add keyboard event listener for Enter key
+        $(document).on('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const visiblePopup = $('.filter-popup:visible');
+                if (visiblePopup.length) {
+                    e.preventDefault();
+                    const paramName = visiblePopup.attr('id').replace('-filter', '').replace(/-/g, '_');
+                    applyFilter(paramName);
+                }
+            }
+        });
+    });
 </script>
+
+<style>
+    .clear-input {
+        cursor: pointer;
+        padding: 0.25rem 0.5rem;
+        line-height: 1;
+    }
+
+    .clear-input:hover {
+        background-color: #e9ecef;
+    }
+
+    .clear-input i {
+        font-size: 0.875rem;
+    }
+</style>

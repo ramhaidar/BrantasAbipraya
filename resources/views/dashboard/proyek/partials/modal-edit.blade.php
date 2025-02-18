@@ -29,6 +29,25 @@
 </div>
 
 @push('styles_3')
+    <style>
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1060;
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+    </style>
 @endpush
 
 @push('scripts_3')
@@ -63,6 +82,11 @@
 
         // Function to display modal for editing and populate form with server data
         function fillFormEdit(id) {
+            const $loadingOverlay = $('<div class="loading-overlay"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+
+            $('#modalForEdit').modal('show');
+            $('#modalForEdit').append($loadingOverlay);
+
             const url = "{{ route('proyek.show', ':id') }}".replace(':id', id);
 
             // AJAX GET request to fetch proyek data
@@ -76,11 +100,11 @@
                     // Set action form to update the specific proyek with PUT method
                     $('#editProyekForm').attr('action', url);
 
-                    // Display the edit modal
-                    $('#modalForEdit').modal('show');
+                    $loadingOverlay.remove();
                 },
                 error: function(xhr) {
                     alert("Gagal mengambil data. Silakan coba lagi.");
+                    $loadingOverlay.remove();
                 }
             });
         }

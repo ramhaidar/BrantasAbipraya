@@ -63,15 +63,15 @@
                         <tr>
                             <td>{{ $item->nama }}</td>
                             <td class="text-center">
-                                <button class="btn btn-primary detailBtn" data-id="{{ $item->id }}">
+                                <button class="btn btn-primary detailBtn" data-id="{{ $item->id }}" type="button">
                                     <i class="bi bi-eye"></i>
                                 </button>
                             </td>
                             <td class="text-center">
-                                <button class="btn btn-warning mx-1 ubahBtn" data-id="{{ $item->id }}" onclick="fillFormEdit({{ $item->id }})">
+                                <button class="btn btn-warning mx-1 ubahBtn" data-id="{{ $item->id }}" type="button" onclick="fillFormEdit({{ $item->id }})">
                                     <i class="bi bi-pencil-square"></i>
                                 </button>
-                                <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item->id }}">
+                                <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item->id }}" type="button">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </td>

@@ -119,14 +119,12 @@
             'paramName' => 'mekanik',
             'filter' => true,
         ],
-    ];
-
-    if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin') {
-        $headers[] = [
+        [
             'title' => 'Aksi',
             'filter' => false,
-        ];
-    }
+            'role' => ['koordinator_proyek', 'superadmin'],
+        ],
+    ];
 
     $appliedFilters = false;
     foreach ($headers as $header) {
@@ -180,7 +178,7 @@
                             <td class="text-center">{{ $item->masterDataSparepart->nama ?? '-' }}</td>
                             <td class="text-center">{{ $item->masterDataSparepart->merk ?? '-' }}</td>
                             <td class="text-center">{{ $item->masterDataSparepart->part_number ?? '-' }}</td>
-                            <td class="text-center">{{ $item->quantity }}</td>
+                            <td class="text-center">{{ $item->quantity }}</td> {{-- Pastikan ini mengambil dari APB --}}
                             <td class="text-center">{{ $item->saldo->satuan ?? '-' }}</td>
                             <td class="currency-value">{{ formatRibuan($item->saldo->harga ?? 0) }}</td>
                             <td class="currency-value">{{ formatRibuan(($item->saldo->harga ?? 0) * $item->quantity) }}</td>

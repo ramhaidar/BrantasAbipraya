@@ -106,7 +106,7 @@
                             <td class="text-center">{{ $sparepart->kategoriSparepart->sub_jenis ?? '-' }}</td>
                             <td class="text-center">{{ $sparepart->kategoriSparepart->nama }}</td>
                             <td class="text-center">
-                                <button class="btn btn-primary detailBtn" data-id="{{ $sparepart['id'] }}" type="button">
+                                <button class="btn btn-primary" type="button" onclick="fillFormDetail({{ $sparepart['id'] }})">
                                     <i class="bi bi-eye"></i>
                                 </button>
                             </td>

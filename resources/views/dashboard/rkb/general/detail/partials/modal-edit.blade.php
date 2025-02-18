@@ -104,6 +104,8 @@
 
 @push('scripts_3')
     <script>
+        const $loadingOverlay = $('<div class="loading-overlay"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+
         $(document).ready(function() {
             'use strict';
 
@@ -121,18 +123,11 @@
                 const kategoriId = $(this).val();
                 const $sparepartSelect = $('#id_master_data_sparepart_edit');
 
-                // console.log("Kategori Sparepart changed:", kategoriId);
-
-                // Clear the sparepart select and reset
                 $sparepartSelect.append(new Option('Pilih Sparepart', '', false, false));
-                // $sparepartSelect.val(null).trigger('change');
-
-                const $loadingOverlay = $('<div class="loading-overlay"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
-                $('#modalForEdit').append($loadingOverlay);
 
                 if (kategoriId) {
                     $.ajax({
-                        url: `/spareparts-by-category/${kategoriId}`,
+                        url: "{{ route('spareparts-by-category', ':id') }}".replace(':id', kategoriId),
                         type: 'GET',
                         success: function(data) {
                             // console.log("Spareparts loaded:", data);
@@ -172,6 +167,8 @@
         function fillFormEditDetailRKB(id) {
             const showUrl = "{{ route('rkb_general.detail.show', ':id') }}".replace(':id', id);
             const updateUrl = "{{ route('rkb_general.detail.update', ':id') }}".replace(':id', id);
+
+            $('#modalForEdit').append($loadingOverlay);
 
             // console.log("Fetching data for ID:", id);
 

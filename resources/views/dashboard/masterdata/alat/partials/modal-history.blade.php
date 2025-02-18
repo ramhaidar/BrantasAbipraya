@@ -33,6 +33,28 @@
             max-height: calc(100vh - 300px);
             height: auto;
         }
+
+        .loading-overlay {
+            position: fixed;
+            /* Change from absolute to fixed */
+            top: 0;
+            left: 0;
+            width: 100vw;
+            /* Change to viewport width */
+            height: 100vh;
+            /* Change to viewport height */
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1060;
+            /* Increase z-index to be above modal */
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
     </style>
 @endpush
 
@@ -64,27 +86,40 @@
 
 @push('scripts_3')
     <script>
+        function showHistory(id) {
+            // Add loading overlay to body instead of modal
+            const $loadingOverlay = $('<div class="loading-overlay"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+
+            $('#historyModal').modal('show');
+            $('#historyModal').append($loadingOverlay);
+
+            $.get("{{ route('master_data_alat.history', '') }}/" + id, function(data) {
+                let rows = '';
+                data.forEach(item => {
+                    const status = item.removed_at ?
+                        `<span class="badge bg-danger w-100">Selesai (${moment(item.removed_at).format('DD/MM/YYYY')})</span>` :
+                        `<span class="badge bg-success w-100">Masih Aktif</span>`;
+
+                    rows += `
+                        <tr>
+                            <td>${item.proyek.nama}</td>
+                            <td>${moment(item.assigned_at).format('DD/MM/YYYY')}</td>
+                            <td>${status}</td>
+                        </tr>
+                    `;
+                });
+                $('#historyTableBody').html(rows || '<tr><td colspan="3" class="text-center">Tidak ada riwayat</td></tr>');
+                $loadingOverlay.remove();
+            }).fail(function() {
+                alert("Gagal memuat riwayat. Silakan coba lagi.");
+                $loadingOverlay.remove();
+            });
+        }
+
         $(document).ready(function() {
             $('.historyBtn').click(function() {
                 const id = $(this).data('id');
-                $.get("{{ route('master_data_alat.history', '') }}/" + id, function(data) {
-                    let rows = '';
-                    data.forEach(item => {
-                        const status = item.removed_at ?
-                            `<span class="badge bg-danger w-100">Selesai (${moment(item.removed_at).format('DD/MM/YYYY')})</span>` :
-                            `<span class="badge bg-success w-100">Masih Aktif</span>`;
-
-                        rows += `
-                            <tr>
-                                <td>${item.proyek.nama}</td>
-                                <td>${moment(item.assigned_at).format('DD/MM/YYYY')}</td>
-                                <td>${status}</td>
-                            </tr>
-                        `;
-                    });
-                    $('#historyTableBody').html(rows || '<tr><td colspan="3" class="text-center">Tidak ada riwayat</td></tr>');
-                    $('#historyModal').modal('show');
-                });
+                showHistory(id);
             });
         });
     </script>

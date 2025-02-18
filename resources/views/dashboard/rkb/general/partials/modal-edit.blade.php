@@ -1,4 +1,23 @@
 @push('styles_3')
+    <style>
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1060;
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+    </style>
 @endpush
 
 <div class="fade modal" id="modalForEdit" data-bs-keyboard="false" aria-hidden="true" aria-labelledby="modalForEditLabel" tabindex="-1">
@@ -92,36 +111,30 @@
         });
 
         // Function to display modal for editing and populate form with server data
-        // Function to display modal for editing and populate form with server data
         function fillFormEditRKB(id) {
-            const url = "{{ route('rkb_general.show', ':id') }}".replace(':id', id);
+            const $loadingOverlay = $('<div class="loading-overlay"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
 
-            // Set Moment.js locale to Indonesian
+            $('#modalForEdit').modal('show');
+            $('#modalForEdit').append($loadingOverlay);
+
+            const url = "{{ route('rkb_general.show', ':id') }}".replace(':id', id);
             moment.locale('id');
 
-            // AJAX GET request to fetch RKB data
             $.ajax({
                 url: url,
                 type: 'GET',
                 success: function(response) {
-                    // Populate fields with data
                     $('#editRKBForm #nomor').val(response.data.nomor);
-
-                    // Format periode using Moment.js for 'YYYY-MM'
                     const formattedPeriode = moment(response.data.periode).format('YYYY-MM');
                     $('#editRKBForm #periode2').val(formattedPeriode);
-
-                    const selectedProyek = response.data.proyek.id;
-                    $('#editRKBForm #proyek2').val(selectedProyek).trigger('change');
-
-                    // Set action form to update the specific RKB with PUT method
+                    $('#editRKBForm #proyek2').val(response.data.proyek.id).trigger('change');
                     $('#editRKBForm').attr('action', url);
 
-                    // Display the edit modal
-                    $('#modalForEdit').modal('show');
+                    $loadingOverlay.remove();
                 },
                 error: function(xhr) {
                     alert("Gagal mengambil data. Silakan coba lagi.");
+                    $loadingOverlay.remove();
                 }
             });
         }

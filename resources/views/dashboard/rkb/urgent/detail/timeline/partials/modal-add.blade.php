@@ -14,23 +14,23 @@
                 @csrf
                 <div class="modal-body">
                     <div class="row g-3">
-                        <input class="form-control" id="id_link_alat_detail_rkb" name="id_link_alat_detail_rkb" type="hidden" value="{{ $data->id }}">
+                        <input class="form-control" id="id_link_alat_detail_rkb_add" name="id_link_alat_detail_rkb" type="hidden" value="{{ $data->id }}">
 
                         <div class="col-12">
-                            <label class="form-label required" for="uraian_pekerjaan">Uraian Pekerjaan</label>
-                            <input class="form-control" id="uraian_pekerjaan" name="uraian_pekerjaan" type="text" placeholder="Masukkan uraian pekerjaan" required>
+                            <label class="form-label required" for="uraian_pekerjaan_add">Uraian Pekerjaan</label>
+                            <input class="form-control" id="uraian_pekerjaan_add" name="uraian_pekerjaan" type="text" placeholder="Masukkan uraian pekerjaan" required>
                             <div class="invalid-feedback">Uraian Pekerjaan diperlukan.</div>
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label required" for="tanggal_awal_rencana">Tanggal Awal Rencana</label>
-                            <input class="form-control datepicker" id="tanggal_awal_rencana" name="tanggal_awal_rencana" type="text" autocomplete="off" required>
+                            <label class="form-label required" for="tanggal_awal_rencana_add">Tanggal Awal Rencana</label>
+                            <input class="form-control" id="tanggal_awal_rencana_add" name="tanggal_awal_rencana" type="text" autocomplete="off" required>
                             <div class="invalid-feedback">Tanggal Awal Rencana diperlukan.</div>
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label required" for="tanggal_akhir_rencana">Tanggal Akhir Rencana</label>
-                            <input class="form-control datepicker" id="tanggal_akhir_rencana" name="tanggal_akhir_rencana" type="text" autocomplete="off" required>
+                            <label class="form-label required" for="tanggal_akhir_rencana_add">Tanggal Akhir Rencana</label>
+                            <input class="form-control" id="tanggal_akhir_rencana_add" name="tanggal_akhir_rencana" type="text" autocomplete="off" required>
                             <div class="invalid-feedback">Tanggal Akhir Rencana diperlukan.</div>
                         </div>
                     </div>
@@ -56,14 +56,14 @@
                 regional: 'id'
             };
 
-            $('#tanggal_awal_rencana').datepicker(options).on('change', function() {
+            $('#tanggal_awal_rencana_add').datepicker(options).on('change', function() {
                 var minDate = $(this).datepicker('getDate');
-                $('#tanggal_akhir_rencana').datepicker('option', 'minDate', minDate);
+                $('#tanggal_akhir_rencana_add').datepicker('option', 'minDate', minDate);
             });
 
-            $('#tanggal_akhir_rencana').datepicker(options).on('change', function() {
+            $('#tanggal_akhir_rencana_add').datepicker(options).on('change', function() {
                 var maxDate = $(this).datepicker('getDate');
-                $('#tanggal_awal_rencana').datepicker('option', 'maxDate', maxDate);
+                $('#tanggal_awal_rencana_add').datepicker('option', 'maxDate', maxDate);
             });
 
             $.datepicker.setDefaults($.datepicker.regional['id']);

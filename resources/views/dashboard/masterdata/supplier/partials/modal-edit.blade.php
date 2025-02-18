@@ -55,6 +55,25 @@
 </div>
 
 @push('styles_3')
+    <style>
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1050;
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+    </style>
 @endpush
 
 @push('scripts_3')
@@ -98,6 +117,10 @@
 
         // Function to display modal for editing and populate form with server data
         function fillFormEdit(id) {
+            // Create and append loading overlay
+            const $loadingOverlay = $('<div class="loading-overlay"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+            $('#modalForEdit').append($loadingOverlay);
+
             const url = "{{ route('master_data_supplier.show', ':id') }}".replace(':id', id);
 
             // Clear previous selections
@@ -124,12 +147,28 @@
 
                     // Display the edit modal
                     $('#modalForEdit').modal('show');
+
+                    // Remove loading overlay on success
+                    $loadingOverlay.remove();
                 },
                 error: function(xhr) {
                     alert("Gagal mengambil data. Silakan coba lagi.");
+                    // Remove loading overlay on error
+                    $loadingOverlay.remove();
                 }
             });
         }
+
+        // Add submit handler to show loading during form submission
+        $('#editSupplierForm').on('submit', function(e) {
+            if (this.checkValidity()) {
+                const $loadingOverlay = $('<div class="loading-overlay"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+                $('#modalForEdit').append($loadingOverlay);
+
+                // Remove overlay after 500ms (adjust based on your needs)
+                setTimeout(() => $loadingOverlay.remove(), 500);
+            }
+        });
 
         // Reset form when modal is hidden
         $('#modalForEdit').on('hidden.bs.modal', function() {

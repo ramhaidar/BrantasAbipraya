@@ -136,6 +136,8 @@
             }
         }
 
+        const $loadingOverlay = $('<div class="loading-overlay"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+
         $(document).ready(function() {
             'use strict';
 
@@ -159,12 +161,9 @@
                 $sparepartSelect.append(new Option('Pilih Sparepart', '', false, false));
                 // $sparepartSelect.val(null).trigger('change');
 
-                const $loadingOverlay = $('<div class="loading-overlay"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
-                $('#modalForEdit').append($loadingOverlay);
-
                 if (kategoriId) {
                     $.ajax({
-                        url: `/spareparts-by-category/${kategoriId}`,
+                        url: "{{ route('spareparts-by-category', ':id') }}".replace(':id', kategoriId),
                         type: 'GET',
                         success: function(data) {
                             // console.log("Spareparts loaded:", data);
@@ -191,12 +190,6 @@
                         }
                     });
                 }
-            });
-
-            // Event listener for edit buttons
-            $(document).on('click', '.ubahBtn', function() {
-                const id = $(this).data('id'); // Get ID from the button
-                fillFormEditDetailRKB(id); // Populate and show the modal
             });
 
             // Add file handling for edit form
@@ -284,6 +277,11 @@
 
             // console.log("Fetching data for ID:", id);
 
+            $('#modalForEdit').append($loadingOverlay);
+
+            // Display the edit modal
+            $('#modalForEdit').modal('show');
+
             // AJAX GET request to fetch data
             $.ajax({
                 url: showUrl,
@@ -299,32 +297,52 @@
                     $('#quantity_requested_edit').val(response.data.quantity_requested);
                     $('#satuan_edit').val(response.data.satuan).trigger('change');
 
-                    // Display existing images
+                    // Display existing dokumentasi
                     const existingDokumentasi = document.getElementById('existing-dokumentasi');
                     existingDokumentasi.innerHTML = '';
-                    if (response.data.dokumentasi) {
+
+                    if (response.data.dokumentasi && response.data.dokumentasi.length > 0) {
                         response.data.dokumentasi.forEach(img => {
-                            // Create thumbnail for existing images
+                            const imgContainer = document.createElement('div');
+                            imgContainer.className = 'd-flex flex-column align-items-center me-2 mb-2';
+
                             const imgElement = document.createElement('img');
                             imgElement.src = img.url;
                             imgElement.alt = img.name;
-                            imgElement.classList.add('img-thumbnail');
+                            imgElement.title = img.name;
+                            imgElement.className = 'img-thumbnail mb-1';
                             imgElement.style.maxWidth = '100px';
                             imgElement.style.maxHeight = '100px';
-                            existingDokumentasi.appendChild(imgElement);
+                            imgElement.style.cursor = 'pointer';
+
+                            // Add click event for preview modal
+                            imgElement.onclick = function() {
+                                $('#largeImagePreviewForEdit').attr('src', img.url);
+                                $('#imagePreviewTitleForEdit').text(img.name);
+                                $('#modalForEdit').modal('hide');
+                                $('#imagePreviewModalforEdit').modal('show');
+                            };
+
+                            imgContainer.appendChild(imgElement);
+                            existingDokumentasi.appendChild(imgContainer);
                         });
+                    } else {
+                        existingDokumentasi.innerHTML = '<p class="text-muted">No existing dokumentasi</p>';
                     }
 
                     // Set action form to update the specific record with PUT method
                     $('#editRKBUrgentForm').attr('action', updateUrl);
-
-                    // Display the edit modal
-                    $('#modalForEdit').modal('show');
                 },
                 error: function(xhr) {
                     alert("Gagal mengambil data. Silakan coba lagi.");
+                    $loadingOverlay.remove();
                 }
             });
         }
+
+        // Handle modal transitions for edit preview
+        $('#imagePreviewModalforEdit').on('hidden.bs.modal', function() {
+            $('#modalForEdit').modal('show');
+        });
     </script>
 @endpush

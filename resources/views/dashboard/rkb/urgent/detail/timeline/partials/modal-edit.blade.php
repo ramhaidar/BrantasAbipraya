@@ -1,16 +1,16 @@
 @push('styles_3')
     <style>
         .loading-overlay {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
+            width: 100vw;
+            height: 100vh;
             background: rgba(255, 255, 255, 0.8);
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 1050;
+            z-index: 1060;
         }
 
         .spinner-border {
@@ -132,6 +132,11 @@
 
         // Function to display modal for editing and populate form with server data
         function fillFormEditJob(id) {
+            const $loadingOverlay = $('<div class="loading-overlay"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+
+            $('#modalForEdit').modal('show');
+            $('#modalForEdit').append($loadingOverlay);
+
             const showUrl = "{{ route('rkb_urgent.detail.timeline.show', ':id') }}".replace(':id', id);
             const updateUrl = "{{ route('rkb_urgent.detail.timeline.update', ':id') }}".replace(':id', id);
 
@@ -174,9 +179,11 @@
 
                     // Display the edit modal
                     $('#modalForEdit').modal('show');
+                    $loadingOverlay.remove();
                 },
                 error: function(xhr) {
                     alert("Gagal mengambil data. Silakan coba lagi.");
+                    $loadingOverlay.remove();
                 }
             });
         }

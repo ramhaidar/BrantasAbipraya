@@ -1,4 +1,23 @@
 @push('styles_3')
+    <style>
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1060;
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+    </style>
 @endpush
 
 <div class="fade modal" id="modalForDetail" aria-hidden="true" aria-labelledby="staticBackdropLabel" tabindex="-1">
@@ -37,6 +56,12 @@
     <script>
         // Fungsi untuk menampilkan modal detail Supplier dan mengisi data dari server
         function fillFormDetail(id) {
+            // Create and append loading overlay
+            const $loadingOverlay = $('<div class="loading-overlay"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+
+            $('#modalForDetail').modal('show');
+            $('#modalForDetail').append($loadingOverlay);
+
             // Set URL untuk mendapatkan data supplier berdasarkan ID
             const url = `{{ route('master_data_supplier.show', ':id') }}`.replace(':id', id);
 
@@ -58,19 +83,13 @@
                         $('#sparepartList').append(`<li class="list-group-item">Tidak ada Sparepart yang disediakan oleh Supplier ini</li>`);
                     }
 
-                    // Tampilkan modal detail
-                    $('#modalForDetail').modal('show');
+                    $loadingOverlay.remove();
                 },
                 error: function(xhr) {
                     alert("Gagal mengambil data. Silakan coba lagi.");
+                    $loadingOverlay.remove();
                 }
             });
         }
-
-        // Event listener untuk tombol detail di tabel
-        $(document).on('click', '.detailBtn', function() {
-            const id = $(this).data('id'); // Ambil ID dari atribut data-id
-            fillFormDetail(id); // Panggil fungsi untuk mengisi modal detail
-        });
     </script>
 @endpush

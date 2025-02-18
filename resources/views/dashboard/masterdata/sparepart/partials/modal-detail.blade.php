@@ -1,3 +1,25 @@
+@push('styles_3')
+    <style>
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1060;
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+    </style>
+@endpush
+
 <div class="fade modal" id="modalForDetail" aria-hidden="true" aria-labelledby="staticBackdropLabel" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content rounded-4">
@@ -62,28 +84,26 @@
 
 @push('scripts_3')
     <script>
-        // Fungsi untuk menampilkan modal detail dan mengisi data dari server
         function fillFormDetail(id) {
-            // Set URL untuk mendapatkan data sparepart berdasarkan ID
+            const $loadingOverlay = $('<div class="loading-overlay"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+
+            $('#modalForDetail').modal('show');
+            $('#modalForDetail').append($loadingOverlay);
+
             const url = `{{ route('master_data_sparepart.show', ':id') }}`.replace(':id', id);
 
-            // Lakukan AJAX GET request ke server
             $.ajax({
                 url: url,
                 type: 'GET',
                 success: function(response) {
-                    // Mengisi nilai input di modal detail dengan data yang diterima
                     $('#modalForDetail #nama').val(response.data.nama);
                     $('#modalForDetail #part_number').val(response.data.part_number);
                     $('#modalForDetail #merk').val(response.data.merk);
-
-                    // Mengisi data kategori, kode, jenis, dan sub jenis
                     $('#modalForDetail #kategori').val(response.data.kategori ? response.data.kategori.nama : 'Tidak ada kategori');
                     $('#modalForDetail #kode').val(response.data.kategori ? response.data.kategori.kode : 'Tidak ada kode');
                     $('#modalForDetail #jenis').val(response.data.kategori ? response.data.kategori.jenis : 'Tidak ada jenis');
                     $('#modalForDetail #sub_jenis').val(response.data.kategori ? response.data.kategori.sub_jenis : 'Tidak ada sub jenis');
 
-                    // Clear previous suppliers and add new list
                     $('#supplierList').empty();
                     if (response.data.suppliers && response.data.suppliers.length > 0) {
                         response.data.suppliers.forEach(supplier => {
@@ -93,19 +113,13 @@
                         $('#supplierList').append(`<li class="list-group-item">Tidak ada Supplier yang menyediakan Sparepart ini</li>`);
                     }
 
-                    // Tampilkan modal detail
-                    $('#modalForDetail').modal('show');
+                    $loadingOverlay.remove();
                 },
                 error: function(xhr) {
                     alert("Gagal mengambil data. Silakan coba lagi.");
+                    $loadingOverlay.remove();
                 }
             });
         }
-
-        // Event listener untuk tombol detail di tabel
-        $(document).on('click', '.detailBtn', function() {
-            const id = $(this).data('id'); // Ambil ID dari atribut data-id
-            fillFormDetail(id); // Panggil fungsi untuk mengisi modal detail
-        });
     </script>
 @endpush

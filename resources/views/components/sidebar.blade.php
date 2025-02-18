@@ -635,32 +635,49 @@
             }
 
             function handleSearchInput() {
-                // Use specific ID for sidebar search
+                const searchKey = 'sidebarSearchProyek';
+
+                // Load saved search value on page load
+                const savedSearch = localStorage.getItem(searchKey);
+                if (savedSearch) {
+                    $('#sidebarSearchProyek').val(savedSearch);
+                    // Trigger search with saved value
+                    filterProyekItems(savedSearch);
+                }
+
+                // Handle search input
                 $('#sidebarSearchProyek').on('keyup', function() {
-                    var searchText = $(this).val().toLowerCase();
-
-                    $('.proyek-item').each(function() {
-                        var proyekTitle = $(this).find('.text-content').attr('data-bs-original-title') || '';
-                        proyekTitle = proyekTitle.toLowerCase();
-
-                        if (proyekTitle.indexOf(searchText) !== -1) {
-                            $(this).show();
-                        } else {
-                            $(this).hide();
-                        }
-                    });
-
-                    toggleSearchIcon();
+                    const searchText = $(this).val().toLowerCase();
+                    // Save to localStorage
+                    localStorage.setItem(searchKey, searchText);
+                    filterProyekItems(searchText);
                 });
 
-                // Use specific ID for sidebar search button
+                // Handle clear search
                 $('#sidebarSearchButton').on('click', function() {
                     var searchButtonIcon = $('#sidebarSearchIcon');
 
                     if (searchButtonIcon.hasClass('fa-times')) {
                         $('#sidebarSearchProyek').val('');
+                        // Clear from localStorage
+                        localStorage.removeItem(searchKey);
                         $('.proyek-item').show();
                         toggleSearchIcon();
+                    }
+                });
+
+                toggleSearchIcon();
+            }
+
+            function filterProyekItems(searchText) {
+                $('.proyek-item').each(function() {
+                    var proyekTitle = $(this).find('.text-content').attr('data-bs-original-title') || '';
+                    proyekTitle = proyekTitle.toLowerCase();
+
+                    if (proyekTitle.indexOf(searchText) !== -1) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
                     }
                 });
 

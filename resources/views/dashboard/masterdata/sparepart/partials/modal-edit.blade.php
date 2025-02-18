@@ -1,4 +1,23 @@
 @push('styles_3')
+    <style>
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1050;
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+    </style>
 @endpush
 
 <div class="fade modal" id="modalForEdit" aria-hidden="true" aria-labelledby="staticBackdropLabel" tabindex="-1">
@@ -115,6 +134,10 @@
 
         // Function to display modal for editing and populate form with server data
         function fillFormEdit(id) {
+            // Create and append loading overlay
+            const $loadingOverlay = $('<div class="loading-overlay"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+            $('#modalForEdit').append($loadingOverlay);
+
             const url = "{{ route('master_data_sparepart.update', ':id') }}".replace(':id', id);
 
             // AJAX GET request to fetch sparepart data along with selected suppliers and kategori
@@ -139,17 +162,27 @@
 
                     // Display the edit modal
                     $('#modalForEdit').modal('show');
+
+                    // Remove loading overlay on success
+                    $loadingOverlay.remove();
                 },
                 error: function(xhr) {
                     alert("Gagal mengambil data. Silakan coba lagi.");
+                    // Remove loading overlay on error
+                    $loadingOverlay.remove();
                 }
             });
         }
 
-        // Event listener untuk tombol edit di tabel
-        // $(document).on('click', '.ubahBtn', function() {
-        //     const id = $(this).data('id'); // Ambil ID dari atribut data-id
-        //     fillFormEdit(id); // Panggil fungsi untuk mengisi form edit
-        // });
+        // Add submit handler to show loading during form submission
+        $('#editSparepartForm').on('submit', function(e) {
+            if (this.checkValidity()) {
+                const $loadingOverlay = $('<div class="loading-overlay"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+                $('#modalForEdit').append($loadingOverlay);
+
+                // Remove overlay after 500ms (adjust based on your needs)
+                setTimeout(() => $loadingOverlay.remove(), 500);
+            }
+        });
     </script>
 @endpush

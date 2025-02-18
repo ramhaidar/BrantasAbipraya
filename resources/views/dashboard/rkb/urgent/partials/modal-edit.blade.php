@@ -1,4 +1,23 @@
 @push('styles_3')
+    <style>
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1060;
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+    </style>
 @endpush
 
 <div class="fade modal" id="modalForEdit" data-bs-keyboard="false" aria-hidden="true" aria-labelledby="modalForEditLabel" tabindex="-1">
@@ -92,9 +111,15 @@
         });
 
         // Function to display modal for editing and populate form with server data
-        // Function to display modal for editing and populate form with server data
         function fillFormEditRKB(id) {
             const url = "{{ route('rkb_urgent.show', ':id') }}".replace(':id', id);
+
+            // Add loading overlay
+            const $loadingOverlay = $('<div class="loading-overlay"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+            $('#modalForEdit').append($loadingOverlay);
+
+            // Display the edit modal
+            $('#modalForEdit').modal('show');
 
             // Set Moment.js locale to Indonesian
             moment.locale('id');
@@ -117,11 +142,12 @@
                     // Set action form to update the specific RKB with PUT method
                     $('#editRKBForm').attr('action', url);
 
-                    // Display the edit modal
-                    $('#modalForEdit').modal('show');
+                    // Remove loading overlay after data is loaded
+                    $loadingOverlay.remove();
                 },
                 error: function(xhr) {
                     alert("Gagal mengambil data. Silakan coba lagi.");
+                    $loadingOverlay.remove();
                 }
             });
         }

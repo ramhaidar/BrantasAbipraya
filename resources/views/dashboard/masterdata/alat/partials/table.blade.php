@@ -102,7 +102,7 @@
                             <td>{{ $item->serial_number }}</td>
                             <td>{{ isset($item->current_project) ? $item->current_project->nama : 'Belum Ditugaskan' }}</td>
                             <td>
-                                <button class="btn btn-info historyBtn" data-id="{{ $item->id }}" type="button" title="Lihat Riwayat">
+                                <button class="btn btn-info" type="button" title="Lihat Riwayat" onclick="showHistory({{ $item->id }})">
                                     <i class="bi bi-clock-history"></i>
                                 </button>
                             </td>

@@ -146,14 +146,12 @@
             'filter' => true,
             'customUniqueValues' => ['Penggunaan', 'Pending', 'Accepted', 'Rejected'],
         ],
-    ];
-
-    if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin') {
-        $headers[] = [
+        [
             'title' => 'Aksi',
             'filter' => false,
-        ];
-    }
+            'role' => ['koordinator_proyek', 'superadmin'],
+        ],
+    ];
 
     $appliedFilters = false;
     foreach ($headers as $header) {

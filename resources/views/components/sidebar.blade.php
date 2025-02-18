@@ -58,34 +58,36 @@
     </style>
 @endpush
 
-<a class="brand-link ms-0 ps-0 pt-3 d-flex w-100" style="text-decoration: none">
+<a class="brand-link ms-0 ps-0 pt-3 d-flex w-100" style="text-decoration: none; cursor: pointer;" onclick="window.location.reload()">
     <img class="brand-image elevation-3 img-circle" src="/favicon.ico" alt="Abipraya Logo" style="opacity:.8">
     <span class="brand-text font-weight-light w-100 text-center">PT. Brantas Abipraya</span>
 </a>
 
 @auth
-    <div class="user-panel ms-0 ps-0 py-3 d-flex collapse-user-panel justify-content-start align-items-center">
-        <div class="image ps-3 me-2">
-            <img class="img-circle elevation-2" src="{{ Auth::user()->path_profile ?? 'dist/img/user2-160x160.jpg' }}" alt="User Image" style="border-radius: 50%; width: 40px; height: 40px; border: 2pt solid #fff;">
+    <a class="p-0 m-0" style="text-decoration: none; cursor: pointer" onclick="window.location.reload()">
+        <div class="user-panel ms-0 ps-0 py-3 d-flex collapse-user-panel justify-content-start align-items-center">
+            <div class="image ps-3 me-2">
+                <img class="img-circle elevation-2" src="{{ Auth::user()->path_profile ?? 'dist/img/user2-160x160.jpg' }}" alt="User Image" style="border-radius: 50%; width: 40px; height: 40px; border: 2pt solid #fff;">
+            </div>
+            <div class="info text-center w-100 p-0 m-0 me-2">
+                <div class="d-block ps-2 pb-1 user-info-text text-white truncate-text p-0 m-0">
+                    <span class="user-text-content m-0 p-0">{{ Auth::user()->name }}</span>
+                    <br class="p-0 m-0">
+                    @if (Auth::user()->role === 'superadmin')
+                        <span class="user-text-content m-0 px-1 py-1 badge bg-danger rounded-1 fw-normal">SuperAdmin</span>
+                    @elseif (Auth::user()->role === 'svp')
+                        <span class="user-text-content m-0 px-1 py-1 badge bg-primary rounded-1 fw-normal">Senior Vice President</span>
+                    @elseif (Auth::user()->role === 'vp')
+                        <span class="user-text-content m-0 px-1 py-1 badge bg-success rounded-1 fw-normal">Vice President</span>
+                    @elseif (Auth::user()->role === 'admin_divisi')
+                        <span class="user-text-content m-0 px-1 py-1 badge bg-warning text-dark rounded-1 fw-normal">Admin Divisi</span>
+                    @elseif (Auth::user()->role === 'koordinator_proyek')
+                        <span class="user-text-content m-0 px-1 py-1 badge bg-info text-dark rounded-1 fw-normal">Koordinator Proyek</span>
+                    @endif
+                </div>
+            </div>
         </div>
-        <div class="info text-center w-100 p-0 m-0 me-2">
-            <a class="d-block ps-2 pb-1 user-info-text text-white truncate-text p-0 m-0" href="#" style="text-decoration: none">
-                <span class="user-text-content m-0 p-0">{{ Auth::user()->name }}</span>
-                <br class="p-0 m-0">
-                @if (Auth::user()->role === 'superadmin')
-                    <span class="user-text-content m-0 px-1 py-1 badge bg-danger rounded-1 fw-normal">SuperAdmin</span>
-                @elseif (Auth::user()->role === 'svp')
-                    <span class="user-text-content m-0 px-1 py-1 badge bg-primary rounded-1 fw-normal">Senior Vice President</span>
-                @elseif (Auth::user()->role === 'vp')
-                    <span class="user-text-content m-0 px-1 py-1 badge bg-success rounded-1 fw-normal">Vice President</span>
-                @elseif (Auth::user()->role === 'admin_divisi')
-                    <span class="user-text-content m-0 px-1 py-1 badge bg-warning text-dark rounded-1 fw-normal">Admin Divisi</span>
-                @elseif (Auth::user()->role === 'koordinator_proyek')
-                    <span class="user-text-content m-0 px-1 py-1 badge bg-info text-dark rounded-1 fw-normal">Koordinator Proyek</span>
-                @endif
-            </a>
-        </div>
-    </div>
+    </a>
 
     <div class="form-inline mt-0 mx-0 d-flex justify-content-center">
         <div class="input-group w-100">

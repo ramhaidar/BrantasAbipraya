@@ -109,7 +109,10 @@ class EvaluasiDetailRKBGeneralController extends Controller
         $uniqueValues = [ 
             'jenis_alat'         => $finalFilteredData->pluck ( 'jenis_alat' )->filter ()->unique ()->sort ()->values (),
             'kode_alat'          => $finalFilteredData->pluck ( 'kode_alat' )->filter ()->unique ()->sort ()->values (),
-            'kategori_sparepart' => $finalFilteredData->pluck ( 'kategori_nama' )->filter ()->unique ()->sort ()->values (),
+            'kategori_sparepart' => $finalFilteredData->map ( function ($item)
+            {
+                return $item->kategori_kode . ': ' . $item->kategori_nama;
+            } )->filter ()->unique ()->sort ()->values (),
             'sparepart'          => $finalFilteredData->pluck ( 'sparepart_nama' )->filter ()->unique ()->sort ()->values (),
             'part_number'        => $finalFilteredData->pluck ( 'part_number' )->filter ()->unique ()->sort ()->values (),
             'merk'               => $finalFilteredData->pluck ( 'merk' )->filter ()->unique ()->sort ()->values (),
@@ -486,56 +489,6 @@ class EvaluasiDetailRKBGeneralController extends Controller
             \Log::error ( 'Error decoding parameter value: ' . $e->getMessage () );
             return [];
         }
-    }
-
-    private function getUniqueValues ( $query )
-    {
-        $result = clone $query;
-        $data   = $result->get ();
-
-        $formatQuantityValues = function ($column) use ($data)
-        {
-            return $data->pluck ( $column )
-                ->reject ( function ($value)
-                {
-                    // Only reject null values, keep 0
-                    return $value === null;
-                } )
-                ->unique ()
-                ->map ( function ($value)
-                {
-                    return (string) $value;
-                } )
-                ->sort ()
-                ->values ();
-        };
-
-        // Format stock quantities separately since they come from a different source
-        $stockQuantities = $data->pluck ( 'stock_quantity' )
-            ->reject ( function ($value)
-            {
-                // Only reject null values, keep 0
-                return $value === null;
-            } )
-            ->unique ()
-            ->map ( function ($value)
-            {
-                return (string) $value;
-            } )
-            ->sort ()
-            ->values ();
-
-        return [ 
-            'jenis_alat'         => $data->pluck ( 'jenis_alat' )->unique ()->filter ()->sort ()->values (),
-            'kode_alat'          => $data->pluck ( 'kode_alat' )->unique ()->filter ()->sort ()->values (),
-            'kategori_sparepart' => $data->pluck ( 'kategori_nama' )->unique ()->filter ()->sort ()->values (),
-            'sparepart'          => $data->pluck ( 'sparepart_nama' )->unique ()->filter ()->sort ()->values (),
-            'part_number'        => $data->pluck ( 'part_number' )->unique ()->filter ()->sort ()->values (),
-            'merk'               => $data->pluck ( 'merk' )->unique ()->filter ()->sort ()->values (),
-            'satuan'             => $data->pluck ( 'satuan' )->unique ()->filter ()->sort ()->values (),
-            'quantity_requested' => $formatQuantityValues ( 'quantity_requested' ),
-            'stock_quantity'     => $stockQuantities,
-        ];
     }
 
     private function getTableData ( $query, $perPage )

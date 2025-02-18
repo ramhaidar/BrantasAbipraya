@@ -188,7 +188,10 @@ class DetailRKBGeneralController extends Controller
         return [ 
             'jenis_alat'         => $data->pluck ( 'jenis_alat' )->unique ()->filter ()->sort ()->values (),
             'kode_alat'          => $data->pluck ( 'kode_alat' )->unique ()->filter ()->sort ()->values (),
-            'kategori_sparepart' => $data->pluck ( 'kategori_nama' )->unique ()->filter ()->sort ()->values (),
+            'kategori_sparepart' => $data->map ( function ($item)
+            {
+                return $item->kategori_kode . ': ' . $item->kategori_nama;
+            } )->unique ()->filter ()->sort ()->values (),
             'sparepart'          => $data->pluck ( 'sparepart_nama' )->unique ()->filter ()->sort ()->values (),
             'part_number'        => $data->pluck ( 'part_number' )->unique ()->filter ()->sort ()->values (),
             'merk'               => $data->pluck ( 'merk' )->unique ()->filter ()->sort ()->values (),
@@ -274,6 +277,35 @@ class DetailRKBGeneralController extends Controller
                             elseif ( $ltValue !== null )
                             {
                                 $q->orWhere ( $columnName, '<=', $ltValue );
+                            }
+                        }
+                    } );
+                }
+                else if ( $paramName === 'kategori_sparepart' )
+                {
+                    // Khusus untuk kategori_sparepart, kita perlu memisahkan kode dan nama
+                    $query->where ( function ($q) use ($values, $columnName)
+                    {
+                        foreach ( $values as $value )
+                        {
+                            if ( $value === 'Empty/Null' )
+                            {
+                                $q->orWhereNull ( 'kategori_sparepart.nama' )
+                                    ->orWhere ( 'kategori_sparepart.nama', '-' )
+                                    ->orWhere ( 'kategori_sparepart.nama', '' );
+                            }
+                            else
+                            {
+                                // Extract nama from "kode: nama" format
+                                $parts = explode ( ': ', $value );
+                                if ( count ( $parts ) === 2 )
+                                {
+                                    $q->orWhere ( function ($subQ) use ($parts)
+                                    {
+                                        $subQ->where ( 'kategori_sparepart.kode', $parts[ 0 ] )
+                                            ->where ( 'kategori_sparepart.nama', $parts[ 1 ] );
+                                    } );
+                                }
                             }
                         }
                     } );

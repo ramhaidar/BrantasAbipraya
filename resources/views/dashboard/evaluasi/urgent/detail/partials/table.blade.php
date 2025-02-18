@@ -157,7 +157,7 @@
                                     <td>{{ $item->masterDataSparepart->nama ?? '-' }}</td>
                                     <td>{{ $item->masterDataSparepart->part_number ?? '-' }}</td>
                                     <td>{{ $item->masterDataSparepart->merk ?? '-' }}</td>
-                                    <td>{{ $alat->nama_koordinator ?? '-' }}</td>
+                                    <td>{{ $item->nama_koordinator ?? '-' }}</td>
                                     <td>
                                         <button class="btn {{ $item->dokumentasi ? 'btn-warning' : 'btn-primary' }}" data-id="{{ $item->id ?? '-' }}" type="button" onclick="event.preventDefault(); event.stopPropagation(); showDokumentasi({{ $item->id ?? '-' }});">
                                             <i class="bi bi-file-earmark-text"></i>

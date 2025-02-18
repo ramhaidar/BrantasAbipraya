@@ -76,6 +76,7 @@ class APBController extends Controller
             'master_data_alat.tipe_alat',
             'master_data_alat.serial_number',
             'kategori_sparepart.kode',
+            'kategori_sparepart.nama as kategori_nama', // Add this line
             'master_data_supplier.nama as supplier_nama',
             'master_data_sparepart.nama as sparepart_nama',
             'master_data_sparepart.merk',
@@ -138,7 +139,9 @@ class APBController extends Controller
             'merek_alat' => $results->pluck('merek_alat')->filter()->unique()->values(),
             'tipe_alat' => $results->pluck('tipe_alat')->filter()->unique()->values(),
             'serial_number' => $results->pluck('serial_number')->filter()->unique()->values(),
-            'kode' => $results->pluck('kode')->filter()->unique()->values(),
+            'kode' => $results->map(function ($item) {
+                return "{$item->kode}: {$item->kategori_nama}";
+            })->filter()->unique()->values(),
             'supplier' => $results->pluck('supplier_nama')->filter()->unique()->values(),
             'sparepart' => $results->pluck('sparepart_nama')->filter()->unique()->values(),
             'merk' => $results->pluck('merk')->filter()->unique()->values(),
@@ -350,12 +353,12 @@ class APBController extends Controller
                     $otherValues = array_diff($selectedValues, ['Empty/Null']);
                     if (! empty($otherValues)) {
                         $q->orWhereHas('masterDataSparepart.kategoriSparepart', function ($sq) use ($otherValues) {
-                            $sq->whereIn('kode', $otherValues);
+                            $sq->whereIn(DB::raw("CONCAT(kode, ': ', nama)"), $otherValues);
                         });
                     }
                 } else {
                     $q->whereHas('masterDataSparepart.kategoriSparepart', function ($sq) use ($selectedValues) {
-                        $sq->whereIn('kode', $selectedValues);
+                        $sq->whereIn(DB::raw("CONCAT(kode, ': ', nama)"), $selectedValues);
                     });
                 }
             });

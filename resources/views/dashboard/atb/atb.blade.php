@@ -21,7 +21,7 @@
                                     <i class="fa fa-plus"></i> <span class="ms-2">Tambah Data ATB</span>
                                 </a>
                             @endif
-                            @if (in_array(Auth::user()->role, ['admin_divisi', 'vp', 'svp', 'superadmin']) && $tipe === 'hutang-unit-alat')
+                            @if (in_array(Auth::user()->role, env('IS_BETA') ? ['admin_divisi', 'vp', 'svp', 'superadmin', 'koordinator_proyek'] : ['admin_divisi', 'vp', 'svp', 'superadmin']) && $tipe === 'hutang-unit-alat')
                                 <a class="btn btn-primary btn-sm btn-hide-text-mobile" data-bs-toggle="modal" data-bs-target="#modalForAddBypass">
                                     <i class="fa fa-plus"></i> <span class="ms-2">Tambah Data ATB [Bypass]</span>
                                 </a>
@@ -95,7 +95,7 @@
             @include('dashboard.atb.partials.panjar-unit-alat_panjar_proyek.modal-add')
         @endif
     @endif
-    @if (in_array(Auth::user()->role, ['admin_divisi', 'vp', 'svp', 'superadmin']) && $tipe === 'hutang-unit-alat')
+    @if (in_array(Auth::user()->role, env('IS_BETA') ? ['admin_divisi', 'vp', 'svp', 'superadmin', 'koordinator_proyek'] : ['admin_divisi', 'vp', 'svp', 'superadmin']) && $tipe === 'hutang-unit-alat')
         <!-- Modal for Adding Data with Bypass -->
         @include('dashboard.atb.partials.hutang-unit-alat.modal-add-bypass')
     @endif

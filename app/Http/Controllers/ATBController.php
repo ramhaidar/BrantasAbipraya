@@ -335,7 +335,7 @@ class ATBController extends Controller
                 {
                     $q->whereHas ( 'masterDataSparepart.kategoriSparepart', function ($sq) use ($nonNullValues)
                     {
-                        $sq->whereIn ( 'kode', $nonNullValues );
+                        $sq->whereIn ( DB::raw ( "CONCAT(kode, ': ', nama)" ), $nonNullValues );
                     } )->orWhereDoesntHave ( 'masterDataSparepart.kategoriSparepart' );
                 } );
             }
@@ -343,7 +343,7 @@ class ATBController extends Controller
             {
                 $query->whereHas ( 'masterDataSparepart.kategoriSparepart', function ($q) use ($selectedValues)
                 {
-                    $q->whereIn ( 'kode', $selectedValues );
+                    $q->whereIn ( DB::raw ( "CONCAT(kode, ': ', nama)" ), $selectedValues );
                 } );
             }
         }
@@ -665,7 +665,7 @@ class ATBController extends Controller
                 ->orderByDesc ( 'updated_at' )
                 ->get ();
         }
-        elseif ( $tipe === 'hutang-unit-alat' && in_array ( Auth::user ()->role, [ 'admin_divisi', 'vp', 'svp', 'superadmin' ] ) )
+        elseif ( $tipe === 'hutang-unit-alat' && in_array ( Auth::user ()->role, env ( 'IS_BETA', false ) ? [ 'admin_divisi', 'vp', 'svp', 'superadmin', 'koordinator_proyek' ] : [ 'admin_divisi', 'vp', 'svp', 'superadmin' ] ) )
         {
             $spareparts = MasterDataSparepart::with ( 'KategoriSparepart' )
                 ->orderByDesc ( 'updated_at' )
@@ -727,7 +727,8 @@ class ATBController extends Controller
             'tanggal'           => $results->pluck ( 'tanggal' )->filter ()->unique ()->values (),
             'kode'              => $results->map ( function ($item)
             {
-                return $item->masterDataSparepart->kategoriSparepart->kode ?? null;
+                $kategoriSparepart = $item->masterDataSparepart->kategoriSparepart ?? null;
+                return $kategoriSparepart ? "{$kategoriSparepart->kode}: {$kategoriSparepart->nama}" : null;
             } )->filter ()->unique ()->values (),
             'supplier'          => $results->map ( function ($item)
             {

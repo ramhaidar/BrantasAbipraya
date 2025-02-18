@@ -88,6 +88,7 @@ class SaldoController extends Controller
         $results = $baseQuery->select (
             'atb.tanggal',
             'kategori_sparepart.kode',
+            'kategori_sparepart.nama as kategori_nama', // Add this line
             'master_data_supplier.nama as supplier_nama',
             'master_data_sparepart.nama as sparepart_nama',
             'master_data_sparepart.merk',
@@ -100,7 +101,10 @@ class SaldoController extends Controller
 
         return [ 
             'tanggal'      => $results->pluck ( 'tanggal' )->filter ()->unique ()->values (),
-            'kode'         => $results->pluck ( 'kode' )->filter ()->unique ()->values (),
+            'kode'         => $results->map ( function ($item)
+            {
+                return "{$item->kode}: {$item->kategori_nama}";
+            } )->filter ()->unique ()->values (),
             'supplier'     => $results->pluck ( 'supplier_nama' )->filter ()->unique ()->values (),
             'sparepart'    => $results->pluck ( 'sparepart_nama' )->filter ()->unique ()->values (),
             'merk'         => $results->pluck ( 'merk' )->filter ()->unique ()->values (),
@@ -195,7 +199,38 @@ class SaldoController extends Controller
                     } );
                 } );
             },
-            'kode'         => 'kategori_sparepart.kode',
+            'kode'         => function ($q, $values)
+            {
+                $q->where ( function ($q) use ($values)
+                {
+                    if ( in_array ( 'Empty/Null', $values ) )
+                    {
+                        $q->whereDoesntHave ( 'masterDataSparepart.kategoriSparepart' )
+                            ->orWhereHas ( 'masterDataSparepart.kategoriSparepart', function ($sq)
+                            {
+                                $sq->whereNull ( 'kode' )
+                                    ->orWhere ( 'kode', '' )
+                                    ->orWhere ( 'kode', '-' );
+                            } );
+
+                        $otherValues = array_diff ( $values, [ 'Empty/Null' ] );
+                        if ( ! empty ( $otherValues ) )
+                        {
+                            $q->orWhereHas ( 'masterDataSparepart.kategoriSparepart', function ($sq) use ($otherValues)
+                            {
+                                $sq->whereIn ( \DB::raw ( "CONCAT(kode, ': ', nama)" ), $otherValues );
+                            } );
+                        }
+                    }
+                    else
+                    {
+                        $q->whereHas ( 'masterDataSparepart.kategoriSparepart', function ($sq) use ($values)
+                        {
+                            $sq->whereIn ( \DB::raw ( "CONCAT(kode, ': ', nama)" ), $values );
+                        } );
+                    }
+                } );
+            },
             'supplier'     => 'master_data_supplier.nama',
             'sparepart'    => 'master_data_sparepart.nama',
             'merk'         => 'master_data_sparepart.merk',

@@ -16,9 +16,9 @@ class UserSeeder extends Seeder
             'vp',
             'admin_divisi',
             'koordinator_proyek',
-            'admin_divisi', // Koor Satu
-            'admin_divisi', // Koor Dua
-            'admin_divisi'  // Koor Tiga
+            'koordinator_proyek', // Koor Satu
+            'koordinator_proyek', // Koor Dua
+            'koordinator_proyek'  // Koor Tiga
         ];
 
         $emails = [

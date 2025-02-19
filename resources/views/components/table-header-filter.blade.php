@@ -93,7 +93,8 @@
 
                         <script>
                             document.addEventListener('DOMContentLoaded', function() {
-                                const datePickerOptions = {
+                                // Modify datepicker initialization to use a more specific selector
+                                const filterDatePickerOptions = {
                                     dateFormat: 'yy-mm-dd',
                                     changeMonth: true,
                                     changeYear: true,
@@ -108,9 +109,9 @@
                                     }
                                 };
 
-                                // Initialize datepickers
-                                $('.datepicker').each(function() {
-                                    $(this).datepicker(datePickerOptions);
+                                // Use a more specific selector for filter datepickers only
+                                $('.filter-popup .datepicker').each(function() {
+                                    $(this).datepicker(filterDatePickerOptions);
                                 });
 
                                 // Prevent popup closing on datepicker click

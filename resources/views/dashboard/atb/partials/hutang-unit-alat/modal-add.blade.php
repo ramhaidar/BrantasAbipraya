@@ -47,8 +47,8 @@
                         <input class="form-control" id="id_proyek" name="id_proyek" value="{{ $proyek->id }}" hidden required>
 
                         <div class="col-12">
-                            <label class="form-label required" for="tanggal">Tanggal Masuk Sparepart</label>
-                            <input class="form-control datepicker" id="tanggal" name="tanggal" type="text" value="{{ \Carbon\Carbon::today()->format('Y-m-d') }}" autocomplete="off" placeholder="Tanggal Masuk Sparepart" required>
+                            <label class="form-label required" for="tanggal_normal">Tanggal Masuk Sparepart</label>
+                            <input class="form-control datepicker" id="tanggal_normal" name="tanggal" type="text" value="{{ \Carbon\Carbon::today()->format('Y-m-d') }}" autocomplete="off" placeholder="Tanggal Masuk Sparepart" required>
                             <div class="invalid-feedback">Tanggal Masuk Sparepart diperlukan.</div>
                         </div>
 
@@ -127,17 +127,23 @@
 
     <script>
         $(document).ready(function() {
-            // Initialize datepicker for #tanggal
-            var dateFormat = 'yy-mm-dd';
-            var options = {
-                dateFormat: dateFormat,
+            // Initialize datepicker for #tanggal_normal with a specific class
+            var modalDatePickerOptions = {
+                dateFormat: 'yy-mm-dd',
                 changeMonth: true,
                 changeYear: true,
-                regional: 'id'
+                regional: 'id',
+                beforeShow: function(input, inst) {
+                    // Ensure the datepicker appears above the modal
+                    setTimeout(function() {
+                        inst.dpDiv.css({
+                            'z-index': 1056 // Higher than modal's z-index
+                        });
+                    }, 0);
+                }
             };
 
-            $('#tanggal').datepicker(options);
-            $.datepicker.setDefaults($.datepicker.regional['id']);
+            $('#tanggal_normal').datepicker(modalDatePickerOptions);
         });
     </script>
 

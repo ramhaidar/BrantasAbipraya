@@ -20,6 +20,7 @@ class MasterDataAlat extends Model
         'merek_alat',
         'tipe_alat',
         'serial_number',
+        'id_proyek_current',
     ];
 
     protected $casts = [ 
@@ -29,6 +30,7 @@ class MasterDataAlat extends Model
         'merek_alat'        => 'string',
         'tipe_alat'         => 'string',
         'serial_number'     => 'string',
+        'id_proyek_current' => 'integer',
     ];
 
     protected static function newFactory ()
@@ -73,12 +75,12 @@ class MasterDataAlat extends Model
             ->withTimestamps ();
     }
 
-    public function getCurrentProjectAttribute()
+    public function getCurrentProjectAttribute ()
     {
-        return $this->alatProyek()
-            ->whereNull('removed_at')
-            ->latest('assigned_at')
-            ->first()?->proyek;
+        return $this->alatProyek ()
+            ->whereNull ( 'removed_at' )
+            ->latest ( 'assigned_at' )
+            ->first ()?->proyek;
     }
 
 }

@@ -75,3 +75,54 @@
         </div>
     </div>
 </div>
+
+@push('scripts_3')
+    <script>
+        const $dokumentasiPreviewContainer = $('#dokumentasiPreviewContainer');
+        const $largeImagePreviewForShow = $('#largeImagePreviewForShow');
+        const dokumentasiPreviewModal = new bootstrap.Modal('#dokumentasiPreviewModal');
+        const imagePreviewModalforShow = new bootstrap.Modal('#imagePreviewModalforShow');
+
+        // Laravel route name for dokumentasi
+        const dokumentasiRoute = @json(route('rkb_urgent.detail.dokumentasi', ['id' => ':id']));
+
+        // Fetch and display dokumentasi in modal
+        window.showDokumentasi = function(id) {
+            $dokumentasiPreviewContainer.empty();
+
+            const fetchUrl = dokumentasiRoute.replace(':id', id);
+
+            $.getJSON(fetchUrl)
+                .done(function(data) {
+                    if (data.dokumentasi && data.dokumentasi.length) {
+                        $.each(data.dokumentasi, function(_, file) {
+                            $('<img>', {
+                                src: file.url,
+                                alt: file.name,
+                                title: file.name,
+                                class: 'img-thumbnail',
+                                click: function() {
+                                    $('#dokumentasiPreviewModal').modal('hide');
+                                    $largeImagePreviewForShow.attr('src', file.url);
+                                    $('#imagePreviewTitleForShow').text(file.name);
+                                    imagePreviewModalforShow.show();
+                                }
+                            }).appendTo($dokumentasiPreviewContainer);
+                        });
+                    } else {
+                        $dokumentasiPreviewContainer.html('<p class="text-muted text-center">Tidak ada Dokumentasi</p>');
+                    }
+                    dokumentasiPreviewModal.show();
+                })
+                .fail(function() {
+                    $dokumentasiPreviewContainer.html('<p class="text-danger text-center">Failed to load dokumentasi</p>');
+                    dokumentasiPreviewModal.show();
+                });
+        };
+
+        // Event listener for when the preview modal is closed
+        $('#imagePreviewModalforShow').on('hidden.bs.modal', function() {
+            $('#dokumentasiPreviewModal').modal('show');
+        });
+    </script>
+@endpush

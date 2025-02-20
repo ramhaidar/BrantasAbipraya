@@ -31,3 +31,5 @@ resources/views/dashboardx.blade.php
 app/Http/Controllers/TestController2.php
 run.bat
 app/Exports/DetailRKBGeneralExport_BAK.php
+run.ps1
+run - Shortcut.lnk

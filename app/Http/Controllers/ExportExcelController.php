@@ -1,11 +1,12 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Models\RKB;
-use App\Exports\DetailRKBGeneralExport;
-use Maatwebsite\Excel\Facades\Excel;
-use Illuminate\Http\Request;
 use Carbon\Carbon;
+use App\Models\RKB;
+use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\DetailRKBUrgentExport;
+use App\Exports\DetailRKBGeneralExport;
 
 class ExportExcelController extends Controller
 {
@@ -17,21 +18,19 @@ class ExportExcelController extends Controller
 
     public function detail_rkb_general ( Request $request )
     {
-        // Ambil data RKB berdasarkan parameter ID atau data lainnya
-        $rkb = RKB::find ( $request->id );
+        // Ambil data RKB berdasarkan parameter ID
+        $rkb = RKB::with ( 'proyek' )->find ( $request->id );
 
         if ( ! $rkb )
         {
             return redirect ()->back ()->withErrors ( [ 'error' => 'RKB tidak ditemukan' ] );
         }
 
-        $periode = Carbon::parse ( $rkb->periode )->locale ( 'id' )->translatedFormat ( 'F Y' );
-
-        $fileName = "{$rkb->nomor}-{$rkb->proyek->nama}-{$periode}.xlsx";
+        $periode  = Carbon::parse ( $rkb->periode )->locale ( 'id' )->translatedFormat ( 'F Y' );
+        $fileName = "RKB General-{$rkb->nomor}-{$rkb->proyek->nama}-{$periode}.xlsx";
 
         // Generate dan unduh file Excel
-        return Excel::download ( new DetailRKBGeneralExport, $fileName );
-        ;
+        return Excel::download ( new DetailRKBGeneralExport( $rkb->id ), $fileName );
     }
 
     public function rkb_urgent ( Request $request )
@@ -40,9 +39,21 @@ class ExportExcelController extends Controller
         // Dummy function for exporting RKB Urgent
     }
 
-    public function detail_rkb_urgent ()
+    public function detail_rkb_urgent ( Request $request )
     {
-        // Dummy function for exporting Detail RKB Urgent
+        // Ambil data RKB berdasarkan parameter ID
+        $rkb = RKB::with ( 'proyek' )->find ( $request->id );
+
+        if ( ! $rkb )
+        {
+            return redirect ()->back ()->withErrors ( [ 'error' => 'RKB tidak ditemukan' ] );
+        }
+
+        $periode  = Carbon::parse ( $rkb->periode )->locale ( 'id' )->translatedFormat ( 'F Y' );
+        $fileName = "RKB Urgent-{$rkb->nomor}-{$rkb->proyek->nama}-{$periode}.xlsx";
+
+        // Generate dan unduh file Excel
+        return Excel::download ( new DetailRKBUrgentExport( $rkb->id ), $fileName );
     }
 
     public function timeline_rkb_urgent ( Request $request )

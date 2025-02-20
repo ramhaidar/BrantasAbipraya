@@ -3,9 +3,10 @@
 namespace App\Exports;
 
 use App\Models\RKB;
-use App\Models\DetailRKBGeneral;
-use Maatwebsite\Excel\Events\AfterSheet;
+use App\Models\Saldo;
+use App\Models\DetailRKBUrgent;
 use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -14,36 +15,55 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 
-class DetailRKBGeneralExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithCustomStartCell, WithEvents
+class EvaluasiDetailRKBUrgentExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithCustomStartCell, WithEvents
 {
     protected $rkbId;
+    protected $stockQuantities;
 
     public function __construct ( $rkbId )
     {
         $this->rkbId = $rkbId;
+        $this->loadStockQuantities ();
+    }
+
+    private function loadStockQuantities ()
+    {
+        $rkb                   = RKB::find ( $this->rkbId );
+        $this->stockQuantities = Saldo::where ( 'id_proyek', $rkb->id_proyek )
+            ->get ()
+            ->groupBy ( 'id_master_data_sparepart' )
+            ->map ( function ($items)
+            {
+                return $items->sum ( 'quantity' );
+            } );
     }
 
     public function collection ()
     {
-        return DetailRKBGeneral::query ()
+        return DetailRKBUrgent::query ()
             ->select ( [ 
-                'detail_rkb_general.*',
+                'detail_rkb_urgent.*',
                 'master_data_alat.jenis_alat',
                 'master_data_alat.kode_alat',
                 'kategori_sparepart.kode as kategori_kode',
                 'kategori_sparepart.nama as kategori_nama',
                 'master_data_sparepart.nama as sparepart_nama',
                 'master_data_sparepart.part_number',
-                'master_data_sparepart.merk'
+                'master_data_sparepart.merk',
+                'master_data_sparepart.id as sparepart_id',
+                'detail_rkb_urgent.quantity_requested',
+                'detail_rkb_urgent.quantity_approved',
+                'detail_rkb_urgent.nama_koordinator'
             ] )
-            ->join ( 'link_rkb_detail', 'detail_rkb_general.id', '=', 'link_rkb_detail.id_detail_rkb_general' )
+            ->join ( 'link_rkb_detail', 'detail_rkb_urgent.id', '=', 'link_rkb_detail.id_detail_rkb_urgent' )
             ->join ( 'link_alat_detail_rkb', 'link_rkb_detail.id_link_alat_detail_rkb', '=', 'link_alat_detail_rkb.id' )
             ->join ( 'master_data_alat', 'link_alat_detail_rkb.id_master_data_alat', '=', 'master_data_alat.id' )
-            ->join ( 'kategori_sparepart', 'detail_rkb_general.id_kategori_sparepart_sparepart', '=', 'kategori_sparepart.id' )
-            ->join ( 'master_data_sparepart', 'detail_rkb_general.id_master_data_sparepart', '=', 'master_data_sparepart.id' )
+            ->join ( 'kategori_sparepart', 'detail_rkb_urgent.id_kategori_sparepart_sparepart', '=', 'kategori_sparepart.id' )
+            ->join ( 'master_data_sparepart', 'detail_rkb_urgent.id_master_data_sparepart', '=', 'master_data_sparepart.id' )
             ->where ( 'link_alat_detail_rkb.id_rkb', $this->rkbId )
-            ->orderBy ( 'detail_rkb_general.updated_at', 'desc' )
-            ->orderBy ( 'detail_rkb_general.id', 'desc' )
+            ->orderBy ( 'master_data_sparepart.part_number' )
+            ->orderBy ( 'master_data_alat.jenis_alat' )
+            ->orderBy ( 'master_data_alat.kode_alat' )
             ->get ();
     }
 
@@ -58,7 +78,7 @@ class DetailRKBGeneralExport implements FromCollection, WithHeadings, WithMappin
         $periode = \Carbon\Carbon::parse ( $rkb->periode )->locale ( 'id' )->translatedFormat ( 'F Y' );
 
         return [ 
-            [ 'DETAIL RKB GENERAL' ],
+            [ 'EVALUASI RKB URGENT' ],
             [ '' ],
             [ 'Nomor RKB', ':', $rkb->nomor ?? '-' ],
             [ 'Nama Proyek', ':', $rkb->proyek->nama ?? '-' ],
@@ -72,8 +92,10 @@ class DetailRKBGeneralExport implements FromCollection, WithHeadings, WithMappin
                 'Sparepart',
                 'Part Number',
                 'Merk',
+                'Nama Koordinator',
                 'Quantity Requested',
                 'Quantity Approved',
+                'Quantity in Stock',
                 'Satuan'
             ],
         ];
@@ -81,22 +103,10 @@ class DetailRKBGeneralExport implements FromCollection, WithHeadings, WithMappin
 
     private function getStatusText ( $rkb )
     {
-        if ( ! $rkb->is_finalized && ! $rkb->is_evaluated && ! $rkb->is_approved_vp && ! $rkb->is_approved_svp )
-        {
-            return 'Pengajuan';
-        }
-        elseif ( $rkb->is_finalized && ! $rkb->is_approved_svp )
-        {
-            return 'Evaluasi';
-        }
-        elseif ( $rkb->is_finalized && $rkb->is_evaluated && $rkb->is_approved_vp && $rkb->is_approved_svp )
-        {
-            return 'Disetujui';
-        }
-        else
-        {
-            return 'Tidak Diketahui';
-        }
+        if ( $rkb->is_approved_svp ) return 'Approved by SVP';
+        if ( $rkb->is_approved_vp ) return 'Approved by VP';
+        if ( $rkb->is_evaluated ) return 'Sudah Evaluasi';
+        return 'Evaluasi';
     }
 
     public function map ( $row ) : array
@@ -108,8 +118,10 @@ class DetailRKBGeneralExport implements FromCollection, WithHeadings, WithMappin
             $row->sparepart_nama ?? '-',
             $row->part_number ?? '-',
             $row->merk ?? '-',
+            $row->nama_koordinator ?? '-',
             $row->quantity_requested ?? '-',
-            $row->quantity_approved ?? '-',
+            $row->quantity_approved ?? '-', // Changed from 0 to '-'
+            $this->stockQuantities[ $row->sparepart_id ] ?? '-',
             $row->satuan ?? '-'
         ];
     }
@@ -120,7 +132,7 @@ class DetailRKBGeneralExport implements FromCollection, WithHeadings, WithMappin
         $lastColumn = $sheet->getHighestColumn ();
 
         // Style for title
-        $sheet->mergeCells ( 'B2:J2' );
+        $sheet->mergeCells ( 'B2:L2' );
         $sheet->getStyle ( 'B2' )->applyFromArray ( [ 
             'font'      => [ 
                 'bold' => true,
@@ -131,7 +143,7 @@ class DetailRKBGeneralExport implements FromCollection, WithHeadings, WithMappin
             ],
         ] );
 
-        // Style for RKB details (updated row range to include Status)
+        // Style for RKB details
         $sheet->getStyle ( 'B4:B7' )->getFont ()->setBold ( true );
         $sheet->getStyle ( 'C4:C7' )->getAlignment ()->setHorizontal ( \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER );
 
@@ -143,8 +155,8 @@ class DetailRKBGeneralExport implements FromCollection, WithHeadings, WithMappin
             ],
         ] );
 
-        // Style for headers (now at row 9 instead of 8)
-        $sheet->getStyle ( 'B9:J9' )->applyFromArray ( [ 
+        // Style for headers
+        $sheet->getStyle ( 'B9:L9' )->applyFromArray ( [ 
             'font'      => [ 
                 'bold'  => true,
                 'color' => [ 'rgb' => '000000' ],
@@ -164,12 +176,15 @@ class DetailRKBGeneralExport implements FromCollection, WithHeadings, WithMappin
             ],
         ] );
 
-        // Style for data cells (starting from row 10 instead of 9)
-        $sheet->getStyle ( 'B10:J' . $lastRow )->applyFromArray ( [ 
+        // Get RKB status for conditional formatting
+        $rkb = RKB::find ( $this->rkbId );
+
+        // Style for data cells
+        $sheet->getStyle ( 'B10:L' . $lastRow )->applyFromArray ( [ 
             'alignment' => [ 
                 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
                 'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
-                'wrapText'   => true,  // Enable text wrapping for all cells
+                'wrapText'   => true,
             ],
             'borders'   => [ 
                 'allBorders' => [ 
@@ -178,13 +193,36 @@ class DetailRKBGeneralExport implements FromCollection, WithHeadings, WithMappin
             ],
         ] );
 
-        // Auto-adjust row heights for all rows with content (updated starting row)
+        // Style for Quantity Requested column (Column H) - Light Yellow
+        $sheet->getStyle ( 'I10:I' . $lastRow )->applyFromArray ( [ 
+            'fill' => [ 
+                'fillType'   => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => [ 'rgb' => 'FFEB9C' ], // Light yellow
+            ],
+        ] );
+
+        // Style for Quantity Approved column (Column I) - Conditional based on RKB status
+        $approvedColumnStyle = [ 
+            'fill' => [ 
+                'fillType'   => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => [ 
+                    'rgb' =>
+                        $rkb->is_approved_svp ? 'CFE2F3' :  // Light blue for SVP approved
+                        ( $rkb->is_approved_vp ? 'D9EAD3' :  // Light green for VP approved
+                            ( $rkb->is_evaluated ? 'D9D2E9' :    // Light purple for evaluated
+                                'FFE599' ) )      // Light orange for draft
+                ],
+            ],
+        ];
+        $sheet->getStyle ( 'J10:J' . $lastRow )->applyFromArray ( $approvedColumnStyle );
+
+        // Auto-adjust row heights
         for ( $row = 9; $row <= $lastRow; $row++ )
         {
             $sheet->getRowDimension ( $row )->setRowHeight ( -1 );
         }
 
-        // Auto-adjust column widths for all columns
+        // Auto-adjust column widths
         foreach ( range ( 'B', $lastColumn ) as $column )
         {
             $sheet->getColumnDimension ( $column )->setAutoSize ( true );

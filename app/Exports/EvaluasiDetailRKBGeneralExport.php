@@ -5,15 +5,17 @@ namespace App\Exports;
 use App\Models\RKB;
 use App\Models\Saldo;
 use App\Models\DetailRKBGeneral;
-use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Concerns\WithStyles;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 
-class EvaluasiDetailRKBGeneralExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithCustomStartCell
+class EvaluasiDetailRKBGeneralExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithCustomStartCell, WithEvents
 {
     protected $rkbId;
     protected $stockQuantities;
@@ -101,8 +103,8 @@ class EvaluasiDetailRKBGeneralExport implements FromCollection, WithHeadings, Wi
     {
         if ( $rkb->is_approved_svp ) return 'Approved by SVP';
         if ( $rkb->is_approved_vp ) return 'Approved by VP';
-        if ( $rkb->is_evaluated ) return 'Evaluated';
-        return 'Draft';
+        if ( $rkb->is_evaluated ) return 'Sudah Evaluasi';
+        return 'Evaluasi';
     }
 
     public function map ( $row ) : array
@@ -115,7 +117,7 @@ class EvaluasiDetailRKBGeneralExport implements FromCollection, WithHeadings, Wi
             $row->part_number ?? '-',
             $row->merk ?? '-',
             $row->quantity_requested ?? '-',
-            $row->quantity_approved ?? 0,
+            $row->quantity_approved ?? '-', // Changed from 0 to '-'
             $this->stockQuantities[ $row->sparepart_id ] ?? '-',
             $row->satuan ?? '-'
         ];
@@ -238,5 +240,15 @@ class EvaluasiDetailRKBGeneralExport implements FromCollection, WithHeadings, Wi
         }
 
         return [];
+    }
+
+    public function registerEvents () : array
+    {
+        return [ 
+            AfterSheet::class => function (AfterSheet $event)
+            {
+                $event->sheet->getDelegate ()->setSelectedCell ( 'A1' );
+            },
+        ];
     }
 }

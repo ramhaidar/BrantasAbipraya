@@ -4,15 +4,17 @@ namespace App\Exports;
 
 use App\Models\RKB;
 use App\Models\DetailRKBUrgent;
-use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Events\AfterSheet;
+use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithStyles;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 
-class DetailRKBUrgentExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithCustomStartCell
+class DetailRKBUrgentExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithCustomStartCell, WithEvents
 {
     protected $rkbId;
 
@@ -61,6 +63,7 @@ class DetailRKBUrgentExport implements FromCollection, WithHeadings, WithMapping
             [ 'Nomor RKB', ':', $rkb->nomor ?? '-' ],
             [ 'Nama Proyek', ':', $rkb->proyek->nama ?? '-' ],
             [ 'Periode', ':', $periode ],
+            [ 'Status', ':', $this->getStatusText ( $rkb ) ],
             [ '' ],
             [ 
                 'Nama Alat',
@@ -76,6 +79,26 @@ class DetailRKBUrgentExport implements FromCollection, WithHeadings, WithMapping
                 'Satuan'
             ],
         ];
+    }
+
+    private function getStatusText ( $rkb )
+    {
+        if ( ! $rkb->is_finalized && ! $rkb->is_evaluated && ! $rkb->is_approved_vp && ! $rkb->is_approved_svp )
+        {
+            return 'Pengajuan';
+        }
+        elseif ( $rkb->is_finalized && ! $rkb->is_approved_svp )
+        {
+            return 'Evaluasi';
+        }
+        elseif ( $rkb->is_finalized && $rkb->is_evaluated && $rkb->is_approved_vp && $rkb->is_approved_svp )
+        {
+            return 'Disetujui';
+        }
+        else
+        {
+            return 'Tidak Diketahui';
+        }
     }
 
     public function map ( $row ) : array
@@ -112,12 +135,20 @@ class DetailRKBUrgentExport implements FromCollection, WithHeadings, WithMapping
             ],
         ] );
 
-        // Style for RKB details
-        $sheet->getStyle ( 'B4:B6' )->getFont ()->setBold ( true );
-        $sheet->getStyle ( 'C4:C6' )->getAlignment ()->setHorizontal ( \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER );
+        // Style for RKB details (updated row range to include Status)
+        $sheet->getStyle ( 'B4:B7' )->getFont ()->setBold ( true );
+        $sheet->getStyle ( 'C4:C7' )->getAlignment ()->setHorizontal ( \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER );
 
-        // Style for headers (now at row 8)
-        $sheet->getStyle ( 'B8:L8' )->applyFromArray ( [ 
+        // Style for status cell
+        $sheet->getStyle ( 'D7' )->applyFromArray ( [ 
+            'font' => [ 
+                'bold'  => true,
+                'color' => [ 'rgb' => '000000' ],
+            ],
+        ] );
+
+        // Style for headers (now at row 9 instead of 8)
+        $sheet->getStyle ( 'B9:L9' )->applyFromArray ( [ 
             'font'      => [ 
                 'bold'  => true,
                 'color' => [ 'rgb' => '000000' ],
@@ -137,8 +168,8 @@ class DetailRKBUrgentExport implements FromCollection, WithHeadings, WithMapping
             ],
         ] );
 
-        // Style for data cells (starting from row 9)
-        $sheet->getStyle ( 'B9:L' . $lastRow )->applyFromArray ( [ 
+        // Style for data cells (starting from row 10 instead of 9)
+        $sheet->getStyle ( 'B10:L' . $lastRow )->applyFromArray ( [ 
             'alignment' => [ 
                 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
                 'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
@@ -153,10 +184,10 @@ class DetailRKBUrgentExport implements FromCollection, WithHeadings, WithMapping
 
         // Only set fixed width for Kronologi column
         $sheet->getColumnDimension ( 'I' )->setWidth ( 50 );
-        $sheet->getStyle ( 'I8:I' . $lastRow )->getAlignment ()->setWrapText ( true );
+        $sheet->getStyle ( 'I9:I' . $lastRow )->getAlignment ()->setWrapText ( true );
 
-        // Auto-adjust row heights for all rows with content
-        for ( $row = 8; $row <= $lastRow; $row++ )
+        // Auto-adjust row heights for all rows with content (updated starting row)
+        for ( $row = 9; $row <= $lastRow; $row++ )
         {
             $sheet->getRowDimension ( $row )->setRowHeight ( -1 );
         }
@@ -171,5 +202,15 @@ class DetailRKBUrgentExport implements FromCollection, WithHeadings, WithMapping
         }
 
         return [];
+    }
+
+    public function registerEvents () : array
+    {
+        return [ 
+            AfterSheet::class => function (AfterSheet $event)
+            {
+                $event->sheet->getDelegate ()->setSelectedCell ( 'A1' );
+            },
+        ];
     }
 }

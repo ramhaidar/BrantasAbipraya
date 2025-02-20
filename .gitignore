@@ -32,4 +32,6 @@ app/Http/Controllers/TestController2.php
 run.bat
 app/Exports/DetailRKBGeneralExport_BAK.php
 run.ps1
+"run - Shortcut.lnk"
+ngrok.exe
 run - Shortcut.lnk

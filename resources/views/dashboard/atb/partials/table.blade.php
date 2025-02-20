@@ -243,6 +243,12 @@
                     const spbNumber = $spbCell.data('spb');
                     const stt = $spbCell.data('stt');
                     const id = $spbCell.data('id');
+
+                    // Skip grouping if SPB number is null or '-'
+                    if (spbNumber === null || spbNumber === '-') {
+                        return;
+                    }
+
                     const groupKey = `${spbNumber}_${stt}`;
 
                     if (!groups[groupKey]) {

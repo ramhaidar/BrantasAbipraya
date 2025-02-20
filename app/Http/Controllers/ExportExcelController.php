@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\DetailRKBUrgentExport;
 use App\Exports\DetailRKBGeneralExport;
+use App\Exports\EvaluasiDetailRKBGeneralExport;
 
 class ExportExcelController extends Controller
 {
@@ -65,8 +66,19 @@ class ExportExcelController extends Controller
 
     public function evaluasi_rkb_general ( Request $request )
     {
-        dd ( $request->all () );
-        // Dummy function for exporting Evaluasi RKB General
+        // Ambil data RKB berdasarkan parameter ID
+        $rkb = RKB::with ( 'proyek' )->find ( $request->id );
+
+        if ( ! $rkb )
+        {
+            return redirect ()->back ()->withErrors ( [ 'error' => 'RKB tidak ditemukan' ] );
+        }
+
+        $periode  = Carbon::parse ( $rkb->periode )->locale ( 'id' )->translatedFormat ( 'F Y' );
+        $fileName = "Evaluasi RKB General-{$rkb->nomor}-{$rkb->proyek->nama}-{$periode}.xlsx";
+
+        // Generate dan unduh file Excel
+        return Excel::download ( new EvaluasiDetailRKBGeneralExport( $rkb->id ), $fileName );
     }
 
     public function evaluasi_rkb_urgent ( Request $request )

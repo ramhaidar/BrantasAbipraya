@@ -12,7 +12,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 
-class DetailRKBGeneralExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize, WithCustomStartCell
+class DetailRKBGeneralExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithCustomStartCell
 {
     protected $rkbId;
 
@@ -138,6 +138,7 @@ class DetailRKBGeneralExport implements FromCollection, WithHeadings, WithMappin
             'alignment' => [ 
                 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
                 'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                'wrapText'   => true,  // Enable text wrapping for all cells
             ],
             'borders'   => [ 
                 'allBorders' => [ 
@@ -145,6 +146,18 @@ class DetailRKBGeneralExport implements FromCollection, WithHeadings, WithMappin
                 ],
             ],
         ] );
+
+        // Auto-adjust row heights for all rows with content
+        for ( $row = 8; $row <= $lastRow; $row++ )
+        {
+            $sheet->getRowDimension ( $row )->setRowHeight ( -1 );
+        }
+
+        // Auto-adjust column widths for all columns
+        foreach ( range ( 'B', $lastColumn ) as $column )
+        {
+            $sheet->getColumnDimension ( $column )->setAutoSize ( true );
+        }
 
         return [];
     }

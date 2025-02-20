@@ -1097,6 +1097,12 @@ Route::middleware ( 'auth' )
             )->where ( 'id', '[0-9]+' )
                 ->name ( 'dokumentasi' );
 
+            Route::get (
+                '/{id}/kronologi',
+                [ EvaluasiDetailRKBUrgentController::class, 'getKronologi' ]
+            )->where ( 'id', '[0-9]+' )
+                ->name ( 'kronologi' );
+
             // Urgent RKB Approval Routes
             Route::post (
                 '/approve/vp/{id}',

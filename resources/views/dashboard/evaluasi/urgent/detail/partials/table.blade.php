@@ -4,6 +4,7 @@
 
 @include('dashboard.evaluasi.urgent.detail.partials.modal-preview')
 @include('dashboard.evaluasi.urgent.detail.partials.modal-lampiran')
+@include('dashboard.evaluasi.urgent.detail.partials.modal-kronologi')
 
 @php
     $headers = [
@@ -48,6 +49,10 @@
             'filterId' => 'nama-koordinator',
             'paramName' => 'nama_koordinator',
             'filter' => true,
+        ],
+        [
+            'title' => 'Kronologi',
+            'filter' => false,
         ],
         [
             'title' => 'Dokumentasi',
@@ -159,6 +164,11 @@
                                     <td>{{ $item->masterDataSparepart->merk ?? '-' }}</td>
                                     <td>{{ $item->nama_koordinator ?? '-' }}</td>
                                     <td>
+                                        <button class="btn {{ $item->kronologi ? 'btn-warning' : 'btn-primary' }}" type="button" onclick="showKronologi({{ $item->id }})">
+                                            <i class="bi bi-clock-history"></i>
+                                        </button>
+                                    </td>
+                                    <td>
                                         <button class="btn {{ $item->dokumentasi ? 'btn-warning' : 'btn-primary' }}" data-id="{{ $item->id ?? '-' }}" type="button" onclick="event.preventDefault(); event.stopPropagation(); showDokumentasi({{ $item->id ?? '-' }});">
                                             <i class="bi bi-file-earmark-text"></i>
                                         </button>
@@ -222,64 +232,4 @@
 @push('scripts_3')
     @include('scripts.adjustTableColumnWidthByHeaderText')
     @include('scripts.filterPopupManager')
-
-    <script>
-        $(document).ready(function() {
-            'use strict';
-
-            const $dokumentasiPreviewContainer = $('#dokumentasiPreviewContainer');
-            const $largeImagePreview = $('#largeImagePreviewForShow');
-            const $imagePreviewTitle = $('#imagePreviewTitleForShow');
-            const dokumentasiRoute = @json(route('evaluasi_rkb_urgent.detail.dokumentasi', ['id' => ':id']));
-
-            window.showDokumentasi = function(id) {
-                $dokumentasiPreviewContainer.empty();
-                const fetchUrl = dokumentasiRoute.replace(':id', id);
-
-                $.getJSON(fetchUrl)
-                    .done(function(data) {
-                        if (data.dokumentasi?.length) {
-                            data.dokumentasi.forEach(file => {
-                                $('<img>', {
-                                        src: file.url,
-                                        alt: file.name,
-                                        title: file.name
-                                    }).addClass('img-thumbnail')
-                                    .on('click', () => {
-                                        $('#dokumentasiPreviewModal').modal('hide');
-                                        $largeImagePreview.attr('src', file.url);
-                                        $imagePreviewTitle.text(file.name);
-                                        $('#imagePreviewModalforShow').modal('show');
-                                    })
-                                    .appendTo($dokumentasiPreviewContainer);
-                            });
-                        } else {
-                            $dokumentasiPreviewContainer.html(
-                                '<p class="text-muted text-center">Tidak ada Dokumentasi</p>'
-                            );
-                        }
-                        $('#dokumentasiPreviewModal').modal('show');
-                    })
-                    .fail(function(jqXHR, textStatus, errorThrown) {
-                        console.error('Error fetching dokumentasi:', textStatus, errorThrown);
-                        $dokumentasiPreviewContainer.html(
-                            '<p class="text-danger text-center">Failed to load dokumentasi</p>'
-                        );
-                        $('#dokumentasiPreviewModal').modal('show');
-                    });
-            };
-
-            $('#imagePreviewModalforShow').on('hidden.bs.modal', function() {
-                $('#dokumentasiPreviewModal').modal('show');
-            });
-
-            // Prevent form submission when clicking dokumentasi button
-            $(document).on('click', '[data-id]', function(e) {
-                if ($(this).closest('td').hasClass('text-center')) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                }
-            });
-        });
-    </script>
 @endpush

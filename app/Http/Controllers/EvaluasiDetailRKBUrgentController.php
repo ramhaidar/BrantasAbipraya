@@ -23,7 +23,7 @@ class EvaluasiDetailRKBUrgentController extends Controller
     {
         if ( $request->get ( 'per_page' ) != -1 )
         {
-            $parameters             = $request->except ( 'per_page' );
+            $parameters               = $request->except ( 'per_page' );
             $parameters[ 'per_page' ] = -1;
 
             return redirect ()->to ( $request->url () . '?' . http_build_query ( $parameters ) );
@@ -687,5 +687,11 @@ class EvaluasiDetailRKBUrgentController extends Controller
         return redirect ()
             ->back ()
             ->with ( 'success', 'RKB Berhasil di Approve oleh SVP!' );
+    }
+
+    public function getKronologi ( $id )
+    {
+        $detailRkbUrgent = DetailRkbUrgent::findOrFail ( $id );
+        return response ()->json ( [ 'kronologi' => $detailRkbUrgent->kronologi ] );
     }
 }

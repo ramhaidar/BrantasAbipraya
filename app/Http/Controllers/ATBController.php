@@ -1129,11 +1129,18 @@ class ATBController extends Controller
 
             if ( $atb->tipe === 'hutang-unit-alat' )
             {
-                // For non-panjar types (existing logic for hutang)
                 $suratTandaTerima = $atb->surat_tanda_terima;
 
-                // Find all ATB records with the same Surat Tanda Terima
-                $atbs = ATB::where ( 'surat_tanda_terima', $suratTandaTerima )->get ();
+                if ( $atb->id_spb )
+                {
+                    // Find all ATB records with the same Surat Tanda Terima
+                    $atbs = ATB::where ( 'surat_tanda_terima', $suratTandaTerima )->get ();
+                }
+                else
+                {
+                    // If no SPB, only handle current ATB
+                    $atbs = collect ( [ $atb ] );
+                }
 
                 $saldoController = new SaldoController();
 
@@ -1145,9 +1152,15 @@ class ATBController extends Controller
                         Storage::disk ( 'public' )->deleteDirectory ( $atb->dokumentasi_foto );
                     }
 
-                    // Restore quantity_belum_diterima for the corresponding DetailSPB
-                    $detailSpb = DetailSPB::find ( $atb->id_detail_spb );
-                    $detailSpb->increaseQuantityBelumDiterima ( $atb->quantity );
+                    // Restore quantity_belum_diterima for the corresponding DetailSPB only if SPB exists
+                    if ( $atb->id_spb && $atb->id_detail_spb )
+                    {
+                        $detailSpb = DetailSPB::find ( $atb->id_detail_spb );
+                        if ( $detailSpb )
+                        {
+                            $detailSpb->increaseQuantityBelumDiterima ( $atb->quantity );
+                        }
+                    }
 
                     // Delete the associated Saldo record
                     $saldo = Saldo::where ( 'id_atb', $atb->id )->first ();
@@ -1160,7 +1173,7 @@ class ATBController extends Controller
                     $atb->delete ();
                 }
 
-                // Delete the shared surat_tanda_terima file
+                // Delete the shared surat_tanda_terima file if it exists
                 if ( $suratTandaTerima )
                 {
                     // Get the main ATB folder path by extracting the parent directory path

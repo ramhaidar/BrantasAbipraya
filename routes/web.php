@@ -851,6 +851,12 @@ Route::middleware ( 'auth' )
             )->where ( 'id', '[0-9]+' )
                 ->name ( 'dokumentasi' );
 
+            Route::get (
+                '/{id}/kronologi',
+                [ DetailRKBUrgentController::class, 'getKronologi' ]
+            )->where ( 'id', '[0-9]+' )
+                ->name ( 'kronologi' );
+
             // Rute Timeline RKB Urgent [TimelineRKBUrgentController]
             Route::prefix ( 'timeline' )
                 ->as ( 'timeline.' )

@@ -52,9 +52,9 @@ class DetailRKBUrgentController extends Controller
         // If per_page parameter doesn't exist or not -1, redirect with per_page=-1
         if ( ! $request->has ( 'per_page' ) || $request->get ( 'per_page' ) != -1 )
         {
-            $parameters             = $request->all ();
+            $parameters               = $request->all ();
             $parameters[ 'per_page' ] = -1;
-            $redirectUrl            = $request->url () . '?' . http_build_query ( $parameters );
+            $redirectUrl              = $request->url () . '?' . http_build_query ( $parameters );
             return redirect ()->to ( $redirectUrl );
         }
 
@@ -672,5 +672,11 @@ class DetailRKBUrgentController extends Controller
         }, $files );
 
         return response ()->json ( [ 'dokumentasi' => $data ] );
+    }
+
+    public function getKronologi ( $id )
+    {
+        $detailRkbUrgent = DetailRkbUrgent::findOrFail ( $id );
+        return response ()->json ( [ 'kronologi' => $detailRkbUrgent->kronologi ] );
     }
 }

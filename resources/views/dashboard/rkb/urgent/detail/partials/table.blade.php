@@ -4,6 +4,7 @@
 
 @include('dashboard.rkb.urgent.detail.partials.modal-preview')
 @include('dashboard.rkb.urgent.detail.partials.modal-lampiran')
+@include('dashboard.rkb.urgent.detail.partials.modal-kronologi')
 
 @php
     $headers = [
@@ -48,6 +49,10 @@
             'filterId' => 'nama-koordinator',
             'paramName' => 'nama_koordinator',
             'filter' => true,
+        ],
+        [
+            'title' => 'Kronologi',
+            'filter' => false,
         ],
         [
             'title' => 'Dokumentasi',
@@ -149,6 +154,11 @@
                                 <td>{{ $item->masterDataSparepart->merk ?? '-' }}</td>
                                 <td>{{ $item->nama_koordinator ?? '-' }}</td>
                                 <td>
+                                    <button class="btn {{ $item->kronologi ? 'btn-warning' : 'btn-primary' }}" type="button" onclick="showKronologi({{ $item->id }})">
+                                        <i class="bi bi-clock-history"></i>
+                                    </button>
+                                </td>
+                                <td>
                                     <button class="btn {{ $item->dokumentasi ? 'btn-warning' : 'btn-primary' }}" type="button" onclick="showDokumentasi({{ $item->id }})">
                                         <i class="bi bi-file-earmark-text"></i>
                                     </button>
@@ -210,67 +220,4 @@
 @push('scripts_3')
     @include('scripts.adjustTableColumnWidthByHeaderText')
     @include('scripts.filterPopupManager')
-
-    <script>
-        $(document).ready(function() {
-            const dokumentasiPreviewContainer = document.getElementById('dokumentasiPreviewContainer');
-            const largeImagePreviewForShow = document.getElementById('largeImagePreviewForShow');
-            const dokumentasiPreviewModal = new bootstrap.Modal(document.getElementById('dokumentasiPreviewModal'));
-            const imagePreviewModalforShow = new bootstrap.Modal(document.getElementById('imagePreviewModalforShow'));
-
-            // Laravel route name for dokumentasi
-            const dokumentasiRoute = @json(route('rkb_urgent.detail.dokumentasi', ['id' => ':id']));
-
-            // Fetch and display dokumentasi in modal
-            window.showDokumentasi = function(id) {
-                // Clear previous previews
-                dokumentasiPreviewContainer.innerHTML = '';
-
-                // Replace ':id' with the actual id
-                const fetchUrl = dokumentasiRoute.replace(':id', id);
-
-                // Fetch dokumentasi data
-                fetch(fetchUrl)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.dokumentasi && data.dokumentasi.length > 0) {
-                            data.dokumentasi.forEach(file => {
-                                const img = document.createElement('img');
-                                img.src = file.url;
-                                img.alt = file.name;
-                                img.title = file.name;
-                                img.classList.add('img-thumbnail');
-
-                                // Add click event to open large preview
-                                img.addEventListener('click', () => {
-                                    $('#dokumentasiPreviewModal').modal('hide');
-
-                                    largeImagePreviewForShow.src = file.url;
-                                    document.getElementById('imagePreviewTitleForShow').textContent = file.name;
-                                    imagePreviewModalforShow.show();
-                                });
-
-                                dokumentasiPreviewContainer.appendChild(img);
-                            });
-                        } else {
-                            dokumentasiPreviewContainer.innerHTML = '<p class="text-muted text-center">Tidak ada Dokumentasi</p>';
-                        }
-
-                        // Show dokumentasi preview modal
-                        dokumentasiPreviewModal.show();
-                    })
-                    .catch(error => {
-                        console.error('Error fetching dokumentasi:', error);
-                        dokumentasiPreviewContainer.innerHTML = '<p class="text-danger text-center">Failed to load dokumentasi</p>';
-                        dokumentasiPreviewModal.show();
-                    });
-            };
-
-            // Event listener for when the preview modal is closed
-            document.getElementById('imagePreviewModalforShow').addEventListener('hidden.bs.modal', function() {
-                // Reopen #modalForAdd using jQuery
-                $('#dokumentasiPreviewModal').modal('show');
-            });
-        });
-    </script>
 @endpush

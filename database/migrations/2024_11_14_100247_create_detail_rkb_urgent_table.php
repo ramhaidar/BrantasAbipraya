@@ -15,7 +15,7 @@ return new class extends Migration
             $table->bigInteger ( 'quantity_approved' )->nullable (); // Jumlah disetujui
             $table->bigInteger ( 'quantity_remainder' )->nullable (); // Jumlah sisa PO
             $table->string ( 'satuan' )->nullable (); // Satuan barang
-            $table->string ( 'kronologi' )->nullable (); // Penjelasan urgensi
+            $table->longText ( 'kronologi' )->nullable (); // Penjelasan urgensi
             $table->string ( 'nama_koordinator' )->nullable (); // Nama koordinator terkait
             $table->string ( 'dokumentasi' )->nullable ();
 

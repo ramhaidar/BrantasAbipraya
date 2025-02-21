@@ -6,7 +6,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    {{-- <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests"> --}}
+    @if (env('USE_HTTPS'))
+        <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    @endif
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- Bootstrap Icons 1.11.3 -->

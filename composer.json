@@ -63,6 +63,18 @@
             "Composer\\Config::disableProcessTimeout",
             "npx concurrently \"php artisan config:clear\" \"php artisan cache:clear\" \"php artisan route:clear\" \"vite\" \"php artisan serve --host=0.0.0.0\" "
         ],
+        "dev-local": [
+            "Composer\\Config::disableProcessTimeout",
+            "npx concurrently \"php artisan config:clear\" \"php artisan cache:clear\" \"php artisan route:clear\" \"vite\" \"php artisan serve --host=0.0.0.0 --port=8000 --env=local\" "
+        ],
+        "dev-ngrok": [
+            "Composer\\Config::disableProcessTimeout",
+            "npx concurrently \"php artisan config:clear\" \"php artisan cache:clear\" \"php artisan route:clear\" \"vite\" \"php artisan serve --host=0.0.0.0 --port=8001 --env=ngrok\" "
+        ],
+        "dev-both": [
+            "Composer\\Config::disableProcessTimeout",
+            "npx concurrently \"php artisan config:clear\" \"php artisan cache:clear\" \"php artisan route:clear\" \"vite\" \"php artisan serve --host=0.0.0.0 --port=8000 --env=local\" \"php artisan serve --host=0.0.0.0 --port=8001 --env=ngrok\" "
+        ],
         "bak": [
             "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"php artisan config:clear\" \"php artisan cache:clear\" \"php artisan route:clear\" \"vite\" \"php artisan serve --host=0.0.0.0\" ",
             "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"php artisan pail --timeout=0\" \"npm run dev\" --names=server,queue,logs,vite"

@@ -29,5 +29,11 @@ class AppServiceProvider extends ServiceProvider
         {
             URL::forceScheme ( 'https' );
         }
+
+        if ( config ( 'IS_FORCE_HTTPS' ) === true )
+        {
+            dd ( "TEST" );
+            URL::forceScheme ( 'https' );
+        }
     }
 }

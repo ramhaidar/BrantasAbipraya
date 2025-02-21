@@ -2,14 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Validation\Rule;
 use App\Models\KategoriSparepart;
 use App\Models\MasterDataSupplier;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class MasterDataSparepart extends Model
 {
@@ -31,6 +32,19 @@ class MasterDataSparepart extends Model
         'merk'                  => 'string',
         'id_kategori_sparepart' => 'integer',
     ];
+
+    /**
+     * Get the unique validation rule for part_number
+     */
+    public static function getPartNumberUniqueRule ( $ignore = null )
+    {
+        return Rule::unique ( 'master_data_sparepart', 'part_number' )
+            ->where ( function ($query)
+            {
+                return $query->where ( 'part_number', '!=', '-' );
+            } )
+            ->ignore ( $ignore );
+    }
 
     public function kategoriSparepart () : BelongsTo
     {

@@ -35,3 +35,5 @@ run.ps1
 "run - Shortcut.lnk"
 ngrok.exe
 run - Shortcut.lnk
+.env.ngrok
+.env.local

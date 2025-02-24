@@ -14,6 +14,7 @@ use App\Exports\ATBHutangUnitAlatExport;
 use App\Exports\ATBPanjarUnitAlatProyekExport;
 use App\Exports\EvaluasiDetailRKBUrgentExport;
 use App\Exports\EvaluasiDetailRKBGeneralExport;
+use App\Exports\ATBMutasiProyekExport;
 
 class ExportExcelController extends Controller
 {
@@ -166,6 +167,8 @@ class ExportExcelController extends Controller
             case 'panjar-unit-alat':
             case 'panjar-proyek':
                 return Excel::download ( new ATBPanjarUnitAlatProyekExport( $request->id, $request->type ), $fileName );
+            case 'mutasi-proyek':
+                return Excel::download ( new ATBMutasiProyekExport( $request->id ), $fileName );
             default:
                 return redirect ()->back ()->withErrors ( [ 'error' => 'Export type not supported yet' ] );
         }

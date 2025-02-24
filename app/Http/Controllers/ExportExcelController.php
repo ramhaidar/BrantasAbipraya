@@ -10,6 +10,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\DetailRKBUrgentExport;
 use App\Exports\DetailSPBProyekExport;
 use App\Exports\DetailRKBGeneralExport;
+use App\Exports\ATBHutangUnitAlatExport;
 use App\Exports\EvaluasiDetailRKBUrgentExport;
 use App\Exports\EvaluasiDetailRKBGeneralExport;
 
@@ -144,8 +145,27 @@ class ExportExcelController extends Controller
 
     public function atb ( Request $request )
     {
-        dd ( $request->all () );
-        // Dummy function for exporting ATB
+        // Validate request
+        $validated = $request->validate ( [ 
+            'id'   => 'required|exists:proyek,id',
+            'type' => 'required|string|in:hutang-unit-alat,panjar-unit-alat,mutasi-proyek,panjar-proyek',
+        ] );
+
+        // Get the proyek
+        $proyek = \App\Models\Proyek::findOrFail ( $request->id );
+
+        // Generate filename
+        $fileName = "ATB-{$proyek->nama}-" . ucwords ( str_replace ( '-', ' ', $request->type ) ) . '.xlsx';
+
+        // Choose export class based on type
+        switch ($request->type)
+        {
+            case 'hutang-unit-alat':
+                return Excel::download ( new ATBHutangUnitAlatExport( $request->id ), $fileName );
+            // Add other ATB types here as needed
+            default:
+                return redirect ()->back ()->withErrors ( [ 'error' => 'Export type not supported yet' ] );
+        }
     }
 
     public function apb ( Request $request )

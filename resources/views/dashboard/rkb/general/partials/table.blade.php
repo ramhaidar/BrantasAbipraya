@@ -95,8 +95,12 @@
                                 @endif
                             </td>
                             <td class="text-center">
-                                <a class="btn btn-primary mx-1 detailBtn" href="{{ route('rkb_general.detail.index', ['id' => $rkb->id]) }}">
-                                    <i class="fa-solid fa-file-pen"></i>
+                                <a class="btn {{ !$rkb->is_finalized && !$rkb->is_evaluated && !$rkb->is_approved_vp && !$rkb->is_approved_svp ? 'btn-primary' : 'btn-info' }} mx-1 detailBtn" href="{{ route('rkb_general.detail.index', ['id' => $rkb->id]) }}">
+                                    @if (!$rkb->is_finalized && !$rkb->is_evaluated && !$rkb->is_approved_vp && !$rkb->is_approved_svp)
+                                        <i class="fa-solid fa-file-pen"></i>
+                                    @else
+                                        <i class="fa-solid fa-eye"></i>
+                                    @endif
                                 </a>
                             </td>
                             @if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin')

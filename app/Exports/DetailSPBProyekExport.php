@@ -182,9 +182,12 @@ class DetailSPBProyekExport implements FromCollection, WithHeadings, WithMapping
 
         // Currency columns styling (Harga & Jumlah Harga) - Updated to match RiwayatSPBExport
         $currencyFormat = '#,##0';
-        $sheet->getStyle ( 'K9:L' . $lastRow )
-            ->getNumberFormat ()
-            ->setFormatCode ( $currencyFormat );
+        $sheet->getStyle ( 'K9:L' . $lastRow )->applyFromArray ( [ 
+            'alignment' => [ 
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT,
+                'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+            ]
+        ] )->getNumberFormat ()->setFormatCode ( $currencyFormat );
 
         // Add totals with same currency format
         $totalRow = $lastRow + 1;
@@ -197,13 +200,13 @@ class DetailSPBProyekExport implements FromCollection, WithHeadings, WithMapping
         $ppnRow = $totalRow + 1;
         $ppn    = $this->totals[ 'totalJumlahHarga' ] * 0.11;
         $sheet->setCellValue ( 'B' . $ppnRow, 'PPN 11%' );
-        $sheet->mergeCells ( 'B' . $ppnRow . ':K' . $ppnRow );
+        $sheet->mergeCells ( 'B' . $ppnRow . ':J' . $ppnRow );
         $sheet->setCellValue ( 'L' . $ppnRow, $ppn );
 
         // Add grand total with same currency format
         $grandTotalRow = $ppnRow + 1;
         $sheet->setCellValue ( 'B' . $grandTotalRow, 'Grand Total' );
-        $sheet->mergeCells ( 'B' . $grandTotalRow . ':K' . $grandTotalRow );
+        $sheet->mergeCells ( 'B' . $grandTotalRow . ':J' . $grandTotalRow );
         $sheet->setCellValue ( 'L' . $grandTotalRow, $this->totals[ 'totalJumlahHarga' ] + $ppn );
 
         // Apply currency format to footer totals
@@ -213,16 +216,28 @@ class DetailSPBProyekExport implements FromCollection, WithHeadings, WithMapping
 
         // Style the footer rows
         $sheet->getStyle ( 'B' . $totalRow . ':L' . $grandTotalRow )->applyFromArray ( [ 
-            'font'    => [ 'bold' => true ],
-            'fill'    => [ 
+            'font'      => [ 'bold' => true ],
+            'fill'      => [ 
                 'fillType'   => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
                 'startColor' => [ 'rgb' => 'c0c0c0' ],
             ],
-            'borders' => [ 
+            'alignment' => [ 
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+            ],
+            'borders'   => [ 
                 'allBorders' => [ 
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
                 ],
             ],
+        ] );
+
+        // Right align the currency columns in footer
+        $sheet->getStyle ( "K{$totalRow}:L{$grandTotalRow}" )->applyFromArray ( [ 
+            'alignment' => [ 
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT,
+                'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+            ]
         ] );
 
         // Auto-adjust column widths

@@ -209,7 +209,7 @@
                 @if ($TableData->currentPage() === $TableData->lastPage())
                     <tfoot>
                         <tr class="table-primary">
-                            <td class="text-center fw-bold" colspan="10">Grand Total (Keseluruhan)</td>
+                            <td class="text-center fw-bold" colspan="10">Grand Total</td>
                             <td class="text-center fw-bold currency-value">{{ formatRibuan($TableData->total_harga) }}</td>
                             <td class="text-center fw-bold currency-value">{{ formatRibuan($TableData->total_ppn) }}</td>
                             <td class="text-center fw-bold currency-value">{{ formatRibuan($TableData->total_bruto) }}</td>

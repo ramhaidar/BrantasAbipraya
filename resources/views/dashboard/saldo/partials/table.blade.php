@@ -148,7 +148,7 @@
             @if ($TableData->currentPage() === $TableData->lastPage())
                 <tfoot>
                     <tr class="table-primary">
-                        <td class="text-center fw-bold" colspan="9">Grand Total (Keseluruhan)</td>
+                        <td class="text-center fw-bold" colspan="9">Grand Total</td>
                         <td class="text-center fw-bold currency-value" id="total-harga">{{ formatRibuan($TableData->total_amount) }}</td>
                     </tr>
                 </tfoot>

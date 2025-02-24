@@ -119,7 +119,7 @@
                         });
                     @endphp
 
-                    @forelse ($groupedByPartNumber as $partNumber => $partNumberGroup)
+                    @forelse ( $groupedByPartNumber as $partNumber => $partNumberGroup )
                         @php
                             $firstItemInGroup = $partNumberGroup->first();
                             $rowspanCount = $groupedItems
@@ -129,31 +129,30 @@
                                 ->count();
                         @endphp
 
-                        @foreach ($groupedItems->filter(function ($items, $key) use ($partNumber) {
-        return explode('|', $key)[0] === $partNumber;
-    }) as $index => $group)
+                        @foreach ($groupedItems->filter(fn($items, $key) => explode('|', $key)[0] === $partNumber) as $group)
                             @php
                                 $firstItem = $group->first();
                                 $detail = $firstItem->linkRkbDetails->first();
+                                $sparepart = $firstItem->masterDataSparepart;
+                                $alat = $detail->linkAlatDetailRkb->masterDataAlat;
                             @endphp
                             <tr>
-                                <td class="text-center">{{ $detail->linkAlatDetailRkb->masterDataAlat->jenis_alat ?? '-' }}</td>
-                                <td class="text-center">{{ $detail->linkAlatDetailRkb->masterDataAlat->kode_alat ?? '-' }}</td>
-                                <td class="text-center">{{ $firstItem->kategoriSparepart->kode ?? '-' }}: {{ $firstItem->kategoriSparepart->nama ?? '-' }}</td>
-                                <td class="text-center">{{ $firstItem->masterDataSparepart->nama ?? '-' }}</td>
-                                <td class="text-center">{{ $firstItem->masterDataSparepart->part_number ?? '-' }}</td>
-                                <td class="text-center">{{ $firstItem->masterDataSparepart->merk ?? '-' }}</td>
+                                <td class="text-center">{{ $alat->jenis_alat ?? '-' }}</td>
+                                <td class="text-center">{{ $alat->kode_alat ?? '-' }}</td>
+                                <td class="text-center">
+                                    {{ $firstItem->kategoriSparepart->kode ?? '-' }}:
+                                    {{ $firstItem->kategoriSparepart->nama ?? '-' }}
+                                </td>
+                                <td class="text-center">{{ $sparepart->nama ?? '-' }}</td>
+                                <td class="text-center">{{ $sparepart->part_number ?? '-' }}</td>
+                                <td class="text-center">{{ $sparepart->merk ?? '-' }}</td>
                                 <td class="text-center">{{ $firstItem->quantity_requested }}</td>
                                 <td class="text-center">
-                                    <input class="form-control text-center
-                                        @if ($rkb->is_approved_svp) bg-primary-subtle
-                                        @elseif ($rkb->is_approved_vp) bg-info-subtle
-                                        @elseif($rkb->is_evaluated) bg-success-subtle 
-                                        @else bg-warning-subtle @endif" name="quantity_approved[{{ $firstItem->id }}]" type="number" value="{{ $firstItem->quantity_approved ?? $firstItem->quantity_requested }}" min="0" {{ $rkb->is_evaluated ? 'disabled' : '' }}>
+                                    <input class="form-control text-center {{ $rkb->is_approved_svp ? 'bg-primary-subtle' : ($rkb->is_approved_vp ? 'bg-info-subtle' : ($rkb->is_evaluated ? 'bg-success-subtle' : 'bg-warning-subtle')) }}" name="quantity_approved[{{ $firstItem->id }}]" type="number" value="{{ $firstItem->quantity_approved ?? $firstItem->quantity_requested }}" min="0" {{ $rkb->is_evaluated ? 'disabled' : '' }}>
                                 </td>
                                 @if ($loop->first)
                                     <td class="text-center" rowspan="{{ $rowspanCount }}">
-                                        {{ $stockQuantities[$firstItem->masterDataSparepart->id] ?? '-' }}
+                                        {{ $stockQuantities[$sparepart->id] ?? '-' }}
                                     </td>
                                 @endif
                                 <td class="text-center">{{ $firstItem->satuan }}</td>

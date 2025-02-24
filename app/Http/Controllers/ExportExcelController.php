@@ -5,6 +5,7 @@ use Carbon\Carbon;
 use App\Models\RKB;
 use App\Models\SPB;
 use App\Exports\APBExport;
+use App\Exports\SaldoExport;
 use Illuminate\Http\Request;
 use App\Exports\RiwayatSPBExport;
 use Maatwebsite\Excel\Facades\Excel;
@@ -202,8 +203,20 @@ class ExportExcelController extends Controller
 
     public function saldo ( Request $request )
     {
-        dd ( $request->all () );
-        // Dummy function for exporting Saldo
+        // Validate request
+        $validated = $request->validate ( [ 
+            'id'   => 'required|exists:proyek,id',
+            'type' => 'required|string|in:hutang-unit-alat,panjar-unit-alat,mutasi-proyek,panjar-proyek',
+        ] );
+
+        // Get the proyek
+        $proyek = \App\Models\Proyek::findOrFail ( $request->id );
+
+        // Generate filename
+        $fileName = "Saldo-{$proyek->nama}-" . ucwords ( str_replace ( '-', ' ', $request->type ) ) . '.xlsx';
+
+        // Download the Excel file
+        return Excel::download ( new SaldoExport( $request->id, $request->type ), $fileName );
     }
 
     public function lnpb_bulan_berjalan ( Request $request = null )

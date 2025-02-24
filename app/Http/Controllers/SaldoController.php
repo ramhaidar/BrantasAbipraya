@@ -713,6 +713,7 @@ class SaldoController extends Controller
             "headerPage"     => $proyek->nama,
             "page"           => $pageTitle,
             "search"         => $search,
+            "tipe"           => $tipe,
             "allowedPerPage" => $allowedPerPage, // Add this to view
             "perPage"        => $perPage, // Add this to view
             "uniqueValues"   => $uniqueValues, // Add this to view

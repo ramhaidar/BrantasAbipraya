@@ -168,7 +168,7 @@ class ATBPanjarUnitAlatProyekExport implements FromCollection, WithHeadings, Wit
         $totalRow = $lastRow + 1;
         $sheet->setCellValue ( "B{$totalRow}", "Grand Total" );
         $sheet->mergeCells ( "B{$totalRow}:J{$totalRow}" );
-        $sheet->setCellValue ( "K{$totalRow}", "=SUM(J7:J" . ( $totalRow - 1 ) . ")" );
+        $sheet->setCellValue ( "K{$totalRow}", "=SUM(K7:K" . ( $totalRow - 1 ) . ")" );
 
         // Style for totals row
         $sheet->getStyle ( "B{$totalRow}:K{$totalRow}" )->applyFromArray ( [ 

@@ -11,6 +11,7 @@ use App\Exports\DetailRKBUrgentExport;
 use App\Exports\DetailSPBProyekExport;
 use App\Exports\DetailRKBGeneralExport;
 use App\Exports\ATBHutangUnitAlatExport;
+use App\Exports\ATBPanjarUnitAlatProyekExport;
 use App\Exports\EvaluasiDetailRKBUrgentExport;
 use App\Exports\EvaluasiDetailRKBGeneralExport;
 
@@ -162,7 +163,9 @@ class ExportExcelController extends Controller
         {
             case 'hutang-unit-alat':
                 return Excel::download ( new ATBHutangUnitAlatExport( $request->id ), $fileName );
-            // Add other ATB types here as needed
+            case 'panjar-unit-alat':
+            case 'panjar-proyek':
+                return Excel::download ( new ATBPanjarUnitAlatProyekExport( $request->id, $request->type ), $fileName );
             default:
                 return redirect ()->back ()->withErrors ( [ 'error' => 'Export type not supported yet' ] );
         }

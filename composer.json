@@ -61,13 +61,13 @@
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
-            "npx concurrently \"php artisan config:clear\" \"php artisan cache:clear\" \"php artisan route:clear\" \"vite\" \"php artisan serve --host=0.0.0.0\" "
+            "npx concurrently \"php artisan key:generate  --force\" \"php artisan config:clear\" \"php artisan cache:clear\" \"php artisan route:clear\" \"vite\" \"php artisan serve --host=0.0.0.0\" "
         ],
-        "dev-local": [
+        "dev-http": [
             "Composer\\Config::disableProcessTimeout",
-            "npx concurrently \"php artisan config:clear\" \"php artisan cache:clear\" \"php artisan route:clear\" \"vite\" \"php artisan serve --host=0.0.0.0 --port=8000 --env=local\" "
+            "npx concurrently \"php artisan key:generate  --force\" \"php artisan config:clear\" \"php artisan cache:clear\" \"php artisan route:clear\" \"vite\" \"php artisan serve --host=0.0.0.0 --port=8000 --env=local\" "
         ],
-        "dev-ngrok": [
+        "dev-https": [
             "Composer\\Config::disableProcessTimeout",
             "npx concurrently \"php artisan key:generate  --force\" \"php artisan config:clear\" \"php artisan cache:clear\" \"php artisan route:clear\" \"vite\" \"php artisan serve --host=0.0.0.0 --port=8001 --env=ngrok\" "
         ],

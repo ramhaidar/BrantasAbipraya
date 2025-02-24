@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 use Carbon\Carbon;
 use App\Models\RKB;
+use App\Models\SPB;
 use Illuminate\Http\Request;
+use App\Exports\RiwayatSPBExport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\DetailRKBUrgentExport;
 use App\Exports\DetailRKBGeneralExport;
@@ -108,8 +110,18 @@ class ExportExcelController extends Controller
 
     public function spb ( Request $request )
     {
-        dd ( $request->all () );
-        // Dummy function for exporting SPB
+        // Ambil data SPB berdasarkan parameter ID
+        $spb = SPB::with ( [ 'linkRkbSpbs.rkb.proyek' ] )->find ( $request->id );
+
+        if ( ! $spb )
+        {
+            return redirect ()->back ()->withErrors ( [ 'error' => 'SPB tidak ditemukan' ] );
+        }
+
+        $fileName = "SPB-{$spb->nomor}.xlsx";
+
+        // Generate dan unduh file Excel
+        return Excel::download ( new RiwayatSPBExport( $spb->id ), $fileName );
     }
 
     public function spb_proyek ( Request $request )

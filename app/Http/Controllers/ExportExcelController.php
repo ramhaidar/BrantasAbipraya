@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 use App\Models\RKB;
 use App\Models\SPB;
+use App\Models\Proyek;
 use App\Exports\APBExport;
 use App\Exports\SaldoExport;
 use Illuminate\Http\Request;
+use App\Exports\LNPBTotalExport;
 use App\Exports\RiwayatSPBExport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\APBMutasiProyekExport;
@@ -230,14 +232,52 @@ class ExportExcelController extends Controller
         // Dummy function for exporting LNPB Bulan Berjalan
     }
 
-    public function lnpb_total ( Request $request = null )
+    public function lnpb_total ( Request $request )
     {
-        if ( $request === null )
+        // Default date calculations
+        $currentDate      = now ();
+        $defaultStartDate = $currentDate->copy ()->subMonth ()->day ( 26 );
+        $defaultEndDate   = $currentDate->copy ()->day ( 25 );
+
+        try
         {
-            dd ( "request is null" );
-            return;
+            $startDate = $request->filled ( 'startDate' ) && $request->startDate !== '-NaN-26'
+                ? Carbon::parse ( $request->startDate )
+                : $defaultStartDate;
+
+            $endDate = $request->filled ( 'endDate' ) && $request->endDate !== '-25'
+                ? Carbon::parse ( $request->endDate )
+                : $defaultEndDate;
+
+            // Ensure startDate is on the 26th and endDate is on the 25th
+            $startDate = $startDate->day ( 26 );
+            $endDate   = $endDate->day ( 25 );
         }
-        dd ( $request->all () );
-        // Dummy function for exporting LNPB Total
+        catch ( \Exception $e )
+        {
+            // If date parsing fails, use defaults
+            $startDate = $defaultStartDate;
+            $endDate   = $defaultEndDate;
+        }
+
+        // Generate filename based on whether id_proyek is provided
+        if ( $request->filled ( 'id' ) )
+        {
+            $proyek   = Proyek::findOrFail ( $request->id );
+            $filename = "LNPB Total - {$proyek->nama}.xlsx";
+        }
+        else
+        {
+            $filename = "LNPB Total - Semua Proyek.xlsx";
+        }
+
+        return Excel::download (
+            new LNPBTotalExport(
+                $request->input ( 'id' ), // Will be null if not provided
+                $startDate,
+                $endDate
+            ),
+            $filename
+        );
     }
 }

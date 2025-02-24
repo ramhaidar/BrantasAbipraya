@@ -22,13 +22,18 @@
 
         /* Add background colors */
         .bg-bulan-lalu {
-            background-color: #e6ffe6 !important; /* Light green */
+            background-color: #e6ffe6 !important;
+            /* Light green */
         }
+
         .bg-bulan-ini {
-            background-color: #fff2e6 !important; /* Light orange */
+            background-color: #fff2e6 !important;
+            /* Light orange */
         }
+
         .bg-sd-bulan-ini {
-            background-color: #e6f3ff !important; /* Light blue */
+            background-color: #e6f3ff !important;
+            /* Light blue */
         }
     </style>
 @endpush
@@ -279,7 +284,7 @@
             @foreach ($sums_current as $key => $category)
                 @if ($key == 'B3')
                     <tr class="collapse pemeliharaan">
-                        <td><strong>{{ $key }}</strong></td>
+                        <td><strong>{{ implode('.', str_split($key)) }}</strong></td>
                         <td><strong>{{ $category['nama'] }}</strong></td>
                         <td class="currency-value"><strong>{{ number_format($sums_before[$key]['atb'], 0, ',', '.') }}</strong></td>
                         <td class="currency-value"><strong>{{ number_format($sums_before[$key]['apb'], 0, ',', '.') }}</strong></td>
@@ -315,7 +320,7 @@
                     </tr>
 
                     <tr class="collapse material">
-                        <td>{{ $key }}</td>
+                        <td>{{ implode('.', str_split($key)) }}</td>
                         <td>{{ ucwords(strtolower($category['nama'])) }}</td>
                         <td class="currency-value">{{ number_format($sums_before[$key]['atb'], 0, ',', '.') }}</td>
                         <td class="currency-value">{{ number_format($sums_before[$key]['apb'], 0, ',', '.') }}</td>

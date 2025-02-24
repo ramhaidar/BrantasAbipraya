@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Exports\RiwayatSPBExport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\DetailRKBUrgentExport;
+use App\Exports\DetailSPBProyekExport;
 use App\Exports\DetailRKBGeneralExport;
 use App\Exports\EvaluasiDetailRKBUrgentExport;
 use App\Exports\EvaluasiDetailRKBGeneralExport;
@@ -126,8 +127,19 @@ class ExportExcelController extends Controller
 
     public function spb_proyek ( Request $request )
     {
-        dd ( $request->all () );
-        // Dummy function for exporting SPB Proyek
+        // Get RKB data
+        $rkb = RKB::with ( 'proyek' )->find ( $request->id );
+
+        if ( ! $rkb )
+        {
+            return redirect ()->back ()->withErrors ( [ 'error' => 'RKB tidak ditemukan' ] );
+        }
+
+        $periode  = Carbon::parse ( $rkb->periode )->locale ( 'id' )->translatedFormat ( 'F Y' );
+        $fileName = "SPB Proyek-{$rkb->nomor}-{$rkb->proyek->nama}-{$periode}.xlsx";
+
+        // Generate and download Excel file
+        return Excel::download ( new DetailSPBProyekExport( $rkb->id ), $fileName );
     }
 
     public function atb ( Request $request )

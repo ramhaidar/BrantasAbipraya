@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 use App\Models\RKB;
 use App\Models\SPB;
+use App\Exports\APBExport;
 use Illuminate\Http\Request;
 use App\Exports\RiwayatSPBExport;
 use Maatwebsite\Excel\Facades\Excel;
@@ -195,7 +196,7 @@ class ExportExcelController extends Controller
             case 'mutasi-proyek':
                 return Excel::download ( new APBMutasiProyekExport( $request->id ), $fileName );
             default:
-                return redirect ()->back ()->withErrors ( [ 'error' => 'Export type not supported yet' ] );
+                return Excel::download ( new APBExport( $request->id, $request->type ), $fileName );
         }
     }
 

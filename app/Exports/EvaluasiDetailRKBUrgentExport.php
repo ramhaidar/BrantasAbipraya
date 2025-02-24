@@ -19,11 +19,13 @@ class EvaluasiDetailRKBUrgentExport implements FromCollection, WithHeadings, Wit
 {
     protected $rkbId;
     protected $stockQuantities;
+    protected $rowspanGroups; // Added property
 
     public function __construct ( $rkbId )
     {
         $this->rkbId = $rkbId;
         $this->loadStockQuantities ();
+        $this->rowspanGroups = collect (); // Initialize property
     }
 
     private function loadStockQuantities ()
@@ -40,7 +42,7 @@ class EvaluasiDetailRKBUrgentExport implements FromCollection, WithHeadings, Wit
 
     public function collection ()
     {
-        return DetailRKBUrgent::query ()
+        $data = DetailRKBUrgent::query ()
             ->select ( [ 
                 'detail_rkb_urgent.*',
                 'master_data_alat.jenis_alat',
@@ -65,6 +67,30 @@ class EvaluasiDetailRKBUrgentExport implements FromCollection, WithHeadings, Wit
             ->orderBy ( 'master_data_alat.jenis_alat' )
             ->orderBy ( 'master_data_alat.kode_alat' )
             ->get ();
+
+        // Group items by part number first for stock quantities
+        $groupedByPartNumber = $data->groupBy ( function ($item)
+        {
+            return $item->part_number;
+        } );
+
+        // Then group by part number AND equipment details
+        $groupedItems = $data->groupBy ( function ($item)
+        {
+            return $item->part_number . '|' . $item->jenis_alat . '|' . $item->kode_alat;
+        } );
+
+        // Store rowspan information
+        $this->rowspanGroups = $groupedByPartNumber->map ( function ($group) use ($groupedItems)
+        {
+            $partNumber = $group->first ()->part_number;
+            return $groupedItems->filter ( function ($items, $key) use ($partNumber)
+            {
+                return explode ( '|', $key )[ 0 ] === $partNumber;
+            } )->count ();
+        } );
+
+        return $data;
     }
 
     public function startCell () : string
@@ -111,6 +137,30 @@ class EvaluasiDetailRKBUrgentExport implements FromCollection, WithHeadings, Wit
 
     public function map ( $row ) : array
     {
+        $partNumber = $row->part_number;
+        $key        = $partNumber . '|' . $row->jenis_alat . '|' . $row->kode_alat;
+
+        // Find position in the group
+        $groupKeys        = $this->rowspanGroups->keys ()->toArray ();
+        $groupIndex       = array_search ( $partNumber, $groupKeys );
+        $currentGroupKeys = collect ( $this->collection () )
+            ->filter ( function ($item) use ($partNumber)
+            {
+                return $item->part_number === $partNumber;
+            } )
+            ->groupBy ( function ($item)
+            {
+                return $item->part_number . '|' . $item->jenis_alat . '|' . $item->kode_alat;
+            } )
+            ->keys ()
+            ->toArray ();
+        $positionInGroup  = array_search ( $key, $currentGroupKeys );
+
+        // Only include stock quantity for first row in group
+        $stockQuantity = ( $positionInGroup === 0 )
+            ? ( $this->stockQuantities[ $row->sparepart_id ] ?? '-' )
+            : null;
+
         return [ 
             $row->jenis_alat ?? '-',
             $row->kode_alat ?? '-',
@@ -120,8 +170,8 @@ class EvaluasiDetailRKBUrgentExport implements FromCollection, WithHeadings, Wit
             $row->merk ?? '-',
             $row->nama_koordinator ?? '-',
             $row->quantity_requested ?? '-',
-            $row->quantity_approved ?? '-', // Changed from 0 to '-'
-            $this->stockQuantities[ $row->sparepart_id ] ?? '-',
+            $row->quantity_approved ?? '-',
+            $stockQuantity,
             $row->satuan ?? '-'
         ];
     }
@@ -226,6 +276,20 @@ class EvaluasiDetailRKBUrgentExport implements FromCollection, WithHeadings, Wit
         foreach ( range ( 'B', $lastColumn ) as $column )
         {
             $sheet->getColumnDimension ( $column )->setAutoSize ( true );
+        }
+
+        // Apply rowspan merges for stock quantity column
+        $currentRow = 10; // Start after headers
+        foreach ( $this->rowspanGroups as $partNumber => $rowspan )
+        {
+            if ( $rowspan > 1 )
+            {
+                $sheet->mergeCells ( "K{$currentRow}:K" . ( $currentRow + $rowspan - 1 ) );
+                $sheet->getStyle ( "K{$currentRow}:K" . ( $currentRow + $rowspan - 1 ) )
+                    ->getAlignment ()
+                    ->setVertical ( 'center' );
+            }
+            $currentRow += $rowspan;
         }
 
         return [];

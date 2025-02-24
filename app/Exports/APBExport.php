@@ -5,7 +5,6 @@ namespace App\Exports;
 use App\Models\APB;
 use App\Models\Proyek;
 use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -19,19 +18,17 @@ class APBExport implements FromCollection, WithHeadings, WithMapping, WithStyles
 {
     protected $proyekId;
     protected $tipe;
-    protected $rowspanGroups;
     protected $totalHarga = 0;
 
     public function __construct ( $proyekId, $tipe )
     {
-        $this->proyekId      = $proyekId;
-        $this->tipe          = $tipe;
-        $this->rowspanGroups = collect ();
+        $this->proyekId = $proyekId;
+        $this->tipe     = $tipe;
     }
 
     public function collection ()
     {
-        $data = APB::with ( [ 
+        return APB::with ( [ 
             'alatProyek.masterDataAlat',
             'masterDataSparepart.kategoriSparepart',
             'masterDataSupplier',
@@ -43,20 +40,6 @@ class APBExport implements FromCollection, WithHeadings, WithMapping, WithStyles
             ->orderBy ( 'updated_at', 'desc' )
             ->orderBy ( 'id', 'desc' )
             ->get ();
-
-        // Group items by alat details
-        $groupedByAlat = $data->groupBy ( function ($item)
-        {
-            return optional ( $item->alatProyek )->id ?? 'No Alat';
-        } );
-
-        // Store rowspan information
-        $this->rowspanGroups = $groupedByAlat->map ( function ($group)
-        {
-            return $group->count ();
-        } );
-
-        return $data;
     }
 
     public function startCell () : string
@@ -196,22 +179,6 @@ class APBExport implements FromCollection, WithHeadings, WithMapping, WithStyles
             $sheet->getStyle ( $col . '7:' . $col . $lastRow )
                 ->getNumberFormat ()
                 ->setFormatCode ( $currencyFormat );
-        }
-
-        // Apply rowspan merges for equipment details
-        $currentRow = 7;
-        foreach ( $this->rowspanGroups as $alatId => $rowspan )
-        {
-            if ( $rowspan > 1 )
-            {
-                foreach ( [ 'C', 'D', 'E', 'F', 'G' ] as $col )
-                {
-                    $sheet->mergeCells ( "{$col}{$currentRow}:{$col}" . ( $currentRow + $rowspan - 1 ) );
-                    $sheet->getStyle ( "{$col}{$currentRow}:{$col}" . ( $currentRow + $rowspan - 1 ) )
-                        ->getAlignment ()->setVertical ( 'center' );
-                }
-            }
-            $currentRow += $rowspan;
         }
 
         // Add totals row

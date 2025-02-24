@@ -84,9 +84,12 @@ class APBMutasiProyekExport implements FromCollection, WithHeadings, WithMapping
 
     public function map ( $row ) : array
     {
-        // Calculate values
-        $jumlahHarga      = $row->quantity * ( $row->saldo->harga ?? 0 );
-        $this->totalHarga += $jumlahHarga;
+        // Calculate total amount only for accepted and null (Penggunaan) status
+        $jumlahHarga = $row->quantity * ( $row->saldo->harga ?? 0 );
+        if ( $row->status === 'accepted' || $row->status === null )
+        {
+            $this->totalHarga += $jumlahHarga;
+        }
 
         // Get status text based on condition
         $status = '';
@@ -195,11 +198,31 @@ class APBMutasiProyekExport implements FromCollection, WithHeadings, WithMapping
                 ->setFormatCode ( $currencyFormat );
         }
 
+        // Add conditional formatting for Jumlah Harga column based on status
+        for ( $row = 7; $row <= $lastRow; $row++ )
+        {
+            $status = $sheet->getCell ( "U{$row}" )->getValue ();
+            if ( $status === 'Pending' )
+            {
+                $sheet->getStyle ( "S{$row}" )->getFill ()->setFillType ( \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID )
+                    ->getStartColor ()->setRGB ( 'FFEB9C' ); // Light yellow
+            }
+            elseif ( $status === 'Accepted' || $status === 'Penggunaan' )
+            {
+                $sheet->getStyle ( "S{$row}" )->getFill ()->setFillType ( \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID )
+                    ->getStartColor ()->setRGB ( 'C6EFCE' ); // Light green
+            }
+        }
+
         // Add and style totals row
         $totalRow = $lastRow + 1;
-        $sheet->setCellValue ( "B{$totalRow}", "Grand Total" );
+        $sheet->setCellValue ( "B{$totalRow}", "Grand Total (Accepted & Penggunaan Only)" );
         $sheet->mergeCells ( "B{$totalRow}:R{$totalRow}" );
-        $sheet->setCellValue ( "S{$totalRow}", "=SUM(S7:S" . ( $totalRow - 1 ) . ")" );
+
+        // Modified formula to only sum rows where status is Accepted or Penggunaan
+        $sumFormula = "=SUMIFS(S7:S" . ( $totalRow - 1 ) . ",U7:U" . ( $totalRow - 1 ) . ",\"Accepted\") + " .
+            "SUMIFS(S7:S" . ( $totalRow - 1 ) . ",U7:U" . ( $totalRow - 1 ) . ",\"Penggunaan\")";
+        $sheet->setCellValue ( "S{$totalRow}", $sumFormula );
 
         // Style for totals row
         $sheet->getStyle ( "B{$totalRow}:{$lastColumn}{$totalRow}" )->applyFromArray ( [ 

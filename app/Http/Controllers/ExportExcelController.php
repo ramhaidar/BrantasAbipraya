@@ -7,6 +7,8 @@ use App\Models\SPB;
 use Illuminate\Http\Request;
 use App\Exports\RiwayatSPBExport;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\APBMutasiProyekExport;
+use App\Exports\ATBMutasiProyekExport;
 use App\Exports\DetailRKBUrgentExport;
 use App\Exports\DetailSPBProyekExport;
 use App\Exports\DetailRKBGeneralExport;
@@ -14,7 +16,6 @@ use App\Exports\ATBHutangUnitAlatExport;
 use App\Exports\ATBPanjarUnitAlatProyekExport;
 use App\Exports\EvaluasiDetailRKBUrgentExport;
 use App\Exports\EvaluasiDetailRKBGeneralExport;
-use App\Exports\ATBMutasiProyekExport;
 
 class ExportExcelController extends Controller
 {
@@ -176,8 +177,26 @@ class ExportExcelController extends Controller
 
     public function apb ( Request $request )
     {
-        dd ( $request->all () );
-        // Dummy function for exporting APB
+        // Validate request
+        $validated = $request->validate ( [ 
+            'id'   => 'required|exists:proyek,id',
+            'type' => 'required|string|in:hutang-unit-alat,panjar-unit-alat,mutasi-proyek,panjar-proyek',
+        ] );
+
+        // Get the proyek
+        $proyek = \App\Models\Proyek::findOrFail ( $request->id );
+
+        // Generate filename
+        $fileName = "APB-{$proyek->nama}-" . ucwords ( str_replace ( '-', ' ', $request->type ) ) . '.xlsx';
+
+        // Choose export class based on type
+        switch ($request->type)
+        {
+            case 'mutasi-proyek':
+                return Excel::download ( new APBMutasiProyekExport( $request->id ), $fileName );
+            default:
+                return redirect ()->back ()->withErrors ( [ 'error' => 'Export type not supported yet' ] );
+        }
     }
 
     public function saldo ( Request $request )

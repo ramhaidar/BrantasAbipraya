@@ -93,7 +93,7 @@ class ATBHutangUnitAlatExport implements FromCollection, WithHeadings, WithMappi
 
     public function map ( $row ) : array
     {
-        $spbNomor = $row->spb->nomor ?? 'No SPB';
+        $spbNomor = $row->spb->nomor ?? '-';
 
         // Calculate values without formatting
         $jumlahHarga = $row->quantity * $row->harga;
@@ -216,6 +216,14 @@ class ATBHutangUnitAlatExport implements FromCollection, WithHeadings, WithMappi
         $totalRow = $lastRow + 1;
         $sheet->setCellValue ( "B{$totalRow}", "Grand Total" );
         $sheet->mergeCells ( "B{$totalRow}:K{$totalRow}" );
+
+        // Center the Grand Total text both vertically and horizontally
+        $sheet->getStyle ( "B{$totalRow}:K{$totalRow}" )->applyFromArray ( [ 
+            'alignment' => [ 
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+            ]
+        ] );
 
         // Set totals
         $sheet->setCellValue ( "J{$totalRow}", "=SUM(J7:J" . ( $totalRow - 1 ) . ")" );

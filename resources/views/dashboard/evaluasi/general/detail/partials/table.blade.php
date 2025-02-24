@@ -148,7 +148,15 @@
                                 <td class="text-center">{{ $sparepart->merk ?? '-' }}</td>
                                 <td class="text-center">{{ $firstItem->quantity_requested }}</td>
                                 <td class="text-center">
-                                    <input class="form-control text-center {{ $rkb->is_approved_svp ? 'bg-primary-subtle' : ($rkb->is_approved_vp ? 'bg-info-subtle' : ($rkb->is_evaluated ? 'bg-success-subtle' : 'bg-warning-subtle')) }}" name="quantity_approved[{{ $firstItem->id }}]" type="number" value="{{ $firstItem->quantity_approved ?? $firstItem->quantity_requested }}" min="0" {{ $rkb->is_evaluated ? 'disabled' : '' }}>
+                                    @php
+                                        $bgClass = match (true) {
+                                            $rkb->is_approved_svp => 'bg-primary-subtle',
+                                            $rkb->is_approved_vp => 'bg-info-subtle',
+                                            $rkb->is_evaluated => 'bg-success-subtle',
+                                            default => 'bg-warning-subtle',
+                                        };
+                                    @endphp
+                                    <input class="form-control text-center {{ $bgClass }}" name="quantity_approved[{{ $firstItem->id }}]" type="number" value="{{ $firstItem->quantity_approved ?? $firstItem->quantity_requested }}" min="0" {{ $rkb->is_evaluated ? 'disabled' : '' }}>
                                 </td>
                                 @if ($loop->first)
                                     <td class="text-center" rowspan="{{ $rowspanCount }}">

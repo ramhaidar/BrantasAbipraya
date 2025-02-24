@@ -187,11 +187,15 @@
                                     @endif
                                     <td>{{ $item->quantity_requested ?? '-' }}</td>
                                     <td>
-                                        <input class="form-control text-center 
-                                        @if ($rkb->is_approved_svp) bg-primary-subtle
-                                        @elseif ($rkb->is_approved_vp) bg-info-subtle
-                                        @elseif($rkb->is_evaluated) bg-success-subtle 
-                                        @else bg-warning-subtle @endif" name="quantity_approved[{{ $item->id ?? '-' }}]" type="number" value="{{ $item->quantity_approved ?? ($item->quantity_requested ?? '-') }}" min="0" {{ $rkb->is_evaluated ? 'disabled' : '' }}>
+                                        @php
+                                            $bgClass = match (true) {
+                                                $rkb->is_approved_svp => 'bg-primary-subtle',
+                                                $rkb->is_approved_vp => 'bg-info-subtle',
+                                                $rkb->is_evaluated => 'bg-success-subtle',
+                                                default => 'bg-warning-subtle',
+                                            };
+                                        @endphp
+                                        <input class="form-control text-center {{ $bgClass }}" name="quantity_approved[{{ $item->id ?? '-' }}]" type="number" value="{{ $item->quantity_approved ?? ($item->quantity_requested ?? '-') }}" min="0" {{ $rkb->is_evaluated ? 'disabled' : '' }}>
                                     </td>
                                     @if (!$processedPartNumbers->has($partNumber))
                                         @php

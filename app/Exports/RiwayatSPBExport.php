@@ -17,10 +17,6 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 class RiwayatSPBExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithCustomStartCell, WithEvents, WithStrictNullComparison
 {
     protected $spbId;
-    protected $totalHarga = 0;
-    protected $totalJumlahHarga = 0;
-    protected $ppn = 0;
-    protected $grandTotal = 0;
 
     public function __construct ( $spbId )
     {
@@ -35,22 +31,7 @@ class RiwayatSPBExport implements FromCollection, WithHeadings, WithMapping, Wit
             'masterDataSupplier'
         ] )->findOrFail ( $this->spbId );
 
-        // Calculate totals
-        $collection = collect ( $spb->linkSpbDetailSpb );
-        $this->calculateTotals ( $collection );
-
-        return $collection;
-    }
-
-    private function calculateTotals ( $collection )
-    {
-        foreach ( $collection as $item )
-        {
-            $this->totalHarga += $item->detailSpb->harga;
-            $this->totalJumlahHarga += $item->detailSpb->quantity_po * $item->detailSpb->harga;
-        }
-        $this->ppn        = $this->totalJumlahHarga * 0.11;
-        $this->grandTotal = $this->totalJumlahHarga + $this->ppn;
+        return collect ( $spb->linkSpbDetailSpb );
     }
 
     public function startCell () : string
@@ -154,19 +135,53 @@ class RiwayatSPBExport implements FromCollection, WithHeadings, WithMapping, Wit
             ],
         ] );
 
-        // Add totals at the bottom
+        // Set right alignment for price columns
+        $sheet->getStyle ( "H10:I{$lastRow}" )->getAlignment ()->setHorizontal ( \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT );
+
+        // Add totals at the bottom using Excel formulas
         $totalRow = $lastRow + 1;
         $sheet->setCellValue ( "B{$totalRow}", 'Jumlah' );
-        $sheet->setCellValue ( "H{$totalRow}", $this->totalHarga );
-        $sheet->setCellValue ( "I{$totalRow}", $this->totalJumlahHarga );
+        // Sum of HARGA column
+        $sheet->setCellValue ( "H{$totalRow}", "=SUM(H10:H{$lastRow})" );
+        // Sum of JUMLAH HARGA column
+        $sheet->setCellValue ( "I{$totalRow}", "=SUM(I10:I{$lastRow})" );
+        // Merge cells for "Jumlah" row
+        $sheet->mergeCells ( "B{$totalRow}:G{$totalRow}" );
+        // Center align the merged cells
+        $sheet->getStyle ( "B{$totalRow}:G{$totalRow}" )->applyFromArray ( [ 
+            'alignment' => [ 
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+            ],
+        ] );
 
         $ppnRow = $totalRow + 1;
         $sheet->setCellValue ( "B{$ppnRow}", 'PPN 11%' );
-        $sheet->setCellValue ( "I{$ppnRow}", $this->ppn );
+        // Calculate PPN as 11% of total JUMLAH HARGA
+        $sheet->setCellValue ( "I{$ppnRow}", "=I{$totalRow}*0.11" );
+        // Merge cells for "PPN 11%" row
+        $sheet->mergeCells ( "B{$ppnRow}:G{$ppnRow}" );
+        // Center align the merged cells
+        $sheet->getStyle ( "B{$ppnRow}:G{$ppnRow}" )->applyFromArray ( [ 
+            'alignment' => [ 
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+            ],
+        ] );
 
         $grandTotalRow = $ppnRow + 1;
         $sheet->setCellValue ( "B{$grandTotalRow}", 'Grand Total' );
-        $sheet->setCellValue ( "I{$grandTotalRow}", $this->grandTotal );
+        // Sum of JUMLAH HARGA and PPN
+        $sheet->setCellValue ( "I{$grandTotalRow}", "=I{$totalRow}+I{$ppnRow}" );
+        // Merge cells for "Grand Total" row
+        $sheet->mergeCells ( "B{$grandTotalRow}:G{$grandTotalRow}" );
+        // Center align the merged cells
+        $sheet->getStyle ( "B{$grandTotalRow}:G{$grandTotalRow}" )->applyFromArray ( [ 
+            'alignment' => [ 
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+            ],
+        ] );
 
         // Style for totals
         $sheet->getStyle ( "B{$totalRow}:I{$grandTotalRow}" )->applyFromArray ( [ 
@@ -182,9 +197,12 @@ class RiwayatSPBExport implements FromCollection, WithHeadings, WithMapping, Wit
             ],
         ] );
 
+        // Set right alignment for total price columns
+        $sheet->getStyle ( "H{$totalRow}:I{$grandTotalRow}" )->getAlignment ()->setHorizontal ( \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT );
+
         // Format currency columns
         $currencyFormat = '#,##0';
-        $sheet->getStyle ( "G10:I{$grandTotalRow}" )
+        $sheet->getStyle ( "H10:I{$grandTotalRow}" )
             ->getNumberFormat ()
             ->setFormatCode ( $currencyFormat );
 

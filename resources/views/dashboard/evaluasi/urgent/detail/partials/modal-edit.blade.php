@@ -54,17 +54,17 @@
                             <label class="form-label required" for="satuan_edit">Satuan</label>
                             <select class="form-control" id="satuan_edit" name="satuan" required>
                                 <option value="">Pilih Satuan</option>
-                                <option value="Btl">Btl</option>
-                                <option value="Ltr">Ltr</option>
-                                <option value="Pcs">Pcs</option>
-                                <option value="Kg">Kg</option>
-                                <option value="Pail">Pail</option>
-                                <option value="Drum">Drum</option>
-                                <option value="Set">Set</option>
-                                <option value="Pack">Pack</option>
                                 <option value="Box">Box</option>
-                                <option value="Ls">Ls</option>
+                                <option value="Btl">Btl</option>
+                                <option value="Drum">Drum</option>
                                 <option value="Ken">Ken</option>
+                                <option value="Kg">Kg</option>
+                                <option value="Ls">Ls</option>
+                                <option value="Ltr">Ltr</option>
+                                <option value="Pack">Pack</option>
+                                <option value="Pail">Pail</option>
+                                <option value="Pcs">Pcs</option>
+                                <option value="Set">Set</option>
                             </select>
                             <div class="invalid-feedback">Satuan diperlukan.</div>
                         </div>

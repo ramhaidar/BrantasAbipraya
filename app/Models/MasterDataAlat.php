@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Database\Factories\MasterDataAlatFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -32,11 +31,6 @@ class MasterDataAlat extends Model
         'serial_number'     => 'string',
         'id_proyek_current' => 'integer',
     ];
-
-    protected static function newFactory ()
-    {
-        return MasterDataAlatFactory::new ();
-    }
 
     public function detailRkbGenerals () : HasMany
     {

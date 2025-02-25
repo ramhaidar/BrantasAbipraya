@@ -58,6 +58,7 @@
                                         {{ $saldo->masterDataSparepart->part_number }}
                                         (Stok: {{ $saldo->quantity }})
                                         [Masuk: {{ \Carbon\Carbon::parse($saldo->atb->tanggal)->format('d/m/Y') }}]
+                                        {Harga: {{ number_format($saldo->harga, 0, ',', '.') }}]}
                                     </option>
                                 @endforeach
                             </select>

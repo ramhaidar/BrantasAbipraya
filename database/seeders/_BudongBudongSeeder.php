@@ -3,12 +3,15 @@
 namespace Database\Seeders;
 
 use Carbon\Carbon;
-use App\Models\MasterDataSparepart;
-use App\Models\MasterDataSupplier;
-use App\Models\KategoriSparepart;
-use App\Models\LinkSupplierSparepart;
+use App\Models\Proyek;
+use App\Models\AlatProyek;
+use App\Models\MasterDataAlat;
 use Illuminate\Database\Seeder;
+use App\Models\KategoriSparepart;
+use App\Models\MasterDataSupplier;
 use Illuminate\Support\Facades\DB;
+use App\Models\MasterDataSparepart;
+use App\Models\LinkSupplierSparepart;
 
 class _BudongBudongSeeder extends Seeder
 {
@@ -303,6 +306,35 @@ class _BudongBudongSeeder extends Seeder
                     $existingSparepart->masterDataSuppliers ()->attach ( $supplier->id );
                 }
             }
+        }
+
+        // Link equipment to Budong Budong project
+        $proyek = Proyek::where ( 'nama', 'BENDUNGAN BUDONG - BUDONG' )->first ();
+
+        $alatCodes = [ 
+            'HD 081-15',
+            'HD 083-15',
+            'HD 091-15',
+            'HD 096-15',
+            'HD 099-15',
+            'HD 102-15',
+            'HD 105-15',
+            'HD 130-15',
+            'HD 134-15',
+            'HD 143-15',
+            'HD 162-15'
+        ];
+
+        $alats = MasterDataAlat::whereIn ( 'kode_alat', $alatCodes )->get ();
+
+        foreach ( $alats as $alat )
+        {
+            AlatProyek::create ( [ 
+                'id_proyek'           => $proyek->id,
+                'id_master_data_alat' => $alat->id,
+                'assigned_at'         => now (),
+                'removed_at'          => null
+            ] );
         }
     }
 }

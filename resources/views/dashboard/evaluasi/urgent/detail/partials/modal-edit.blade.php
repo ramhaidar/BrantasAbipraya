@@ -85,6 +85,14 @@
         $(document).ready(function() {
             'use strict';
 
+            const form = $('#editRKBUrgentForm');
+            const submitButton = $('#update-rkburgent');
+
+            form.on('submit', function() {
+                submitButton.prop('disabled', true)
+                    .html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
+            });
+
             // Initialize select2 for dropdowns
             const $select2Elements = $('#id_master_data_alat_edit, #id_kategori_sparepart_sparepart_edit, #id_master_data_sparepart_edit, #satuan_edit');
             $select2Elements.select2({

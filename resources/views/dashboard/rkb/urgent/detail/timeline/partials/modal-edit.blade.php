@@ -69,6 +69,10 @@
         $(document).ready(function() {
             'use strict';
 
+            $('#editJobForm').on('submit', function() {
+                $('#update-job').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
+            });
+
             // Initialize datepicker
             const dateFormat = 'yy-mm-dd';
             const options = {

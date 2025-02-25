@@ -46,12 +46,10 @@
 
         // Fungsi untuk menghapus data dengan mengirimkan form DELETE
         function deleteWithForm(id) {
+            $('#confirmDeleteButton').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
             const form = document.getElementById('deleteForm');
-
-            // Gunakan route() untuk membuat URL dinamis
             form.action = `{{ route('rkb_general.detail.destroy', ['id' => ':id']) }}`.replace(':id', id);
-
-            form.submit(); // Kirim form
+            form.submit();
         }
     </script>
 @endpush

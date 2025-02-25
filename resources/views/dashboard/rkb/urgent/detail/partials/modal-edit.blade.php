@@ -247,6 +247,11 @@
             $('#imagePreviewModalforEdit').on('hidden.bs.modal', function() {
                 $('#modalForEdit').modal('show');
             });
+
+            $('#editRKBUrgentForm').on('submit', function() {
+                $(this).find('button[type="submit"]').prop('disabled', true)
+                    .html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
+            });
         });
 
         // Function to display modal for editing and populate form with server data

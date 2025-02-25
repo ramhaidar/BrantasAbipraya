@@ -79,6 +79,8 @@
                 if (!form.checkValidity() || !validateSelect2()) {
                     event.preventDefault();
                     event.stopPropagation();
+                } else {
+                    $('#add-sparepart').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
                 }
                 form.classList.add('was-validated');
             });

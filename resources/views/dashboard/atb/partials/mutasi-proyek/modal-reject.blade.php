@@ -38,6 +38,7 @@
 
         $('#confirmRejectButton').on('click', function() {
             const id = $(this).data('id');
+            $(this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
             rejectWithForm(id);
         });
 

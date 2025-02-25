@@ -41,6 +41,7 @@
         // Event handler untuk tombol "Hapus" di modal delete
         $('#confirmDeleteButton').on('click', function() {
             const id = $(this).data('id'); // Ambil ID item dari data-id tombol
+            $(this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
             deleteWithForm(id); // Panggil fungsi untuk menghapus dengan form
         });
 

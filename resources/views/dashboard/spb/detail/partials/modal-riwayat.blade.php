@@ -31,7 +31,7 @@
                                                 <form class="d-inline" action="{{ route('spb.addendum', $item->id) }}" method="POST">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button class="btn btn-sm btn-warning me-2" type="submit" {{ $item->is_addendum ? 'disabled' : '' }}>
+                                                    <button class="btn btn-sm btn-warning me-2 submitButton" type="submit" {{ $item->is_addendum ? 'disabled' : '' }}>
                                                         <i class="fas fa-pencil"></i>
                                                     </button>
                                                 </form>
@@ -40,7 +40,7 @@
                                                 <form class="d-inline" action="{{ route('spb.destroy', $item->id) }}" method="POST">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button class="btn btn-sm btn-danger" type="submit" {{ $item->is_addendum == true && !isset($item->id_spb_original) ? 'disabled' : '' }}>
+                                                    <button class="btn btn-sm btn-danger submitButton" type="submit" {{ $item->is_addendum == true && !isset($item->id_spb_original) ? 'disabled' : '' }}>
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 </form>
@@ -70,6 +70,12 @@
             // Show history modal when button is clicked
             $(document).on('click', '.showRiwayatSPB', function() {
                 $('#modalRiwayatSPB').modal('show');
+            });
+
+            // Add loading spinner to submit buttons
+            $('form').on('submit', function() {
+                $(this).find('.submitButton').prop('disabled', true)
+                    .html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
             });
         });
     </script>

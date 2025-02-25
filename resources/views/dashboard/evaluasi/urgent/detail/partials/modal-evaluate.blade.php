@@ -31,6 +31,7 @@
     <script>
         $(document).ready(function() {
             const form = $('#approveRkbForm');
+            const confirmButton = $('#confirmEvaluateButton');
 
             $('#evaluateBtnButton').on('click', function() {
                 const action = $(this).data('action');
@@ -38,6 +39,8 @@
             });
 
             $('#confirmEvaluateButton').on('click', function() {
+                confirmButton.prop('disabled', true)
+                    .html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
                 form.submit();
             });
         });

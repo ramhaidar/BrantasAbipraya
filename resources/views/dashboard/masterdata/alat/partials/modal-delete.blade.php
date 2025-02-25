@@ -53,11 +53,11 @@
 
         // Function to delete data by submitting the DELETE form
         function deleteWithForm(id) {
+            $('#confirmDeleteButton').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
             const form = document.getElementById('deleteForm');
-            // Generate action URL using named route and replace ':id' with the item ID
             const actionUrl = "{{ route('master_data_alat.destroy', ':id') }}".replace(':id', id);
             form.action = actionUrl;
-            form.submit(); // Submit the form
+            form.submit();
         }
     </script>
 @endpush

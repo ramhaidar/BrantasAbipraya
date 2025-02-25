@@ -55,6 +55,11 @@
 
                 form.submit(); // Submit the form
             }
+
+            // Disable the finalize button and show a spinner when the form is submitted
+            $('#finalizeForm').on('submit', function() {
+                $('#confirmFinalizeButton').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
+            });
         });
     </script>
 @endpush

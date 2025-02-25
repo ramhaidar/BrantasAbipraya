@@ -89,6 +89,10 @@
             document.getElementById('periode2').addEventListener('click', function() {
                 this.showPicker();
             })
+
+            $('#editRKBForm').on('submit', function() {
+                $('#update-rkb').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
+            });
         });
 
         // Function to display modal for editing and populate form with server data

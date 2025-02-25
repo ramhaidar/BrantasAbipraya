@@ -43,6 +43,8 @@
                 if (!form.checkValidity()) {
                     event.preventDefault();
                     event.stopPropagation();
+                } else {
+                    $('#add-proyek').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
                 }
                 form.classList.add('was-validated');
             });

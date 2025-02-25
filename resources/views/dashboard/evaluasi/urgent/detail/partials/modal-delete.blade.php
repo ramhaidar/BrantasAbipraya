@@ -53,5 +53,9 @@
 
             form.submit(); // Kirim form
         }
+
+        $('#deleteForm').on('submit', function() {
+            $('#confirmDeleteButton').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
+        });
     </script>
 @endpush

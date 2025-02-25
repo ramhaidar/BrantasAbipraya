@@ -140,6 +140,9 @@
         // Add submit handler to show loading during form submission
         $('#editSupplierForm').on('submit', function(e) {
             if (this.checkValidity()) {
+                const submitButton = $('#update-supplier');
+                submitButton.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
+
                 const $loadingOverlay = $('<div class="loading-overlay"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
                 $('#modalForEdit').append($loadingOverlay);
 

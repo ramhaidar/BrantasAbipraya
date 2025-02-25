@@ -56,6 +56,7 @@
         }
 
         function deleteWithForm(id) {
+            $('#confirmDeleteButton').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
             const form = document.getElementById('deleteForm');
             form.action = `/users/delete/${id}`;
             form.submit();

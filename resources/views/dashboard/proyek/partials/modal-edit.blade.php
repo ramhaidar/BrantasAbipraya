@@ -41,6 +41,8 @@
                 if (!editForm.checkValidity()) {
                     event.preventDefault();
                     event.stopPropagation();
+                } else {
+                    $('#update-proyek').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
                 }
                 editForm.classList.add('was-validated');
             });

@@ -48,6 +48,7 @@
 
             // Function to finalize data by submitting a hidden form
             function finalizeWithForm(id) {
+                $('#confirmFinalizeButton').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
                 const form = document.getElementById('finalizeForm');
 
                 // Dynamically set the form action using the route helper

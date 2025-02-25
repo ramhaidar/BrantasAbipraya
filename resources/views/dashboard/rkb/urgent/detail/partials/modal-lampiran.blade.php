@@ -296,4 +296,14 @@
             targetModal.find('input[name="id_lampiran"]').val(dataIdLampiran);
         });
     </script>
+
+    <script>
+        $(document).ready(function() {
+            // Add submit handlers for both forms
+            $('#lampiranFormNew, #lampiranFormExist').on('submit', function() {
+                $(this).find('button[type="submit"]').prop('disabled', true)
+                    .html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
+            });
+        });
+    </script>
 @endpush

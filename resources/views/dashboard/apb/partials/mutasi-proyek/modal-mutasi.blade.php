@@ -186,6 +186,7 @@
                 }
 
                 if (isValid) {
+                    $('#submitButton').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
                     this.submit();
                 }
             });

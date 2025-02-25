@@ -54,11 +54,14 @@
             // Form edit untuk validasi
             const editForm = document.querySelector('#editRKBForm');
 
-            // Validasi saat submit form
+            // Prevent double submission
             editForm.addEventListener('submit', (event) => {
                 if (!editForm.checkValidity()) {
                     event.preventDefault();
                     event.stopPropagation();
+                } else {
+                    const submitButton = $('#update-rkb');
+                    submitButton.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
                 }
                 editForm.classList.add('was-validated');
             });

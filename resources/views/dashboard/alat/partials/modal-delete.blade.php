@@ -42,6 +42,7 @@
         });
 
         function deleteWithForm(id) {
+            $('#confirmDeleteButton').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
             const form = document.getElementById('deleteForm');
             form.action = `{{ route('alat.destroy', ':id') }}`.replace(':id', id);
             form.submit();

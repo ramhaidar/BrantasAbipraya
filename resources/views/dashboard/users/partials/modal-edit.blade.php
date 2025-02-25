@@ -167,7 +167,7 @@
             if (this.checkValidity()) {
                 const $loadingOverlay = $('<div class="loading-overlay"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
                 $('#modalForEdit').append($loadingOverlay);
-
+                $('#update-user').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
                 // Remove overlay after 500ms (adjust based on your needs)
                 setTimeout(() => $loadingOverlay.remove(), 500);
             }

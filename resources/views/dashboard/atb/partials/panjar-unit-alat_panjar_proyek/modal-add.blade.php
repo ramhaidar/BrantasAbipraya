@@ -244,6 +244,7 @@
             // Validate form on submit button click
             $('#submitButton').on('click', function() {
                 if ($('#addDataForm')[0].checkValidity()) {
+                    $(this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
                     $('#addDataForm').submit();
                 } else {
                     $('#addDataForm').addClass('was-validated');

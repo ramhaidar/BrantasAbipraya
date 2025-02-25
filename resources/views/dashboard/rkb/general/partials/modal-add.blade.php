@@ -124,6 +124,10 @@
             $('#periode').on('click', function() {
                 this.showPicker();
             });
+
+            $('#rkbgeneralForm').submit(function() {
+                $('#add-sparepart').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
+            });
         });
     </script>
 @endpush

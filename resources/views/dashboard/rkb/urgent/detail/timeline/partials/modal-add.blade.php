@@ -47,6 +47,10 @@
 @push('scripts_3')
     <script>
         $(document).ready(function() {
+            $('#addJobForm').on('submit', function() {
+                $(this).find('button[type="submit"]').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
+            });
+
             var dateFormat = 'yy-mm-dd';
             var options = {
                 dateFormat: dateFormat,

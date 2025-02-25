@@ -339,5 +339,12 @@
                 $('#modalForAdd').modal('show');
             });
         });
+
+        $('#detailrkburgentForm').on('submit', function(event) {
+            if (this.checkValidity()) {
+                $(this).find('button[type="submit"]').prop('disabled', true)
+                    .html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
+            }
+        });
     </script>
 @endpush

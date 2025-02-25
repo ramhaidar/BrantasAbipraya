@@ -413,17 +413,25 @@
             $('#submitButtonNormal').on('click', function(e) {
                 e.preventDefault();
                 const form = $('#addDataFormNormal');
+                const submitButton = $(this);
 
                 // Add Bootstrap's validation class
                 form.addClass('was-validated');
 
                 if (validateForm() && validateSelect2()) {
+                    // Disable button and show loading spinner
+                    submitButton.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
                     form.submit();
+                } else {
+                    // Re-enable button if validation fails
+                    submitButton.prop('disabled', false).html('Tambah Data');
                 }
             });
 
-            // Remove all input/change validation handlers
-            // Keep only the basic reset and init functionality
+            // Reset button should also reset the submit button state
+            $('#resetButtonNormal').on('click', function() {
+                $('#submitButtonNormal').prop('disabled', false).html('Tambah Data');
+            });
         });
     </script>
 @endpush

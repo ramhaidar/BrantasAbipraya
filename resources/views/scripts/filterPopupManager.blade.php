@@ -227,6 +227,12 @@
         const container = $(selector).first().closest('.checkbox-list');
         const searchText = searchEvent ? $(searchEvent.target).val().toLowerCase() : '';
 
+        // Store checkbox states before filtering
+        const checkboxStates = {};
+        container.find('input[type="checkbox"]').each(function() {
+            checkboxStates[$(this).val()] = $(this).prop('checked');
+        });
+
         const checkedItems = [];
         const uncheckedItems = [];
 
@@ -242,7 +248,8 @@
             const item = $(this);
             const label = item.find('label').text();
             const labelLower = label.toLowerCase();
-            const isChecked = item.find('input[type="checkbox"]').prop('checked');
+            const checkbox = item.find('input[type="checkbox"]');
+            const isChecked = checkbox.prop('checked');
             const matchesSearch = !searchText || labelLower.includes(searchText);
             const priority = getItemPriority(label);
 
@@ -295,6 +302,14 @@
         }) => {
             item.toggle(visible);
             container.append(item);
+        });
+
+        // Restore checkbox states after filtering
+        container.find('input[type="checkbox"]').each(function() {
+            const value = $(this).val();
+            if (checkboxStates[value] !== undefined) {
+                $(this).prop('checked', checkboxStates[value]);
+            }
         });
     }
 
@@ -457,12 +472,12 @@
             event.stopPropagation();
         });
 
-        // Apply debounced search filter
+        // Apply debounced search filter with a longer delay
         const debouncedFilter = debounce((event) => {
             const popupId = $(event.target).closest('.filter-popup').attr('id');
             const type = popupId.replace('-filter', '').replace('-', '_');
             filterCheckboxes(type, event);
-        }, 300); // Wait 300ms before applying filter
+        }, 500); // Increased to 500ms for better performance
 
         // Attach debounced filter to search inputs
         $('.filter-popup input[type="text"]').on('input', debouncedFilter);
@@ -477,19 +492,6 @@
                 });
             }
         });
-
-        // Set interval to check and apply filter every second if input has value
-        setInterval(() => {
-            $('.filter-popup input[type="text"]').each(function() {
-                if ($(this).val()) {
-                    const popupId = $(this).closest('.filter-popup').attr('id');
-                    const type = popupId.replace('-filter', '').replace('-', '_');
-                    filterCheckboxes(type, {
-                        target: this
-                    });
-                }
-            });
-        }, 60);
 
         // Add event listeners to clear other inputs when one changes
         const inputs = document.querySelectorAll('input[type="number"], .datepicker');

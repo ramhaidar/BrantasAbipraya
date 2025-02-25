@@ -21,10 +21,10 @@ return new class extends Migration
                 ->nullOnDelete ();
 
             $table->timestamps ();
-        } );
 
-        // Add partial unique index
-        DB::statement ( 'CREATE UNIQUE INDEX part_number_unique ON master_data_sparepart (part_number) WHERE part_number != \'-\'' );
+            // Unique constraint untuk kombinasi nama dan part_number
+            $table->unique ( [ 'nama', 'part_number' ] );
+        } );
     }
 
     public function down () : void

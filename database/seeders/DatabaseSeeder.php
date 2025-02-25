@@ -20,8 +20,10 @@ class DatabaseSeeder extends Seeder
                 ProyekSeeder::class,
                 KategoriSparepartSeeder::class,
                 MasterDataAlatSeeder::class,
-                MasterDataSparepartSeeder::class,
-                MasterDataSupplierSeeder::class,
+                    // MasterDataSparepartSeeder::class,
+                    // MasterDataSupplierSeeder::class,
+
+                _BudongBudongSeeder::class,
             ]
         );
     }

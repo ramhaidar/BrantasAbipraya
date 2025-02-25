@@ -106,15 +106,17 @@
                             <label class="form-label required" for="satuan">Satuan</label>
                             <select class="form-control" id="satuan" name="satuan" required>
                                 <option value="">Pilih Satuan</option>
-                                <option value="BTL">BTL</option>
-                                <option value="LTR">LTR</option>
-                                <option value="PCS">PCS</option>
-                                <option value="KG">KG</option>
-                                <option value="PAIL">PAIL</option>
-                                <option value="DRUM">DRUM</option>
-                                <option value="SET">SET</option>
-                                <option value="PACK">PACK</option>
-                                <option value="BOX">BOX</option>
+                                <option value="Btl">Btl</option>
+                                <option value="Ltr">Ltr</option>
+                                <option value="Pcs">Pcs</option>
+                                <option value="Kg">Kg</option>
+                                <option value="Pail">Pail</option>
+                                <option value="Drum">Drum</option>
+                                <option value="Set">Set</option>
+                                <option value="Pack">Pack</option>
+                                <option value="Box">Box</option>
+                                <option value="Ls">Ls</option>
+                                <option value="Ken">Ken</option>
                             </select>
                             <div class="invalid-feedback">Satuan diperlukan.</div>
                         </div>

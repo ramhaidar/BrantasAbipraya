@@ -1,32 +1,3 @@
-@push('styles_3')
-    <style>
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
-
-        .spinner-border {
-            width: 3rem;
-            height: 3rem;
-        }
-
-        .img-thumbnail {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            cursor: pointer;
-        }
-    </style>
-@endpush
-
 <div class="fade modal" id="modalForAddBypass" aria-hidden="true" aria-labelledby="staticBackdropLabel" tabindex="-1">
     <div class="modal-dialog modal-dialog-scrollable modal-xl modal-dialog-centered">
         <div class="modal-content rounded-4">
@@ -274,13 +245,9 @@
                     const originalText = submitButton.html();
 
                     submitButton.prop('disabled', true)
-                        .html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...');
+                        .html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
 
                     form.submit();
-
-                    setTimeout(() => {
-                        submitButton.prop('disabled', false).html(originalText);
-                    }, 2000);
                 }
             });
 

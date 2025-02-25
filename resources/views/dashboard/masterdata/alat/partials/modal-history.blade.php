@@ -33,28 +33,6 @@
             max-height: calc(100vh - 300px);
             height: auto;
         }
-
-        .loading-overlay {
-            position: fixed;
-            /* Change from absolute to fixed */
-            top: 0;
-            left: 0;
-            width: 100vw;
-            /* Change to viewport width */
-            height: 100vh;
-            /* Change to viewport height */
-            background: rgba(255, 255, 255, 0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1060;
-            /* Increase z-index to be above modal */
-        }
-
-        .spinner-border {
-            width: 3rem;
-            height: 3rem;
-        }
     </style>
 @endpush
 

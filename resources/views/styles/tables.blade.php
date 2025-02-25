@@ -27,6 +27,15 @@
         right: 10px;
     }
 
+    .img-preview {
+        max-width: 200px;
+        max-height: 200px;
+        margin: 5px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 5px;
+    }
+
     .img-thumbnail {
         width: 120px;
         height: 120px;
@@ -47,9 +56,16 @@
         z-index: 9999;
     }
 
+    .preview-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
     .spinner-border {
-        width: 3rem;
-        height: 3rem;
+        width: 1dvw;
+        height: 1dvw;
     }
 
     .table-responsive {

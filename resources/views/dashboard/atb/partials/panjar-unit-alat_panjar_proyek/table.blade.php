@@ -159,13 +159,13 @@
                                         $hasImages = !empty($files);
                                     }
                                 @endphp
-                                <button class="btn {{ $hasImages ? 'btn-primary' : 'btn-secondary' }} mx-1" onclick="showDokumentasiModal('{{ $item->id }}')" {{ !$hasImages ? 'disabled' : '' }}>
+                                <button class="btn {{ $hasImages ? 'btn-primary' : 'btn-secondary' }} mx-1" type="button" onclick="showDokumentasiModal('{{ $item->id }}')" {{ !$hasImages ? 'disabled' : '' }}>
                                     <i class="bi bi-images"></i>
                                 </button>
                             </td>
                             @if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin')
                                 <td class="text-center action-cell">
-                                    <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item->id }}">
+                                    <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item->id }}" type="button">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </td>

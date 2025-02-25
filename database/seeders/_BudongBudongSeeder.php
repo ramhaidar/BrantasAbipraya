@@ -335,6 +335,11 @@ class _BudongBudongSeeder extends Seeder
                 'assigned_at'         => now (),
                 'removed_at'          => null
             ] );
+
+            // Update the current project for the equipment
+            $alat->update ( [ 
+                'id_proyek_current' => $proyek->id
+            ] );
         }
     }
 }

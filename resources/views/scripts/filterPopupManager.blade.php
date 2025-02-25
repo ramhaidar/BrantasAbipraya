@@ -325,10 +325,8 @@
 
         const urlParams = new URLSearchParams(window.location.search);
 
-        // Reset to first page when filter changes
-        if (urlParams.has('page')) {
-            urlParams.set('page', '1');
-        }
+        // Always reset to first page when filter changes
+        urlParams.set('page', '1');
 
         // Update URL parameters
         if (selected.length > 0) {
@@ -559,6 +557,12 @@
             }
         }
 
+        // Update the URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+
+        // Always reset to first page when applying filters
+        urlParams.set('page', '1');
+
         if (values.length > 0) {
             // Encode the values
             const encodedValue = btoa(values.join('||'));
@@ -568,19 +572,15 @@
             if (hiddenInput) {
                 hiddenInput.value = encodedValue;
             }
+
+            urlParams.set(`selected_${paramName}`, btoa(values.join('||')));
         } else {
             // Clear the hidden input if no values are selected
             const hiddenInput = document.getElementById(`selected-${paramName}`);
             if (hiddenInput) {
                 hiddenInput.value = '';
             }
-        }
 
-        // Update the URL parameters
-        const urlParams = new URLSearchParams(window.location.search);
-        if (values.length > 0) {
-            urlParams.set(`selected_${paramName}`, btoa(values.join('||')));
-        } else {
             urlParams.delete(`selected_${paramName}`);
         }
 

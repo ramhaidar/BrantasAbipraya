@@ -227,12 +227,6 @@
         const container = $(selector).first().closest('.checkbox-list');
         const searchText = searchEvent ? $(searchEvent.target).val().toLowerCase() : '';
 
-        // Store checkbox states before filtering
-        const checkboxStates = {};
-        container.find('input[type="checkbox"]').each(function() {
-            checkboxStates[$(this).val()] = $(this).prop('checked');
-        });
-
         const checkedItems = [];
         const uncheckedItems = [];
 
@@ -248,8 +242,7 @@
             const item = $(this);
             const label = item.find('label').text();
             const labelLower = label.toLowerCase();
-            const checkbox = item.find('input[type="checkbox"]');
-            const isChecked = checkbox.prop('checked');
+            const isChecked = item.find('input[type="checkbox"]').prop('checked');
             const matchesSearch = !searchText || labelLower.includes(searchText);
             const priority = getItemPriority(label);
 
@@ -303,14 +296,6 @@
             item.toggle(visible);
             container.append(item);
         });
-
-        // Restore checkbox states after filtering
-        container.find('input[type="checkbox"]').each(function() {
-            const value = $(this).val();
-            if (checkboxStates[value] !== undefined) {
-                $(this).prop('checked', checkboxStates[value]);
-            }
-        });
     }
 
     /**
@@ -325,8 +310,10 @@
 
         const urlParams = new URLSearchParams(window.location.search);
 
-        // Always reset to first page when filter changes
-        urlParams.set('page', '1');
+        // Reset to first page when filter changes
+        if (urlParams.has('page')) {
+            urlParams.set('page', '1');
+        }
 
         // Update URL parameters
         if (selected.length > 0) {
@@ -470,12 +457,12 @@
             event.stopPropagation();
         });
 
-        // Apply debounced search filter with a longer delay
+        // Apply debounced search filter
         const debouncedFilter = debounce((event) => {
             const popupId = $(event.target).closest('.filter-popup').attr('id');
             const type = popupId.replace('-filter', '').replace('-', '_');
             filterCheckboxes(type, event);
-        }, 500); // Increased to 500ms for better performance
+        }, 300); // Wait 300ms before applying filter
 
         // Attach debounced filter to search inputs
         $('.filter-popup input[type="text"]').on('input', debouncedFilter);
@@ -557,12 +544,6 @@
             }
         }
 
-        // Update the URL parameters
-        const urlParams = new URLSearchParams(window.location.search);
-
-        // Always reset to first page when applying filters
-        urlParams.set('page', '1');
-
         if (values.length > 0) {
             // Encode the values
             const encodedValue = btoa(values.join('||'));
@@ -572,15 +553,19 @@
             if (hiddenInput) {
                 hiddenInput.value = encodedValue;
             }
-
-            urlParams.set(`selected_${paramName}`, btoa(values.join('||')));
         } else {
             // Clear the hidden input if no values are selected
             const hiddenInput = document.getElementById(`selected-${paramName}`);
             if (hiddenInput) {
                 hiddenInput.value = '';
             }
+        }
 
+        // Update the URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        if (values.length > 0) {
+            urlParams.set(`selected_${paramName}`, btoa(values.join('||')));
+        } else {
             urlParams.delete(`selected_${paramName}`);
         }
 

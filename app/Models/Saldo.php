@@ -29,7 +29,7 @@ class Saldo extends Model
         'tipe'                     => 'string',
         'satuan'                   => 'string',
         'quantity'                 => 'integer',
-        'harga'                    => 'integer',
+        'harga'                    => 'decimal:5',
         'id_atb'                   => 'integer',
         'id_proyek'                => 'integer',
         'id_asal_proyek'           => 'integer',

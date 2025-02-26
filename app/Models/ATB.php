@@ -35,7 +35,7 @@ class ATB extends Model
         'surat_tanda_terima'       => 'string',
         'tanggal'                  => 'date',
         'quantity'                 => 'integer',
-        'harga'                    => 'integer',
+        'harga'                    => 'decimal:5',
         'id_proyek'                => 'integer',
         'id_asal_proyek'           => 'integer',
         'id_apb_mutasi'            => 'integer',

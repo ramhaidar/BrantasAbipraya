@@ -30,7 +30,7 @@ class DetailSPB extends Model
         'id'                       => 'integer',
         'quantity_po'              => 'integer',
         'quantity_belum_diterima'  => 'integer',
-        'harga'                    => 'integer',
+        'harga'                    => 'decimal:5',
         'satuan'                   => 'string',
         'id_master_data_sparepart' => 'integer',
         'id_master_data_alat'      => 'integer',

@@ -74,8 +74,14 @@
 
             // Add loading spinner to submit buttons
             $('form').on('submit', function() {
-                $(this).find('.submitButton').prop('disabled', true)
-                    .html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
+                $(this).find('.submitButton').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
+            });
+
+            // Add loading spinner to view buttons
+            $(document).on('click', 'a.btn-primary i.fas.fa-eye', function(e) {
+                var viewButton = $(this).parent();
+                var originalContent = viewButton.html();
+                viewButton.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
             });
         });
     </script>

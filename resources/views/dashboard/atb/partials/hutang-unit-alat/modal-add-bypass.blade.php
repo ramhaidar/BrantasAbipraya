@@ -89,8 +89,8 @@
 
                         <div class="col-12">
                             <label class="form-label required" for="harga">Harga (Rp.)</label>
-                            <input class="form-control" id="harga" name="harga" type="number" min="0" placeholder="Harga" required>
-                            <div class="invalid-feedback">Harga diperlukan.</div>
+                            <input class="form-control" id="harga" name="harga" type="text" placeholder="Harga" required>
+                            <div class="invalid-feedback">Harga diperlukan dan harus berupa angka dengan format yang benar.</div>
                         </div>
 
                     </div>
@@ -121,6 +121,56 @@
         $(document).ready(function() {
             // Add loading overlay to body
             $('body').append('<div class="loading-overlay" style="display: none;"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+
+            // Format number function for Indonesian locale
+            function formatRupiah(angka, prefix) {
+                var number_string = angka.replace(/[^,\d]/g, '').toString(),
+                    split = number_string.split(','),
+                    sisa = split[0].length % 3,
+                    rupiah = split[0].substr(0, sisa),
+                    ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+                if (ribuan) {
+                    separator = sisa ? '.' : '';
+                    rupiah += separator + ribuan.join('.');
+                }
+
+                rupiah = split[1] !== undefined ? rupiah + ',' + split[1].substr(0, 2) : rupiah;
+                return prefix === undefined ? rupiah : (rupiah ? 'Rp. ' + rupiah : '');
+            }
+
+            // Parse Indonesian formatted number back to standard decimal
+            function parseRupiah(rupiahString) {
+                return parseFloat(rupiahString.replace(/\./g, '').replace(',', '.'));
+            }
+
+            // Handle harga input formatting
+            $('#harga').on('input', function() {
+                var value = $(this).val();
+
+                // Remove non-numeric characters except comma
+                value = value.replace(/[^\d,]/g, '');
+
+                // Ensure only one comma exists
+                var commaCount = (value.match(/,/g) || []).length;
+                if (commaCount > 1) {
+                    value = value.replace(/,/g, function(match, offset, string) {
+                        return offset === string.indexOf(',') ? match : '';
+                    });
+                }
+
+                // Limit to 2 decimal places after comma
+                if (value.indexOf(',') !== -1) {
+                    var parts = value.split(',');
+                    if (parts[1].length > 2) {
+                        parts[1] = parts[1].substring(0, 2);
+                        value = parts.join(',');
+                    }
+                }
+
+                // Format the number with thousand separators
+                $(this).val(formatRupiah(value));
+            });
 
             // Initialize select2 components
             $('#id_kategori_sparepart').select2({
@@ -244,6 +294,25 @@
                     const submitButton = $(this);
                     const originalText = submitButton.html();
 
+                    // Convert the formatted price back to standard decimal before submit
+                    const hargaFormatted = $('#harga').val();
+                    const hargaValue = parseRupiah(hargaFormatted);
+
+                    // Create a hidden input to store the converted value
+                    if ($('#hargaHidden').length === 0) {
+                        $('<input>').attr({
+                            type: 'hidden',
+                            id: 'hargaHidden',
+                            name: 'harga',
+                            value: hargaValue
+                        }).appendTo(form);
+
+                        // Remove the name attribute from the original field to avoid duplicates
+                        $('#harga').removeAttr('name');
+                    } else {
+                        $('#hargaHidden').val(hargaValue);
+                    }
+
                     submitButton.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
 
                     form.submit();
@@ -272,9 +341,18 @@
                     isValid = false;
                 }
 
-                if (parseFloat($('#harga').val()) <= 0) {
+                // Validate harga
+                const harga = $('#harga').val();
+                if (!harga) {
                     $('#harga').addClass('is-invalid');
                     isValid = false;
+                } else {
+                    // Check if value can be parsed as a number and is greater than zero
+                    const hargaValue = parseRupiah(harga);
+                    if (isNaN(hargaValue) || hargaValue <= 0) {
+                        $('#harga').addClass('is-invalid');
+                        isValid = false;
+                    }
                 }
 
                 if (!isValid) {

@@ -161,8 +161,8 @@
                             <td class="text-center">{{ $item->detailSpb->masterDataSparepart->part_number }}</td>
                             <td class="text-center">{{ $item->detailSpb->quantity_po }}</td>
                             <td class="text-center">{{ $item->detailSpb->satuan }}</td>
-                            <td class="currency-value">{{ number_format($item->detailSpb->harga, 0, ',', '.') }}</td>
-                            <td class="currency-value">{{ number_format($item->detailSpb->quantity_po * $item->detailSpb->harga, 0, ',', '.') }}</td>
+                            <td class="currency-value">{{ number_format($item->detailSpb->harga, 2, ',', '.') }}</td>
+                            <td class="currency-value">{{ number_format($item->detailSpb->quantity_po * $item->detailSpb->harga, 2, ',', '.') }}</td>
                         </tr>
                     @empty
                         <tr>
@@ -185,16 +185,16 @@
             <tfoot class="table-primary">
                 <tr>
                     <th class="ps-4" style="text-align: left;" colspan="6">Jumlah</th>
-                    <th class="currency-value">{{ number_format($totalHarga, 0, ',', '.') }}</th>
-                    <th class="currency-value">{{ number_format($totalJumlahHarga, 0, ',', '.') }}</th>
+                    <th class="currency-value">{{ number_format($totalHarga, 2, ',', '.') }}</th>
+                    <th class="currency-value">{{ number_format($totalJumlahHarga, 2, ',', '.') }}</th>
                 </tr>
                 <tr>
                     <th class="ps-4" style="text-align: left;" colspan="7">PPN 11%</th>
-                    <th class="currency-value">{{ number_format($ppn, 0, ',', '.') }}</th>
+                    <th class="currency-value">{{ number_format($ppn, 2, ',', '.') }}</th>
                 </tr>
                 <tr>
                     <th class="ps-4" style="text-align: left;" colspan="7">Grand Total</th>
-                    <th class="currency-value">{{ number_format($grandTotal, 0, ',', '.') }}</th>
+                    <th class="currency-value">{{ number_format($grandTotal, 2, ',', '.') }}</th>
                 </tr>
             </tfoot>
         </table>

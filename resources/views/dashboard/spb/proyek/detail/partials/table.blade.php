@@ -101,23 +101,7 @@
             <thead class="table-primary">
                 <tr>
                     @foreach ($headers as $header)
-                        @include(
-                            'components.table-header-filter',
-                            array_merge($header, [
-                                'uniqueValues' => [
-                                    'jenis_alat' => $uniqueJenisAlat ?? [],
-                                    'kode_alat' => $uniqueKodeAlat ?? [],
-                                    'kategori' => $uniqueKategori ?? [],
-                                    'sparepart' => $uniqueSparepart ?? [],
-                                    'merk' => $uniqueMerk ?? [],
-                                    'supplier' => $uniqueSupplier ?? [],
-                                    'quantity_po' => $uniqueQuantityPO ?? [],
-                                    'quantity_diterima' => $uniqueQuantityDiterima ?? [],
-                                    'satuan' => $uniqueSatuan ?? [],
-                                    'harga' => $uniqueHarga ?? [],
-                                    'jumlah_harga' => $uniqueJumlahHarga ?? [],
-                                ],
-                            ]))
+                        @include('components.table-header-filter', $header)
                     @endforeach
                 </tr>
             </thead>
@@ -138,8 +122,8 @@
                             <td class="text-center">{{ $item->linkSpbDetailSpb[$loop->index]->detailSPB->quantity_po }}</td>
                             <td class="text-center">{{ $detail->detailSPB->atbs->sum('quantity') }}</td>
                             <td class="text-center">{{ $detail->detailSPB->satuan }}</td>
-                            <td class="currency-value">{{ number_format($detail->detailSPB->harga, 0, ',', '.') }}</td>
-                            <td class="currency-value">{{ number_format($detail->detailSPB->harga * $detail->detailSPB->quantity_po, 0, ',', '.') }}</td>
+                            <td class="currency-value">{{ number_format($detail->detailSPB->harga, 2, ',', '.') }}</td>
+                            <td class="currency-value">{{ number_format($detail->detailSPB->harga * $detail->detailSPB->quantity_po, 2, ',', '.') }}</td>
                         </tr>
                     @empty
                         <tr>
@@ -181,11 +165,13 @@
     <script>
         $(document).ready(function() {
             function formatRibuan(angka) {
-                return angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                // Format untuk locale Indonesia (koma untuk desimal, titik untuk ribuan)
+                return angka.toFixed(2).toString().replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, ".");
             }
 
             function unformatRibuan(rupiah) {
-                return parseInt(rupiah.replace(/[^\d]/g, '')) || 0;
+                // Ubah format Indonesia ke format numerik
+                return parseFloat(rupiah.replace(/\./g, '').replace(',', '.')) || 0;
             }
 
             function updateJumlahHarga(row) {

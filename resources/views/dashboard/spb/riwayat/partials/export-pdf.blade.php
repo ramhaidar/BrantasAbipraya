@@ -82,23 +82,23 @@
                     <td>{{ $item->detailSpb->masterDataSparepart->part_number }}</td>
                     <td>{{ $item->detailSpb->quantity_po }}</td>
                     <td>{{ $item->detailSpb->satuan }}</td>
-                    <td>Rp {{ number_format($item->detailSpb->harga, 0, ',', '.') }}</td>
-                    <td>Rp {{ number_format($item->detailSpb->quantity_po * $item->detailSpb->harga, 0, ',', '.') }}</td>
+                    <td>Rp {{ number_format($item->detailSpb->harga, 2, ',', '.') }}</td>
+                    <td>Rp {{ number_format($item->detailSpb->quantity_po * $item->detailSpb->harga, 2, ',', '.') }}</td>
                 </tr>
             @endforeach
         </tbody>
         <tfoot>
             <tr>
                 <th style="text-align: left" colspan="7">Jumlah</th>
-                <th>Rp {{ number_format($totalJumlahHarga, 0, ',', '.') }}</th>
+                <th>Rp {{ number_format($totalJumlahHarga, 2, ',', '.') }}</th>
             </tr>
             <tr>
                 <th style="text-align: left" colspan="7">PPN 11%</th>
-                <th>Rp {{ number_format($ppn, 0, ',', '.') }}</th>
+                <th>Rp {{ number_format($ppn, 2, ',', '.') }}</th>
             </tr>
             <tr>
                 <th style="text-align: left" colspan="7">Grand Total</th>
-                <th>Rp {{ number_format($grandTotal, 0, ',', '.') }}</th>
+                <th>Rp {{ number_format($grandTotal, 2, ',', '.') }}</th>
             </tr>
         </tfoot>
     </table>

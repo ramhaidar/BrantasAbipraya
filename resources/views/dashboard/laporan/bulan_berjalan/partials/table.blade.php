@@ -113,21 +113,21 @@
             <tr class="header-row" onclick="toggleAccordion('suku-cadang')">
                 <td><strong>I</strong></td>
                 <td><strong>SUKU CADANG</strong></td>
-                <td class="currency-value"><strong>{{ number_format($sc_total_atb_hutang, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($sc_total_atb_panjar, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($sc_total_atb_mutasi, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($sc_total_atb_panjar_proyek, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($sc_total_atb, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($sc_total_apb_hutang, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($sc_total_apb_panjar, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($sc_total_apb_mutasi, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($sc_total_apb_panjar_proyek, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($sc_total_apb, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($sc_total_saldo_hutang, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($sc_total_saldo_panjar, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($sc_total_saldo_mutasi, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($sc_total_saldo_panjar_proyek, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($sc_total_saldo, 0, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($sc_total_atb_hutang, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($sc_total_atb_panjar, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($sc_total_atb_mutasi, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($sc_total_atb_panjar_proyek, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($sc_total_atb, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($sc_total_apb_hutang, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($sc_total_apb_panjar, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($sc_total_apb_mutasi, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($sc_total_apb_panjar_proyek, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($sc_total_apb, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($sc_total_saldo_hutang, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($sc_total_saldo_panjar, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($sc_total_saldo_mutasi, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($sc_total_saldo_panjar_proyek, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($sc_total_saldo, 2, ',', '.') }}</strong></td>
             </tr>
 
             <!-- Hitung total untuk bagian Perbaikan -->
@@ -174,21 +174,21 @@
             <tr class="collapse suku-cadang" onclick="toggleAccordion('perbaikan')">
                 <td><strong>A.</strong></td>
                 <td><strong>PERBAIKAN</strong></td>
-                <td class="currency-value"><strong>{{ number_format($perbaikan_total_atb_hutang, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($perbaikan_total_atb_panjar, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($perbaikan_total_atb_mutasi, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($perbaikan_total_atb_panjar_proyek, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($perbaikan_total_atb, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($perbaikan_total_apb_hutang, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($perbaikan_total_apb_panjar, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($perbaikan_total_apb_mutasi, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($perbaikan_total_apb_panjar_proyek, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($perbaikan_total_apb, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($perbaikan_total_saldo_hutang, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($perbaikan_total_saldo_panjar, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($perbaikan_total_saldo_mutasi, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($perbaikan_total_saldo_panjar_proyek, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($perbaikan_total_saldo, 0, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($perbaikan_total_atb_hutang, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($perbaikan_total_atb_panjar, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($perbaikan_total_atb_mutasi, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($perbaikan_total_atb_panjar_proyek, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($perbaikan_total_atb, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($perbaikan_total_apb_hutang, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($perbaikan_total_apb_panjar, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($perbaikan_total_apb_mutasi, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($perbaikan_total_apb_panjar_proyek, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($perbaikan_total_apb, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($perbaikan_total_saldo_hutang, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($perbaikan_total_saldo_panjar, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($perbaikan_total_saldo_mutasi, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($perbaikan_total_saldo_panjar_proyek, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($perbaikan_total_saldo, 2, ',', '.') }}</strong></td>
             </tr>
 
             @foreach ($sums as $key => $category)
@@ -196,21 +196,21 @@
                     <tr class="collapse perbaikan">
                         <td>{{ preg_replace('/(\d+)/', '.$1', $key) }}</td>
                         <td>{{ ucwords(strtolower($category['nama'])) }}</td>
-                        <td class="currency-value">{{ number_format($category['atb']['hutang-unit-alat'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['atb']['panjar-unit-alat'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['atb']['mutasi-proyek'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['atb']['panjar-proyek'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['atb']['total'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['apb']['hutang-unit-alat'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['apb']['panjar-unit-alat'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['apb']['mutasi-proyek'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['apb']['panjar-proyek'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['apb']['total'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['saldo']['hutang-unit-alat'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['saldo']['panjar-unit-alat'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['saldo']['mutasi-proyek'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['saldo']['panjar-proyek'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['saldo']['total'], 0, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['atb']['hutang-unit-alat'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['atb']['panjar-unit-alat'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['atb']['mutasi-proyek'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['atb']['panjar-proyek'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['atb']['total'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['apb']['hutang-unit-alat'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['apb']['panjar-unit-alat'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['apb']['mutasi-proyek'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['apb']['panjar-proyek'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['apb']['total'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['saldo']['hutang-unit-alat'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['saldo']['panjar-unit-alat'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['saldo']['mutasi-proyek'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['saldo']['panjar-proyek'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['saldo']['total'], 2, ',', '.') }}</td>
                     </tr>
                 @endif
             @endforeach
@@ -258,21 +258,21 @@
             <tr class="collapse suku-cadang" onclick="toggleAccordion('pemeliharaan')">
                 <td><strong>B.</strong></td>
                 <td><strong>PEMELIHARAAN</strong></td>
-                <td class="currency-value"><strong>{{ number_format($pemeliharaan_total_atb_hutang, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($pemeliharaan_total_atb_panjar, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($pemeliharaan_total_atb_mutasi, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($pemeliharaan_total_atb_panjar_proyek, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($pemeliharaan_total_atb, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($pemeliharaan_total_apb_hutang, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($pemeliharaan_total_apb_panjar, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($pemeliharaan_total_apb_mutasi, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($pemeliharaan_total_apb_panjar_proyek, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($pemeliharaan_total_apb, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($pemeliharaan_total_saldo_hutang, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($pemeliharaan_total_saldo_panjar, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($pemeliharaan_total_saldo_mutasi, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($pemeliharaan_total_saldo_panjar_proyek, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($pemeliharaan_total_saldo, 0, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($pemeliharaan_total_atb_hutang, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($pemeliharaan_total_atb_panjar, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($pemeliharaan_total_atb_mutasi, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($pemeliharaan_total_atb_panjar_proyek, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($pemeliharaan_total_atb, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($pemeliharaan_total_apb_hutang, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($pemeliharaan_total_apb_panjar, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($pemeliharaan_total_apb_mutasi, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($pemeliharaan_total_apb_panjar_proyek, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($pemeliharaan_total_apb, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($pemeliharaan_total_saldo_hutang, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($pemeliharaan_total_saldo_panjar, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($pemeliharaan_total_saldo_mutasi, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($pemeliharaan_total_saldo_panjar_proyek, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($pemeliharaan_total_saldo, 2, ',', '.') }}</strong></td>
             </tr>
 
             <!-- Calculate Maintenance Kit totals -->
@@ -319,21 +319,21 @@
             <tr class="collapse pemeliharaan" onclick="toggleAccordion('maintenance-kit')">
                 <td><strong>B.1</strong></td>
                 <td><strong>Maintenance Kit</strong></td>
-                <td class="currency-value"><strong>{{ number_format($mk_total_atb_hutang, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($mk_total_atb_panjar, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($mk_total_atb_mutasi, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($mk_total_atb_panjar_proyek, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($mk_total_atb, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($mk_total_apb_hutang, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($mk_total_apb_panjar, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($mk_total_apb_mutasi, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($mk_total_apb_panjar_proyek, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($mk_total_apb, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($mk_total_saldo_hutang, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($mk_total_saldo_panjar, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($mk_total_saldo_mutasi, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($mk_total_saldo_panjar_proyek, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($mk_total_saldo, 0, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($mk_total_atb_hutang, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($mk_total_atb_panjar, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($mk_total_atb_mutasi, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($mk_total_atb_panjar_proyek, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($mk_total_atb, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($mk_total_apb_hutang, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($mk_total_apb_panjar, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($mk_total_apb_mutasi, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($mk_total_apb_panjar_proyek, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($mk_total_apb, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($mk_total_saldo_hutang, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($mk_total_saldo_panjar, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($mk_total_saldo_mutasi, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($mk_total_saldo_panjar_proyek, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($mk_total_saldo, 2, ',', '.') }}</strong></td>
             </tr>
 
             @foreach ($sums as $key => $category)
@@ -341,21 +341,21 @@
                     <tr class="collapse maintenance-kit">
                         <td>{{ implode('.', str_split($key)) }}</td>
                         <td>{{ ucwords(strtolower($category['nama'])) }}</td>
-                        <td class="currency-value">{{ number_format($category['atb']['hutang-unit-alat'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['atb']['panjar-unit-alat'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['atb']['mutasi-proyek'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['atb']['panjar-proyek'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['atb']['total'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['apb']['hutang-unit-alat'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['apb']['panjar-unit-alat'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['apb']['mutasi-proyek'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['apb']['panjar-proyek'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['apb']['total'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['saldo']['hutang-unit-alat'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['saldo']['panjar-unit-alat'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['saldo']['mutasi-proyek'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['saldo']['panjar-proyek'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['saldo']['total'], 0, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['atb']['hutang-unit-alat'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['atb']['panjar-unit-alat'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['atb']['mutasi-proyek'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['atb']['panjar-proyek'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['atb']['total'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['apb']['hutang-unit-alat'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['apb']['panjar-unit-alat'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['apb']['mutasi-proyek'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['apb']['panjar-proyek'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['apb']['total'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['saldo']['hutang-unit-alat'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['saldo']['panjar-unit-alat'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['saldo']['mutasi-proyek'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['saldo']['panjar-proyek'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['saldo']['total'], 2, ',', '.') }}</td>
                     </tr>
                 @endif
             @endforeach
@@ -404,21 +404,21 @@
             <tr class="collapse pemeliharaan" onclick="toggleAccordion('oil-lubricants')">
                 <td><strong>B.2</strong></td>
                 <td><strong>Oil & Lubricants</strong></td>
-                <td class="currency-value"><strong>{{ number_format($oil_total_atb_hutang, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($oil_total_atb_panjar, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($oil_total_atb_mutasi, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($oil_total_atb_panjar_proyek, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($oil_total_atb, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($oil_total_apb_hutang, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($oil_total_apb_panjar, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($oil_total_apb_mutasi, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($oil_total_apb_panjar_proyek, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($oil_total_apb, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($oil_total_saldo_hutang, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($oil_total_saldo_panjar, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($oil_total_saldo_mutasi, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($oil_total_saldo_panjar_proyek, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($oil_total_saldo, 0, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($oil_total_atb_hutang, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($oil_total_atb_panjar, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($oil_total_atb_mutasi, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($oil_total_atb_panjar_proyek, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($oil_total_atb, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($oil_total_apb_hutang, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($oil_total_apb_panjar, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($oil_total_apb_mutasi, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($oil_total_apb_panjar_proyek, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($oil_total_apb, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($oil_total_saldo_hutang, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($oil_total_saldo_panjar, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($oil_total_saldo_mutasi, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($oil_total_saldo_panjar_proyek, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($oil_total_saldo, 2, ',', '.') }}</strong></td>
             </tr>
 
             @foreach ($sums as $key => $category)
@@ -426,21 +426,21 @@
                     <tr class="collapse oil-lubricants">
                         <td>{{ implode('.', str_split($key)) }}</td>
                         <td>{{ ucwords(strtolower($category['nama'])) }}</td>
-                        <td class="currency-value">{{ number_format($category['atb']['hutang-unit-alat'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['atb']['panjar-unit-alat'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['atb']['mutasi-proyek'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['atb']['panjar-proyek'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['atb']['total'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['apb']['hutang-unit-alat'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['apb']['panjar-unit-alat'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['apb']['mutasi-proyek'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['apb']['panjar-proyek'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['apb']['total'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['saldo']['hutang-unit-alat'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['saldo']['panjar-unit-alat'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['saldo']['mutasi-proyek'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['saldo']['panjar-proyek'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['saldo']['total'], 0, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['atb']['hutang-unit-alat'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['atb']['panjar-unit-alat'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['atb']['mutasi-proyek'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['atb']['panjar-proyek'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['atb']['total'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['apb']['hutang-unit-alat'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['apb']['panjar-unit-alat'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['apb']['mutasi-proyek'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['apb']['panjar-proyek'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['apb']['total'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['saldo']['hutang-unit-alat'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['saldo']['panjar-unit-alat'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['saldo']['mutasi-proyek'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['saldo']['panjar-proyek'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['saldo']['total'], 2, ',', '.') }}</td>
                     </tr>
                 @endif
             @endforeach
@@ -450,21 +450,21 @@
                     <tr class="collapse pemeliharaan">
                         <td><strong>{{ $key }}</strong></td>
                         <td><strong>{{ $category['nama'] }}</strong></td>
-                        <td class="currency-value"><strong>{{ number_format($category['atb']['hutang-unit-alat'], 0, ',', '.') }}</strong></td>
-                        <td class="currency-value"><strong>{{ number_format($category['atb']['panjar-unit-alat'], 0, ',', '.') }}</strong></td>
-                        <td class="currency-value"><strong>{{ number_format($category['atb']['mutasi-proyek'], 0, ',', '.') }}</strong></td>
-                        <td class="currency-value"><strong>{{ number_format($category['atb']['panjar-proyek'], 0, ',', '.') }}</strong></td>
-                        <td class="currency-value"><strong>{{ number_format($category['atb']['total'], 0, ',', '.') }}</strong></td>
-                        <td class="currency-value"><strong>{{ number_format($category['apb']['hutang-unit-alat'], 0, ',', '.') }}</strong></td>
-                        <td class="currency-value"><strong>{{ number_format($category['apb']['panjar-unit-alat'], 0, ',', '.') }}</strong></td>
-                        <td class="currency-value"><strong>{{ number_format($category['apb']['mutasi-proyek'], 0, ',', '.') }}</strong></td>
-                        <td class="currency-value"><strong>{{ number_format($category['apb']['panjar-proyek'], 0, ',', '.') }}</strong></td>
-                        <td class="currency-value"><strong>{{ number_format($category['apb']['total'], 0, ',', '.') }}</strong></td>
-                        <td class="currency-value"><strong>{{ number_format($category['saldo']['hutang-unit-alat'], 0, ',', '.') }}</strong></td>
-                        <td class="currency-value"><strong>{{ number_format($category['saldo']['panjar-unit-alat'], 0, ',', '.') }}</strong></td>
-                        <td class="currency-value"><strong>{{ number_format($category['saldo']['mutasi-proyek'], 0, ',', '.') }}</strong></td>
-                        <td class="currency-value"><strong>{{ number_format($category['saldo']['panjar-proyek'], 0, ',', '.') }}</strong></td>
-                        <td class="currency-value"><strong>{{ number_format($category['saldo']['total'], 0, ',', '.') }}</strong></td>
+                        <td class="currency-value"><strong>{{ number_format($category['atb']['hutang-unit-alat'], 2, ',', '.') }}</strong></td>
+                        <td class="currency-value"><strong>{{ number_format($category['atb']['panjar-unit-alat'], 2, ',', '.') }}</strong></td>
+                        <td class="currency-value"><strong>{{ number_format($category['atb']['mutasi-proyek'], 2, ',', '.') }}</strong></td>
+                        <td class="currency-value"><strong>{{ number_format($category['atb']['panjar-proyek'], 2, ',', '.') }}</strong></td>
+                        <td class="currency-value"><strong>{{ number_format($category['atb']['total'], 2, ',', '.') }}</strong></td>
+                        <td class="currency-value"><strong>{{ number_format($category['apb']['hutang-unit-alat'], 2, ',', '.') }}</strong></td>
+                        <td class="currency-value"><strong>{{ number_format($category['apb']['panjar-unit-alat'], 2, ',', '.') }}</strong></td>
+                        <td class="currency-value"><strong>{{ number_format($category['apb']['mutasi-proyek'], 2, ',', '.') }}</strong></td>
+                        <td class="currency-value"><strong>{{ number_format($category['apb']['panjar-proyek'], 2, ',', '.') }}</strong></td>
+                        <td class="currency-value"><strong>{{ number_format($category['apb']['total'], 2, ',', '.') }}</strong></td>
+                        <td class="currency-value"><strong>{{ number_format($category['saldo']['hutang-unit-alat'], 2, ',', '.') }}</strong></td>
+                        <td class="currency-value"><strong>{{ number_format($category['saldo']['panjar-unit-alat'], 2, ',', '.') }}</strong></td>
+                        <td class="currency-value"><strong>{{ number_format($category['saldo']['mutasi-proyek'], 2, ',', '.') }}</strong></td>
+                        <td class="currency-value"><strong>{{ number_format($category['saldo']['panjar-proyek'], 2, ',', '.') }}</strong></td>
+                        <td class="currency-value"><strong>{{ number_format($category['saldo']['total'], 2, ',', '.') }}</strong></td>
                     </tr>
                 @endif
             @endforeach
@@ -475,41 +475,41 @@
                         <td><strong>II</strong></td>
                         <td><strong>MATERIAL</strong></td>
 
-                        <td class="currency-value"><strong>{{ number_format($category['atb']['hutang-unit-alat'], 0, ',', '.') }}</strong></td>
-                        <td class="currency-value"><strong>{{ number_format($category['atb']['panjar-unit-alat'], 0, ',', '.') }}</strong></td>
-                        <td class="currency-value"><strong>{{ number_format($category['atb']['mutasi-proyek'], 0, ',', '.') }}</strong></td>
-                        <td class="currency-value"><strong>{{ number_format($category['atb']['panjar-proyek'], 0, ',', '.') }}</strong></td>
-                        <td class="currency-value"><strong>{{ number_format($category['atb']['total'], 0, ',', '.') }}</strong></td>
-                        <td class="currency-value"><strong>{{ number_format($category['apb']['hutang-unit-alat'], 0, ',', '.') }}</strong></td>
-                        <td class="currency-value"><strong>{{ number_format($category['apb']['panjar-unit-alat'], 0, ',', '.') }}</strong></td>
-                        <td class="currency-value"><strong>{{ number_format($category['apb']['mutasi-proyek'], 0, ',', '.') }}</strong></td>
-                        <td class="currency-value"><strong>{{ number_format($category['apb']['panjar-proyek'], 0, ',', '.') }}</strong></td>
-                        <td class="currency-value"><strong>{{ number_format($category['apb']['total'], 0, ',', '.') }}</strong></td>
-                        <td class="currency-value"><strong>{{ number_format($category['saldo']['hutang-unit-alat'], 0, ',', '.') }}</strong></td>
-                        <td class="currency-value"><strong>{{ number_format($category['saldo']['panjar-unit-alat'], 0, ',', '.') }}</strong></td>
-                        <td class="currency-value"><strong>{{ number_format($category['saldo']['mutasi-proyek'], 0, ',', '.') }}</strong></td>
-                        <td class="currency-value"><strong>{{ number_format($category['saldo']['panjar-proyek'], 0, ',', '.') }}</strong></td>
-                        <td class="currency-value"><strong>{{ number_format($category['saldo']['total'], 0, ',', '.') }}</strong></td>
+                        <td class="currency-value"><strong>{{ number_format($category['atb']['hutang-unit-alat'], 2, ',', '.') }}</strong></td>
+                        <td class="currency-value"><strong>{{ number_format($category['atb']['panjar-unit-alat'], 2, ',', '.') }}</strong></td>
+                        <td class="currency-value"><strong>{{ number_format($category['atb']['mutasi-proyek'], 2, ',', '.') }}</strong></td>
+                        <td class="currency-value"><strong>{{ number_format($category['atb']['panjar-proyek'], 2, ',', '.') }}</strong></td>
+                        <td class="currency-value"><strong>{{ number_format($category['atb']['total'], 2, ',', '.') }}</strong></td>
+                        <td class="currency-value"><strong>{{ number_format($category['apb']['hutang-unit-alat'], 2, ',', '.') }}</strong></td>
+                        <td class="currency-value"><strong>{{ number_format($category['apb']['panjar-unit-alat'], 2, ',', '.') }}</strong></td>
+                        <td class="currency-value"><strong>{{ number_format($category['apb']['mutasi-proyek'], 2, ',', '.') }}</strong></td>
+                        <td class="currency-value"><strong>{{ number_format($category['apb']['panjar-proyek'], 2, ',', '.') }}</strong></td>
+                        <td class="currency-value"><strong>{{ number_format($category['apb']['total'], 2, ',', '.') }}</strong></td>
+                        <td class="currency-value"><strong>{{ number_format($category['saldo']['hutang-unit-alat'], 2, ',', '.') }}</strong></td>
+                        <td class="currency-value"><strong>{{ number_format($category['saldo']['panjar-unit-alat'], 2, ',', '.') }}</strong></td>
+                        <td class="currency-value"><strong>{{ number_format($category['saldo']['mutasi-proyek'], 2, ',', '.') }}</strong></td>
+                        <td class="currency-value"><strong>{{ number_format($category['saldo']['panjar-proyek'], 2, ',', '.') }}</strong></td>
+                        <td class="currency-value"><strong>{{ number_format($category['saldo']['total'], 2, ',', '.') }}</strong></td>
                     </tr>
 
                     <tr class="collapse material">
                         <td>{{ implode('.', str_split($key)) }}</td>
                         <td>{{ ucwords(strtolower($category['nama'])) }}</td>
-                        <td class="currency-value">{{ number_format($category['atb']['hutang-unit-alat'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['atb']['panjar-unit-alat'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['atb']['mutasi-proyek'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['atb']['panjar-proyek'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['atb']['total'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['apb']['hutang-unit-alat'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['apb']['panjar-unit-alat'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['apb']['mutasi-proyek'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['apb']['panjar-proyek'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['apb']['total'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['saldo']['hutang-unit-alat'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['saldo']['panjar-unit-alat'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['saldo']['mutasi-proyek'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['saldo']['panjar-proyek'], 0, ',', '.') }}</td>
-                        <td class="currency-value">{{ number_format($category['saldo']['total'], 0, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['atb']['hutang-unit-alat'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['atb']['panjar-unit-alat'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['atb']['mutasi-proyek'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['atb']['panjar-proyek'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['atb']['total'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['apb']['hutang-unit-alat'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['apb']['panjar-unit-alat'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['apb']['mutasi-proyek'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['apb']['panjar-proyek'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['apb']['total'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['saldo']['hutang-unit-alat'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['saldo']['panjar-unit-alat'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['saldo']['mutasi-proyek'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['saldo']['panjar-proyek'], 2, ',', '.') }}</td>
+                        <td class="currency-value">{{ number_format($category['saldo']['total'], 2, ',', '.') }}</td>
                     </tr>
                 @endif
             @endforeach
@@ -557,21 +557,21 @@
 
             <tr class="total-row border-dark table-bordered table-striped">
                 <td colspan="2"><strong>TOTAL</strong></td>
-                <td class="currency-value"><strong>{{ number_format($grand_total_atb_hutang, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($grand_total_atb_panjar, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($grand_total_atb_mutasi, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($grand_total_atb_panjar_proyek, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($grand_total_atb, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($grand_total_apb_hutang, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($grand_total_apb_panjar, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($grand_total_apb_mutasi, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($grand_total_apb_panjar_proyek, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($grand_total_apb, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($grand_total_saldo_hutang, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($grand_total_saldo_panjar, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($grand_total_saldo_mutasi, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($grand_total_saldo_panjar_proyek, 0, ',', '.') }}</strong></td>
-                <td class="currency-value"><strong>{{ number_format($grand_total_saldo, 0, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($grand_total_atb_hutang, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($grand_total_atb_panjar, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($grand_total_atb_mutasi, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($grand_total_atb_panjar_proyek, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($grand_total_atb, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($grand_total_apb_hutang, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($grand_total_apb_panjar, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($grand_total_apb_mutasi, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($grand_total_apb_panjar_proyek, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($grand_total_apb, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($grand_total_saldo_hutang, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($grand_total_saldo_panjar, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($grand_total_saldo_mutasi, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($grand_total_saldo_panjar_proyek, 2, ',', '.') }}</strong></td>
+                <td class="currency-value"><strong>{{ number_format($grand_total_saldo, 2, ',', '.') }}</strong></td>
             </tr>
         </tfoot>
     </table>

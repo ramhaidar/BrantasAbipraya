@@ -80,7 +80,7 @@
                     <span class="info-box-icon bg-info elevation-1"><i class="fas fa-sign-in-alt"></i></span>
                     <div class="info-box-content" id="totalBarangMasuk">
                         <span class="info-box-text">Total ATB</span>
-                        <span class="info-box-number">Rp{{ number_format($totalATB, 0, ',', '.') }}</span>
+                        <span class="info-box-number">Rp{{ number_format($totalATB, 2, ',', '.') }}</span>
                     </div>
                 </div>
             </div>
@@ -91,7 +91,7 @@
                     <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-sign-out-alt"></i></span>
                     <div class="info-box-content" id="totalBarangKeluar">
                         <span class="info-box-text">Total APB</span>
-                        <span class="info-box-number">Rp{{ number_format($totalAPB, 0, ',', '.') }}</span>
+                        <span class="info-box-number">Rp{{ number_format($totalAPB, 2, ',', '.') }}</span>
                     </div>
                 </div>
             </div>
@@ -102,7 +102,7 @@
                     <span class="info-box-icon bg-success elevation-1"><i class="fas fa-balance-scale"></i></span>
                     <div class="info-box-content" id="totalSemuaBarang">
                         <span class="info-box-text">Total Saldo</span>
-                        <span class="info-box-number">Rp{{ number_format($totalSaldo, 0, ',', '.') }}</span>
+                        <span class="info-box-number">Rp{{ number_format($totalSaldo, 2, ',', '.') }}</span>
                     </div>
                 </div>
             </div>

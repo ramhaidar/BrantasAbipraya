@@ -54,76 +54,106 @@
             }
 
             $('#confirmSaveSPBButton').on('click', function() {
-                // Validasi form sebelum submit
+                // Get the form
                 const form = $('#detailSpbForm');
-
-                // Remove the old append code since we're using hidden input
-                // const spbAddendum = $('#spb_addendum').val();
-                // if (spbAddendum) {
-                //     form.append('<input type="hidden" name="spb_addendum_id" value="' + spbAddendum + '">');
-                // }
 
                 // Cek apakah supplier sudah dipilih
                 if (!$('#supplier_main').val()) {
                     alert('Silakan pilih supplier terlebih dahulu');
+                    $('#modalForSaveSPB').modal('hide');
                     return;
                 }
 
-                // Cek apakah ada sparepart yang dipilih
-                let hasSelectedSparepart = false;
+                // Flag to track if at least one sparepart is completely filled
+                let hasValidRow = false;
+
+                // We'll track any validation errors here
+                let validationErrors = [];
+
+                // Process each row to check for valid entries
                 $('.sparepart-select').each(function() {
-                    if ($(this).val()) {
-                        hasSelectedSparepart = true;
-                        return false; // break the loop
-                    }
-                });
+                    const row = $(this).closest('tr');
+                    const detailId = $(this).attr('id').replace('sparepart-', '');
+                    const qtyInput = row.find('input[name^="qty"]');
+                    const hargaInput = row.find('.harga-input');
+                    const sparepartValue = $(this).val();
 
-                if (!hasSelectedSparepart) {
-                    alert('Silakan pilih minimal satu sparepart');
-                    return;
-                }
+                    // Only validate rows where sparepart is selected
+                    if (sparepartValue) {
+                        const qtyValue = parseFloat(qtyInput.val());
+                        const hargaValue = parseRupiahValue(hargaInput.val());
 
-                // Check if all quantities are valid
-                let isQuantityValid = true;
+                        // Check if this row has all required values filled
+                        if (qtyValue > 0 && hargaValue > 0) {
+                            hasValidRow = true;
 
-                $('input[name^="qty"]').each(function() {
-                    const value = parseFloat($(this).val());
-                    const max = parseFloat($(this).attr('max'));
+                            // Clear any error highlighting
+                            qtyInput.removeClass('is-invalid');
+                            hargaInput.removeClass('is-invalid');
+                        } else {
+                            // Mark the specific issues for this row
+                            if (qtyValue <= 0) {
+                                qtyInput.addClass('is-invalid');
+                                validationErrors.push(`Quantity harus lebih besar dari 0`);
+                            }
 
-                    if (!$(this).prop('disabled') && (value <= 0 || value > max)) {
-                        isQuantityValid = false;
-                        return false; // Exit loop early
-                    }
-                });
-
-
-                if (!isQuantityValid) {
-                    alert('Pastikan quantity yang diisi valid dan tidak melebihi batas maksimum!');
-                    return;
-                }
-
-                // Improved price validation
-                let isPriceValid = true;
-                $('input[name^="harga"]').each(function() {
-                    if (!$(this).prop('disabled')) {
-                        const priceValue = $(this).val().replace(/[^\d]/g, '');
-                        if (!priceValue || parseInt(priceValue) === 0) {
-                            isPriceValid = false;
-                            return false; // break the loop
+                            if (hargaValue <= 0) {
+                                hargaInput.addClass('is-invalid');
+                                validationErrors.push(`Harga harus lebih besar dari 0`);
+                            }
                         }
                     }
                 });
 
-                if (!isPriceValid) {
-                    alert('Pastikan harga sudah diisi untuk setiap item yang dipilih dan tidak boleh 0');
+                // Check if we have at least one valid row
+                if (!hasValidRow) {
+                    if ($('.sparepart-select option:selected[value]').length === 0) {
+                        // No spareparts selected at all
+                        alert('Silakan pilih minimal satu sparepart');
+                    } else {
+                        // Spareparts selected but not completely filled
+                        let errorMessage = 'Untuk setiap sparepart yang dipilih:';
+                        if (validationErrors.length > 0) {
+                            // Show unique errors only
+                            const uniqueErrors = [...new Set(validationErrors)];
+                            errorMessage += '\n- ' + uniqueErrors.join('\n- ');
+                        }
+                        alert(errorMessage);
+                    }
+
+                    $('#modalForSaveSPB').modal('hide');
                     return;
                 }
 
-                // Submit form jika semua validasi berhasil
+                // If we got here, we have at least one valid row, proceed with submission
                 $('#confirmSaveSPBButton').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
+
+                // Update all hidden values for harga inputs before submission
+                $('.harga-input').each(function() {
+                    const detailId = $(this).attr('id').replace('harga-', '');
+                    const sparepartSelected = $('#sparepart-' + detailId).val();
+
+                    // Only update hidden values for rows with selected spareparts
+                    if (sparepartSelected) {
+                        const hargaValue = parseRupiahValue($(this).val());
+                        $('#harga-hidden-' + detailId).val(hargaValue);
+                    }
+                });
+
+                // Submit the form
                 form.submit();
-                // $('#modalForSaveSPB').modal('hide');
             });
+
+            // Helper function to parse rupiah formatted values
+            function parseRupiahValue(rupiahString) {
+                if (!rupiahString) return 0;
+
+                // Remove prefix and clean the string
+                var cleanStr = rupiahString.replace(/^Rp\s+/, '').replace(/[^\d,\.]/g, '').trim();
+
+                // Replace thousand separators and convert decimal separator
+                return parseFloat(cleanStr.replace(/\./g, '').replace(',', '.')) || 0;
+            }
         });
     </script>
 @endpush

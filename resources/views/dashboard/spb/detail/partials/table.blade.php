@@ -386,7 +386,7 @@
             // Enable sparepart dropdowns
             $('.sparepart-select').prop('disabled', false);
 
-            // Add loading overlay to body instead of table 
+            // Show loading indicator
             $('body').append(`
 <div class="loading-overlay">
 <div class="spinner-border text-primary" role="status">
@@ -395,44 +395,102 @@
 </div>
 `);
 
-            // Fetch spareparts dari supplier yang dipilih
+            // Fetch spareparts from API
             $.ajax({
-                url: "{{ route('spb.detail.getSparepart', ':supplierId') }}".replace(':supplierId',
-                    supplierId),
+                url: "{{ route('spb.detail.getSparepart', ':supplierId') }}".replace(':supplierId', supplierId),
                 type: 'GET',
                 success: function(response) {
-                    // console.log(response);
-                    // Loop setiap dropdown sparepart
+                    // First, completely destroy any existing Select2 instances
+                    $('.sparepart-select').select2('destroy');
+
+                    // Organize spareparts by kategori
+                    const sparepartsByKategori = {};
+
+                    // Process the API response
+                    if (response.master_data_spareparts && Array.isArray(response.master_data_spareparts)) {
+                        response.master_data_spareparts.forEach(function(sparepart) {
+                            if (!sparepart || !sparepart.id_kategori_sparepart) return;
+
+                            const kategoriId = sparepart.id_kategori_sparepart;
+
+                            // Create category array if it doesn't exist
+                            if (!sparepartsByKategori[kategoriId]) {
+                                sparepartsByKategori[kategoriId] = [];
+                            }
+
+                            // Add to this kategori if not already added
+                            if (!sparepartsByKategori[kategoriId].some(s => s.id === sparepart.id)) {
+                                sparepartsByKategori[kategoriId].push(sparepart);
+                            }
+                        });
+                    }
+
+                    // Process each dropdown
                     $('.sparepart-select').each(function() {
-                        let $select = $(this);
-                        let kategoriId = $select.data('kategori');
+                        const $select = $(this);
+                        const kategoriId = $select.data('kategori');
 
-                        $select.empty().append(
-                            '<option value="" selected disabled>Pilih Sparepart</option>');
+                        // Clear dropdown
+                        $select.empty();
 
-                        // Filter sparepart berdasarkan kategori
-                        let filteredSpareparts = response.master_data_spareparts.filter(function(
-                            sparepart) {
-                            return sparepart.id_kategori_sparepart == kategoriId;
+                        // Add placeholder option
+                        $select.append('<option value="" selected>Pilih Sparepart</option>');
+
+                        // Get spareparts for this kategori
+                        const spareparts = sparepartsByKategori[kategoriId] || [];
+
+                        // Add each sparepart option
+                        spareparts.forEach(function(sparepart) {
+                            $select.append(`<option value="${sparepart.id}">${sparepart.nama} - ${sparepart.merk || 'No Merk'} (${sparepart.part_number || 'No Part'})</option>`);
                         });
-
-                        // Tambahkan opsi yang sudah difilter
-                        filteredSpareparts.forEach(function(sparepart) {
-                            $select.append(new Option(
-                                `${sparepart.nama} - ${sparepart.merk}`,
-                                sparepart.id
-                            ));
-                        });
-
-                        $select.trigger('change');
                     });
+
+                    // Re-initialize Select2 on all dropdowns
+                    $('.sparepart-select').select2({
+                        width: '100%',
+                        placeholder: 'Pilih Sparepart',
+                        allowClear: true,
+                        dropdownParent: $('body')
+                    });
+
+                    // Ensure changes are recognized
+                    $('.sparepart-select').trigger('change');
                 },
-                error: function() {
-                    alert('Gagal memuat data sparepart');
+                error: function(xhr, status, error) {
+                    console.error("Error loading spareparts:", error);
+                    alert('Failed to load spareparts: ' + error);
                 },
                 complete: function() {
                     $('.loading-overlay').remove();
                 }
+            });
+        });
+
+        // Immediately initialize Select2 on page load using a function
+        function initializeSelect2() {
+            $('.sparepart-select').select2({
+                width: '100%',
+                placeholder: 'Pilih Sparepart',
+                allowClear: true,
+                dropdownParent: $('body')
+            });
+
+            $('#supplier_main').select2({
+                width: '100%',
+                placeholder: 'Pilih Supplier',
+                allowClear: true
+            });
+        }
+
+        // Call the function at document ready
+        $(document).ready(function() {
+            initializeSelect2();
+
+            // Re-initialize Select2 after Ajax completes
+            $(document).ajaxComplete(function() {
+                setTimeout(function() {
+                    initializeSelect2();
+                }, 100);
             });
         });
     </script>

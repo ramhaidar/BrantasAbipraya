@@ -11,86 +11,121 @@ class MasterDataSparepartSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    // public function run ()
-    // {
-    //     MasterDataSparepart::factory ()->count ( 300 )->create ();
-    // }
-
     public function run ()
     {
         // Menambahkan 5 data secara manual
-        MasterDataSparepart::create ( [ 
-            'nama'                  => 'Filter Oli C-1007',
-            'part_number'           => 'SO-1007P', // Format Sakura Oil Filter
-            'merk'                  => 'Sakura',
-            'id_kategori_sparepart' => KategoriSparepart::where ( 'kode', 'B11' )->value ( 'id' ),
-        ] );
+        MasterDataSparepart::firstOrCreate (
+            [ 
+                'nama'        => 'Filter Oli C-1007',
+                'part_number' => 'SO-1007P'
+            ],
+            [ 
+                'merk'                  => 'Sakura',
+                'id_kategori_sparepart' => KategoriSparepart::where ( 'kode', 'B11' )->value ( 'id' ),
+            ]
+        );
 
-        MasterDataSparepart::create ( [ 
-            'nama'                  => 'Klakson Keong 24V',
-            'part_number'           => '0 986 AH0 501', // Format Bosch part number
-            'merk'                  => 'Bosch',
-            'id_kategori_sparepart' => KategoriSparepart::where ( 'kode', 'C1' )->value ( 'id' ),
-        ] );
+        MasterDataSparepart::firstOrCreate (
+            [ 
+                'nama'        => 'Klakson Keong 24V',
+                'part_number' => '0 986 AH0 501'
+            ],
+            [ 
+                'merk'                  => 'Bosch',
+                'id_kategori_sparepart' => KategoriSparepart::where ( 'kode', 'C1' )->value ( 'id' ),
+            ]
+        );
 
-        MasterDataSparepart::create ( [ 
-            'nama'                  => 'Kipas Angin Dashboard Exca',
-            'part_number'           => '11N6-90780', // Format Excavator part
-            'merk'                  => 'Exca',
-            'id_kategori_sparepart' => KategoriSparepart::where ( 'kode', 'C1' )->value ( 'id' ),
-        ] );
+        MasterDataSparepart::firstOrCreate (
+            [ 
+                'nama'        => 'Kipas Angin Dashboard Exca',
+                'part_number' => '11N6-90780'
+            ],
+            [ 
+                'merk'                  => 'Exca',
+                'id_kategori_sparepart' => KategoriSparepart::where ( 'kode', 'C1' )->value ( 'id' ),
+            ]
+        );
 
-        MasterDataSparepart::create ( [ 
-            'nama'                  => 'Grease Top 1',
-            'part_number'           => 'EP-2/10', // Format Grease specification
-            'merk'                  => 'Top 1',
-            'id_kategori_sparepart' => KategoriSparepart::where ( 'kode', 'B27' )->value ( 'id' ),
-        ] );
+        MasterDataSparepart::firstOrCreate (
+            [ 
+                'nama'        => 'Grease Top 1',
+                'part_number' => 'EP-2/10'
+            ],
+            [ 
+                'merk'                  => 'Top 1',
+                'id_kategori_sparepart' => KategoriSparepart::where ( 'kode', 'B27' )->value ( 'id' ),
+            ]
+        );
 
-        MasterDataSparepart::create ( [ 
-            'nama'                  => 'Kampas Rem Depan',
-            'part_number'           => 'GDB3309', // Format TRW brake pad
-            'merk'                  => 'TRW',
-            'id_kategori_sparepart' => KategoriSparepart::where ( 'kode', 'A9' )->value ( 'id' ),
-        ] );
+        MasterDataSparepart::firstOrCreate (
+            [ 
+                'nama'        => 'Kampas Rem Depan',
+                'part_number' => 'GDB3309'
+            ],
+            [ 
+                'merk'                  => 'TRW',
+                'id_kategori_sparepart' => KategoriSparepart::where ( 'kode', 'A9' )->value ( 'id' ),
+            ]
+        );
 
         // =======================================
 
         // Menambahkan 5 data dengan merk yang berbeda
-        MasterDataSparepart::create ( [ 
-            'nama'                  => 'Filter Oli C-1007',
-            'part_number'           => '15208-65F0A', // Format Denso/OEM style
-            'merk'                  => 'Denso',
-            'id_kategori_sparepart' => KategoriSparepart::where ( 'kode', 'B11' )->value ( 'id' ),
-        ] );
+        MasterDataSparepart::firstOrCreate (
+            [ 
+                'nama'        => 'Filter Oli C-1007',
+                'part_number' => '15208-65F0A'
+            ],
+            [ 
+                'merk'                  => 'Denso',
+                'id_kategori_sparepart' => KategoriSparepart::where ( 'kode', 'B11' )->value ( 'id' ),
+            ]
+        );
 
-        MasterDataSparepart::create ( [ 
-            'nama'                  => 'Klakson Keong 24V',
-            'part_number'           => '3PA 004 811-851', // Format Hella part number
-            'merk'                  => 'Hella',
-            'id_kategori_sparepart' => KategoriSparepart::where ( 'kode', 'C1' )->value ( 'id' ),
-        ] );
+        MasterDataSparepart::firstOrCreate (
+            [ 
+                'nama'        => 'Klakson Keong 24V',
+                'part_number' => '3PA 004 811-851'
+            ],
+            [ 
+                'merk'                  => 'Hella',
+                'id_kategori_sparepart' => KategoriSparepart::where ( 'kode', 'C1' )->value ( 'id' ),
+            ]
+        );
 
-        MasterDataSparepart::create ( [ 
-            'nama'                  => 'Kipas Angin Dashboard Exca',
-            'part_number'           => 'FN12V-60B', // Format Panasonic industrial fan
-            'merk'                  => 'Panasonic',
-            'id_kategori_sparepart' => KategoriSparepart::where ( 'kode', 'C1' )->value ( 'id' ),
-        ] );
+        MasterDataSparepart::firstOrCreate (
+            [ 
+                'nama'        => 'Kipas Angin Dashboard Exca',
+                'part_number' => 'FN12V-60B'
+            ],
+            [ 
+                'merk'                  => 'Panasonic',
+                'id_kategori_sparepart' => KategoriSparepart::where ( 'kode', 'C1' )->value ( 'id' ),
+            ]
+        );
 
-        MasterDataSparepart::create ( [ 
-            'nama'                  => 'Grease Top 1',
-            'part_number'           => 'GD5/180', // Format Shell Grease
-            'merk'                  => 'Shell',
-            'id_kategori_sparepart' => KategoriSparepart::where ( 'kode', 'B27' )->value ( 'id' ),
-        ] );
+        MasterDataSparepart::firstOrCreate (
+            [ 
+                'nama'        => 'Grease Top 1',
+                'part_number' => 'GD5/180'
+            ],
+            [ 
+                'merk'                  => 'Shell',
+                'id_kategori_sparepart' => KategoriSparepart::where ( 'kode', 'B27' )->value ( 'id' ),
+            ]
+        );
 
-        MasterDataSparepart::create ( [ 
-            'nama'                  => 'Kampas Rem Depan',
-            'part_number'           => 'P85 012', // Format Brembo pad number
-            'merk'                  => 'Brembo',
-            'id_kategori_sparepart' => KategoriSparepart::where ( 'kode', 'A9' )->value ( 'id' ),
-        ] );
+        MasterDataSparepart::firstOrCreate (
+            [ 
+                'nama'        => 'Kampas Rem Depan',
+                'part_number' => 'P85 012'
+            ],
+            [ 
+                'merk'                  => 'Brembo',
+                'id_kategori_sparepart' => KategoriSparepart::where ( 'kode', 'A9' )->value ( 'id' ),
+            ]
+        );
 
         // Additional 25 spareparts
         $spareparts = [ 
@@ -123,12 +158,16 @@ class MasterDataSparepartSeeder extends Seeder
 
         foreach ( $spareparts as $part )
         {
-            MasterDataSparepart::create ( [ 
-                'nama'                  => $part[ 'nama' ],
-                'part_number'           => $part[ 'part_number' ],
-                'merk'                  => $part[ 'merk' ],
-                'id_kategori_sparepart' => KategoriSparepart::where ( 'kode', $part[ 'kode' ] )->value ( 'id' ),
-            ] );
+            MasterDataSparepart::firstOrCreate (
+                [ 
+                    'nama'        => $part[ 'nama' ],
+                    'part_number' => $part[ 'part_number' ]
+                ],
+                [ 
+                    'merk'                  => $part[ 'merk' ],
+                    'id_kategori_sparepart' => KategoriSparepart::where ( 'kode', $part[ 'kode' ] )->value ( 'id' ),
+                ]
+            );
         }
     }
 }

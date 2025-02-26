@@ -37,11 +37,10 @@ class _BudongBudongSeeder extends Seeder
 
         foreach ( $suppliers as $supplierName )
         {
-            MasterDataSupplier::create ( [ 
-                'nama'           => $supplierName,
-                'alamat'         => '-',
-                'contact_person' => '-'
-            ] );
+            MasterDataSupplier::firstOrCreate (
+                [ 'nama' => $supplierName ],
+                [ 'alamat' => '-', 'contact_person' => '-' ]
+            );
         }
 
         // Create spareparts and link with suppliers
@@ -280,36 +279,28 @@ class _BudongBudongSeeder extends Seeder
             $supplier = MasterDataSupplier::where ( 'nama', $item[ 'supplier' ] )->first ();
             if ( ! $supplier ) continue;
 
-            // Check if sparepart already exists with same name and part_number
-            $existingSparepart = MasterDataSparepart::where ( 'nama', $item[ 'nama' ] )
-                ->where ( 'part_number', $item[ 'part_number' ] ?? '-' )
-                ->first ();
-
-            if ( ! $existingSparepart )
-            {
-                // Create the sparepart only if it doesn't exist
-                $sparepart = MasterDataSparepart::create ( [ 
-                    'nama'                  => $item[ 'nama' ],
-                    'part_number'           => $item[ 'part_number' ] ?? '-',
+            // Use firstOrCreate to avoid duplicate entries
+            $sparepart = MasterDataSparepart::firstOrCreate (
+                [ 
+                    'nama'        => $item[ 'nama' ],
+                    'part_number' => $item[ 'part_number' ] ?? '-'
+                ],
+                [ 
                     'merk'                  => '-',
                     'id_kategori_sparepart' => $kategori->id
-                ] );
+                ]
+            );
 
-                // Link supplier to sparepart
-                $sparepart->masterDataSuppliers ()->attach ( $supplier->id );
-            }
-            else
+            // Link supplier to sparepart if not already linked
+            if ( ! $sparepart->masterDataSuppliers ()->where ( 'master_data_supplier.id', $supplier->id )->exists () )
             {
-                // If sparepart exists, just link it with the supplier if not already linked
-                if ( ! $existingSparepart->masterDataSuppliers ()->where ( 'master_data_supplier.id', $supplier->id )->exists () )
-                {
-                    $existingSparepart->masterDataSuppliers ()->attach ( $supplier->id );
-                }
+                $sparepart->masterDataSuppliers ()->attach ( $supplier->id );
             }
         }
 
         // Link equipment to Budong Budong project
         $proyek = Proyek::where ( 'nama', 'BENDUNGAN BUDONG - BUDONG' )->first ();
+        if ( ! $proyek ) return;
 
         $alatCodes = [ 
             'HD 081-15',
@@ -329,17 +320,29 @@ class _BudongBudongSeeder extends Seeder
 
         foreach ( $alats as $alat )
         {
-            AlatProyek::create ( [ 
-                'id_proyek'           => $proyek->id,
-                'id_master_data_alat' => $alat->id,
-                'assigned_at'         => now (),
-                'removed_at'          => null
-            ] );
+            // Check if the alat is already linked to this project
+            $existing = AlatProyek::where ( 'id_proyek', $proyek->id )
+                ->where ( 'id_master_data_alat', $alat->id )
+                ->whereNull ( 'removed_at' )
+                ->first ();
 
-            // Update the current project for the equipment
-            $alat->update ( [ 
-                'id_proyek_current' => $proyek->id
-            ] );
+            if ( ! $existing )
+            {
+                AlatProyek::create ( [ 
+                    'id_proyek'           => $proyek->id,
+                    'id_master_data_alat' => $alat->id,
+                    'assigned_at'         => now (),
+                    'removed_at'          => null
+                ] );
+
+                // Update the current project for the equipment only if it's not already set
+                if ( $alat->id_proyek_current !== $proyek->id )
+                {
+                    $alat->update ( [ 
+                        'id_proyek_current' => $proyek->id
+                    ] );
+                }
+            }
         }
     }
 }

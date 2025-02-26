@@ -14,54 +14,6 @@ class MasterDataSupplierSeeder extends Seeder
      */
     public function run ()
     {
-        // $companies = [ 
-        //     "CV Cahaya Berkah Sentosa",
-        //     "PT Xpresindo Logistik Utama",
-        //     "CV Makindo Wiguna",
-        //     "CV Daya Motor Ii",
-        //     "PT Dayton Motor Bali",
-        //     "CV Sawitri Cahaya Traktor",
-        //     "PT Makmur Persada Solusindo",
-        //     "PT Maju Megah Trans",
-        //     "PT Adhie Usaha Mandiri",
-        //     "PT Multicrane Perkasa",
-        //     "CV Kencana Multindo Putra",
-        //     "PT Mukti Abadi Sarana",
-        //     "PT Nihon Pandu Dayatama",
-        //     "PT Centra Global Indo",
-        //     "PT United Tractors Tbk",
-        //     "PT Cahaya Surya Kaltara",
-        //     "CV Cahyadi Sukses Bersama",
-        //     "PT Diesel Utama Indonesia",
-        //     "CV Kurnia Partindo Jaya",
-        //     "PT Gala Jaya Banjarmasin",
-        //     "CV Sinar Makmur Baru",
-        //     "PT Blessindo Prima Sarana",
-        //     "PT Sefas Keliantama",
-        //     "PT Arjuna Logistik Indonesia",
-        //     "CV Industrialindo",
-        //     "CV Geronimo Mandiri",
-        //     "PT Gala Jaya Mandiri",
-        //     "PT Annapurna Jaya Agung",
-        //     "PT Gala Jaya Pekanbaru",
-        //     "PT Diva Mandiri Semesta",
-        //     "PT Mahkota Elang Internusa",
-        //     "PT Bukaka Teknik Utama Tbk",
-        //     "PT Trakindo Utama",
-        //     "CV Harapan Motor",
-        //     "PT Equipindo Perkasa",
-        //     "PT Sicoma Indo Perkasa",
-        //     "PT Vakamindo Mitra Prima",
-        //     "PT Hartono Raya Motor",
-        //     "UD Yoko Motor"
-        // ];
-
-        // foreach ( $companies as $company )
-        // {
-        //     // Menggunakan factory untuk setiap nama perusahaan
-        //     MasterDataSupplier::factory ()->create ( [ 'nama' => $company ] );
-        // }
-
         $real_companies = [ 
             "77 JAYA",
             "FAJRI JAYA MOTOR",
@@ -78,61 +30,45 @@ class MasterDataSupplierSeeder extends Seeder
 
         foreach ( $real_companies as $company )
         {
-            // Menggunakan factory untuk setiap nama perusahaan
-            MasterDataSupplier::factory ()->create ( [ 'nama' => $company ] );
+            // Use firstOrCreate to make idempotent
+            MasterDataSupplier::firstOrCreate (
+                [ 'nama' => $company ],
+                [ 
+                    'alamat'         => 'Alamat ' . $company,
+                    'contact_person' => 'CP ' . $company
+                ]
+            );
         }
 
-        LinkSupplierSparepart::create ( [ 
-            'id_master_data_supplier'  => 1,
-            'id_master_data_sparepart' => 1,
-        ] );
+        // Define specific supplier-sparepart links
+        $specificLinks = [ 
+            [ 'supplier' => 1, 'sparepart' => 1 ],
+            [ 'supplier' => 2, 'sparepart' => 2 ],
+            [ 'supplier' => 2, 'sparepart' => 3 ],
+            [ 'supplier' => 3, 'sparepart' => 4 ],
+            [ 'supplier' => 4, 'sparepart' => 5 ],
+            [ 'supplier' => 2, 'sparepart' => 6 ],
+            [ 'supplier' => 1, 'sparepart' => 7 ],
+            [ 'supplier' => 1, 'sparepart' => 8 ],
+            [ 'supplier' => 4, 'sparepart' => 9 ],
+            [ 'supplier' => 3, 'sparepart' => 10 ]
+        ];
 
-        LinkSupplierSparepart::create ( [ 
-            'id_master_data_supplier'  => 2,
-            'id_master_data_sparepart' => 2,
-        ] );
+        foreach ( $specificLinks as $link )
+        {
+            // Check if the link already exists
+            $exists = LinkSupplierSparepart::where ( 'id_master_data_supplier', $link[ 'supplier' ] )
+                ->where ( 'id_master_data_sparepart', $link[ 'sparepart' ] )
+                ->exists ();
 
-        LinkSupplierSparepart::create ( [ 
-            'id_master_data_supplier'  => 2,
-            'id_master_data_sparepart' => 3,
-        ] );
-
-        LinkSupplierSparepart::create ( [ 
-            'id_master_data_supplier'  => 3,
-            'id_master_data_sparepart' => 4,
-        ] );
-
-        LinkSupplierSparepart::create ( [ 
-            'id_master_data_supplier'  => 4,
-            'id_master_data_sparepart' => 5,
-        ] );
-
-        // ==============================
-
-        LinkSupplierSparepart::create ( [ 
-            'id_master_data_supplier'  => 2,
-            'id_master_data_sparepart' => 6,
-        ] );
-
-        LinkSupplierSparepart::create ( [ 
-            'id_master_data_supplier'  => 1,
-            'id_master_data_sparepart' => 7,
-        ] );
-
-        LinkSupplierSparepart::create ( [ 
-            'id_master_data_supplier'  => 1,
-            'id_master_data_sparepart' => 8,
-        ] );
-
-        LinkSupplierSparepart::create ( [ 
-            'id_master_data_supplier'  => 4,
-            'id_master_data_sparepart' => 9,
-        ] );
-
-        LinkSupplierSparepart::create ( [ 
-            'id_master_data_supplier'  => 3,
-            'id_master_data_sparepart' => 10,
-        ] );
+            if ( ! $exists )
+            {
+                LinkSupplierSparepart::create ( [ 
+                    'id_master_data_supplier'  => $link[ 'supplier' ],
+                    'id_master_data_sparepart' => $link[ 'sparepart' ]
+                ] );
+            }
+        }
 
         // Ensure all parts (1-35) have at least one supplier
         for ( $i = 1; $i <= 35; $i++ )
@@ -156,18 +92,26 @@ class MasterDataSupplierSeeder extends Seeder
                     ->pluck ( 'id_master_data_supplier' )
                     ->toArray ();
 
+                // Find a supplier that isn't already linked
                 $newSupplier = rand ( 1, 7 );
-                while ( in_array ( $newSupplier, $existingSuppliers ) )
+                $attempts    = 0;
+
+                // Only try 10 times to avoid infinite loop if all suppliers are already linked
+                while ( in_array ( $newSupplier, $existingSuppliers ) && $attempts < 10 )
                 {
                     $newSupplier = rand ( 1, 7 );
+                    $attempts++;
                 }
 
-                LinkSupplierSparepart::create ( [ 
-                    'id_master_data_supplier'  => $newSupplier,
-                    'id_master_data_sparepart' => $i,
-                ] );
+                // Only create if we found an unlinked supplier
+                if ( ! in_array ( $newSupplier, $existingSuppliers ) )
+                {
+                    LinkSupplierSparepart::create ( [ 
+                        'id_master_data_supplier'  => $newSupplier,
+                        'id_master_data_sparepart' => $i,
+                    ] );
+                }
             }
         }
-
     }
 }

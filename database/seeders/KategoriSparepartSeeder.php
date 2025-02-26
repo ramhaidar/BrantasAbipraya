@@ -80,8 +80,11 @@ class KategoriSparepartSeeder extends Seeder
             $item[ 'jenis' ]     = $jenis;
             $item[ 'sub_jenis' ] = $subJenis;
 
-            // Create the record with overridden values
-            KategoriSparepart::factory ()->create ( $item );
+            // Use firstOrCreate instead of factory->create to avoid duplicates
+            KategoriSparepart::firstOrCreate (
+                [ 'kode' => $item[ 'kode' ] ],  // Search by the unique field
+                $item                       // Data to create if not found
+            );
         }
     }
 }

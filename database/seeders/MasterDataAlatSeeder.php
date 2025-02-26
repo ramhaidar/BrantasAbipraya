@@ -13,11 +13,6 @@ class MasterDataAlatSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    // public function run ()
-    // {
-    //     MasterDataAlat::factory ()->count ( 300 )->create ();
-    // }
-
     public function run ()
     {
         // Definisikan path ke file Excel
@@ -49,14 +44,16 @@ class MasterDataAlatSeeder extends Seeder
             $tipeAlat     = isset ( $row[ 6 ] ) && ! empty ( $row[ 6 ] ) ? $row[ 6 ] : "-"; // TYPE [V] (Column G -> index 6)
             $serialNumber = isset ( $row[ 8 ] ) && ! empty ( $row[ 8 ] ) ? $row[ 8 ] : "-"; // SN [V] (Column I -> index 8)
 
-            // Insert data ke dalam tabel master_data_alat
-            MasterDataAlat::create ( [ 
-                'jenis_alat'    => $jenisAlat,
-                'kode_alat'     => $kodeAlat,
-                'merek_alat'    => $merekAlat,
-                'tipe_alat'     => $tipeAlat,
-                'serial_number' => $serialNumber,
-            ] );
+            // Use firstOrCreate instead of create to prevent duplicate entries
+            MasterDataAlat::firstOrCreate (
+                [ 'kode_alat' => $kodeAlat ], // Search by the kode_alat as unique identifier
+                [ 
+                    'jenis_alat'    => $jenisAlat,
+                    'merek_alat'    => $merekAlat,
+                    'tipe_alat'     => $tipeAlat,
+                    'serial_number' => $serialNumber,
+                ]
+            );
         }
     }
 }

@@ -8,9 +8,9 @@ use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
-    public function run(): void
+    public function run () : void
     {
-        $roles = [
+        $roles = [ 
             'superadmin',
             'svp',
             'vp',
@@ -21,7 +21,7 @@ class UserSeeder extends Seeder
             'koordinator_proyek'  // Koor Tiga
         ];
 
-        $emails = [
+        $emails = [ 
             'superadmin@brantas-abipraya.co.id',
             'svp@brantas-abipraya.co.id',
             'vp@brantas-abipraya.co.id',
@@ -32,7 +32,7 @@ class UserSeeder extends Seeder
             'koortiga@email.com'   // Koor Tiga
         ];
 
-        $names = [
+        $names = [ 
             'Super Administrator',
             'Senior Vice President',
             'Vice President',
@@ -43,7 +43,7 @@ class UserSeeder extends Seeder
             'Nama Koor Tiga'   // Koor Tiga
         ];
 
-        $users = [
+        $users = [ 
             'superadmin',
             'svp',
             'vp',
@@ -54,7 +54,7 @@ class UserSeeder extends Seeder
             'koortiga'   // Koor Tiga
         ];
 
-        $passwords = [
+        $passwords = [ 
             'superadmin123',
             'svp123',
             'vp123',
@@ -67,15 +67,21 @@ class UserSeeder extends Seeder
 
         $defaultProfilePath = '/UserDefault.png';
 
-        foreach ($roles as $index => $role) {
-            User::factory()->create([
-                'name'         => $names[$index],
-                'username'     => $users[$index],
-                'email'        => $emails[$index],
-                'role'         => $role,
-                'password'     => Hash::make($passwords[$index]),
-                'path_profile' => $defaultProfilePath,
-            ]);
+        foreach ( $roles as $index => $role )
+        {
+            // Use firstOrCreate to avoid duplicates when seeder runs multiple times
+            User::firstOrCreate (
+                [ 'username' => $users[ $index ] ], // Unique identifier to check
+                [ 
+                    'name'         => $names[ $index ],
+                    'email'        => $emails[ $index ],
+                    'role'         => $role,
+                    'password'     => Hash::make ( $passwords[ $index ] ),
+                    'path_profile' => $defaultProfilePath,
+                    'sex'          => 'L', // Default value since it's required in the schema
+                    'phone'        => '08' . rand ( 1000000000, 9999999999 ), // Random phone number
+                ]
+            );
         }
     }
 }

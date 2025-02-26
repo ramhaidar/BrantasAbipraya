@@ -75,7 +75,7 @@ class ProyekSeeder extends Seeder
 
         foreach ( $proyek as $nama )
         {
-            Proyek::factory ()->create ( [ 'nama' => $nama ] );
+            Proyek::firstOrCreate ( [ 'nama' => $nama ] );
         }
     }
 }

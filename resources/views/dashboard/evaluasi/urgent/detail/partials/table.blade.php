@@ -108,7 +108,8 @@
 @endphp
 
 <div class="ibox-body ms-0 ps-0">
-    <form class="mb-3" id="filter-form" method="GET">
+    <form id="approveRkbForm" method="POST" action="">
+        @csrf
         <div class="mb-3 d-flex justify-content-end">
             @if ($appliedFilters)
                 <a class="btn btn-danger btn-sm btn-hide-text-mobile" href="{{ $resetUrl . $queryParams }}">

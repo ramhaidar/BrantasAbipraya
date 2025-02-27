@@ -59,60 +59,52 @@
 @endphp
 
 <div class="ibox-body ms-0 ps-0">
-    <form class="mb-3" id="filter-form" method="GET">
-        <div class="mb-3 d-flex justify-content-end">
-            @if ($appliedFilters)
-                <a class="btn btn-danger btn-sm btn-hide-text-mobile" href="{{ $resetUrl . $queryParams }}">
-                    <i class="bi bi-x-circle"></i> <span class="ms-2">Hapus Semua Filter</span>
-                </a>
-            @endif
-        </div>
+    <div class="mb-3 d-flex justify-content-end">
+        @if ($appliedFilters)
+            <a class="btn btn-danger btn-sm btn-hide-text-mobile" href="{{ $resetUrl . $queryParams }}">
+                <i class="bi bi-x-circle"></i> <span class="ms-2">Hapus Semua Filter</span>
+            </a>
+        @endif
+    </div>
 
-        <div class="table-responsive">
-            <table class="m-0 table table-bordered table-hover" id="table-data">
-                <thead class="table-primary">
+    <div class="table-responsive">
+        <table class="m-0 table table-bordered table-hover" id="table-data">
+            <thead class="table-primary">
+                <tr>
+                    @foreach ($headers as $header)
+                        @include(
+                            'components.table-header-filter',
+                            array_merge($header, [
+                                'uniqueValues' => $uniqueValues ?? [],
+                            ]))
+                    @endforeach
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($TableData as $item)
                     <tr>
-                        @foreach ($headers as $header)
-                            @include(
-                                'components.table-header-filter',
-                                array_merge($header, [
-                                    'uniqueValues' => $uniqueValues ?? [],
-                                ]))
-                        @endforeach
+                        <td class="text-center">{{ $item->masterDataAlat->jenis_alat }}</td>
+                        <td class="text-center">{{ $item->masterDataAlat->kode_alat }}</td>
+                        <td class="text-center">{{ $item->masterDataAlat->merek_alat }}</td>
+                        <td class="text-center">{{ $item->masterDataAlat->tipe_alat }}</td>
+                        <td class="text-center">{{ $item->masterDataAlat->serial_number }}</td>
+                        <td class="text-center">
+                            <button class="btn btn-danger deleteBtn" data-id="{{ $item->id }}" type="button">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    @forelse ($TableData as $item)
-                        <tr>
-                            <td class="text-center">{{ $item->masterDataAlat->jenis_alat }}</td>
-                            <td class="text-center">{{ $item->masterDataAlat->kode_alat }}</td>
-                            <td class="text-center">{{ $item->masterDataAlat->merek_alat }}</td>
-                            <td class="text-center">{{ $item->masterDataAlat->tipe_alat }}</td>
-                            <td class="text-center">{{ $item->masterDataAlat->serial_number }}</td>
-                            <td class="text-center">
-                                <button class="btn btn-danger deleteBtn" data-id="{{ $item->id }}" type="button">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td class="text-center py-3 text-muted" colspan="16">
-                                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                                Belum ada data alat yang tersedia untuk proyek ini.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-
-        <input id="selected-jenis-alat" name="selected_jenis_alat" type="hidden" value="{{ request('selected_jenis_alat') }}">
-        <input id="selected-kode-alat" name="selected_kode_alat" type="hidden" value="{{ request('selected_kode_alat') }}">
-        <input id="selected-merek-alat" name="selected_merek_alat" type="hidden" value="{{ request('selected_merek_alat') }}">
-        <input id="selected-tipe-alat" name="selected_tipe_alat" type="hidden" value="{{ request('selected_tipe_alat') }}">
-        <input id="selected-serial-number" name="selected_serial_number" type="hidden" value="{{ request('selected_serial_number') }}">
-    </form>
+                @empty
+                    <tr>
+                        <td class="text-center py-3 text-muted" colspan="16">
+                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                            Belum ada data alat yang tersedia untuk proyek ini.
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
 </div>
 
 @push('scripts_3')

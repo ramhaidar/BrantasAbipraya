@@ -111,110 +111,96 @@
 @endphp
 
 <div class="ibox-body ms-0 ps-0">
-    <form class="mb-3" id="filter-form" method="GET">
-        <div class="mb-3 d-flex justify-content-end">
-            @if ($appliedFilters)
-                <a class="btn btn-danger btn-sm btn-hide-text-mobile" href="{{ $resetUrl . $queryParams }}">
-                    <i class="bi bi-x-circle"></i> <span class="ms-2">Hapus Semua Filter</span>
-                </a>
-            @endif
-        </div>
+    <div class="mb-3 d-flex justify-content-end">
+        @if ($appliedFilters)
+            <a class="btn btn-danger btn-sm btn-hide-text-mobile" href="{{ $resetUrl . $queryParams }}">
+                <i class="bi bi-x-circle"></i> <span class="ms-2">Hapus Semua Filter</span>
+            </a>
+        @endif
+    </div>
 
-        <div class="table-responsive">
-            <table class="m-0 table table-bordered table-hover" id="table-data">
-                <thead class="table-primary">
-                    <tr>
-                        @foreach ($headers as $header)
-                            @include('components.table-header-filter', array_merge($header, ['uniqueValues' => $uniqueValues]))
-                        @endforeach
-                    </tr>
-                </thead>
-                <tbody>
+    <div class="table-responsive">
+        <table class="m-0 table table-bordered table-hover" id="table-data">
+            <thead class="table-primary">
+                <tr>
+                    @foreach ($headers as $header)
+                        @include('components.table-header-filter', array_merge($header, ['uniqueValues' => $uniqueValues]))
+                    @endforeach
+                </tr>
+            </thead>
+            <tbody>
+                @php
+                    // Group items by linkAlatDetailRkb ID
+                    $groupedItems = collect($TableData->items())->groupBy(function ($item) {
+                        return $item->linkRkbDetails->first()->linkAlatDetailRkb->id;
+                    });
+                @endphp
+
+                @forelse ($groupedItems as $alatId => $items)
                     @php
-                        // Group items by linkAlatDetailRkb ID
-                        $groupedItems = collect($TableData->items())->groupBy(function ($item) {
-                            return $item->linkRkbDetails->first()->linkAlatDetailRkb->id;
-                        });
+                        $firstItem = $items->first();
+                        $detail = $firstItem->linkRkbDetails->first();
+                        $alat = $detail->linkAlatDetailRkb;
                     @endphp
 
-                    @forelse ($groupedItems as $alatId => $items)
-                        @php
-                            $firstItem = $items->first();
-                            $detail = $firstItem->linkRkbDetails->first();
-                            $alat = $detail->linkAlatDetailRkb;
-                        @endphp
-
-                        @foreach ($items as $item)
-                            <tr>
-                                <td>{{ $alat->masterDataAlat->jenis_alat ?? '-' }}</td>
-                                <td>{{ $alat->masterDataAlat->kode_alat ?? '-' }}</td>
-                                <td>{{ $item->kategoriSparepart->kode ?? '-' }}: {{ $item->kategoriSparepart->nama ?? '-' }}</td>
-                                <td>{{ $item->masterDataSparepart->nama ?? '-' }}</td>
-                                <td>{{ $item->masterDataSparepart->part_number ?? '-' }}</td>
-                                <td>{{ $item->masterDataSparepart->merk ?? '-' }}</td>
-                                <td>{{ $item->nama_koordinator ?? '-' }}</td>
-                                <td>
-                                    <button class="btn {{ $item->kronologi ? 'btn-warning' : 'btn-primary' }}" type="button" onclick="showKronologi({{ $item->id }})">
-                                        <i class="bi bi-clock-history"></i>
-                                    </button>
-                                </td>
-                                <td>
-                                    <button class="btn {{ $item->dokumentasi ? 'btn-warning' : 'btn-primary' }}" type="button" onclick="showDokumentasi({{ $item->id }})">
-                                        <i class="bi bi-file-earmark-text"></i>
-                                    </button>
-                                </td>
-                                @if ($loop->first)
-                                    <td rowspan="{{ $items->count() }}">
-                                        <a class="btn {{ $alat->timelineRkbUrgents->count() > 0 ? 'btn-warning' : 'btn-primary' }}" href="{{ route('rkb_urgent.detail.timeline.index', ['id' => $alat->id]) }}">
-                                            <i class="bi bi-hourglass-split"></i>
-                                        </a>
-                                    </td>
-
-                                    <td rowspan="{{ $items->count() }}">
-                                        <button class="btn {{ $alat->lampiranRkbUrgent ? 'btn-warning' : 'btn-primary' }} lampiranBtn" data-bs-toggle="modal" data-bs-target="{{ $alat->lampiranRkbUrgent ? '#modalForLampiranExist' : '#modalForLampiranNew' }}" data-id-linkalatdetail="{{ $alat->id }}" data-id-lampiran="{{ $alat->lampiranRkbUrgent ? $alat->lampiranRkbUrgent->id : null }}" type="button">
-                                            <i class="bi bi-paperclip"></i>
-                                        </button>
-                                    </td>
-                                @endif
-                                <td>{{ $item->quantity_requested }}</td>
-                                <td>{{ $item->quantity_approved ?? '-' }}</td>
-                                <td>{{ $item->satuan }}</td>
-                                @if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin')
-                                    <td>
-                                        <button class="btn btn-warning mx-1 ubahBtn" data-id="{{ $item->id }}" type="button" {{ $detail->linkAlatDetailRkb->rkb->is_finalized ? 'disabled' : '' }} onclick="fillFormEditDetailRKB({{ $item->id }})">
-                                            <i class="bi bi-pencil-square"></i>
-                                        </button>
-                                        <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item->id }}" type="button" {{ $detail->linkAlatDetailRkb->rkb->is_finalized ? 'disabled' : '' }}>
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </td>
-                                @endif
-                            </tr>
-                        @endforeach
-                    @empty
+                    @foreach ($items as $item)
                         <tr>
-                            <td class="text-center py-3 text-muted" colspan="14">
-                                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                                No data found
+                            <td>{{ $alat->masterDataAlat->jenis_alat ?? '-' }}</td>
+                            <td>{{ $alat->masterDataAlat->kode_alat ?? '-' }}</td>
+                            <td>{{ $item->kategoriSparepart->kode ?? '-' }}: {{ $item->kategoriSparepart->nama ?? '-' }}</td>
+                            <td>{{ $item->masterDataSparepart->nama ?? '-' }}</td>
+                            <td>{{ $item->masterDataSparepart->part_number ?? '-' }}</td>
+                            <td>{{ $item->masterDataSparepart->merk ?? '-' }}</td>
+                            <td>{{ $item->nama_koordinator ?? '-' }}</td>
+                            <td>
+                                <button class="btn {{ $item->kronologi ? 'btn-warning' : 'btn-primary' }}" type="button" onclick="showKronologi({{ $item->id }})">
+                                    <i class="bi bi-clock-history"></i>
+                                </button>
                             </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+                            <td>
+                                <button class="btn {{ $item->dokumentasi ? 'btn-warning' : 'btn-primary' }}" type="button" onclick="showDokumentasi({{ $item->id }})">
+                                    <i class="bi bi-file-earmark-text"></i>
+                                </button>
+                            </td>
+                            @if ($loop->first)
+                                <td rowspan="{{ $items->count() }}">
+                                    <a class="btn {{ $alat->timelineRkbUrgents->count() > 0 ? 'btn-warning' : 'btn-primary' }}" href="{{ route('rkb_urgent.detail.timeline.index', ['id' => $alat->id]) }}">
+                                        <i class="bi bi-hourglass-split"></i>
+                                    </a>
+                                </td>
 
-        <input id="selected-jenis-alat" name="selected_jenis_alat" type="hidden" value="{{ request('selected_jenis_alat') }}">
-        <input id="selected-kode-alat" name="selected_kode_alat" type="hidden" value="{{ request('selected_kode_alat') }}">
-        <input id="selected-kategori-sparepart" name="selected_kategori_sparepart" type="hidden" value="{{ request('selected_kategori_sparepart') }}">
-        <input id="selected-sparepart" name="selected_sparepart" type="hidden" value="{{ request('selected_sparepart') }}">
-        <input id="selected-part-number" name="selected_part_number" type="hidden" value="{{ request('selected_part_number') }}">
-        <input id="selected-merk" name="selected_merk" type="hidden" value="{{ request('selected_merk') }}">
-        <input id="selected-nama-koordinator" name="selected_nama_koordinator" type="hidden" value="{{ request('selected_nama_koordinator') }}">
-        <input id="selected-quantity-requested" name="selected_quantity_requested" type="hidden" value="{{ request('selected_quantity_requested') }}">
-        <input id="selected-quantity-approved" name="selected_quantity_approved" type="hidden" value="{{ request('selected_quantity_approved') }}">
-        <input id="selected-satuan" name="selected_satuan" type="hidden" value="{{ request('selected_satuan') }}">
-        <!-- Add other hidden inputs for filters -->
-    </form>
+                                <td rowspan="{{ $items->count() }}">
+                                    <button class="btn {{ $alat->lampiranRkbUrgent ? 'btn-warning' : 'btn-primary' }} lampiranBtn" data-bs-toggle="modal" data-bs-target="{{ $alat->lampiranRkbUrgent ? '#modalForLampiranExist' : '#modalForLampiranNew' }}" data-id-linkalatdetail="{{ $alat->id }}" data-id-lampiran="{{ $alat->lampiranRkbUrgent ? $alat->lampiranRkbUrgent->id : null }}" type="button">
+                                        <i class="bi bi-paperclip"></i>
+                                    </button>
+                                </td>
+                            @endif
+                            <td>{{ $item->quantity_requested }}</td>
+                            <td>{{ $item->quantity_approved ?? '-' }}</td>
+                            <td>{{ $item->satuan }}</td>
+                            @if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin')
+                                <td>
+                                    <button class="btn btn-warning mx-1 ubahBtn" data-id="{{ $item->id }}" type="button" {{ $detail->linkAlatDetailRkb->rkb->is_finalized ? 'disabled' : '' }} onclick="fillFormEditDetailRKB({{ $item->id }})">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+                                    <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item->id }}" type="button" {{ $detail->linkAlatDetailRkb->rkb->is_finalized ? 'disabled' : '' }}>
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            @endif
+                        </tr>
+                    @endforeach
+                @empty
+                    <tr>
+                        <td class="text-center py-3 text-muted" colspan="14">
+                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                            No data found
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
 </div>
 
 @push('scripts_3')

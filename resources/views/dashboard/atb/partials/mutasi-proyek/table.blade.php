@@ -93,6 +93,20 @@
             'filter' => true,
         ],
         [
+            'title' => 'PPN',
+            'filterId' => 'ppn',
+            'paramName' => 'ppn',
+            'filter' => true,
+            'type' => 'price',
+        ],
+        [
+            'title' => 'Bruto',
+            'filterId' => 'bruto',
+            'paramName' => 'bruto',
+            'filter' => true,
+            'type' => 'price',
+        ],
+        [
             'title' => 'Dokumentasi',
             'filter' => false,
         ],
@@ -132,7 +146,11 @@
             <thead class="table-primary">
                 <tr>
                     @foreach ($headers as $header)
-                        @include('components.table-header-filter', array_merge($header, ['uniqueValues' => $uniqueValues ?? []]))
+                        @include(
+                            'components.table-header-filter',
+                            array_merge($header, [
+                                'uniqueValues' => $uniqueValues ?? [],
+                            ]))
                     @endforeach
                 </tr>
             </thead>
@@ -156,6 +174,8 @@
                         @endif
                         <td class="currency-value">{{ formatRibuan($item->harga) }}</td>
                         <td class="currency-value">{{ formatRibuan($item->quantity * $item->harga) }}</td>
+                        <td class="currency-value">{{ formatRibuan($item->quantity * $item->harga * 0.11) }}</td>
+                        <td class="currency-value">{{ formatRibuan($item->quantity * $item->harga * 1.11) }}</td>
                         <td class="text-center doc-cell" data-id="{{ $item->id }}">
                             @php
                                 $storagePath = storage_path('app/public/' . $item->dokumentasi_foto);
@@ -203,20 +223,14 @@
                     <tr class="table-primary">
                         <td class="text-center fw-bold" colspan="11">Grand Total</td>
                         <td class="text-center fw-bold currency-value">{{ formatRibuan($TableData->total_harga) }}</td>
+                        <td class="text-center fw-bold currency-value">{{ formatRibuan($TableData->total_harga * 0.11) }}</td>
+                        <td class="text-center fw-bold currency-value">{{ formatRibuan($TableData->total_harga * 1.11) }}</td>
                         <td colspan="2"></td>
                     </tr>
                 </tfoot>
             @endif
         </table>
     </div>
-
-    <form id="filter-form" method="GET">
-        @foreach ($headers as $header)
-            @if ($header['filter'])
-                <input id="selected-{{ $header['filterId'] }}" name="selected_{{ $header['paramName'] }}" type="hidden" value="{{ request("selected_{$header['paramName']}") }}">
-            @endif
-        @endforeach
-    </form>
 </div>
 
 @push('scripts_3')

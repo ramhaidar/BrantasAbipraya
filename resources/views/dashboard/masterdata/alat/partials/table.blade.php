@@ -70,72 +70,63 @@
 @endphp
 
 <div class="ibox-body ms-0 ps-0">
-    <form class="mb-3" id="filter-form" method="GET">
-        <div class="mb-3 d-flex justify-content-end">
-            @if ($appliedFilters)
-                <a class="btn btn-danger btn-sm btn-hide-text-mobile" href="{{ $resetUrl . $queryParams }}">
-                    <i class="bi bi-x-circle"></i> <span class="ms-2">Hapus Semua Filter</span>
-                </a>
-            @endif
-        </div>
+    <div class="mb-3 d-flex justify-content-end">
+        @if ($appliedFilters)
+            <a class="btn btn-danger btn-sm btn-hide-text-mobile" href="{{ $resetUrl . $queryParams }}">
+                <i class="bi bi-x-circle"></i> <span class="ms-2">Hapus Semua Filter</span>
+            </a>
+        @endif
+    </div>
 
-        <div class="table-responsive">
-            <table class="m-0 table table-bordered table-hover" id="table-data">
-                <thead class="table-primary">
+    <div class="table-responsive">
+        <table class="m-0 table table-bordered table-hover" id="table-data">
+            <thead class="table-primary">
+                <tr>
+                    @foreach ($headers as $header)
+                        @include(
+                            'components.table-header-filter',
+                            array_merge($header, [
+                                'uniqueValues' => $uniqueValues ?? [],
+                            ]))
+                    @endforeach
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($TableData as $item)
                     <tr>
-                        @foreach ($headers as $header)
-                            @include(
-                                'components.table-header-filter',
-                                array_merge($header, [
-                                    'uniqueValues' => $uniqueValues ?? [],
-                                ]))
-                        @endforeach
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($TableData as $item)
-                        <tr>
-                            <td>{{ $item->jenis_alat }}</td>
-                            <td>{{ $item->kode_alat }}</td>
-                            <td>{{ $item->merek_alat }}</td>
-                            <td>{{ $item->tipe_alat }}</td>
-                            <td>{{ $item->serial_number }}</td>
-                            <td>{{ isset($item->current_project) ? $item->current_project->nama : 'Belum Ditugaskan' }}</td>
-                            <td>
-                                <button class="btn btn-info" type="button" title="Lihat Riwayat" onclick="showHistory({{ $item->id }})">
-                                    <i class="bi bi-clock-history"></i>
+                        <td>{{ $item->jenis_alat }}</td>
+                        <td>{{ $item->kode_alat }}</td>
+                        <td>{{ $item->merek_alat }}</td>
+                        <td>{{ $item->tipe_alat }}</td>
+                        <td>{{ $item->serial_number }}</td>
+                        <td>{{ isset($item->current_project) ? $item->current_project->nama : 'Belum Ditugaskan' }}</td>
+                        <td>
+                            <button class="btn btn-info" type="button" title="Lihat Riwayat" onclick="showHistory({{ $item->id }})">
+                                <i class="bi bi-clock-history"></i>
+                            </button>
+                        </td>
+                        @if (auth()->user()->role == 'admin_divisi' || auth()->user()->role == 'superadmin')
+                            <td class="text-center">
+                                <button class="btn btn-warning mx-1 ubahBtn" data-id="{{ $item->id }}" type="button" onclick="fillFormEdit({{ $item->id }})">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                                <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item->id }}" type="button">
+                                    <i class="bi bi-trash"></i>
                                 </button>
                             </td>
-                            @if (auth()->user()->role == 'admin_divisi' || auth()->user()->role == 'superadmin')
-                                <td class="text-center">
-                                    <button class="btn btn-warning mx-1 ubahBtn" data-id="{{ $item->id }}" type="button" onclick="fillFormEdit({{ $item->id }})">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </button>
-                                    <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item->id }}" type="button">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </td>
-                            @endif
-                        </tr>
-                    @empty
-                        <tr>
-                            <td class="text-center py-3 text-muted" colspan="{{ auth()->user()->role == 'admin_divisi' || auth()->user()->role == 'superadmin' ? '8' : '7' }}">
-                                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                                Tidak Ada Data Master Data Alat
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-
-        <input id="selected-jenis" name="selected_jenis" type="hidden" value="{{ request('selected_jenis') }}">
-        <input id="selected-merek" name="selected_merek" type="hidden" value="{{ request('selected_merek') }}">
-        <input id="selected-kode" name="selected_kode" type="hidden" value="{{ request('selected_kode') }}">
-        <input id="selected-tipe" name="selected_tipe" type="hidden" value="{{ request('selected_tipe') }}">
-        <input id="selected-serial" name="selected_serial" type="hidden" value="{{ request('selected_serial') }}">
-        <input id="selected-proyek" name="selected_proyek" type="hidden" value="{{ request('selected_proyek') }}">
-    </form>
+                        @endif
+                    </tr>
+                @empty
+                    <tr>
+                        <td class="text-center py-3 text-muted" colspan="{{ auth()->user()->role == 'admin_divisi' || auth()->user()->role == 'superadmin' ? '8' : '7' }}">
+                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                            Tidak Ada Data Master Data Alat
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
 </div>
 
 @push('scripts_3')

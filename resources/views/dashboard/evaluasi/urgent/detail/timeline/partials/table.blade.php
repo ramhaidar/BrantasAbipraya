@@ -77,56 +77,50 @@
 @endphp
 
 <div class="ibox-body ms-0 ps-0">
-    <form class="mb-3" id="filter-form" method="GET">
-        <div class="mb-3 d-flex justify-content-end">
-            @if ($appliedFilters)
-                <a class="btn btn-danger btn-sm btn-hide-text-mobile" href="{{ $resetUrl . $queryParams }}">
-                    <i class="bi bi-x-circle"></i> <span class="ms-2">Hapus Semua Filter</span>
-                </a>
-            @endif
-        </div>
+    <div class="mb-3 d-flex justify-content-end">
+        @if ($appliedFilters)
+            <a class="btn btn-danger btn-sm btn-hide-text-mobile" href="{{ $resetUrl . $queryParams }}">
+                <i class="bi bi-x-circle"></i> <span class="ms-2">Hapus Semua Filter</span>
+            </a>
+        @endif
+    </div>
 
-        <div class="table-responsive">
-            <table class="m-0 table table-bordered table-hover" id="table-data">
-                <thead class="table-primary">
+    <div class="table-responsive">
+        <table class="m-0 table table-bordered table-hover" id="table-data">
+            <thead class="table-primary">
+                <tr>
+                    @foreach ($headers as $header)
+                        @include(
+                            'components.table-header-filter',
+                            array_merge($header, [
+                                'uniqueValues' => $uniqueValues ?? [],
+                            ]))
+                    @endforeach
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($TableData as $item)
                     <tr>
-                        @foreach ($headers as $header)
-                            @include(
-                                'components.table-header-filter',
-                                array_merge($header, [
-                                    'uniqueValues' => $uniqueValues ?? [],
-                                ]))
-                        @endforeach
+                        <td class="text-center">{{ $item->nama_rencana }}</td>
+                        <td class="text-center">{{ $item->diff_in_days_rencana ? $item->diff_in_days_rencana . ' Hari' : '-' }}</td>
+                        <td class="text-center">{{ $item->tanggal_awal_rencana ? $item->tanggal_awal_rencana->format('Y-m-d') : '-' }}</td>
+                        <td class="text-center">{{ $item->tanggal_akhir_rencana ? $item->tanggal_akhir_rencana->format('Y-m-d') : '-' }}</td>
+                        <td class="text-center">{{ $item->diff_in_days_actual ? $item->diff_in_days_actual . ' Hari' : '-' }}</td>
+                        <td class="text-center">{{ $item->tanggal_awal_actual ? $item->tanggal_awal_actual->format('Y-m-d') : '-' }}</td>
+                        <td class="text-center">{{ $item->tanggal_akhir_actual ? $item->tanggal_akhir_actual->format('Y-m-d') : '-' }}</td>
+                        <td class="text-center"><span class="badge {{ $item->is_done ? 'bg-success' : 'bg-warning' }} w-100">{{ $item->is_done ? 'Sudah Selesai' : 'Belum Selesai' }}</span></td>
                     </tr>
-                </thead>
-                <tbody>
-                    @forelse ($TableData as $item)
-                        <tr>
-                            <td class="text-center">{{ $item->nama_rencana }}</td>
-                            <td class="text-center">{{ $item->diff_in_days_rencana ? $item->diff_in_days_rencana . ' Hari' : '-' }}</td>
-                            <td class="text-center">{{ $item->tanggal_awal_rencana ? $item->tanggal_awal_rencana->format('Y-m-d') : '-' }}</td>
-                            <td class="text-center">{{ $item->tanggal_akhir_rencana ? $item->tanggal_akhir_rencana->format('Y-m-d') : '-' }}</td>
-                            <td class="text-center">{{ $item->diff_in_days_actual ? $item->diff_in_days_actual . ' Hari' : '-' }}</td>
-                            <td class="text-center">{{ $item->tanggal_awal_actual ? $item->tanggal_awal_actual->format('Y-m-d') : '-' }}</td>
-                            <td class="text-center">{{ $item->tanggal_akhir_actual ? $item->tanggal_akhir_actual->format('Y-m-d') : '-' }}</td>
-                            <td class="text-center"><span class="badge {{ $item->is_done ? 'bg-success' : 'bg-warning' }} w-100">{{ $item->is_done ? 'Sudah Selesai' : 'Belum Selesai' }}</span></td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td class="text-center py-3" colspan="9">
-                                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                                <span class="text-muted">No data found</span>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-
-        @foreach ($headers as $header)
-            <input id="selected-{{ $header['paramName'] }}" name="selected_{{ $header['paramName'] }}" type="hidden" value="{{ request('selected_' . $header['paramName']) }}">
-        @endforeach
-    </form>
+                @empty
+                    <tr>
+                        <td class="text-center py-3" colspan="9">
+                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                            <span class="text-muted">No data found</span>
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
 </div>
 
 @push('scripts_3')

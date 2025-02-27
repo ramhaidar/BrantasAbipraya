@@ -129,103 +129,99 @@
 @endphp
 
 <div class="ibox-body ms-0 ps-0">
-    <form class="mb-3" id="filter-form" method="GET">
-        <div class="mb-3 d-flex justify-content-end">
-            @if ($appliedFilters)
-                <a class="btn btn-danger btn-sm btn-hide-text-mobile" href="{{ $resetUrl . $queryParams }}">
-                    <i class="bi bi-x-circle"></i> <span class="ms-2">Hapus Semua Filter</span>
-                </a>
-            @endif
-        </div>
+    <div class="mb-3 d-flex justify-content-end">
+        @if ($appliedFilters)
+            <a class="btn btn-danger btn-sm btn-hide-text-mobile" href="{{ $resetUrl . $queryParams }}">
+                <i class="bi bi-x-circle"></i> <span class="ms-2">Hapus Semua Filter</span>
+            </a>
+        @endif
+    </div>
 
-        <div class="table-responsive">
-            <table class="m-0 table table-bordered table-hover" id="table-data">
-                <thead class="table-primary">
+    <div class="table-responsive">
+        <table class="m-0 table table-bordered table-hover" id="table-data">
+            <thead class="table-primary">
+                <tr>
+                    @foreach ($headers as $header)
+                        @include(
+                            'components.table-header-filter',
+                            array_merge($header, [
+                                'uniqueValues' => $uniqueValues ?? [],
+                            ]))
+                    @endforeach
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($TableData as $item)
                     <tr>
-                        @foreach ($headers as $header)
-                            @include('components.table-header-filter', array_merge($header, ['uniqueValues' => $uniqueValues ?? []]))
-                        @endforeach
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($TableData as $item)
-                        <tr>
-                            <td class="spb-number" data-spb="{{ $item->spb->nomor ?? '-' }}" data-id="{{ $item->id }}" data-stt="{{ $item->surat_tanda_terima }}">
-                                {{ $item->spb->nomor ?? '-' }}
-                            </td>
-                            <td>{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('l, d F Y') }}</td>
-                            <td>{{ $item->masterDataSparepart->kategoriSparepart->kode }}: {{ $item->masterDataSparepart->kategoriSparepart->nama }}</td>
-                            <td>{{ $item->masterDataSupplier->nama }}</td>
-                            <td>{{ $item->masterDataSparepart->nama }}</td>
-                            <td>{{ $item->masterDataSparepart->merk }}</td>
-                            <td>{{ $item->masterDataSparepart->part_number }}</td>
-                            <td>{{ $item->quantity }}</td>
-                            <td>{{ $item->detailSpb->satuan ?? ($item->saldo->satuan ?? '-') }}</td>
-                            <td class="currency-value">{{ formatRibuan($item->harga) }}</td>
-                            <td class="currency-value">{{ formatRibuan($item->quantity * $item->harga) }}</td>
-                            <td class="currency-value">{{ formatRibuan($item->quantity * $item->harga * 0.11) }}</td>
-                            <td class="currency-value">{{ formatRibuan($item->quantity * $item->harga * 1.11) }}</td>
-                            <td class="text-center stt-cell">
-                                @if ($item->surat_tanda_terima)
-                                    <button class="btn btn-primary mx-1 sttBtn" onclick="showSTTModal('{{ $item->id }}')">
-                                        <i class="bi bi-file-earmark-pdf"></i>
-                                    </button>
-                                @else
-                                    <button class="btn btn-secondary mx-1" disabled>
-                                        <i class="bi bi-file-earmark-pdf"></i>
-                                    </button>
-                                @endif
-                            </td>
-                            <td class="text-center doc-cell" data-id="{{ $item->id }}">
-                                @php
-                                    $storagePath = storage_path('app/public/' . $item->dokumentasi_foto);
-                                    $hasImages = false;
-                                    if ($item->dokumentasi_foto && is_dir($storagePath)) {
-                                        $files = glob($storagePath . '/*.{jpg,jpeg,png,heic}', GLOB_BRACE);
-                                        $hasImages = !empty($files);
-                                    }
-                                @endphp
-                                <button class="btn {{ $hasImages ? 'btn-primary' : 'btn-secondary' }} mx-1" onclick="showDokumentasiModal('{{ $item->id }}')" {{ !$hasImages ? 'disabled' : '' }}>
-                                    <i class="bi bi-images"></i>
+                        <td class="spb-number" data-spb="{{ $item->spb->nomor ?? '-' }}" data-id="{{ $item->id }}" data-stt="{{ $item->surat_tanda_terima }}">
+                            {{ $item->spb->nomor ?? '-' }}
+                        </td>
+                        <td>{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('l, d F Y') }}</td>
+                        <td>{{ $item->masterDataSparepart->kategoriSparepart->kode }}: {{ $item->masterDataSparepart->kategoriSparepart->nama }}</td>
+                        <td>{{ $item->masterDataSupplier->nama }}</td>
+                        <td>{{ $item->masterDataSparepart->nama }}</td>
+                        <td>{{ $item->masterDataSparepart->merk }}</td>
+                        <td>{{ $item->masterDataSparepart->part_number }}</td>
+                        <td>{{ $item->quantity }}</td>
+                        <td>{{ $item->detailSpb->satuan ?? ($item->saldo->satuan ?? '-') }}</td>
+                        <td class="currency-value">{{ formatRibuan($item->harga) }}</td>
+                        <td class="currency-value">{{ formatRibuan($item->quantity * $item->harga) }}</td>
+                        <td class="currency-value">{{ formatRibuan($item->quantity * $item->harga * 0.11) }}</td>
+                        <td class="currency-value">{{ formatRibuan($item->quantity * $item->harga * 1.11) }}</td>
+                        <td class="text-center stt-cell">
+                            @if ($item->surat_tanda_terima)
+                                <button class="btn btn-primary mx-1 sttBtn" onclick="showSTTModal('{{ $item->id }}')">
+                                    <i class="bi bi-file-earmark-pdf"></i>
+                                </button>
+                            @else
+                                <button class="btn btn-secondary mx-1" disabled>
+                                    <i class="bi bi-file-earmark-pdf"></i>
+                                </button>
+                            @endif
+                        </td>
+                        <td class="text-center doc-cell" data-id="{{ $item->id }}">
+                            @php
+                                $storagePath = storage_path('app/public/' . $item->dokumentasi_foto);
+                                $hasImages = false;
+                                if ($item->dokumentasi_foto && is_dir($storagePath)) {
+                                    $files = glob($storagePath . '/*.{jpg,jpeg,png,heic}', GLOB_BRACE);
+                                    $hasImages = !empty($files);
+                                }
+                            @endphp
+                            <button class="btn {{ $hasImages ? 'btn-primary' : 'btn-secondary' }} mx-1" onclick="showDokumentasiModal('{{ $item->id }}')" {{ !$hasImages ? 'disabled' : '' }}>
+                                <i class="bi bi-images"></i>
+                            </button>
+                        </td>
+                        @if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin')
+                            <td class="text-center action-cell">
+                                <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item->id }}" type="button">
+                                    <i class="bi bi-trash"></i>
                                 </button>
                             </td>
-                            @if (Auth::user()->role === 'koordinator_proyek' || Auth::user()->role === 'superadmin')
-                                <td class="text-center action-cell">
-                                    <button class="btn btn-danger mx-1 deleteBtn" data-id="{{ $item->id }}" type="button">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </td>
-                            @endif
-                        </tr>
-                    @empty
-                        <tr>
-                            <td class="text-center py-3 text-muted" colspan="16">
-                                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                                No ATB records found
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-                @if ($TableData->currentPage() === $TableData->lastPage())
-                    <tfoot>
-                        <tr class="table-primary">
-                            <td class="text-center fw-bold" colspan="10">Grand Total</td>
-                            <td class="text-center fw-bold currency-value">{{ formatRibuan($TableData->total_harga) }}</td>
-                            <td class="text-center fw-bold currency-value">{{ formatRibuan($TableData->total_ppn) }}</td>
-                            <td class="text-center fw-bold currency-value">{{ formatRibuan($TableData->total_bruto) }}</td>
-                            <td colspan="3"></td>
-                        </tr>
-                    </tfoot>
-                @endif
-            </table>
-        </div>
-
-        @foreach ($headers as $header)
-            @if ($header['filter'])
-                <input id="selected-{{ $header['paramName'] }}" name="selected_{{ $header['paramName'] }}" type="hidden" value="{{ request("selected_{$header['paramName']}") }}">
+                        @endif
+                    </tr>
+                @empty
+                    <tr>
+                        <td class="text-center py-3 text-muted" colspan="16">
+                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                            No ATB records found
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+            @if ($TableData->currentPage() === $TableData->lastPage())
+                <tfoot>
+                    <tr class="table-primary">
+                        <td class="text-center fw-bold" colspan="10">Grand Total</td>
+                        <td class="text-center fw-bold currency-value">{{ formatRibuan($TableData->total_harga) }}</td>
+                        <td class="text-center fw-bold currency-value">{{ formatRibuan($TableData->total_ppn) }}</td>
+                        <td class="text-center fw-bold currency-value">{{ formatRibuan($TableData->total_bruto) }}</td>
+                        <td colspan="3"></td>
+                    </tr>
+                </tfoot>
             @endif
-        @endforeach
-    </form>
+        </table>
+    </div>
 </div>
 
 @push('scripts_3')

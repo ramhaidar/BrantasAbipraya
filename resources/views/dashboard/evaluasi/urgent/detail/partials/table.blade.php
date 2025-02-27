@@ -123,7 +123,11 @@
                 <thead class="table-primary">
                     <tr>
                         @foreach ($headers as $header)
-                            @include('components.table-header-filter', array_merge($header, ['uniqueValues' => $uniqueValues ?? []]))
+                            @include(
+                                'components.table-header-filter',
+                                array_merge($header, [
+                                    'uniqueValues' => $uniqueValues ?? [],
+                                ]))
                         @endforeach
                     </tr>
                 </thead>
@@ -224,13 +228,6 @@
                 </tbody>
             </table>
         </div>
-
-        <!-- Add hidden inputs for all filters -->
-        @foreach ($headers as $header)
-            @if ($header['filter'])
-                <input id="selected-{{ $header['paramName'] }}" name="selected_{{ $header['paramName'] }}" type="hidden" value="{{ request('selected_' . $header['paramName']) }}">
-            @endif
-        @endforeach
     </form>
 </div>
 

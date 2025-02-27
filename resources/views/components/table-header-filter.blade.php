@@ -377,6 +377,14 @@
             }
         });
 
+        // Add immediate input event listeners for inputs
+        $('input[type="number"], .datepicker, .price-input').on('input keyup', function(e) {
+            const paramName = this.id.split('-')[0];
+            const type = this.id.split('-')[1];
+            clearRelatedFields(paramName, type);
+            updateClearButtonVisibility(this.id);
+        });
+
         // Add search input clear button functionality - be more specific with selector
         $('.filter-popup input[id^="search-"]').on('input keyup', function() {
             const clearBtn = $(this).siblings('.clear-input');
@@ -416,6 +424,25 @@
         // Prevent filtering on non-search inputs
         $('.filter-popup .price-input, .filter-popup .datepicker').on('keyup', function(e) {
             e.stopPropagation(); // Prevent event bubbling
+        });
+
+        // Make sure filterCheckboxes function correctly updates display property
+        document.addEventListener('DOMContentLoaded', function() {
+            // Additional event handler for filter inputs in price and date groups
+            $('.filter-popup #price-filter-group input, .filter-popup #date-filter-group input').on('change', function() {
+                const popupId = $(this).closest('.filter-popup').attr('id');
+                const type = popupId.replace('-filter', '').replace(/-/g, '_');
+
+                // Make sure checkbox display states are correctly updated when these inputs change
+                setTimeout(() => {
+                    const searchInput = $('#search-' + type);
+                    if (searchInput.length) {
+                        filterCheckboxes(type, {
+                            target: searchInput[0]
+                        });
+                    }
+                }, 50);
+            });
         });
     });
 </script>

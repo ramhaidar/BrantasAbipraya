@@ -459,14 +459,22 @@
         const searchInput = container.closest('.filter-popup').find('input[type="text"]');
         const searchText = searchInput.val().toLowerCase();
 
-        // Only work with items that match the current search
+        // Only work with items that match the current search and are visible in UI
         const visibleCheckboxes = container.find(`.${type}-checkbox`).filter(function() {
-            const label = $(this).closest('.form-check').find('label').text().toLowerCase();
+            // Check if the parent form-check is actually visible in the UI
+            const formCheck = $(this).closest('.form-check');
+            if (formCheck.css('display') === 'none') {
+                return false;
+            }
+
+            // Double check with text search too
+            const label = formCheck.find('label').text().toLowerCase();
             return !searchText || label.includes(searchText);
         });
 
         // Check if all currently visible checkboxes are checked
-        const allVisibleChecked = visibleCheckboxes.length === visibleCheckboxes.filter(':checked').length;
+        const allVisibleChecked = visibleCheckboxes.length > 0 &&
+            visibleCheckboxes.filter(':checked').length === visibleCheckboxes.length;
 
         // Toggle only visible checkboxes
         visibleCheckboxes.prop('checked', !allVisibleChecked);
@@ -490,33 +498,36 @@
         // Handle keyboard shortcuts
         $(document).on('keydown', function(event) {
             const visiblePopup = $('.filter-popup:visible');
-            const activeElement = document.activeElement;
+            if (!visiblePopup.length) return; // Exit if no popup is visible
 
-            // Check if the active element is an input inside the popup
-            const isInputFocused = $(activeElement).is('.filter-popup input');
-            const isTextInput = $(activeElement).is('.filter-popup input[type="text"], .filter-popup input[type="number"], .filter-popup .datepicker, .filter-popup .price-input');
+            const activeElement = document.activeElement;
+            const popupId = visiblePopup.attr('id');
+            const type = popupId.replace('-filter', '').replaceAll('-', '_');
+
+            // Separate checks for different input types
+            const isSearchInput = $(activeElement).is('.filter-popup input[id^="search-"]');
+            const isOtherInput = $(activeElement).is('input[type="number"], textarea, .datepicker, .price-input');
 
             if (event.key === 'Escape') {
                 $('.filter-popup').hide();
-            } else if (event.key === 'Enter' && visiblePopup.length && isInputFocused) {
-                const popupId = visiblePopup.attr('id');
-                const type = popupId.replace('-filter', '').replaceAll('-', '_');
+            } else if (event.key === 'Enter' && $(activeElement).is('.filter-popup input')) {
                 applyFilter(type);
                 event.preventDefault();
-            } else if (event.key === 'a' && event.ctrlKey && visiblePopup.length) {
-                // If a text/number/date input is focused, allow default behavior (select all)
-                if (isTextInput) {
-                    // Let default behavior happen (select all text)
-                    return true;
-                } else {
-                    // Prevent default select all behavior for non-text inputs
-                    event.preventDefault();
-                    // Get popup type and toggle all checkboxes
-                    const popupId = visiblePopup.attr('id');
-                    const type = popupId.replace('-filter', '').replaceAll('-', '_');
+            } else if (event.key === 'a' && event.ctrlKey) {
+                // Special case for search inputs - implement the checkbox toggle behavior
+                if (isSearchInput) {
+                    event.preventDefault(); // Prevent default select all text
                     toggleAllFilters(type);
                     return false;
                 }
+                // For other inputs, allow default browser behavior (select all text)
+                else if (!isOtherInput) {
+                    // If not in any input, toggle checkboxes
+                    event.preventDefault();
+                    toggleAllFilters(type);
+                    return false;
+                }
+                // For other inputs (price, date, etc.), let the browser handle it
             }
         });
 

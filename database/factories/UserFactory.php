@@ -31,12 +31,12 @@ class UserFactory extends Factory
 
         return [ 
             'name'           => $faker->name (),
-            'username'       => $faker->firstName (),
-            'path_profile'   => $faker->imageUrl (),
-            'role'           => $faker->randomElement ( [ 'Pegawai', 'Admin', 'Bos' ] ),
+            'username'       => $faker->unique ()->userName (),
+            'path_profile'   => '/UserDefault.png',
+            'role'           => $faker->randomElement ( [ 'svp', 'vp', 'admin_divisi', 'koordinator_proyek' ] ),
             'sex'            => $faker->randomElement ( [ 'Laki-laki', 'Perempuan' ] ),
-            'phone'          => $faker->unique ()->phoneNumber (),
-            'email'          => $faker->unique ()->email (),
+            'phone'          => '08' . $faker->numberBetween ( 1000000000, 9999999999 ),
+            'email'          => $faker->unique ()->safeEmail (),
             'password'       => static::$password ??= Hash::make ( 'password' ),
             'remember_token' => Str::random ( 10 ),
         ];
@@ -49,6 +49,17 @@ class UserFactory extends Factory
     {
         return $this->state ( fn ( array $attributes ) => [ 
             'email_verified_at' => null,
+        ] );
+    }
+
+    public function withCredentials ( string $username, string $name, string $email, string $role, string $password ) : self
+    {
+        return $this->state ( fn ( array $attributes ) => [ 
+            'username' => $username,
+            'name'     => $name,
+            'email'    => $email,
+            'role'     => $role,
+            'password' => Hash::make ( $password ),
         ] );
     }
 }

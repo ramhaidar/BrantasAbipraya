@@ -67,21 +67,27 @@ class UserSeeder extends Seeder
 
         $defaultProfilePath = '/UserDefault.png';
 
-        foreach ( $roles as $index => $role )
+        for ( $i = 0; $i < count ( $users ); $i++ )
         {
-            // Use firstOrCreate to avoid duplicates when seeder runs multiple times
+            $attributes = User::factory ()->withCredentials (
+                $users[ $i ],
+                $names[ $i ],
+                $emails[ $i ],
+                $roles[ $i ],
+                $passwords[ $i ]
+            )->raw ();
+
             User::firstOrCreate (
-                [ 'username' => $users[ $index ] ], // Unique identifier to check
-                [ 
-                    'name'         => $names[ $index ],
-                    'email'        => $emails[ $index ],
-                    'role'         => $role,
-                    'password'     => Hash::make ( $passwords[ $index ] ),
-                    'path_profile' => $defaultProfilePath,
-                    'sex'          => 'L', // Default value since it's required in the schema
-                    'phone'        => '08' . rand ( 1000000000, 9999999999 ), // Random phone number
-                ]
+                [ 'email' => $emails[ $i ] ], // unique identifier
+                $attributes
             );
+        }
+
+        // Create random users only if less than 15 additional users exist
+        $additionalUsersCount = 15 - User::where ( 'email', 'not like', '%brantas-abipraya.co.id' )->count ();
+        if ( $additionalUsersCount > 0 )
+        {
+            User::factory ()->count ( $additionalUsersCount )->create ();
         }
     }
 }

@@ -70,49 +70,179 @@ class SaldoController extends Controller
             ->leftJoin ( 'master_data_supplier', 'saldo.id_master_data_supplier', '=', 'master_data_supplier.id' );
     }
 
-    private function getUniqueValues ( $query )
+    /**
+     * Extract unique values for all filterable fields
+     * 
+     * @param int $id_proyek Project ID
+     * @param string $tipe Saldo type
+     * @return array Associative array of unique values by field
+     */
+    private function getUniqueValues ( $id_proyek, $tipe )
     {
-        // Clone the query to avoid modifying the original
-        $baseQuery = clone $query;
+        // Create a new base query for all Saldo records of this type for this project
+        $baseQuery = Saldo::where ( 'id_proyek', $id_proyek )
+            ->where ( 'tipe', $tipe );
 
-        // Remove existing selects to avoid conflicts
-        $baseQuery->getQuery ()->selects = null;
-
-        // Apply joins if not already present
-        if ( ! $baseQuery->getQuery ()->joins )
+        // Get all Saldo IDs from the query to use in subqueries for better performance
+        $saldoIds = $baseQuery->pluck ( 'id' )->toArray ();
+        if ( empty ( $saldoIds ) )
         {
-            $baseQuery = $this->applyBaseJoins ( $baseQuery );
+            return [ 
+                'tanggal'      => [],
+                'kode'         => [],
+                'supplier'     => [],
+                'sparepart'    => [],
+                'merk'         => [],
+                'part_number'  => [],
+                'satuan'       => [],
+                'quantity'     => [],
+                'harga'        => [],
+                'jumlah_harga' => [],
+            ];
         }
 
-        // Add specific select columns
-        $results = $baseQuery->select (
-            'atb.tanggal',
-            'kategori_sparepart.kode',
-            'kategori_sparepart.nama as kategori_nama', // Add this line
-            'master_data_supplier.nama as supplier_nama',
-            'master_data_sparepart.nama as sparepart_nama',
-            'master_data_sparepart.merk',
-            'master_data_sparepart.part_number',
-            'saldo.satuan',
-            'saldo.quantity', // Add this line
-            'saldo.harga',
-            \DB::raw ( '(saldo.quantity * saldo.harga) as jumlah_harga' )
-        )->get ();
-
-        return [ 
-            'tanggal'      => $results->pluck ( 'tanggal' )->filter ()->unique ()->values (),
-            'kode'         => $results->map ( function ($item)
+        // Get unique dates in formatted form from ATB records linked to these Saldo records
+        $dates = Saldo::whereIn ( 'id', $saldoIds )
+            ->whereHas ( 'atb' )
+            ->with ( 'atb' )
+            ->get ()
+            ->map ( function ($saldo)
             {
-                return "{$item->kode}: {$item->kategori_nama}";
-            } )->filter ()->unique ()->values (),
-            'supplier'     => $results->pluck ( 'supplier_nama' )->filter ()->unique ()->values (),
-            'sparepart'    => $results->pluck ( 'sparepart_nama' )->filter ()->unique ()->values (),
-            'merk'         => $results->pluck ( 'merk' )->filter ()->unique ()->values (),
-            'part_number'  => $results->pluck ( 'part_number' )->filter ()->unique ()->values (),
-            'satuan'       => $results->pluck ( 'satuan' )->filter ()->unique ()->values (),
-            'quantity'     => $results->pluck ( 'quantity' )->filter ()->unique ()->values (), // Add this line
-            'harga'        => $results->pluck ( 'harga' )->filter ()->unique ()->sort ()->values (),
-            'jumlah_harga' => $results->pluck ( 'jumlah_harga' )->filter ()->unique ()->sort ()->values (),
+                return $saldo->atb ? date ( 'Y-m-d', strtotime ( $saldo->atb->tanggal ) ) : null;
+            } )
+            ->filter ()
+            ->unique ()
+            ->values ()
+            ->toArray ();
+
+        // Get unique kategori sparepart combinations (kode: nama)
+        $kategoriSpareparts = Saldo::whereIn ( 'id', $saldoIds )
+            ->whereHas ( 'masterDataSparepart.kategoriSparepart' )
+            ->with ( 'masterDataSparepart.kategoriSparepart' )
+            ->get ()
+            ->map ( function ($saldo)
+            {
+                if ( $saldo->masterDataSparepart && $saldo->masterDataSparepart->kategoriSparepart )
+                {
+                    $kat = $saldo->masterDataSparepart->kategoriSparepart;
+                    return $kat->kode . ': ' . $kat->nama;
+                }
+                return null;
+            } )
+            ->filter ()
+            ->unique ()
+            ->values ()
+            ->toArray ();
+
+        // Get unique suppliers
+        $suppliers = Saldo::whereIn ( 'id', $saldoIds )
+            ->whereHas ( 'masterDataSupplier' )
+            ->with ( 'masterDataSupplier' )
+            ->get ()
+            ->map ( function ($saldo)
+            {
+                return $saldo->masterDataSupplier->nama ?? null;
+            } )
+            ->filter ()
+            ->unique ()
+            ->values ()
+            ->toArray ();
+
+        // Get unique spareparts
+        $spareparts = Saldo::whereIn ( 'id', $saldoIds )
+            ->whereHas ( 'masterDataSparepart' )
+            ->with ( 'masterDataSparepart' )
+            ->get ()
+            ->map ( function ($saldo)
+            {
+                return $saldo->masterDataSparepart->nama ?? null;
+            } )
+            ->filter ()
+            ->unique ()
+            ->values ()
+            ->toArray ();
+
+        // Get unique merks
+        $merks = Saldo::whereIn ( 'id', $saldoIds )
+            ->whereHas ( 'masterDataSparepart' )
+            ->with ( 'masterDataSparepart' )
+            ->get ()
+            ->map ( function ($saldo)
+            {
+                return $saldo->masterDataSparepart->merk ?? null;
+            } )
+            ->filter ()
+            ->unique ()
+            ->values ()
+            ->toArray ();
+
+        // Get unique part numbers
+        $partNumbers = Saldo::whereIn ( 'id', $saldoIds )
+            ->whereHas ( 'masterDataSparepart' )
+            ->with ( 'masterDataSparepart' )
+            ->get ()
+            ->map ( function ($saldo)
+            {
+                return $saldo->masterDataSparepart->part_number ?? null;
+            } )
+            ->filter ()
+            ->unique ()
+            ->values ()
+            ->toArray ();
+
+        // Get unique satuan values
+        $satuanValues = Saldo::whereIn ( 'id', $saldoIds )
+            ->whereNotNull ( 'satuan' )
+            ->pluck ( 'satuan' )
+            ->unique ()
+            ->values ()
+            ->toArray ();
+        sort ( $satuanValues );
+
+        // Get unique quantities
+        $quantities = Saldo::whereIn ( 'id', $saldoIds )
+            ->whereNotNull ( 'quantity' )
+            ->pluck ( 'quantity' )
+            ->unique ()
+            ->sort ()
+            ->values ()
+            ->toArray ();
+
+        // Get unique harga values
+        $hargaValues = Saldo::whereIn ( 'id', $saldoIds )
+            ->whereNotNull ( 'harga' )
+            ->pluck ( 'harga' )
+            ->unique ()
+            ->sort ()
+            ->values ()
+            ->toArray ();
+
+        // Calculate jumlah_harga for uniqueness
+        $jumlahHargaValues = Saldo::whereIn ( 'id', $saldoIds )
+            ->whereNotNull ( 'quantity' )
+            ->whereNotNull ( 'harga' )
+            ->get ()
+            ->map ( function ($saldo)
+            {
+                return $saldo->quantity * $saldo->harga;
+            } )
+            ->unique ()
+            ->sort ()
+            ->values ()
+            ->toArray ();
+
+        // Return all unique values
+        return [ 
+            'tanggal'      => $dates,
+            'kode'         => $kategoriSpareparts,
+            'supplier'     => $suppliers,
+            'sparepart'    => $spareparts,
+            'merk'         => $merks,
+            'part_number'  => $partNumbers,
+            'satuan'       => $satuanValues,
+            'quantity'     => $quantities,
+            'harga'        => $hargaValues,
+            'jumlah_harga' => $jumlahHargaValues,
         ];
     }
 
@@ -665,8 +795,8 @@ class SaldoController extends Controller
         // Apply filters to query if any filter is active
         $query = $this->applyFilters ( $query, request () );
 
-        // Get unique values for filters
-        $uniqueValues = $this->getUniqueValues ( $query );
+        // Get unique values for filters - changed to use project ID and type instead of query
+        $uniqueValues = $this->getUniqueValues ( $id_proyek, $tipe );
 
         // Calculate total amount
         $totalAmount = $query->sum ( \DB::raw ( 'saldo.quantity * saldo.harga' ) );

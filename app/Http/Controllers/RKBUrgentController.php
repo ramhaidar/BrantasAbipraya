@@ -136,13 +136,28 @@ class RKBUrgentController extends Controller
             try
             {
                 $periodeValues = $this->getSelectedValues ( $request->selected_periode );
-                if ( in_array ( 'null', $periodeValues ) )
+
+                // Check for null indicators (both "null" and "Empty/Null")
+                $nullValues       = [ 'null', 'Empty/Null' ];
+                $hasNullIndicator = count ( array_intersect ( $nullValues, $periodeValues ) ) > 0;
+
+                if ( $hasNullIndicator )
                 {
-                    $nonNullValues = array_filter ( $periodeValues, fn ( $value ) => $value !== 'null' );
+                    // Filter out null indicators
+                    $nonNullValues = array_filter ( $periodeValues, function ($value) use ($nullValues)
+                    {
+                        return ! in_array ( $value, $nullValues );
+                    } );
+
                     $query->where ( function ($q) use ($nonNullValues)
                     {
-                        $q->whereNull ( 'periode' )
-                            ->orWhereIn ( 'periode', $nonNullValues );
+                        $q->whereNull ( 'periode' );
+
+                        // Only add non-null values if they exist
+                        if ( count ( $nonNullValues ) > 0 )
+                        {
+                            $q->orWhereIn ( 'periode', $nonNullValues );
+                        }
                     } );
                 }
                 else
@@ -216,53 +231,32 @@ class RKBUrgentController extends Controller
 
     private function getUniqueValues ( Request $request = null, $baseQuery = null )
     {
-        if ( ! $baseQuery )
-        {
-            $baseQuery = RKB::where ( 'tipe', 'urgent' );
-        }
+        // Query to get all RKB records with 'urgent' type
+        $rkbs = RKB::where ( 'tipe', 'urgent' );
 
-        // Clone the base query for each unique value
-        $nomorQuery   = clone $baseQuery;
-        $proyekQuery  = clone $baseQuery;
-        $periodeQuery = clone $baseQuery;
+        // Get all unique nomor values
+        $nomorValues = $rkbs->clone ()
+            ->whereNotNull ( 'nomor' )
+            ->distinct ()
+            ->pluck ( 'nomor' );
 
-        // Apply existing filters except for the one being queried
-        if ( $request )
-        {
-            if ( $request->filled ( 'selected_proyek' ) )
-            {
-                $nomorQuery   = $this->handleProyekFilter ( $request, $nomorQuery );
-                $periodeQuery = $this->handleProyekFilter ( $request, $periodeQuery );
-            }
-            if ( $request->filled ( 'selected_nomor' ) )
-            {
-                $proyekQuery  = $this->handleNomorFilter ( $request, $proyekQuery );
-                $periodeQuery = $this->handleNomorFilter ( $request, $periodeQuery );
-            }
-            if ( $request->filled ( 'selected_periode' ) )
-            {
-                $nomorQuery  = $this->handlePeriodeFilter ( $request, $nomorQuery );
-                $proyekQuery = $this->handlePeriodeFilter ( $request, $proyekQuery );
-            }
-            if ( $request->filled ( 'selected_status' ) )
-            {
-                $nomorQuery   = $this->handleStatusFilter ( $request, $nomorQuery );
-                $proyekQuery  = $this->handleStatusFilter ( $request, $proyekQuery );
-                $periodeQuery = $this->handleStatusFilter ( $request, $periodeQuery );
-            }
-        }
+        // Get all unique proyek names associated with urgent RKBs
+        $proyekIds    = $rkbs->clone ()->distinct ()->pluck ( 'id_proyek' );
+        $proyekValues = Proyek::whereIn ( 'id', $proyekIds )
+            ->orderBy ( 'nama' )
+            ->pluck ( 'nama' );
+
+        // Get all unique periode values
+        $periodeValues = $rkbs->clone ()
+            ->whereNotNull ( 'periode' )
+            ->orderBy ( 'periode', 'desc' )
+            ->distinct ()
+            ->pluck ( 'periode' );
 
         return [ 
-            'nomor'   => $nomorQuery->whereNotNull ( 'nomor' )
-                ->distinct ()
-                ->pluck ( 'nomor' ),
-            'proyek'  => Proyek::whereIn ( 'id', $proyekQuery->select ( 'id_proyek' )->distinct () )
-                ->orderBy ( 'nama' )
-                ->pluck ( 'nama' ),
-            'periode' => $periodeQuery
-                ->orderBy ( 'periode', 'desc' )
-                ->distinct ()
-                ->pluck ( 'periode' )
+            'nomor'   => $nomorValues,
+            'proyek'  => $proyekValues,
+            'periode' => $periodeValues
         ];
     }
 

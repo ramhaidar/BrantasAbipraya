@@ -111,35 +111,37 @@ class MasterDataAlatController extends Controller
 
     private function getUniqueValues ( $query, $proyeks )
     {
-        $queryForUniqueValues = clone $query;
-        $results              = $queryForUniqueValues->get ();
+        // Get unique values directly from the database instead of filtered query
+        $results = MasterDataAlat::select (
+            'jenis_alat',
+            'merek_alat',
+            'kode_alat',
+            'tipe_alat',
+            'serial_number'
+        )->get ();
 
-        // Get all active alat records with their current projects
-        $activeAlatWithProjects = $results->map ( function ($alat)
-        {
-            return [ 
-                'jenis_alat'    => $alat->jenis_alat,
-                'merek_alat'    => $alat->merek_alat,
-                'kode_alat'     => $alat->kode_alat,
-                'tipe_alat'     => $alat->tipe_alat,
-                'serial_number' => $alat->serial_number,
-                'proyek_name'   => $alat->current_project ? $alat->current_project->nama : null
-            ];
-        } );
-
-        // Get unique values
-        $uniqueProyeks = collect ( $activeAlatWithProjects )
-            ->pluck ( 'proyek_name' )
+        // Get all unique project names associated with equipment
+        $uniqueProyeks          = collect ();
+        $activeAlatWithProjects = MasterDataAlat::with ( 'proyekCurrent' )
+            ->whereNotNull ( 'id_proyek_current' )
+            ->get ()
+            ->map ( function ($alat)
+            {
+                return $alat->proyekCurrent ? $alat->proyekCurrent->nama : null;
+            } )
             ->filter ()
             ->unique ()
             ->values ();
 
+        // Add the unique project names to the collection
+        $uniqueProyeks = $uniqueProyeks->merge ( $activeAlatWithProjects );
+
         return [ 
-            'jenis'  => $results->pluck ( 'jenis_alat' )->unique ()->values (),
-            'merek'  => $results->pluck ( 'merek_alat' )->unique ()->values (),
-            'kode'   => $results->pluck ( 'kode_alat' )->unique ()->values (),
-            'tipe'   => $results->pluck ( 'tipe_alat' )->unique ()->values (),
-            'serial' => $results->pluck ( 'serial_number' )->unique ()->values (),
+            'jenis'  => $results->pluck ( 'jenis_alat' )->filter ()->unique ()->values (),
+            'merek'  => $results->pluck ( 'merek_alat' )->filter ()->unique ()->values (),
+            'kode'   => $results->pluck ( 'kode_alat' )->filter ()->unique ()->values (),
+            'tipe'   => $results->pluck ( 'tipe_alat' )->filter ()->unique ()->values (),
+            'serial' => $results->pluck ( 'serial_number' )->filter ()->unique ()->values (),
             'proyek' => $uniqueProyeks
         ];
     }

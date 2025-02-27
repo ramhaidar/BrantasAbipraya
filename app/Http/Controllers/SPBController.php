@@ -112,13 +112,28 @@ class SPBController extends Controller
             try
             {
                 $periodeValues = $this->getSelectedValues ( $request->selected_periode );
-                if ( in_array ( 'null', $periodeValues ) )
+
+                // Check if the array contains "null" or "Empty/Null"
+                $hasNullFilter = in_array ( 'null', $periodeValues ) || in_array ( 'Empty/Null', $periodeValues );
+
+                if ( $hasNullFilter )
                 {
-                    $nonNullValues = array_filter ( $periodeValues, fn ( $value ) => $value !== 'null' );
+                    // Filter out "null" and "Empty/Null" values
+                    $nonNullValues = array_filter ( $periodeValues, function ($value)
+                    {
+                        return $value !== 'null' && $value !== 'Empty/Null';
+                    } );
+
                     $query->where ( function ($q) use ($nonNullValues)
                     {
-                        $q->whereNull ( 'periode' )
-                            ->orWhereIn ( 'periode', $nonNullValues );
+                        // Only check for NULL values
+                        $q->whereNull ( 'periode' );
+
+                        // Add non-null values if they exist
+                        if ( ! empty ( $nonNullValues ) )
+                        {
+                            $q->orWhereIn ( 'periode', $nonNullValues );
+                        }
                     } );
                 }
                 else
@@ -210,33 +225,8 @@ class SPBController extends Controller
             ->paginate ( $perPage )
             ->withQueryString ();
 
-        // Get unique values for filters
-        $uniqueValues = [ 
-            'nomor'   => $query->clone ()
-                ->select ( 'nomor' )
-                ->whereNotNull ( 'nomor' )
-                ->distinct ()
-                ->reorder ()
-                ->orderBy ( 'nomor', 'asc' )
-                ->pluck ( 'nomor' ),
-            'proyek'  => Proyek::whereIn ( 'id', function ($subquery) use ($query)
-            {
-                $subquery->select ( 'id_proyek' )
-                    ->fromSub ( $query->clone ()->select ( 'id_proyek' ), 'filtered_rkb' )
-                    ->whereNotNull ( 'id_proyek' )
-                    ->distinct ();
-            } )
-                ->orderBy ( 'nama' )
-                ->pluck ( 'nama' ),
-            'periode' => $query->clone ()
-                ->select ( 'periode' )
-                ->whereNotNull ( 'periode' )
-                ->distinct ()
-                ->reorder ()
-                ->orderBy ( 'periode', 'desc' )
-                ->pluck ( 'periode' ),
-            'tipe'    => [ 'general', 'urgent' ],
-        ];
+        // Get unique values for filters - now using the getUniqueValues method
+        $uniqueValues = $this->getUniqueValues ();
 
         return view ( 'dashboard.spb.spb', [ 
             'headerPage'   => "SPB Supplier",
@@ -245,6 +235,42 @@ class SPBController extends Controller
             'TableData'    => $TableData,
             'uniqueValues' => $uniqueValues,
         ] );
+    }
+
+    /**
+     * Get unique values for filters, independent of current filter state
+     */
+    private function getUniqueValues ()
+    {
+        // Get all approved RKBs
+        $allRkbs = RKB::where ( 'is_approved_svp', true )->get ();
+
+        // Get all project IDs from RKBs
+        $proyekIds = $allRkbs->pluck ( 'id_proyek' )->filter ()->unique ();
+
+        // Return unique values for each filter field
+        return [ 
+            'nomor'   => $allRkbs->pluck ( 'nomor' )
+                ->filter () // Remove null/empty values
+                ->unique ()
+                ->sort () // Sort alphabetically
+                ->values (),
+
+            'proyek'  => Proyek::whereIn ( 'id', $proyekIds )
+                ->orderBy ( 'nama' )
+                ->pluck ( 'nama' ),
+
+            'periode' => $allRkbs->pluck ( 'periode' )
+                ->filter ()
+                ->unique ()
+                ->sortByDesc ( function ($date)
+                {
+                    return strtotime ( $date );
+                } )
+                ->values (),
+
+            'tipe'    => [ 'general', 'urgent' ],
+        ];
     }
 
     /**

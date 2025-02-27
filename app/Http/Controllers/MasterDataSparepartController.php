@@ -21,10 +21,11 @@ class MasterDataSparepartController extends Controller
         $this->applyAllFilters ( $request, $query );
         $this->applyUserRoleFilter ( $query );
 
-        $suppliers    = $this->getSuppliers ();
-        $kategori     = $this->getKategori ();
-        $proyeks      = $this->getProyeks ();
-        $uniqueValues = $this->getUniqueValues ( $query );
+        $suppliers = $this->getSuppliers ();
+        $kategori  = $this->getKategori ();
+        $proyeks   = $this->getProyeks ();
+        // No longer passing the query to getUniqueValues
+        $uniqueValues = $this->getUniqueValues ();
         $TableData    = $this->getTableData ( $query, $perPage );
 
         return view ( 'dashboard.masterdata.sparepart.sparepart', [ 
@@ -138,26 +139,42 @@ class MasterDataSparepartController extends Controller
             ->withQueryString ();
     }
 
-    private function getUniqueValues ( $query )
+    private function getUniqueValues ()
     {
-        $queryForUniqueValues = clone $query;
-        $results              = $queryForUniqueValues->get ();
-        $kategoriIds          = $results->pluck ( 'id_kategori_sparepart' );
+        $user  = Auth::user ();
+        $query = MasterDataSparepart::query ();
 
+        // Apply user role filtering if needed
+        if ( $user->role === 'Pegawai' )
+        {
+            $query->where ( 'id_user', $user->id );
+        }
+        elseif ( $user->role === 'Boss' )
+        {
+            $proyeks       = $user->proyek ()->with ( "users" )->get ();
+            $usersInProyek = $proyeks->pluck ( 'users.*.id' )->flatten ();
+            $query->whereIn ( 'id_user', $usersInProyek );
+        }
+
+        // Get category IDs used in spareparts
+        $kategoriIds = $query->distinct ()->pluck ( 'id_kategori_sparepart' )->filter ();
+
+        // Get unique values directly from the database
         return [ 
-            'nama'        => $results->pluck ( 'nama' )->unique ()->values (),
-            'part_number' => $results->pluck ( 'part_number' )->unique ()->values (),
-            'merk'        => $results->pluck ( 'merk' )->unique ()->values (),
-            'kode'        => KategoriSparepart::whereIn ( 'id', $kategoriIds )->pluck ( 'kode' )->unique ()->values (),
-            'jenis'       => KategoriSparepart::whereIn ( 'id', $kategoriIds )->pluck ( 'jenis' )->unique ()->sort ()->values (),
+            'nama'        => $query->distinct ()->pluck ( 'nama' )->filter ()->values (),
+            'part_number' => $query->distinct ()->pluck ( 'part_number' )->filter ()->values (),
+            'merk'        => $query->distinct ()->pluck ( 'merk' )->filter ()->values (),
+            'kode'        => KategoriSparepart::whereIn ( 'id', $kategoriIds )->distinct ()->pluck ( 'kode' )->filter ()->values (),
+            'jenis'       => KategoriSparepart::whereIn ( 'id', $kategoriIds )->distinct ()->pluck ( 'jenis' )->filter ()->sort ()->values (),
             'sub_jenis'   => KategoriSparepart::whereIn ( 'id', $kategoriIds )
                 ->whereNotNull ( 'sub_jenis' )
                 ->where ( 'sub_jenis', '!=', '' )
+                ->distinct ()
                 ->pluck ( 'sub_jenis' )
-                ->unique ()
+                ->filter ()
                 ->sort ()
                 ->values (),
-            'kategori'    => KategoriSparepart::whereIn ( 'id', $kategoriIds )->pluck ( 'nama' )->unique ()->values (),
+            'kategori'    => KategoriSparepart::whereIn ( 'id', $kategoriIds )->distinct ()->pluck ( 'nama' )->filter ()->values (),
         ];
     }
 

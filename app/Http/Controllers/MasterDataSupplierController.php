@@ -22,7 +22,7 @@ class MasterDataSupplierController extends Controller
         $spareparts   = $this->getSpareparts ();
         $proyeks      = $this->getProyeks ();
         $TableData    = $this->getTableData ( $query, $perPage );
-        $uniqueValues = $this->getUniqueValues ( $query );
+        $uniqueValues = $this->getUniqueValues ();
 
         return view ( 'dashboard.masterdata.supplier.supplier', [ 
             'headerPage'   => "Master Data Supplier",
@@ -175,12 +175,12 @@ class MasterDataSupplierController extends Controller
         }
     }
 
-    private function getUniqueValues ( $query )
+    private function getUniqueValues ()
     {
         return [ 
-            'nama'           => $query->get ()->pluck ( 'nama' )->unique ()->values (),
-            'alamat'         => $query->get ()->pluck ( 'alamat' )->unique ()->values (),
-            'contact_person' => $query->get ()->pluck ( 'contact_person' )->unique ()->values (),
+            'nama'           => MasterDataSupplier::pluck ( 'nama' )->filter ()->unique ()->values (),
+            'alamat'         => MasterDataSupplier::pluck ( 'alamat' )->filter ()->unique ()->values (),
+            'contact_person' => MasterDataSupplier::pluck ( 'contact_person' )->filter ()->unique ()->values (),
         ];
     }
 

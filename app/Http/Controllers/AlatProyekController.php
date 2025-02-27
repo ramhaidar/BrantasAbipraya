@@ -161,75 +161,21 @@ class AlatProyekController extends Controller
 
     private function getUniqueValues ( $proyekId, Request $request = null )
     {
-        // Base query for alat proyek with the specified project
-        $baseQuery = AlatProyek::where ( 'id_proyek', $proyekId )
-            ->whereNull ( 'removed_at' );
+        // Get all master data alat IDs associated with this project
+        $alatIds = AlatProyek::where ( 'id_proyek', $proyekId )
+            ->whereNull ( 'removed_at' )
+            ->pluck ( 'id_master_data_alat' );
 
-        // Get the base set of master data alat IDs
-        $baseIds = $baseQuery->pluck ( 'id_master_data_alat' );
+        // Get all master data records for this project without any filtering
+        $masterDataAlat = MasterDataAlat::whereIn ( 'id', $alatIds )->get ();
 
-        // Start with the base master data alat query
-        $masterQuery = MasterDataAlat::whereIn ( 'id', $baseIds );
-
-        // Apply filters one by one, building separate queries for each field
-        if ( $request )
-        {
-            if ( $request->filled ( 'selected_jenis_alat' ) )
-            {
-                $values = $this->getSelectedValues ( $request->selected_jenis_alat );
-                $masterQuery->where ( function ($q) use ($values)
-                {
-                    $this->applyValueFilter ( $q, 'jenis_alat', $values );
-                } );
-            }
-
-            if ( $request->filled ( 'selected_kode_alat' ) )
-            {
-                $values = $this->getSelectedValues ( $request->selected_kode_alat );
-                $masterQuery->where ( function ($q) use ($values)
-                {
-                    $this->applyValueFilter ( $q, 'kode_alat', $values );
-                } );
-            }
-
-            if ( $request->filled ( 'selected_merek_alat' ) )
-            {
-                $values = $this->getSelectedValues ( $request->selected_merek_alat );
-                $masterQuery->where ( function ($q) use ($values)
-                {
-                    $this->applyValueFilter ( $q, 'merek_alat', $values );
-                } );
-            }
-
-            if ( $request->filled ( 'selected_tipe_alat' ) )
-            {
-                $values = $this->getSelectedValues ( $request->selected_tipe_alat );
-                $masterQuery->where ( function ($q) use ($values)
-                {
-                    $this->applyValueFilter ( $q, 'tipe_alat', $values );
-                } );
-            }
-
-            if ( $request->filled ( 'selected_serial_number' ) )
-            {
-                $values = $this->getSelectedValues ( $request->selected_serial_number );
-                $masterQuery->where ( function ($q) use ($values)
-                {
-                    $this->applyValueFilter ( $q, 'serial_number', $values );
-                } );
-            }
-        }
-
-        // Get filtered results
-        $filteredResults = $masterQuery->get ();
-
-        // Return unique values for each field from the filtered results
+        // Return unique values for each field
         return [ 
-            'jenis_alat'    => $filteredResults->pluck ( 'jenis_alat' )->unique ()->values (),
-            'kode_alat'     => $filteredResults->pluck ( 'kode_alat' )->unique ()->values (),
-            'merek_alat'    => $filteredResults->pluck ( 'merek_alat' )->unique ()->values (),
-            'tipe_alat'     => $filteredResults->pluck ( 'tipe_alat' )->unique ()->values (),
-            'serial_number' => $filteredResults->pluck ( 'serial_number' )->unique ()->values (),
+            'jenis_alat'    => $masterDataAlat->pluck ( 'jenis_alat' )->filter ()->unique ()->values (),
+            'kode_alat'     => $masterDataAlat->pluck ( 'kode_alat' )->filter ()->unique ()->values (),
+            'merek_alat'    => $masterDataAlat->pluck ( 'merek_alat' )->filter ()->unique ()->values (),
+            'tipe_alat'     => $masterDataAlat->pluck ( 'tipe_alat' )->filter ()->unique ()->values (),
+            'serial_number' => $masterDataAlat->pluck ( 'serial_number' )->filter ()->unique ()->values (),
         ];
     }
 

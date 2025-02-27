@@ -145,13 +145,28 @@ class EvaluasiRKBGeneralController extends Controller
             try
             {
                 $periodeValues = $this->getSelectedValues ( $request->selected_periode );
-                if ( in_array ( 'null', $periodeValues ) )
+
+                // Check if the array contains "null" or "Empty/Null"
+                $hasNullFilter = in_array ( 'null', $periodeValues ) || in_array ( 'Empty/Null', $periodeValues );
+
+                if ( $hasNullFilter )
                 {
-                    $nonNullValues = array_filter ( $periodeValues, fn ( $value ) => $value !== 'null' );
+                    // Filter out "null" and "Empty/Null" values
+                    $nonNullValues = array_filter ( $periodeValues, function ($value)
+                    {
+                        return $value !== 'null' && $value !== 'Empty/Null';
+                    } );
+
                     $query->where ( function ($q) use ($nonNullValues)
                     {
-                        $q->whereNull ( 'periode' )
-                            ->orWhereIn ( 'periode', $nonNullValues );
+                        // Only check for NULL values - don't compare with '-' for PostgreSQL date fields
+                        $q->whereNull ( 'periode' );
+
+                        // Add non-null values if they exist
+                        if ( ! empty ( $nonNullValues ) )
+                        {
+                            $q->orWhereIn ( 'periode', $nonNullValues );
+                        }
                     } );
                 }
                 else
@@ -302,41 +317,40 @@ class EvaluasiRKBGeneralController extends Controller
 
     private function getUniqueValues ( Request $request = null, $baseQuery = null )
     {
-        if ( ! $baseQuery )
-        {
-            $baseQuery = RKB::where ( 'tipe', 'general' );
-        }
+        // Get all RKB entries of type 'general' directly from the database
+        // without applying any filters from the current request
+        $allRKBs = RKB::where ( 'tipe', 'general' )->get ();
 
-        // Create clones for each filter type
-        $nomorQuery   = clone $baseQuery;
-        $proyekQuery  = clone $baseQuery;
-        $periodeQuery = clone $baseQuery;
+        // Get unique nomor values
+        $nomors = $allRKBs->pluck ( 'nomor' )
+            ->filter () // Remove null values
+            ->unique ()
+            ->sort ()
+            ->values ();
 
-        // Apply cascading filters
-        if ( $request )
-        {
-            if ( $request->filled ( 'selected_nomor' ) )
-            {
-                $proyekQuery  = $this->handleNomorFilter ( $request, $proyekQuery );
-                $periodeQuery = $this->handleNomorFilter ( $request, $periodeQuery );
-            }
-            if ( $request->filled ( 'selected_proyek' ) )
-            {
-                $nomorQuery   = $this->handleProyekFilter ( $request, $nomorQuery );
-                $periodeQuery = $this->handleProyekFilter ( $request, $periodeQuery );
-            }
-            if ( $request->filled ( 'selected_periode' ) )
-            {
-                $nomorQuery  = $this->handlePeriodeFilter ( $request, $nomorQuery );
-                $proyekQuery = $this->handlePeriodeFilter ( $request, $proyekQuery );
-            }
-        }
+        // Get unique periode values
+        $periodes = $allRKBs->pluck ( 'periode' )
+            ->filter () // Remove null values
+            ->unique ()
+            ->sortDesc ()
+            ->values ();
+
+        // Get all proyek IDs from RKBs
+        $proyekIds = $allRKBs->pluck ( 'id_proyek' )->unique ();
+
+        // Get all related proyeks' names
+        $proyeks = Proyek::whereIn ( 'id', $proyekIds )
+            ->orderBy ( 'nama' )
+            ->pluck ( 'nama' );
+
+        // Static status options remain unchanged
+        $statuses = $this->getAllStatusOptions ();
 
         return [ 
-            'nomor'   => $this->getFilteredNomors ( $nomorQuery ),
-            'proyek'  => $this->getFilteredProyeks ( $proyekQuery ),
-            'periode' => $this->getFilteredPeriodes ( $periodeQuery ),
-            'status'  => $this->getAllStatusOptions () // Static status options
+            'nomor'   => $nomors,
+            'proyek'  => $proyeks,
+            'periode' => $periodes,
+            'status'  => $statuses
         ];
     }
 

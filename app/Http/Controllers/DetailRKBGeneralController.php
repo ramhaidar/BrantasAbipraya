@@ -26,7 +26,7 @@ class DetailRKBGeneralController extends Controller
 
         $rkb            = RKB::with ( [ 'proyek' ] )->find ( $id );
         $query          = $this->buildQuery ( $request, $id );
-        $uniqueValues   = $this->getUniqueValues ( $query );
+        $uniqueValues   = $this->getUniqueValues ( $id );
         $TableData      = $this->getTableData ( $query, $perPage );
         $available_alat = $this->getAlatAvailable ( $rkb );
         $proyeks        = $this->getProyeks ();
@@ -163,10 +163,28 @@ class DetailRKBGeneralController extends Controller
         } )->get ();
     }
 
-    private function getUniqueValues ( $query )
+    private function getUniqueValues ( $id )
     {
-        $result = clone $query;
-        $data   = $result->get ();
+        // Create a direct query to get all unique values for this RKB without any filters
+        $query = DetailRKBGeneral::query ()
+            ->select ( [ 
+                'detail_rkb_general.*',
+                'master_data_alat.jenis_alat',
+                'master_data_alat.kode_alat',
+                'kategori_sparepart.kode as kategori_kode',
+                'kategori_sparepart.nama as kategori_nama',
+                'master_data_sparepart.nama as sparepart_nama',
+                'master_data_sparepart.part_number',
+                'master_data_sparepart.merk'
+            ] )
+            ->join ( 'link_rkb_detail', 'detail_rkb_general.id', '=', 'link_rkb_detail.id_detail_rkb_general' )
+            ->join ( 'link_alat_detail_rkb', 'link_rkb_detail.id_link_alat_detail_rkb', '=', 'link_alat_detail_rkb.id' )
+            ->join ( 'master_data_alat', 'link_alat_detail_rkb.id_master_data_alat', '=', 'master_data_alat.id' )
+            ->join ( 'kategori_sparepart', 'detail_rkb_general.id_kategori_sparepart_sparepart', '=', 'kategori_sparepart.id' )
+            ->join ( 'master_data_sparepart', 'detail_rkb_general.id_master_data_sparepart', '=', 'master_data_sparepart.id' )
+            ->where ( 'link_alat_detail_rkb.id_rkb', $id );
+
+        $data = $query->get ();
 
         $formatQuantityValues = function ($column) use ($data)
         {

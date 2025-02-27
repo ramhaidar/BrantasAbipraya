@@ -111,7 +111,7 @@ class TimelineEvaluasiUrgentController extends Controller
             }
         }
 
-        // Handle date fields
+        // Handle date fields with additional range logic
         $dateFields = [ 
             'tanggal_awal_rencana',
             'tanggal_akhir_rencana',
@@ -135,7 +135,7 @@ class TimelineEvaluasiUrgentController extends Controller
 
                         foreach ( $dateValues as $value )
                         {
-                            if ( $value === 'Empty/Null' )
+                            if ( $value === 'Empty/Null' || $value === 'null' )
                             {
                                 $q->orWhereNull ( $field );
                             }
@@ -154,23 +154,27 @@ class TimelineEvaluasiUrgentController extends Controller
                                 $ltDate   = substr ( $value, 3 );
                                 $hasRange = true;
                             }
+                            else
+                            {
+                                // Handle regular date values if any
+                                $q->orWhereDate ( $field, '=', $value );
+                            }
                         }
 
-                        // Handle date range if present
+                        // Handle date range if both gt and lt are present
                         if ( $hasRange )
                         {
-                            if ( $gtDate && $ltDate )
+                            $rangeQuery = $q->orWhere ( function ($query) use ($field, $gtDate, $ltDate)
                             {
-                                $q->orWhereBetween ( $field, [ $gtDate, $ltDate ] );
-                            }
-                            elseif ( $gtDate )
-                            {
-                                $q->orWhereDate ( $field, '>=', $gtDate );
-                            }
-                            elseif ( $ltDate )
-                            {
-                                $q->orWhereDate ( $field, '<=', $ltDate );
-                            }
+                                if ( $gtDate )
+                                {
+                                    $query->whereDate ( $field, '>=', $gtDate );
+                                }
+                                if ( $ltDate )
+                                {
+                                    $query->whereDate ( $field, '<=', $ltDate );
+                                }
+                            } );
                         }
                     } );
                 }
@@ -193,10 +197,11 @@ class TimelineEvaluasiUrgentController extends Controller
 
                     $query->where ( function ($q) use ($values, $field)
                     {
-                        $exactValues = [];
-                        $gtValue     = null;
-                        $ltValue     = null;
-                        $hasNull     = false;
+                        $exactValues    = [];
+                        $gtValue        = null;
+                        $ltValue        = null;
+                        $checkboxValues = [];
+                        $hasNull        = false;
 
                         foreach ( $values as $value )
                         {
@@ -216,89 +221,20 @@ class TimelineEvaluasiUrgentController extends Controller
                             {
                                 $ltValue = (int) substr ( $value, 3 );
                             }
+                            elseif ( is_numeric ( str_replace ( ' Hari', '', $value ) ) )
+                            {
+                                // Handle checkbox values (removing 'Hari' suffix if present)
+                                $checkboxValues[] = (int) str_replace ( ' Hari', '', $value );
+                            }
                         }
 
                         if ( $field === 'durasi_actual' )
                         {
-                            if ( $hasNull )
-                            {
-                                $q->orWhereNull ( 'tanggal_awal_actual' )
-                                    ->orWhereNull ( 'tanggal_akhir_actual' )
-                                    ->orWhereRaw ( 'tanggal_awal_actual = tanggal_akhir_actual' );
-                            }
-
-                            if ( ! empty ( $exactValues ) )
-                            {
-                                foreach ( $exactValues as $value )
-                                {
-                                    $q->orWhereRaw (
-                                        'EXTRACT(DAY FROM (tanggal_akhir_actual::timestamp - tanggal_awal_actual::timestamp))::integer = ?',
-                                        [ $value ]
-                                    );
-                                }
-                            }
-                            if ( $gtValue !== null && $ltValue !== null )
-                            {
-                                $q->orWhereRaw (
-                                    'EXTRACT(DAY FROM (tanggal_akhir_actual::timestamp - tanggal_awal_actual::timestamp))::integer BETWEEN ? AND ?',
-                                    [ $gtValue, $ltValue ]
-                                );
-                            }
-                            elseif ( $gtValue !== null )
-                            {
-                                $q->orWhereRaw (
-                                    'EXTRACT(DAY FROM (tanggal_akhir_actual::timestamp - tanggal_awal_actual::timestamp))::integer >= ?',
-                                    [ $gtValue ]
-                                );
-                            }
-                            elseif ( $ltValue !== null )
-                            {
-                                $q->orWhereRaw (
-                                    'EXTRACT(DAY FROM (tanggal_akhir_actual::timestamp - tanggal_awal_actual::timestamp))::integer <= ?',
-                                    [ $ltValue ]
-                                );
-                            }
+                            $this->applyDurationFilter ( $q, 'tanggal_awal_actual', 'tanggal_akhir_actual', $hasNull, $exactValues, $gtValue, $ltValue, $checkboxValues );
                         }
                         else
                         {
-                            if ( $hasNull )
-                            {
-                                $q->orWhereNull ( 'tanggal_awal_rencana' )
-                                    ->orWhereNull ( 'tanggal_akhir_rencana' )
-                                    ->orWhereRaw ( 'tanggal_awal_rencana = tanggal_akhir_rencana' );
-                            }
-
-                            if ( ! empty ( $exactValues ) )
-                            {
-                                foreach ( $exactValues as $value )
-                                {
-                                    $q->orWhereRaw (
-                                        'EXTRACT(DAY FROM (tanggal_akhir_rencana::timestamp - tanggal_awal_rencana::timestamp))::integer = ?',
-                                        [ $value ]
-                                    );
-                                }
-                            }
-                            if ( $gtValue !== null && $ltValue !== null )
-                            {
-                                $q->orWhereRaw (
-                                    'EXTRACT(DAY FROM (tanggal_akhir_rencana::timestamp - tanggal_awal_rencana::timestamp))::integer BETWEEN ? AND ?',
-                                    [ $gtValue, $ltValue ]
-                                );
-                            }
-                            elseif ( $gtValue !== null )
-                            {
-                                $q->orWhereRaw (
-                                    'EXTRACT(DAY FROM (tanggal_akhir_rencana::timestamp - tanggal_awal_rencana::timestamp))::integer >= ?',
-                                    [ $gtValue ]
-                                );
-                            }
-                            elseif ( $ltValue !== null )
-                            {
-                                $q->orWhereRaw (
-                                    'EXTRACT(DAY FROM (tanggal_akhir_rencana::timestamp - tanggal_akhir_rencana::timestamp))::integer <= ?',
-                                    [ $ltValue ]
-                                );
-                            }
+                            $this->applyDurationFilter ( $q, 'tanggal_awal_rencana', 'tanggal_akhir_rencana', $hasNull, $exactValues, $gtValue, $ltValue, $checkboxValues );
                         }
                     } );
                 }
@@ -312,20 +248,81 @@ class TimelineEvaluasiUrgentController extends Controller
         return $query;
     }
 
-    private function getUniqueValues ( $id, $filteredQuery = null )
+    private function applyDurationFilter ( $query, $startField, $endField, $hasNull, $exactValues, $gtValue, $ltValue, $checkboxValues )
     {
-        // If no filtered query is provided, create a base query
-        if ( ! $filteredQuery )
+        if ( $hasNull )
         {
-            $filteredQuery = TimelineRKBUrgent::where ( 'id_link_alat_detail_rkb', $id );
+            $query->orWhereNull ( $startField )
+                ->orWhereNull ( $endField )
+                ->orWhereRaw ( "$startField = $endField" );
         }
 
-        // Get filtered results
-        $filteredResults = $filteredQuery->get ();
+        if ( ! empty ( $checkboxValues ) )
+        {
+            foreach ( $checkboxValues as $value )
+            {
+                $query->orWhereRaw (
+                    "EXTRACT(DAY FROM ($endField::timestamp - $startField::timestamp))::integer = ?",
+                    [ $value ]
+                );
+            }
+        }
+
+        if ( ! empty ( $exactValues ) )
+        {
+            foreach ( $exactValues as $value )
+            {
+                $query->orWhereRaw (
+                    "EXTRACT(DAY FROM ($endField::timestamp - $startField::timestamp))::integer = ?",
+                    [ $value ]
+                );
+            }
+        }
+
+        // FIX: Handle gtValue and ltValue together if both are present
+        if ( $gtValue !== null && $ltValue !== null )
+        {
+            // Use a combined condition with AND logic in a single orWhere clause
+            $query->orWhere ( function ($q) use ($startField, $endField, $gtValue, $ltValue)
+            {
+                $q->whereRaw (
+                    "EXTRACT(DAY FROM ($endField::timestamp - $startField::timestamp))::integer >= ?",
+                    [ $gtValue ]
+                )->whereRaw (
+                        "EXTRACT(DAY FROM ($endField::timestamp - $startField::timestamp))::integer <= ?",
+                        [ $ltValue ]
+                    );
+            } );
+        }
+        else
+        {
+            // Handle individual conditions if only one is present
+            if ( $gtValue !== null )
+            {
+                $query->orWhereRaw (
+                    "EXTRACT(DAY FROM ($endField::timestamp - $startField::timestamp))::integer >= ?",
+                    [ $gtValue ]
+                );
+            }
+
+            if ( $ltValue !== null )
+            {
+                $query->orWhereRaw (
+                    "EXTRACT(DAY FROM ($endField::timestamp - $startField::timestamp))::integer <= ?",
+                    [ $ltValue ]
+                );
+            }
+        }
+    }
+
+    private function getUniqueValues ( $id, Request $request = null )
+    {
+        // Get all timeline records for this RKB without any filtering
+        $allResults = TimelineRKBUrgent::where ( 'id_link_alat_detail_rkb', $id )->get ();
 
         return [ 
-            'uraian'                => $filteredResults->pluck ( 'nama_rencana' )->unique ()->values (),
-            'durasi_rencana'        => $filteredResults
+            'uraian'                => $allResults->pluck ( 'nama_rencana' )->filter ()->unique ()->values (),
+            'durasi_rencana'        => $allResults
                 ->whereNotNull ( 'tanggal_awal_rencana' )
                 ->whereNotNull ( 'tanggal_akhir_rencana' )
                 ->map ( function ($item)
@@ -336,19 +333,19 @@ class TimelineEvaluasiUrgentController extends Controller
                 ->unique ()
                 ->sort () // Sort the durations numerically
                 ->values (),
-            'tanggal_awal_rencana'  => $filteredResults
+            'tanggal_awal_rencana'  => $allResults
                 ->whereNotNull ( 'tanggal_awal_rencana' )
                 ->pluck ( 'tanggal_awal_rencana' )
                 ->map ( fn ( $date ) => $date->format ( 'Y-m-d' ) )
                 ->unique ()
                 ->values (),
-            'tanggal_akhir_rencana' => $filteredResults
+            'tanggal_akhir_rencana' => $allResults
                 ->whereNotNull ( 'tanggal_akhir_rencana' )
                 ->pluck ( 'tanggal_akhir_rencana' )
                 ->map ( fn ( $date ) => $date->format ( 'Y-m-d' ) )
                 ->unique ()
                 ->values (),
-            'durasi_actual'         => $filteredResults
+            'durasi_actual'         => $allResults
                 ->whereNotNull ( 'tanggal_awal_actual' )
                 ->whereNotNull ( 'tanggal_akhir_actual' )
                 ->map ( function ($item)
@@ -359,13 +356,13 @@ class TimelineEvaluasiUrgentController extends Controller
                 ->unique ()
                 ->sort () // Sort the durations numerically
                 ->values (),
-            'tanggal_awal_actual'   => $filteredResults
+            'tanggal_awal_actual'   => $allResults
                 ->whereNotNull ( 'tanggal_awal_actual' )
                 ->pluck ( 'tanggal_awal_actual' )
                 ->map ( fn ( $date ) => $date->format ( 'Y-m-d' ) )
                 ->unique ()
                 ->values (),
-            'tanggal_akhir_actual'  => $filteredResults
+            'tanggal_akhir_actual'  => $allResults
                 ->whereNotNull ( 'tanggal_akhir_actual' )
                 ->pluck ( 'tanggal_akhir_actual' )
                 ->map ( fn ( $date ) => $date->format ( 'Y-m-d' ) )
@@ -389,6 +386,9 @@ class TimelineEvaluasiUrgentController extends Controller
         $proyek = Proyek::find ( $id );
 
         $query = $this->buildQuery ( $request, $id );
+
+        // Get unique values from all records, not just filtered ones
+        $uniqueValues = $this->getUniqueValues ( $id );
 
         if ( $request->has ( 'search' ) )
         {
@@ -452,8 +452,6 @@ class TimelineEvaluasiUrgentController extends Controller
                     } );
             } );
         }
-
-        $uniqueValues = $this->getUniqueValues ( $id, clone $query );
 
         $data = LinkAlatDetailRKB::with ( [ 
             'rkb',

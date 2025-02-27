@@ -28,7 +28,7 @@ class DetailRKBUrgentController extends Controller
 
         $rkb            = RKB::with ( [ 'proyek' ] )->find ( $id );
         $query          = $this->buildQuery ( $request, $id );
-        $uniqueValues   = $this->getUniqueValues ( $query );
+        $uniqueValues   = $this->getUniqueValues ( $id );
         $TableData      = $this->getTableData ( $query, $perPage );
         $available_alat = $this->getAlatAvailable ( $rkb );
         $proyeks        = $this->getProyeks ();
@@ -164,12 +164,14 @@ class DetailRKBUrgentController extends Controller
                         $gtValue        = null;
                         $ltValue        = null;
                         $checkboxValues = [];
+                        $hasNullFilter  = false;
 
                         foreach ( $values as $value )
                         {
-                            if ( $value === 'null' )
+                            // Check for both 'null' and 'Empty/Null' to handle NULL filtering
+                            if ( $value === 'null' || $value === 'Empty/Null' )
                             {
-                                $q->orWhereNull ( $columnName );
+                                $hasNullFilter = true;
                             }
                             elseif ( strpos ( $value, 'exact:' ) === 0 )
                             {
@@ -188,6 +190,12 @@ class DetailRKBUrgentController extends Controller
                                 // This is a checkbox value
                                 $checkboxValues[] = (int) $value;
                             }
+                        }
+
+                        // Apply NULL filter if requested
+                        if ( $hasNullFilter )
+                        {
+                            $q->orWhereNull ( $columnName );
                         }
 
                         // Handle exact values (including checkbox values)
@@ -264,19 +272,45 @@ class DetailRKBUrgentController extends Controller
         }
     }
 
-    private function getUniqueValues ( $query )
+    private function getUniqueValues ( $rkbId )
     {
-        $result = clone $query;
-        $data   = $result->get ();
+        // Get all detail_rkb_urgent records related to this RKB
+        $detailIds = LinkAlatDetailRKB::where ( 'id_rkb', $rkbId )
+            ->join ( 'link_rkb_detail', 'link_alat_detail_rkb.id', '=', 'link_rkb_detail.id_link_alat_detail_rkb' )
+            ->pluck ( 'link_rkb_detail.id_detail_rkb_urgent' );
 
-        $formatQuantityValues = function ($column) use ($data)
+        // Get unique jenis_alat and kode_alat values
+        $alatValues = LinkAlatDetailRKB::where ( 'id_rkb', $rkbId )
+            ->join ( 'master_data_alat', 'link_alat_detail_rkb.id_master_data_alat', '=', 'master_data_alat.id' )
+            ->select ( 'master_data_alat.jenis_alat', 'master_data_alat.kode_alat' )
+            ->distinct ()
+            ->get ();
+
+        // Get kategori sparepart values - Fix the ambiguous column reference
+        $kategoriValues = DetailRKBUrgent::whereIn ( 'detail_rkb_urgent.id', $detailIds )
+            ->join ( 'kategori_sparepart', 'detail_rkb_urgent.id_kategori_sparepart_sparepart', '=', 'kategori_sparepart.id' )
+            ->select ( 'kategori_sparepart.kode as kategori_kode', 'kategori_sparepart.nama as kategori_nama' )
+            ->distinct ()
+            ->get ();
+
+        // Get sparepart values - Fix the ambiguous column reference
+        $sparepartValues = DetailRKBUrgent::whereIn ( 'detail_rkb_urgent.id', $detailIds )
+            ->join ( 'master_data_sparepart', 'detail_rkb_urgent.id_master_data_sparepart', '=', 'master_data_sparepart.id' )
+            ->select ( 'master_data_sparepart.nama as sparepart_nama', 'master_data_sparepart.part_number', 'master_data_sparepart.merk' )
+            ->distinct ()
+            ->get ();
+
+        // Get other values directly from detail_rkb_urgent - Fix the ambiguous column reference
+        $detailValues = DetailRKBUrgent::whereIn ( 'detail_rkb_urgent.id', $detailIds )
+            ->select ( 'nama_koordinator', 'satuan', 'quantity_requested', 'quantity_approved' )
+            ->get ();
+
+        // Format quantity values function - MODIFIED to not add NULL value to collection
+        $formatQuantityValues = function ($values, $column)
         {
-            return $data->pluck ( $column )
-                ->filter ( function ($value)
-                {
-                    // Only return non-null values since null will be handled by the view's "Empty/Null" option
-                    return $value !== null;
-                } )
+            // Get only non-null values (NULL values will be handled by the "Empty/Null" option in the view)
+            return $values->pluck ( $column )
+                ->filter () // Remove nulls
                 ->unique ()
                 ->map ( function ($value)
                 {
@@ -284,26 +318,25 @@ class DetailRKBUrgentController extends Controller
                 } )
                 ->sort ( function ($a, $b)
                 {
-                    // Custom sort to ensure numeric order
                     return (int) $a - (int) $b;
                 } )
                 ->values ();
         };
 
         return [ 
-            'jenis_alat'         => $data->pluck ( 'jenis_alat' )->unique ()->filter ()->sort ()->values (),
-            'kode_alat'          => $data->pluck ( 'kode_alat' )->unique ()->filter ()->sort ()->values (),
-            'kategori_sparepart' => $data->map ( function ($item)
+            'jenis_alat'         => $alatValues->pluck ( 'jenis_alat' )->unique ()->filter ()->sort ()->values (),
+            'kode_alat'          => $alatValues->pluck ( 'kode_alat' )->unique ()->filter ()->sort ()->values (),
+            'kategori_sparepart' => $kategoriValues->map ( function ($item)
             {
                 return $item->kategori_kode . ': ' . $item->kategori_nama;
             } )->unique ()->filter ()->sort ()->values (),
-            'sparepart'          => $data->pluck ( 'sparepart_nama' )->unique ()->filter ()->sort ()->values (),
-            'part_number'        => $data->pluck ( 'part_number' )->unique ()->filter ()->sort ()->values (),
-            'merk'               => $data->pluck ( 'merk' )->unique ()->filter ()->sort ()->values (),
-            'nama_koordinator'   => $data->pluck ( 'nama_koordinator' )->unique ()->filter ()->sort ()->values (), // Add this line
-            'satuan'             => $data->pluck ( 'satuan' )->unique ()->filter ()->sort ()->values (),
-            'quantity_requested' => $formatQuantityValues ( 'quantity_requested' ),
-            'quantity_approved'  => $formatQuantityValues ( 'quantity_approved' ),
+            'sparepart'          => $sparepartValues->pluck ( 'sparepart_nama' )->unique ()->filter ()->sort ()->values (),
+            'part_number'        => $sparepartValues->pluck ( 'part_number' )->unique ()->filter ()->sort ()->values (),
+            'merk'               => $sparepartValues->pluck ( 'merk' )->unique ()->filter ()->sort ()->values (),
+            'nama_koordinator'   => $detailValues->pluck ( 'nama_koordinator' )->unique ()->filter ()->sort ()->values (),
+            'satuan'             => $detailValues->pluck ( 'satuan' )->unique ()->filter ()->sort ()->values (),
+            'quantity_requested' => $formatQuantityValues ( $detailValues, 'quantity_requested' ),
+            'quantity_approved'  => $formatQuantityValues ( $detailValues, 'quantity_approved' ),
         ];
     }
 
@@ -374,7 +407,7 @@ class DetailRKBUrgentController extends Controller
             'quantity_requested'              => 'required|integer|min:1',
             'satuan'                          => 'required|string|max:50',
             'nama_koordinator'                => 'required|string|max:50',
-            'kronologi'                       => 'required|string|max:1000',
+            'kronologi'                       => 'required|string|max:5120',
             'id_master_data_alat'             => 'required|integer|exists:master_data_alat,id',
             'id_kategori_sparepart_sparepart' => 'required|integer|exists:kategori_sparepart,id',
             'id_master_data_sparepart'        => 'required|integer|exists:master_data_sparepart,id',
@@ -523,7 +556,7 @@ class DetailRKBUrgentController extends Controller
             'quantity_requested'              => 'required|integer|min:1',
             'satuan'                          => 'required|string|max:50',
             'nama_koordinator'                => 'required|string|max:50',
-            'kronologi'                       => 'required|string|max:1000',
+            'kronologi'                       => 'required|string|max:5120',
             'id_master_data_alat'             => 'required|integer|exists:master_data_alat,id',
             'id_kategori_sparepart_sparepart' => 'required|integer|exists:kategori_sparepart,id',
             'id_master_data_sparepart'        => 'required|integer|exists:master_data_sparepart,id',

@@ -185,13 +185,28 @@ class RKBGeneralController extends Controller
             try
             {
                 $periodeValues = $this->getSelectedValues ( $request->selected_periode );
-                if ( in_array ( 'null', $periodeValues ) )
+
+                // Check if the array contains "null" or "Empty/Null"
+                $hasNullFilter = in_array ( 'null', $periodeValues ) || in_array ( 'Empty/Null', $periodeValues );
+
+                if ( $hasNullFilter )
                 {
-                    $nonNullValues = array_filter ( $periodeValues, fn ( $value ) => $value !== 'null' );
+                    // Filter out "null" and "Empty/Null" values
+                    $nonNullValues = array_filter ( $periodeValues, function ($value)
+                    {
+                        return $value !== 'null' && $value !== 'Empty/Null';
+                    } );
+
                     $query->where ( function ($q) use ($nonNullValues)
                     {
-                        $q->whereNull ( 'periode' )
-                            ->orWhereIn ( 'periode', $nonNullValues );
+                        // Only check for NULL values - don't compare with '-' for PostgreSQL date fields
+                        $q->whereNull ( 'periode' );
+
+                        // Add non-null values if they exist
+                        if ( ! empty ( $nonNullValues ) )
+                        {
+                            $q->orWhereIn ( 'periode', $nonNullValues );
+                        }
                     } );
                 }
                 else
@@ -498,53 +513,31 @@ class RKBGeneralController extends Controller
 
     private function getUniqueValues ( Request $request = null, $baseQuery = null )
     {
-        if ( ! $baseQuery )
-        {
-            $baseQuery = RKB::where ( 'tipe', 'general' );
-        }
+        // Get all RKBs with type 'general'
+        $allRkbs = RKB::where ( 'tipe', 'general' )->get ();
 
-        // Clone the base query for each unique value
-        $nomorQuery   = clone $baseQuery;
-        $proyekQuery  = clone $baseQuery;
-        $periodeQuery = clone $baseQuery;
+        // Get all project IDs from RKBs
+        $proyekIds = $allRkbs->pluck ( 'id_proyek' )->filter ()->unique ();
 
-        // Apply existing filters except for the one being queried
-        if ( $request )
-        {
-            if ( $request->filled ( 'selected_proyek' ) )
-            {
-                $nomorQuery   = $this->handleProyekFilter ( $request, $nomorQuery );
-                $periodeQuery = $this->handleProyekFilter ( $request, $periodeQuery );
-            }
-            if ( $request->filled ( 'selected_nomor' ) )
-            {
-                $proyekQuery  = $this->handleNomorFilter ( $request, $proyekQuery );
-                $periodeQuery = $this->handleNomorFilter ( $request, $periodeQuery );
-            }
-            if ( $request->filled ( 'selected_periode' ) )
-            {
-                $nomorQuery  = $this->handlePeriodeFilter ( $request, $nomorQuery );
-                $proyekQuery = $this->handlePeriodeFilter ( $request, $proyekQuery );
-            }
-            if ( $request->filled ( 'selected_status' ) )
-            {
-                $nomorQuery   = $this->handleStatusFilter ( $request, $nomorQuery );
-                $proyekQuery  = $this->handleStatusFilter ( $request, $proyekQuery );
-                $periodeQuery = $this->handleStatusFilter ( $request, $periodeQuery );
-            }
-        }
-
+        // Get unique values for each field, filtering out empty values
         return [ 
-            'nomor'   => $nomorQuery->whereNotNull ( 'nomor' )
-                ->distinct ()
-                ->pluck ( 'nomor' ),
-            'proyek'  => Proyek::whereIn ( 'id', $proyekQuery->select ( 'id_proyek' )->distinct () )
+            'nomor'   => $allRkbs->pluck ( 'nomor' )
+                ->filter ()  // Remove null/empty values
+                ->unique ()
+                ->values (),
+
+            'proyek'  => Proyek::whereIn ( 'id', $proyekIds )
                 ->orderBy ( 'nama' )
                 ->pluck ( 'nama' ),
-            'periode' => $periodeQuery
-                ->orderBy ( 'periode', 'desc' )
-                ->distinct ()
-                ->pluck ( 'periode' )
+
+            'periode' => $allRkbs->pluck ( 'periode' )
+                ->filter ()
+                ->unique ()
+                ->sortByDesc ( function ($date)
+                {
+                    return strtotime ( $date );
+                } )
+                ->values ()
         ];
     }
 

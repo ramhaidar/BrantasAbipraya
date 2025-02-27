@@ -297,40 +297,65 @@ class TimelineRKBUrgentController extends Controller
         }
     }
 
-    private function getUniqueValues ( $query )
+    private function getUniqueValues ( $linkAlatDetailRkbId )
     {
+        // Get all timeline entries for this link_alat_detail_rkb without any filtering
+        $allTimelineEntries = TimelineRKBUrgent::where ( 'id_link_alat_detail_rkb', $linkAlatDetailRkbId )->get ();
+
         return [ 
-            'uraian'                => $query->clone ()->distinct ()->pluck ( 'nama_rencana' ),
-            'durasi_rencana'        => $query->clone ()
+            'uraian'                => $allTimelineEntries->pluck ( 'nama_rencana' )->filter ()->unique ()->values (),
+            'durasi_rencana'        => $allTimelineEntries
                 ->whereNotNull ( 'tanggal_awal_rencana' )
                 ->whereNotNull ( 'tanggal_akhir_rencana' )
-                ->selectRaw ( 'DISTINCT EXTRACT(DAY FROM (tanggal_akhir_rencana::timestamp - tanggal_awal_rencana::timestamp))::integer as days' )
-                ->pluck ( 'days' ),
-            'tanggal_awal_rencana'  => $query->clone ()
+                ->map ( function ($item)
+                {
+                    if ( ! $item->tanggal_awal_rencana || ! $item->tanggal_akhir_rencana ) return null;
+                    $start = \Carbon\Carbon::parse ( $item->tanggal_awal_rencana );
+                    $end   = \Carbon\Carbon::parse ( $item->tanggal_akhir_rencana );
+                    // Simple difference in days without adding 1 (not inclusive)
+                    return $start->diffInDays ( $end );
+                } )
+                ->filter ()
+                ->unique ()
+                ->values (),
+            'tanggal_awal_rencana'  => $allTimelineEntries
                 ->whereNotNull ( 'tanggal_awal_rencana' )
-                ->distinct ()
                 ->pluck ( 'tanggal_awal_rencana' )
-                ->map ( fn ( $date ) => $date->format ( 'Y-m-d' ) ),
-            'tanggal_akhir_rencana' => $query->clone ()
+                ->map ( fn ( $date ) => $date->format ( 'Y-m-d' ) )
+                ->unique ()
+                ->values (),
+            'tanggal_akhir_rencana' => $allTimelineEntries
                 ->whereNotNull ( 'tanggal_akhir_rencana' )
-                ->distinct ()
                 ->pluck ( 'tanggal_akhir_rencana' )
-                ->map ( fn ( $date ) => $date->format ( 'Y-m-d' ) ),
-            'durasi_actual'         => $query->clone ()
+                ->map ( fn ( $date ) => $date->format ( 'Y-m-d' ) )
+                ->unique ()
+                ->values (),
+            'durasi_actual'         => $allTimelineEntries
                 ->whereNotNull ( 'tanggal_awal_actual' )
                 ->whereNotNull ( 'tanggal_akhir_actual' )
-                ->selectRaw ( 'DISTINCT EXTRACT(DAY FROM (tanggal_akhir_actual::timestamp - tanggal_awal_actual::timestamp))::integer as days' )
-                ->pluck ( 'days' ),
-            'tanggal_awal_actual'   => $query->clone ()
+                ->map ( function ($item)
+                {
+                    if ( ! $item->tanggal_awal_actual || ! $item->tanggal_akhir_actual ) return null;
+                    $start = \Carbon\Carbon::parse ( $item->tanggal_awal_actual );
+                    $end   = \Carbon\Carbon::parse ( $item->tanggal_akhir_actual );
+                    // Simple difference in days without adding 1 (not inclusive)
+                    return $start->diffInDays ( $end );
+                } )
+                ->filter ()
+                ->unique ()
+                ->values (),
+            'tanggal_awal_actual'   => $allTimelineEntries
                 ->whereNotNull ( 'tanggal_awal_actual' )
-                ->distinct ()
                 ->pluck ( 'tanggal_awal_actual' )
-                ->map ( fn ( $date ) => $date->format ( 'Y-m-d' ) ),
-            'tanggal_akhir_actual'  => $query->clone ()
+                ->map ( fn ( $date ) => $date->format ( 'Y-m-d' ) )
+                ->unique ()
+                ->values (),
+            'tanggal_akhir_actual'  => $allTimelineEntries
                 ->whereNotNull ( 'tanggal_akhir_actual' )
-                ->distinct ()
                 ->pluck ( 'tanggal_akhir_actual' )
-                ->map ( fn ( $date ) => $date->format ( 'Y-m-d' ) ),
+                ->map ( fn ( $date ) => $date->format ( 'Y-m-d' ) )
+                ->unique ()
+                ->values (),
         ];
     }
 
@@ -349,8 +374,10 @@ class TimelineRKBUrgentController extends Controller
         // Get RKB data
         $rkb = Proyek::find ( $id );
 
-        $query        = $this->buildQuery ( $request, $id );
-        $uniqueValues = $this->getUniqueValues ( $query );
+        $query = $this->buildQuery ( $request, $id );
+
+        // Modified: Get unique values directly from database without filtering
+        $uniqueValues = $this->getUniqueValues ( $id );
 
         if ( $request->has ( 'search' ) )
         {

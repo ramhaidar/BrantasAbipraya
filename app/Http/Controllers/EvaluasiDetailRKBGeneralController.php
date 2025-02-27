@@ -56,73 +56,14 @@ class EvaluasiDetailRKBGeneralController extends Controller
         $this->applySearch ( $query, $request );
         $this->applyNonStockFilters ( $query, $request );
 
-        // Get filtered data after applying non-stock filters
-        $filteredQuery = clone $query;
-        $filteredData  = $filteredQuery->get ();
-
-        // Get the summed stock quantities that exist in the filtered data
-        $filteredStockQuantities = $filteredData->map ( function ($item)
-        {
-            return $item->masterDataSparepart->saldos
-                ->where ( 'id_proyek', $this->rkb->id_proyek )
-                ->sum ( 'quantity' );
-        } )
-            ->reject ( function ($value)
-            {
-                return $value === null;
-            } )
-            ->unique ()
-            ->sort ()
-            ->values ();
-
         // Apply stock quantity filter if selected
         if ( $request->filled ( 'selected_stock_quantity' ) )
         {
             $this->applyStockQuantityFilter ( $query, $request, $allStockQuantities );
         }
 
-        // Get final filtered data
-        $finalFilteredQuery = clone $query;
-        $finalFilteredData  = $finalFilteredQuery->get ();
-
-        // Get all stock quantities for each sparepart, including nulls
-        $stockQuantityValues = collect ();
-        $finalFilteredData->each ( function ($item) use ($stockQuantityValues)
-        {
-            $saldos = $item->masterDataSparepart->saldos
-                ->where ( 'id_proyek', $this->rkb->id_proyek );
-
-            if ( $saldos->isEmpty () )
-            {
-                // If no saldo records exist, it's NULL (not 0)
-                $stockQuantityValues->push ( null );
-            }
-            else
-            {
-                // If saldo records exist, get the sum
-                $sum = $saldos->sum ( 'quantity' );
-                $stockQuantityValues->push ( $sum );
-            }
-        } );
-
-        // Get unique values for filters
-        $uniqueValues = [ 
-            'jenis_alat'         => $finalFilteredData->pluck ( 'jenis_alat' )->filter ()->unique ()->sort ()->values (),
-            'kode_alat'          => $finalFilteredData->pluck ( 'kode_alat' )->filter ()->unique ()->sort ()->values (),
-            'kategori_sparepart' => $finalFilteredData->map ( function ($item)
-            {
-                return $item->kategori_kode . ': ' . $item->kategori_nama;
-            } )->filter ()->unique ()->sort ()->values (),
-            'sparepart'          => $finalFilteredData->pluck ( 'sparepart_nama' )->filter ()->unique ()->sort ()->values (),
-            'part_number'        => $finalFilteredData->pluck ( 'part_number' )->filter ()->unique ()->sort ()->values (),
-            'merk'               => $finalFilteredData->pluck ( 'merk' )->filter ()->unique ()->sort ()->values (),
-            'quantity_requested' => $finalFilteredData->pluck ( 'quantity_requested' )->filter ()->unique ()->sort ()->values (),
-            'stock_quantity'     => $stockQuantityValues->filter ()->unique ()->sortBy ( function ($value)
-            {
-                return $value;
-            } )->values (),
-            'satuan'             => $finalFilteredData->pluck ( 'satuan' )->filter ()->unique ()->sort ()->values (),
-        ];
+        // Get unique values directly from the database, not from filtered data
+        $uniqueValues = $this->getUniqueValues ( $id );
 
         // Get paginated data
         $TableData = $this->getTableData ( $query, $perPage );
@@ -170,6 +111,73 @@ class EvaluasiDetailRKBGeneralController extends Controller
             'stockQuantities'       => $stockQuantities,
             'uniqueValues'          => $uniqueValues,
         ] );
+    }
+
+    /**
+     * Get unique values directly from the database, not affected by current filters
+     */
+    private function getUniqueValues ( $rkbId )
+    {
+        // Get the base query without any filters
+        $baseQuery = DetailRKBGeneral::query ()
+            ->select ( [ 
+                'detail_rkb_general.*',
+                'master_data_alat.jenis_alat',
+                'master_data_alat.kode_alat',
+                'kategori_sparepart.kode as kategori_kode',
+                'kategori_sparepart.nama as kategori_nama',
+                'master_data_sparepart.nama as sparepart_nama',
+                'master_data_sparepart.part_number',
+                'master_data_sparepart.merk',
+                'master_data_sparepart.id as sparepart_id'
+            ] )
+            ->join ( 'link_rkb_detail', 'detail_rkb_general.id', '=', 'link_rkb_detail.id_detail_rkb_general' )
+            ->join ( 'link_alat_detail_rkb', 'link_rkb_detail.id_link_alat_detail_rkb', '=', 'link_alat_detail_rkb.id' )
+            ->join ( 'master_data_alat', 'link_alat_detail_rkb.id_master_data_alat', '=', 'master_data_alat.id' )
+            ->join ( 'kategori_sparepart', 'detail_rkb_general.id_kategori_sparepart_sparepart', '=', 'kategori_sparepart.id' )
+            ->join ( 'master_data_sparepart', 'detail_rkb_general.id_master_data_sparepart', '=', 'master_data_sparepart.id' )
+            ->where ( 'link_alat_detail_rkb.id_rkb', $rkbId );
+
+        // Get all data without any filters
+        $allData = $baseQuery->get ();
+
+        // Get stock quantities for all spareparts in this project
+        $stockQuantities = Saldo::where ( 'id_proyek', $this->rkb->id_proyek )
+            ->selectRaw ( 'id_master_data_sparepart, SUM(quantity) as total_quantity' )
+            ->groupBy ( 'id_master_data_sparepart' )
+            ->get ()
+            ->pluck ( 'total_quantity', 'id_master_data_sparepart' );
+
+        // Get stock quantities for all filtered spareparts
+        $sparepartIds = $allData->pluck ( 'id_master_data_sparepart' )->unique ();
+        $stockValues  = collect ();
+
+        foreach ( $sparepartIds as $sparepartId )
+        {
+            if ( $stockQuantities->has ( $sparepartId ) )
+            {
+                $stockValues->push ( $stockQuantities[ $sparepartId ] );
+            }
+            else
+            {
+                $stockValues->push ( null ); // No stock = null, not 0
+            }
+        }
+
+        return [ 
+            'jenis_alat'         => $allData->pluck ( 'jenis_alat' )->filter ()->unique ()->sort ()->values (),
+            'kode_alat'          => $allData->pluck ( 'kode_alat' )->filter ()->unique ()->sort ()->values (),
+            'kategori_sparepart' => $allData->map ( function ($item)
+            {
+                return $item->kategori_kode . ': ' . $item->kategori_nama;
+            } )->filter ()->unique ()->sort ()->values (),
+            'sparepart'          => $allData->pluck ( 'sparepart_nama' )->filter ()->unique ()->sort ()->values (),
+            'part_number'        => $allData->pluck ( 'part_number' )->filter ()->unique ()->sort ()->values (),
+            'merk'               => $allData->pluck ( 'merk' )->filter ()->unique ()->sort ()->values (),
+            'quantity_requested' => $allData->pluck ( 'quantity_requested' )->filter ()->unique ()->sort ()->values (),
+            'stock_quantity'     => $stockValues->filter ()->unique ()->sort ()->values (),
+            'satuan'             => $allData->pluck ( 'satuan' )->filter ()->unique ()->sort ()->values (),
+        ];
     }
 
     private function applySearch ( $query, Request $request )
@@ -237,6 +245,34 @@ class EvaluasiDetailRKBGeneralController extends Controller
             try
             {
                 $values = $this->getSelectedValues ( $request->get ( $selectedParam ) );
+
+                // Special handling for kategori_sparepart which uses "code: name" format in the UI
+                if ( $paramName === 'kategori_sparepart' )
+                {
+                    $query->where ( function ($q) use ($values)
+                    {
+                        foreach ( $values as $value )
+                        {
+                            // Check if it's in the "kode: nama" format
+                            if ( strpos ( $value, ': ' ) !== false )
+                            {
+                                list( $kode, $nama ) = explode ( ': ', $value, 2 );
+                                $q->orWhere ( function ($subQ) use ($kode, $nama)
+                                {
+                                    $subQ->where ( 'kategori_sparepart.kode', $kode )
+                                        ->where ( 'kategori_sparepart.nama', $nama );
+                                } );
+                            }
+                            else
+                            {
+                                // Fallback - search in both columns
+                                $q->orWhere ( 'kategori_sparepart.nama', $value )
+                                    ->orWhere ( 'kategori_sparepart.kode', $value );
+                            }
+                        }
+                    } );
+                    return;
+                }
 
                 // Special handling for numeric columns
                 if ( in_array ( $paramName, [ 'quantity_requested', 'stock_quantity' ] ) )

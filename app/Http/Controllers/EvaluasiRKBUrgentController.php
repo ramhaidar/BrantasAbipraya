@@ -126,13 +126,28 @@ class EvaluasiRKBUrgentController extends Controller
             try
             {
                 $periodeValues = $this->getSelectedValues ( $request->selected_periode );
-                if ( in_array ( 'null', $periodeValues ) )
+
+                // Check if the array contains "null" or "Empty/Null"
+                $hasNullFilter = in_array ( 'null', $periodeValues ) || in_array ( 'Empty/Null', $periodeValues );
+
+                if ( $hasNullFilter )
                 {
-                    $nonNullValues = array_filter ( $periodeValues, fn ( $value ) => $value !== 'null' );
+                    // Filter out "null" and "Empty/Null" values
+                    $nonNullValues = array_filter ( $periodeValues, function ($value)
+                    {
+                        return $value !== 'null' && $value !== 'Empty/Null';
+                    } );
+
                     $query->where ( function ($q) use ($nonNullValues)
                     {
-                        $q->whereNull ( 'periode' )
-                            ->orWhereIn ( 'periode', $nonNullValues );
+                        // Only check for NULL values - don't compare with '-' for date fields
+                        $q->whereNull ( 'periode' );
+
+                        // Add non-null values if they exist
+                        if ( ! empty ( $nonNullValues ) )
+                        {
+                            $q->orWhereIn ( 'periode', $nonNullValues );
+                        }
                     } );
                 }
                 else
@@ -283,84 +298,27 @@ class EvaluasiRKBUrgentController extends Controller
 
     private function getUniqueValues ( Request $request = null, $baseQuery = null )
     {
-        if ( ! $baseQuery )
-        {
-            $baseQuery = RKB::where ( 'tipe', 'urgent' );
-        }
+        // Get all RKBs with type 'urgent', without applying any filters
+        $allUrgentRKBs = RKB::where ( 'tipe', 'urgent' );
 
-        // Create clones for each filter type
-        $nomorQuery   = clone $baseQuery;
-        $proyekQuery  = clone $baseQuery;
-        $periodeQuery = clone $baseQuery;
-
-        // Apply cascading filters
+        // Apply user role filters if needed
         if ( $request )
         {
-            if ( $request->filled ( 'selected_nomor' ) )
-            {
-                $proyekQuery  = $this->handleNomorFilter ( $request, $proyekQuery );
-                $periodeQuery = $this->handleNomorFilter ( $request, $periodeQuery );
-            }
-            if ( $request->filled ( 'selected_proyek' ) )
-            {
-                $nomorQuery   = $this->handleProyekFilter ( $request, $nomorQuery );
-                $periodeQuery = $this->handleProyekFilter ( $request, $periodeQuery );
-            }
-            if ( $request->filled ( 'selected_periode' ) )
-            {
-                $nomorQuery  = $this->handlePeriodeFilter ( $request, $nomorQuery );
-                $proyekQuery = $this->handlePeriodeFilter ( $request, $proyekQuery );
-            }
+            $user    = Auth::user ();
+            $proyeks = $this->getProyeks ( $user );
+            $this->applyUserRoleFilters ( $allUrgentRKBs, $user, $proyeks );
         }
 
+        // Get all project IDs from the filtered RKBs
+        $proyekIds = $allUrgentRKBs->pluck ( 'id_proyek' )->unique ()->filter ();
+
+        // Get unique values for each filter field
         return [ 
-            'nomor'   => $this->getFilteredNomors ( $nomorQuery ),
-            'proyek'  => $this->getFilteredProyeks ( $proyekQuery ),
-            'periode' => $this->getFilteredPeriodes ( $periodeQuery ),
+            'nomor'   => $this->getUniqueNomors ( $allUrgentRKBs ),
+            'proyek'  => $this->getUniqueProyeks ( $proyekIds ),
+            'periode' => $this->getUniquePeriodes ( $allUrgentRKBs ),
             'status'  => $this->getAllStatusOptions () // Static status options
         ];
-    }
-
-    private function getFilteredNomors ( $query )
-    {
-        return $query->select ( 'nomor' )
-            ->whereNotNull ( 'nomor' )
-            ->distinct ()
-            ->get ()
-            ->pluck ( 'nomor' )
-            ->sort ()
-            ->values ();
-    }
-
-    private function getFilteredProyeks ( $query )
-    {
-        $proyekIds = $query->pluck ( 'id_proyek' )->unique ();
-        return Proyek::whereIn ( 'id', $proyekIds )
-            ->orderBy ( 'nama' )
-            ->pluck ( 'nama' );
-    }
-
-    private function getFilteredPeriodes ( $query )
-    {
-        return $query->select ( 'periode' )
-            ->whereNotNull ( 'periode' )
-            ->distinct ()
-            ->get ()
-            ->pluck ( 'periode' )
-            ->sortDesc ()
-            ->values ();
-    }
-
-    private function getAllStatusOptions ()
-    {
-        return collect ( [ 
-            'pengajuan',
-            'evaluasi',
-            'menunggu approval vp',
-            'menunggu approval svp',
-            'disetujui',
-            'tidak diketahui'
-        ] );
     }
 
     // Helper Methods
@@ -453,15 +411,9 @@ class EvaluasiRKBUrgentController extends Controller
             ->values ();
     }
 
-    private function getUniqueProyeks ( $query )
+    private function getUniqueProyeks ( $proyekIds )
     {
-        return Proyek::whereIn ( 'id', function ($subquery) use ($query)
-        {
-            $subquery->select ( 'id_proyek' )
-                ->from ( 'rkb' )
-                ->where ( 'tipe', 'urgent' )
-                ->distinct ();
-        } )
+        return Proyek::whereIn ( 'id', $proyekIds )
             ->orderBy ( 'nama' )
             ->pluck ( 'nama' );
     }
@@ -475,6 +427,18 @@ class EvaluasiRKBUrgentController extends Controller
             ->pluck ( 'periode' )
             ->sortDesc ()
             ->values ();
+    }
+
+    private function getAllStatusOptions ()
+    {
+        return collect ( [ 
+            'pengajuan',
+            'evaluasi',
+            'menunggu approval vp',
+            'menunggu approval svp',
+            'disetujui',
+            'tidak diketahui'
+        ] );
     }
 
     /**

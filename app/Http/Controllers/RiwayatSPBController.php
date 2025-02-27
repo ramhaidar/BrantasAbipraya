@@ -27,6 +27,51 @@ class RiwayatSPBController extends Controller
         }
     }
 
+    private function getUniqueValues ( $spbId )
+    {
+        $spb = SPB::with ( [ 
+            'linkSpbDetailSpb.detailSpb.masterDataSparepart',
+        ] )->findOrFail ( $spbId );
+
+        $allItems = $spb->linkSpbDetailSpb;
+
+        return [ 
+            'jenis_barang' => $allItems->pluck ( 'detailSpb.masterDataSparepart.nama' )
+                ->filter ()
+                ->unique ()
+                ->values (),
+            'merk'         => $allItems->pluck ( 'detailSpb.masterDataSparepart.merk' )
+                ->filter ()
+                ->unique ()
+                ->values (),
+            'spesifikasi'  => $allItems->pluck ( 'detailSpb.masterDataSparepart.part_number' )
+                ->filter ()
+                ->unique ()
+                ->values (),
+            'quantity'     => $allItems->pluck ( 'detailSpb.quantity_po' )
+                ->filter ()
+                ->unique ()
+                ->values (),
+            'satuan'       => $allItems->pluck ( 'detailSpb.satuan' )
+                ->filter ()
+                ->unique ()
+                ->values (),
+            'harga'        => $allItems->pluck ( 'detailSpb.harga' )
+                ->filter ()
+                ->unique ()
+                ->sort ()
+                ->values (),
+            'jumlah_harga' => $allItems->map ( function ($item)
+            {
+                return $item->detailSpb->quantity_po * $item->detailSpb->harga;
+            } )
+                ->filter ()
+                ->unique ()
+                ->sort ()
+                ->values (),
+        ];
+    }
+
     public function index ( $id )
     {
         $spb = SPB::with ( [ 
@@ -117,39 +162,11 @@ class RiwayatSPBController extends Controller
 
             $filteredSpb = clone $spb;
             $filteredSpb->setRelation ( 'linkSpbDetailSpb', $filteredItems );
-            $spb   = $filteredSpb;
-            $items = $filteredItems; // Update items with filtered data
+            $spb = $filteredSpb;
         }
 
-        // Recalculate unique values based on $items now (filtered or full)
-        $uniqueValues = [ 
-            'jenis_barang' => $items->pluck ( 'detailSpb.masterDataSparepart.nama' )
-                ->unique ()
-                ->values (),
-            'merk'         => $items->pluck ( 'detailSpb.masterDataSparepart.merk' )
-                ->unique ()
-                ->values (),
-            'spesifikasi'  => $items->pluck ( 'detailSpb.masterDataSparepart.part_number' )
-                ->unique ()
-                ->values (),
-            'quantity'     => $items->pluck ( 'detailSpb.quantity_po' )
-                ->unique ()
-                ->values (),
-            'satuan'       => $items->pluck ( 'detailSpb.satuan' )
-                ->unique ()
-                ->values (),
-            'harga'        => $items->pluck ( 'detailSpb.harga' )
-                ->unique ()
-                ->sort ()
-                ->values (),
-            'jumlah_harga' => $items->map ( function ($item)
-            {
-                return $item->detailSpb->quantity_po * $item->detailSpb->harga;
-            } )
-                ->unique ()
-                ->sort ()
-                ->values (),
-        ];
+        // Get unique values from the database regardless of current filters
+        $uniqueValues = $this->getUniqueValues ( $id );
 
         // Filter projects based on user role
         $user         = Auth::user ();

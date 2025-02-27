@@ -170,6 +170,34 @@ class EvaluasiDetailRKBUrgentController extends Controller
             {
                 $values = $this->getSelectedValues ( $request->get ( $selectedParam ) );
 
+                // Special handling for kategori_sparepart which uses "code: name" format in the UI
+                if ( $paramName === 'kategori_sparepart' )
+                {
+                    $query->where ( function ($q) use ($values)
+                    {
+                        foreach ( $values as $value )
+                        {
+                            // Check if it's in the "kode: nama" format
+                            if ( strpos ( $value, ': ' ) !== false )
+                            {
+                                list( $kode, $nama ) = explode ( ': ', $value, 2 );
+                                $q->orWhere ( function ($subQ) use ($kode, $nama)
+                                {
+                                    $subQ->where ( 'kategori_sparepart.kode', $kode )
+                                        ->where ( 'kategori_sparepart.nama', $nama );
+                                } );
+                            }
+                            else
+                            {
+                                // Fallback - search in both columns
+                                $q->orWhere ( 'kategori_sparepart.nama', $value )
+                                    ->orWhere ( 'kategori_sparepart.kode', $value );
+                            }
+                        }
+                    } );
+                    return;
+                }
+
                 // Handle numeric columns (quantity_requested and stock_quantity)
                 if ( in_array ( $paramName, [ 'quantity_requested', 'stock_quantity' ] ) )
                 {
@@ -462,32 +490,33 @@ class EvaluasiDetailRKBUrgentController extends Controller
 
     private function getUniqueValues ( $query )
     {
-        $result = clone $query;
-        $data   = $result->get ();
+        // Instead of using filtered query, get all DetailRKBUrgent records for the RKB
+        $allRecords = DetailRKBUrgent::query ()
+            ->select ( [ 
+                'detail_rkb_urgent.*',
+                'master_data_alat.jenis_alat',
+                'master_data_alat.kode_alat',
+                'kategori_sparepart.kode as kategori_kode',
+                'kategori_sparepart.nama as kategori_nama',
+                'master_data_sparepart.nama as sparepart_nama',
+                'master_data_sparepart.part_number',
+                'master_data_sparepart.merk',
+                'master_data_sparepart.id as sparepart_id'
+            ] )
+            ->join ( 'link_rkb_detail', 'detail_rkb_urgent.id', '=', 'link_rkb_detail.id_detail_rkb_urgent' )
+            ->join ( 'link_alat_detail_rkb', 'link_rkb_detail.id_link_alat_detail_rkb', '=', 'link_alat_detail_rkb.id' )
+            ->join ( 'master_data_alat', 'link_alat_detail_rkb.id_master_data_alat', '=', 'master_data_alat.id' )
+            ->join ( 'kategori_sparepart', 'detail_rkb_urgent.id_kategori_sparepart_sparepart', '=', 'kategori_sparepart.id' )
+            ->join ( 'master_data_sparepart', 'detail_rkb_urgent.id_master_data_sparepart', '=', 'master_data_sparepart.id' )
+            ->where ( 'link_alat_detail_rkb.id_rkb', $this->rkb->id )
+            ->get ();
 
-        $formatQuantityValues = function ($column) use ($data)
-        {
-            return $data->pluck ( $column )
-                ->reject ( function ($value)
-                {
-                    // Only reject null values, keep 0
-                    return $value === null;
-                } )
-                ->unique ()
-                ->map ( function ($value)
-                {
-                    return (string) $value;
-                } )
-                ->sort ()
-                ->values ();
-        };
+        // Get all sparepart IDs from the RKB
+        $allSparepartIds = $allRecords->pluck ( 'id_master_data_sparepart' )->unique ();
 
-        // Get sparepart IDs from the filtered data
-        $filteredSparepartIds = $data->pluck ( 'id_master_data_sparepart' )->unique ();
-
-        // Get stock quantities only for the filtered sparepart IDs
+        // Get stock quantities directly from the database for all spareparts in the RKB
         $stockQuantities = Saldo::where ( 'id_proyek', $this->rkb->id_proyek )
-            ->whereIn ( 'id_master_data_sparepart', $filteredSparepartIds )
+            ->whereIn ( 'id_master_data_sparepart', $allSparepartIds )
             ->selectRaw ( 'id_master_data_sparepart, SUM(quantity) as total_quantity' )
             ->groupBy ( 'id_master_data_sparepart' )
             ->get ()
@@ -504,20 +533,37 @@ class EvaluasiDetailRKBUrgentController extends Controller
             ->sort ()
             ->values ();
 
+        // Format quantity values consistently
+        $formatQuantityValues = function ($column) use ($allRecords)
+        {
+            return $allRecords->pluck ( $column )
+                ->reject ( function ($value)
+                {
+                    return $value === null;
+                } )
+                ->unique ()
+                ->map ( function ($value)
+                {
+                    return (string) $value;
+                } )
+                ->sort ()
+                ->values ();
+        };
+
         return [ 
-            'jenis_alat'         => $data->pluck ( 'jenis_alat' )->unique ()->filter ()->sort ()->values (),
-            'kode_alat'          => $data->pluck ( 'kode_alat' )->unique ()->filter ()->sort ()->values (),
-            'kategori_sparepart' => $data->map ( function ($item)
+            'jenis_alat'         => $allRecords->pluck ( 'jenis_alat' )->unique ()->filter ()->sort ()->values (),
+            'kode_alat'          => $allRecords->pluck ( 'kode_alat' )->unique ()->filter ()->sort ()->values (),
+            'kategori_sparepart' => $allRecords->map ( function ($item)
             {
                 return $item->kategori_kode . ': ' . $item->kategori_nama;
             } )->unique ()->filter ()->sort ()->values (),
-            'sparepart'          => $data->pluck ( 'sparepart_nama' )->unique ()->filter ()->sort ()->values (),
-            'part_number'        => $data->pluck ( 'part_number' )->unique ()->filter ()->sort ()->values (),
-            'merk'               => $data->pluck ( 'merk' )->unique ()->filter ()->sort ()->values (),
-            'nama_koordinator'   => $data->pluck ( 'nama_koordinator' )->unique ()->filter ()->sort ()->values (),
+            'sparepart'          => $allRecords->pluck ( 'sparepart_nama' )->unique ()->filter ()->sort ()->values (),
+            'part_number'        => $allRecords->pluck ( 'part_number' )->unique ()->filter ()->sort ()->values (),
+            'merk'               => $allRecords->pluck ( 'merk' )->unique ()->filter ()->sort ()->values (),
+            'nama_koordinator'   => $allRecords->pluck ( 'nama_koordinator' )->unique ()->filter ()->sort ()->values (),
             'quantity_requested' => $formatQuantityValues ( 'quantity_requested' ),
             'stock_quantity'     => $stockQuantities,
-            'satuan'             => $data->pluck ( 'satuan' )->unique ()->filter ()->sort ()->values (),
+            'satuan'             => $allRecords->pluck ( 'satuan' )->unique ()->filter ()->sort ()->values (),
         ];
     }
 

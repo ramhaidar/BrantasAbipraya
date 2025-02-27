@@ -44,49 +44,8 @@ class UserController extends Controller
             ->paginate ( $perPage )
             ->withQueryString ();
 
-        // Compute uniqueValues which respect filters on other columns.
-        $filterFields = [ 'name', 'username', 'sex', 'role', 'phone', 'email' ];
-        $uniqueValues = [];
-        foreach ( $filterFields as $field )
-        {
-            // Create a fresh query for each field.
-            $uniqueQuery = User::query ();
-            foreach ( $filterFields as $otherField )
-            {
-                if ( $otherField === $field )
-                {
-                    continue;
-                }
-                $selectedValues = $request->get ( "selected_{$otherField}" );
-                if ( ! empty ( $selectedValues ) )
-                {
-                    try
-                    {
-                        $values = explode ( '||', base64_decode ( $selectedValues ) );
-                        $values = array_filter ( $values, fn ( $value ) => $value !== '' );
-                        if ( in_array ( 'null', $values, true ) )
-                        {
-                            $nonNullValues = array_filter ( $values, fn ( $value ) => $value !== 'null' );
-                            $uniqueQuery->where ( function ($q) use ($otherField, $nonNullValues)
-                            {
-                                $q->whereNull ( $otherField )
-                                    ->orWhere ( $otherField, '-' )
-                                    ->orWhereIn ( $otherField, $nonNullValues );
-                            } );
-                        }
-                        else
-                        {
-                            $uniqueQuery->whereIn ( $otherField, $values );
-                        }
-                    }
-                    catch ( \Exception $e )
-                    {
-                        \Log::error ( "Error in {$otherField} filter for uniqueValues: " . $e->getMessage () );
-                    }
-                }
-            }
-            $uniqueValues[ $field ] = $uniqueQuery->whereNotNull ( $field )->distinct ()->pluck ( $field );
-        }
+        // Get unique values from database, independent of current filtering
+        $uniqueValues = $this->getUniqueValues ();
 
         // Get projects based on user role
         $user         = Auth::user ();
@@ -111,6 +70,31 @@ class UserController extends Controller
             'TableData'    => $TableData,
             'uniqueValues' => $uniqueValues,
         ] );
+    }
+
+    /**
+     * Get unique values for each filterable field directly from the database
+     * 
+     * @return array
+     */
+    private function getUniqueValues ()
+    {
+        $filterFields = [ 'name', 'username', 'sex', 'role', 'phone', 'email' ];
+        $uniqueValues = [];
+
+        foreach ( $filterFields as $field )
+        {
+            // Get all unique values for this field from the database
+            $uniqueValues[ $field ] = User::whereNotNull ( $field )
+                ->where ( $field, '!=', '' )
+                ->distinct ()
+                ->pluck ( $field )
+                ->filter ()
+                ->unique ()
+                ->values ();
+        }
+
+        return $uniqueValues;
     }
 
     private function applyAllFilters ( Request $request, $query )

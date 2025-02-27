@@ -19,28 +19,24 @@
             'filterId' => 'jenis-alat',
             'paramName' => 'jenis_alat',
             'filter' => true,
-            'uniqueValues' => $uniqueValues,
         ],
         [
             'title' => 'Kode Alat',
             'filterId' => 'kode-alat',
             'paramName' => 'kode_alat',
             'filter' => true,
-            'uniqueValues' => $uniqueValues,
         ],
         [
             'title' => 'Kategori',
             'filterId' => 'kategori',
             'paramName' => 'kategori',
             'filter' => true,
-            'uniqueValues' => $uniqueValues,
         ],
         [
             'title' => 'Sparepart Requested',
             'filterId' => 'sparepart',
             'paramName' => 'sparepart',
             'filter' => true,
-            'uniqueValues' => $uniqueValues,
         ],
         [
             'title' => 'Sparepart PO',
@@ -51,7 +47,7 @@
             'filterId' => 'quantity',
             'paramName' => 'quantity',
             'filter' => true,
-            'uniqueValues' => $uniqueValues,
+            'type' => 'number',
         ],
         [
             'title' => 'Quantity PO',
@@ -62,7 +58,6 @@
             'filterId' => 'satuan',
             'paramName' => 'satuan',
             'filter' => true,
-            'uniqueValues' => $uniqueValues,
         ],
         [
             'title' => 'Harga',

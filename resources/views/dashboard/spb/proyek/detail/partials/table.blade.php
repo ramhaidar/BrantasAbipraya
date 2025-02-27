@@ -45,12 +45,14 @@
             'filterId' => 'quantity-po',
             'paramName' => 'quantity_po',
             'filter' => true,
+            'type' => 'number',
         ],
         [
             'title' => 'Quantity Diterima',
             'filterId' => 'quantity-diterima',
             'paramName' => 'quantity_diterima',
             'filter' => true,
+            'type' => 'number',
         ],
         [
             'title' => 'Satuan',
@@ -63,12 +65,14 @@
             'filterId' => 'harga',
             'paramName' => 'harga',
             'filter' => true,
+            'type' => 'number',
         ],
         [
             'title' => 'Jumlah Harga',
             'filterId' => 'jumlah-harga',
             'paramName' => 'jumlah_harga',
             'filter' => true,
+            'type' => 'number',
         ],
     ];
 

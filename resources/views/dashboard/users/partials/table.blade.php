@@ -79,11 +79,7 @@
                 <thead class="table-primary">
                     <tr>
                         @foreach ($headers as $header)
-                            @include(
-                                'components.table-header-filter',
-                                array_merge($header, [
-                                    'uniqueValues' => $uniqueValues,
-                                ]))
+                            @include('components.table-header-filter', $header)
                         @endforeach
                     </tr>
                 </thead>

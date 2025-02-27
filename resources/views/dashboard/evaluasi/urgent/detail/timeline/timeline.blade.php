@@ -46,4 +46,5 @@
 @endsection
 
 @push('scripts_2')
+    @include('components.form-submit-handler')
 @endpush

@@ -51,5 +51,5 @@
 @endsection
 
 @push('scripts_2')
-    <script></script>
+    @include('components.form-submit-handler')
 @endpush

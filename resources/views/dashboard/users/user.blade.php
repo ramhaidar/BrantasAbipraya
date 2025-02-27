@@ -13,7 +13,7 @@
                     </div>
                     <div class="d-flex justify-content-end gap-2">
                         @if (Auth::user()->role === 'superadmin')
-                            <a class="btn btn-primary btn-sm" id=btn-hide-text-mobile onclick=showModalAdd()>
+                            <a class="btn btn-primary btn-sm btn-hide-text-mobile" id=btn-hide-text-mobile data-bs-toggle="modal" data-bs-target="#modalForAdd">
                                 <i class="fa fa-plus"></i> <span class=ms-2>Tambah Data</span>
                             </a>
                         @endif
@@ -52,9 +52,5 @@
 @endsection
 
 @push('scripts_2')
-    <script>
-        function showModalAdd() {
-            $('#modalForAdd').modal('show');
-        }
-    </script>
+    @include('components.form-submit-handler')
 @endpush

@@ -28,6 +28,29 @@
         return $selectedValue ? substr($selectedValue, strlen($prefix)) : '';
     };
 
+    // Helper function to format price value from standard to Indonesian format
+    $formatPriceValue = function ($value) {
+        if (empty($value)) {
+            return '';
+        }
+
+        // Check if value contains decimal part
+        if (strpos($value, '.') !== false) {
+            $parts = explode('.', $value);
+            $intPart = $parts[0];
+            $decimalPart = isset($parts[1]) ? $parts[1] : '';
+
+            // Format integer part with thousand separators
+            $formattedInt = number_format((int) $intPart, 0, '', '.');
+
+            // Format with Indonesian decimal separator (comma)
+            return $formattedInt . ($decimalPart ? ',' . $decimalPart : '');
+        } else {
+            // No decimal part, just format with thousand separators
+            return number_format((int) $value, 0, '', '.');
+        }
+    };
+
     // Set default variables
     $showHeader = true;
     if (isset($roles)) {
@@ -45,6 +68,13 @@
     $exactValue = $getFilterValue($paramName, 'exact:');
     $gtValue = $getFilterValue($paramName, 'gt:');
     $ltValue = $getFilterValue($paramName, 'lt:');
+
+    // Format price values if type is price
+    if (isset($type) && $type === 'price') {
+        $exactValue = $formatPriceValue($exactValue);
+        $gtValue = $formatPriceValue($gtValue);
+        $ltValue = $formatPriceValue($ltValue);
+    }
 @endphp
 
 @if ($showHeader)
@@ -126,6 +156,28 @@
                             }
                         </script>
 
+                        {{-- Price Filter Section --}}
+                    @elseif (isset($type) && $type === 'price')
+                        <div id="price-filter-group">
+                            @foreach (['exact' => 'Sama Dengan "="', 'gt' => 'Lebih Besar Dari Sama Dengan ">="', 'lt' => 'Lebih Kecil Dari Sama Dengan "<="'] as $key => $label)
+                                <div class="mb-2">
+                                    <label class="form-label small">{{ $label }}</label>
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text">Rp</span>
+                                        <input class="form-control form-control-sm price-input" id="{{ $paramName }}-{{ $key }}" type="text" value="{{ ${$key . 'Value'} }}" placeholder="{{ $key === 'exact' ? 'Masukkan nilai tepat' : ($key === 'gt' ? 'Lebih besar dari...' : 'Lebih kecil dari...') }}" onkeyup="formatPriceInput(this)" onchange="clearRelatedFields('{{ $paramName }}', '{{ $key }}')">
+                                        @if (${$key . 'Value'})
+                                            <span class="input-group-text clear-input" data-input-id="{{ $paramName }}-{{ $key }}" role="button">
+                                                <i class="bi bi-x"></i>
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
+                                @if ($key === 'exact' || $key === 'lt')
+                                    <hr>
+                                @endif
+                            @endforeach
+                        </div>
+
                         {{-- Number Filter Section --}}
                     @elseif (isset($type) && in_array($type, ['number', 'number_of_days']))
                         <div id="number-filter-group">
@@ -181,7 +233,7 @@
                     </div>
 
                     {{-- Apply Button --}}
-                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('{{ $paramName }}')">
+                    <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('{{ $paramName }}', this)">
                         <i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span>
                     </button>
                 </div>
@@ -209,6 +261,66 @@
         clearButton.toggle(input.val() !== '');
     }
 
+    // Price input formatter
+    function formatPriceInput(element) {
+        let value = element.value;
+
+        // Remove all non-numeric characters except for comma
+        value = value.replace(/[^\d,]/g, '');
+
+        // Ensure only one comma exists
+        let commaIndex = value.indexOf(',');
+        if (commaIndex !== -1) {
+            let beforeComma = value.substring(0, commaIndex);
+            let afterComma = value.substring(commaIndex + 1);
+
+            // Remove any additional commas from afterComma
+            afterComma = afterComma.replace(/,/g, '');
+
+            // Limit to 2 decimal places
+            if (afterComma.length > 2) {
+                afterComma = afterComma.substring(0, 2);
+            }
+
+            value = beforeComma + ',' + afterComma;
+        }
+
+        // Format numbers with thousand separators
+        if (commaIndex === -1) {
+            // If no comma yet, format the whole number
+            value = addThousandSeparator(value);
+        } else {
+            // If there's a comma, format only the part before comma
+            let beforeComma = value.substring(0, commaIndex);
+            let afterComma = value.substring(commaIndex);
+            value = addThousandSeparator(beforeComma) + afterComma;
+        }
+
+        element.value = value;
+    }
+
+    // Add thousand separators
+    function addThousandSeparator(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    // Parse price value to a number
+    function parsePriceValue(value) {
+        if (!value) return '';
+
+        // First remove all thousand separators (dots in Indonesian format)
+        let cleanValue = value.replace(/\./g, '');
+
+        // Then replace comma with dot for standard decimal format
+        // But only replace the first comma (the decimal separator in Indonesian)
+        const commaIndex = cleanValue.indexOf(',');
+        if (commaIndex !== -1) {
+            cleanValue = cleanValue.substring(0, commaIndex) + '.' + cleanValue.substring(commaIndex + 1);
+        }
+
+        return cleanValue;
+    }
+
     // Update clearRelatedFields function
     function clearRelatedFields(paramName, type) {
         if (type === 'exact') {
@@ -230,8 +342,8 @@
 
     // Add input event listeners
     document.addEventListener('DOMContentLoaded', function() {
-        // Add input event listeners for number and date inputs
-        $('input[type="number"], .datepicker').on('input change', function() {
+        // Add input event listeners for number, date and price inputs
+        $('input[type="number"], .datepicker, .price-input').on('input change', function() {
             updateClearButtonVisibility(this.id);
         });
 
@@ -251,7 +363,7 @@
         });
 
         // Show/hide clear button on input
-        $('input[type="number"], .datepicker').on('input change', function() {
+        $('input[type="number"], .datepicker, .price-input').on('input change', function() {
             const clearBtn = $(this).siblings('.clear-input');
             if (this.value) {
                 if (clearBtn.length === 0) {
@@ -265,16 +377,16 @@
             }
         });
 
-        // Add immediate input event listeners for number and date inputs
-        $('input[type="number"], .datepicker').on('input keyup', function(e) {
+        // Add immediate input event listeners for inputs
+        $('input[type="number"], .datepicker, .price-input').on('input keyup', function(e) {
             const paramName = this.id.split('-')[0];
             const type = this.id.split('-')[1];
             clearRelatedFields(paramName, type);
             updateClearButtonVisibility(this.id);
         });
 
-        // Add search input clear button functionality
-        $('.filter-popup input[type="text"]').on('input keyup', function() {
+        // Add search input clear button functionality - be more specific with selector
+        $('.filter-popup input[id^="search-"]').on('input keyup', function() {
             const clearBtn = $(this).siblings('.clear-input');
             clearBtn.toggle(this.value !== '');
         });
@@ -296,9 +408,22 @@
                 if (visiblePopup.length) {
                     e.preventDefault();
                     const paramName = visiblePopup.attr('id').replace('-filter', '').replace(/-/g, '_');
-                    applyFilter(paramName);
+                    const button = visiblePopup.find('button[type="button"]');
+                    applyFilter(paramName, button[0]);
                 }
             }
+        });
+
+        // Initialize price inputs with proper formatting
+        $('.price-input').each(function() {
+            if (this.value) {
+                formatPriceInput(this);
+            }
+        });
+
+        // Prevent filtering on non-search inputs
+        $('.filter-popup .price-input, .filter-popup .datepicker').on('keyup', function(e) {
+            e.stopPropagation(); // Prevent event bubbling
         });
     });
 </script>

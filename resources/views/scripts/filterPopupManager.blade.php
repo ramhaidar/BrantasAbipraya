@@ -301,8 +301,16 @@
     /**
      * Applies the selected filters and updates the URL
      * @param {string} type - The type of filter to apply
+     * @param {HTMLElement} buttonElement - The button that was clicked (optional)
      */
-    function applyFilter(type) {
+    function applyFilter(type, buttonElement) {
+        // If button element is provided, show spinner and disable it
+        const button = buttonElement ? $(buttonElement) : $(`.filter-popup#${type.replace('_', '-')}-filter button[type="button"]`);
+        const originalButtonHtml = button.html();
+
+        // Disable button and show spinner
+        button.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
+
         const selector = `.${type}-checkbox:checked`;
         const selected = $(selector).map(function() {
             return $(this).val();
@@ -315,17 +323,70 @@
             urlParams.set('page', '1');
         }
 
-        // Update URL parameters
-        if (selected.length > 0) {
-            // Use special delimiter instead of comma
-            const encodedValue = btoa(selected.join('||'));
-            urlParams.set(`selected_${type}`, encodedValue);
+        // Check for price or numeric inputs
+        const exactInput = document.getElementById(`${type}-exact`);
+        const gtInput = document.getElementById(`${type}-gt`);
+        const ltInput = document.getElementById(`${type}-lt`);
+
+        if (exactInput || gtInput || ltInput) {
+            let values = [...selected];
+            const isPriceFilter = exactInput && exactInput.classList.contains('price-input');
+
+            // Handle exact value
+            if (exactInput && exactInput.value.trim()) {
+                const value = isPriceFilter ? parsePriceValue(exactInput.value) : exactInput.value.trim();
+                values.push(`exact:${value}`);
+            } else {
+                // Handle greater than value
+                if (gtInput && gtInput.value.trim()) {
+                    const value = isPriceFilter ? parsePriceValue(gtInput.value) : gtInput.value.trim();
+                    values.push(`gt:${value}`);
+                }
+
+                // Handle less than value
+                if (ltInput && ltInput.value.trim()) {
+                    const value = isPriceFilter ? parsePriceValue(ltInput.value) : ltInput.value.trim();
+                    values.push(`lt:${value}`);
+                }
+            }
+
+            // Log for debugging
+            console.log(`Filter values for ${type}:`, values);
+
+            // Update URL parameters
+            if (values.length > 0) {
+                const encodedValue = btoa(values.join('||'));
+                urlParams.set(`selected_${type}`, encodedValue);
+            } else {
+                urlParams.delete(`selected_${type}`);
+            }
         } else {
-            urlParams.delete(`selected_${type}`);
+            // Handle checkbox values
+            if (selected.length > 0) {
+                // Use special delimiter instead of comma
+                const encodedValue = btoa(selected.join('||'));
+                urlParams.set(`selected_${type}`, encodedValue);
+            } else {
+                urlParams.delete(`selected_${type}`);
+            }
         }
 
-        // Navigate to updated URL
-        window.location.href = `${window.location.pathname}?${urlParams.toString()}`;
+        // Note: The popup will close automatically when page loads due to URL change
+        // This is normal browser behavior with full page redirects
+
+        // Create the new URL
+        const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+
+        // Use a small delay to allow the spinner to appear before redirect
+        // This gives better visual feedback to the user that something is happening
+        setTimeout(() => {
+            window.location.href = newUrl;
+        }, 300);
+
+        // If for some reason the redirect doesn't happen immediately, restore button after 5 seconds
+        setTimeout(() => {
+            button.prop('disabled', false).html(originalButtonHtml);
+        }, 5000);
     }
 
     /**
@@ -457,18 +518,18 @@
             event.stopPropagation();
         });
 
-        // Apply debounced search filter
+        // Apply debounced search filter - IMPORTANT: Only target search inputs specifically
         const debouncedFilter = debounce((event) => {
             const popupId = $(event.target).closest('.filter-popup').attr('id');
             const type = popupId.replace('-filter', '').replace('-', '_');
             filterCheckboxes(type, event);
         }, 300); // Wait 300ms before applying filter
 
-        // Attach debounced filter to search inputs
-        $('.filter-popup input[type="text"]').on('input', debouncedFilter);
+        // Attach debounced filter ONLY to search inputs (not to all text inputs)
+        $('.filter-popup input[id^="search-"]').on('input', debouncedFilter);
 
         // Apply filter if search input already has value on document ready
-        $('.filter-popup input[type="text"]').each(function() {
+        $('.filter-popup input[id^="search-"]').each(function() {
             if ($(this).val()) {
                 const popupId = $(this).closest('.filter-popup').attr('id');
                 const type = popupId.replace('-filter', '').replace('-', '_');
@@ -479,7 +540,7 @@
         });
 
         // Add event listeners to clear other inputs when one changes
-        const inputs = document.querySelectorAll('input[type="number"], .datepicker');
+        const inputs = document.querySelectorAll('input[type="number"], .datepicker, .price-input');
         inputs.forEach(input => {
             input.addEventListener('change', function() {
                 const paramName = this.id.split('-')[0];
@@ -509,7 +570,7 @@
             if (applyButton) {
                 applyButton.addEventListener('click', function(event) {
                     const paramName = popup.id.replace('-filter', '').replace(/-/g, '_');
-                    applyFilter(paramName);
+                    applyFilter(paramName, this); // Pass the button element
                 });
             }
         });
@@ -523,53 +584,65 @@
         return 3;
     }
 
-    function applyFilter(paramName) {
-        const checkboxes = document.querySelectorAll(`.${paramName}-checkbox:checked`);
-        let values = Array.from(checkboxes).map(cb => cb.value);
+    /**
+     * Parse price value from Indonesian format to standard decimal
+     * @param {string} value - Price value in Indonesian format (e.g. "1.234,56")
+     * @returns {string} - Standard decimal value (e.g. "1234.56")
+     */
+    function parsePriceValue(value) {
+        if (!value) return '';
 
-        // Handle numeric and date filters
-        const exactInput = document.getElementById(`${paramName}-exact`);
-        const gtInput = document.getElementById(`${paramName}-gt`);
-        const ltInput = document.getElementById(`${paramName}-lt`);
+        // First remove all thousand separators (dots in Indonesian format)
+        let cleanValue = value.replace(/\./g, '');
 
-        // Only add values if they exist and are not empty
-        if (exactInput && exactInput.value.trim()) {
-            values.push(`exact:${exactInput.value.trim()}`);
-        } else {
-            if (gtInput && gtInput.value.trim()) {
-                values.push(`gt:${gtInput.value.trim()}`);
-            }
-            if (ltInput && ltInput.value.trim()) {
-                values.push(`lt:${ltInput.value.trim()}`);
-            }
+        // Then replace comma with dot for standard decimal format
+        // But only replace the first comma (the decimal separator in Indonesian)
+        const commaIndex = cleanValue.indexOf(',');
+        if (commaIndex !== -1) {
+            cleanValue = cleanValue.substring(0, commaIndex) + '.' + cleanValue.substring(commaIndex + 1);
         }
 
-        if (values.length > 0) {
-            // Encode the values
-            const encodedValue = btoa(values.join('||'));
+        return cleanValue;
+    }
 
-            // Update the hidden input
-            const hiddenInput = document.getElementById(`selected-${paramName}`);
-            if (hiddenInput) {
-                hiddenInput.value = encodedValue;
+    /**
+     * Format price input field with Indonesian locale
+     * @param {HTMLElement} element - The input element to format
+     */
+    function formatPriceInput(element) {
+        let value = element.value;
+
+        // Remove all non-numeric characters except for comma
+        value = value.replace(/[^\d,]/g, '');
+
+        // Ensure only one comma exists
+        const commaIndex = value.indexOf(',');
+        if (commaIndex !== -1) {
+            const beforeComma = value.substring(0, commaIndex);
+            let afterComma = value.substring(commaIndex + 1);
+
+            // Remove any additional commas from afterComma
+            afterComma = afterComma.replace(/,/g, '');
+
+            // Limit to 2 decimal places
+            if (afterComma.length > 2) {
+                afterComma = afterComma.substring(0, 2);
             }
-        } else {
-            // Clear the hidden input if no values are selected
-            const hiddenInput = document.getElementById(`selected-${paramName}`);
-            if (hiddenInput) {
-                hiddenInput.value = '';
-            }
+
+            value = beforeComma + ',' + afterComma;
         }
 
-        // Update the URL parameters
-        const urlParams = new URLSearchParams(window.location.search);
-        if (values.length > 0) {
-            urlParams.set(`selected_${paramName}`, btoa(values.join('||')));
+        // Format numbers with thousand separators
+        if (commaIndex === -1) {
+            // If no comma yet, format the whole number
+            value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         } else {
-            urlParams.delete(`selected_${paramName}`);
+            // If there's a comma, format only the part before comma
+            const beforeComma = value.substring(0, commaIndex).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            const afterComma = value.substring(commaIndex);
+            value = beforeComma + afterComma;
         }
 
-        // Navigate to updated URL
-        window.location.href = `${window.location.pathname}?${urlParams.toString()}`;
+        element.value = value;
     }
 </script>

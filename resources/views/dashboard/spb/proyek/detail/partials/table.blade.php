@@ -65,14 +65,14 @@
             'filterId' => 'harga',
             'paramName' => 'harga',
             'filter' => true,
-            'type' => 'number',
+            'type' => 'price',
         ],
         [
             'title' => 'Jumlah Harga',
             'filterId' => 'jumlah-harga',
             'paramName' => 'jumlah_harga',
             'filter' => true,
-            'type' => 'number',
+            'type' => 'price',
         ],
     ];
 

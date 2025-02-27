@@ -164,7 +164,7 @@
                                     <label class="form-label small">{{ $label }}</label>
                                     <div class="input-group input-group-sm">
                                         <span class="input-group-text">Rp</span>
-                                        <input class="form-control form-control-sm price-input" id="{{ $paramName }}-{{ $key }}" type="text" value="{{ ${$key . 'Value'} }}" placeholder="{{ $key === 'exact' ? 'Masukkan nilai tepat' : ($key === 'gt' ? 'Lebih besar dari...' : 'Lebih kecil dari...') }}" onkeyup="formatPriceInput(this)" onchange="clearRelatedFields('{{ $paramName }}', '{{ $key }}')">
+                                        <input class="form-control form-control-sm price-input" id="{{ $paramName }}-{{ $key }}" type="text" value="{{ ${$key . 'Value'} }}" placeholder="{{ $key === 'exact' ? 'Masukkan nilai tepat' : ($key === 'gt' ? 'Lebih besar dari...' : 'Lebih kecil dari...') }}" onkeyup="formatPriceInput(this)" onchange="clearRelatedFields('{{ $paramName }}', '{{ $key }}')" autocomplete="off">
                                         @if (${$key . 'Value'})
                                             <span class="input-group-text clear-input" data-input-id="{{ $paramName }}-{{ $key }}" role="button">
                                                 <i class="bi bi-x"></i>
@@ -185,7 +185,7 @@
                                 <div class="mb-2">
                                     <label class="form-label small">{{ $label }}</label>
                                     <div class="input-group input-group-sm">
-                                        <input class="form-control form-control-sm" id="{{ $paramName }}-{{ $key }}" type="number" value="{{ ${$key . 'Value'} }}" placeholder="{{ $key === 'exact' ? 'Masukkan nilai tepat' : ($key === 'gt' ? 'Lebih besar dari...' : 'Lebih kecil dari...') }}">
+                                        <input class="form-control form-control-sm" id="{{ $paramName }}-{{ $key }}" type="number" value="{{ ${$key . 'Value'} }}" placeholder="{{ $key === 'exact' ? 'Masukkan nilai tepat' : ($key === 'gt' ? 'Lebih besar dari...' : 'Lebih kecil dari...') }}" autocomplete="off">
                                         @if (${$key . 'Value'})
                                             <span class="input-group-text clear-input" data-input-id="{{ $paramName }}-{{ $key }}" role="button">
                                                 <i class="bi bi-x"></i>
@@ -203,7 +203,7 @@
                     {{-- Search and Checkbox Section --}}
                     <div id="checkbox-filter-group">
                         <div class="input-group input-group-sm mb-2">
-                            <input class="form-control form-control-sm" id="search-{{ $paramName }}" type="text" placeholder="Cari {{ strtolower($title) }}..." onkeyup="filterCheckboxes('{{ $paramName }}', event)">
+                            <input class="form-control form-control-sm" id="search-{{ $paramName }}" type="text" placeholder="Cari {{ strtolower($title) }}..." onkeyup="filterCheckboxes('{{ $paramName }}', event)" autocomplete="off">
                             <span class="input-group-text clear-input" data-input-id="search-{{ $paramName }}" role="button" style="display: none;">
                                 <i class="bi bi-x"></i>
                             </span>
@@ -375,14 +375,6 @@
             } else {
                 clearBtn.hide();
             }
-        });
-
-        // Add immediate input event listeners for inputs
-        $('input[type="number"], .datepicker, .price-input').on('input keyup', function(e) {
-            const paramName = this.id.split('-')[0];
-            const type = this.id.split('-')[1];
-            clearRelatedFields(paramName, type);
-            updateClearButtonVisibility(this.id);
         });
 
         // Add search input clear button functionality - be more specific with selector

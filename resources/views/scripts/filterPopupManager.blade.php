@@ -493,7 +493,8 @@
             const activeElement = document.activeElement;
 
             // Check if the active element is an input inside the popup
-            const isInputFocused = $(activeElement).is('.filter-popup input[type="text"]');
+            const isInputFocused = $(activeElement).is('.filter-popup input');
+            const isTextInput = $(activeElement).is('.filter-popup input[type="text"], .filter-popup input[type="number"], .filter-popup .datepicker, .filter-popup .price-input');
 
             if (event.key === 'Escape') {
                 $('.filter-popup').hide();
@@ -503,13 +504,19 @@
                 applyFilter(type);
                 event.preventDefault();
             } else if (event.key === 'a' && event.ctrlKey && visiblePopup.length) {
-                // Prevent default select all behavior
-                event.preventDefault();
-                // Get popup type and toggle all checkboxes
-                const popupId = visiblePopup.attr('id');
-                const type = popupId.replace('-filter', '').replaceAll('-', '_');
-                toggleAllFilters(type);
-                return false;
+                // If a text/number/date input is focused, allow default behavior (select all)
+                if (isTextInput) {
+                    // Let default behavior happen (select all text)
+                    return true;
+                } else {
+                    // Prevent default select all behavior for non-text inputs
+                    event.preventDefault();
+                    // Get popup type and toggle all checkboxes
+                    const popupId = visiblePopup.attr('id');
+                    const type = popupId.replace('-filter', '').replaceAll('-', '_');
+                    toggleAllFilters(type);
+                    return false;
+                }
             }
         });
 

@@ -73,8 +73,8 @@
                 </div>
 
                 <div class="modal-footer d-flex w-100 justify-content-end">
-                    <button class="btn btn-secondary me-2 w-25" id="resetButton" type="button">Reset</button>
-                    <button class="btn btn-success w-25" id="submitButton" type="submit">Tambah Data</button>
+                    <button class="btn btn-secondary me-2 w-25" id="resetButtonAdd" type="button">Reset</button>
+                    <button class="btn btn-success w-25" id="submitButtonAdd" type="submit">Tambah Data</button>
                 </div>
             </form>
         </div>
@@ -184,9 +184,23 @@
                 }
 
                 if (isValid) {
-                    $('#submitButton').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
-                    this.submit();
+                    // Disable button and show spinner
+                    $('#submitButtonAdd').prop('disabled', true)
+                        .html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Loading...');
+
+                    // Use setTimeout to ensure UI updates before submission
+                    setTimeout(() => {
+                        this.submit();
+                    }, 50);
                 }
+            });
+
+            // Reset button handler
+            $('#resetButtonAdd').on('click', function() {
+                const form = $('#addDataFormAdd')[0];
+                form.reset();
+                $('#submitButtonAdd').prop('disabled', false).html('Tambah Data');
+                $('#id_alat_add, #id_saldo_add').val('').trigger('change');
             });
         });
     </script>

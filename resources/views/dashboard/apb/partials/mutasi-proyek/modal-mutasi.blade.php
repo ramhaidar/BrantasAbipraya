@@ -76,8 +76,8 @@
                 </div>
 
                 <div class="modal-footer d-flex w-100 justify-content-end">
-                    <button class="btn btn-secondary me-2 w-25" id="resetButton" type="button">Reset</button>
-                    <button class="btn btn-success w-25" id="submitButton" type="submit">Tambah Data</button>
+                    <button class="btn btn-secondary me-2 w-25" id="resetButtonMutasi" type="button">Reset</button>
+                    <button class="btn btn-success w-25" id="submitButtonMutasi" type="submit">Tambah Data</button>
                 </div>
             </form>
         </div>
@@ -186,9 +186,25 @@
                 }
 
                 if (isValid) {
-                    $('#submitButton').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
-                    this.submit();
+                    // Disable the button and show spinner before form submission
+                    $('#submitButtonMutasi').prop('disabled', true)
+                        .html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Loading...');
+
+                    // Use setTimeout to ensure the UI updates before form submission
+                    setTimeout(() => {
+                        // Use the DOM element's submit method to avoid triggering this handler again
+                        this.submit();
+                    }, 50);
                 }
+            });
+
+            // Reset button handler
+            $('#resetButtonMutasi').on('click', function() {
+                const form = $('#addDataFormMutasi')[0];
+                form.reset();
+                $('#submitButtonMutasi').prop('disabled', false).html('Tambah Data');
+                $('#id_saldo_mutasi, #id_proyek_tujuan').val('').trigger('change');
+                $('#SatuanPlaceholder').text('');
             });
         });
     </script>

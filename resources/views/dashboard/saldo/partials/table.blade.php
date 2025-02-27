@@ -6,7 +6,7 @@
     if (!function_exists('formatRibuan')) {
         function formatRibuan($number)
         {
-            return number_format($number, 0, ',', '.');
+            return number_format($number, 2, ',', '.');
         }
     }
 
@@ -74,14 +74,14 @@
             'filterId' => 'harga',
             'paramName' => 'harga',
             'filter' => true,
-            'type' => 'number',
+            'type' => 'price',
         ],
         [
             'title' => 'Jumlah Harga',
             'filterId' => 'jumlah-harga',
             'paramName' => 'jumlah_harga',
             'filter' => true,
-            'type' => 'number',
+            'type' => 'price',
         ],
     ];
 

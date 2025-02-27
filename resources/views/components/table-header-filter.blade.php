@@ -71,29 +71,30 @@
                 <div class="p-2">
                     {{-- Date Filter Section --}}
                     @if (isset($type) && $type === 'date')
-                        @foreach (['exact' => 'Sama Dengan "="', 'gt' => 'Setelah atau Sama Dengan ">="', 'lt' => 'Sebelum atau Sama Dengan "<="'] as $key => $label)
-                            <div class="mb-2">
-                                <label class="form-label small">{{ $label }}</label>
-                                <div class="input-group input-group-sm date-input-group">
-                                    <input class="form-control datepicker" id="{{ $paramName }}-{{ $key }}" type="text" value="{{ ${$key . 'Value'} }}" placeholder="{{ $key === 'exact' ? 'Pilih tanggal' : ($key === 'gt' ? 'Setelah tanggal...' : 'Sebelum tanggal...') }}" autocomplete="off" onchange="clearRelatedFields('{{ $paramName }}', '{{ $key }}')">
-                                    <span class="input-group-text" style="cursor: pointer;" onclick="showDatepicker('{{ $paramName }}-{{ $key }}')">
-                                        <i class="fa fa-calendar"></i>
-                                    </span>
-                                    @if (${$key . 'Value'})
-                                        <span class="input-group-text clear-input" data-input-id="{{ $paramName }}-{{ $key }}" role="button">
-                                            <i class="bi bi-x"></i>
+                        <div id="date-filter-group">
+                            @foreach (['exact' => 'Sama Dengan "="', 'gt' => 'Setelah atau Sama Dengan ">="', 'lt' => 'Sebelum atau Sama Dengan "<="'] as $key => $label)
+                                <div class="mb-2">
+                                    <label class="form-label small">{{ $label }}</label>
+                                    <div class="input-group input-group-sm date-input-group">
+                                        <input class="form-control datepicker" id="{{ $paramName }}-{{ $key }}" type="text" value="{{ ${$key . 'Value'} }}" placeholder="{{ $key === 'exact' ? 'Pilih tanggal' : ($key === 'gt' ? 'Setelah tanggal...' : 'Sebelum tanggal...') }}" autocomplete="off" onchange="clearRelatedFields('{{ $paramName }}', '{{ $key }}')">
+                                        <span class="input-group-text" style="cursor: pointer;" onclick="showDatepicker('{{ $paramName }}-{{ $key }}')">
+                                            <i class="fa fa-calendar"></i>
                                         </span>
-                                    @endif
+                                        @if (${$key . 'Value'})
+                                            <span class="input-group-text clear-input" data-input-id="{{ $paramName }}-{{ $key }}" role="button">
+                                                <i class="bi bi-x"></i>
+                                            </span>
+                                        @endif
+                                    </div>
                                 </div>
-                            </div>
-                            @if ($key === 'exact' || $key === 'lt')
-                                <hr>
-                            @endif
-                        @endforeach
+                                @if ($key === 'exact' || $key === 'lt')
+                                    <hr>
+                                @endif
+                            @endforeach
+                        </div>
 
                         <script>
                             document.addEventListener('DOMContentLoaded', function() {
-                                // Modify datepicker initialization to use a more specific selector
                                 const filterDatePickerOptions = {
                                     dateFormat: 'yy-mm-dd',
                                     changeMonth: true,
@@ -109,17 +110,14 @@
                                     }
                                 };
 
-                                // Use a more specific selector for filter datepickers only
                                 $('.filter-popup .datepicker').each(function() {
                                     $(this).datepicker(filterDatePickerOptions);
                                 });
 
-                                // Prevent popup closing on datepicker click
                                 $(document).on('click', '.ui-datepicker, .ui-datepicker *', function(e) {
                                     e.stopPropagation();
                                 });
 
-                                // Set regional settings
                                 $.datepicker.setDefaults($.datepicker.regional['id']);
                             });
 
@@ -130,53 +128,57 @@
 
                         {{-- Number Filter Section --}}
                     @elseif (isset($type) && in_array($type, ['number', 'number_of_days']))
-                        @foreach (['exact' => 'Sama Dengan "="', 'gt' => 'Lebih Besar Dari Sama Dengan ">="', 'lt' => 'Lebih Kecil Dari Sama Dengan "<="'] as $key => $label)
-                            <div class="mb-2">
-                                <label class="form-label small">{{ $label }}</label>
-                                <div class="input-group input-group-sm">
-                                    <input class="form-control form-control-sm" id="{{ $paramName }}-{{ $key }}" type="number" value="{{ ${$key . 'Value'} }}" placeholder="{{ $key === 'exact' ? 'Masukkan nilai tepat' : ($key === 'gt' ? 'Lebih besar dari...' : 'Lebih kecil dari...') }}">
-                                    @if (${$key . 'Value'})
-                                        <span class="input-group-text clear-input" data-input-id="{{ $paramName }}-{{ $key }}" role="button">
-                                            <i class="bi bi-x"></i>
-                                        </span>
-                                    @endif
+                        <div id="number-filter-group">
+                            @foreach (['exact' => 'Sama Dengan "="', 'gt' => 'Lebih Besar Dari Sama Dengan ">="', 'lt' => 'Lebih Kecil Dari Sama Dengan "<="'] as $key => $label)
+                                <div class="mb-2">
+                                    <label class="form-label small">{{ $label }}</label>
+                                    <div class="input-group input-group-sm">
+                                        <input class="form-control form-control-sm" id="{{ $paramName }}-{{ $key }}" type="number" value="{{ ${$key . 'Value'} }}" placeholder="{{ $key === 'exact' ? 'Masukkan nilai tepat' : ($key === 'gt' ? 'Lebih besar dari...' : 'Lebih kecil dari...') }}">
+                                        @if (${$key . 'Value'})
+                                            <span class="input-group-text clear-input" data-input-id="{{ $paramName }}-{{ $key }}" role="button">
+                                                <i class="bi bi-x"></i>
+                                            </span>
+                                        @endif
+                                    </div>
                                 </div>
-                            </div>
-                            @if ($key === 'exact' || $key === 'lt')
-                                <hr>
-                            @endif
-                        @endforeach
-                    @endif
-
-                    {{-- Search and Checkbox Section --}}
-                    <div class="input-group input-group-sm mb-2">
-                        <input class="form-control form-control-sm" id="search-{{ $paramName }}" type="text" placeholder="Cari {{ strtolower($title) }}..." onkeyup="filterCheckboxes('{{ $paramName }}', event)">
-                        <span class="input-group-text clear-input" data-input-id="search-{{ $paramName }}" role="button" style="display: none;">
-                            <i class="bi bi-x"></i>
-                        </span>
-                    </div>
-
-                    @if (isset($uniqueValues[(string) $paramName]) || isset($customUniqueValues))
-                        <div class="checkbox-list text-start">
-                            {{-- Empty/Null Checkbox --}}
-                            <div class="form-check">
-                                <input class="form-check-input {{ $paramName }}-checkbox" type="checkbox" value="Empty/Null" style="cursor: pointer" {{ in_array('Empty/Null', explode(',', request("selected_$paramName", ''))) ? 'checked' : '' }}>
-                                <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">
-                                    Empty/Null
-                                </label>
-                            </div>
-
-                            {{-- Values Checkboxes --}}
-                            @foreach (isset($customUniqueValues) ? $customUniqueValues : $uniqueValues[(string) $paramName] as $key => $value)
-                                <div class="form-check">
-                                    <input class="form-check-input {{ $paramName }}-checkbox" type="checkbox" value="{{ $value }}" style="cursor: pointer" {{ in_array((string) $value, explode(',', request("selected_$paramName", ''))) ? 'checked' : '' }}>
-                                    <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">
-                                        {{ isset($customUniqueValues) ? $value : $formattedValues[$key] ?? $value }}
-                                    </label>
-                                </div>
+                                @if ($key === 'exact' || $key === 'lt')
+                                    <hr>
+                                @endif
                             @endforeach
                         </div>
                     @endif
+
+                    {{-- Search and Checkbox Section --}}
+                    <div id="checkbox-filter-group">
+                        <div class="input-group input-group-sm mb-2">
+                            <input class="form-control form-control-sm" id="search-{{ $paramName }}" type="text" placeholder="Cari {{ strtolower($title) }}..." onkeyup="filterCheckboxes('{{ $paramName }}', event)">
+                            <span class="input-group-text clear-input" data-input-id="search-{{ $paramName }}" role="button" style="display: none;">
+                                <i class="bi bi-x"></i>
+                            </span>
+                        </div>
+
+                        @if (isset($uniqueValues[(string) $paramName]) || isset($customUniqueValues))
+                            <div class="checkbox-list text-start">
+                                {{-- Empty/Null Checkbox --}}
+                                <div class="form-check">
+                                    <input class="form-check-input {{ $paramName }}-checkbox" type="checkbox" value="Empty/Null" style="cursor: pointer" {{ in_array('Empty/Null', explode(',', request("selected_$paramName", ''))) ? 'checked' : '' }}>
+                                    <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">
+                                        Empty/Null
+                                    </label>
+                                </div>
+
+                                {{-- Values Checkboxes --}}
+                                @foreach (isset($customUniqueValues) ? $customUniqueValues : $uniqueValues[(string) $paramName] as $key => $value)
+                                    <div class="form-check">
+                                        <input class="form-check-input {{ $paramName }}-checkbox" type="checkbox" value="{{ $value }}" style="cursor: pointer" {{ in_array((string) $value, explode(',', request("selected_$paramName", ''))) ? 'checked' : '' }}>
+                                        <label class="form-check-label" style="cursor: pointer" onclick="toggleCheckbox(this)">
+                                            {{ isset($customUniqueValues) ? $value : $formattedValues[$key] ?? $value }}
+                                        </label>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
 
                     {{-- Apply Button --}}
                     <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('{{ $paramName }}')">

@@ -304,13 +304,18 @@
      * @param {HTMLElement} buttonElement - The button that was clicked (optional)
      */
     function applyFilter(type, buttonElement) {
+        // Get the filter popup element
+        const popupId = type.replace('_', '-') + '-filter';
+        const popup = $(`#${popupId}`);
+
         // If button element is provided, show spinner and disable it
-        const button = buttonElement ? $(buttonElement) : $(`.filter-popup#${type.replace('_', '-')}-filter button[type="button"]`);
+        const button = buttonElement ? $(buttonElement) : $(`.filter-popup#${popupId} button[type="button"]`);
         const originalButtonHtml = button.html();
 
-        // Disable button and show spinner
+        // Disable button and show spinner - this should remain visible
         button.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
 
+        // Process filter values
         const selector = `.${type}-checkbox:checked`;
         const selected = $(selector).map(function() {
             return $(this).val();
@@ -350,9 +355,6 @@
                 }
             }
 
-            // Log for debugging
-            console.log(`Filter values for ${type}:`, values);
-
             // Update URL parameters
             if (values.length > 0) {
                 const encodedValue = btoa(values.join('||'));
@@ -371,22 +373,21 @@
             }
         }
 
-        // Note: The popup will close automatically when page loads due to URL change
-        // This is normal browser behavior with full page redirects
-
         // Create the new URL
         const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
 
+        // IMPORTANT: Do NOT hide the popup here - the browser will handle this during navigation
+        // We want users to see the spinner animation
+
         // Use a small delay to allow the spinner to appear before redirect
-        // This gives better visual feedback to the user that something is happening
         setTimeout(() => {
             window.location.href = newUrl;
-        }, 300);
+        }, 0);
 
         // If for some reason the redirect doesn't happen immediately, restore button after 5 seconds
-        setTimeout(() => {
-            button.prop('disabled', false).html(originalButtonHtml);
-        }, 5000);
+        // setTimeout(() => {
+        //     button.prop('disabled', false).html(originalButtonHtml);
+        // }, 5000);
     }
 
     /**

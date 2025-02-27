@@ -234,7 +234,7 @@
 
                     {{-- Apply Button --}}
                     <button class="btn btn-primary btn-sm mt-2 w-100" type="button" onclick="applyFilter('{{ $paramName }}', this)">
-                        <i class="bi bi-check-circle"></i> <span class="ms-2">Apply</span>
+                        <i class="bi bi-check-circle"></i><span class="ms-2">Apply</span>
                     </button>
                 </div>
             </div>
@@ -443,6 +443,34 @@
                     }
                 }, 50);
             });
+        });
+
+        // Ensure consistent behavior across the entire Apply button
+        $('.filter-popup button[type="button"]').on('click', function(e) {
+            // Prevent the default behavior that might cause the popup to close
+            e.preventDefault();
+
+            const popupId = $(this).closest('.filter-popup').attr('id');
+            const paramName = popupId.replace('-filter', '').replace(/-/g, '_');
+
+            // This should keep the popup open while the spinner shows
+            applyFilter(paramName, this);
+
+            // Stop propagation to prevent other handlers from closing the popup
+            return false;
+        });
+
+        // Make sure clicks on button children (icon, text) are handled properly
+        $('.filter-popup button[type="button"] *').on('click', function(e) {
+            // Stop event propagation
+            e.stopPropagation();
+            e.preventDefault();
+
+            // Find the parent button and trigger its click handler
+            const button = $(this).closest('button[type="button"]');
+            button.click();
+
+            return false;
         });
     });
 </script>

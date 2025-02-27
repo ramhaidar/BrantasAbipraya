@@ -403,6 +403,12 @@
 
         // Add keyboard event listener for Enter key
         $(document).on('keydown', function(e) {
+            // Check if filter is already processing - if yes, prevent any action
+            if (typeof isFilterProcessing !== 'undefined' && isFilterProcessing) {
+                e.preventDefault();
+                return false;
+            }
+
             if (e.key === 'Enter') {
                 const visiblePopup = $('.filter-popup:visible');
                 if (visiblePopup.length) {
@@ -447,6 +453,12 @@
 
         // Ensure consistent behavior across the entire Apply button
         $('.filter-popup button[type="button"]').on('click', function(e) {
+            // Check if filter is already processing
+            if (typeof isFilterProcessing !== 'undefined' && isFilterProcessing) {
+                e.preventDefault();
+                return false;
+            }
+
             // Prevent the default behavior that might cause the popup to close
             e.preventDefault();
 

@@ -17,6 +17,9 @@
         };
     }
 
+    // Add flag to track if a filter operation is in progress
+    let isFilterProcessing = false;
+
     /**
      * Decodes a parameter value from base64 if possible
      * Falls back to original value if decoding fails
@@ -304,6 +307,14 @@
      * @param {HTMLElement} buttonElement - The button that was clicked (optional)
      */
     function applyFilter(type, buttonElement) {
+        // Prevent multiple submissions
+        if (isFilterProcessing) {
+            return;
+        }
+
+        // Set flag to indicate processing is in progress
+        isFilterProcessing = true;
+
         // Get the filter popup element
         const popupId = type.replace('_', '-') + '-filter';
         const popup = $(`#${popupId}`);
@@ -314,6 +325,9 @@
 
         // Disable button and show spinner - this should remain visible
         button.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
+
+        // Disable all inputs in the popup during processing
+        popup.find('input').prop('disabled', true);
 
         // Process filter values
         const selector = `.${type}-checkbox:checked`;
@@ -384,10 +398,12 @@
             window.location.href = newUrl;
         }, 0);
 
-        // If for some reason the redirect doesn't happen immediately, restore button after 5 seconds
-        // setTimeout(() => {
-        //     button.prop('disabled', false).html(originalButtonHtml);
-        // }, 5000);
+        // If for some reason the redirect doesn't happen, reset the processing flag after timeout
+        setTimeout(() => {
+            isFilterProcessing = false;
+            button.prop('disabled', false).html(originalButtonHtml);
+            popup.find('input').prop('disabled', false);
+        }, 5000);
     }
 
     /**
@@ -498,6 +514,12 @@
 
         // Handle keyboard shortcuts
         $(document).on('keydown', function(event) {
+            // Ignore keydown events if a filter operation is in progress
+            if (isFilterProcessing) {
+                event.preventDefault();
+                return false;
+            }
+
             const visiblePopup = $('.filter-popup:visible');
             if (!visiblePopup.length) return; // Exit if no popup is visible
 

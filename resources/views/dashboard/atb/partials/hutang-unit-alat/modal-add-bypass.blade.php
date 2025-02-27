@@ -21,7 +21,7 @@
 
                         <div class="col-12">
                             <label class="form-label required" for="tanggal_bypass">Tanggal Masuk Sparepart</label>
-                            <input class="form-control datepicker" id="tanggal_bypass" name="tanggal" type="text" value="{{ \Carbon\Carbon::today()->format('Y-m-d') }}" autocomplete="off" placeholder="Tanggal Masuk Sparepart" required>
+                            <input class="form-control datepicker" id="tanggal_bypass" name="tanggal" type="text" autocomplete="off" placeholder="Tanggal Masuk Sparepart" required>
                             <div class="invalid-feedback">Tanggal Masuk Sparepart diperlukan.</div>
                         </div>
 
@@ -265,24 +265,6 @@
                 $('.is-invalid').removeClass('is-invalid');
                 $('.was-validated').removeClass('was-validated');
             });
-
-            // Initialize datepicker for #tanggal_bypass with a specific class
-            var modalDatePickerOptions = {
-                dateFormat: 'yy-mm-dd',
-                changeMonth: true,
-                changeYear: true,
-                regional: 'id',
-                beforeShow: function(input, inst) {
-                    // Ensure the datepicker appears above the modal
-                    setTimeout(function() {
-                        inst.dpDiv.css({
-                            'z-index': 1056 // Higher than modal's z-index
-                        });
-                    }, 0);
-                }
-            };
-
-            $('#tanggal_bypass').datepicker(modalDatePickerOptions);
 
             // Single validation and submit handler
             $('#submitButtonBypass').on('click', function(e) {

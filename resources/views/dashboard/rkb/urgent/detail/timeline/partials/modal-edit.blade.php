@@ -73,37 +73,25 @@
                 $('#update-job').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
             });
 
-            // Initialize datepicker
-            const dateFormat = 'yy-mm-dd';
-            const options = {
-                dateFormat: dateFormat,
-                changeMonth: true,
-                changeYear: true,
-                // minDate: 0,
-                regional: 'id'
-            };
-
-            $('#tanggal_awal_rencana_edit').datepicker(options).on('change', function() {
+            $('#tanggal_awal_rencana_edit').on('change', function() {
                 const minDate = $(this).datepicker('getDate');
                 $('#tanggal_akhir_rencana_edit').datepicker('option', 'minDate', minDate);
             });
 
-            $('#tanggal_akhir_rencana_edit').datepicker(options).on('change', function() {
+            $('#tanggal_akhir_rencana_edit').on('change', function() {
                 const maxDate = $(this).datepicker('getDate');
                 $('#tanggal_awal_rencana_edit').datepicker('option', 'maxDate', maxDate);
             });
 
-            $('#tanggal_awal_actual_edit').datepicker(options).on('change', function() {
+            $('#tanggal_awal_actual_edit').on('change', function() {
                 const minDate = $(this).datepicker('getDate');
                 $('#tanggal_akhir_actual_edit').datepicker('option', 'minDate', minDate);
             });
 
-            $('#tanggal_akhir_actual_edit').datepicker(options).on('change', function() {
+            $('#tanggal_akhir_actual_edit').on('change', function() {
                 const maxDate = $(this).datepicker('getDate');
                 $('#tanggal_awal_actual_edit').datepicker('option', 'maxDate', maxDate);
             });
-
-            $.datepicker.setDefaults($.datepicker.regional['id']);
 
             // Event listener for edit buttons
             $(document).on('click', '.editBtn', function() {

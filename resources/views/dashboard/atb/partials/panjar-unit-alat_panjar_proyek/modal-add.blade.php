@@ -26,7 +26,7 @@
 
                         <div class="col-12">
                             <label class="form-label required" for="tanggal">Tanggal Masuk Sparepart</label>
-                            <input class="form-control datepicker" id="tanggal" name="tanggal" type="text" value="{{ \Carbon\Carbon::today()->format('Y-m-d') }}" autocomplete="off" placeholder="Tanggal Masuk Sparepart" required>
+                            <input class="form-control datepicker" id="tanggal" name="tanggal" type="text" autocomplete="off" placeholder="Tanggal Masuk Sparepart" required>
                             <div class="invalid-feedback">Tanggal Masuk Sparepart diperlukan.</div>
                         </div>
 
@@ -278,18 +278,6 @@
                 $('#id_master_data_supplier, #id_kategori_sparepart, #id_master_data_sparepart').val(null).trigger('change');
                 clearPreview();
             });
-
-            // Initialize datepicker for #tanggal
-            var dateFormat = 'yy-mm-dd';
-            var options = {
-                dateFormat: dateFormat,
-                changeMonth: true,
-                changeYear: true,
-                regional: 'id'
-            };
-
-            $('#tanggal').datepicker(options);
-            $.datepicker.setDefaults($.datepicker.regional['id']);
 
             // Validate form on submit button click
             $('#submitButton').on('click', function() {

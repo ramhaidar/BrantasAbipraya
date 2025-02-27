@@ -24,13 +24,13 @@
 
                         <div class="col-md-6">
                             <label class="form-label required" for="tanggal_awal_rencana_add">Tanggal Awal Rencana</label>
-                            <input class="form-control" id="tanggal_awal_rencana_add" name="tanggal_awal_rencana" type="text" autocomplete="off" required>
+                            <input class="form-control datepicker" id="tanggal_awal_rencana_add" name="tanggal_awal_rencana" type="text" autocomplete="off" required>
                             <div class="invalid-feedback">Tanggal Awal Rencana diperlukan.</div>
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label required" for="tanggal_akhir_rencana_add">Tanggal Akhir Rencana</label>
-                            <input class="form-control" id="tanggal_akhir_rencana_add" name="tanggal_akhir_rencana" type="text" autocomplete="off" required>
+                            <input class="form-control datepicker" id="tanggal_akhir_rencana_add" name="tanggal_akhir_rencana" type="text" autocomplete="off" required>
                             <div class="invalid-feedback">Tanggal Akhir Rencana diperlukan.</div>
                         </div>
                     </div>
@@ -51,26 +51,15 @@
                 $(this).find('button[type="submit"]').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
             });
 
-            var dateFormat = 'yy-mm-dd';
-            var options = {
-                dateFormat: dateFormat,
-                changeMonth: true,
-                changeYear: true,
-                // minDate: 0,
-                regional: 'id'
-            };
-
-            $('#tanggal_awal_rencana_add').datepicker(options).on('change', function() {
+            $('#tanggal_awal_rencana_add').on('change', function() {
                 var minDate = $(this).datepicker('getDate');
                 $('#tanggal_akhir_rencana_add').datepicker('option', 'minDate', minDate);
             });
 
-            $('#tanggal_akhir_rencana_add').datepicker(options).on('change', function() {
+            $('#tanggal_akhir_rencana_add').on('change', function() {
                 var maxDate = $(this).datepicker('getDate');
                 $('#tanggal_awal_rencana_add').datepicker('option', 'maxDate', maxDate);
             });
-
-            $.datepicker.setDefaults($.datepicker.regional['id']);
         });
     </script>
 @endpush

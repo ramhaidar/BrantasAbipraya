@@ -24,7 +24,7 @@
 
                         <div class="col-12">
                             <label class="form-label required" for="tanggal_mutasi">Tanggal</label>
-                            <input class="form-control datepicker" id="tanggal_mutasi" name="tanggal" type="text" value="{{ \Carbon\Carbon::today()->format('Y-m-d') }}" autocomplete="off" required>
+                            <input class="form-control datepicker" id="tanggal_mutasi" name="tanggal" type="text" autocomplete="off" required>
                             <div class="invalid-feedback">Tanggal diperlukan.</div>
                         </div>
 
@@ -87,18 +87,6 @@
 @push('scripts_3')
     <script>
         $(document).ready(function() {
-            // Initialize datepicker for #tanggal
-            var dateFormat = 'yy-mm-dd';
-            var options = {
-                dateFormat: dateFormat,
-                changeMonth: true,
-                changeYear: true,
-                regional: 'id'
-            };
-
-            $('#tanggal_mutasi').datepicker(options);
-            $.datepicker.setDefaults($.datepicker.regional['id']);
-
             // Initialize sparepart select
             $('#id_saldo_mutasi, #id_proyek_tujuan').select2({
                 placeholder: "Pilih",

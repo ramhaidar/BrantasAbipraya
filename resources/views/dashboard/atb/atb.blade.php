@@ -122,4 +122,6 @@
 
 @push('scripts_2')
     @include('components.form-submit-handler')
+    @include('components.date-value-persistence')
+    @include('components.datepicker')
 @endpush

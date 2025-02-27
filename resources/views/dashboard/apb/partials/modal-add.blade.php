@@ -24,11 +24,9 @@
 
                         <div class="col-12">
                             <label class="form-label required" for="tanggal">Tanggal</label>
-                            <input class="form-control datepicker" id="tanggal" name="tanggal" type="text" value="{{ \Carbon\Carbon::today()->format('Y-m-d') }}" autocomplete="off" required>
+                            <input class="form-control datepicker" id="tanggal" name="tanggal" type="text" autocomplete="off" required>
                             <div class="invalid-feedback">Tanggal diperlukan.</div>
                         </div>
-
-                        <!-- Removed root_cause select field -->
 
                         <div class="col-12">
                             <label class="form-label required" for="mekanik">Mekanik</label>
@@ -85,17 +83,22 @@
 @push('scripts_3')
     <script>
         $(document).ready(function() {
-            // Initialize datepicker for #tanggal
-            var dateFormat = 'yy-mm-dd';
-            var options = {
-                dateFormat: dateFormat,
-                changeMonth: true,
-                changeYear: true,
-                regional: 'id'
-            };
+            // Add Reset button functionality
+            $('#resetButton').on('click', function() {
+                // Reset all form fields
+                $('#addDataForm')[0].reset();
 
-            $('#tanggal').datepicker(options);
-            $.datepicker.setDefaults($.datepicker.regional['id']);
+                // Reset Select2 fields
+                $('#id_alat').val('').trigger('change');
+                $('#id_saldo').val('').trigger('change');
+
+                // Disable quantity input
+                $('#quantity').prop('disabled', true).val('');
+
+                // Remove validation classes
+                $('#addDataForm').find('.is-invalid').removeClass('is-invalid');
+                $('#addDataForm').find('.is-valid').removeClass('is-valid');
+            });
 
             // Initialize alat select
             $('#id_alat').select2({

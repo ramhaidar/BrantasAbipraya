@@ -315,7 +315,7 @@ class _BudongBudongSeeder extends Seeder
             'CE 080-20',
             'CE 081-20',
             'CE 120-20',
-            'CE 123-20',
+            'CE 123-20/B',
             'CE 135-20',
             'DT 087-8',
             'DT 095-8',

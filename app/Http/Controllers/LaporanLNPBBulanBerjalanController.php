@@ -105,14 +105,6 @@ class LaporanLNPBBulanBerjalanController extends Controller
             ->whereBetween ( 'tanggal', [ $startDate, $endDate ] )
             ->get ();
 
-        $SALDO = Saldo::with ( 'masterDataSparepart.KategoriSparepart', 'atb' )
-            ->where ( 'id_proyek', $request->id_proyek )
-            ->whereHas ( 'atb', function ($query) use ($startDate, $endDate)
-            {
-                $query->whereBetween ( 'tanggal', [ $startDate, $endDate ] );
-            } )
-            ->get ();
-
         $sums = [];
         foreach ( $data as $category )
         {
@@ -128,70 +120,61 @@ class LaporanLNPBBulanBerjalanController extends Controller
                 return $item->masterDataSparepart->kategoriSparepart->kode === $category[ 'kode' ];
             } );
 
-            // New direct Saldo calculations
-            $categoryItemsSaldo = $SALDO->filter ( function ($item) use ($category)
-            {
-                return $item->masterDataSparepart->kategoriSparepart->kode === $category[ 'kode' ];
-            } );
+            // Calculate ATB values by type
+            $atbValues = [ 
+                'hutang-unit-alat' => $categoryItemsATB->where ( 'tipe', 'hutang-unit-alat' )->sum ( function ($item)
+                {
+                    return $item->quantity * $item->harga;
+                } ),
+                'panjar-unit-alat' => $categoryItemsATB->where ( 'tipe', 'panjar-unit-alat' )->sum ( function ($item)
+                {
+                    return $item->quantity * $item->harga;
+                } ),
+                'mutasi-proyek'    => $categoryItemsATB->where ( 'tipe', 'mutasi-proyek' )->sum ( function ($item)
+                {
+                    return $item->quantity * $item->harga;
+                } ),
+                'panjar-proyek'    => $categoryItemsATB->where ( 'tipe', 'panjar-proyek' )->sum ( function ($item)
+                {
+                    return $item->quantity * $item->harga;
+                } )
+            ];
+
+            // Calculate APB values by type
+            $apbValues = [ 
+                'hutang-unit-alat' => $categoryItemsAPB->where ( 'tipe', 'hutang-unit-alat' )->sum ( function ($item)
+                {
+                    return $item->quantity * $item->saldo->harga;
+                } ),
+                'panjar-unit-alat' => $categoryItemsAPB->where ( 'tipe', 'panjar-unit-alat' )->sum ( function ($item)
+                {
+                    return $item->quantity * $item->saldo->harga;
+                } ),
+                'mutasi-proyek'    => $categoryItemsAPB->where ( 'tipe', 'mutasi-proyek' )->whereNotIn ( 'status', [ 'pending', 'rejected' ] )->sum ( function ($item)
+                {
+                    return $item->quantity * $item->saldo->harga;
+                } ),
+                'panjar-proyek'    => $categoryItemsAPB->where ( 'tipe', 'panjar-proyek' )->sum ( function ($item)
+                {
+                    return $item->quantity * $item->saldo->harga;
+                } )
+            ];
+
+            // Calculate Saldo as ATB - APB for each type
+            $saldoValues = [ 
+                'hutang-unit-alat' => $atbValues[ 'hutang-unit-alat' ] - $apbValues[ 'hutang-unit-alat' ],
+                'panjar-unit-alat' => $atbValues[ 'panjar-unit-alat' ] - $apbValues[ 'panjar-unit-alat' ],
+                'mutasi-proyek'    => $atbValues[ 'mutasi-proyek' ] - $apbValues[ 'mutasi-proyek' ],
+                'panjar-proyek'    => $atbValues[ 'panjar-proyek' ] - $apbValues[ 'panjar-proyek' ]
+            ];
 
             $sums[ $category[ 'kode' ] ] = [ 
                 'nama'     => $category[ 'nama' ],
                 'jenis'    => $category[ 'jenis' ],
                 'subJenis' => $category[ 'subJenis' ],
-                'atb'      => [ 
-                    'hutang-unit-alat' => $categoryItemsATB->where ( 'tipe', 'hutang-unit-alat' )->sum ( function ($item)
-                    {
-                        return $item->quantity * $item->harga;
-                    } ),
-                    'panjar-unit-alat' => $categoryItemsATB->where ( 'tipe', 'panjar-unit-alat' )->sum ( function ($item)
-                    {
-                        return $item->quantity * $item->harga;
-                    } ),
-                    'mutasi-proyek'    => $categoryItemsATB->where ( 'tipe', 'mutasi-proyek' )->sum ( function ($item)
-                    {
-                        return $item->quantity * $item->harga;
-                    } ),
-                    'panjar-proyek'    => $categoryItemsATB->where ( 'tipe', 'panjar-proyek' )->sum ( function ($item)
-                    {
-                        return $item->quantity * $item->harga;
-                    } )
-                ],
-                'apb'      => [ 
-                    'hutang-unit-alat' => $categoryItemsAPB->where ( 'tipe', 'hutang-unit-alat' )->sum ( function ($item)
-                    {
-                        return $item->quantity * $item->saldo->harga;
-                    } ),
-                    'panjar-unit-alat' => $categoryItemsAPB->where ( 'tipe', 'panjar-unit-alat' )->sum ( function ($item)
-                    {
-                        return $item->quantity * $item->saldo->harga;
-                    } ),
-                    'mutasi-proyek'    => $categoryItemsAPB->where ( 'tipe', 'mutasi-proyek' )->whereNotIn ( 'status', [ 'pending', 'rejected' ] )->sum ( function ($item)
-                    {
-                        return $item->quantity * $item->saldo->harga;
-                    } ),
-                    'panjar-proyek'    => $categoryItemsAPB->where ( 'tipe', 'panjar-proyek' )->sum ( function ($item)
-                    {
-                        return $item->quantity * $item->saldo->harga;
-                    } )
-                ],
-                'saldo'    => [ 
-                    'hutang-unit-alat' => $categoryItemsSaldo->where ( 'tipe', 'hutang-unit-alat' )->sum ( function ($item)
-                    {
-                        return $item->quantity * $item->harga;
-                    } ),
-                    'panjar-unit-alat' => $categoryItemsSaldo->where ( 'tipe', 'panjar-unit-alat' )->sum ( function ($item)
-                    {
-                        return $item->quantity * $item->harga;
-                    } ),
-                    'mutasi-proyek'    => $categoryItemsSaldo->where ( 'tipe', 'mutasi-proyek' )->sum ( function ($item)
-                    {
-                        return $item->quantity * $item->harga;
-                    } ),
-                    'panjar-proyek'    => $categoryItemsSaldo->where ( 'tipe', 'panjar-proyek' )->sum ( function ($item)
-                    {
-                        return $item->quantity * $item->harga;
-                    } )
-                ]
+                'atb'      => $atbValues,
+                'apb'      => $apbValues,
+                'saldo'    => $saldoValues
             ];
 
             // Calculate totals
@@ -313,13 +296,6 @@ class LaporanLNPBBulanBerjalanController extends Controller
             ->whereBetween ( 'tanggal', [ $startDate, $endDate ] )
             ->get ();
 
-        $SALDO = Saldo::with ( 'masterDataSparepart.KategoriSparepart', 'atb' )
-            ->whereHas ( 'atb', function ($query) use ($startDate, $endDate)
-            {
-                $query->whereBetween ( 'tanggal', [ $startDate, $endDate ] );
-            } )
-            ->get ();
-
         $sums = [];
         foreach ( $data as $category )
         {
@@ -335,70 +311,61 @@ class LaporanLNPBBulanBerjalanController extends Controller
                 return $item->masterDataSparepart->kategoriSparepart->kode === $category[ 'kode' ];
             } );
 
-            // New direct Saldo calculations
-            $categoryItemsSaldo = $SALDO->filter ( function ($item) use ($category)
-            {
-                return $item->masterDataSparepart->kategoriSparepart->kode === $category[ 'kode' ];
-            } );
+            // Calculate ATB values by type
+            $atbValues = [ 
+                'hutang-unit-alat' => $categoryItemsATB->where ( 'tipe', 'hutang-unit-alat' )->sum ( function ($item)
+                {
+                    return $item->quantity * $item->harga;
+                } ),
+                'panjar-unit-alat' => $categoryItemsATB->where ( 'tipe', 'panjar-unit-alat' )->sum ( function ($item)
+                {
+                    return $item->quantity * $item->harga;
+                } ),
+                'mutasi-proyek'    => $categoryItemsATB->where ( 'tipe', 'mutasi-proyek' )->sum ( function ($item)
+                {
+                    return $item->quantity * $item->harga;
+                } ),
+                'panjar-proyek'    => $categoryItemsATB->where ( 'tipe', 'panjar-proyek' )->sum ( function ($item)
+                {
+                    return $item->quantity * $item->harga;
+                } )
+            ];
+
+            // Calculate APB values by type
+            $apbValues = [ 
+                'hutang-unit-alat' => $categoryItemsAPB->where ( 'tipe', 'hutang-unit-alat' )->sum ( function ($item)
+                {
+                    return $item->quantity * $item->saldo->harga;
+                } ),
+                'panjar-unit-alat' => $categoryItemsAPB->where ( 'tipe', 'panjar-unit-alat' )->sum ( function ($item)
+                {
+                    return $item->quantity * $item->saldo->harga;
+                } ),
+                'mutasi-proyek'    => $categoryItemsAPB->where ( 'tipe', 'mutasi-proyek' )->whereNotIn ( 'status', [ 'pending', 'rejected' ] )->sum ( function ($item)
+                {
+                    return $item->quantity * $item->saldo->harga;
+                } ),
+                'panjar-proyek'    => $categoryItemsAPB->where ( 'tipe', 'panjar-proyek' )->sum ( function ($item)
+                {
+                    return $item->quantity * $item->saldo->harga;
+                } )
+            ];
+
+            // Calculate Saldo as ATB - APB for each type
+            $saldoValues = [ 
+                'hutang-unit-alat' => $atbValues[ 'hutang-unit-alat' ] - $apbValues[ 'hutang-unit-alat' ],
+                'panjar-unit-alat' => $atbValues[ 'panjar-unit-alat' ] - $apbValues[ 'panjar-unit-alat' ],
+                'mutasi-proyek'    => $atbValues[ 'mutasi-proyek' ] - $apbValues[ 'mutasi-proyek' ],
+                'panjar-proyek'    => $atbValues[ 'panjar-proyek' ] - $apbValues[ 'panjar-proyek' ]
+            ];
 
             $sums[ $category[ 'kode' ] ] = [ 
                 'nama'     => $category[ 'nama' ],
                 'jenis'    => $category[ 'jenis' ],
                 'subJenis' => $category[ 'subJenis' ],
-                'atb'      => [ 
-                    'hutang-unit-alat' => $categoryItemsATB->where ( 'tipe', 'hutang-unit-alat' )->sum ( function ($item)
-                    {
-                        return $item->quantity * $item->harga;
-                    } ),
-                    'panjar-unit-alat' => $categoryItemsATB->where ( 'tipe', 'panjar-unit-alat' )->sum ( function ($item)
-                    {
-                        return $item->quantity * $item->harga;
-                    } ),
-                    'mutasi-proyek'    => $categoryItemsATB->where ( 'tipe', 'mutasi-proyek' )->sum ( function ($item)
-                    {
-                        return $item->quantity * $item->harga;
-                    } ),
-                    'panjar-proyek'    => $categoryItemsATB->where ( 'tipe', 'panjar-proyek' )->sum ( function ($item)
-                    {
-                        return $item->quantity * $item->harga;
-                    } )
-                ],
-                'apb'      => [ 
-                    'hutang-unit-alat' => $categoryItemsAPB->where ( 'tipe', 'hutang-unit-alat' )->sum ( function ($item)
-                    {
-                        return $item->quantity * $item->saldo->harga;
-                    } ),
-                    'panjar-unit-alat' => $categoryItemsAPB->where ( 'tipe', 'panjar-unit-alat' )->sum ( function ($item)
-                    {
-                        return $item->quantity * $item->saldo->harga;
-                    } ),
-                    'mutasi-proyek'    => $categoryItemsAPB->where ( 'tipe', 'mutasi-proyek' )->whereNotIn ( 'status', [ 'pending', 'rejected' ] )->sum ( function ($item)
-                    {
-                        return $item->quantity * $item->saldo->harga;
-                    } ),
-                    'panjar-proyek'    => $categoryItemsAPB->where ( 'tipe', 'panjar-proyek' )->sum ( function ($item)
-                    {
-                        return $item->quantity * $item->saldo->harga;
-                    } )
-                ],
-                'saldo'    => [ 
-                    'hutang-unit-alat' => $categoryItemsSaldo->where ( 'tipe', 'hutang-unit-alat' )->sum ( function ($item)
-                    {
-                        return $item->quantity * $item->harga;
-                    } ),
-                    'panjar-unit-alat' => $categoryItemsSaldo->where ( 'tipe', 'panjar-unit-alat' )->sum ( function ($item)
-                    {
-                        return $item->quantity * $item->harga;
-                    } ),
-                    'mutasi-proyek'    => $categoryItemsSaldo->where ( 'tipe', 'mutasi-proyek' )->sum ( function ($item)
-                    {
-                        return $item->quantity * $item->harga;
-                    } ),
-                    'panjar-proyek'    => $categoryItemsSaldo->where ( 'tipe', 'panjar-proyek' )->sum ( function ($item)
-                    {
-                        return $item->quantity * $item->harga;
-                    } )
-                ]
+                'atb'      => $atbValues,
+                'apb'      => $apbValues,
+                'saldo'    => $saldoValues
             ];
 
             // Calculate totals

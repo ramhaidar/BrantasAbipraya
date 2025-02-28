@@ -107,14 +107,6 @@ class LaporanLNPBTotalController extends Controller
             ->whereBetween ( 'tanggal', [ $startDate, $endDate ] )
             ->get ();
 
-        $SALDO_Current = Saldo::with ( 'masterDataSparepart.KategoriSparepart', 'atb' )
-            ->where ( 'id_proyek', $request->id_proyek )
-            ->whereHas ( 'atb', function ($query) use ($startDate, $endDate)
-            {
-                $query->whereBetween ( 'tanggal', [ $startDate, $endDate ] );
-            } )
-            ->get ();
-
         // +++ Calculate ATB, APB, and Saldo Before Current Period +++
         $ATB_Before = ATB::with ( 'masterDataSparepart.KategoriSparepart' )
             ->where ( 'id_proyek', $request->id_proyek )
@@ -124,14 +116,6 @@ class LaporanLNPBTotalController extends Controller
         $APB_Before = APB::with ( 'masterDataSparepart.KategoriSparepart' )
             ->where ( 'id_proyek', $request->id_proyek )
             ->where ( 'tanggal', '<', $startDate )
-            ->get ();
-
-        $SALDO_Before = Saldo::with ( 'masterDataSparepart.KategoriSparepart', 'atb' )
-            ->where ( 'id_proyek', $request->id_proyek )
-            ->whereHas ( 'atb', function ($query) use ($startDate)
-            {
-                $query->where ( 'tanggal', '<', $startDate );
-            } )
             ->get ();
         // +++
 
@@ -152,28 +136,28 @@ class LaporanLNPBTotalController extends Controller
                 return $item->masterDataSparepart->kategoriSparepart->kode === $category[ 'kode' ];
             } );
 
-            // Saldo calculations
-            $categoryItemsSaldo = $SALDO_Current->filter ( function ($item) use ($category)
+            // Calculate ATB Value
+            $atbValue = $categoryItemsATB->sum ( function ($item)
             {
-                return $item->masterDataSparepart->kategoriSparepart->kode === $category[ 'kode' ];
+                return $item->quantity * $item->harga;
             } );
+
+            // Calculate APB Value (only accepted items)
+            $apbValue = $categoryItemsAPB->whereNotIn ( 'status', [ 'pending', 'rejected' ] )->sum ( function ($item)
+            {
+                return $item->quantity * $item->saldo->harga;
+            } );
+
+            // Calculate Saldo as ATB - APB
+            $saldoValue = $atbValue - $apbValue;
 
             $sums_current[ $category[ 'kode' ] ] = [ 
                 'nama'     => $category[ 'nama' ],
                 'jenis'    => $category[ 'jenis' ],
                 'subJenis' => $category[ 'subJenis' ],
-                'atb'      => $categoryItemsATB->sum ( function ($item)
-                {
-                    return $item->quantity * $item->harga;
-                } ),
-                'apb'      => $categoryItemsAPB->whereNotIn ( 'status', [ 'pending', 'rejected' ] )->sum ( function ($item)
-                {
-                    return $item->quantity * $item->saldo->harga;
-                } ),
-                'saldo'    => $categoryItemsSaldo->sum ( function ($item)
-                {
-                    return $item->quantity * $item->harga;
-                } )
+                'atb'      => $atbValue,
+                'apb'      => $apbValue,
+                'saldo'    => $saldoValue
             ];
 
             // +++ Calculate sums_before +++
@@ -187,27 +171,28 @@ class LaporanLNPBTotalController extends Controller
                 return $item->masterDataSparepart->kategoriSparepart->kode === $category[ 'kode' ];
             } );
 
-            $categoryItemsSaldo_Before = $SALDO_Before->filter ( function ($item) use ($category)
+            // Calculate ATB Value for before period
+            $atbValueBefore = $categoryItemsATB_Before->sum ( function ($item)
             {
-                return $item->masterDataSparepart->kategoriSparepart->kode === $category[ 'kode' ];
+                return $item->quantity * $item->harga;
             } );
+
+            // Calculate APB Value for before period (only accepted items)
+            $apbValueBefore = $categoryItemsAPB_Before->whereNotIn ( 'status', [ 'pending', 'rejected' ] )->sum ( function ($item)
+            {
+                return $item->quantity * $item->saldo->harga;
+            } );
+
+            // Calculate Saldo as ATB - APB for before period
+            $saldoValueBefore = $atbValueBefore - $apbValueBefore;
 
             $sums_before[ $category[ 'kode' ] ] = [ 
                 'nama'     => $category[ 'nama' ],
                 'jenis'    => $category[ 'jenis' ],
                 'subJenis' => $category[ 'subJenis' ],
-                'atb'      => $categoryItemsATB_Before->sum ( function ($item)
-                {
-                    return $item->quantity * $item->harga;
-                } ),
-                'apb'      => $categoryItemsAPB_Before->whereNotIn ( 'status', [ 'pending', 'rejected' ] )->sum ( function ($item)
-                {
-                    return $item->quantity * $item->saldo->harga;
-                } ),
-                'saldo'    => $categoryItemsSaldo_Before->sum ( function ($item)
-                {
-                    return $item->quantity * $item->harga;
-                } )
+                'atb'      => $atbValueBefore,
+                'apb'      => $apbValueBefore,
+                'saldo'    => $saldoValueBefore
             ];
             // +++
         }
@@ -316,13 +301,6 @@ class LaporanLNPBTotalController extends Controller
             ->whereBetween ( 'tanggal', [ $startDate, $endDate ] )
             ->get ();
 
-        $SALDO_Current = Saldo::with ( 'masterDataSparepart.KategoriSparepart', 'atb' )
-            ->whereHas ( 'atb', function ($query) use ($startDate, $endDate)
-            {
-                $query->whereBetween ( 'tanggal', [ $startDate, $endDate ] );
-            } )
-            ->get ();
-
         // +++ Calculate ATB, APB, and Saldo Before Current Period +++
         $ATB_Before = ATB::with ( 'masterDataSparepart.KategoriSparepart' )
             ->where ( 'tanggal', '<', $startDate )
@@ -330,13 +308,6 @@ class LaporanLNPBTotalController extends Controller
 
         $APB_Before = APB::with ( 'masterDataSparepart.KategoriSparepart' )
             ->where ( 'tanggal', '<', $startDate )
-            ->get ();
-
-        $SALDO_Before = Saldo::with ( 'masterDataSparepart.KategoriSparepart', 'atb' )
-            ->whereHas ( 'atb', function ($query) use ($startDate)
-            {
-                $query->where ( 'tanggal', '<', $startDate );
-            } )
             ->get ();
         // +++
 
@@ -357,28 +328,28 @@ class LaporanLNPBTotalController extends Controller
                 return $item->masterDataSparepart->kategoriSparepart->kode === $category[ 'kode' ];
             } );
 
-            // Saldo calculations
-            $categoryItemsSaldo = $SALDO_Current->filter ( function ($item) use ($category)
+            // Calculate ATB Value
+            $atbValue = $categoryItemsATB->sum ( function ($item)
             {
-                return $item->masterDataSparepart->kategoriSparepart->kode === $category[ 'kode' ];
+                return $item->quantity * $item->harga;
             } );
+
+            // Calculate APB Value (only accepted items)
+            $apbValue = $categoryItemsAPB->whereNotIn ( 'status', [ 'pending', 'rejected' ] )->sum ( function ($item)
+            {
+                return $item->quantity * $item->saldo->harga;
+            } );
+
+            // Calculate Saldo as ATB - APB
+            $saldoValue = $atbValue - $apbValue;
 
             $sums_current[ $category[ 'kode' ] ] = [ 
                 'nama'     => $category[ 'nama' ],
                 'jenis'    => $category[ 'jenis' ],
                 'subJenis' => $category[ 'subJenis' ],
-                'atb'      => $categoryItemsATB->sum ( function ($item)
-                {
-                    return $item->quantity * $item->harga;
-                } ),
-                'apb'      => $categoryItemsAPB->whereNotIn ( 'status', [ 'pending', 'rejected' ] )->sum ( function ($item)
-                {
-                    return $item->quantity * $item->saldo->harga;
-                } ),
-                'saldo'    => $categoryItemsSaldo->sum ( function ($item)
-                {
-                    return $item->quantity * $item->harga;
-                } )
+                'atb'      => $atbValue,
+                'apb'      => $apbValue,
+                'saldo'    => $saldoValue
             ];
 
             // +++ Calculate sums_before +++
@@ -392,27 +363,28 @@ class LaporanLNPBTotalController extends Controller
                 return $item->masterDataSparepart->kategoriSparepart->kode === $category[ 'kode' ];
             } );
 
-            $categoryItemsSaldo_Before = $SALDO_Before->filter ( function ($item) use ($category)
+            // Calculate ATB Value for before period
+            $atbValueBefore = $categoryItemsATB_Before->sum ( function ($item)
             {
-                return $item->masterDataSparepart->kategoriSparepart->kode === $category[ 'kode' ];
+                return $item->quantity * $item->harga;
             } );
+
+            // Calculate APB Value for before period (only accepted items)
+            $apbValueBefore = $categoryItemsAPB_Before->whereNotIn ( 'status', [ 'pending', 'rejected' ] )->sum ( function ($item)
+            {
+                return $item->quantity * $item->saldo->harga;
+            } );
+
+            // Calculate Saldo as ATB - APB for before period
+            $saldoValueBefore = $atbValueBefore - $apbValueBefore;
 
             $sums_before[ $category[ 'kode' ] ] = [ 
                 'nama'     => $category[ 'nama' ],
                 'jenis'    => $category[ 'jenis' ],
                 'subJenis' => $category[ 'subJenis' ],
-                'atb'      => $categoryItemsATB_Before->sum ( function ($item)
-                {
-                    return $item->quantity * $item->harga;
-                } ),
-                'apb'      => $categoryItemsAPB_Before->whereNotIn ( 'status', [ 'pending', 'rejected' ] )->sum ( function ($item)
-                {
-                    return $item->quantity * $item->saldo->harga;
-                } ),
-                'saldo'    => $categoryItemsSaldo_Before->sum ( function ($item)
-                {
-                    return $item->quantity * $item->harga;
-                } )
+                'atb'      => $atbValueBefore,
+                'apb'      => $apbValueBefore,
+                'saldo'    => $saldoValueBefore
             ];
             // +++
         }

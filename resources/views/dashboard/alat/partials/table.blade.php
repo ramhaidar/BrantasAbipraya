@@ -89,7 +89,7 @@
                         <td class="text-center">{{ $item->masterDataAlat->tipe_alat }}</td>
                         <td class="text-center">{{ $item->masterDataAlat->serial_number }}</td>
                         <td class="text-center">
-                            <button class="btn btn-danger deleteBtn" data-id="{{ $item->id }}" type="button">
+                            <button class="btn {{ $item->masterDataAlat->jenis_alat === 'Workshop' ? 'btn-secondary' : 'btn-danger' }} deleteBtn" data-id="{{ $item->id }}" type="button" {{ $item->masterDataAlat->jenis_alat === 'Workshop' ? 'disabled' : '' }}>
                                 <i class="bi bi-trash"></i>
                             </button>
                         </td>

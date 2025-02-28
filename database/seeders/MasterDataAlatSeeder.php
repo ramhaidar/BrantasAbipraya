@@ -15,6 +15,17 @@ class MasterDataAlatSeeder extends Seeder
      */
     public function run ()
     {
+        // Add Workshop entry manually
+        MasterDataAlat::firstOrCreate (
+            [ 'kode_alat' => 'Workshop' ],
+            [ 
+                'jenis_alat'    => 'Workshop',
+                'merek_alat'    => 'Workshop',
+                'tipe_alat'     => 'Workshop',
+                'serial_number' => 'Workshop',
+            ]
+        );
+
         // Definisikan path ke file Excel
         $filePath = storage_path ( 'app/public/seeders/DataAlat.xlsx' );
 

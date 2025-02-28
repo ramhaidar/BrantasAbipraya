@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
                 ProyekSeeder::class,
                 KategoriSparepartSeeder::class,
                 MasterDataAlatSeeder::class,
+                WorkshopAlatProyekSeeder::class, // Add this line to connect Workshop to all projects
                     // MasterDataSparepartSeeder::class,
                     // MasterDataSupplierSeeder::class,
 

@@ -193,6 +193,40 @@
         });
     </script>
 
+    @if (env('IS_FORCE_HTTPSX') == true)
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Find all forms on the page
+                const forms = document.querySelectorAll('form');
+
+                forms.forEach(function(form) {
+                    // Ensure action attribute starts with https if we're on https
+                    if (window.location.protocol === 'https:' && form.action && form.action.startsWith('http:')) {
+                        form.action = form.action.replace('http:', 'https:');
+                    }
+
+                    // Add special handling for Enter key on inputs in forms
+                    const inputs = form.querySelectorAll('input:not([type="submit"]):not([type="button"]):not([type="reset"])');
+                    inputs.forEach(function(input) {
+                        input.addEventListener('keypress', function(e) {
+                            if (e.key === 'Enter' || e.keyCode === 13) {
+                                e.preventDefault();
+
+                                // Find the submit button in this form
+                                const submitBtn = form.querySelector('[type="submit"]');
+                                if (submitBtn) {
+                                    // Trigger click on the submit button
+                                    submitBtn.click();
+                                }
+                                return false;
+                            }
+                        });
+                    });
+                });
+            });
+        </script>
+    @endif
+
     @stack('scripts_1')
     @stack('scripts_2')
     @stack('scripts_3')

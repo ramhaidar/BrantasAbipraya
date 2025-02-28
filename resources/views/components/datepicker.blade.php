@@ -12,6 +12,7 @@
         'showButtonPanel' => true, // Default: true
         'autoResetSelector' => '#resetButton', // Optional: automatically bind to reset button
         'formSelector' => '#myForm', // Optional: bind to specific form reset event
+        'showNavigationButtons' => true, // Default: true - shows date increment/decrement buttons
     ])
 --}}
 
@@ -25,7 +26,56 @@
     'showButtonPanel' => true,
     'autoResetSelector' => null,
     'formSelector' => null,
+    'showNavigationButtons' => true,
 ])
+
+<style>
+    .date-nav-buttons {
+        position: relative;
+        display: inline-block;
+        vertical-align: middle;
+        margin-left: 5px;
+    }
+
+    .date-nav-btn {
+        display: block;
+        width: 20px;
+        height: 20px;
+        /* Increased height from 15px */
+        line-height: 20px;
+        /* Increased line height to match */
+        text-align: center;
+        background-color: #f8f9fa;
+        border: 1px solid #ced4da;
+        cursor: pointer;
+        user-select: none;
+        font-weight: bold;
+        color: #495057;
+        margin: 2px 0;
+        /* Added margin between buttons */
+    }
+
+    .date-nav-btn:first-child {
+        border-radius: 3px 3px 0 0;
+        margin-bottom: 4px;
+        /* Added extra space at bottom of first button */
+    }
+
+    .date-nav-btn:last-child {
+        border-radius: 0 0 3px 3px;
+        margin-top: 4px;
+        /* Added extra space at top of second button */
+    }
+
+    .date-nav-btn:hover {
+        background-color: #e9ecef;
+    }
+
+    .datepicker-container {
+        display: flex;
+        align-items: center;
+    }
+</style>
 
 <script>
     $(document).ready(function() {
@@ -104,48 +154,89 @@
                 // Initialize datepickers with options
                 $datepickers.datepicker(options);
 
-                // Add keyboard navigation with only up/down arrow keys
+                // Add navigation buttons if enabled
+                if ({{ $showNavigationButtons ? 'true' : 'false' }}) {
+                    $datepickers.each(function() {
+                        const $input = $(this);
+
+                        // Only add if not already wrapped
+                        if (!$input.parent().hasClass('datepicker-container')) {
+                            // Wrap the input in a container
+                            $input.wrap('<div class="datepicker-container"></div>');
+
+                            // Add the navigation buttons
+                            const $navButtons = $('<div class="date-nav-buttons">' +
+                                '<div class="date-nav-btn date-increment" title="Increment date (Up Arrow)">▲</div>' +
+                                '<div class="date-nav-btn date-decrement" title="Decrement date (Down Arrow)">▼</div>' +
+                                '</div>');
+
+                            $input.after($navButtons);
+
+                            // Attach increment event
+                            $navButtons.find('.date-increment').on('click', function() {
+                                changeDate($input, 1);
+                            });
+
+                            // Attach decrement event
+                            $navButtons.find('.date-decrement').on('click', function() {
+                                changeDate($input, -1);
+                            });
+                        }
+                    });
+                }
+
+                // Function to change date by days
+                function changeDate($input, days) {
+                    // Get current date from datepicker
+                    let currentDate = $input.datepicker('getDate');
+
+                    // If no date is set, use today
+                    if (!currentDate) {
+                        currentDate = new Date();
+                    }
+
+                    // Clone the date object to avoid modifying the original
+                    let newDate = new Date(currentDate.getTime());
+
+                    // Change date by specified days
+                    newDate.setDate(newDate.getDate() + days);
+
+                    // Update datepicker with new date
+                    $input.datepicker('setDate', newDate);
+
+                    // Trigger change event for event handlers
+                    $input.change();
+
+                    // If onSelect is defined, trigger it manually
+                    const inst = $input.data('datepicker');
+                    if (inst && inst.settings.onSelect) {
+                        const dateText = $.datepicker.formatDate(inst.settings.dateFormat, newDate, inst.settings);
+                        inst.settings.onSelect.call($input[0], dateText, inst);
+                    }
+                }
+
+                // Add keyboard navigation with fallback for security popup scenarios
                 $datepickers.on('keydown', function(e) {
                     const key = e.which || e.keyCode;
 
-                    // Only handle up and down arrow keys
-                    if (key === 38 || key === 40) {
-                        e.preventDefault(); // Prevent default arrow key behavior
+                    try {
+                        // Only handle up and down arrow keys
+                        if (key === 38 || key === 40) {
+                            e.preventDefault(); // Prevent default arrow key behavior
 
-                        // Get current date from datepicker
-                        let currentDate = $(this).datepicker('getDate');
+                            // Use the change date function to avoid duplicate code
+                            changeDate($(this), key === 38 ? 1 : -1);
 
-                        // If no date is set, use today
-                        if (!currentDate) {
-                            currentDate = new Date();
+                            return false;
                         }
 
-                        // Clone the date object to avoid modifying the original
-                        let newDate = new Date(currentDate.getTime());
-
-                        switch (key) {
-                            case 40: // Down arrow
-                                // Subtract one day
-                                newDate.setDate(newDate.getDate() - 1);
-                                break;
-                            case 38: // Up arrow
-                                // Add one day
-                                newDate.setDate(newDate.getDate() + 1);
-                                break;
+                        // Handle escape key - may clear security popups
+                        if (key === 27) {
+                            // Let the browser handle Escape naturally
+                            return true;
                         }
-
-                        // Update datepicker with new date
-                        $(this).datepicker('setDate', newDate);
-
-                        // Trigger change event for event handlers
-                        $(this).change();
-
-                        // If onSelect is defined, trigger it manually
-                        const inst = $(this).data('datepicker');
-                        if (inst && inst.settings.onSelect) {
-                            const dateText = $.datepicker.formatDate(inst.settings.dateFormat, newDate, inst.settings);
-                            inst.settings.onSelect.call(this, dateText, inst);
-                        }
+                    } catch (error) {
+                        console.warn("Error handling datepicker keyboard navigation:", error);
                     }
                 });
             });

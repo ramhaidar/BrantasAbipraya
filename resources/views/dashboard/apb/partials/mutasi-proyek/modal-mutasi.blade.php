@@ -6,7 +6,7 @@
                 <button class="btn-close" data-bs-dismiss="modal" type="button" aria-label="Close"></button>
             </div>
             <hr class="p-0 m-0 border border-secondary-subtle border-2 opacity-50">
-            <form class="w-100 align-items-center flex-column gap-0 overflow-auto" id="addDataFormMutasi" method="POST" action="{{ route('apb.post.mutasi') }}" enctype="multipart/form-data" novalidate>
+            <form class="w-100 align-items-center flex-column gap-0 overflow-auto needs-validation" id="addDataFormMutasi" method="POST" action="{{ route('apb.post.mutasi') }}" enctype="multipart/form-data" novalidate>
                 @csrf
                 <div class="modal-body">
                     <div class="row g-3">

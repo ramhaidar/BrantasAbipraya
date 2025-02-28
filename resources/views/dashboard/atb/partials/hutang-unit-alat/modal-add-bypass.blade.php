@@ -6,7 +6,7 @@
                 <button class="btn-close" data-bs-dismiss="modal" type="button" aria-label="Close"></button>
             </div>
             <hr class="p-0 m-0 border border-secondary-subtle border-2 opacity-50">
-            <form class="w-100 align-items-center flex-column gap-0 overflow-auto" id="addDataFormBypass" method="POST" action="{{ route('atb.post.store') }}">
+            <form class="w-100 align-items-center flex-column gap-0 overflow-auto needs-validation" id="addDataFormBypass" method="POST" action="{{ route('atb.post.store') }}">
                 @csrf
                 <div class="modal-body">
                     <div class="row g-3">

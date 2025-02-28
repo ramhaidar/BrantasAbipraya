@@ -54,7 +54,7 @@
                             <select class="form-control" id="id_saldo" name="id_saldo" required>
                                 <option value="">Pilih Sparepart</option>
                                 @foreach ($spareparts as $saldo)
-                                    <option value="{{ $saldo->id }}">
+                                    <option data-satuan="{{ $saldo->satuan ?? ($saldo->masterDataSparepart->satuan ?? '') }}" value="{{ $saldo->id }}">
                                         {{ $saldo->masterDataSparepart->nama }} -
                                         {{ $saldo->masterDataSparepart->merk }} -
                                         {{ $saldo->masterDataSparepart->part_number }}
@@ -68,7 +68,9 @@
                         </div>
 
                         <div class="col-12">
-                            <label class="form-label required" for="quantity">Quantity</label>
+                            <label class="form-label required" for="quantity">
+                                <span class="p-0 m-0">Quantity</span><span id="SatuanPlaceholder"></span>
+                            </label>
                             <input class="form-control" id="quantity" name="quantity" type="number" min="1" max="1" disabled required>
                             <div class="invalid-feedback">Quantity diperlukan dan tidak boleh melebihi stok yang tersedia.</div>
                         </div>
@@ -135,10 +137,12 @@
             $('#id_saldo').on('change', function() {
                 const selectedOption = $(this).find('option:selected');
                 const quantityInput = $('#quantity');
+                const SatuanPlaceholder = $('#SatuanPlaceholder');
 
                 // Disable quantity input if no sparepart selected
                 if (!$(this).val()) {
                     quantityInput.prop('disabled', true).val('');
+                    SatuanPlaceholder.text('');
                     return;
                 }
 
@@ -148,11 +152,15 @@
                     maxQuantity = parseInt(stockMatch[1]);
                 }
 
+                // Get satuan from the data attribute
+                const satuan = selectedOption.data('satuan');
+                SatuanPlaceholder.text(satuan ? ` (dalam ${satuan})` : '');
+
                 // Enable and update quantity input constraints
                 quantityInput.prop('disabled', false);
                 quantityInput.attr('max', maxQuantity);
                 quantityInput.val('');
-                quantityInput.attr('title', `Quantity harus antara 1 dan ${maxQuantity}`);
+                quantityInput.attr('title', `Quantity harus antara 1 dan ${maxQuantity}${satuan ? ' '+satuan : ''}`);
             });
 
             // Add quantity validation on input

@@ -3,14 +3,14 @@
     Prevents form spamming by handling Enter key presses and button clicks
     
     Usage:
-    1. Add the data-prevent-spam="true" attribute to any form you want to protect
-    2. Optionally specify the submit button with data-submit-btn selector
-    3. Include this component once in your main layout or page file
+    1. Include this component once in your main layout
+    2. All forms will be protected by default
+    3. To exclude a form, add data-prevent-spam="false" attribute
+    4. Optionally specify the submit button with data-submit-btn selector
     
-    Example:
-    <form id="myForm" data-prevent-spam="true" data-submit-btn="#customSubmitBtn">
-        <!-- form fields -->
-        <button id="customSubmitBtn" type="submit">Submit</button>
+    Example to opt OUT a specific form:
+    <form id="unprotectedForm" data-prevent-spam="false">
+        <!-- form fields that shouldn't use this behavior -->
     </form>
     
     @include('components.form-submit-handler')
@@ -18,16 +18,19 @@
 
 <script>
     $(document).ready(function() {
-        // Target all forms with data-prevent-spam attribute
-        const $forms = $('form[data-prevent-spam="true"]');
+        // Target all forms EXCEPT those that explicitly opt out
+        const $forms = $('form:not([data-prevent-spam="false"])');
 
-        // Process each form that needs spam protection
+        // Process each form
         $forms.each(function() {
             const $form = $(this);
 
             // Find submit button - either from data attribute or default to first submit button
             const submitBtnSelector = $form.data('submit-btn') || '[type="submit"]';
             const $submitBtn = $form.find(submitBtnSelector);
+
+            // Skip this form if it doesn't have a submit button
+            if ($submitBtn.length === 0) return;
 
             // Store original button text
             const originalBtnText = $submitBtn.html();
@@ -46,60 +49,133 @@
             }
             const formId = $form.attr('id');
 
-            // Handle form submission (both button click and Enter key)
-            $form.on('submit', function(e) {
-                // Prevent multiple submissions
+            // Add specific handling for addDataForm
+            const isAddDataForm = formId === 'addDataForm';
+
+            // Function to perform custom validation
+            function validateForm() {
+                let isValid = true;
+
+                // If we have a specific addDataForm with Quantity validation
+                if (isAddDataForm) {
+                    // Reset validation state first
+                    $form.find('.is-invalid').removeClass('is-invalid');
+
+                    // Validate all required fields
+                    $form.find('[required]:enabled').each(function() {
+                        if (!$(this).val()) {
+                            $(this).addClass('is-invalid');
+                            isValid = false;
+                        }
+                    });
+
+                    // Special validation for Select2 fields
+                    ['#id_alat', '#id_saldo'].forEach(function(selector) {
+                        const $select = $(selector);
+                        if ($select.length && $select.prop('required') && !$select.val()) {
+                            $select.next('.select2-container').find('.select2-selection').addClass('is-invalid');
+                            isValid = false;
+                        }
+                    });
+
+                    // Check quantity validation if it's enabled
+                    const quantityInput = $('#quantity');
+                    if (quantityInput.length && !quantityInput.prop('disabled')) {
+                        const max = parseInt(quantityInput.attr('max')) || 0;
+                        const min = parseInt(quantityInput.attr('min')) || 1;
+                        const value = parseInt(quantityInput.val()) || 0;
+
+                        if (value > max || value < min || !quantityInput.val()) {
+                            quantityInput.addClass('is-invalid');
+                            isValid = false;
+                        }
+                    }
+                } else {
+                    // Standard form validation
+                    isValid = $form[0].checkValidity();
+                    if (!isValid) {
+                        $form.addClass('was-validated');
+                    }
+                }
+
+                return isValid;
+            }
+
+            // Function to focus on first invalid field
+            function focusFirstInvalid() {
+                const $firstInvalid = $form.find('.is-invalid').first();
+                if ($firstInvalid.length) {
+                    setTimeout(function() {
+                        // For Select2, focus on the search field
+                        if ($firstInvalid.hasClass('select2-hidden-accessible')) {
+                            $firstInvalid.next('.select2-container').find('.select2-selection').trigger('focus');
+                        } else {
+                            $firstInvalid.trigger('focus');
+                        }
+                    }, 10);
+                }
+            }
+
+            // Common form submission logic
+            function submitFormIfValid() {
+                // Do nothing if already submitting
                 if (isSubmitting) {
-                    e.preventDefault();
                     return false;
                 }
 
-                if (this.checkValidity()) {
-                    // Prevent default browser submission temporarily
-                    e.preventDefault();
+                // Run validation
+                const isValid = validateForm();
 
+                if (isValid) {
                     // Mark as submitting to prevent multiple submissions
                     isSubmitting = true;
 
                     // Disable button and show spinner
                     $submitBtn.prop('disabled', true).html(spinnerHtml);
 
-                    // Store form reference
-                    const form = this;
-
                     // Delay form submission slightly to ensure spinner is visible
                     setTimeout(function() {
-                        // Use native form submission to ensure spinner stays visible
-                        // during page navigation
-                        form.submit();
-
-                        // Ensure button stays disabled with spinner
-                        $submitBtn.prop('disabled', true).html(spinnerHtml);
-
                         // Set a flag in localStorage to indicate form was submitted
                         try {
                             localStorage.setItem('formSubmitted-' + formId, 'true');
                         } catch (e) {
                             // localStorage might be disabled, ignore errors
                         }
-                    }, 50); // Small delay to ensure UI updates before submission
+
+                        // Use native form submission
+                        $form[0].submit();
+                    }, 50);
+                    return true;
                 } else {
-                    e.preventDefault();
-                    $(this).addClass('was-validated');
-                    $(this).find(':invalid').first().focus();
+                    // Focus first invalid field without reloading
+                    focusFirstInvalid();
+                    return false;
                 }
+            }
+
+            // Replace original form submission handler
+            $form.off('submit').on('submit', function(e) {
+                // Always prevent default browser submit to avoid page reload
+                e.preventDefault();
+                return submitFormIfValid();
             });
 
-            // Handle Enter key in any input field
-            $form.find('input:not([type="submit"]):not([type="button"]):not([type="reset"])').on('keypress', function(e) {
+            // Handle all inputs including dynamically enabled ones
+            $(document).on('keydown', `#${formId} input, #${formId} select, #${formId} textarea`, function(e) {
+                // Only handle Enter key
                 if (e.which === 13 || e.keyCode === 13) {
+                    // Always prevent default to avoid reload
                     e.preventDefault();
+                    e.stopPropagation();
 
-                    // Only trigger submit if not already submitting
-                    if (!isSubmitting) {
-                        $form.submit();
+                    // Special handling for quantity input in addDataForm
+                    if (isAddDataForm && $(this).attr('id') === 'quantity') {
+                        // Force focus on another field first to trigger any blur events
+                        $(this).blur();
                     }
 
+                    // Submit the form if valid
+                    submitFormIfValid();
                     return false;
                 }
             });
@@ -111,6 +187,7 @@
                     if (!isSubmitting) {
                         $submitBtn.prop('disabled', false).html(originalBtnText);
                         $form.removeClass('was-validated');
+                        $form.find('.is-invalid').removeClass('is-invalid');
                     }
                 });
             }

@@ -300,49 +300,109 @@ class _BudongBudongSeeder extends Seeder
 
         // Link equipment to Budong Budong project
         $proyek = Proyek::where ( 'nama', 'BENDUNGAN BUDONG - BUDONG' )->first ();
-        if ( ! $proyek ) return;
+        if ( ! $proyek )
+        {
+            console ( "Project 'BENDUNGAN BUDONG - BUDONG' not found!" );
+            return;
+        }
+        console ( "Found project: " . $proyek->nama . " (ID: " . $proyek->id . ")" );
 
+        // Define equipment data with all equipment codes
         $alatCodes = [ 
+            'BL 010-17',
+            'BL 028-20',
+            'CE 075-20',
+            'CE 080-20',
+            'CE 081-20',
+            'CE 120-20',
+            'CE 123-20',
+            'CE 135-20',
+            'DT 087-8',
+            'DT 095-8',
+            'DT 104-8',
+            'DT 105-8',
             'HD 081-15',
             'HD 083-15',
             'HD 091-15',
             'HD 096-15',
+            'HD 097-15',
             'HD 099-15',
             'HD 102-15',
             'HD 105-15',
             'HD 130-15',
             'HD 134-15',
             'HD 143-15',
-            'HD 162-15'
+            'HD 162-15',
+            'VR 013-10'
         ];
 
-        $alats = MasterDataAlat::whereIn ( 'kode_alat', $alatCodes )->get ();
+        console ( "Looking for " . count ( $alatCodes ) . " equipment records" );
 
-        foreach ( $alats as $alat )
+        // Find existing equipment
+        $existingAlats = MasterDataAlat::whereIn ( 'kode_alat', $alatCodes )->get ();
+        console ( "Found " . $existingAlats->count () . " existing equipment records" );
+
+        // Log all found equipment
+        foreach ( $existingAlats as $alat )
         {
-            // Check if the alat is already linked to this project
+            console ( "Found equipment: " . $alat->kode_alat . " (ID: " . $alat->id . ")" );
+        }
+
+        // Find missing equipment codes
+        $existingCodes = $existingAlats->pluck ( 'kode_alat' )->toArray ();
+        $missingCodes  = array_diff ( $alatCodes, $existingCodes );
+
+        if ( count ( $missingCodes ) > 0 )
+        {
+            console ( "Missing equipment codes: " . implode ( ', ', $missingCodes ) );
+        }
+        else
+        {
+            console ( "All equipment codes found in database" );
+        }
+
+        // Process each equipment
+        foreach ( $existingAlats as $alat )
+        {
+            // Check if the equipment is already linked to this project
             $existing = AlatProyek::where ( 'id_proyek', $proyek->id )
                 ->where ( 'id_master_data_alat', $alat->id )
                 ->whereNull ( 'removed_at' )
                 ->first ();
 
-            if ( ! $existing )
+            if ( $existing )
             {
-                AlatProyek::create ( [ 
+                console ( "Equipment " . $alat->kode_alat . " already linked to this project" );
+                continue;
+            }
+
+            console ( "Linking equipment " . $alat->kode_alat . " to project" );
+
+            try
+            {
+                // Link equipment to project
+                $alatProyek = AlatProyek::create ( [ 
                     'id_proyek'           => $proyek->id,
                     'id_master_data_alat' => $alat->id,
                     'assigned_at'         => now (),
                     'removed_at'          => null
                 ] );
 
-                // Update the current project for the equipment only if it's not already set
-                if ( $alat->id_proyek_current !== $proyek->id )
-                {
-                    $alat->update ( [ 
-                        'id_proyek_current' => $proyek->id
-                    ] );
-                }
+                console ( "Successfully created AlatProyek record with ID: " . $alatProyek->id );
+
+                // Update the current project for the equipment
+                $alat->update ( [ 
+                    'id_proyek_current' => $proyek->id
+                ] );
+
+                console ( "Updated equipment's current project" );
+            }
+            catch ( \Exception $e )
+            {
+                console ( "ERROR linking equipment: " . $e->getMessage () );
             }
         }
+
+        console ( "Equipment linking process completed" );
     }
 }

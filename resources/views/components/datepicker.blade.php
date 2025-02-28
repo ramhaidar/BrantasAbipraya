@@ -103,6 +103,51 @@
 
                 // Initialize datepickers with options
                 $datepickers.datepicker(options);
+
+                // Add keyboard navigation with only up/down arrow keys
+                $datepickers.on('keydown', function(e) {
+                    const key = e.which || e.keyCode;
+
+                    // Only handle up and down arrow keys
+                    if (key === 38 || key === 40) {
+                        e.preventDefault(); // Prevent default arrow key behavior
+
+                        // Get current date from datepicker
+                        let currentDate = $(this).datepicker('getDate');
+
+                        // If no date is set, use today
+                        if (!currentDate) {
+                            currentDate = new Date();
+                        }
+
+                        // Clone the date object to avoid modifying the original
+                        let newDate = new Date(currentDate.getTime());
+
+                        switch (key) {
+                            case 40: // Down arrow
+                                // Subtract one day
+                                newDate.setDate(newDate.getDate() - 1);
+                                break;
+                            case 38: // Up arrow
+                                // Add one day
+                                newDate.setDate(newDate.getDate() + 1);
+                                break;
+                        }
+
+                        // Update datepicker with new date
+                        $(this).datepicker('setDate', newDate);
+
+                        // Trigger change event for event handlers
+                        $(this).change();
+
+                        // If onSelect is defined, trigger it manually
+                        const inst = $(this).data('datepicker');
+                        if (inst && inst.settings.onSelect) {
+                            const dateText = $.datepicker.formatDate(inst.settings.dateFormat, newDate, inst.settings);
+                            inst.settings.onSelect.call(this, dateText, inst);
+                        }
+                    }
+                });
             });
 
             // Fix Today button if not already fixed

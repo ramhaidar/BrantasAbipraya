@@ -137,7 +137,7 @@ td,
     }
 }
 
-@media screen and (max-width: 1500px) {
+@media screen and (max-width: 1600px) {
     .btn-hide-text-mobile span {
         display: none;
     }

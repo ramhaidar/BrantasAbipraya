@@ -159,7 +159,7 @@ class ExportExcelController extends Controller
         ] );
 
         // Get the proyek
-        $proyek = \App\Models\Proyek::findOrFail ( $request->id );
+        $proyek = Proyek::findOrFail ( $request->id );
 
         // Generate filename
         $fileName = "ATB-{$proyek->nama}-" . ucwords ( str_replace ( '-', ' ', $request->type ) ) . '.xlsx';
@@ -188,7 +188,7 @@ class ExportExcelController extends Controller
         ] );
 
         // Get the proyek
-        $proyek = \App\Models\Proyek::findOrFail ( $request->id );
+        $proyek = Proyek::findOrFail ( $request->id );
 
         // Generate filename
         $fileName = "APB-{$proyek->nama}-" . ucwords ( str_replace ( '-', ' ', $request->type ) ) . '.xlsx';
@@ -212,7 +212,7 @@ class ExportExcelController extends Controller
         ] );
 
         // Get the proyek
-        $proyek = \App\Models\Proyek::findOrFail ( $request->id );
+        $proyek = Proyek::findOrFail ( $request->id );
 
         // Generate filename
         $fileName = "Saldo-{$proyek->nama}-" . ucwords ( str_replace ( '-', ' ', $request->type ) ) . '.xlsx';
@@ -234,6 +234,9 @@ class ExportExcelController extends Controller
 
     public function lnpb_total ( Request $request )
     {
+        // Remove the dd() call that was stopping execution
+        // dd ( $request->all () );
+
         // Default date calculations
         $currentDate      = now ();
         $defaultStartDate = $currentDate->copy ()->subMonth ()->day ( 26 );

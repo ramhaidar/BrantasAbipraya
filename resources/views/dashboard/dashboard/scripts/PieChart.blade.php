@@ -120,9 +120,13 @@
                         .style("opacity", .9);
 
                     const percentage = ((d.value / d3.sum(pieData, d => d.value)) * 100).toFixed(1);
+
+                    // Check if the value is 1 (which is the placeholder value)
+                    const valueDisplay = d.value === 1 && !hasNonZeroValue ? "Rp0" : formatRupiah(d.value);
+
                     tooltip.html(`
                         <strong>${d.data.name}</strong><br>
-                        ${formatRupiah(d.value)}<br>
+                        ${valueDisplay}<br>
                         ${percentage}%
                     `)
                         .style("left", (event.pageX + 10) + "px")

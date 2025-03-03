@@ -246,6 +246,9 @@ class DashboardController extends Controller
         $totalAPB   = $this->calculateAPBTotal ( $filteredData[ "apbData" ] );
         $totalSaldo = $totalATB - $totalAPB; // Calculate saldo as ATB - APB
 
+        // Calculate monthly financial data for ATB, APB, and Saldo
+        $monthlyFinancialData = $this->calculateMonthlyFinancialData ( $id_proyek );
+
         return view ( "dashboard.dashboard.dashboard", [ 
             "headerPage"                 => "Dashboard",
             "page"                       => "Dashboard",
@@ -270,6 +273,9 @@ class DashboardController extends Controller
             "horizontalChartTotal"       => $horizontalCharts[ "total" ],
             "categoryData"               => $categoryData,
             "formatSaldoWithParentheses" => true,
+
+            // Add monthly financial data for the charts
+            "monthlyFinancialData"       => $monthlyFinancialData,
         ] );
     }
 
@@ -716,5 +722,82 @@ class DashboardController extends Controller
                 }
                 return $item->quantity * ( $item->saldo->harga ?? 0 );
             } );
+    }
+
+    // Updated method to calculate monthly financial data with PostgreSQL compatibility
+    // and correct date ranges (26th of previous month to 25th of current month)
+    private function calculateMonthlyFinancialData ( $projectId = null )
+    {
+        $currentYear = now ()->year;
+        $monthlyData = [];
+        $monthNames  = [ 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec' ];
+
+        // For each month, calculate values using custom date ranges
+        for ( $month = 1; $month <= 12; $month++ )
+        {
+            // Calculate start date (26th of previous month)
+            $startDate = Carbon::create ( $currentYear, $month, 1 )->subDays ( 5 );
+            if ( $month == 1 )
+            {
+                // For January, start date is December 26 of previous year
+                $startDate = Carbon::create ( $currentYear - 1, 12, 26 );
+            }
+            else
+            {
+                // For other months, start date is 26th of previous month
+                $startDate = Carbon::create ( $currentYear, $month - 1, 26 );
+            }
+
+            // Calculate end date (25th of current month)
+            $endDate = Carbon::create ( $currentYear, $month, 25 );
+
+            // Base query for ATB with explicit table name prefixes
+            $atbQuery = ATB::where ( 'atb.tanggal', '>=', $startDate )
+                ->where ( 'atb.tanggal', '<=', $endDate )
+                ->whereIn ( 'atb.tipe', self::VALID_TYPES );
+
+            // Apply project filter if provided
+            if ( $projectId )
+            {
+                $atbQuery->where ( 'atb.id_proyek', $projectId );
+            }
+
+            // Calculate ATB total for this month
+            $atbValue = $atbQuery->sum ( \DB::raw ( 'atb.quantity * atb.harga' ) );
+
+            // Base query for APB with explicit table name prefixes
+            $apbQuery = APB::where ( 'apb.tanggal', '>=', $startDate )
+                ->where ( 'apb.tanggal', '<=', $endDate )
+                ->whereNotIn ( 'apb.status', [ 'pending', 'rejected' ] )
+                ->whereIn ( 'apb.tipe', self::VALID_TYPES )
+                ->join ( 'saldo', 'saldo.id', '=', 'apb.id_saldo' );
+
+            // Apply project filter if provided
+            if ( $projectId )
+            {
+                $apbQuery->where ( 'apb.id_proyek', $projectId );
+            }
+
+            // Calculate APB total for this month
+            $apbValue = $apbQuery->sum ( \DB::raw ( 'apb.quantity * saldo.harga' ) );
+
+            // Add data to the monthly arrays
+            $monthlyData[ 'atb' ][] = [ 
+                'month' => $monthNames[ $month - 1 ],
+                'value' => (float) $atbValue
+            ];
+
+            $monthlyData[ 'apb' ][] = [ 
+                'month' => $monthNames[ $month - 1 ],
+                'value' => (float) $apbValue
+            ];
+
+            $monthlyData[ 'saldo' ][] = [ 
+                'month' => $monthNames[ $month - 1 ],
+                'value' => (float) ( $atbValue - $apbValue )
+            ];
+        }
+
+        return $monthlyData;
     }
 }

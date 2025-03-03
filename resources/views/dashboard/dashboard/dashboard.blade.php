@@ -72,6 +72,28 @@
             height: 100%;
             cursor: pointer;
         }
+
+        /* Add new styles for card headers with centered titles and right-aligned buttons */
+        .card-header-with-button {
+            position: relative;
+            padding-right: 100px;
+            /* Make space for the absolute positioned button */
+        }
+
+        .card-header-with-button h5 {
+            width: 100%;
+            text-align: center;
+            margin: 0;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+
+        .card-header-with-button .btn {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+        }
     </style>
 @endpush
 
@@ -102,8 +124,8 @@
                     <input class="form-control" id="endDate" name="endDate" type="month" value="{{ request('endDate') ? \Carbon\Carbon::parse($endDate)->format('Y-m') : '' }}">
                     <div class="date-input-overlay" onclick="document.getElementById('endDate').showPicker()"></div>
                 </div>
-                <button class="btn btn-primary" onclick="applyFilters()">
-                    <i class="fa fa-filter"></i> <span class="d-none d-sm-inline-block ms-2">Filter</span>
+                <button class="btn btn-primary btn-hide-text-mobile" onclick="applyFilters()">
+                    <i class="fa fa-filter"></i> <span class="ms-2">Filter</span>
                 </button>
             </div>
         </div>
@@ -215,6 +237,57 @@
         </div>
 
         <div class="row mt-3">
+            <div class="col-12 col-md-4">
+                <div class="card card-primary">
+                    <div class="card-header card-header-with-button">
+                        <h5>
+                            <i class="fas fa-chart-bar mr-1"></i>
+                            ATB per Bulan ({{ date('Y') }})
+                        </h5>
+                        <button class="btn btn-sm btn-light btn-hide-text-mobile" data-bs-toggle="modal" data-bs-target="#atbChartModal" type="button">
+                            <i class="fas fa-expand-alt"></i> <span class="ms-1">View Larger</span>
+                        </button>
+                    </div>
+                    <div class="card-body d-flex justify-content-center align-items-center" style="background-color: #353a50; min-height: 300px;">
+                        <div class="flex-grow-1 text-center" id="monthlyAtbChart"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="card card-primary">
+                    <div class="card-header card-header-with-button">
+                        <h5>
+                            <i class="fas fa-chart-bar mr-1"></i>
+                            APB per Bulan ({{ date('Y') }})
+                        </h5>
+                        <button class="btn btn-sm btn-light btn-hide-text-mobile" data-bs-toggle="modal" data-bs-target="#apbChartModal" type="button">
+                            <i class="fas fa-expand-alt"></i> <span class="ms-1">View Larger</span>
+                        </button>
+                    </div>
+                    <div class="card-body d-flex justify-content-center align-items-center" style="background-color: #353a50; min-height: 300px;">
+                        <div class="flex-grow-1 text-center" id="monthlyApbChart"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="card card-primary">
+                    <div class="card-header card-header-with-button">
+                        <h5>
+                            <i class="fas fa-chart-bar mr-1"></i>
+                            Saldo per Bulan ({{ date('Y') }})
+                        </h5>
+                        <button class="btn btn-sm btn-light btn-hide-text-mobile" data-bs-toggle="modal" data-bs-target="#saldoChartModal" type="button">
+                            <i class="fas fa-expand-alt"></i> <span class="ms-1">View Larger</span>
+                        </button>
+                    </div>
+                    <div class="card-body d-flex justify-content-center align-items-center" style="background-color: #353a50; min-height: 300px;">
+                        <div class="flex-grow-1 text-center" id="monthlySaldoChart"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-3">
             <div class="col-12">
                 @if (!request('id_proyek'))
                     <div class="card card-primary">
@@ -274,6 +347,57 @@
             </div>
         </div>
 
+    </div>
+
+    <!-- Modal for ATB Chart -->
+    <div class="modal fade" id="atbChartModal" aria-labelledby="atbChartModalLabel" aria-hidden="true" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title w-100 text-center" id="atbChartModalLabel"><i class="fas fa-chart-bar mr-2"></i>ATB per Bulan ({{ date('Y') }})</h5>
+                    <button class="btn-close btn-close-white" data-bs-dismiss="modal" type="button" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="background-color: #353a50; min-height: 500px;">
+                    <div class="d-flex justify-content-center align-items-center" style="background-color: #353a50; min-height: 500px;">
+                        <div class="flex-grow-1 text-center" id="monthlyAtbChartModal"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for APB Chart -->
+    <div class="modal fade" id="apbChartModal" aria-labelledby="apbChartModalLabel" aria-hidden="true" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title w-100 text-center" id="atbChartModalLabel"><i class="fas fa-chart-bar mr-2"></i>APB per Bulan ({{ date('Y') }})</h5>
+                    <button class="btn-close btn-close-white" data-bs-dismiss="modal" type="button" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="background-color: #353a50; min-height: 500px;">
+                    <div class="d-flex justify-content-center align-items-center" style="background-color: #353a50; min-height: 500px;">
+                        <div class="flex-grow-1 text-center" id="monthlyApbChartModal"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Saldo Chart -->
+    <div class="modal fade" id="saldoChartModal" aria-labelledby="saldoChartModalLabel" aria-hidden="true" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title w-100 text-center" id="atbChartModalLabel"><i class="fas fa-chart-bar mr-2"></i>Saldo per Bulan ({{ date('Y') }})</h5>
+                    <button class="btn-close btn-close-white" data-bs-dismiss="modal" type="button" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="background-color: #353a50; min-height: 500px;">
+                    <div class="d-flex justify-content-center align-items-center" style="background-color: #353a50; min-height: 500px;">
+                        <div class="flex-grow-1 text-center" id="monthlySaldoChartModal"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 @endsection
 
@@ -376,4 +500,5 @@
         @include('dashboard.dashboard.scripts.CategoryHorizontalChart')
     @endif
     @include('dashboard.dashboard.scripts.PieChart')
+    @include('dashboard.dashboard.scripts.MonthlyFinancialChart')
 @endpush

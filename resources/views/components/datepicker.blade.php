@@ -32,18 +32,34 @@
 <style>
     .date-nav-buttons {
         position: relative;
-        display: inline-block;
+        display: inline-flex;
+        flex-direction: column;
         vertical-align: middle;
         margin-left: 5px;
+        z-index: 1;
+    }
+
+    .input-group .date-nav-buttons {
+        position: absolute;
+        right: 30px;
+        /* Position before the clear button */
+        top: 0;
+        height: 100%;
+        margin-left: 0;
+        justify-content: center;
+        z-index: 4;
+    }
+
+    /* Ensure calendar icon visibility when nav buttons are present */
+    .input-group-text+.date-nav-buttons {
+        right: 45px;
     }
 
     .date-nav-btn {
         display: block;
-        width: 20px;
-        height: 20px;
-        /* Increased height from 15px */
-        line-height: 20px;
-        /* Increased line height to match */
+        width: 16px;
+        height: 14px;
+        line-height: 12px;
         text-align: center;
         background-color: #f8f9fa;
         border: 1px solid #ced4da;
@@ -51,20 +67,16 @@
         user-select: none;
         font-weight: bold;
         color: #495057;
-        margin: 2px 0;
-        /* Added margin between buttons */
+        margin: 1px 0;
+        font-size: 8px;
     }
 
     .date-nav-btn:first-child {
         border-radius: 3px 3px 0 0;
-        margin-bottom: 4px;
-        /* Added extra space at bottom of first button */
     }
 
     .date-nav-btn:last-child {
         border-radius: 0 0 3px 3px;
-        margin-top: 4px;
-        /* Added extra space at top of second button */
     }
 
     .date-nav-btn:hover {
@@ -74,6 +86,17 @@
     .datepicker-container {
         display: flex;
         align-items: center;
+        position: relative;
+    }
+
+    /* Make room on the right for nav buttons */
+    .input-group .datepicker {
+        padding-right: 40px !important;
+    }
+
+    /* Ensure clear button stays to the right */
+    .input-group .clear-input {
+        z-index: 5;
     }
 </style>
 
@@ -159,26 +182,44 @@
                     $datepickers.each(function() {
                         const $input = $(this);
 
-                        // Only add if not already wrapped
-                        if (!$input.parent().hasClass('datepicker-container')) {
-                            // Wrap the input in a container
-                            $input.wrap('<div class="datepicker-container"></div>');
+                        // Check if input is within an input-group
+                        const isInInputGroup = $input.closest('.input-group').length > 0;
 
-                            // Add the navigation buttons
+                        // Check if we should skip this element (exclude date-filter-group)
+                        const skipNavigation = $input.closest('#date-filter-group, .date-filter-group').length > 0;
+
+                        // Only add if not already wrapped and not in an excluded group
+                        if (!skipNavigation &&
+                            !$input.parent().hasClass('datepicker-container') &&
+                            $input.siblings('.date-nav-buttons').length === 0) {
+
+                            // Create the navigation buttons
                             const $navButtons = $('<div class="date-nav-buttons">' +
                                 '<div class="date-nav-btn date-increment" title="Increment date (Up Arrow)">▲</div>' +
                                 '<div class="date-nav-btn date-decrement" title="Decrement date (Down Arrow)">▼</div>' +
                                 '</div>');
 
-                            $input.after($navButtons);
+                            // Different handling based on whether input is in input-group
+                            if (isInInputGroup) {
+                                // For input groups, position the nav buttons inside the input
+                                $input.after($navButtons);
+                                // Ensure enough space on right
+                                $input.css('padding-right', '40px');
+                            } else {
+                                // Normal handling - wrap and append
+                                $input.wrap('<div class="datepicker-container"></div>');
+                                $input.after($navButtons);
+                            }
 
                             // Attach increment event
-                            $navButtons.find('.date-increment').on('click', function() {
+                            $navButtons.find('.date-increment').on('click', function(e) {
+                                e.stopPropagation(); // Prevent bubbling
                                 changeDate($input, 1);
                             });
 
                             // Attach decrement event
-                            $navButtons.find('.date-decrement').on('click', function() {
+                            $navButtons.find('.date-decrement').on('click', function(e) {
+                                e.stopPropagation(); // Prevent bubbling
                                 changeDate($input, -1);
                             });
                         }
@@ -212,6 +253,11 @@
                     if (inst && inst.settings.onSelect) {
                         const dateText = $.datepicker.formatDate(inst.settings.dateFormat, newDate, inst.settings);
                         inst.settings.onSelect.call($input[0], dateText, inst);
+                    }
+
+                    // Make sure clear button updates
+                    if (typeof updateClearButtonVisibility === 'function') {
+                        updateClearButtonVisibility($input.attr('id'));
                     }
                 }
 

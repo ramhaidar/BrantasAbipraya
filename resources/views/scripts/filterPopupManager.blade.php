@@ -615,6 +615,32 @@
                 });
             }
         });
+
+        // Fix for date navigation buttons conflict with clear button
+        $(document).on('click', '.date-nav-buttons .date-nav-btn', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Ensure the event doesn't bubble up and close the filter popup
+            return false;
+        });
+
+        // Make sure navigation buttons don't interfere with other clickable elements
+        $('.filter-popup').on('click', '.date-nav-buttons', function(e) {
+            e.stopPropagation();
+        });
+
+        // Special handling for date navigation buttons
+        $(document).on('click', '.date-nav-buttons, .date-nav-btn', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Prevent the event from closing filter popups
+            return false;
+        });
+
+        // Specifically remove date navigation buttons from filter groups if they were somehow added
+        $('#date-filter-group .date-nav-buttons, .date-filter-group .date-nav-buttons').remove();
     });
 
     // Custom function to determine item priority

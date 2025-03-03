@@ -484,6 +484,28 @@
 
             return false;
         });
+
+        // Ensure enough space for both nav buttons and clear button
+        $('.date-input-group .datepicker').each(function() {
+            $(this).css('padding-right', '40px');
+        });
+
+        // Fix z-index for date navigation buttons
+        $('.date-input-group').css('position', 'relative');
+
+        // Prevent date navigation buttons from triggering other actions
+        $(document).on('click', '.date-nav-btn', function(e) {
+            e.stopPropagation();
+            return false;
+        });
+
+        // Remove any left-side padding for date inputs in filter groups
+        $('.date-input-group .datepicker').each(function() {
+            $(this).css('padding-left', '');
+        });
+
+        // Ensure calendar icon stays visible
+        $('.date-input-group').css('position', 'relative');
     });
 </script>
 
@@ -492,13 +514,60 @@
         cursor: pointer;
         padding: 0.25rem 0.5rem;
         line-height: 1;
+        z-index: 5;
     }
 
-    .clear-input:hover {
-        background-color: #e9ecef;
+    .date-input-group {
+        position: relative;
     }
 
-    .clear-input i {
-        font-size: 0.875rem;
+    /* Adjust input padding to make room for navigation buttons */
+    .date-input-group .datepicker {
+        padding-left: 25px !important;
     }
+
+    /* Position date navigation buttons on the left */
+    .date-input-group .date-nav-buttons {
+        position: absolute;
+        left: 1px;
+        top: 0;
+        height: 100%;
+        z-index: 5;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        margin: 0;
+    }
+
+    /* Special case for input groups with prepend element */
+    .date-input-group .input-group-text:first-child+.datepicker {
+        padding-left: 0.375rem !important;
+    }
+
+    .date-input-group .input-group-text:first-child+.datepicker+.date-nav-buttons {
+        left: auto;
+        right: 64px;
+        /* Position before calendar icon */
+    }
+
+    /* Ensure clear button stays rightmost */
+    .date-input-group .clear-input {
+        z-index: 5;
+        position: relative;
+    }
+
+    /* Remove positioning styles for the filter datepickers */
+    #date-filter-group .date-input-group .datepicker,
+    .date-filter-group .date-input-group .datepicker {
+        padding-left: 0.375rem !important;
+        padding-right: 0.375rem !important;
+    }
+
+    /* Override any other positioning styles */
+    #date-filter-group .date-nav-buttons,
+    .date-filter-group .date-nav-buttons {
+        display: none !important;
+    }
+
+    /* ...existing styles... */
 </style>

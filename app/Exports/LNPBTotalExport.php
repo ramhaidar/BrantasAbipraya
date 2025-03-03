@@ -74,7 +74,9 @@ class LNPBTotalExport implements FromCollection, WithHeadings, WithMapping, With
 
     private function calculateSums ()
     {
-        // Query for current period
+        console ( "Starting calculateSums() with proyekId: " . ( $this->proyekId ?? 'null' ) );
+
+        // === Calculate ATB, APB, and Saldo Current Period === //
         $ATB_Current = ATB::with ( 'masterDataSparepart.KategoriSparepart' )
             ->when ( $this->proyekId, function ($query)
             {
@@ -82,6 +84,8 @@ class LNPBTotalExport implements FromCollection, WithHeadings, WithMapping, With
             } )
             ->whereBetween ( 'tanggal', [ $this->startDate, $this->endDate ] )
             ->get ();
+
+        console ( "ATB_Current count: " . $ATB_Current->count () );
 
         $APB_Current = APB::with ( 'masterDataSparepart.KategoriSparepart' )
             ->when ( $this->proyekId, function ($query)
@@ -91,7 +95,9 @@ class LNPBTotalExport implements FromCollection, WithHeadings, WithMapping, With
             ->whereBetween ( 'tanggal', [ $this->startDate, $this->endDate ] )
             ->get ();
 
-        // Query for previous period
+        console ( "APB_Current count: " . $APB_Current->count () );
+
+        // +++ Calculate ATB, APB, and Saldo Before Current Period +++
         $ATB_Before = ATB::with ( 'masterDataSparepart.KategoriSparepart' )
             ->when ( $this->proyekId, function ($query)
             {
@@ -99,6 +105,8 @@ class LNPBTotalExport implements FromCollection, WithHeadings, WithMapping, With
             } )
             ->where ( 'tanggal', '<', $this->startDate )
             ->get ();
+
+        console ( "ATB_Before count: " . $ATB_Before->count () );
 
         $APB_Before = APB::with ( 'masterDataSparepart.KategoriSparepart' )
             ->when ( $this->proyekId, function ($query)
@@ -108,47 +116,197 @@ class LNPBTotalExport implements FromCollection, WithHeadings, WithMapping, With
             ->where ( 'tanggal', '<', $this->startDate )
             ->get ();
 
-        // Calculate sums for each period
+        console ( "APB_Before count: " . $APB_Before->count () );
+
+        // Debug: Check all available kategori_sparepart.kode values
+        console ( "All kategori codes:" );
+        $allKategoriCodes   = [];
+        $allKategoriFromATB = $ATB_Current->map ( function ($item) use (&$allKategoriCodes)
+        {
+            if ( $item->masterDataSparepart && $item->masterDataSparepart->kategoriSparepart )
+            {
+                $code = $item->masterDataSparepart->kategoriSparepart->kode;
+                if ( ! in_array ( $code, $allKategoriCodes ) )
+                {
+                    $allKategoriCodes[] = $code;
+                }
+                return $code;
+            }
+            return null;
+        } )->filter ()->unique ()->values ()->toArray ();
+        console ( json_encode ( $allKategoriCodes ) );
+
+        // Check specifically for Tyre-related items
+        $tyreItems = $ATB_Current->filter ( function ($item)
+        {
+            return $item->masterDataSparepart &&
+                $item->masterDataSparepart->kategoriSparepart &&
+                ( strtoupper ( $item->masterDataSparepart->kategoriSparepart->kode ) == 'B3' ||
+                    stripos ( $item->masterDataSparepart->kategoriSparepart->nama, 'TYRE' ) !== false );
+        } );
+        console ( "Tyre items in ATB_Current: " . $tyreItems->count () );
+        if ( $tyreItems->count () > 0 )
+        {
+            $firstTyre = $tyreItems->first ();
+            console ( "First Tyre item details:" );
+            console ( "Kode: " . ( $firstTyre->masterDataSparepart->kategoriSparepart->kode ?? 'NULL' ) );
+            console ( "Nama: " . ( $firstTyre->masterDataSparepart->kategoriSparepart->nama ?? 'NULL' ) );
+            console ( "Quantity: " . ( $firstTyre->quantity ?? 'NULL' ) );
+            console ( "Harga: " . ( $firstTyre->harga ?? 'NULL' ) );
+        }
+
         $this->sums_current = [];
         $this->sums_before  = [];
 
         foreach ( $this->data as $category )
         {
-            $this->sums_current[ $category[ 'kode' ] ] = $this->calculateCategorySums ( $category, $ATB_Current, $APB_Current );
-            $this->sums_before[ $category[ 'kode' ] ]  = $this->calculateCategorySums ( $category, $ATB_Before, $APB_Before );
+            // Debug: Print current category
+            console ( "Processing category: " . $category[ 'kode' ] . " - " . $category[ 'nama' ] );
+
+            // For debugging Tyre specifically
+            if ( strtoupper ( $category[ 'kode' ] ) === 'B3' )
+            {
+                console ( "===== DETAILED TYRE DEBUG =====" );
+            }
+
+            // Case insensitive comparison with safety checks
+            $categoryItemsATB = $ATB_Current->filter ( function ($item) use ($category)
+            {
+                $hasRelations = $item->masterDataSparepart &&
+                    $item->masterDataSparepart->kategoriSparepart;
+
+                if ( ! $hasRelations )
+                {
+                    return false;
+                }
+
+                $dbCode       = trim ( $item->masterDataSparepart->kategoriSparepart->kode );
+                $categoryCode = trim ( $category[ 'kode' ] );
+                $matches = strtoupper ( $dbCode ) === strtoupper ( $categoryCode );
+
+                // Debug Tyre matching specifically
+                if ( strtoupper ( $categoryCode ) === 'B3' )
+                {
+                    console ( "Checking ATB item - DB code: " . $dbCode . ", Category code: " . $categoryCode . ", Matches: " . ( $matches ? 'YES' : 'NO' ) );
+                }
+
+                return $matches;
+            } );
+
+            // For Tyre, dump all item codes being compared
+            if ( strtoupper ( $category[ 'kode' ] ) === 'B3' )
+            {
+                console ( "ATB items matching Tyre: " . $categoryItemsATB->count () );
+                $tyreCodesFromATB = $ATB_Current->map ( function ($item)
+                {
+                    if ( $item->masterDataSparepart && $item->masterDataSparepart->kategoriSparepart )
+                    {
+                        return $item->masterDataSparepart->kategoriSparepart->kode;
+                    }
+                    return null;
+                } )->filter ()->unique ()->values ()->toArray ();
+                console ( "All codes in ATB: " . json_encode ( $tyreCodesFromATB ) );
+            }
+
+            // Calculate ATB Value
+            $atbValue = $categoryItemsATB->sum ( function ($item)
+            {
+                $value = $item->quantity * $item->harga;
+                if ( strtoupper ( $item->masterDataSparepart->kategoriSparepart->kode ) === 'B3' )
+                {
+                    console ( "Adding to TYRE ATB value: " . $value . " (qty:" . $item->quantity . " x price:" . $item->harga . ")" );
+                }
+                return $value;
+            } );
+
+            if ( strtoupper ( $category[ 'kode' ] ) === 'B3' )
+            {
+                console ( "Final TYRE ATB Value: " . $atbValue );
+                console ( "===== END TYRE DEBUG =====" );
+            }
+
+            // Calculate APB Value (only accepted items)
+            $categoryItemsAPB = $APB_Current->filter ( function ($item) use ($category)
+            {
+                return $item->masterDataSparepart &&
+                    $item->masterDataSparepart->kategoriSparepart &&
+                    strtoupper ( trim ( $item->masterDataSparepart->kategoriSparepart->kode ) ) === strtoupper ( trim ( $category[ 'kode' ] ) );
+            } );
+
+            // For debugging Tyre specifically
+            if ( strtoupper ( $category[ 'kode' ] ) === 'B3' )
+            {
+                \Log::info ( 'TYRE ATB Count: ' . $categoryItemsATB->count () );
+                if ( $categoryItemsATB->count () > 0 )
+                {
+                    $first = $categoryItemsATB->first ();
+                    \Log::info ( 'TYRE ATB First Item Kode: ' . ( $first->masterDataSparepart->kategoriSparepart->kode ?? 'NULL' ) );
+                }
+            }
+
+            // Calculate ATB Value
+            $atbValue = $categoryItemsATB->sum ( function ($item)
+            {
+                return $item->quantity * $item->harga;
+            } );
+
+            // Calculate APB Value (only accepted items)
+            $apbValue = $categoryItemsAPB->whereNotIn ( 'status', [ 'pending', 'rejected' ] )->sum ( function ($item)
+            {
+                return $item->quantity * $item->saldo->harga;
+            } );
+
+            // Calculate Saldo as ATB - APB
+            $saldoValue = $atbValue - $apbValue;
+
+            $this->sums_current[ $category[ 'kode' ] ] = [ 
+                'nama'     => $category[ 'nama' ],
+                'jenis'    => $category[ 'jenis' ],
+                'subJenis' => $category[ 'subJenis' ],
+                'atb'      => $atbValue,
+                'apb'      => $apbValue,
+                'saldo'    => $saldoValue
+            ];
+
+            // Calculate for previous period with the same robust comparison
+            $categoryItemsATB_Before = $ATB_Before->filter ( function ($item) use ($category)
+            {
+                return $item->masterDataSparepart &&
+                    $item->masterDataSparepart->kategoriSparepart &&
+                    strtoupper ( trim ( $item->masterDataSparepart->kategoriSparepart->kode ) ) === strtoupper ( trim ( $category[ 'kode' ] ) );
+            } );
+
+            $categoryItemsAPB_Before = $APB_Before->filter ( function ($item) use ($category)
+            {
+                return $item->masterDataSparepart &&
+                    $item->masterDataSparepart->kategoriSparepart &&
+                    strtoupper ( trim ( $item->masterDataSparepart->kategoriSparepart->kode ) ) === strtoupper ( trim ( $category[ 'kode' ] ) );
+            } );
+
+            // Calculate ATB Value for before period
+            $atbValueBefore = $categoryItemsATB_Before->sum ( function ($item)
+            {
+                return $item->quantity * $item->harga;
+            } );
+
+            // Calculate APB Value for before period (only accepted items)
+            $apbValueBefore = $categoryItemsAPB_Before->whereNotIn ( 'status', [ 'pending', 'rejected' ] )->sum ( function ($item)
+            {
+                return $item->quantity * $item->saldo->harga;
+            } );
+
+            // Calculate Saldo as ATB - APB for before period
+            $saldoValueBefore = $atbValueBefore - $apbValueBefore;
+
+            $this->sums_before[ $category[ 'kode' ] ] = [ 
+                'nama'     => $category[ 'nama' ],
+                'jenis'    => $category[ 'jenis' ],
+                'subJenis' => $category[ 'subJenis' ],
+                'atb'      => $atbValueBefore,
+                'apb'      => $apbValueBefore,
+                'saldo'    => $saldoValueBefore
+            ];
         }
-    }
-
-    private function calculateCategorySums ( $category, $ATB, $APB )
-    {
-        $categoryItemsATB = $ATB->filter ( function ($item) use ($category)
-        {
-            return $item->masterDataSparepart->kategoriSparepart->kode === $category[ 'kode' ];
-        } );
-
-        $categoryItemsAPB = $APB->filter ( function ($item) use ($category)
-        {
-            return $item->masterDataSparepart->kategoriSparepart->kode === $category[ 'kode' ];
-        } );
-
-        $atb = $categoryItemsATB->sum ( function ($item)
-        {
-            return $item->quantity * $item->harga;
-        } );
-
-        $apb = $categoryItemsAPB->whereNotIn ( 'status', [ 'pending', 'rejected' ] )->sum ( function ($item)
-        {
-            return $item->quantity * $item->saldo->harga;
-        } );
-
-        return [ 
-            'nama'     => $category[ 'nama' ],
-            'jenis'    => $category[ 'jenis' ],
-            'subJenis' => $category[ 'subJenis' ],
-            'atb'      => $atb,
-            'apb'      => $apb,
-            'saldo'    => $atb - $apb
-        ];
     }
 
     public function collection ()
@@ -206,21 +364,44 @@ class LNPBTotalExport implements FromCollection, WithHeadings, WithMapping, With
         $before  = $this->sums_before[ $row[ 'kode' ] ] ?? [ 'atb' => 0, 'apb' => 0, 'saldo' => 0 ];
         $current = $this->sums_current[ $row[ 'kode' ] ] ?? [ 'atb' => 0, 'apb' => 0, 'saldo' => 0 ];
 
+        // Function to format values - always return the value, even for zeros
+        $formatValue = function ($value)
+        {
+            return $value; // Return the value as is, including zeros
+        };
+
         // Add text styles for section headers
         if ( $row[ 'kode' ] === 'section_header' )
         {
             return [ 
                 $row[ 'number' ],
                 $row[ 'nama' ], // No HTML tags needed
-                $row[ 'before_atb' ],
-                $row[ 'before_apb' ],
-                $row[ 'before_saldo' ],
-                $row[ 'current_atb' ],
-                $row[ 'current_apb' ],
-                $row[ 'current_saldo' ],
-                $row[ 'before_atb' ] + $row[ 'current_atb' ],
-                $row[ 'before_apb' ] + $row[ 'current_apb' ],
-                $row[ 'before_saldo' ] + $row[ 'current_saldo' ]
+                $formatValue ( $row[ 'before_atb' ] ),
+                $formatValue ( $row[ 'before_apb' ] ),
+                $formatValue ( $row[ 'before_saldo' ] ),
+                $formatValue ( $row[ 'current_atb' ] ),
+                $formatValue ( $row[ 'current_apb' ] ),
+                $formatValue ( $row[ 'current_saldo' ] ),
+                $formatValue ( $row[ 'before_atb' ] + $row[ 'current_atb' ] ),
+                $formatValue ( $row[ 'before_apb' ] + $row[ 'current_apb' ] ),
+                $formatValue ( $row[ 'before_saldo' ] + $row[ 'current_saldo' ] )
+            ];
+        }
+        // Special handling for grand total row
+        elseif ( $row[ 'kode' ] === 'total_row' )
+        {
+            return [ 
+                '',
+                $row[ 'nama' ], // TOTAL
+                $formatValue ( $row[ 'before_atb' ] ),
+                $formatValue ( $row[ 'before_apb' ] ),
+                $formatValue ( $row[ 'before_saldo' ] ),
+                $formatValue ( $row[ 'current_atb' ] ),
+                $formatValue ( $row[ 'current_apb' ] ),
+                $formatValue ( $row[ 'current_saldo' ] ),
+                $formatValue ( $row[ 'before_atb' ] + $row[ 'current_atb' ] ),
+                $formatValue ( $row[ 'before_apb' ] + $row[ 'current_apb' ] ),
+                $formatValue ( $row[ 'before_saldo' ] + $row[ 'current_saldo' ] )
             ];
         }
 
@@ -228,15 +409,15 @@ class LNPBTotalExport implements FromCollection, WithHeadings, WithMapping, With
         return [ 
             $row[ 'number' ],
             $row[ 'nama' ],
-            $before[ 'atb' ],
-            $before[ 'apb' ],
-            $before[ 'saldo' ],
-            $current[ 'atb' ],
-            $current[ 'apb' ],
-            $current[ 'saldo' ],
-            $before[ 'atb' ] + $current[ 'atb' ],
-            $before[ 'apb' ] + $current[ 'apb' ],
-            $before[ 'saldo' ] + $current[ 'saldo' ]
+            $formatValue ( $before[ 'atb' ] ),
+            $formatValue ( $before[ 'apb' ] ),
+            $formatValue ( $before[ 'saldo' ] ),
+            $formatValue ( $current[ 'atb' ] ),
+            $formatValue ( $current[ 'apb' ] ),
+            $formatValue ( $current[ 'saldo' ] ),
+            $formatValue ( $before[ 'atb' ] + $current[ 'atb' ] ),
+            $formatValue ( $before[ 'apb' ] + $current[ 'apb' ] ),
+            $formatValue ( $before[ 'saldo' ] + $current[ 'saldo' ] )
         ];
     }
 
@@ -289,15 +470,14 @@ class LNPBTotalExport implements FromCollection, WithHeadings, WithMapping, With
                                     ];
                                 }, range ( 1, 9 ) )
                             ]
+                        ],
+                        // CHANGE: Add Tyre as a direct item within PEMELIHARAAN rather than a separate subsection
+                        'items'       => [ 
+                            [ 
+                                'code'   => 'B3',
+                                'number' => 'B.3'
+                            ]
                         ]
-                    ],
-                    // TYRE as direct subsection of PEMELIHARAAN with explicit level
-                    [ 
-                        'kode'   => 'B.3',
-                        'nama'   => 'TYRE',
-                        'number' => 'B.3',
-                        'code'   => 'B3',
-                        'level'  => 2  // Set explicit level for TYRE
                     ]
                 ]
             ],
@@ -395,6 +575,37 @@ class LNPBTotalExport implements FromCollection, WithHeadings, WithMapping, With
                 }
             }
         }
+
+        // Calculate grand totals
+        $grand_total_before  = [ 'atb' => 0, 'apb' => 0, 'saldo' => 0 ];
+        $grand_total_current = [ 'atb' => 0, 'apb' => 0, 'saldo' => 0 ];
+
+        foreach ( $this->sums_current as $key => $category )
+        {
+            // Sum up all previous month values
+            $grand_total_before[ 'atb' ] += $this->sums_before[ $key ][ 'atb' ];
+            $grand_total_before[ 'apb' ] += $this->sums_before[ $key ][ 'apb' ];
+            $grand_total_before[ 'saldo' ] += $this->sums_before[ $key ][ 'saldo' ];
+
+            // Sum up all current month values
+            $grand_total_current[ 'atb' ] += $category[ 'atb' ];
+            $grand_total_current[ 'apb' ] += $category[ 'apb' ];
+            $grand_total_current[ 'saldo' ] += $category[ 'saldo' ];
+        }
+
+        // Add grand total row
+        $rows[] = [ 
+            'kode'          => 'total_row',
+            'nama'          => 'TOTAL',
+            'level'         => 0,
+            'number'        => '',
+            'before_atb'    => $grand_total_before[ 'atb' ],
+            'before_apb'    => $grand_total_before[ 'apb' ],
+            'before_saldo'  => $grand_total_before[ 'saldo' ],
+            'current_atb'   => $grand_total_current[ 'atb' ],
+            'current_apb'   => $grand_total_current[ 'apb' ],
+            'current_saldo' => $grand_total_current[ 'saldo' ],
+        ];
 
         return $rows;
     }
@@ -540,9 +751,9 @@ class LNPBTotalExport implements FromCollection, WithHeadings, WithMapping, With
             ],
         ] );
 
-        // Format currency columns
-        $currencyFormat = '#,##0';
-        foreach ( range ( 'C', 'K' ) as $col )
+        // Format currency columns to show zeros as 0 and negatives in parentheses:
+        $currencyFormat = '#,##0.00_-;(#,##0.00);0.00';
+        foreach ( range ( 'D', 'L' ) as $col )
         {
             $sheet->getStyle ( "{$col}7:{$col}{$lastRow}" )
                 ->getNumberFormat ()
@@ -567,16 +778,18 @@ class LNPBTotalExport implements FromCollection, WithHeadings, WithMapping, With
         foreach ( $collection as $row )
         {
             if (
-                $row[ 'kode' ] === 'section_header' &&
-                in_array ( $row[ 'nama' ], [ 
-                    'SUKU CADANG',
-                    'PERBAIKAN',
-                    'PEMELIHARAAN',
-                    'Maintenance Kit',
-                    'Oil & Lubricants',
-                    'TYRE',
-                    'MATERIAL'
-                ] )
+                ( $row[ 'kode' ] === 'section_header' &&
+                    in_array ( $row[ 'nama' ], [ 
+                        'SUKU CADANG',
+                        'PERBAIKAN',
+                        'PEMELIHARAAN',
+                        'Maintenance Kit',
+                        'Oil & Lubricants',
+                        'TYRE',
+                        'MATERIAL'
+                    ] ) ) ||
+                // Add condition to make TYRE row bold
+                $row[ 'kode' ] === 'B3'
             )
             {
                 $sheet->getStyle ( "B{$currentRow}:L{$currentRow}" )
@@ -586,13 +799,20 @@ class LNPBTotalExport implements FromCollection, WithHeadings, WithMapping, With
             $currentRow++;
         }
 
-        // Set up grouping levels and rows
+        // Set up grouping levels only (without hiding rows)
         $currentRow  = 8;
         $collection  = $this->collection ();
         $groupStarts = [];
 
         foreach ( $collection as $row )
         {
+            // Skip applying outline level for TOTAL row
+            if ( $row[ 'kode' ] === 'total_row' )
+            {
+                $currentRow++;
+                continue;
+            }
+
             $name   = $row[ 'nama' ];
             $number = $row[ 'number' ] ?? '';
 
@@ -606,11 +826,10 @@ class LNPBTotalExport implements FromCollection, WithHeadings, WithMapping, With
                     default => 4
                 };
 
-                // Set outline level
+                // Set outline level but keep all rows visible
                 if ( $level > 1 )
                 {
                     $sheet->getRowDimension ( $currentRow )->setOutlineLevel ( $level - 1 );
-                    $sheet->getRowDimension ( $currentRow )->setVisible ( false );
                 }
             }
             else
@@ -627,7 +846,6 @@ class LNPBTotalExport implements FromCollection, WithHeadings, WithMapping, With
                 };
 
                 $sheet->getRowDimension ( $currentRow )->setOutlineLevel ( $level - 1 );
-                $sheet->getRowDimension ( $currentRow )->setVisible ( false );
             }
 
             $currentRow++;
@@ -636,6 +854,35 @@ class LNPBTotalExport implements FromCollection, WithHeadings, WithMapping, With
         // Set outline properties
         $sheet->setShowSummaryBelow ( false );
         $sheet->setShowSummaryRight ( false );
+
+        // Style for total row
+        $sheet->mergeCells ( "B{$lastRow}:C{$lastRow}" ); // Merge first two columns for the total row
+        $sheet->setCellValue ( "B{$lastRow}", "TOTAL" ); // Explicitly set the TOTAL text
+
+        $sheet->getStyle ( "B{$lastRow}:L{$lastRow}" )->applyFromArray ( [ 
+            'font'      => [ 
+                'bold' => true,
+            ],
+            'alignment' => [ 
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+            ],
+            'borders'   => [ 
+                'allBorders' => [ 
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                ],
+                'top'        => [ 
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM,
+                ],
+            ],
+        ] );
+
+        // Center the "TOTAL" text
+        $sheet->getStyle ( "B{$lastRow}" )->getAlignment ()
+            ->setHorizontal ( \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER );
+
+        // Right-align the numeric values
+        $sheet->getStyle ( "D{$lastRow}:L{$lastRow}" )->getAlignment ()
+            ->setHorizontal ( \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT );
 
         return [];
     }

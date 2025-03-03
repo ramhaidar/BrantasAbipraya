@@ -71,9 +71,15 @@
 
                         <!-- Right side - Buttons -->
                         <div class="d-flex justify-content-end gap-2">
-                            <a class="btn btn-warning btn-sm btn-hide-text-mobile" href="{{ isset($proyek) ? route('export.lnpb_total', ['id' => $proyek->id]) : route('export.lnpb_total') }}">
-                                <i class="fa-solid fa-file-excel"></i> <span class="ms-2">Export</span>
-                            </a>
+                            @if (isset($proyek))
+                                <a class="btn btn-warning btn-sm btn-hide-text-mobile" href="{{ route('export.lnpb_total') }}?id={{ $proyek->id }}&startDate={{ $startDate }}&endDate={{ $endDate }}">
+                                    <i class="fa-solid fa-file-excel"></i> <span class="ms-2">Export</span>
+                                </a>
+                            @else
+                                <a class="btn btn-warning btn-sm btn-hide-text-mobile" href="{{ route('export.lnpb_total') }}?startDate={{ $startDate }}&endDate={{ $endDate }}">
+                                    <i class="fa-solid fa-file-excel"></i> <span class="ms-2">Export</span>
+                                </a>
+                            @endif
                             <button class="btn btn-primary btn-sm btn-hide-text-mobile" id="toggleAllButton" type="button" onclick="toggleAll()">
                                 <i class="fa fa-expand" id="toggleAllIcon"></i>
                                 <span class="ms-2" id="toggleAllText">Expand All</span>

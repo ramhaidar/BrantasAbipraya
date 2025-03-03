@@ -58,21 +58,56 @@
             font-size: 12px;
             fill: white;
         }
+
+        /* Only keep necessary date picker specific styles */
+        .date-input-container {
+            position: relative;
+        }
+
+        .date-input-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
     </style>
 @endpush
 
 @section('content')
     <div class="container-fluid">
-        <div class="dropdown-container mb-3">
-            <select class="form-select" id="projectSelect" onchange="window.location.href=this.value">
-                <option value="{{ route('dashboard') }}" {{ !request('id_proyek') ? 'selected' : '' }}>Semua Proyek</option>
-                @foreach ($proyeks as $proyekOne)
-                    <option value="{{ route('dashboard', ['id_proyek' => $proyekOne->id]) }}" {{ request('id_proyek') == $proyekOne->id ? 'selected' : '' }}>
-                        {{ $proyekOne->nama }}
-                    </option>
-                @endforeach
-            </select>
+        <!-- Use Bootstrap classes for the filters row instead of custom CSS -->
+        <div class="d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center gap-3 mb-3">
+            <!-- Project selection with responsive width -->
+            <div class="flex-lg-fill" style="min-width: 200px;">
+                <select class="form-select" id="projectSelect">
+                    <option value="" {{ !request('id_proyek') ? 'selected' : '' }}>Semua Proyek</option>
+                    @foreach ($proyeks as $proyekOne)
+                        <option value="{{ $proyekOne->id }}" {{ request('id_proyek') == $proyekOne->id ? 'selected' : '' }}>
+                            {{ $proyekOne->nama }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <!-- Period filters with responsive layout -->
+            <div class="d-flex align-items-center gap-2 flex-lg-fill" style="flex: 2;">
+                <div class="date-input-container flex-fill">
+                    <input class="form-control" id="startDate" name="startDate" type="month" value="{{ request('startDate') ? \Carbon\Carbon::parse($startDate)->format('Y-m') : '' }}">
+                    <div class="date-input-overlay" onclick="document.getElementById('startDate').showPicker()"></div>
+                </div>
+                <span class="text-nowrap">s/d</span>
+                <div class="date-input-container flex-fill">
+                    <input class="form-control" id="endDate" name="endDate" type="month" value="{{ request('endDate') ? \Carbon\Carbon::parse($endDate)->format('Y-m') : '' }}">
+                    <div class="date-input-overlay" onclick="document.getElementById('endDate').showPicker()"></div>
+                </div>
+                <button class="btn btn-primary" onclick="applyFilters()">
+                    <i class="fa fa-filter"></i> <span class="d-none d-sm-inline-block ms-2">Filter</span>
+                </button>
+            </div>
         </div>
+
         <div class="row">
             <!-- Display Jumlah Barang Masuk -->
             <div class="col-12 col-sm-6 col-md-4">
@@ -96,13 +131,22 @@
                 </div>
             </div>
 
-            <!-- Display Total Semua Barang -->
+            <!-- Display Total Semua Barang with parentheses for negative values -->
             <div class="col-12 col-sm-6 col-md-4">
                 <div class="info-box mb-3">
                     <span class="info-box-icon bg-success elevation-1"><i class="fas fa-balance-scale"></i></span>
                     <div class="info-box-content" id="totalSemuaBarang">
                         <span class="info-box-text">Total Saldo</span>
-                        <span class="info-box-number">Rp{{ number_format($totalSaldo, 2, ',', '.') }}</span>
+                        <span class="info-box-number">
+                            @php
+                                // Check if saldo is negative and format appropriately
+                                if ($totalSaldo < 0) {
+                                    echo 'Rp(' . number_format(abs($totalSaldo), 2, ',', '.') . ')';
+                                } else {
+                                    echo 'Rp' . number_format($totalSaldo, 2, ',', '.');
+                                }
+                            @endphp
+                        </span>
                     </div>
                 </div>
             </div>
@@ -235,6 +279,95 @@
 
 @push('scripts_2')
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+
+    <script>
+        // Initialize date constraints when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const startDateInput = document.getElementById('startDate');
+            const endDateInput = document.getElementById('endDate');
+
+            // Set initial constraints if values exist
+            if (startDateInput.value) {
+                endDateInput.min = startDateInput.value;
+            }
+
+            if (endDateInput.value) {
+                startDateInput.max = endDateInput.value;
+            }
+
+            // Add event listeners to update constraints when dates change
+            startDateInput.addEventListener('change', function() {
+                if (this.value) {
+                    endDateInput.min = this.value;
+
+                    // If end date is now less than start date, reset it
+                    if (endDateInput.value && endDateInput.value < this.value) {
+                        endDateInput.value = this.value;
+                    }
+                } else {
+                    endDateInput.min = "";
+                }
+            });
+
+            endDateInput.addEventListener('change', function() {
+                if (this.value) {
+                    startDateInput.max = this.value;
+
+                    // If start date is now greater than end date, reset it
+                    if (startDateInput.value && startDateInput.value > this.value) {
+                        startDateInput.value = this.value;
+                    }
+                } else {
+                    startDateInput.max = "";
+                }
+            });
+        });
+
+        function applyFilters() {
+            const projectId = document.getElementById('projectSelect').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const currentUrl = new URL(window.location.href);
+
+            // Handle project filter
+            if (projectId) {
+                currentUrl.searchParams.set('id_proyek', projectId);
+            } else {
+                currentUrl.searchParams.delete('id_proyek');
+            }
+
+            // Handle date filters - only add if they have values
+            if (startDate) {
+                currentUrl.searchParams.set('startDate', startDate);
+            } else {
+                currentUrl.searchParams.delete('startDate');
+            }
+
+            if (endDate) {
+                currentUrl.searchParams.set('endDate', endDate);
+            } else {
+                currentUrl.searchParams.delete('endDate');
+            }
+
+            // Navigate to the new URL
+            window.location.href = currentUrl.toString();
+        }
+
+        // Add helper function to format saldo values with parentheses for negative numbers
+        function formatSaldoValue(value) {
+            if (value < 0) {
+                return '(Rp' + Math.abs(value).toLocaleString('de-DE', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }) + ')';
+            } else {
+                return 'Rp' + value.toLocaleString('de-DE', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+            }
+        }
+    </script>
 
     @include('dashboard.dashboard.scripts.VerticalBarChart')
     @if (!request('id_proyek'))

@@ -14,6 +14,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -110,12 +111,71 @@ class DashboardController extends Controller
             ->orderBy ( "id", "desc" )
             ->get ();
 
-        // dd ( $proyeks );
+        // Track whether date parameters were provided
+        $hasDateParams = $request->has ( 'startDate' ) && ! empty ( $request->startDate ) &&
+            $request->has ( 'endDate' ) && ! empty ( $request->endDate );
 
-        // Date ranges
+        // Date ranges - Parse from request parameters or use defaults
         $currentDate = now ();
-        $startDate   = $currentDate->copy ()->startOfMonth ();
-        $endDate     = $currentDate->copy ()->endOfMonth ();
+
+        // Check if startDate is provided in the request
+        if ( $request->has ( 'startDate' ) && ! empty ( $request->startDate ) )
+        {
+            try
+            {
+                // Parse YYYY-MM format from input
+                // Set to the 26th day of the selected month
+                $startDate = Carbon::createFromFormat ( 'Y-m', $request->startDate )->setDay ( 26 );
+            }
+            catch ( \Exception $e )
+            {
+                // Fallback to 26th of current month if invalid
+                $startDate = $currentDate->copy ()->setDay ( 26 );
+                // If current day is before 26th, use previous month
+                if ( $currentDate->day < 26 )
+                {
+                    $startDate->subMonth ();
+                }
+            }
+        }
+        else
+        {
+            // Default: 26th of current month or previous month
+            $startDate = $currentDate->copy ()->setDay ( 26 );
+            // If current day is before 26th, use previous month
+            if ( $currentDate->day < 26 )
+            {
+                $startDate->subMonth ();
+            }
+        }
+
+        // Check if endDate is provided in the request
+        if ( $request->has ( 'endDate' ) && ! empty ( $request->endDate ) )
+        {
+            try
+            {
+                // Parse the YYYY-MM format from input and set to the 25th day
+                // Removed the addMonth() call that was causing incorrect date
+                $endDate = Carbon::createFromFormat ( 'Y-m', $request->endDate )
+                    ->setDay ( 25 ); // Set to day 25 of the specified month
+            }
+            catch ( \Exception $e )
+            {
+                // Fallback if invalid: 25th of next month from startDate
+                $endDate = $startDate->copy ()->addMonth ()->setDay ( 25 );
+            }
+        }
+        else
+        {
+            // Default: 25th of the month after startDate
+            $endDate = $startDate->copy ()->addMonth ()->setDay ( 25 );
+        }
+
+        // Ensure endDate is not before startDate (this should rarely happen with our logic)
+        if ( $endDate->lt ( $startDate ) )
+        {
+            $endDate = $startDate->copy ()->addMonth ()->setDay ( 25 );
+        }
 
         // Build base queries
         [ $atbQuery, $apbQuery, $saldoQuery ] = $this->buildBaseQueries (
@@ -123,13 +183,23 @@ class DashboardController extends Controller
             $id_proyek
         );
 
-        // Get data for different date ranges
+        // Get data for different date ranges using the parsed dates
         $data = $this->getQueriesData (
             $atbQuery,
             $apbQuery,
             $saldoQuery,
             $startDate,
             $endDate
+        );
+
+        // Create filtered data specifically for the main totals
+        $filteredData = $this->getFilteredDataForTotals (
+            $atbQuery,
+            $apbQuery,
+            $saldoQuery,
+            $startDate,
+            $endDate,
+            $hasDateParams
         );
 
         // dd ( $data[ 'atbDataTotal' ] );
@@ -157,28 +227,95 @@ class DashboardController extends Controller
 
         // dd ( $categoryData );
 
+        console ( "START DATE: " . $startDate->format ( 'Y-m-d' ) );
+        console ( "END DATE: " . $endDate->format ( 'Y-m-d' ) );
+
+        console ( "ATB TOTAL COUNT: " . $data[ 'atbDataTotal' ]->count () );
+        console ( "FILTERED ATB COUNT: " . $filteredData[ 'atbData' ]->count () );
+
+        // Sample a few records
+        if ( $data[ 'atbDataTotal' ]->isNotEmpty () )
+        {
+            console ( "FIRST ATB RECORD DATE: " . $data[ 'atbDataTotal' ]->first ()->tanggal );
+            console ( "FIRST ATB RECORD TIPE: " . $data[ 'atbDataTotal' ]->first ()->tipe );
+        }
+
+
+        // Calculate totals using the correct ATB-APB formula for saldo
+        $totalATB   = $this->calculateATBTotal ( $filteredData[ "atbData" ] );
+        $totalAPB   = $this->calculateAPBTotal ( $filteredData[ "apbData" ] );
+        $totalSaldo = $totalATB - $totalAPB; // Calculate saldo as ATB - APB
+
         return view ( "dashboard.dashboard.dashboard", [ 
-            "headerPage"             => "Dashboard",
-            "page"                   => "Dashboard",
+            "headerPage"                 => "Dashboard",
+            "page"                       => "Dashboard",
 
-            "proyeks"                => $proyeks,
-            "selectedProject"        => $id_proyek,
+            "proyeks"                    => $proyeks,
+            "selectedProject"            => $id_proyek,
 
-            "totalATB"               => $this->calculateOverallTotal ( $data[ "atbData" ] ),
-            "totalAPB"               => $this->calculateOverallTotal ( $data[ "apbData" ] ),
-            "totalSaldo"             => $this->calculateOverallTotal ( $data[ "saldoData" ] ),
+            "test"                       => $data[ "atbDataTotal" ],
+            // Use the calculated values instead of calling calculateOverallTotal
+            "totalATB"                   => $totalATB,
+            "totalAPB"                   => $totalAPB,
+            "totalSaldo"                 => $totalSaldo,
 
-            "chartData"              => $chartData[ "main" ],
-            "chartDataCurrent"       => $chartData[ "current" ],
-            "chartDataTotal"         => $chartData[ "total" ],
+            "chartData"                  => $chartData[ "main" ],
+            "chartDataCurrent"           => $chartData[ "current" ],
+            "chartDataTotal"             => $chartData[ "total" ],
 
-            "startDate"              => $startDate->format ( "Y-m-d" ),
-            "endDate"                => $endDate->format ( "Y-m-d" ),
+            "startDate"                  => $startDate->format ( "Y-m-d" ),
+            "endDate"                    => $endDate->format ( "Y-m-d" ),
 
-            "horizontalChartCurrent" => $horizontalCharts[ "current" ],
-            "horizontalChartTotal"   => $horizontalCharts[ "total" ],
-            "categoryData"           => $categoryData,
+            "horizontalChartCurrent"     => $horizontalCharts[ "current" ],
+            "horizontalChartTotal"       => $horizontalCharts[ "total" ],
+            "categoryData"               => $categoryData,
+            "formatSaldoWithParentheses" => true,
         ] );
+    }
+
+    // New method to get filtered data specifically for the totals
+    private function getFilteredDataForTotals ( $atbQuery, $apbQuery, $saldoQuery, $startDate, $endDate, $applyDateFilter = true )
+    {
+        // Clone the queries to prevent modifying the originals
+        $atbBase = clone $atbQuery->with ( [ 'masterDataSparepart.kategoriSparepart', 'saldo' ] )
+            ->orderBy ( 'updated_at', 'desc' )
+            ->orderBy ( 'id', 'desc' );
+
+        $apbBase = clone $apbQuery->with ( [ 'masterDataSparepart.kategoriSparepart', 'saldo' ] )
+            ->orderBy ( 'updated_at', 'desc' )
+            ->orderBy ( 'id', 'desc' );
+
+        $saldoBase = clone $saldoQuery->with ( [ 'masterDataSparepart.kategoriSparepart', 'atb' ] )
+            ->orderBy ( 'updated_at', 'desc' )
+            ->orderBy ( 'id', 'desc' );
+
+        // Apply date filtering conditionally
+        if ( $applyDateFilter )
+        {
+            return [ 
+                "atbData"   => ( clone $atbBase )
+                    ->whereBetween ( "tanggal", [ $startDate, $endDate ] )
+                    ->get (),
+                "apbData"   => ( clone $apbBase )
+                    ->whereBetween ( "tanggal", [ $startDate, $endDate ] )
+                    ->get (),
+                "saldoData" => ( clone $saldoBase )
+                    ->whereHas (
+                        "atb",
+                        fn ( $q ) => $q->whereBetween ( "tanggal", [ $startDate, $endDate ] )
+                    )
+                    ->get (),
+            ];
+        }
+        else
+        {
+            // No date filtering - get all data that matches the project and type
+            return [ 
+                "atbData"   => ( clone $atbBase )->get (),
+                "apbData"   => ( clone $apbBase )->get (),
+                "saldoData" => ( clone $saldoBase )->get (),
+            ];
+        }
     }
 
     private function buildBaseQueries ( $user, $id_proyek )
@@ -233,6 +370,23 @@ class DashboardController extends Controller
             ->orderBy ( 'updated_at', 'desc' )
             ->orderBy ( 'id', 'desc' );
 
+        // Calculate the start of month for current period
+        $currentPeriodStart = $startDate->copy ();
+
+        // Calculate the end of month for current period
+        $currentPeriodEnd = $endDate->copy ();
+
+        console ( "PERIOD START: " . $currentPeriodStart->format ( 'Y-m-d' ) );
+        console ( "PERIOD END: " . $currentPeriodEnd->format ( 'Y-m-d' ) );
+
+        // dd ( ( clone $saldoBase )
+        //     ->whereHas (
+        //         "atb",
+        //         fn ( $q ) =>
+        //         $q->whereBetween ( "tanggal", [ $currentPeriodStart, $currentPeriodEnd ] )
+        //     )
+        //     ->get () );
+
         // Build all queries using the base queries
         return [ 
             "atbData"          => ( clone $atbBase )->get (),
@@ -240,30 +394,31 @@ class DashboardController extends Controller
             "saldoData"        => ( clone $saldoBase )->get (),
 
             "atbDataCurrent"   => ( clone $atbBase )
-                ->whereBetween ( "tanggal", [ $startDate, $endDate ] )
+                ->whereBetween ( "tanggal", [ $currentPeriodStart, $currentPeriodEnd ] )
                 ->get (),
             "apbDataCurrent"   => ( clone $apbBase )
-                ->whereBetween ( "tanggal", [ $startDate, $endDate ] )
+                ->whereBetween ( "tanggal", [ $currentPeriodStart, $currentPeriodEnd ] )
                 ->get (),
             "saldoDataCurrent" => ( clone $saldoBase )
                 ->whereHas (
                     "atb",
                     fn ( $q ) =>
-                    $q->whereBetween ( "tanggal", [ $startDate, $endDate ] )
+                    $q->whereBetween ( "tanggal", [ $currentPeriodStart, $currentPeriodEnd ] )
                 )
                 ->get (),
 
+            // Keep the original logic for the charts - data up to the end date
             "atbDataTotal"     => ( clone $atbBase )
-                ->where ( "tanggal", "<=", $endDate )
+                ->where ( "tanggal", "<=", $currentPeriodEnd )
                 ->get (),
             "apbDataTotal"     => ( clone $apbBase )
-                ->where ( "tanggal", "<=", $endDate )
+                ->where ( "tanggal", "<=", $currentPeriodEnd )
                 ->get (),
             "saldoDataTotal"   => ( clone $saldoBase )
                 ->whereHas (
                     "atb",
                     fn ( $q ) =>
-                    $q->where ( "tanggal", "<=", $endDate )
+                    $q->where ( "tanggal", "<=", $currentPeriodEnd )
                 )
                 ->get (),
         ];
@@ -330,17 +485,27 @@ class DashboardController extends Controller
     private function sumProjectData ( $data, $proyekId, $isApb = false )
     {
         $filteredData = $data->where ( "id_proyek", $proyekId );
+
         if ( $isApb )
         {
             $filteredData = $filteredData->whereNotIn ( "status", [ 
                 "pending",
                 "rejected",
             ] );
+
+            return $filteredData->sum ( function ($item)
+            {
+                return $item->quantity * ( $item->saldo->harga ?? 0 );
+            } );
         }
-        return $filteredData->sum (
-            fn ( $item ) => $item->quantity *
-            ( $item->saldo->harga ?? ( $item->harga ?? 0 ) )
-        );
+        else
+        {
+            // For ATB data
+            return $filteredData->sum ( function ($item)
+            {
+                return $item->quantity * ( $item->harga ?? 0 );
+            } );
+        }
     }
 
     private function calculateChartData ( $atbData, $apbData, $saldoData )
@@ -396,9 +561,22 @@ class DashboardController extends Controller
                         ? $item->quantity * $item->saldo->harga
                         : 0;
                 }
-                return $item->quantity *
+
+                // Calculate the raw value - don't use abs() for saldo items
+                // This will allow negative values to remain negative
+                $value = $item->quantity *
                     ( $item->saldo->harga ?? ( $item->harga ?? 0 ) );
+
+                return $value;
             } );
+    }
+
+    // Helper to identify saldo items
+    private function isSaldoItem ( $item )
+    {
+        // Check if it's a Saldo model or has a specific property indicating it's a saldo
+        return $item instanceof Saldo ||
+            ( isset ( $item->tipe ) && strpos ( strtolower ( $item->tipe ), 'saldo' ) !== false );
     }
 
     private function getCategoryDataForProject ( $projectId, $atbCurrent, $apbCurrent, $saldoCurrent, $atbTotal, $apbTotal, $saldoTotal )
@@ -512,5 +690,31 @@ class DashboardController extends Controller
             return $totalB <=> $totalA;
         } );
         return $data;
+    }
+
+    // Add these helper methods for clearer ATB and APB calculations
+    private function calculateATBTotal ( Collection $data )
+    {
+        return $data
+            ->filter ( fn ( $item ) => in_array ( $item->tipe, self::VALID_TYPES ) )
+            ->sum ( function ($item)
+            {
+                return $item->quantity * ( $item->harga ?? 0 );
+            } );
+    }
+
+    private function calculateAPBTotal ( Collection $data )
+    {
+        return $data
+            ->filter ( fn ( $item ) => in_array ( $item->tipe, self::VALID_TYPES ) )
+            ->sum ( function ($item)
+            {
+                // Only count APB items that aren't pending or rejected
+                if ( in_array ( $item->status, [ "pending", "rejected" ] ) )
+                {
+                    return 0;
+                }
+                return $item->quantity * ( $item->saldo->harga ?? 0 );
+            } );
     }
 }

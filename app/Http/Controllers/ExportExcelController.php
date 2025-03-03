@@ -20,6 +20,7 @@ use App\Exports\ATBHutangUnitAlatExport;
 use App\Exports\ATBPanjarUnitAlatProyekExport;
 use App\Exports\EvaluasiDetailRKBUrgentExport;
 use App\Exports\EvaluasiDetailRKBGeneralExport;
+use App\Exports\LNPBBulanBerjalanExport;
 
 class ExportExcelController extends Controller
 {
@@ -221,22 +222,8 @@ class ExportExcelController extends Controller
         return Excel::download ( new SaldoExport( $request->id, $request->type ), $fileName );
     }
 
-    public function lnpb_bulan_berjalan ( Request $request = null )
+    public function lnpb_bulan_berjalan ( Request $request )
     {
-        if ( $request === null )
-        {
-            dd ( "request is null" );
-            return;
-        }
-        dd ( $request->all () );
-        // Dummy function for exporting LNPB Bulan Berjalan
-    }
-
-    public function lnpb_total ( Request $request )
-    {
-        // Remove the dd() call that was stopping execution
-        // dd ( $request->all () );
-
         // Default date calculations
         $currentDate      = now ();
         $defaultStartDate = $currentDate->copy ()->subMonth ()->day ( 26 );
@@ -263,15 +250,70 @@ class ExportExcelController extends Controller
             $endDate   = $defaultEndDate;
         }
 
+        // Format month and year for the filename using Indonesian locale
+        $monthYear = Carbon::parse ( $endDate )->locale ( 'id' )->translatedFormat ( 'F Y' );
+
         // Generate filename based on whether id_proyek is provided
         if ( $request->filled ( 'id' ) )
         {
             $proyek   = Proyek::findOrFail ( $request->id );
-            $filename = "LNPB Total - {$proyek->nama}.xlsx";
+            $filename = "LNPB Bulan Berjalan - {$proyek->nama} - {$monthYear}.xlsx";
         }
         else
         {
-            $filename = "LNPB Total - Semua Proyek.xlsx";
+            $filename = "LNPB Bulan Berjalan - Semua Proyek - {$monthYear}.xlsx";
+        }
+
+        return Excel::download (
+            new LNPBBulanBerjalanExport(
+                $request->input ( 'id' ), // Will be null if not provided
+                $startDate,
+                $endDate
+            ),
+            $filename
+        );
+    }
+
+    public function lnpb_total ( Request $request )
+    {
+        // Default date calculations
+        $currentDate      = now ();
+        $defaultStartDate = $currentDate->copy ()->subMonth ()->day ( 26 );
+        $defaultEndDate   = $currentDate->copy ()->day ( 25 );
+
+        try
+        {
+            $startDate = $request->filled ( 'startDate' ) && $request->startDate !== '-NaN-26'
+                ? Carbon::parse ( $request->startDate )
+                : $defaultStartDate;
+
+            $endDate = $request->filled ( 'endDate' ) && $request->endDate !== '-25'
+                ? Carbon::parse ( $request->endDate )
+                : $defaultEndDate;
+
+            // Ensure startDate is on the 26th and endDate is on the 25th
+            $startDate = $startDate->day ( 26 );
+            $endDate   = $endDate->day ( 25 );
+        }
+        catch ( \Exception $e )
+        {
+            // If date parsing fails, use defaults
+            $startDate = $defaultStartDate;
+            $endDate   = $defaultEndDate;
+        }
+
+        // Format month and year for the filename using Indonesian locale
+        $monthYear = Carbon::parse ( $endDate )->locale ( 'id' )->translatedFormat ( 'F Y' );
+
+        // Generate filename based on whether id_proyek is provided
+        if ( $request->filled ( 'id' ) )
+        {
+            $proyek   = Proyek::findOrFail ( $request->id );
+            $filename = "LNPB Total - {$proyek->nama} - {$monthYear}.xlsx";
+        }
+        else
+        {
+            $filename = "LNPB Total - Semua Proyek - {$monthYear}.xlsx";
         }
 
         return Excel::download (

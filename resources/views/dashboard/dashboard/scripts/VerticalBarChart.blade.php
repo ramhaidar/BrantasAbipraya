@@ -22,7 +22,7 @@
             return 'Rp ' + number.toLocaleString('de-DE').split(',')[0];
         };
 
-        function createVerticalChart(elementId, data) {
+        function createVerticalChart(elementId, data, seriesToInclude = ['atb', 'apb', 'saldo']) {
             // Clear existing chart
             d3.select(`#${elementId}`).html('');
 
@@ -51,7 +51,7 @@
 
             // Prepare data
             const categories = Object.keys(data);
-            const series = ['atb', 'apb', 'saldo'];
+            const series = seriesToInclude; // Use the provided series parameter
             const colors = {
                 atb: '#fe6d73', // Merah muda
                 apb: '#f6f6f6', // Putih
@@ -65,11 +65,12 @@
                 'saldo': 'Saldo'
             };
 
+            // Filter legend items to only include those in seriesToInclude
             const legend = svg.append('g')
                 .attr('transform', `translate(0, ${-margin.top/1.2})`); // Changed from /2 to /1.5
 
             const legendItems = legend.selectAll('g')
-                .data(Object.keys(legendLabels))
+                .data(seriesToInclude) // Only show included series in legend
                 .enter()
                 .append('g')
                 .attr('transform', (d, i) => `translate(${i * 150}, 0)`);
@@ -243,8 +244,8 @@
                 .text('Rupiah (dalam Miliar)');
         }
 
-        // Create both charts
-        createVerticalChart('currentMonthVerticalChart', currentMonthData);
-        createVerticalChart('totalVerticalChart', totalData);
+        // Create charts with different series configurations
+        createVerticalChart('currentMonthVerticalChart', currentMonthData, ['atb', 'apb']); // Only show ATB and APB
+        createVerticalChart('totalVerticalChart', totalData); // Show all series
     });
 </script>

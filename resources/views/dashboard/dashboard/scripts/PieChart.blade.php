@@ -27,7 +27,7 @@
             return 'Rp ' + number.toLocaleString('de-DE').split(',')[0];
         };
 
-        function createPieChart(elementId, data) {
+        function createPieChart(elementId, data, includeSaldo = true) {
             // Clear existing chart
             d3.select(`#${elementId}`).html('');
 
@@ -59,12 +59,16 @@
                 {
                     name: 'APB',
                     value: data.apb || 0
-                },
-                {
-                    name: 'Saldo',
-                    value: data.saldo || 0
                 }
             ];
+
+            // Only include Saldo if specified
+            if (includeSaldo) {
+                pieData.push({
+                    name: 'Saldo',
+                    value: data.saldo || 0
+                });
+            }
 
             // Ensure at least one slice has a non-zero value
             const hasNonZeroValue = pieData.some(d => d.value > 0);
@@ -201,14 +205,6 @@
                         .text(`${billions}M`);
                 })
                 .style('opacity', d => (d.value === 0 ? 0 : 1));
-
-            // Remove center label if it exists
-            // svg.append('text')
-            //     .attr('text-anchor', 'middle')
-            //     .attr('dy', '0.35em')
-            //     .style('fill', 'white')
-            //     .style('font-size', '14px')
-            //     .text('Total');
         }
 
         // Calculate total values for each category
@@ -231,14 +227,14 @@
         const totalTotals = calculateTotals(@json($horizontalChartTotal));
 
         setTimeout(() => {
-            createPieChart('pieChartCurrent', currentTotals);
-            createPieChart('pieChartTotal', totalTotals);
+            createPieChart('pieChartCurrent', currentTotals, false); // Don't include Saldo
+            createPieChart('pieChartTotal', totalTotals, true); // Include Saldo
         }, 100);
 
         // Add resize handler
         window.addEventListener('resize', debounce(() => {
-            createPieChart('pieChartCurrent', currentTotals);
-            createPieChart('pieChartTotal', totalTotals);
+            createPieChart('pieChartCurrent', currentTotals, false); // Don't include Saldo
+            createPieChart('pieChartTotal', totalTotals, true); // Include Saldo
         }, 250));
     });
 </script>

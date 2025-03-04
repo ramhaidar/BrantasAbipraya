@@ -15,7 +15,7 @@
             return 'Rp ' + number.toLocaleString('de-DE').split(',')[0];
         };
 
-        function createHorizontalChart(elementId, data) {
+        function createHorizontalChart(elementId, data, includeSaldo = true) {
             // Clear existing chart
             d3.select(`#${elementId}`).html('');
 
@@ -54,7 +54,8 @@
                 .attr('transform', `translate(${margin.left},${margin.top})`);
 
             // Get projects and prepare data
-            const series = ['atb', 'apb', 'saldo'];
+            // Determine which series to display based on includeSaldo parameter
+            const series = includeSaldo ? ['atb', 'apb', 'saldo'] : ['atb', 'apb'];
             const colors = {
                 atb: '#fe6d73', // Red
                 apb: '#f6f6f6', // White
@@ -90,7 +91,7 @@
                 .range([0, width]);
 
             // Calculate total width of legend items
-            const legendData = ['ATB', 'APB', 'Saldo'];
+            const legendData = includeSaldo ? ['ATB', 'APB', 'Saldo'] : ['ATB', 'APB'];
             const legendItemWidth = 150; // Width of each legend item
             const legendTotalWidth = legendData.length * legendItemWidth;
 
@@ -331,14 +332,14 @@
 
         // Create both horizontal charts with a small delay to ensure container sizes are calculated
         setTimeout(() => {
-            createHorizontalChart('currentMonthHorizontalChart', @json($horizontalChartCurrent));
-            createHorizontalChart('totalHorizontalChart', @json($horizontalChartTotal));
+            createHorizontalChart('currentMonthHorizontalChart', @json($horizontalChartCurrent), false); // No Saldo for current month
+            createHorizontalChart('totalHorizontalChart', @json($horizontalChartTotal), true); // Include Saldo for total
         }, 100);
 
         // Add resize handler
         window.addEventListener('resize', debounce(() => {
-            createHorizontalChart('currentMonthHorizontalChart', @json($horizontalChartCurrent));
-            createHorizontalChart('totalHorizontalChart', @json($horizontalChartTotal));
+            createHorizontalChart('currentMonthHorizontalChart', @json($horizontalChartCurrent), false); // No Saldo for current month
+            createHorizontalChart('totalHorizontalChart', @json($horizontalChartTotal), true); // Include Saldo for total
         }, 250));
 
         // Debounce function to prevent too many resize events

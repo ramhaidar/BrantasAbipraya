@@ -15,7 +15,7 @@
             return 'Rp ' + number.toLocaleString('de-DE').split(',')[0];
         };
 
-        function createCategoryChart(elementId, data) {
+        function createCategoryChart(elementId, data, seriesToShow = ['ATB', 'APB', 'Saldo']) {
             // Clear existing chart
             d3.select(`#${elementId}`).html('');
 
@@ -45,7 +45,7 @@
 
             // Get categories and prepare data
             const categories = Object.keys(data);
-            const series = ['ATB', 'APB', 'Saldo'];
+            const series = seriesToShow; // Use the provided series
             const colors = {
                 ATB: '#fe6d73', // Red
                 APB: '#f6f6f6', // White
@@ -72,7 +72,7 @@
                 .range([0, width]);
 
             // Add legend
-            const legendData = ['ATB', 'APB', 'Saldo'];
+            const legendData = series;
             const legendItemWidth = 150;
             const legendTotalWidth = legendData.length * legendItemWidth;
 
@@ -342,15 +342,15 @@
             };
         }
 
-        // Create both category charts
+        // Create both category charts with different series configurations
         setTimeout(() => {
-            createCategoryChart('categoryChartCurrent', @json($categoryData['current']));
+            createCategoryChart('categoryChartCurrent', @json($categoryData['current']), ['ATB', 'APB']);
             createCategoryChart('categoryChartTotal', @json($categoryData['total']));
         }, 100);
 
         // Add resize handler
         window.addEventListener('resize', debounce(() => {
-            createCategoryChart('categoryChartCurrent', @json($categoryData['current']));
+            createCategoryChart('categoryChartCurrent', @json($categoryData['current']), ['ATB', 'APB']);
             createCategoryChart('categoryChartTotal', @json($categoryData['total']));
         }, 250));
     });

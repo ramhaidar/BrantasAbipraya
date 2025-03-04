@@ -5,6 +5,19 @@
     const monthlyApbData = @json($monthlyFinancialData['apb'] ?? []);
     const monthlySaldoData = @json($monthlyFinancialData['saldo'] ?? []);
 
+    // Format number to billions with rounding up and specific format
+    const formatBillion = (number) => {
+        // Convert to billions and round to 2 decimal places
+        const billions = (number / 1000000000);
+        // Round up to 2 decimal places
+        const rounded = Math.ceil(billions * 100) / 100;
+        // Format with dot for thousands and comma for decimals
+        return rounded.toLocaleString('de-DE', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    };
+
     // Function to create a placeholder for charts not yet loaded
     function createPlaceholder(elementId, title) {
         const chartElement = document.getElementById(elementId);
@@ -44,7 +57,7 @@
             top: isModal ? 30 : 15,
             right: isModal ? 30 : 15,
             bottom: isModal ? 50 : 40,
-            left: isModal ? 120 : 80
+            left: isModal ? 80 : 60
         };
 
         // Set width and height - Larger for modal
@@ -84,16 +97,17 @@
             .style('font-size', isModal ? '12px' : '8px')
             .style('pointer-events', 'none'); // Make axis text non-interactive
 
-        // Add Y axis with formatted labels and appropriate font size
+        // Add Y axis with formatted labels to match VerticalBarChart
         svg.append('g')
             .call(d3.axisLeft(y)
-                .ticks(isModal ? 10 : 5) // More ticks in modal
-                .tickFormat(d => 'Rp' + d3.format(',')(d).replace(/,/g, '.'))
+                .ticks(isModal ? 10 : 5)
+                .tickFormat(d => formatBillion(d) + ' M')
             )
+            .style('color', 'white')
             .selectAll('text')
             .style('fill', 'white')
             .style('font-size', isModal ? '10px' : '7px')
-            .style('pointer-events', 'none'); // Make axis text non-interactive
+            .style('pointer-events', 'none');
 
         // Add X axis label with appropriate font size
         svg.append('text')
@@ -199,7 +213,7 @@
             top: isModal ? 30 : 15,
             right: isModal ? 30 : 15,
             bottom: isModal ? 50 : 40,
-            left: isModal ? 120 : 80
+            left: isModal ? 80 : 60
         };
 
         // Set width and height - Larger for modal
@@ -239,16 +253,17 @@
             .style('font-size', isModal ? '12px' : '8px')
             .style('pointer-events', 'none'); // Make axis text non-interactive
 
-        // Add Y axis with formatted labels and appropriate font size
+        // Add Y axis with formatted labels to match VerticalBarChart
         svg.append('g')
             .call(d3.axisLeft(y)
-                .ticks(isModal ? 10 : 5) // More ticks in modal
-                .tickFormat(d => 'Rp' + d3.format(',')(d).replace(/,/g, '.'))
+                .ticks(isModal ? 10 : 5)
+                .tickFormat(d => formatBillion(d) + ' M')
             )
+            .style('color', 'white')
             .selectAll('text')
             .style('fill', 'white')
             .style('font-size', isModal ? '10px' : '7px')
-            .style('pointer-events', 'none'); // Make axis text non-interactive
+            .style('pointer-events', 'none');
 
         // Add X axis label with appropriate font size
         svg.append('text')
@@ -354,7 +369,7 @@
             top: isModal ? 30 : 15,
             right: isModal ? 30 : 15,
             bottom: isModal ? 50 : 40,
-            left: isModal ? 120 : 80
+            left: isModal ? 80 : 60
         };
 
         // Set width and height - Larger for modal
@@ -394,16 +409,17 @@
             .style('font-size', isModal ? '12px' : '8px')
             .style('pointer-events', 'none'); // Make axis text non-interactive
 
-        // Add Y axis with formatted labels and appropriate font size
+        // Add Y axis with formatted labels to match VerticalBarChart
         svg.append('g')
             .call(d3.axisLeft(y)
-                .ticks(isModal ? 10 : 5) // More ticks in modal
-                .tickFormat(d => 'Rp' + d3.format(',')(d).replace(/,/g, '.'))
+                .ticks(isModal ? 10 : 5)
+                .tickFormat(d => formatBillion(d) + ' M')
             )
+            .style('color', 'white')
             .selectAll('text')
             .style('fill', 'white')
             .style('font-size', isModal ? '10px' : '7px')
-            .style('pointer-events', 'none'); // Make axis text non-interactive
+            .style('pointer-events', 'none');
 
         // Add X axis label with appropriate font size
         svg.append('text')

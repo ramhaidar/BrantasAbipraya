@@ -407,6 +407,13 @@
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 
     <script>
+        // Initialize select2
+        $('#projectSelect').select2({
+            placeholder: 'Semua Proyek',
+            width: '100%',
+            allowClear: true
+        });
+
         // Initialize date constraints when page loads
         document.addEventListener('DOMContentLoaded', function() {
             const startDateInput = document.getElementById('startDate');

@@ -1,12 +1,5 @@
 <script>
     $(document).ready(function() {
-
-        // Initialize select2
-        $('#projectSelect').select2({
-            placeholder: 'Pilih Proyek',
-            width: '100%'
-        });
-
         // Chart data from PHP
         const currentMonthData = @json($chartDataCurrent);
         const totalData = @json($chartDataTotal);

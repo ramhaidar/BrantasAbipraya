@@ -72,7 +72,9 @@ class EvaluasiDetailRKBGeneralController extends Controller
         {
             $query->where ( 'id_proyek', $this->rkb->id_proyek )
                 ->whereNull ( 'removed_at' );
-        } )->get ();
+        } )
+            ->where ( 'kode_alat', '!=', 'Workshop' )
+            ->get ();
 
         // Filter projects based on user role
         $user         = Auth::user ();

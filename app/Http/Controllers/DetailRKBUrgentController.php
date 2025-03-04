@@ -379,7 +379,9 @@ class DetailRKBUrgentController extends Controller
         {
             $query->where ( 'id_proyek', $rkb->id_proyek )
                 ->whereNull ( 'removed_at' );
-        } )->get ();
+        } )
+            ->where ( 'kode_alat', '!=', 'Workshop' )
+            ->get ();
     }
 
     private function getProyeks ()

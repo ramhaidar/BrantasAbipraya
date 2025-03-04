@@ -35,12 +35,6 @@ return [
         ],
     ],
 
-    // 'cloudflare' => [ 
-    //     'site_key'   => env ( 'CLOUDFLARE_SITE_KEY' ),
-    //     'secret_key' => env ( 'CLOUDFLARE_SECRET_KEY' ),
-    //     'dev_mode'   => env ( 'APP_ENV' ) === 'local', // true untuk development
-    // ],
-
     'turnstile' => [ 
         'key'    => env ( 'TURNSTILE_SITE_KEY' ),
         'secret' => env ( 'TURNSTILE_SECRET_KEY' ),

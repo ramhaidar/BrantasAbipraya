@@ -26,8 +26,8 @@
 
                         <div class="col-12">
                             <label class="form-label required" for="tanggal_normal">Tanggal Masuk Sparepart</label>
-                            <input class="form-control datepicker" id="tanggal_normal" name="tanggal" type="text" autocomplete="off" placeholder="Tanggal Masuk Sparepart" required>
-                            <div class="invalid-feedback">Tanggal Masuk Sparepart diperlukan.</div>
+                            <input class="form-control datepicker" id="tanggal_normal" name="tanggal" type="text" autocomplete="off" placeholder="Tanggal Masuk Sparepart (26 bulan kemarin - 25 bulan ini)" required>
+                            <div class="invalid-feedback">Tanggal Masuk Sparepart diperlukan (26 bulan kemarin - 25 bulan ini).</div>
                         </div>
 
                         <div class="col-12">
@@ -75,6 +75,109 @@
 
     <script>
         $(document).ready(function() {
+            // Check if the current user is a koordinator_proyek based on position attribute
+            const isKoordinatorProyek = {{ auth()->user()->role === 'koordinator_proyek' ? 'true' : 'false' }};
+
+            // Destroy existing datepicker to reinitialize with our settings
+            $('#tanggal_normal').datepicker('destroy');
+
+            if (isKoordinatorProyek) {
+                // ONLY FOR KOORDINATOR PROYEK - Apply date restrictions
+                // Calculate valid date range (26th of previous month to 25th of current month)
+                const today = new Date();
+                const startDate = new Date(today.getFullYear(), today.getMonth() - 1, 26);
+                const endDate = new Date(today.getFullYear(), today.getMonth(), 25);
+
+                // Format dates for display
+                const formatDate = (date) => {
+                    return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear();
+                };
+
+                // Initialize the datepicker with strict constraints
+                $('#tanggal_normal').datepicker({
+                    dateFormat: 'yy-mm-dd',
+                    changeMonth: true,
+                    changeYear: true,
+                    minDate: startDate,
+                    maxDate: endDate,
+                    beforeShowDay: function(date) {
+                        // Only allow dates in the specific range
+                        return [date >= startDate && date <= endDate, ''];
+                    },
+                    onSelect: function(dateText) {
+                        $(this).change();
+                        // Add validation visual feedback
+                        $(this).removeClass('is-invalid').addClass('is-valid');
+                    }
+                });
+
+                // Set initial date - if today is in range, use today, otherwise use the closest valid date
+                let initialDate;
+                if (today >= startDate && today <= endDate) {
+                    initialDate = today;
+                } else if (today > endDate) {
+                    initialDate = endDate;
+                } else {
+                    initialDate = startDate;
+                }
+                $('#tanggal_normal').datepicker('setDate', initialDate);
+
+                // Update placeholder to show valid range
+                $('#tanggal_normal').attr('placeholder',
+                    `Tanggal antara ${formatDate(startDate)} - ${formatDate(endDate)}`);
+                $('.invalid-feedback').first().text(
+                    `Tanggal harus antara ${formatDate(startDate)} - ${formatDate(endDate)}`);
+
+                // Custom validation to enforce date range on direct input
+                $('#tanggal_normal').on('change', function() {
+                    try {
+                        const input = $(this).val();
+                        if (!input) {
+                            $(this).removeClass('is-valid').addClass('is-invalid');
+                            return false;
+                        }
+
+                        // Parse the input date 
+                        const parts = input.split('-');
+                        if (parts.length !== 3) {
+                            $(this).removeClass('is-valid').addClass('is-invalid');
+                            return false;
+                        }
+
+                        const inputDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+
+                        // Check if date is within range
+                        if (isNaN(inputDate) || inputDate < startDate || inputDate > endDate) {
+                            $(this).removeClass('is-valid').addClass('is-invalid');
+                            // Reset to a valid date
+                            $(this).datepicker('setDate', initialDate);
+                            return false;
+                        } else {
+                            $(this).removeClass('is-invalid').addClass('is-valid');
+                            return true;
+                        }
+                    } catch (e) {
+                        console.error('Date validation error:', e);
+                        $(this).removeClass('is-valid').addClass('is-invalid');
+                        return false;
+                    }
+                });
+            } else {
+                // FOR OTHER ROLES - Initialize the datepicker without date restrictions
+                $('#tanggal_normal').datepicker({
+                    dateFormat: 'yy-mm-dd',
+                    changeMonth: true,
+                    changeYear: true,
+                    onSelect: function(dateText) {
+                        $(this).change();
+                        $(this).removeClass('is-invalid').addClass('is-valid');
+                    }
+                });
+
+                // Set today as the default date
+                $('#tanggal_normal').datepicker('setDate', new Date());
+            }
+
             // Initialize Select2 with options
             $('#id_master_data_alat').select2({
                 placeholder: "Pilih",
@@ -288,6 +391,9 @@
             let isValid = true;
             const form = $('#addDataFormNormal');
 
+            // Check if the current user is a koordinator_proyek
+            const isKoordinatorProyek = {{ auth()->user()->role === 'koordinator_proyek' ? 'true' : 'false' }};
+
             // Reset previous validation states
             $('.is-invalid').removeClass('is-invalid');
 
@@ -302,6 +408,39 @@
                     isValid = false;
                 }
             });
+
+            // Validate date field
+            const tanggal = $('#tanggal_normal');
+            if (!tanggal.val()) {
+                tanggal.addClass('is-invalid');
+                isValid = false;
+            } else if (isKoordinatorProyek) {
+                // ONLY FOR KOORDINATOR PROYEK - Validate date range
+                // Calculate valid date range
+                const today = new Date();
+                const startDate = new Date(today.getFullYear(), today.getMonth() - 1, 26);
+                const endDate = new Date(today.getFullYear(), today.getMonth(), 25);
+
+                // Parse the input date
+                try {
+                    const parts = tanggal.val().split('-');
+                    if (parts.length === 3) {
+                        const selectedDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+
+                        if (isNaN(selectedDate) || selectedDate < startDate || selectedDate > endDate) {
+                            tanggal.addClass('is-invalid');
+                            isValid = false;
+                        }
+                    } else {
+                        tanggal.addClass('is-invalid');
+                        isValid = false;
+                    }
+                } catch (e) {
+                    console.error('Date validation error:', e);
+                    tanggal.addClass('is-invalid');
+                    isValid = false;
+                }
+            }
 
             // Existing validation code...
             // Validate date field
@@ -334,10 +473,15 @@
             });
 
             if (!isValid) {
-                // Show error message
+                // Show error message, with customized text based on user role
+                let errorText = 'Mohon lengkapi semua field yang wajib diisi.';
+                if (isKoordinatorProyek) {
+                    errorText += ' Pastikan tanggal masuk sparepart antara tanggal 26 bulan kemarin sampai tanggal 25 bulan ini.';
+                }
+
                 Swal.fire({
                     title: 'Error!',
-                    text: 'Mohon lengkapi semua field yang wajib diisi. Foto dokumentasi wajib diisi untuk setiap item yang diterima.',
+                    text: errorText,
                     icon: 'error',
                     confirmButtonText: 'Ok'
                 });
@@ -406,9 +550,35 @@
                 }
             });
 
-            // Reset button should also reset the submit button state
+            // Reset button should also reset the submit button state and set a valid date
             $('#resetButtonNormal').on('click', function() {
                 $('#submitButtonNormal').prop('disabled', false).html('Tambah Data');
+
+                // Check if the current user is a koordinator_proyek
+                const isKoordinatorProyek = {{ auth()->user()->role === 'koordinator_proyek' ? 'true' : 'false' }};
+
+                if (isKoordinatorProyek) {
+                    // FOR KOORDINATOR PROYEK - Check for valid range and set appropriate date
+                    const today = new Date();
+                    const range = {
+                        startDate: new Date(today.getFullYear(), today.getMonth() - 1, 26),
+                        endDate: new Date(today.getFullYear(), today.getMonth(), 25)
+                    };
+
+                    let dateToSet;
+                    if (today >= range.startDate && today <= range.endDate) {
+                        dateToSet = today;
+                    } else if (today > range.endDate) {
+                        dateToSet = range.endDate;
+                    } else {
+                        dateToSet = range.startDate;
+                    }
+
+                    $('#tanggal_normal').datepicker('setDate', dateToSet);
+                } else {
+                    // FOR OTHER ROLES - Just set today's date
+                    $('#tanggal_normal').datepicker('setDate', new Date());
+                }
             });
         });
     </script>

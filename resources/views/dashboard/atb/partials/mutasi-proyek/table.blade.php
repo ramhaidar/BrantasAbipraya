@@ -157,7 +157,7 @@
             <tbody>
                 @forelse ($TableData as $item)
                     <tr>
-                        <td class="text-center">{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('l, d F Y') }}</td>
+                        <td class="text-center">{{ $item->tanggal ? \Carbon\Carbon::parse($item->tanggal)->translatedFormat('l, d F Y') : '-' }}</td>
                         <td class="text-center">{{ $item->asalProyek->nama ?? '-' }}</td>
                         <td class="text-center">{{ $item->masterDataSparepart->kategoriSparepart->kode }}: {{ $item->masterDataSparepart->kategoriSparepart->nama }}</td>
                         <td class="text-center">{{ $item->masterDataSupplier->nama ?? '-' }}</td>

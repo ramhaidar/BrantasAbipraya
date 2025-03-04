@@ -18,8 +18,10 @@
                             <select class="form-control" id="id_master_data_alat" name="id_master_data_alat" required>
                                 <option value="">Pilih Alat</option>
                                 @foreach ($available_alat as $alat)
-                                    <option value="{{ $alat->id }}">{{ $alat->kode_alat }} - {{ $alat->jenis_alat }}
-                                    </option>
+                                    @if ($alat->kode_alat !== 'Workshop')
+                                        <option value="{{ $alat->id }}">{{ $alat->kode_alat }} - {{ $alat->jenis_alat }}
+                                        </option>
+                                    @endif
                                 @endforeach
                             </select>
                             <div class="invalid-feedback">Alat diperlukan.</div>

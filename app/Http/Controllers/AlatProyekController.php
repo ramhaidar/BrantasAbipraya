@@ -29,7 +29,7 @@ class AlatProyekController extends Controller
             'proyek'        => $proyek,
             'TableData'     => $TableData,
             'AlatAvailable' => $AlatAvailable,
-            'headerPage'    => "Data Alat Proyek",
+            "headerPage"    => $proyek->nama,
             'page'          => 'Data Alat',
             'uniqueValues'  => $uniqueValues,
         ] );

@@ -326,8 +326,8 @@
                                         <ul class="nav nav-treeview">
 
                                             <!-- Alat Submenu (Level 2) -->
-                                            <li class="nav-item has-treeview {{ isset($proyek) && str_contains($page, 'Data Alat') && str_contains($headerPage, 'Data Alat') && $proyek->id == $item->id ? 'menu-open' : '' }}">
-                                                <a class="ps-4 nav-link level-1 {{ isset($proyek) && str_contains($page, 'Data Alat') && str_contains($headerPage, 'Data Alat') && $proyek->id == $item->id ? 'active' : '' }}" href="{{ route('alat.index', ['id_proyek' => $item->id]) }}" style="{{ isset($proyek) && str_contains($page, 'Data Alat') && str_contains($headerPage, 'Data Alat') && $proyek->id == $item->id ? 'background-color: #66CDAA; color: #ffffff;' : '' }}">
+                                            <li class="nav-item has-treeview {{ isset($proyek) && str_contains($page, 'Data Alat') && str_contains($headerPage, $item->nama) && $proyek->id == $item->id ? 'menu-open' : '' }}">
+                                                <a class="ps-4 nav-link level-1 {{ isset($proyek) && str_contains($page, 'Data Alat') && str_contains($headerPage, $item->nama) && $proyek->id == $item->id ? 'active' : '' }}" href="{{ route('alat.index', ['id_proyek' => $item->id]) }}" style="{{ isset($proyek) && str_contains($page, 'Data Alat') && str_contains($headerPage, $item->nama) && $proyek->id == $item->id ? 'background-color: #66CDAA; color: #ffffff;' : '' }}">
                                                     <i class="bi me-2 nav-icon fs-5 bi-wrench"></i>
                                                     <p>Alat</p>
                                                 </a>

@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', $proyek->nama . ' - Alat Proyek')
+
 @push('styles_2')
 @endpush
 

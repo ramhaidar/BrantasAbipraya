@@ -1,5 +1,21 @@
 @extends('layouts.app')
 
+@section('title')
+    @php
+        function formatTipeTitle($tipe)
+        {
+            // Split by hyphens and capitalize each word
+            $words = explode('-', $tipe);
+            $formattedWords = array_map(function ($word) {
+                return ucfirst($word);
+            }, $words);
+            // Join with spaces
+            return implode(' ', $formattedWords);
+        }
+    @endphp
+    {{ $proyek->nama . ' - APB - ' . formatTipeTitle($tipe) }}
+@endsection
+
 @push('styles_2')
 @endpush
 

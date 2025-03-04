@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Master Data Sparepart')
+
 @push('styles_2')
 @endpush
 

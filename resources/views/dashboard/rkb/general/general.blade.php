@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'RKB General')
+
 @push('styles_2')
 @endpush
 

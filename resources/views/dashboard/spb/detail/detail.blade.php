@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'SPB - ' . $rkb->proyek->nama)
+
 @push('styles_2')
 @endpush
 

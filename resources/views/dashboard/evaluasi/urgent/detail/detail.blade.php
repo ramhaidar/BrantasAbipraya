@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Evaluasi Detail RKB Urgent - ' . $rkb->proyek->nama)
+
 @push('styles_2')
 @endpush
 

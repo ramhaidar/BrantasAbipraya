@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Evaluasi Timeline RKB Urgent - ' . $data->masterDataAlat->jenis_alat . ' : ' . $data->masterDataAlat->kode_alat)
+
 @push('styles_2')
 @endpush
 

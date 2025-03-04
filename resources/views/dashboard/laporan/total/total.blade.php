@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', isset($proyek) ? $proyek->nama . ' - LNPB Total' : 'LNPB Total Semua Proyek')
+
 @push('styles_2')
     <style>
         input[type="month"] {

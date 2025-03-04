@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Dashboard')
+
 @push('styles_2')
     <style>
         .axis-label {

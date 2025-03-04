@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Riwayat SPB - ' . $TableData->first()->linkRkbSpbs[0]->rkb->proyek->nama)
+
 @push('styles_2')
 @endpush
 

@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Surat Permintaan Barang [Divisi]')
+
 @push('styles_2')
 @endpush
 

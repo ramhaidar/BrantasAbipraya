@@ -89,6 +89,103 @@
 @push('scripts_3')
     <script>
         $(document).ready(function() {
+            // Add date restriction logic at the beginning
+            const isKoordinatorProyek = {{ auth()->user()->role === 'koordinator_proyek' ? 'true' : 'false' }};
+
+            // Destroy existing datepicker to reinitialize with our settings
+            $('#tanggal').datepicker('destroy');
+
+            if (isKoordinatorProyek) {
+                // Calculate valid date range (26th of previous month to 25th of current month)
+                const today = new Date();
+                const startDate = new Date(today.getFullYear(), today.getMonth() - 1, 26);
+                const endDate = new Date(today.getFullYear(), today.getMonth(), 25);
+
+                // Format dates for display
+                const formatDate = (date) => {
+                    return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear();
+                };
+
+                // Initialize datepicker with strict constraints
+                $('#tanggal').datepicker({
+                    dateFormat: 'yy-mm-dd',
+                    changeMonth: true,
+                    changeYear: true,
+                    minDate: startDate,
+                    maxDate: endDate,
+                    beforeShowDay: function(date) {
+                        return [date >= startDate && date <= endDate, ''];
+                    },
+                    onSelect: function(dateText) {
+                        $(this).change();
+                        $(this).removeClass('is-invalid').addClass('is-valid');
+                    }
+                });
+
+                // Set initial date
+                let initialDate;
+                if (today >= startDate && today <= endDate) {
+                    initialDate = today;
+                } else if (today > endDate) {
+                    initialDate = endDate;
+                } else {
+                    initialDate = startDate;
+                }
+                $('#tanggal').datepicker('setDate', initialDate);
+
+                // Update placeholder and validation message
+                $('#tanggal').attr('placeholder',
+                    `Tanggal antara ${formatDate(startDate)} - ${formatDate(endDate)}`);
+                $('#tanggal').closest('div').find('.invalid-feedback').text(
+                    `Tanggal harus antara ${formatDate(startDate)} - ${formatDate(endDate)}`);
+
+                // Add custom validation
+                $('#tanggal').on('change', function() {
+                    try {
+                        const input = $(this).val();
+                        if (!input) {
+                            $(this).removeClass('is-valid').addClass('is-invalid');
+                            return false;
+                        }
+
+                        const parts = input.split('-');
+                        if (parts.length !== 3) {
+                            $(this).removeClass('is-valid').addClass('is-invalid');
+                            return false;
+                        }
+
+                        const inputDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+
+                        if (isNaN(inputDate) || inputDate < startDate || inputDate > endDate) {
+                            $(this).removeClass('is-valid').addClass('is-invalid');
+                            $(this).datepicker('setDate', initialDate);
+                            return false;
+                        } else {
+                            $(this).removeClass('is-invalid').addClass('is-valid');
+                            return true;
+                        }
+                    } catch (e) {
+                        console.error('Date validation error:', e);
+                        $(this).removeClass('is-valid').addClass('is-invalid');
+                        return false;
+                    }
+                });
+            } else {
+                // FOR OTHER ROLES - Initialize without date restrictions
+                $('#tanggal').datepicker({
+                    dateFormat: 'yy-mm-dd',
+                    changeMonth: true,
+                    changeYear: true,
+                    onSelect: function(dateText) {
+                        $(this).change();
+                        $(this).removeClass('is-invalid').addClass('is-valid');
+                    }
+                });
+
+                // Set today as default date
+                $('#tanggal').datepicker('setDate', new Date());
+            }
+
             // Add Reset button functionality
             $('#resetButton').on('click', function() {
                 // Reset all form fields

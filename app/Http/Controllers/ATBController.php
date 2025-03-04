@@ -1523,12 +1523,14 @@ class ATBController extends Controller
     {
         try
         {
-            // Validate the request
+            // Update validation to include tanggal_terima
+
             $validated = $request->validate ( [ 
-                'id_atb'        => 'required|exists:atb,id',
-                'quantity'      => 'required|integer|min:1',
-                'dokumentasi'   => 'required|array',
-                'dokumentasi.*' => 'required|file|image|mimes:jpeg,png,jpg|max:2048'
+                'id_atb'         => 'required|exists:atb,id',
+                'quantity'       => 'required|integer|min:1',
+                'tanggal_terima' => 'required|date',
+                'dokumentasi'    => 'required|array',
+                'dokumentasi.*'  => 'required|file|image|mimes:jpeg,png,jpg|max:2048'
             ] );
 
             DB::beginTransaction ();
@@ -1581,10 +1583,11 @@ class ATBController extends Controller
                 Storage::disk ( 'public' )->deleteDirectory ( $atb->dokumentasi_foto );
             }
 
-            // Update the existing ATB record
+            // Update the existing ATB record with tanggal_terima
             $atb->update ( [ 
                 'quantity'         => $request->quantity,
-                'dokumentasi_foto' => $docPath
+                'dokumentasi_foto' => $docPath,
+                'tanggal'          => $request->tanggal_terima // Add this line
             ] );
 
             // Update or create Saldo record
@@ -1632,16 +1635,25 @@ class ATBController extends Controller
         }
     }
 
-    public function rejectMutasi ( $id )
+    public function rejectMutasi ( Request $request, $id )
     {
         try
         {
+            // Add validation for tanggal_tolak
+            $validated = $request->validate ( [ 
+                'tanggal_tolak' => 'required|date'
+            ] );
+
             // Find ATB first to validate it exists
             $atb = ATB::findOrFail ( $id );
 
             DB::beginTransaction ();
 
-            $atb->apbMutasi->update ( [ 'status' => 'rejected' ] );
+            // Update APBMutasi with status and rejection date
+            $atb->apbMutasi->update ( [ 
+                'status'          => 'rejected',
+                'tanggal_ditolak' => $request->tanggal_tolak // Add this line
+            ] );
 
             DB::commit ();
             return back ()->with ( 'success', 'Mutasi ATB berhasil ditolak.' );

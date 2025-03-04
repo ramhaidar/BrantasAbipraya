@@ -57,340 +57,362 @@ class APBController extends Controller
      * @param string $tipe APB type
      * @return array Associative array of unique values by field
      */
-    private function getUniqueValues($id_proyek, $tipe)
+    private function getUniqueValues ( $id_proyek, $tipe )
     {
         // Create a new base query for all APB records of this type for this project
-        $baseQuery = APB::where('id_proyek', $id_proyek)
-            ->where('tipe', $tipe);
+        $baseQuery = APB::where ( 'id_proyek', $id_proyek )
+            ->where ( 'tipe', $tipe );
 
         // Get all APB IDs from the query to use in subqueries for better performance
-        $apbIds = $baseQuery->pluck('id')->toArray();
-        if (empty($apbIds)) {
-            return [
-                'tanggal' => [],
-                'jenis_alat' => [],
-                'kode_alat' => [],
-                'merek_alat' => [],
-                'tipe_alat' => [],
-                'serial_number' => [],
-                'kode' => [],
-                'supplier' => [],
-                'sparepart' => [],
-                'merk' => [],
-                'part_number' => [],
-                'quantity' => [],
-                'satuan' => [],
-                'harga' => [],
-                'jumlah_harga' => [],
-                'mekanik' => [],
-                'status' => [],
-                'tujuan_proyek' => [],
-                'quantity_dikirim' => [],
-                'quantity_diterima' => [],
+        $apbIds = $baseQuery->pluck ( 'id' )->toArray ();
+        if ( empty ( $apbIds ) )
+        {
+            return [ 
+                'tanggal'            => [],
+                'jenis_alat'         => [],
+                'kode_alat'          => [],
+                'merek_alat'         => [],
+                'tipe_alat'          => [],
+                'serial_number'      => [],
+                'kode'               => [],
+                'supplier'           => [],
+                'sparepart'          => [],
+                'merk'               => [],
+                'part_number'        => [],
+                'quantity'           => [],
+                'satuan'             => [],
+                'harga'              => [],
+                'jumlah_harga'       => [],
+                'mekanik'            => [],
+                'status'             => [],
+                'tujuan_proyek'      => [],
+                'quantity_dikirim'   => [],
+                'quantity_diterima'  => [],
                 'quantity_digunakan' => [],
             ];
         }
 
         // Get unique dates in formatted form
-        $dates = APB::whereIn('id', $apbIds)
-            ->whereNotNull('tanggal')
-            ->orderBy('tanggal')
-            ->pluck('tanggal')
-            ->map(function ($date) {
-                return date('Y-m-d', strtotime($date));
-            })
-            ->unique()
-            ->values()
-            ->toArray();
+        $dates = APB::whereIn ( 'id', $apbIds )
+            ->whereNotNull ( 'tanggal' )
+            ->orderBy ( 'tanggal' )
+            ->pluck ( 'tanggal' )
+            ->map ( function ($date)
+            {
+                return date ( 'Y-m-d', strtotime ( $date ) );
+            } )
+            ->unique ()
+            ->values ()
+            ->toArray ();
 
         // Equipment-related fields (can be null for some types like mutasi-proyek)
         // Get unique jenis_alat
-        $jenisAlat = APB::whereIn('id', $apbIds)
-            ->whereNotNull('id_alat_proyek')
-            ->with('alatProyek.masterDataAlat')
-            ->get()
-            ->map(function ($apb) {
-                if ($apb->alatProyek && $apb->alatProyek->masterDataAlat) {
+        $jenisAlat = APB::whereIn ( 'id', $apbIds )
+            ->whereNotNull ( 'id_alat_proyek' )
+            ->with ( 'alatProyek.masterDataAlat' )
+            ->get ()
+            ->map ( function ($apb)
+            {
+                if ( $apb->alatProyek && $apb->alatProyek->masterDataAlat )
+                {
                     return $apb->alatProyek->masterDataAlat->jenis_alat;
                 }
                 return null;
-            })
-            ->filter()
-            ->unique()
-            ->values()
-            ->toArray();
+            } )
+            ->filter ()
+            ->unique ()
+            ->values ()
+            ->toArray ();
 
         // Get unique kode_alat
-        $kodeAlat = APB::whereIn('id', $apbIds)
-            ->whereNotNull('id_alat_proyek')
-            ->with('alatProyek.masterDataAlat')
-            ->get()
-            ->map(function ($apb) {
-                if ($apb->alatProyek && $apb->alatProyek->masterDataAlat) {
+        $kodeAlat = APB::whereIn ( 'id', $apbIds )
+            ->whereNotNull ( 'id_alat_proyek' )
+            ->with ( 'alatProyek.masterDataAlat' )
+            ->get ()
+            ->map ( function ($apb)
+            {
+                if ( $apb->alatProyek && $apb->alatProyek->masterDataAlat )
+                {
                     return $apb->alatProyek->masterDataAlat->kode_alat;
                 }
                 return null;
-            })
-            ->filter()
-            ->unique()
-            ->values()
-            ->toArray();
+            } )
+            ->filter ()
+            ->unique ()
+            ->values ()
+            ->toArray ();
 
         // Get unique merek_alat
-        $merekAlat = APB::whereIn('id', $apbIds)
-            ->whereNotNull('id_alat_proyek')
-            ->with('alatProyek.masterDataAlat')
-            ->get()
-            ->map(function ($apb) {
-                if ($apb->alatProyek && $apb->alatProyek->masterDataAlat) {
+        $merekAlat = APB::whereIn ( 'id', $apbIds )
+            ->whereNotNull ( 'id_alat_proyek' )
+            ->with ( 'alatProyek.masterDataAlat' )
+            ->get ()
+            ->map ( function ($apb)
+            {
+                if ( $apb->alatProyek && $apb->alatProyek->masterDataAlat )
+                {
                     return $apb->alatProyek->masterDataAlat->merek_alat;
                 }
                 return null;
-            })
-            ->filter()
-            ->unique()
-            ->values()
-            ->toArray();
+            } )
+            ->filter ()
+            ->unique ()
+            ->values ()
+            ->toArray ();
 
         // Get unique tipe_alat
-        $tipeAlat = APB::whereIn('id', $apbIds)
-            ->whereNotNull('id_alat_proyek')
-            ->with('alatProyek.masterDataAlat')
-            ->get()
-            ->map(function ($apb) {
-                if ($apb->alatProyek && $apb->alatProyek->masterDataAlat) {
+        $tipeAlat = APB::whereIn ( 'id', $apbIds )
+            ->whereNotNull ( 'id_alat_proyek' )
+            ->with ( 'alatProyek.masterDataAlat' )
+            ->get ()
+            ->map ( function ($apb)
+            {
+                if ( $apb->alatProyek && $apb->alatProyek->masterDataAlat )
+                {
                     return $apb->alatProyek->masterDataAlat->tipe_alat;
                 }
                 return null;
-            })
-            ->filter()
-            ->unique()
-            ->values()
-            ->toArray();
+            } )
+            ->filter ()
+            ->unique ()
+            ->values ()
+            ->toArray ();
 
         // Get unique serial_number
-        $serialNumber = APB::whereIn('id', $apbIds)
-            ->whereNotNull('id_alat_proyek')
-            ->with('alatProyek.masterDataAlat')
-            ->get()
-            ->map(function ($apb) {
-                if ($apb->alatProyek && $apb->alatProyek->masterDataAlat) {
+        $serialNumber = APB::whereIn ( 'id', $apbIds )
+            ->whereNotNull ( 'id_alat_proyek' )
+            ->with ( 'alatProyek.masterDataAlat' )
+            ->get ()
+            ->map ( function ($apb)
+            {
+                if ( $apb->alatProyek && $apb->alatProyek->masterDataAlat )
+                {
                     return $apb->alatProyek->masterDataAlat->serial_number;
                 }
                 return null;
-            })
-            ->filter()
-            ->unique()
-            ->values()
-            ->toArray();
+            } )
+            ->filter ()
+            ->unique ()
+            ->values ()
+            ->toArray ();
 
         // Get unique kategori sparepart combinations (kode: nama)
-        $kategoriSpareparts = APB::whereIn('id', $apbIds)
-            ->whereHas('masterDataSparepart.kategoriSparepart')
-            ->with('masterDataSparepart.kategoriSparepart')
-            ->get()
-            ->map(function ($apb) {
-                if ($apb->masterDataSparepart && $apb->masterDataSparepart->kategoriSparepart) {
+        $kategoriSpareparts = APB::whereIn ( 'id', $apbIds )
+            ->whereHas ( 'masterDataSparepart.kategoriSparepart' )
+            ->with ( 'masterDataSparepart.kategoriSparepart' )
+            ->get ()
+            ->map ( function ($apb)
+            {
+                if ( $apb->masterDataSparepart && $apb->masterDataSparepart->kategoriSparepart )
+                {
                     $kat = $apb->masterDataSparepart->kategoriSparepart;
                     return $kat->kode . ': ' . $kat->nama;
                 }
                 return null;
-            })
-            ->filter()
-            ->unique()
-            ->values()
-            ->toArray();
+            } )
+            ->filter ()
+            ->unique ()
+            ->values ()
+            ->toArray ();
 
         // Get unique suppliers
-        $suppliers = APB::whereIn('id', $apbIds)
-            ->whereHas('masterDataSupplier')
-            ->with('masterDataSupplier')
-            ->get()
-            ->map(function ($apb) {
+        $suppliers = APB::whereIn ( 'id', $apbIds )
+            ->whereHas ( 'masterDataSupplier' )
+            ->with ( 'masterDataSupplier' )
+            ->get ()
+            ->map ( function ($apb)
+            {
                 return $apb->masterDataSupplier->nama ?? null;
-            })
-            ->filter()
-            ->unique()
-            ->values()
-            ->toArray();
+            } )
+            ->filter ()
+            ->unique ()
+            ->values ()
+            ->toArray ();
 
         // Get unique spareparts
-        $spareparts = APB::whereIn('id', $apbIds)
-            ->whereHas('masterDataSparepart')
-            ->with('masterDataSparepart')
-            ->get()
-            ->map(function ($apb) {
+        $spareparts = APB::whereIn ( 'id', $apbIds )
+            ->whereHas ( 'masterDataSparepart' )
+            ->with ( 'masterDataSparepart' )
+            ->get ()
+            ->map ( function ($apb)
+            {
                 return $apb->masterDataSparepart->nama ?? null;
-            })
-            ->filter()
-            ->unique()
-            ->values()
-            ->toArray();
+            } )
+            ->filter ()
+            ->unique ()
+            ->values ()
+            ->toArray ();
 
         // Get unique merks
-        $merks = APB::whereIn('id', $apbIds)
-            ->whereHas('masterDataSparepart')
-            ->with('masterDataSparepart')
-            ->get()
-            ->map(function ($apb) {
+        $merks = APB::whereIn ( 'id', $apbIds )
+            ->whereHas ( 'masterDataSparepart' )
+            ->with ( 'masterDataSparepart' )
+            ->get ()
+            ->map ( function ($apb)
+            {
                 return $apb->masterDataSparepart->merk ?? null;
-            })
-            ->filter()
-            ->unique()
-            ->values()
-            ->toArray();
+            } )
+            ->filter ()
+            ->unique ()
+            ->values ()
+            ->toArray ();
 
         // Get unique part numbers
-        $partNumbers = APB::whereIn('id', $apbIds)
-            ->whereHas('masterDataSparepart')
-            ->with('masterDataSparepart')
-            ->get()
-            ->map(function ($apb) {
+        $partNumbers = APB::whereIn ( 'id', $apbIds )
+            ->whereHas ( 'masterDataSparepart' )
+            ->with ( 'masterDataSparepart' )
+            ->get ()
+            ->map ( function ($apb)
+            {
                 return $apb->masterDataSparepart->part_number ?? null;
-            })
-            ->filter()
-            ->unique()
-            ->values()
-            ->toArray();
+            } )
+            ->filter ()
+            ->unique ()
+            ->values ()
+            ->toArray ();
 
         // Get unique quantities
-        $quantities = APB::whereIn('id', $apbIds)
-            ->whereNotNull('quantity')
-            ->pluck('quantity')
-            ->unique()
-            ->sort()
-            ->values()
-            ->toArray();
+        $quantities = APB::whereIn ( 'id', $apbIds )
+            ->whereNotNull ( 'quantity' )
+            ->pluck ( 'quantity' )
+            ->unique ()
+            ->sort ()
+            ->values ()
+            ->toArray ();
 
         // Get unique satuan values from Saldo
-        $satuanValues = APB::whereIn('id', $apbIds)
-            ->whereNotNull('id_saldo')
-            ->with('saldo')
-            ->get()
-            ->map(function ($apb) {
+        $satuanValues = APB::whereIn ( 'id', $apbIds )
+            ->whereNotNull ( 'id_saldo' )
+            ->with ( 'saldo' )
+            ->get ()
+            ->map ( function ($apb)
+            {
                 return $apb->saldo->satuan ?? null;
-            })
-            ->filter()
-            ->unique()
-            ->values()
-            ->toArray();
-        sort($satuanValues);
+            } )
+            ->filter ()
+            ->unique ()
+            ->values ()
+            ->toArray ();
+        sort ( $satuanValues );
 
         // Get unique harga values
-        $hargaValues = APB::whereIn('id', $apbIds)
-            ->whereHas('saldo')
-            ->with('saldo')
-            ->get()
-            ->map(function ($apb) {
+        $hargaValues = APB::whereIn ( 'id', $apbIds )
+            ->whereHas ( 'saldo' )
+            ->with ( 'saldo' )
+            ->get ()
+            ->map ( function ($apb)
+            {
                 return $apb->saldo->harga ?? null;
-            })
-            ->filter()
-            ->unique()
-            ->sort()
-            ->values()
-            ->toArray();
+            } )
+            ->filter ()
+            ->unique ()
+            ->sort ()
+            ->values ()
+            ->toArray ();
 
         // Calculate jumlah_harga
-        $jumlahHargaValues = APB::whereIn('id', $apbIds)
-            ->whereNotNull('quantity')
-            ->whereHas('saldo')
-            ->with('saldo')
-            ->get()
-            ->map(function ($apb) {
-                return $apb->quantity * ($apb->saldo->harga ?? 0);
-            })
-            ->unique()
-            ->sort()
-            ->values()
-            ->toArray();
+        $jumlahHargaValues = APB::whereIn ( 'id', $apbIds )
+            ->whereNotNull ( 'quantity' )
+            ->whereHas ( 'saldo' )
+            ->with ( 'saldo' )
+            ->get ()
+            ->map ( function ($apb)
+            {
+                return $apb->quantity * ( $apb->saldo->harga ?? 0 );
+            } )
+            ->unique ()
+            ->sort ()
+            ->values ()
+            ->toArray ();
 
         // Get unique mekanik values
-        $mekanik = APB::whereIn('id', $apbIds)
-            ->whereNotNull('mekanik')
-            ->pluck('mekanik')
-            ->unique()
-            ->sort()
-            ->values()
-            ->toArray();
+        $mekanik = APB::whereIn ( 'id', $apbIds )
+            ->whereNotNull ( 'mekanik' )
+            ->pluck ( 'mekanik' )
+            ->unique ()
+            ->sort ()
+            ->values ()
+            ->toArray ();
 
         // Get unique status values (plus special 'Empty/Null' for records with no status)
-        $statusValues = APB::whereIn('id', $apbIds)
-            ->whereNotNull('status')
-            ->pluck('status')
-            ->unique()
-            ->sort()
-            ->values()
-            ->toArray();
+        $statusValues = APB::whereIn ( 'id', $apbIds )
+            ->whereNotNull ( 'status' )
+            ->pluck ( 'status' )
+            ->unique ()
+            ->sort ()
+            ->values ()
+            ->toArray ();
         // Always include these statuses
-        $statusValues = array_unique(array_merge($statusValues, ['pending', 'accepted', 'rejected']));
-        sort($statusValues);
+        $statusValues = array_unique ( array_merge ( $statusValues, [ 'pending', 'accepted', 'rejected' ] ) );
+        sort ( $statusValues );
 
         // Get unique tujuan_proyek values
-        $tujuanProyek = APB::whereIn('id', $apbIds)
-            ->whereNotNull('id_tujuan_proyek')
-            ->with('tujuanProyek')
-            ->get()
-            ->map(function ($apb) {
+        $tujuanProyek = APB::whereIn ( 'id', $apbIds )
+            ->whereNotNull ( 'id_tujuan_proyek' )
+            ->with ( 'tujuanProyek' )
+            ->get ()
+            ->map ( function ($apb)
+            {
                 return $apb->tujuanProyek->nama ?? null;
-            })
-            ->filter()
-            ->unique()
-            ->sort()
-            ->values()
-            ->toArray();
+            } )
+            ->filter ()
+            ->unique ()
+            ->sort ()
+            ->values ()
+            ->toArray ();
 
         // Values for special columns related to mutasi status
         // Sent quantity (quantity_dikirim)
-        $quantityDikirim = APB::whereIn('id', $apbIds)
-            ->where('tipe', 'mutasi-proyek')
-            ->whereNotNull('status')
-            ->pluck('quantity')
-            ->unique()
-            ->sort()
-            ->values()
-            ->toArray();
+        $quantityDikirim = APB::whereIn ( 'id', $apbIds )
+            ->where ( 'tipe', 'mutasi-proyek' )
+            ->whereNotNull ( 'status' )
+            ->pluck ( 'quantity' )
+            ->unique ()
+            ->sort ()
+            ->values ()
+            ->toArray ();
 
         // Received quantity (quantity_diterima)
-        $quantityDiterima = APB::join('atb', 'apb.id', '=', 'atb.id_apb_mutasi')
-            ->whereIn('apb.id', $apbIds)
-            ->where('apb.tipe', 'mutasi-proyek')
-            ->whereNotNull('atb.quantity')
-            ->pluck('atb.quantity')
-            ->unique()
-            ->sort()
-            ->values()
-            ->toArray();
+        $quantityDiterima = APB::join ( 'atb', 'apb.id', '=', 'atb.id_apb_mutasi' )
+            ->whereIn ( 'apb.id', $apbIds )
+            ->where ( 'apb.tipe', 'mutasi-proyek' )
+            ->whereNotNull ( 'atb.quantity' )
+            ->pluck ( 'atb.quantity' )
+            ->unique ()
+            ->sort ()
+            ->values ()
+            ->toArray ();
 
         // Used quantity (quantity_digunakan) - records without status
-        $quantityDigunakan = APB::whereIn('id', $apbIds)
-            ->whereNull('status')
-            ->pluck('quantity')
-            ->unique()
-            ->sort()
-            ->values()
-            ->toArray();
+        $quantityDigunakan = APB::whereIn ( 'id', $apbIds )
+            ->whereNull ( 'status' )
+            ->pluck ( 'quantity' )
+            ->unique ()
+            ->sort ()
+            ->values ()
+            ->toArray ();
 
-        return [
-            'tanggal' => $dates,
-            'jenis_alat' => $jenisAlat,
-            'kode_alat' => $kodeAlat,
-            'merek_alat' => $merekAlat,
-            'tipe_alat' => $tipeAlat,
-            'serial_number' => $serialNumber,
-            'kode' => $kategoriSpareparts,
-            'supplier' => $suppliers,
-            'sparepart' => $spareparts,
-            'merk' => $merks,
-            'part_number' => $partNumbers,
-            'satuan' => $satuanValues,
-            'quantity' => $quantities,
-            'harga' => $hargaValues,
-            'jumlah_harga' => $jumlahHargaValues,
-            'mekanik' => $mekanik,
-            'status' => $statusValues,
-            'tujuan_proyek' => $tujuanProyek,
-            'quantity_dikirim' => $quantityDikirim,
-            'quantity_diterima' => $quantityDiterima,
+        return [ 
+            'tanggal'            => $dates,
+            'jenis_alat'         => $jenisAlat,
+            'kode_alat'          => $kodeAlat,
+            'merek_alat'         => $merekAlat,
+            'tipe_alat'          => $tipeAlat,
+            'serial_number'      => $serialNumber,
+            'kode'               => $kategoriSpareparts,
+            'supplier'           => $suppliers,
+            'sparepart'          => $spareparts,
+            'merk'               => $merks,
+            'part_number'        => $partNumbers,
+            'satuan'             => $satuanValues,
+            'quantity'           => $quantities,
+            'harga'              => $hargaValues,
+            'jumlah_harga'       => $jumlahHargaValues,
+            'mekanik'            => $mekanik,
+            'status'             => $statusValues,
+            'tujuan_proyek'      => $tujuanProyek,
+            'quantity_dikirim'   => $quantityDikirim,
+            'quantity_diterima'  => $quantityDiterima,
             'quantity_digunakan' => $quantityDigunakan,
         ];
     }
@@ -1680,7 +1702,7 @@ class APBController extends Controller
                 }
             } );
         }
-        $uniqueValues = $this->getUniqueValues($id_proyek, $tipe);
+        $uniqueValues = $this->getUniqueValues ( $id_proyek, $tipe );
         $query        = $this->applyFilters ( $query, request () );
         $totalQuery   = clone $query;
         $totalAmount  = $totalQuery->join ( 'saldo', 'apb.id_saldo', '=', 'saldo.id' )
@@ -1792,8 +1814,34 @@ class APBController extends Controller
             {
                 throw new \Exception( 'Stok sparepart tidak mencukupi. Sisa stok yang tersedia: ' . $availableQuantity . ' ' . $saldo->masterDataSparepart->satuan );
             }
-            $newAPB = APB::create ( [ 'tanggal' => $request->tanggal, 'tipe' => $request->tipe, 'quantity' => $request->quantity, 'status' => 'pending', 'id_saldo' => $saldo->id, 'id_proyek' => $request->id_proyek, 'id_tujuan_proyek' => $request->id_proyek_tujuan, 'id_master_data_sparepart' => $saldo->id_master_data_sparepart, 'id_master_data_supplier' => $saldo->id_master_data_supplier, 'keterangan' => $request->keterangan ] );
-            ATB::create ( [ 'tanggal' => $request->tanggal, 'tipe' => 'mutasi-proyek', 'quantity' => null, 'harga' => $saldo->harga, 'id_proyek' => $request->id_proyek_tujuan, 'id_asal_proyek' => $request->id_proyek, 'id_apb_mutasi' => $newAPB->id, 'id_spb' => null, 'id_detail_spb' => null, 'id_master_data_sparepart' => $saldo->id_master_data_sparepart, 'id_master_data_supplier' => $saldo->id_master_data_supplier ] );
+
+            $newAPB = APB::create ( [ 
+                'tanggal'                  => $request->tanggal,
+                'tipe'                     => $request->tipe,
+                'quantity'                 => $request->quantity,
+                'status'                   => 'pending',
+                'id_saldo'                 => $saldo->id,
+                'id_proyek'                => $request->id_proyek,
+                'id_tujuan_proyek'         => $request->id_proyek_tujuan,
+                'id_master_data_sparepart' => $saldo->id_master_data_sparepart,
+                'id_master_data_supplier'  => $saldo->id_master_data_supplier,
+                'keterangan'               => $request->keterangan
+            ] );
+
+            ATB::create ( [ 
+                'tanggal'                  => null,
+                'tipe'                     => 'mutasi-proyek',
+                'quantity'                 => null,
+                'harga'                    => $saldo->harga,
+                'id_proyek'                => $request->id_proyek_tujuan,
+                'id_asal_proyek'           => $request->id_proyek,
+                'id_apb_mutasi'            => $newAPB->id,
+                'id_spb'                   => null,
+                'id_detail_spb'            => null,
+                'id_master_data_sparepart' => $saldo->id_master_data_sparepart,
+                'id_master_data_supplier'  => $saldo->id_master_data_supplier
+            ] );
+
             DB::commit ();
             return redirect ()->back ()->with ( 'success', 'Mutasi sparepart berhasil dibuat dan menunggu persetujuan.' );
         }

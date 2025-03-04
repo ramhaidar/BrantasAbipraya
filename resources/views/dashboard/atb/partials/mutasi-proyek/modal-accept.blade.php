@@ -13,6 +13,12 @@
                 <p class="p-0 m-0">Tindakan ini tidak dapat dibatalkan!</p>
 
                 <div class="mt-3">
+                    <label class="form-label required" for="tanggal_terima">Tanggal Sparepart Diterima</label>
+                    <input class="form-control datepicker" id="tanggal_terima" name="tanggal_terima" type="text" autocomplete="off" placeholder="Tanggal Sparepart Diterima" required>
+                    <div class="invalid-feedback">Tanggal Sparepart Diterima diperlukan.</div>
+                </div>
+
+                <div class="mt-3">
                     <label class="form-label required" for="quantity"><span>Quantity Diterima</span><span id="maxQuantityPlaceholder"></span></label>
                     <input class="form-control" id="quantity" name="quantity" type="number" min="1" required>
                     <div class="invalid-feedback">
@@ -49,6 +55,109 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             'use strict';
+
+            // Check if the current user is a koordinator_proyek based on position attribute
+            const isKoordinatorProyek = {{ auth()->user()->role === 'koordinator_proyek' ? 'true' : 'false' }};
+
+            // Destroy existing datepicker to reinitialize with our settings
+            $('#tanggal_terima').datepicker('destroy');
+
+            if (isKoordinatorProyek) {
+                // ONLY FOR KOORDINATOR PROYEK - Apply date restrictions
+                // Calculate valid date range (26th of previous month to 25th of current month)
+                const today = new Date();
+                const startDate = new Date(today.getFullYear(), today.getMonth() - 1, 26);
+                const endDate = new Date(today.getFullYear(), today.getMonth(), 25);
+
+                // Format dates for display
+                const formatDate = (date) => {
+                    return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear();
+                };
+
+                // Initialize the datepicker with strict constraints
+                $('#tanggal_terima').datepicker({
+                    dateFormat: 'yy-mm-dd',
+                    changeMonth: true,
+                    changeYear: true,
+                    minDate: startDate,
+                    maxDate: endDate,
+                    beforeShowDay: function(date) {
+                        // Only allow dates in the specific range
+                        return [date >= startDate && date <= endDate, ''];
+                    },
+                    onSelect: function(dateText) {
+                        $(this).change();
+                        // Add validation visual feedback
+                        $(this).removeClass('is-invalid').addClass('is-valid');
+                    }
+                });
+
+                // Set initial date - if today is in range, use today, otherwise use the closest valid date
+                let initialDate;
+                if (today >= startDate && today <= endDate) {
+                    initialDate = today;
+                } else if (today > endDate) {
+                    initialDate = endDate;
+                } else {
+                    initialDate = startDate;
+                }
+                $('#tanggal_terima').datepicker('setDate', initialDate);
+
+                // Update placeholder to show valid range
+                $('#tanggal_terima').attr('placeholder',
+                    `Tanggal antara ${formatDate(startDate)} - ${formatDate(endDate)}`);
+                $('#tanggal_terima').closest('div').find('.invalid-feedback').text(
+                    `Tanggal harus antara ${formatDate(startDate)} - ${formatDate(endDate)}`);
+
+                // Custom validation to enforce date range on direct input
+                $('#tanggal_terima').on('change', function() {
+                    try {
+                        const input = $(this).val();
+                        if (!input) {
+                            $(this).removeClass('is-valid').addClass('is-invalid');
+                            return false;
+                        }
+
+                        // Parse the input date 
+                        const parts = input.split('-');
+                        if (parts.length !== 3) {
+                            $(this).removeClass('is-valid').addClass('is-invalid');
+                            return false;
+                        }
+
+                        const inputDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+
+                        // Check if date is within range
+                        if (isNaN(inputDate) || inputDate < startDate || inputDate > endDate) {
+                            $(this).removeClass('is-valid').addClass('is-invalid');
+                            // Reset to a valid date
+                            $(this).datepicker('setDate', initialDate);
+                            return false;
+                        } else {
+                            $(this).removeClass('is-invalid').addClass('is-valid');
+                            return true;
+                        }
+                    } catch (e) {
+                        console.error('Date validation error:', e);
+                        $(this).removeClass('is-valid').addClass('is-invalid');
+                        return false;
+                    }
+                });
+            } else {
+                // FOR OTHER ROLES - Initialize the datepicker without date restrictions
+                $('#tanggal_terima').datepicker({
+                    dateFormat: 'yy-mm-dd',
+                    changeMonth: true,
+                    changeYear: true,
+                    onSelect: function(dateText) {
+                        $(this).change();
+                        $(this).removeClass('is-invalid').addClass('is-valid');
+                    }
+                });
+
+                // Set today as the default date
+                $('#tanggal_terima').datepicker('setDate', new Date());
+            }
 
             const dokumentasiInput = document.getElementById('dokumentasiInput');
             const dokumentasiPreview = document.getElementById('dokumentasiPreview');
@@ -165,11 +274,6 @@
                 return true;
             }
 
-            // Add quantity validation to existing validation chain
-            const validateForm = () => {
-                return validateFiles() && validateQuantity();
-            };
-
             // Update quantity on input
             quantityInput.addEventListener('input', function() {
                 const value = parseInt(this.value);
@@ -189,6 +293,12 @@
                 $('#modalForAccept').modal('show');
             };
 
+            // Update existing validateForm function to include date validation
+            const validateForm = () => {
+                const tanggalValid = isKoordinatorProyek ? $('#tanggal_terima').hasClass('is-valid') : true;
+                return validateFiles() && validateQuantity() && tanggalValid;
+            };
+
             // Update submit handler to include id_atb
             $('#confirmAcceptButton').off('click').on('click', function() {
                 if (!validateForm()) {
@@ -204,6 +314,13 @@
 
                 // Set id_atb value
                 document.getElementById('id_atb').value = id;
+
+                // Add tanggal_terima to form
+                const tanggalTerimaHidden = document.createElement('input');
+                tanggalTerimaHidden.type = 'hidden';
+                tanggalTerimaHidden.name = 'tanggal_terima';
+                tanggalTerimaHidden.value = $('#tanggal_terima').val();
+                form.appendChild(tanggalTerimaHidden);
 
                 // Create hidden inputs for quantity
                 const quantityHidden = document.createElement('input');

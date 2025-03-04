@@ -372,7 +372,7 @@ class TimelineRKBUrgentController extends Controller
         $perPage = (int) $request->per_page;
 
         // Get RKB data
-        $rkb = Proyek::find ( $id );
+        $rkb = LinkAlatDetailRKB::find ( $id )->rkb;
 
         $query = $this->buildQuery ( $request, $id );
 

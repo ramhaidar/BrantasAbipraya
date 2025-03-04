@@ -276,7 +276,7 @@
                     <div class="card-header card-header-with-button">
                         <h5>
                             <i class="fas fa-chart-bar mr-1"></i>
-                            Saldo per Bulan ({{ date('Y') }})
+                            Saldo S/D Bulan ({{ date('Y') }})
                         </h5>
                         <button class="btn btn-sm btn-light btn-hide-text-mobile" data-bs-toggle="modal" data-bs-target="#saldoChartModal" type="button">
                             <i class="fas fa-expand-alt"></i> <span class="ms-1">View Larger</span>
@@ -390,7 +390,7 @@
         <div class="modal-dialog modal-xl modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title w-100 text-center" id="atbChartModalLabel"><i class="fas fa-chart-bar mr-2"></i>Saldo per Bulan ({{ date('Y') }})</h5>
+                    <h5 class="modal-title w-100 text-center" id="atbChartModalLabel"><i class="fas fa-chart-bar mr-2"></i>Saldo S/D Bulan ({{ date('Y') }})</h5>
                     <button class="btn-close btn-close-white" data-bs-dismiss="modal" type="button" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" style="background-color: #353a50; min-height: 500px;">

@@ -227,17 +227,17 @@ class DashboardController extends Controller
 
         // dd ( $categoryData );
 
-        console ( "START DATE: " . $startDate->format ( 'Y-m-d' ) );
-        console ( "END DATE: " . $endDate->format ( 'Y-m-d' ) );
+        // console ( "START DATE: " . $startDate->format ( 'Y-m-d' ) );
+        // console ( "END DATE: " . $endDate->format ( 'Y-m-d' ) );
 
-        console ( "ATB TOTAL COUNT: " . $data[ 'atbDataTotal' ]->count () );
-        console ( "FILTERED ATB COUNT: " . $filteredData[ 'atbData' ]->count () );
+        // console ( "ATB TOTAL COUNT: " . $data[ 'atbDataTotal' ]->count () );
+        // console ( "FILTERED ATB COUNT: " . $filteredData[ 'atbData' ]->count () );
 
         // Sample a few records
         if ( $data[ 'atbDataTotal' ]->isNotEmpty () )
         {
-            console ( "FIRST ATB RECORD DATE: " . $data[ 'atbDataTotal' ]->first ()->tanggal );
-            console ( "FIRST ATB RECORD TIPE: " . $data[ 'atbDataTotal' ]->first ()->tipe );
+            // console ( "FIRST ATB RECORD DATE: " . $data[ 'atbDataTotal' ]->first ()->tanggal );
+            // console ( "FIRST ATB RECORD TIPE: " . $data[ 'atbDataTotal' ]->first ()->tipe );
         }
 
 
@@ -382,8 +382,8 @@ class DashboardController extends Controller
         // Calculate the end of month for current period
         $currentPeriodEnd = $endDate->copy ();
 
-        console ( "PERIOD START: " . $currentPeriodStart->format ( 'Y-m-d' ) );
-        console ( "PERIOD END: " . $currentPeriodEnd->format ( 'Y-m-d' ) );
+        // console ( "PERIOD START: " . $currentPeriodStart->format ( 'Y-m-d' ) );
+        // console ( "PERIOD END: " . $currentPeriodEnd->format ( 'Y-m-d' ) );
 
         // dd ( ( clone $saldoBase )
         //     ->whereHas (
@@ -518,6 +518,7 @@ class DashboardController extends Controller
     {
         $chartData = [];
 
+        // First pass: Process all predefined categories
         foreach ( self::CATEGORIES as $category )
         {
             $jenis = $category[ "jenis" ];
@@ -526,16 +527,60 @@ class DashboardController extends Controller
                 $chartData[ $jenis ] = [ "atb" => 0, "apb" => 0, "saldo" => 0 ];
             }
 
-            $categoryTotal                  = $this->calculateTotal ( $atbData, $category );
-            $chartData[ $jenis ][ "atb" ] += $categoryTotal;
-            $chartData[ $jenis ][ "apb" ] += $this->calculateTotal (
-                $apbData,
-                $category
-            );
-            $chartData[ $jenis ][ "saldo" ] += $this->calculateTotal (
-                $saldoData,
-                $category
-            );
+            $chartData[ $jenis ][ "atb" ] += $this->calculateTotal ( $atbData, $category );
+            $chartData[ $jenis ][ "apb" ] += $this->calculateTotal ( $apbData, $category );
+            $chartData[ $jenis ][ "saldo" ] += $this->calculateTotal ( $saldoData, $category );
+        }
+
+        // Second pass: Collect any items with kategori that might have been missed
+        // This ensures we capture all maintenance items even if not in predefined categories
+        foreach ( [ $atbData, $apbData, $saldoData ] as $index => $dataSet )
+        {
+            $dataType = $index === 0 ? 'atb' : ( $index === 1 ? 'apb' : 'saldo' );
+
+            foreach ( $dataSet as $item )
+            {
+                if ( ! $item->masterDataSparepart || ! $item->masterDataSparepart->kategoriSparepart )
+                {
+                    continue;
+                }
+
+                $kategori = $item->masterDataSparepart->kategoriSparepart;
+                $jenis    = $kategori->jenis ?? 'Lain-lain';
+
+                // Skip if not related to maintenance
+                if (
+                    strtolower ( $jenis ) !== 'pemeliharaan' &&
+                    ! str_contains ( strtolower ( $kategori->nama ?? '' ), 'maintenance' ) &&
+                    ! str_contains ( strtolower ( $kategori->kode ?? '' ), 'b' )
+                )
+                {
+                    continue;
+                }
+
+                if ( ! isset ( $chartData[ $jenis ] ) )
+                {
+                    $chartData[ $jenis ] = [ "atb" => 0, "apb" => 0, "saldo" => 0 ];
+                }
+
+                // Only add if the category wasn't already processed in the first pass
+                $alreadyCounted = false;
+                foreach ( self::CATEGORIES as $predefinedCategory )
+                {
+                    if ( $predefinedCategory[ "kode" ] === ( $kategori->kode ?? '' ) )
+                    {
+                        $alreadyCounted = true;
+                        break;
+                    }
+                }
+
+                if ( ! $alreadyCounted )
+                {
+                    $chartData[ $jenis ][ $dataType ] += $item->quantity *
+                        ( $dataType === 'apb' && $item->saldo ? $item->saldo->harga :
+                            ( $item->harga ?? 0 ) );
+                }
+            }
         }
 
         return $chartData;
@@ -724,19 +769,156 @@ class DashboardController extends Controller
             } );
     }
 
-    // Updated method to calculate monthly financial data with PostgreSQL compatibility
-    // and correct date ranges (26th of previous month to 25th of current month)
+    /**
+     * Calculate the total ATB value for a specific month
+     */
+    private function getMonthlyATBValue ( $startDate, $endDate, $projectId = null )
+    {
+        $query = ATB::whereBetween ( 'tanggal', [ $startDate, $endDate ] )
+            ->whereIn ( 'tipe', self::VALID_TYPES );
+
+        // Apply project filter if provided
+        if ( $projectId )
+        {
+            $query->where ( 'id_proyek', $projectId );
+        }
+
+        // Use a simple sum calculation that works across DB engines
+        $total   = 0;
+        $results = $query->get ();
+
+        foreach ( $results as $item )
+        {
+            $total += $item->quantity * ( $item->harga ?? 0 );
+        }
+
+        return $total;
+    }
+
+    /**
+     * Calculate the total APB value for a specific month with extensive debugging
+     */
+    private function getMonthlyAPBValue ( $startDate, $endDate, $projectId = null )
+    {
+        // Step 1: Get the base query with just date filtering
+        $baseQuery = APB::whereBetween ( 'tanggal', [ $startDate, $endDate ] );
+        $baseCount = $baseQuery->count ();
+        // console ( "Step 1: Base query found {$baseCount} APB records for the period" );
+
+        // Step 2: Add valid types filtering
+        $withTypeQuery = clone $baseQuery;
+        $withTypeQuery->whereIn ( 'tipe', self::VALID_TYPES );
+        $withTypeCount = $withTypeQuery->count ();
+        // console ( "Step 2: After type filtering found {$withTypeCount} APB records" );
+
+        // Step 3: Add status filtering - IMPORTANT FIX: Include NULL status values
+        $withStatusQuery = clone $withTypeQuery;
+        $withStatusQuery->where ( function ($query)
+        {
+            $query->whereNotIn ( 'status', [ 'pending', 'rejected' ] )
+                ->orWhereNull ( 'status' ); // This is the key fix - include null status values
+        } );
+        $withStatusCount = $withStatusQuery->count ();
+        // console ( "Step 3: After status filtering (including NULLs) found {$withStatusCount} APB records" );
+
+        // Step 4: Add id_saldo filtering
+        $withSaldoQuery = clone $withStatusQuery;
+        $withSaldoQuery->whereNotNull ( 'id_saldo' );
+        $withSaldoCount = $withSaldoQuery->count ();
+        // console ( "Step 4: After ensuring id_saldo is not null found {$withSaldoCount} APB records" );
+
+        // Step 5: Add project filtering if specified
+        $finalQuery = clone $withSaldoQuery;
+        if ( $projectId )
+        {
+            $finalQuery->where ( 'id_proyek', $projectId );
+            $finalCount = $finalQuery->count ();
+            // console ( "Step 5: After project filtering found {$finalCount} APB records" );
+        }
+        else
+        {
+            $finalCount = $finalQuery->count ();
+            // console ( "Step 5: No project filtering applied, still have {$finalCount} APB records" );
+        }
+
+        // Debug the SQL query
+        $sql      = str_replace ( [ '?' ], [ '\'%s\'' ], $finalQuery->toSql () );
+        $bindings = collect ( $finalQuery->getBindings () )->map ( function ($binding)
+        {
+            if ( $binding instanceof \DateTime )
+            {
+                return $binding->format ( 'Y-m-d H:i:s' );
+            }
+            if ( is_numeric ( $binding ) )
+            {
+                return $binding;
+            }
+            return "'" . $binding . "'";
+        } )->toArray ();
+        $fullSql  = vsprintf ( $sql, $bindings );
+        // console ( "Final SQL: " . $fullSql );
+
+        // Compare with expected SQL
+        $expectedSQL = 'SELECT * 
+        FROM "apb" 
+        WHERE "tanggal" BETWEEN \'' . $startDate->format ( 'Y-m-d H:i:s' ) . '\' AND \'' . $endDate->format ( 'Y-m-d H:i:s' ) . '\' 
+        AND "tipe" IN (\'hutang-unit-alat\', \'panjar-unit-alat\', \'mutasi-proyek\', \'panjar-proyek\') 
+        AND ("status" NOT IN (\'pending\', \'rejected\') OR "status" IS NULL)
+        AND "id_saldo" is not null' .
+            ( $projectId ? ' AND "id_proyek" = \'' . $projectId . '\'' : '' );
+
+        // console ( "Expected SQL: " . $expectedSQL );
+
+        // Eagerly load the saldo relationship to avoid N+1 problem
+        $apbItems = $finalQuery->with ( 'saldo' )->get ();
+
+        // Manually calculate the sum to ensure proper handling
+        $total = 0;
+        foreach ( $apbItems as $apb )
+        {
+            if ( ! $apb->saldo )
+            {
+                // console ( "Warning: APB item #{$apb->id} has no linked saldo record" );
+                continue;
+            }
+
+            if ( ! isset ( $apb->saldo->harga ) || $apb->saldo->harga === null )
+            {
+                // console ( "Warning: APB item #{$apb->id}'s saldo record has null price" );
+                continue;
+            }
+
+            $itemValue = $apb->quantity * $apb->saldo->harga;
+            // console ( "APB item #{$apb->id}: quantity={$apb->quantity}, price={$apb->saldo->harga}, value={$itemValue}" );
+            $total += $itemValue;
+        }
+
+        // console ( "Total APB value: " . number_format ( $total, 2 ) );
+        return $total;
+    }
+
+    /**
+     * Calculate monthly financial data with correct cumulative saldo
+     */
     private function calculateMonthlyFinancialData ( $projectId = null )
     {
         $currentYear = now ()->year;
         $monthlyData = [];
         $monthNames  = [ 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec' ];
 
-        // For each month, calculate values using custom date ranges
+        // First, get the historical balance (all transactions before current year)
+        $startOfYear       = Carbon::create ( $currentYear, 1, 1, 0, 0, 0 );
+        $historicalBalance = $this->getHistoricalBalance ( $startOfYear, $projectId );
+
+        console ( "Historical balance before {$currentYear}: " . number_format ( $historicalBalance, 2 ) );
+
+        // Initialize cumulative saldo with the historical balance
+        $cumulativeSaldo = $historicalBalance;
+
+        // For each month in the current year
         for ( $month = 1; $month <= 12; $month++ )
         {
-            // Calculate start date (26th of previous month)
-            $startDate = Carbon::create ( $currentYear, $month, 1 )->subDays ( 5 );
+            // Calculate date range for this month (26th of previous month to 25th of current month)
             if ( $month == 1 )
             {
                 // For January, start date is December 26 of previous year
@@ -751,35 +933,19 @@ class DashboardController extends Controller
             // Calculate end date (25th of current month)
             $endDate = Carbon::create ( $currentYear, $month, 25 );
 
-            // Base query for ATB with explicit table name prefixes
-            $atbQuery = ATB::where ( 'atb.tanggal', '>=', $startDate )
-                ->where ( 'atb.tanggal', '<=', $endDate )
-                ->whereIn ( 'atb.tipe', self::VALID_TYPES );
+            // Calculate ATB value for this month
+            $atbValue = $this->getMonthlyATBValue ( $startDate, $endDate, $projectId );
 
-            // Apply project filter if provided
-            if ( $projectId )
-            {
-                $atbQuery->where ( 'atb.id_proyek', $projectId );
-            }
+            // Calculate APB value for this month
+            $apbValue = $this->getMonthlyAPBValue ( $startDate, $endDate, $projectId );
 
-            // Calculate ATB total for this month
-            $atbValue = $atbQuery->sum ( \DB::raw ( 'atb.quantity * atb.harga' ) );
+            // Calculate this month's saldo contribution (ATB - APB)
+            $monthSaldoValue = $atbValue - $apbValue;
 
-            // Base query for APB with explicit table name prefixes
-            $apbQuery = APB::where ( 'apb.tanggal', '>=', $startDate )
-                ->where ( 'apb.tanggal', '<=', $endDate )
-                ->whereNotIn ( 'apb.status', [ 'pending', 'rejected' ] )
-                ->whereIn ( 'apb.tipe', self::VALID_TYPES )
-                ->join ( 'saldo', 'saldo.id', '=', 'apb.id_saldo' );
+            // Add to the cumulative total
+            $cumulativeSaldo += $monthSaldoValue;
 
-            // Apply project filter if provided
-            if ( $projectId )
-            {
-                $apbQuery->where ( 'apb.id_proyek', $projectId );
-            }
-
-            // Calculate APB total for this month
-            $apbValue = $apbQuery->sum ( \DB::raw ( 'apb.quantity * saldo.harga' ) );
+            console ( "Month {$monthNames[ $month - 1 ]}: ATB={$atbValue}, APB={$apbValue}, Month Saldo={$monthSaldoValue}, Cumulative={$cumulativeSaldo}" );
 
             // Add data to the monthly arrays
             $monthlyData[ 'atb' ][] = [ 
@@ -792,12 +958,90 @@ class DashboardController extends Controller
                 'value' => (float) $apbValue
             ];
 
+            // Use cumulative saldo for "S/D Bulan" (Up To Month)
             $monthlyData[ 'saldo' ][] = [ 
                 'month' => $monthNames[ $month - 1 ],
-                'value' => (float) ( $atbValue - $apbValue )
+                'value' => (float) $cumulativeSaldo
             ];
         }
 
         return $monthlyData;
+    }
+
+    /**
+     * Calculate the historical balance (all transactions before a given date)
+     */
+    private function getHistoricalBalance ( $beforeDate, $projectId = null )
+    {
+        // Get all ATB transactions before the start date
+        $historicalAtb = $this->getHistoricalATBValue ( $beforeDate, $projectId );
+
+        // Get all APB transactions before the start date
+        $historicalApb = $this->getHistoricalAPBValue ( $beforeDate, $projectId );
+
+        // Calculate historical balance
+        return $historicalAtb - $historicalApb;
+    }
+
+    /**
+     * Calculate the total ATB value before a specific date
+     */
+    private function getHistoricalATBValue ( $beforeDate, $projectId = null )
+    {
+        $query = ATB::where ( 'tanggal', '<', $beforeDate )
+            ->whereIn ( 'tipe', self::VALID_TYPES );
+
+        // Apply project filter if provided
+        if ( $projectId )
+        {
+            $query->where ( 'id_proyek', $projectId );
+        }
+
+        // Use a simple sum calculation that works across DB engines
+        $total   = 0;
+        $results = $query->get ();
+
+        foreach ( $results as $item )
+        {
+            $total += $item->quantity * ( $item->harga ?? 0 );
+        }
+
+        return $total;
+    }
+
+    /**
+     * Calculate the total APB value before a specific date
+     */
+    private function getHistoricalAPBValue ( $beforeDate, $projectId = null )
+    {
+        $query = APB::where ( 'tanggal', '<', $beforeDate )
+            ->whereIn ( 'tipe', self::VALID_TYPES )
+            ->whereNotNull ( 'id_saldo' )
+            ->where ( function ($q)
+            {
+                $q->whereNotIn ( 'status', [ 'pending', 'rejected' ] )
+                    ->orWhereNull ( 'status' );
+            } );
+
+        // Apply project filter if provided
+        if ( $projectId )
+        {
+            $query->where ( 'id_proyek', $projectId );
+        }
+
+        // Eagerly load the saldo relationship to avoid N+1 problem
+        $apbItems = $query->with ( 'saldo' )->get ();
+
+        // Manually calculate the sum to ensure proper handling
+        $total = 0;
+        foreach ( $apbItems as $apb )
+        {
+            if ( $apb->saldo && isset ( $apb->saldo->harga ) )
+            {
+                $total += $apb->quantity * $apb->saldo->harga;
+            }
+        }
+
+        return $total;
     }
 }

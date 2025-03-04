@@ -64,6 +64,11 @@
         .table-responsive {
             overflow: auto !important;
         }
+
+        html {
+            font-family: "Poppins", sans-serif;
+            font-weight: 100;
+        }
     </style>
 
     <!-- Styles -->

@@ -59,13 +59,13 @@
 
                     </div>
                 </div>
+
+                <div class="modal-footer d-flex w-100 justify-content-end">
+                    <button class="btn btn-secondary me-2 w-25" id="resetButtonNormal" type="button">Reset</button>
+                    <button class="btn btn-success w-25" id="submitButtonNormal" type="button">Tambah Data</button>
+                </div>
+
             </form>
-
-            <div class="modal-footer d-flex w-100 justify-content-end">
-                <button class="btn btn-secondary me-2 w-25" id="resetButtonNormal" type="button">Reset</button>
-                <button class="btn btn-success w-25" id="submitButtonNormal" type="button">Tambah Data</button>
-            </div>
-
         </div>
     </div>
 </div>
@@ -410,9 +410,9 @@
             });
 
             // Validate date field
-            const tanggal = $('#tanggal_normal');
-            if (!tanggal.val()) {
-                tanggal.addClass('is-invalid');
+            const tanggalx = $('#tanggal_normal');
+            if (!tanggalx.val()) {
+                tanggalx.addClass('is-invalid');
                 isValid = false;
             } else if (isKoordinatorProyek) {
                 // ONLY FOR KOORDINATOR PROYEK - Validate date range

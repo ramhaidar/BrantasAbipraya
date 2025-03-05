@@ -15,7 +15,6 @@
                     </div>
                 </div>
             </div>
-            </form>
 
             <!-- Hidden form for delete -->
             <form id="deleteLampiranForm" style="display: none;" method="POST" action="{{ route('rkb_urgent.detail.lampiran.destroy', ['id' => '__dataId__']) }}">

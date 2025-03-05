@@ -109,12 +109,13 @@
 
                     </div>
                 </div>
-            </form>
 
-            <div class="modal-footer d-flex w-100 justify-content-end">
-                <button class="btn btn-secondary me-2 w-25" id="resetButton" type="button">Reset</button>
-                <button class="btn btn-success w-25" id="submitButton" type="button">Tambah Data</button>
-            </div>
+                <div class="modal-footer d-flex w-100 justify-content-end">
+                    <button class="btn btn-secondary me-2 w-25" id="resetButton" type="button">Reset</button>
+                    <button class="btn btn-success w-25" id="submitButton" type="button">Tambah Data</button>
+                </div>
+
+            </form>
 
         </div>
     </div>

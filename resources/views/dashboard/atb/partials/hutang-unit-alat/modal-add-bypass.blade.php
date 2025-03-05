@@ -159,11 +159,11 @@
                     });
                 }
 
-                // Limit to 2 decimal places after comma
+                // Limit to 3 decimal places after comma (changed from 2)
                 if (value.indexOf(',') !== -1) {
                     var parts = value.split(',');
-                    if (parts[1].length > 2) {
-                        parts[1] = parts[1].substring(0, 2);
+                    if (parts[1].length > 3) {
+                        parts[1] = parts[1].substring(0, 3);
                         value = parts.join(',');
                     }
                 }

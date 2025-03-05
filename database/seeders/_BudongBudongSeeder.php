@@ -2,16 +2,13 @@
 
 namespace Database\Seeders;
 
-use Carbon\Carbon;
 use App\Models\Proyek;
 use App\Models\AlatProyek;
 use App\Models\MasterDataAlat;
 use Illuminate\Database\Seeder;
 use App\Models\KategoriSparepart;
 use App\Models\MasterDataSupplier;
-use Illuminate\Support\Facades\DB;
 use App\Models\MasterDataSparepart;
-use App\Models\LinkSupplierSparepart;
 
 class _BudongBudongSeeder extends Seeder
 {

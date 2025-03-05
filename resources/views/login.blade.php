@@ -71,6 +71,9 @@
             padding-bottom: 1.5rem
         }
     </style>
+
+    <!-- Cloudflare Turnstile -->
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 
 <body>
@@ -118,17 +121,19 @@
                         <p class="fs-5 text-dark text-opacity-50 mb-4">Masukkan detail login</p>
                         <div class="form-group mb-3">
                             <input class="form-control" id="username" name="username" placeholder="Nama Pengguna">
+                            <div class="invalid-feedback">Nama Pengguna diperlukan.</div>
                         </div>
                         <div class="form-group mb-3 position-relative">
                             <input class="form-control" id="password" name="password" type="password" placeholder="Kata sandi">
+                            <div class="invalid-feedback">Kata sandi diperlukan.</div>
                             <span class="position-absolute top-50 end-0 translate-middle-y me-3">
                                 <i class="fa fa-eye" id="togglePassword" style="cursor:pointer"></i>
                             </span>
                         </div>
 
                         <!-- CloudFlare Turnstile Component -->
-                        <div class="mb-3">
-                            <x-turnstile />
+                        <div class="pt-2 w-100">
+                            <x-turnstile data-size="flexible" data-language="id" />
                             @error('turnstile')
                                 <div class="text-danger">
                                     <strong>{{ $message }}</strong>
@@ -137,7 +142,7 @@
                         </div>
 
                         <div class="form-group pb-3">
-                            <button class="btn btn-warning text-light fs-5 fw-medium my-3" type="submit" style="--bs-btn-padding-x: 3rem; --bs-btn-padding-y: 1rem; --bs-btn-bg: #E99D02;">Masuk</button>
+                            <button class="btn btn-warning text-light fs-5 fw-medium my-3 w-100" id="loginButton" type="submit" style="--bs-btn-bg: #E99D02;">Masuk</button>
                         </div>
                     </div>
                 </form>
@@ -152,23 +157,123 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.14.3/sweetalert2.min.js" integrity="sha512-zK+mEmgBJpVrlnQXcbEfs6Ao4e+ESmepuHso+2UpRwMJbfhPGYNxAZz+IqsiK6/hGn8S1nx1mFOVBoJXJGx8PQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
-        $("#btn-recaptcha").click((function() {
-            $.ajax({
-                url: "recaptcha",
-                type: "get",
-                success: function(e) {
-                    $(".RefreshCaptcha").html(e.captcha)
-                },
-                error: function(e) {
-                    alert("Try Again.")
+        $(document).ready(function() {
+            // Flag to prevent multiple form submissions
+            let isSubmitting = false;
+
+            // Refresh captcha functionality
+            $("#btn-recaptcha").click(function() {
+                $.ajax({
+                    url: "recaptcha",
+                    type: "get",
+                    success: function(e) {
+                        $(".RefreshCaptcha").html(e.captcha);
+                    },
+                    error: function(e) {
+                        alert("Try Again.");
+                    }
+                });
+            });
+
+            // Toggle password visibility using jQuery
+            $("#togglePassword").click(function() {
+                var passwordField = $("#password");
+                var passwordFieldType = passwordField.attr("type");
+
+                if (passwordFieldType === "password") {
+                    passwordField.attr("type", "text");
+                    $(this).removeClass("fa-eye").addClass("fa-eye-slash");
+                } else {
+                    passwordField.attr("type", "password");
+                    $(this).removeClass("fa-eye-slash").addClass("fa-eye");
                 }
-            })
-        }));
-        document.getElementById("togglePassword").addEventListener("click", (function() {
-            var e = document.getElementById("password"),
-                t = this;
-            "password" === e.type ? (e.type = "text", t.classList.remove("fa-eye"), t.classList.add("fa-eye-slash")) : (e.type = "password", t.classList.remove("fa-eye-slash"), t.classList.add("fa-eye"))
-        }));
+            });
+
+            // Add validation feedback to inputs
+            $('#username, #password').on('input', function() {
+                if ($(this).val().trim()) {
+                    $(this).removeClass('is-invalid').addClass('is-valid');
+                } else {
+                    $(this).removeClass('is-valid').addClass('is-invalid');
+                }
+            });
+
+            // Function to validate login form
+            function validateLoginForm() {
+                let isValid = true;
+
+                // Reset previous validation states
+                $('.is-invalid').removeClass('is-invalid');
+
+                // Check if username is empty
+                if (!$('#username').val().trim()) {
+                    $('#username').addClass('is-invalid');
+                    isValid = false;
+                }
+
+                // Check if password is empty
+                if (!$('#password').val().trim()) {
+                    $('#password').addClass('is-invalid');
+                    isValid = false;
+                }
+
+                return isValid;
+            }
+
+            // Function to display a spinner and disable the submit button
+            function showSpinner() {
+                $('#loginButton').prop('disabled', true).html('<span class="spinner-border spinner-border-sm ms-2" role="status" aria-hidden="true"></span>');
+            }
+
+            // Handle form submission with validation and anti-spam protection
+            $('#loginForm').on('submit', function(e) {
+                e.preventDefault();
+
+                // Prevent multiple submissions
+                if (isSubmitting) {
+                    return false;
+                }
+
+                if (validateLoginForm()) {
+                    // Set flag to prevent multiple submissions
+                    isSubmitting = true;
+
+                    // Show spinner and disable button
+                    showSpinner();
+
+                    // Submit the form after a short delay to ensure spinner is visible
+                    setTimeout(() => {
+                        this.submit();
+                    }, 50);
+                }
+            });
+
+            // Handle Enter key press in input fields with anti-spam protection
+            $('#username, #password').on('keypress', function(e) {
+                if (e.which == 13) { // Enter key code
+                    e.preventDefault();
+
+                    // Prevent multiple submissions
+                    if (isSubmitting) {
+                        return false;
+                    }
+
+                    if (validateLoginForm()) {
+                        // Set flag to prevent multiple submissions
+                        isSubmitting = true;
+
+                        // Show spinner and disable button
+                        showSpinner();
+
+                        // Submit the form after a short delay
+                        setTimeout(() => {
+                            $('#loginForm')[0].submit();
+                        }, 50);
+                    }
+                    return false;
+                }
+            });
+        });
     </script>
 
     @if (session('success'))

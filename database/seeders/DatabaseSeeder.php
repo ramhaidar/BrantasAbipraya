@@ -19,12 +19,13 @@ class DatabaseSeeder extends Seeder
                 ProyekSeeder::class,
                 KategoriSparepartSeeder::class,
                 MasterDataAlatSeeder::class,
-                WorkshopAlatProyekSeeder::class, // Add this line to connect Workshop to all projects
+                WorkshopAlatProyekSeeder::class,
+                MasterDataSupplierSeeder::class,
                     // MasterDataSparepartSeeder::class,
-                    // MasterDataSupplierSeeder::class,
 
                 _BudongBudongSeeder::class,
                 _BulangoSeeder::class,
+                _BenerPaket4Seeder::class,
             ]
         );
     }

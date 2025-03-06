@@ -175,7 +175,7 @@ class _KeureutoSeeder extends Seeder
             [ 'kode' => 'C1', 'supplier' => 'PT Gala Jaya Pekanbaru', 'nama' => 'ZB Water Pump', 'part_number' => 'A9042002501' ],
 
             // PT Multicrane Perkasa
-            [ 'kode' => 'B11', 'supplier' => 'PT Multicrane Perkasa', 'nama' => 'Filter Oil', 'part_number' => '10297295' ],
+            // [ 'kode' => 'B11', 'supplier' => 'PT Multicrane Perkasa', 'nama' => 'Filter Oil', 'part_number' => '10297295' ], // Duplicate but dont remove from code Please
             [ 'kode' => 'B11', 'supplier' => 'PT Multicrane Perkasa', 'nama' => 'Filter Oli', 'part_number' => '10297295' ],
             [ 'kode' => 'B12', 'supplier' => 'PT Multicrane Perkasa', 'nama' => 'Fuel Fine Filter', 'part_number' => '12820742' ],
             [ 'kode' => 'B12', 'supplier' => 'PT Multicrane Perkasa', 'nama' => 'Fuel Fine Filter', 'part_number' => '10429946' ],

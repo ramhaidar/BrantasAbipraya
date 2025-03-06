@@ -138,8 +138,8 @@
                 icon: 'success',
                 title: 'Sukses',
                 text: '{{ session('success') }}',
-                timer: 2000,
-                showConfirmButton: false
+                // timer: 2000,
+                showConfirmButton: true
             });
         </script>
     @endif
@@ -150,8 +150,8 @@
                 icon: 'error',
                 title: 'Error',
                 text: '{{ session('error') }}',
-                timer: 2000,
-                showConfirmButton: false
+                // timer: 2000,
+                showConfirmButton: true
             });
         </script>
     @endif
@@ -162,8 +162,8 @@
                 icon: 'success',
                 title: 'Berhasil Dihapus',
                 text: '{{ session('deleted') }}',
-                timer: 2000,
-                showConfirmButton: false
+                // timer: 2000,
+                showConfirmButton: true
             });
         </script>
     @endif
@@ -174,6 +174,7 @@
                 icon: 'error',
                 title: 'Kesalahan Validasi',
                 html: `<ul>@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>`,
+                showConfirmButton: true
             });
         </script>
     @endif

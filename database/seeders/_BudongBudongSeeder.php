@@ -14,26 +14,6 @@ class _BudongBudongSeeder extends Seeder
 {
     public function run () : void
     {
-        // Define Supplier from Unit Alat
-        $supplierNilaiRiil = [ 
-            'PT Sefas Keliantama',
-            'CV Industrialindo',
-            'PT Gala Jaya Mandiri',
-            'PT Adhie Usaha Mandiri',
-        ];
-
-        // Define Supplier from Panjar
-        $supplierPanjar = [ 
-            'AI Diesel',
-            'Aneka Teknik',
-            'Arfan Ban',
-            'Elektronik',
-            'Mattoangin',
-            'Sumber Coklat',
-            'Sumber Coklat Teknik',
-            'Sumatra'
-        ];
-
         // Define Alat data with all equipment codes
         $alatCodes = [ 
             'BL 010-17',
@@ -164,6 +144,26 @@ class _BudongBudongSeeder extends Seeder
             [ 'kode' => 'B22', 'supplier' => 'PT Sefas Keliantama', 'nama' => 'Oli Tellus 68-12', 'part_number' => 'Tellus 68' ],
             [ 'kode' => 'B23', 'supplier' => 'PT Sefas Keliantama', 'nama' => 'Oli Transmisi', 'part_number' => 'Spirax S2 G 90' ],
         ];
+
+        // Extract unique suppliers from sparepartNilaiRiil
+        $supplierNilaiRiil = [];
+        foreach ( $sparepartNilaiRiil as $part )
+        {
+            if ( ! in_array ( $part[ 'supplier' ], $supplierNilaiRiil ) )
+            {
+                $supplierNilaiRiil[] = $part[ 'supplier' ];
+            }
+        }
+
+        // Extract unique suppliers from sparepartPanjar
+        $supplierPanjar = [];
+        foreach ( $sparepartPanjar as $part )
+        {
+            if ( ! in_array ( $part[ 'supplier' ], $supplierPanjar ) )
+            {
+                $supplierPanjar[] = $part[ 'supplier' ];
+            }
+        }
 
         // Create MasterDataSupplier records for Panjar suppliers
         foreach ( $supplierPanjar as $supplier )

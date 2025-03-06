@@ -26,7 +26,7 @@ class MasterDataSupplierSeeder extends Seeder
             [ "CV Kurnia Partindo Jaya", "Jonsen", "+6281938257229", "Surabaya" ],
             [ "CV Makindo Wiguna", "Bogan", "+6289630805019", "Jakarta" ],
             [ "CV Mitra Mandiri Teknik", "Alvian", "+6283822259968", "Jakarta" ],
-            [ " CV Sawitri Cahaya Traktor", "-", "-", "-" ],
+            [ "CV Sawitri Cahaya Traktor", "-", "-", "-" ],
             [ "CV Sinar Makmur Baru", "Adi", "+6285730063480", "Surabaya" ],
             [ "CV Tunggal Jaya", "Suryadi M", "+6285237759999", "Ende" ],
             [ "Eko Juhan", "Eko Juhan", "+6281288199845", "Jakarta" ],

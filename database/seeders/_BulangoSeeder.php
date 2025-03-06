@@ -14,20 +14,6 @@ class _BulangoSeeder extends Seeder
 {
     public function run () : void
     {
-        // Define Supplier from Unit Alat
-        $supplierNilaiRiil = [ 
-            "CV Industrialindo",
-            "PT Gala Jaya Mandiri (Manado)",
-            "PT Centra Global Indo",
-            "PT LTA Diesel Engine Service",
-            "PT Maju Megah Trans",
-            "PT Sefas Keliantama",
-            "PT Trakindo Utama"
-        ];
-
-        // Define Supplier from Panjar
-        $supplierPanjar = [];
-
         // Define Alat data with all equipment codes
         $alatCodes = [];
 
@@ -101,6 +87,26 @@ class _BulangoSeeder extends Seeder
             // PT Trakindo Utama
             [ 'kode' => 'B12', 'supplier' => 'PT Trakindo Utama', 'nama' => 'Element Fuel', 'part_number' => '3608960' ],
         ];
+
+        // Extract unique suppliers from sparepartNilaiRiil
+        $supplierNilaiRiil = [];
+        foreach ( $sparepartNilaiRiil as $part )
+        {
+            if ( ! in_array ( $part[ 'supplier' ], $supplierNilaiRiil ) )
+            {
+                $supplierNilaiRiil[] = $part[ 'supplier' ];
+            }
+        }
+
+        // Extract unique suppliers from sparepartPanjar
+        $supplierPanjar = [];
+        foreach ( $sparepartPanjar as $part )
+        {
+            if ( ! in_array ( $part[ 'supplier' ], $supplierPanjar ) )
+            {
+                $supplierPanjar[] = $part[ 'supplier' ];
+            }
+        }
 
         // Create MasterDataSupplier records for Panjar suppliers
         foreach ( $supplierPanjar as $supplier )

@@ -14,24 +14,6 @@ class _BenerPaket4Seeder extends Seeder
 {
     public function run () : void
     {
-        // Define Supplier from Unit Alat
-        $supplierNilaiRiil = [ 
-            "CV Cahaya Berkah Sentosa",
-            "CV Cahyadi Sukses Bersama",
-            "CV Kurnia Partindo Jaya",
-            "PT Adhie Usaha Mandiri",
-            "PT Blessindo Prima Sarana",
-            "PT Cahaya Surya Kaltara",
-            "PT Centra Global Indo",
-            "PT Fortuna Senjaya Abadi",
-            "PT Multi Traktor Utama",
-            "PT Sefas Keliantama",
-            "PT United Tractors"
-        ];
-
-        // Define Supplier from Panjar
-        $supplierPanjar = [];
-
         // Define Alat data with all equipment codes
         $alatCodes = [];
 
@@ -39,7 +21,7 @@ class _BenerPaket4Seeder extends Seeder
         $sparepartPanjar = [];
 
         $sparepartNilaiRiil = [ 
-            //  CV Cahaya Berkah Sentosa 
+            // CV Cahaya Berkah Sentosa 
             [ 'kode' => 'A1', 'supplier' => 'CV Cahaya Berkah Sentosa', 'nama' => 'Blade (Karet Wiper)', 'part_number' => '20Y-54-39450' ],
             [ 'kode' => 'A2', 'supplier' => 'CV Cahaya Berkah Sentosa', 'nama' => 'Feed Pump', 'part_number' => 'Denso' ],
             [ 'kode' => 'A3', 'supplier' => 'CV Cahaya Berkah Sentosa', 'nama' => 'Kampas Kopling', 'part_number' => '-' ],
@@ -102,16 +84,16 @@ class _BenerPaket4Seeder extends Seeder
             [ 'kode' => 'C1', 'supplier' => 'CV Cahaya Berkah Sentosa', 'nama' => 'KAWAT LAS LB 52 3,2 MM', 'part_number' => 'LB 3,2 MM' ],
             [ 'kode' => 'C1', 'supplier' => 'CV Cahaya Berkah Sentosa', 'nama' => 'KAWAT LAS LB 52 4,0 MM', 'part_number' => 'LB 4,0 MM' ],
 
-            //  CV Cahyadi Sukses Bersama 
+            // CV Cahyadi Sukses Bersama 
             [ 'kode' => 'B3', 'supplier' => 'CV Cahyadi Sukses Bersama', 'nama' => 'FLAP GT', 'part_number' => '20R' ],
 
-            //  CV Kurnia Partindo Jaya
+            // CV Kurnia Partindo Jaya
             [ 'kode' => 'A12', 'supplier' => 'CV Kurnia Partindo Jaya', 'nama' => 'Guard ( Kiri Kanan )', 'part_number' => '14Y-30-16133' ],
             [ 'kode' => 'A12', 'supplier' => 'CV Kurnia Partindo Jaya', 'nama' => 'Guard, L.H (Welded)', 'part_number' => '14X-30-11292' ],
             [ 'kode' => 'A12', 'supplier' => 'CV Kurnia Partindo Jaya', 'nama' => 'Guard, R.H (Welded)', 'part_number' => '14X-30-11312' ],
             [ 'kode' => 'A12', 'supplier' => 'CV Kurnia Partindo Jaya', 'nama' => 'Track roller double flange', 'part_number' => '14X-30-14122' ],
 
-            //  PT Adhie Usaha Mandiri 
+            // PT Adhie Usaha Mandiri 
             [ 'kode' => 'B13', 'supplier' => 'PT Adhie Usaha Mandiri', 'nama' => 'Air Cleaner', 'part_number' => 'P53-2966' ],
             [ 'kode' => 'B15', 'supplier' => 'PT Adhie Usaha Mandiri', 'nama' => 'Filter Coolant', 'part_number' => 'J8640075' ],
             [ 'kode' => 'B11', 'supplier' => 'PT Adhie Usaha Mandiri', 'nama' => 'Filter Oli', 'part_number' => 'J8611670' ],
@@ -127,7 +109,7 @@ class _BenerPaket4Seeder extends Seeder
             [ 'kode' => 'B12', 'supplier' => 'PT Adhie Usaha Mandiri', 'nama' => 'Water Separator', 'part_number' => 'P50-5961 = (600-319-3610)' ],
             [ 'kode' => 'B12', 'supplier' => 'PT Adhie Usaha Mandiri', 'nama' => 'WATER SEPARATOR HINO', 'part_number' => 'P550730' ],
 
-            //  PT Blessindo Prima Sarana 
+            // PT Blessindo Prima Sarana 
             [ 'kode' => 'A11', 'supplier' => 'PT Blessindo Prima Sarana', 'nama' => 'Adapter', 'part_number' => '-' ],
             [ 'kode' => 'B13', 'supplier' => 'PT Blessindo Prima Sarana', 'nama' => 'Air Cleaner', 'part_number' => '898321413A' ],
             [ 'kode' => 'B13', 'supplier' => 'PT Blessindo Prima Sarana', 'nama' => 'Air Cleaner Primary', 'part_number' => '6I-2501' ],
@@ -153,7 +135,7 @@ class _BenerPaket4Seeder extends Seeder
             [ 'kode' => 'A6', 'supplier' => 'PT Cahaya Surya Kaltara', 'nama' => 'Sensor (Pressure Switch)', 'part_number' => '7861-93-1840' ],
             [ 'kode' => 'B12', 'supplier' => 'PT Cahaya Surya Kaltara', 'nama' => 'Water Separator', 'part_number' => 'JFC-88052 = (600-319-3610)' ],
 
-            //  PT Centra Global Indo 
+            // PT Centra Global Indo 
             [ 'kode' => 'A2', 'supplier' => 'PT Centra Global Indo', 'nama' => 'Compressor AC', 'part_number' => '20Y-810-1260' ],
             [ 'kode' => 'A12', 'supplier' => 'PT Centra Global Indo', 'nama' => 'Track Shoe', 'part_number' => '-' ],
 
@@ -175,6 +157,26 @@ class _BenerPaket4Seeder extends Seeder
             [ 'kode' => 'B14', 'supplier' => 'PT United Tractors', 'nama' => 'Air Filter Element', 'part_number' => '6125-81-7032' ],
             [ 'kode' => 'B14', 'supplier' => 'PT United Tractors', 'nama' => 'Air Filter Element', 'part_number' => '600-181-4300' ],
         ];
+
+        // Extract unique suppliers from sparepartNilaiRiil
+        $supplierNilaiRiil = [];
+        foreach ( $sparepartNilaiRiil as $part )
+        {
+            if ( ! in_array ( $part[ 'supplier' ], $supplierNilaiRiil ) )
+            {
+                $supplierNilaiRiil[] = $part[ 'supplier' ];
+            }
+        }
+
+        // Extract unique suppliers from sparepartPanjar
+        $supplierPanjar = [];
+        foreach ( $sparepartPanjar as $part )
+        {
+            if ( ! in_array ( $part[ 'supplier' ], $supplierPanjar ) )
+            {
+                $supplierPanjar[] = $part[ 'supplier' ];
+            }
+        }
 
         // Create MasterDataSupplier records for Panjar suppliers
         foreach ( $supplierPanjar as $supplier )

@@ -8,6 +8,9 @@
     3. To exclude a form, add data-prevent-spam="false" attribute
     4. Optionally specify the submit button with data-submit-btn selector
     
+    Special Cases:
+    - Forms with data-has-price-conversion="true" will ensure price fields are properly processed
+    
     Example to opt OUT a specific form:
     <form id="unprotectedForm" data-prevent-spam="false">
         <!-- form fields that shouldn't use this behavior -->
@@ -24,6 +27,7 @@
         // Process each form
         $forms.each(function() {
             const $form = $(this);
+            const hasPriceConversion = $form.data('has-price-conversion') === true;
 
             // Find submit button - either from data attribute or default to first submit button
             const submitBtnSelector = $form.data('submit-btn') || '[type="submit"]';
@@ -56,8 +60,11 @@
             function validateForm() {
                 let isValid = true;
 
-                // If we have a specific addDataForm with Quantity validation
-                if (isAddDataForm) {
+                // Special handling for forms with custom validation functions
+                if (hasPriceConversion && typeof window.validatePriceForm === 'function') {
+                    // Use custom validation function if available
+                    isValid = window.validatePriceForm($form);
+                } else if (formId === 'addDataForm') {
                     // Reset validation state first
                     $form.find('.is-invalid').removeClass('is-invalid');
 
@@ -123,6 +130,15 @@
                     return false;
                 }
 
+                // Handle special price conversion forms
+                if (hasPriceConversion) {
+                    // Trigger blur on price display field to update hidden field
+                    const $hargaDisplay = $form.find('#harga_display');
+                    if ($hargaDisplay.length) {
+                        $hargaDisplay.blur();
+                    }
+                }
+
                 // Run validation
                 const isValid = validateForm();
 
@@ -168,10 +184,13 @@
                     e.preventDefault();
                     e.stopPropagation();
 
-                    // Special handling for quantity input in addDataForm
-                    if (isAddDataForm && $(this).attr('id') === 'quantity') {
-                        // Force focus on another field first to trigger any blur events
-                        $(this).blur();
+                    // Handle special price conversion forms
+                    if (hasPriceConversion) {
+                        // Trigger blur on price display field to update hidden field
+                        const $hargaDisplay = $form.find('#harga_display');
+                        if ($hargaDisplay.length) {
+                            $hargaDisplay.blur();
+                        }
                     }
 
                     // Submit the form if valid

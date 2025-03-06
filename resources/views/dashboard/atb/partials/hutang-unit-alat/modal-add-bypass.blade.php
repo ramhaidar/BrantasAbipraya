@@ -6,7 +6,7 @@
                 <button class="btn-close" data-bs-dismiss="modal" type="button" aria-label="Close"></button>
             </div>
             <hr class="p-0 m-0 border border-secondary-subtle border-2 opacity-50">
-            <form class="w-100 align-items-center flex-column gap-0 overflow-auto needs-validation" id="addDataFormBypass" method="POST" action="{{ route('atb.post.store') }}">
+            <form class="w-100 align-items-center flex-column gap-0 overflow-auto needs-validation" id="addDataFormBypass" data-has-price-conversion="true" method="POST" action="{{ route('atb.post.store') }}">
                 @csrf
                 <div class="modal-body">
                     <div class="row g-3">
@@ -88,8 +88,10 @@
                         </div>
 
                         <div class="col-12">
-                            <label class="form-label required" for="harga">Harga (Rp.)</label>
-                            <input class="form-control" id="harga" name="harga" type="text" placeholder="Harga" required>
+                            <label class="form-label required" for="harga_display">Harga (Rp.)</label>
+                            <input class="form-control" id="harga_display" type="text" placeholder="Harga" required>
+                            <!-- Hidden field that will hold the actual value to be submitted -->
+                            <input id="harga" name="harga" type="hidden" value="">
                             <div class="invalid-feedback">Harga diperlukan dan harus berupa angka dengan format yang benar.</div>
                         </div>
 
@@ -135,17 +137,27 @@
                     rupiah += separator + ribuan.join('.');
                 }
 
-                rupiah = split[1] !== undefined ? rupiah + ',' + split[1].substr(0, 2) : rupiah;
+                rupiah = split[1] !== undefined ? rupiah + ',' + split[1].substr(0, 3) : rupiah;
                 return prefix === undefined ? rupiah : (rupiah ? 'Rp. ' + rupiah : '');
             }
 
-            // Parse Indonesian formatted number back to standard decimal
+            // Parse Indonesian formatted number back to standard decimal - IMPROVED
             function parseRupiah(rupiahString) {
-                return parseFloat(rupiahString.replace(/\./g, '').replace(',', '.'));
+                // Remove any non-numeric characters except dots and comma
+                var cleanStr = rupiahString.replace(/[^\d.,]/g, '');
+
+                // Replace dots (thousand separators) with empty string and comma with dot
+                var normalizedStr = cleanStr.replace(/\./g, '').replace(',', '.');
+
+                // Convert to float
+                var number = parseFloat(normalizedStr);
+
+                // Return the number or 0 if parsing failed
+                return isNaN(number) ? 0 : number;
             }
 
-            // Handle harga input formatting
-            $('#harga').on('input', function() {
+            // Handle harga input formatting and update hidden field immediately
+            $('#harga_display').on('input blur', function() {
                 var value = $(this).val();
 
                 // Remove non-numeric characters except comma
@@ -159,7 +171,7 @@
                     });
                 }
 
-                // Limit to 3 decimal places after comma (changed from 2)
+                // Limit to 3 decimal places after comma
                 if (value.indexOf(',') !== -1) {
                     var parts = value.split(',');
                     if (parts[1].length > 3) {
@@ -168,8 +180,11 @@
                     }
                 }
 
-                // Format the number with thousand separators
+                // Format the display value with thousand separators
                 $(this).val(formatRupiah(value));
+
+                // Update the hidden field with the parsed numeric value
+                $('#harga').val(parseRupiah(formatRupiah(value)));
             });
 
             // Initialize select2 components
@@ -262,42 +277,24 @@
             $('#resetButtonBypass').on('click', function() {
                 $('#addDataFormBypass')[0].reset();
                 $('#id_master_data_supplier, #id_kategori_sparepart, #id_master_data_sparepart').val(null).trigger('change');
+                $('#harga').val(''); // Clear hidden field too
                 $('.is-invalid').removeClass('is-invalid');
                 $('.was-validated').removeClass('was-validated');
             });
 
-            // Single validation and submit handler
-            $('#submitButtonBypass').on('click', function(e) {
-                e.preventDefault();
+            // Handle submit button click - only sets validation but doesn't submit
+            $('#submitButtonBypass').on('click', function() {
                 const form = $('#addDataFormBypass');
-
                 form.addClass('was-validated');
-                if (validateForm()) {
-                    const submitButton = $(this);
-                    const originalText = submitButton.html();
 
-                    // Convert the formatted price back to standard decimal before submit
-                    const hargaFormatted = $('#harga').val();
-                    const hargaValue = parseRupiah(hargaFormatted);
+                // Ensure price field is updated one more time before validation
+                const hargaFormatted = $('#harga_display').val();
+                const hargaValue = parseRupiah(hargaFormatted);
+                $('#harga').val(hargaValue);
 
-                    // Create a hidden input to store the converted value
-                    if ($('#hargaHidden').length === 0) {
-                        $('<input>').attr({
-                            type: 'hidden',
-                            id: 'hargaHidden',
-                            name: 'harga',
-                            value: hargaValue
-                        }).appendTo(form);
-
-                        // Remove the name attribute from the original field to avoid duplicates
-                        $('#harga').removeAttr('name');
-                    } else {
-                        $('#hargaHidden').val(hargaValue);
-                    }
-
-                    submitButton.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
-
-                    form.submit();
+                // Only validate - let the native form submission or form-submit-handler do the rest
+                if (!validateForm()) {
+                    return false;
                 }
             });
 
@@ -307,7 +304,7 @@
                 const form = $('#addDataFormBypass');
 
                 // Reset previous validation states
-                $('.is-invalid').removeClass('is-invalid');
+                form.find('.is-invalid').removeClass('is-invalid');
 
                 // Validate required fields
                 form.find('[required]').each(function() {
@@ -324,17 +321,15 @@
                 }
 
                 // Validate harga
-                const harga = $('#harga').val();
+                const harga = $('#harga_display').val();
+                const hargaValue = $('#harga').val();
+
                 if (!harga) {
-                    $('#harga').addClass('is-invalid');
+                    $('#harga_display').addClass('is-invalid');
                     isValid = false;
-                } else {
-                    // Check if value can be parsed as a number and is greater than zero
-                    const hargaValue = parseRupiah(harga);
-                    if (isNaN(hargaValue) || hargaValue <= 0) {
-                        $('#harga').addClass('is-invalid');
-                        isValid = false;
-                    }
+                } else if (parseFloat(hargaValue) <= 0) {
+                    $('#harga_display').addClass('is-invalid');
+                    isValid = false;
                 }
 
                 if (!isValid) {
@@ -349,6 +344,13 @@
                 return isValid;
             }
 
+            // Special handler for Enter key in the whole form
+            $('#addDataFormBypass').on('keypress', function(e) {
+                if (e.which === 13 || e.keyCode === 13) {
+                    // Make sure price is updated before validation/submission
+                    $('#harga_display').trigger('blur');
+                }
+            });
         });
     </script>
 @endpush

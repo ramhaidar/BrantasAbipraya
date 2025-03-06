@@ -150,7 +150,7 @@
                     rupiah += separator + ribuan.join('.');
                 }
 
-                rupiah = split[1] !== undefined ? rupiah + ',' + split[1].substr(0, 2) : rupiah;
+                rupiah = split[1] !== undefined ? rupiah + ',' + split[1].substr(0, 3) : rupiah;
                 return prefix === undefined ? rupiah : (rupiah ? 'Rp. ' + rupiah : '');
             }
 

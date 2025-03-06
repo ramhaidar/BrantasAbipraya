@@ -78,6 +78,7 @@
                             <select class="form-control" id="satuan" name="satuan" required>
                                 <option value="">Pilih Satuan</option>
                                 <option value="Box">Box</option>
+                                <option value="Btl">Btg</option>
                                 <option value="Btl">Btl</option>
                                 <option value="Drum">Drum</option>
                                 <option value="Ken">Ken</option>

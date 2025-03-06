@@ -289,6 +289,8 @@
                                 sparepartSelect.prop('disabled', false);
                             } else {
                                 sparepartSelect.append('<option value="">Tidak ada sparepart tersedia</option>');
+                                // Keep dropdown disabled when no spareparts available
+                                sparepartSelect.prop('disabled', true);
                             }
                             sparepartSelect.val(null).trigger('change');
                         },

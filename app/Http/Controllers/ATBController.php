@@ -1086,7 +1086,7 @@ class ATBController extends Controller
                     'id_master_data_supplier'  => 'required|exists:master_data_supplier,id',
                     'id_master_data_sparepart' => 'required|exists:master_data_sparepart,id',
                     'quantity'                 => 'required|integer|min:1',
-                    'harga'                    => 'required|numeric|min:0',
+                    'harga'                    => 'required|numeric',
                     'satuan'                   => 'required|string'
                 ] );
 

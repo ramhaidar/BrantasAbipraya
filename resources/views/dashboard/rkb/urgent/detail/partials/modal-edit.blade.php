@@ -87,6 +87,7 @@
                                 <option value="Drum">Drum</option>
                                 <option value="Ken">Ken</option>
                                 <option value="Kg">Kg</option>
+                                <option value="Ktk">Ktk</option>
                                 <option value="Ls">Ls</option>
                                 <option value="Ltr">Ltr</option>
                                 <option value="Pack">Pack</option>

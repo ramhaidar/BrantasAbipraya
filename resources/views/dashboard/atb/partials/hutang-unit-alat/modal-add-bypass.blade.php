@@ -77,6 +77,7 @@
                                 <option value="Drum">Drum</option>
                                 <option value="Ken">Ken</option>
                                 <option value="Kg">Kg</option>
+                                <option value="Ktk">Ktk</option>
                                 <option value="Ls">Ls</option>
                                 <option value="Ltr">Ltr</option>
                                 <option value="Pack">Pack</option>
@@ -124,8 +125,17 @@
             // Add loading overlay to body
             $('body').append('<div class="loading-overlay" style="display: none;"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>');
 
-            // Format number function for Indonesian locale
+            // Format number function for Indonesian locale - UPDATED TO SUPPORT NEGATIVE VALUES
             function formatRupiah(angka, prefix) {
+                // Check if string starts with minus sign
+                const isNegative = angka.startsWith('-');
+
+                // Remove the minus sign for processing
+                if (isNegative) {
+                    angka = angka.substring(1);
+                }
+
+                // Format as usual
                 var number_string = angka.replace(/[^,\d]/g, '').toString(),
                     split = number_string.split(','),
                     sisa = split[0].length % 3,
@@ -138,13 +148,27 @@
                 }
 
                 rupiah = split[1] !== undefined ? rupiah + ',' + split[1].substr(0, 3) : rupiah;
+
+                // Add the minus sign back if the original was negative
+                if (isNegative) {
+                    rupiah = '-' + rupiah;
+                }
+
                 return prefix === undefined ? rupiah : (rupiah ? 'Rp. ' + rupiah : '');
             }
 
-            // Parse Indonesian formatted number back to standard decimal - IMPROVED
+            // Parse Indonesian formatted number back to standard decimal - IMPROVED FOR NEGATIVE VALUES
             function parseRupiah(rupiahString) {
-                // Remove any non-numeric characters except dots and comma
-                var cleanStr = rupiahString.replace(/[^\d.,]/g, '');
+                // Check if string contains minus sign
+                const isNegative = rupiahString.includes('-');
+
+                // Remove any non-numeric characters except dots, comma and minus sign
+                var cleanStr = rupiahString.replace(/[^\d.,\-]/g, '');
+
+                // Ensure minus sign is only at the beginning if present
+                if (isNegative) {
+                    cleanStr = '-' + cleanStr.replace(/\-/g, '');
+                }
 
                 // Replace dots (thousand separators) with empty string and comma with dot
                 var normalizedStr = cleanStr.replace(/\./g, '').replace(',', '.');
@@ -160,8 +184,20 @@
             $('#harga_display').on('input blur', function() {
                 var value = $(this).val();
 
-                // Remove non-numeric characters except comma
-                value = value.replace(/[^\d,]/g, '');
+                // Check if input starts with minus sign
+                const isNegative = value.startsWith('-');
+
+                // Remove non-numeric characters except comma and minus
+                value = value.replace(/[^\d,\-]/g, '');
+
+                // Ensure minus sign is only at the beginning
+                if (isNegative) {
+                    // Remove all minus signs and add one at beginning
+                    value = '-' + value.replace(/\-/g, '');
+                } else {
+                    // Remove any minus signs
+                    value = value.replace(/\-/g, '');
+                }
 
                 // Ensure only one comma exists
                 var commaCount = (value.match(/,/g) || []).length;
@@ -298,7 +334,7 @@
                 }
             });
 
-            // Function to validate form
+            // Function to validate form - UPDATED TO ACCEPT NEGATIVE VALUES
             function validateForm() {
                 let isValid = true;
                 const form = $('#addDataFormBypass');
@@ -320,14 +356,15 @@
                     isValid = false;
                 }
 
-                // Validate harga
+                // Validate harga - removed the greater than zero check
                 const harga = $('#harga_display').val();
                 const hargaValue = $('#harga').val();
 
                 if (!harga) {
                     $('#harga_display').addClass('is-invalid');
                     isValid = false;
-                } else if (parseFloat(hargaValue) <= 0) {
+                } else if (isNaN(parseFloat(hargaValue))) {
+                    // Only check if it's a valid number, not if it's positive
                     $('#harga_display').addClass('is-invalid');
                     isValid = false;
                 }

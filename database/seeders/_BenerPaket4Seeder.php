@@ -99,7 +99,7 @@ class _BenerPaket4Seeder extends Seeder
             [ 'kode' => 'B11', 'supplier' => 'PT Adhie Usaha Mandiri', 'nama' => 'Filter Oli', 'part_number' => 'J8611670' ],
             [ 'kode' => 'B12', 'supplier' => 'PT Adhie Usaha Mandiri', 'nama' => 'Fuel Filter', 'part_number' => 'J8621105D' ],
             [ 'kode' => 'B12', 'supplier' => 'PT Adhie Usaha Mandiri', 'nama' => 'FUEL FILTER HINO', 'part_number' => 'P550225' ],
-            [ 'kode' => 'B12', 'supplier' => 'PT Adhie Usaha Mandiri', 'nama' => 'FUEL FILTER PC 200-8MO', 'part_number' => 'J8621314' ],
+            [ 'kode' => 'B12', 'supplier' => 'PT Adhie Usaha Mandiri', 'nama' => 'Fuel Filter PC200-8M0', 'part_number' => 'J8621314' ], // Duplicate, already seeded in _BulangoSeeder
             [ 'kode' => 'B12', 'supplier' => 'PT Adhie Usaha Mandiri', 'nama' => 'FUEL PRE FILTER PC 200-8MO', 'part_number' => 'J8620561' ],
             [ 'kode' => 'B14', 'supplier' => 'PT Adhie Usaha Mandiri', 'nama' => 'HYDRAULIC FILTER PC 200-8MO', 'part_number' => 'J8630180-1' ],
             [ 'kode' => 'B13', 'supplier' => 'PT Adhie Usaha Mandiri', 'nama' => 'HYDRAULIC TANK BREATHER PC 200-8MO', 'part_number' => 'P502574' ],

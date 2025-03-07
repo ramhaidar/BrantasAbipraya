@@ -117,7 +117,7 @@ class _KeureutoSeeder extends Seeder
             [ 'kode' => 'C1', 'supplier' => 'PT Gala Jaya Pekanbaru', 'nama' => 'LU Presure Sensor /KB', 'part_number' => 'A4005420718' ],
             [ 'kode' => 'A2', 'supplier' => 'PT Gala Jaya Pekanbaru', 'nama' => 'LU Stater / 24V Stater Motor', 'part_number' => 'A4001500901' ],
             [ 'kode' => 'A8', 'supplier' => 'PT Gala Jaya Pekanbaru', 'nama' => 'Lu Tie Rod', 'part_number' => 'A4003301703' ],
-            [ 'kode' => 'A11', 'supplier' => 'PT Gala Jaya Pekanbaru', 'nama' => 'Lu Tie Rod', 'part_number' => 'A4003301703' ],
+            // [ 'kode' => 'A11', 'supplier' => 'PT Gala Jaya Pekanbaru', 'nama' => 'Lu Tie Rod', 'part_number' => 'A4003301703' ], // Wrong Kode but dont remove from code Please
             [ 'kode' => 'A3', 'supplier' => 'PT Gala Jaya Pekanbaru', 'nama' => 'Lu Universal Joint / Kit', 'part_number' => 'A4004111011' ],
             [ 'kode' => 'C1', 'supplier' => 'PT Gala Jaya Pekanbaru', 'nama' => 'MATA GERINDA TANGAN', 'part_number' => '-' ],
             [ 'kode' => 'B28', 'supplier' => 'PT Gala Jaya Pekanbaru', 'nama' => 'Minyak Rem', 'part_number' => 'BOTOL BESAR' ],

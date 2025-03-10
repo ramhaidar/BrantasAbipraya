@@ -100,8 +100,8 @@
 @push('scripts_2')
     <script>
         function filterPeriode() {
-            let startDate = document.getElementById('startDate').value + '-26'; // Start at 26th
-            let endDate = document.getElementById('endDate').value + '-25'; // End at 25th
+            let startDate = document.getElementById('startDate').value; // Just use YYYY-MM format
+            let endDate = document.getElementById('endDate').value; // Just use YYYY-MM format
 
             let currentUrl = new URL(window.location.href);
             let id_proyek = currentUrl.searchParams.get('id_proyek');

@@ -10,6 +10,7 @@ class ProyekSeeder extends Seeder
     {
         $proyek =
             [ 
+                "BENDUNGAN BAGONG",
                 "BENDUNGAN BUDONG - BUDONG",
                 "BENDUNGAN MARANGKAYU",
                 "CV NURA SAKTI (BENER 4)",
@@ -31,7 +32,7 @@ class ProyekSeeder extends Seeder
                 "PEMBANGUNAN BENDUNGAN BENER PAKET 1 (MYC)",
                 "PEMBANGUNAN BENDUNGAN BENER PAKET 4 (MYC)",
                 "PEMBANGUNAN BENDUNGAN BULANGO ULU",
-                "PEMBANGUNAN BENDUNGAN JRAGUNG PAKET III",
+                "PEMBANGUNAN BENDUNGAN JRAGUNG PAKET 3",
                 "PEMBANGUNAN BENDUNGAN KEUREUTO ACEH",
                 "PEMBANGUNAN BENDUNGAN MBAY",
                 "PEMBANGUNAN BENDUNGAN SEPAKU SEMOI (LANJUTAN)",
@@ -71,6 +72,7 @@ class ProyekSeeder extends Seeder
                 "SPAM PAKET 1 - IKN",
                 "SPAM PAKET 2 - IKN",
                 "WING 2 PUPR IKN (GEDUNG PUPR 5 TOWER)",
+                "WORKSHOP IKN",
             ];
 
         foreach ( $proyek as $nama )

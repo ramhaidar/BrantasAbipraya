@@ -395,7 +395,7 @@
                 </div>
                 <div class="modal-body" style="background-color: #353a50; min-height: 500px;">
                     <div class="d-flex justify-content-center align-items-center" style="background-color: #353a50; min-height: 500px;">
-                        <div class="flex-grow-1 text-center" id="monthlySaldoChartModal"></div>
+                        <div class="flex-grow-1 text-center" id="monthlyCumulativeSaldoChartModal"></div>
                     </div>
                 </div>
             </div>

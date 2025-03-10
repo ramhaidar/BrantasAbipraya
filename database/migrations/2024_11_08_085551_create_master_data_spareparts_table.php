@@ -22,9 +22,12 @@ return new class extends Migration
 
             $table->timestamps ();
 
-            // Unique constraint untuk kombinasi nama dan part_number
-            $table->unique ( [ 'nama', 'part_number' ] );
+            // Unique constraint untuk kombinasi merk dan part_number
+            // $table->unique ( [ 'merk', 'part_number' ] );
+
         } );
+        // Nama dan Part Number boleh sama jika merk berbeda
+        DB::statement ( 'CREATE UNIQUE INDEX unique_nama_part_number_except_merk ON master_data_sparepart (nama, part_number)' );
     }
 
     public function down () : void

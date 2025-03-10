@@ -364,6 +364,44 @@
         // Clear any existing content
         chartElement.innerHTML = '';
 
+        // Get current month to zero out future months
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        const currentMonth = currentDate.getMonth() + 1; // JavaScript months are 0-indexed
+
+        // Create a mapping of month names to their numeric values for comparison
+        const monthMapping = {
+            'Jan': 1,
+            'Feb': 2,
+            'Mar': 3,
+            'Apr': 4,
+            'May': 5,
+            'Jun': 6,
+            'Jul': 7,
+            'Aug': 8,
+            'Sep': 9,
+            'Oct': 10,
+            'Nov': 11,
+            'Dec': 12
+        };
+
+        // Create modified data where future months have value = 0
+        const modifiedSaldoData = monthlySaldoData.map(d => {
+            const monthName = d.month;
+            const monthNumber = monthMapping[monthName];
+
+            // If this month is after the current month, set value to 0
+            if (monthNumber > currentMonth) {
+                return {
+                    month: d.month,
+                    value: 0
+                };
+            }
+
+            // Otherwise, keep the original value
+            return d;
+        });
+
         // Set up chart dimensions and margins - Larger for modal
         const margin = {
             top: isModal ? 30 : 15,
@@ -389,15 +427,19 @@
             .attr('class', 'tooltip')
             .style('opacity', 0);
 
-        // X scale - months
+        // X scale - months (using all months)
         const x = d3.scaleBand()
-            .domain(monthlySaldoData.map(d => d.month))
+            .domain(modifiedSaldoData.map(d => d.month))
             .range([0, width])
             .padding(isModal ? 0.3 : 0.2); // More padding in modal for better visibility
 
+        // Calculate max value from the original data (not the modified data with zeros)
+        // This ensures the Y scale remains consistent even with future months zeroed out
+        const maxValue = d3.max(monthlySaldoData, d => d.value) * 1.1;
+
         // Y scale - Saldo values
         const y = d3.scaleLinear()
-            .domain([0, d3.max(monthlySaldoData, d => d.value) * 1.1]) // Add 10% padding
+            .domain([0, maxValue]) // Use original max value
             .range([height, 0]);
 
         // Add X axis with appropriate font size
@@ -447,9 +489,9 @@
         // Use single solid color for Saldo without hover effect
         const saldoColor = '#16ce9a'; // Green color for Saldo
 
-        // Create bar groups
+        // Create bar groups with the modified data (future months zeroed out)
         const barGroups = svg.selectAll('.bar-group')
-            .data(monthlySaldoData)
+            .data(modifiedSaldoData)
             .enter()
             .append('g')
             .attr('class', 'bar-group');
@@ -470,11 +512,16 @@
                     .duration(200)
                     .style('opacity', 0.9);
 
-                tooltip.html(`<strong>Bulan: ${d.month}</strong><br>
-                              <strong>Saldo:</strong> Rp${d.value.toLocaleString('de-DE', {
-                                  minimumFractionDigits: 2,
-                                  maximumFractionDigits: 2
-                              }).replace(/\./g, ',').replace(/,/g, '.')}`)
+                const tooltipContent = d.value > 0 ?
+                    `<strong>Bulan: ${d.month}</strong><br>
+                     <strong>Saldo:</strong> Rp${d.value.toLocaleString('de-DE', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                     }).replace(/\./g, ',').replace(/,/g, '.')}` :
+                    `<strong>Bulan: ${d.month}</strong><br>
+                     <strong>Saldo:</strong> Rp0,00`;
+
+                tooltip.html(tooltipContent)
                     .style('left', (event.pageX + 10) + 'px')
                     .style('top', (event.pageY - 28) + 'px');
             })
@@ -496,8 +543,9 @@
             .style('filter', `drop-shadow(0px ${isModal ? 2 : 1}px ${isModal ? 2 : 1}px rgba(0,0,0,0.3))`)
             .style('pointer-events', 'none'); // Make actual bars non-interactive
 
-        // Add value labels on top of bars with appropriate font size
-        barGroups.append('text')
+        // Add value labels on top of bars with appropriate font size (only for non-zero values)
+        barGroups.filter(d => d.value > 0)
+            .append('text')
             .attr('class', 'label')
             .attr('x', d => x(d.month) + x.bandwidth() / 2)
             .attr('y', d => y(d.value) - (isModal ? 5 : 3))
@@ -526,7 +574,7 @@
         });
 
         $('#saldoChartModal').on('shown.bs.modal', function() {
-            monthlySaldoChart('monthlySaldoChartModal', true);
+            monthlySaldoChart('monthlyCumulativeSaldoChartModal', true);
         });
 
         // Re-initialize on window resize for responsiveness
@@ -547,7 +595,7 @@
                 monthlyApbChart('monthlyApbChartModal', true);
             }
             if ($('#saldoChartModal').is(':visible')) {
-                monthlySaldoChart('monthlySaldoChartModal', true);
+                monthlySaldoChart('monthlyCumulativeSaldoChartModal', true);
             }
         });
     });

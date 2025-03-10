@@ -69,6 +69,7 @@
                                 <option value="Ktk">Ktk</option>
                                 <option value="Ls">Ls</option>
                                 <option value="Ltr">Ltr</option>
+                                <option value="Ltr">M</option>
                                 <option value="Pack">Pack</option>
                                 <option value="Pail">Pail</option>
                                 <option value="Pcs">Pcs</option>

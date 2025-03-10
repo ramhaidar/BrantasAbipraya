@@ -80,6 +80,7 @@
                             <label class="form-label required" for="satuan">Satuan</label>
                             <select class="form-control" id="satuan" name="satuan" required>
                                 <option value="">Pilih Satuan</option>
+                                <option value="Assy">Assy</option>
                                 <option value="Box">Box</option>
                                 <option value="Btl">Btg</option>
                                 <option value="Btl">Btl</option>

@@ -54,6 +54,7 @@
                             <label class="form-label required" for="satuan_edit">Satuan</label>
                             <select class="form-control" id="satuan_edit" name="satuan" required>
                                 <option value="">Pilih Satuan</option>
+                                <option value="Assy">Assy</option>
                                 <option value="Box">Box</option>
                                 <option value="Btl">Btg</option>
                                 <option value="Btl">Btl</option>

@@ -4,14 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\APB;
 use App\Models\ATB;
-use App\Models\Alat;
-use App\Models\User;
 use App\Models\Saldo;
 use App\Models\Proyek;
 use Illuminate\Http\Request;
 use App\Models\KategoriSparepart;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -124,8 +121,33 @@ class DashboardController extends Controller
             try
             {
                 // Parse YYYY-MM format from input
-                // Set to the 26th day of the selected month
-                $startDate = Carbon::createFromFormat ( 'Y-m', $request->startDate )->setDay ( 26 );
+                $startMonth = Carbon::createFromFormat ( 'Y-m', $request->startDate );
+
+                // Special case: If start month is November and end month is December
+                if (
+                    $startMonth->month == 11 && $request->has ( 'endDate' ) &&
+                    ! empty ( $request->endDate ) &&
+                    Carbon::createFromFormat ( 'Y-m', $request->endDate )->month == 12
+                )
+                {
+                    // Set to the 26th day of November
+                    $startDate = $startMonth->copy ()->setDay ( 26 );
+                }
+                // Special case: If start month is December and end month is January
+                else if (
+                    $startMonth->month == 12 && $request->has ( 'endDate' ) &&
+                    ! empty ( $request->endDate ) &&
+                    Carbon::createFromFormat ( 'Y-m', $request->endDate )->month == 1
+                )
+                {
+                    // Set to the 1st day of January (next year)
+                    $startDate = $startMonth->copy ()->addMonth ()->setDay ( 1 );
+                }
+                else
+                {
+                    // Normal case: Set to the 26th day of the selected month
+                    $startDate = $startMonth->copy ()->setDay ( 26 );
+                }
             }
             catch ( \Exception $e )
             {
@@ -154,10 +176,29 @@ class DashboardController extends Controller
         {
             try
             {
-                // Parse the YYYY-MM format from input and set to the 25th day
-                // Removed the addMonth() call that was causing incorrect date
-                $endDate = Carbon::createFromFormat ( 'Y-m', $request->endDate )
-                    ->setDay ( 25 ); // Set to day 25 of the specified month
+                // Parse the YYYY-MM format from input
+                $endMonth = Carbon::createFromFormat ( 'Y-m', $request->endDate );
+
+                // Special case: If end month is December and start month is November
+                if ( $endMonth->month == 12 && $startDate->month == 11 )
+                {
+                    // Set to the 31st day of December
+                    $endDate = $endMonth->copy ()->endOfMonth ();
+                }
+                // Special case: If end month is January and start month is December or January
+                else if (
+                    $endMonth->month == 1 &&
+                    ( $startDate->month == 12 || $startDate->month == 1 )
+                )
+                {
+                    // Set to the 25th day of January
+                    $endDate = $endMonth->copy ()->setDay ( 25 );
+                }
+                else
+                {
+                    // Normal case: Set to day 25 of the specified month
+                    $endDate = $endMonth->copy ()->setDay ( 25 );
+                }
             }
             catch ( \Exception $e )
             {
@@ -169,6 +210,17 @@ class DashboardController extends Controller
         {
             // Default: 25th of the month after startDate
             $endDate = $startDate->copy ()->addMonth ()->setDay ( 25 );
+
+            // Special case: If start date is in November, end date should be December 31
+            if ( $startDate->month == 11 )
+            {
+                $endDate = $startDate->copy ()->month ( 12 )->endOfMonth ();
+            }
+            // Special case: If start date is in December, end date should be January 25
+            else if ( $startDate->month == 12 )
+            {
+                $endDate = $startDate->copy ()->addMonth ()->setDay ( 25 );
+            }
         }
 
         // Ensure endDate is not before startDate (this should rarely happen with our logic)
@@ -918,20 +970,24 @@ class DashboardController extends Controller
         // For each month in the current year
         for ( $month = 1; $month <= 12; $month++ )
         {
-            // Calculate date range for this month (26th of previous month to 25th of current month)
+            // Special case for January: January 1 to January 25
             if ( $month == 1 )
             {
-                // For January, start date is December 26 of previous year
-                $startDate = Carbon::create ( $currentYear - 1, 12, 26 );
+                $startDate = Carbon::create ( $currentYear, 1, 1 ); // January 1st
+                $endDate   = Carbon::create ( $currentYear, 1, 25 );  // January 25th
             }
+            // Special case for December: November 26 to December 31
+            else if ( $month == 12 )
+            {
+                $startDate = Carbon::create ( $currentYear, 11, 26 ); // November 26th
+                $endDate   = Carbon::create ( $currentYear, 12, 31 );   // December 31st
+            }
+            // Regular case for other months: 26th of previous month to 25th of current month
             else
             {
-                // For other months, start date is 26th of previous month
                 $startDate = Carbon::create ( $currentYear, $month - 1, 26 );
+                $endDate   = Carbon::create ( $currentYear, $month, 25 );
             }
-
-            // Calculate end date (25th of current month)
-            $endDate = Carbon::create ( $currentYear, $month, 25 );
 
             // Calculate ATB value for this month
             $atbValue = $this->getMonthlyATBValue ( $startDate, $endDate, $projectId );

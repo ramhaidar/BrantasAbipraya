@@ -49,9 +49,25 @@ class LaporanLNPBTotalController extends Controller
                 ? Carbon::parse ( $request->endDate )
                 : $defaultEndDate;
 
-            // Ensure startDate is on the 26th and endDate is on the 25th
-            $startDate = $startDate->day ( 26 );
-            $endDate   = $endDate->day ( 25 );
+            // Special case handling for November-December period
+            if ( $startDate->month == 11 && $endDate->month == 12 )
+            {
+                $startDate = $startDate->copy ()->setDay ( 26 ); // November 26th
+                $endDate   = $endDate->copy ()->endOfMonth ();   // December 31st
+            }
+            // Special case handling for December-January period
+            else if ( $startDate->month == 12 && $endDate->month == 1 )
+            {
+                // For December-January, we only want January 1st to January 25th
+                $startDate = Carbon::parse ( $endDate->year . '-01-01' ); // January 1st
+                $endDate   = Carbon::parse ( $endDate->year . '-01-25' ); // January 25th
+            }
+            // Normal case: Ensure startDate is on the 26th and endDate is on the 25th
+            else
+            {
+                $startDate = $startDate->day ( 26 );
+                $endDate   = $endDate->day ( 25 );
+            }
         }
         catch ( \Exception $e )
         {
@@ -245,9 +261,25 @@ class LaporanLNPBTotalController extends Controller
                 ? Carbon::parse ( $request->endDate )
                 : $defaultEndDate;
 
-            // Ensure startDate is on the 26th and endDate is on the 25th
-            $startDate = $startDate->day ( 26 );
-            $endDate   = $endDate->day ( 25 );
+            // Special case handling for November-December period
+            if ( $startDate->month == 11 && $endDate->month == 12 )
+            {
+                $startDate = $startDate->copy ()->setDay ( 26 ); // November 26th
+                $endDate   = $endDate->copy ()->endOfMonth ();   // December 31st
+            }
+            // Special case handling for December-January period
+            else if ( $startDate->month == 12 && $endDate->month == 1 )
+            {
+                // For December-January, we only want January 1st to January 25th
+                $startDate = Carbon::parse ( $endDate->year . '-01-01' ); // January 1st
+                $endDate   = Carbon::parse ( $endDate->year . '-01-25' ); // January 25th
+            }
+            // Normal case: Ensure startDate is on the 26th and endDate is on the 25th
+            else
+            {
+                $startDate = $startDate->day ( 26 );
+                $endDate   = $endDate->day ( 25 );
+            }
         }
         catch ( \Exception $e )
         {

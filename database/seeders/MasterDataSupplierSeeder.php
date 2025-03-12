@@ -16,12 +16,14 @@ class MasterDataSupplierSeeder extends Seeder
     {
         $suppliers = [ 
             [ "Cardig", "Bram", "+62817852629", "Jakarta" ],
+            [ "Centra Selang", "-", "-", "-" ],
             [ "CV Cahaya Berkah Sentosa", "Slamet Khambali", "+6285257548948", "Sidoarjo" ],
             [ "CV Cahyadi Sukses Bersama", "Alvin Cahyadi", "+6281288932388", "Tarakan" ],
             [ "CV Daya Motor II", "Hartopo", "+62812561142", "Kalimantan Barat" ],
             [ "CV Geronimo Mandiri", "Lina", "+6281330445566", "Surabaya" ],
             [ "CV Harapan Motor", "Jetson", "+62811570776", "Kalimantan Barat" ],
             [ "CV Industrialindo", "Haris Frianto", "+6281252066050", "Makassar" ],
+            [ "CV Jasa Karya Manggala", "-", "-", "-" ],
             [ "CV Kencana Multindo Putra", "Arif", "+6281382333036", "Jakarta" ],
             [ "CV Kurnia Partindo Jaya", "Jonsen", "+6281938257229", "Surabaya" ],
             [ "CV Makindo Wiguna", "Bogan", "+6289630805019", "Jakarta" ],
@@ -30,6 +32,10 @@ class MasterDataSupplierSeeder extends Seeder
             [ "CV Sinar Makmur Baru", "Adi", "+6285730063480", "Surabaya" ],
             [ "CV Tunggal Jaya", "Suryadi M", "+6285237759999", "Ende" ],
             [ "Eko Juhan", "Eko Juhan", "+6281288199845", "Jakarta" ],
+            [ "Indo Plastik", "-", "-", "-" ],
+            [ "Indra Jaya", "-", "-", "-" ],
+            [ "Istana Teknik", "-", "-", "-" ],
+            [ "Kurnia Motor", "-", "-", "-" ],
             [ "PT Adhie Usaha Mandiri", "Ringo", "+6281383801009", "Bekasi" ],
             [ "PT Annapurna Jaya Agung", "-", "-", "-" ],
             [ "PT Angkasa Pura Logistik", "Redy", "+6281133899928", "Jakarta" ],
@@ -44,7 +50,7 @@ class MasterDataSupplierSeeder extends Seeder
             [ "PT Dayton Motor Bali", "Erik", "+6281346393852", "Bali" ],
             [ "PT Detede", "Teddy", "+6285210567648", "Cibubur" ],
             [ "PT Diesel Pratama Indonesia", "Aldy", "+6281386741768", "Jakarta" ],
-            [ "PT Diesel Utama", "Ishardinata", "+6281316740026", "Jakarta" ],
+            [ "PT Diesel Utama Indonesia", "Ishardinata", "+6281316740026", "Jakarta" ],
             [ "PT Diva Mandiri Semesta", "Ariyani", "+6281213061629", "Ciledug" ],
             [ "PT Duta Utama Sumatera", "-", "-", "-" ],
             [ "PT Equipindo Perkasa", "Syaiful", "+6281213117672", "Jakarta" ],
@@ -81,6 +87,9 @@ class MasterDataSupplierSeeder extends Seeder
             [ "PT United Tractors", "Restu", "+6285715655554", "Jakarta" ],
             [ "PT Vakamindo Mitra Prima", "Syahrul", "+6281319770019", "Jakarta" ],
             [ "PT Xpresindo Logistik Utama", "Indra", "+6283830795144", "Global" ],
+            [ "Pusaka Jaya Motor", "-", "-", "-" ],
+            [ "Ubung Jaya Motor", "-", "-", "-" ],
+            [ "UD Sri Murti Oxygen", "-", "-", "-" ],
             [ "UD Yoko Motor", "Joseph", "+6281238414500", "Denpasar" ]
         ];
 

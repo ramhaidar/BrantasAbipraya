@@ -26,7 +26,8 @@ class DatabaseSeeder extends Seeder
                     // _BudongBudongSeeder::class,
                     // _BulangoSeeder::class,
                     // _BenerPaket4Seeder::class,
-                ATBSeeder::class, // This will now process both BUDONG and BULANGO sheets
+                ATBSeeder::class,
+                MasterDataSparepartSeeder2::class,
             ]
         );
     }

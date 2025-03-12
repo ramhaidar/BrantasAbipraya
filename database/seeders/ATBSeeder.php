@@ -24,7 +24,7 @@ class ATBSeeder extends Seeder
     public function run () : void
     {
         // Define the path to your Excel file
-        $excelFilePath = storage_path ( 'app/seeds/Formatted_Mine.xlsx' );
+        $excelFilePath = storage_path ( 'app/seeds/ATB/Desember_Formatted.xlsx' );
 
         if ( ! file_exists ( $excelFilePath ) )
         {

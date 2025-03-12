@@ -77,21 +77,27 @@
                             <label class="form-label required" for="satuan">Satuan</label>
                             <select class="form-control" id="satuan" name="satuan" required>
                                 <option value="">Pilih Satuan</option>
-                                <option value="Assy">Assy</option>
+                                <option value="Assy">Assembly</option>
                                 <option value="Box">Box</option>
-                                <option value="Btl">Btg</option>
-                                <option value="Btl">Btl</option>
+                                <option value="Btg">Batang</option>
+                                <option value="Btl">Botol</option>
+                                <option value="Cm">Cm</option>
                                 <option value="Drum">Drum</option>
+                                <option value="Gln">Galon</option>
                                 <option value="Ken">Ken</option>
-                                <option value="Kg">Kg</option>
-                                <option value="Ktk">Ktk</option>
-                                <option value="Ls">Ls</option>
-                                <option value="Ltr">Ltr</option>
-                                <option value="Ltr">M</option>
+                                <option value="Kg">Kilogram</option>
+                                <option value="Krg">Karung</option>
+                                <option value="Ktk">Kotak</option>
+                                <option value="Lbr">Lebar</option>
+                                <option value="Ls">Lump Sum</option>
+                                <option value="Ltr">Liter</option>
+                                <option value="M">Meter</option>
                                 <option value="Pack">Pack</option>
                                 <option value="Pail">Pail</option>
-                                <option value="Pcs">Pcs</option>
+                                <option value="Pcs">Pieces</option>
+                                <option value="Roll">Roll</option>
                                 <option value="Set">Set</option>
+                                <option value="Tbg">Tabung</option>
                             </select>
                             <div class="invalid-feedback">Satuan diperlukan.</div>
                         </div>

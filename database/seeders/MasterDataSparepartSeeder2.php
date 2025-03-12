@@ -6,6 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\KategoriSparepart;
 use App\Models\MasterDataSparepart;
+use App\Models\MasterDataSupplier;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class MasterDataSparepartSeeder2 extends Seeder
@@ -103,6 +104,7 @@ class MasterDataSparepartSeeder2 extends Seeder
         {
             // Map Excel columns to our data structure
             $kodeValue       = $worksheet->getCell ( 'E' . $row )->getValue ();
+            $supplierValue   = $worksheet->getCell ( 'F' . $row )->getValue (); // Added supplier column
             $sparepartValue  = $worksheet->getCell ( 'G' . $row )->getValue ();
             $merkValue       = $worksheet->getCell ( 'H' . $row )->getValue ();
             $partNumberValue = $worksheet->getCell ( 'I' . $row )->getValue ();
@@ -115,6 +117,7 @@ class MasterDataSparepartSeeder2 extends Seeder
 
             $data[] = [ 
                 'kode'        => $kodeValue,
+                'supplier'    => $supplierValue ?: '-',
                 'sparepart'   => $sparepartValue,
                 'merk'        => $merkValue ?: '-',
                 'part_number' => $partNumberValue ?: '-',
@@ -199,9 +202,33 @@ class MasterDataSparepartSeeder2 extends Seeder
 
             $uniqueSpareparts[ $uniqueKey ] = true;
 
-            $kategori = null;
+            $kategori  = null;
+            $supplier  = null;
+            $sparepart = null;
 
-            // Find the kategori based on code
+            // 1. Find or create the supplier
+            try
+            {
+                if ( ! empty ( $item[ 'supplier' ] ) && $item[ 'supplier' ] != '-' )
+                {
+                    $supplier = MasterDataSupplier::firstOrCreate (
+                        [ 'nama' => $item[ 'supplier' ] ],
+                        [ 
+                            'alamat'         => '-',
+                            'contact_person' => '- (-)',
+                        ]
+                    );
+
+                    console ( "Using supplier: {$item[ 'supplier' ]} (ID: {$supplier->id})" );
+                }
+            }
+            catch ( \Exception $e )
+            {
+                $this->addError ( "Error creating supplier '{$item[ 'supplier' ]}': " . $e->getMessage () );
+                // Continue anyway to create the sparepart
+            }
+
+            // 2. Find the kategori based on code
             try
             {
                 $kategori = KategoriSparepart::where ( 'kode', $item[ 'kode' ] )->first ();
@@ -220,7 +247,7 @@ class MasterDataSparepartSeeder2 extends Seeder
                 continue; // Skip this record
             }
 
-            // Create or find the sparepart
+            // 3. Create or find the sparepart
             try
             {
                 // Check if sparepart already exists with same name and part number
@@ -232,6 +259,7 @@ class MasterDataSparepartSeeder2 extends Seeder
                 if ( $existingSparepart )
                 {
                     console ( "Sparepart already exists: {$item[ 'sparepart' ]} (ID: {$existingSparepart->id})" );
+                    $sparepart = $existingSparepart;
                     $successCount++; // Count as success since we found it
                 }
                 else
@@ -252,6 +280,33 @@ class MasterDataSparepartSeeder2 extends Seeder
             {
                 $this->addError ( "Error creating sparepart '{$item[ 'sparepart' ]}': " . $e->getMessage () );
                 $errorCount++;
+                continue; // Skip to next record if sparepart creation fails
+            }
+
+            // 4. Link the sparepart to the supplier if both exist
+            try
+            {
+                if ( $sparepart && $supplier )
+                {
+                    $linkExists = $sparepart->masterDataSuppliers ()
+                        ->where ( 'master_data_supplier.id', $supplier->id )
+                        ->exists ();
+
+                    if ( ! $linkExists )
+                    {
+                        $sparepart->masterDataSuppliers ()->attach ( $supplier->id );
+                        console ( "Linked supplier {$supplier->nama} to sparepart {$sparepart->nama}" );
+                    }
+                    else
+                    {
+                        console ( "Link between supplier {$supplier->nama} and sparepart {$sparepart->nama} already exists" );
+                    }
+                }
+            }
+            catch ( \Exception $e )
+            {
+                $this->addError ( "Error linking supplier to sparepart: " . $e->getMessage () );
+                // Continue anyway since the sparepart was already created
             }
         }
 

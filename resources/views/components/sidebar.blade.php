@@ -503,15 +503,24 @@
             }
 
             function loadSidebarState() {
-                const savedState = localStorage.getItem('sidebarState');
-                if (savedState === 'collapsed') {
+                const documentWidth = document.documentElement.clientWidth;
+                if (documentWidth < 768) {
+                    // Always collapse sidebar on small screens regardless of saved state
                     $('body').addClass('sidebar-collapse');
+                    toggleUserPanelText(true);
+                    toggleSearchInput(true);
                 } else {
-                    $('body').removeClass('sidebar-collapse');
+                    // Only apply saved state on larger screens
+                    const savedState = localStorage.getItem('sidebarState');
+                    if (savedState === 'collapsed') {
+                        $('body').addClass('sidebar-collapse');
+                    } else {
+                        $('body').removeClass('sidebar-collapse');
+                    }
+                    // Update UI based on loaded state
+                    toggleUserPanelText($('body').hasClass('sidebar-collapse'));
+                    toggleSearchInput($('body').hasClass('sidebar-collapse'));
                 }
-                // Update UI based on loaded state
-                toggleUserPanelText($('body').hasClass('sidebar-collapse'));
-                toggleSearchInput($('body').hasClass('sidebar-collapse'));
             }
 
             function toProperCase(text) {
@@ -608,14 +617,20 @@
                 $(document).on('collapsed.lte.pushmenu', function() {
                     toggleUserPanelText(true);
                     toggleSearchInput(true);
-                    saveSidebarState(true);
+                    // Only save state if not on mobile
+                    if (document.documentElement.clientWidth >= 768) {
+                        saveSidebarState(true);
+                    }
                 });
 
                 // When sidebar is expanded
                 $(document).on('shown.lte.pushmenu', function() {
                     toggleUserPanelText(false);
                     toggleSearchInput(false);
-                    saveSidebarState(false);
+                    // Only save state if not on mobile
+                    if (document.documentElement.clientWidth >= 768) {
+                        saveSidebarState(false);
+                    }
                 });
 
                 // Load initial state
@@ -775,8 +790,11 @@
                 const updateSidebarForWidth = () => {
                     const documentWidth = document.documentElement.clientWidth;
                     if (documentWidth < 768) {
+                        // Always collapse on small screens
                         document.querySelector('body').classList.add('sidebar-collapse');
-                        saveSidebarState(true);
+                        toggleUserPanelText(true);
+                        toggleSearchInput(true);
+                        // Don't save state when forcing collapse due to screen size
                     } else {
                         // Only restore the saved state if screen is large enough
                         loadSidebarState();
@@ -784,7 +802,8 @@
                 };
 
                 window.addEventListener('resize', updateSidebarForWidth);
-                window.addEventListener('load', updateSidebarForWidth);
+                // Ensure it runs on initial page load
+                updateSidebarForWidth();
             }
 
             // Initialize functions
@@ -795,7 +814,6 @@
             handleSearchInput();
             handleScrollToActiveElement();
             handleWindowResize();
-            loadSidebarState();
         });
     </script>
 @endpush

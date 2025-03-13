@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
                     // _BenerPaket4Seeder::class,
                 ATBSeeder::class,
                 MasterDataSparepartSeeder2::class,
+                LinkAlatProyekSeeder::class,
             ]
         );
     }

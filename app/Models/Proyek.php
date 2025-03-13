@@ -10,6 +10,7 @@ use App\Models\UserProyek;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Proyek extends Model
 {
@@ -83,5 +84,15 @@ class Proyek extends Model
     public function rkbs () : HasMany
     {
         return $this->hasMany ( RKB::class, 'id_proyek' );
+    }
+
+    public function alatProyek () : HasMany
+    {
+        return $this->hasMany ( AlatProyek::class, 'id_proyek' );
+    }
+
+    public function currentAlat () : HasOne
+    {
+        return $this->hasOne ( MasterDataAlat::class, 'id_proyek_current' );
     }
 }

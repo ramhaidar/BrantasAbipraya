@@ -57,7 +57,7 @@ class MasterDataAlat extends Model
         return $this->belongsTo ( Proyek::class, 'id_proyek_current', 'id' );
     }
 
-    public function alatProyek ()
+    public function alatProyek () : HasMany
     {
         return $this->hasMany ( AlatProyek::class, 'id_master_data_alat' );
     }

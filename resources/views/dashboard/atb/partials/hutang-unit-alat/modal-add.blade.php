@@ -13,7 +13,7 @@
                         <div class="p-0 m-0" hidden>
                             <label class="form-label" for="tipe">Tipe ATB</label>
                             <div class="input-group">
-                                <select class="form-control" id="pilihan-proyek1" name="tipe">
+                                <select class="form-control" name="tipe">
                                     <option value="hutang-unit-alat" {{ $page == 'Data ATB Hutang Unit Alat' ? 'selected' : '' }}>Hutang Unit Alat</option>
                                     <option value="panjar-unit-alat" {{ $page == 'Data ATB Panjar Unit Alat' ? 'selected' : '' }}>Panjar Unit Alat</option>
                                     <option value="mutasi-proyek" {{ $page == 'Data ATB Mutasi Proyek' ? 'selected' : '' }}>Mutasi Proyek</option>

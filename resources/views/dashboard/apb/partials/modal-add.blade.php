@@ -14,7 +14,7 @@
 
                         <div class="col-12" hidden>
                             <label class="form-label" for="tipe">Tipe ATB</label>
-                            <select class="form-control" id="pilihan-proyek1" name="tipe">
+                            <select class="form-control" name="tipe">
                                 <option value="hutang-unit-alat" {{ $page == 'Data APB EX Hutang Unit Alat' ? 'selected' : '' }}>Hutang Unit Alat</option>
                                 <option value="panjar-unit-alat" {{ $page == 'Data APB EX Panjar Unit Alat' ? 'selected' : '' }}>Panjar Unit Alat</option>
                                 <option value="mutasi-proyek" {{ $page == 'Data APB EX Mutasi Proyek' ? 'selected' : '' }}>Mutasi Proyek</option>

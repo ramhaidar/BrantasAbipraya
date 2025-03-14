@@ -12,7 +12,7 @@
                     <div class="row g-3">
                         <div class="p-0 m-0" hidden>
                             <label class="form-label" for="tipe">Tipe ATB</label>
-                            <select class="form-control" id="pilihan-proyek1" name="tipe">
+                            <select class="form-control" name="tipe">
                                 <option value="hutang-unit-alat-bypass" selected>Hutang Unit Alat Bypass</option>
                             </select>
                         </div>

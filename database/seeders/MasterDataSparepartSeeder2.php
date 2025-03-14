@@ -37,46 +37,43 @@ class MasterDataSparepartSeeder2 extends Seeder
             $reader      = IOFactory::createReader ( 'Xlsx' );
             $spreadsheet = $reader->load ( $excelFilePath );
 
-            $totalSuccess = 0;
-            $totalErrors  = 0;
+            // First load all suppliers from MASTER sheet
+            list( $supplierSuccess, $supplierErrors ) = $this->loadSuppliersFromMasterSheet ( $spreadsheet );
+            console ( "Loaded suppliers from MASTER sheet. Success: {$supplierSuccess}, Errors: {$supplierErrors}" );
 
-            // Process the first sheet - ATB-HUTANG UNIT ALAT
-            $worksheet = $spreadsheet->getSheetByName ( 'ATB-HUTANG UNIT ALAT' );
+            $totalSuccess = $supplierSuccess;
+            $totalErrors  = $supplierErrors;
 
-            if ( $worksheet )
+            // Define sheets to process
+            $sheetsToProcess = [ 
+                'Nilai Sisa Persediaan Rill',
+                'ATB-HUTANG UNIT ALAT',
+                'ATB-PANJAR UNIT ALAT',
+                'ATB-PANJAR PROYEK',
+                'ATB-MUTASI PROYEK'
+            ];
+
+            foreach ( $sheetsToProcess as $sheetName )
             {
-                console ( "Processing sheet: ATB-HUTANG UNIT ALAT" );
-                list( $success1, $errors1 ) = $this->processSheetATB ( $worksheet );
-                console ( "Sheet processed. Success: {$success1}, Errors: {$errors1}" );
+                $worksheet = $spreadsheet->getSheetByName ( $sheetName );
 
-                $totalSuccess += $success1;
-                $totalErrors += $errors1;
-            }
-            else
-            {
-                $this->addError ( "Sheet 'ATB-HUTANG UNIT ALAT' not found in Excel file" );
-            }
+                if ( $worksheet )
+                {
+                    console ( "Processing sheet: {$sheetName}" );
+                    // Use the same process method for all sheets since they have the same structure
+                    list( $success, $errors ) = $this->processSheet ( $worksheet );
+                    console ( "Sheet processed. Success: {$success}, Errors: {$errors}" );
 
-            // Process the second sheet - Nilai Sisa Persediaan Rill
-            $worksheet = $spreadsheet->getSheetByName ( 'Nilai Sisa Persediaan Rill' );
-
-            if ( $worksheet )
-            {
-                console ( "Processing sheet: Nilai Sisa Persediaan Rill" );
-                list( $success2, $errors2 ) = $this->processSheetPersediaan ( $worksheet );
-                console ( "Sheet processed. Success: {$success2}, Errors: {$errors2}" );
-
-                $totalSuccess += $success2;
-                $totalErrors += $errors2;
-            }
-            else
-            {
-                $this->addError ( "Sheet 'Nilai Sisa Persediaan Rill' not found in Excel file" );
+                    $totalSuccess += $success;
+                    $totalErrors += $errors;
+                }
+                else
+                {
+                    $this->addError ( "Sheet '{$sheetName}' not found in Excel file" );
+                }
             }
 
             console ( "All sheets processed. Total Success: {$totalSuccess}, Total Errors: {$totalErrors}" );
-
-            // Output all collected errors at the end
             $this->outputErrors ();
         }
         catch ( \Exception $e )
@@ -88,13 +85,15 @@ class MasterDataSparepartSeeder2 extends Seeder
     }
 
     /**
-     * Process the ATB-HUTANG UNIT ALAT worksheet and create MasterDataSparepart records
+     * Process worksheet and create MasterDataSparepart records
      * 
      * @param \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $worksheet
      * @return array [successCount, errorCount]
      */
-    protected function processSheetATB ( $worksheet )
+    protected function processSheet ( $worksheet )
     {
+        // Get the sheet name for error reporting
+        $sheetName = $worksheet->getTitle ();
         // Get the highest row with data
         $highestRow = $worksheet->getHighestRow ();
 
@@ -102,9 +101,18 @@ class MasterDataSparepartSeeder2 extends Seeder
         $data = [];
         for ( $row = 2; $row <= $highestRow; $row++ )
         {
+            // Check if row is marked as CONTOH
+            $noValue = $worksheet->getCell ( 'A' . $row )->getValue ();
+            if ( $noValue === 'CONTOH' )
+            {
+                continue; // Skip this row
+            }
+
             // Map Excel columns to our data structure
+            // #  Proyek  Tanggal  PO  Kode  Supplier  Sparepart  Merk  Part Number  Quantity  Satuan  Harga  Net
+            $poValue         = $worksheet->getCell ( 'D' . $row )->getValue (); // Added PO column
             $kodeValue       = $worksheet->getCell ( 'E' . $row )->getValue ();
-            $supplierValue   = $worksheet->getCell ( 'F' . $row )->getValue (); // Added supplier column
+            $supplierValue   = $worksheet->getCell ( 'F' . $row )->getValue ();
             $sparepartValue  = $worksheet->getCell ( 'G' . $row )->getValue ();
             $merkValue       = $worksheet->getCell ( 'H' . $row )->getValue ();
             $partNumberValue = $worksheet->getCell ( 'I' . $row )->getValue ();
@@ -115,64 +123,48 @@ class MasterDataSparepartSeeder2 extends Seeder
                 continue;
             }
 
+            // Validate supplier - skip if it looks like a PO number or if it's the same as the PO value
+            if ( $this->isPONumber ( $supplierValue ) || $supplierValue == $poValue )
+            {
+                $supplierValue = '-'; // Reset to default if it looks like a PO
+            }
+
             $data[] = [ 
                 'kode'        => $kodeValue,
                 'supplier'    => $supplierValue ?: '-',
                 'sparepart'   => $sparepartValue,
                 'merk'        => $merkValue ?: '-',
                 'part_number' => $partNumberValue ?: '-',
+                'row'         => $row,
+                'sheet_name'  => $sheetName
             ];
         }
 
-        console ( 'Loaded ' . count ( $data ) . ' records from ATB-HUTANG UNIT ALAT sheet' );
+        console ( 'Loaded ' . count ( $data ) . ' records from ' . $sheetName );
 
         return $this->processData ( $data );
     }
 
     /**
-     * Process the Nilai Sisa Persediaan Rill worksheet and create MasterDataSparepart records
+     * Checks if a value appears to be a PO number
      * 
-     * @param \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $worksheet
-     * @return array [successCount, errorCount]
+     * @param mixed $value
+     * @return bool
      */
-    protected function processSheetPersediaan ( $worksheet )
+    protected function isPONumber ( $value )
     {
-        // Get the highest row with data
-        $highestRow = $worksheet->getHighestRow ();
+        if ( empty ( $value ) ) return false;
 
-        // Assuming the first row is headers, start from row 2
-        $data = [];
-        for ( $row = 2; $row <= $highestRow; $row++ )
-        {
-            // Map Excel columns to our data structure
-            // Correct column structure: Proyek Tanggal Kode Supplier Sparepart Part Number Quantity Satuan Harga Net Sparepart Ori
-            $kodeValue         = $worksheet->getCell ( 'C' . $row )->getValue ();
-            $supplierValue     = $worksheet->getCell ( 'D' . $row )->getValue ();
-            $sparepartValue    = $worksheet->getCell ( 'E' . $row )->getValue ();
-            $partNumberValue   = $worksheet->getCell ( 'F' . $row )->getValue ();
-            $sparepartOriValue = $worksheet->getCell ( 'K' . $row )->getValue ();
+        // Check if it's numeric or matches common PO formats
+        if ( is_numeric ( $value ) ) return true;
 
-            // Skip empty rows
-            if ( empty ( $sparepartValue ) )
-            {
-                continue;
-            }
+        // Check for common PO patterns (e.g., PO-12345, PO/12345)
+        if ( preg_match ( '/^(po|purchase|order|nomor)\s*[-\/:]?\s*\d+/i', $value ) ) return true;
 
-            // Use Sparepart Ori if available, otherwise use Sparepart
-            $finalSparepartName = ! empty ( $sparepartOriValue ) ? $sparepartOriValue : $sparepartValue;
+        // Check for date-like formats often used in POs
+        if ( preg_match ( '/^\d+[\/\-\.]\d+[\/\-\.]\d+$/', $value ) ) return true;
 
-            $data[] = [ 
-                'kode'        => $kodeValue,
-                'sparepart'   => $finalSparepartName,
-                'merk'        => '-', // Merk is not available in this sheet, using default
-                'part_number' => $partNumberValue ?: '-',
-                'supplier'    => $supplierValue ?: '-', // Store supplier info for logging
-            ];
-        }
-
-        console ( 'Loaded ' . count ( $data ) . ' records from Nilai Sisa Persediaan Rill sheet' );
-
-        return $this->processData ( $data );
+        return false;
     }
 
     /**
@@ -235,14 +227,16 @@ class MasterDataSparepartSeeder2 extends Seeder
 
                 if ( ! $kategori )
                 {
-                    $this->addError ( "Category with code {$item[ 'kode' ]} not found." );
+                    $locationInfo = "Sheet: {$item[ 'sheet_name' ]}, Row: {$item[ 'row' ]}, Code: {$item[ 'kode' ]}, Sparepart: {$item[ 'sparepart' ]}";
+                    $this->addError ( "Category with code {$item[ 'kode' ]} not found. Location: {$locationInfo}" );
                     $errorCount++;
                     continue; // Skip this record
                 }
             }
             catch ( \Exception $e )
             {
-                $this->addError ( "Error finding category with code {$item[ 'kode' ]}: " . $e->getMessage () );
+                $locationInfo = "Sheet: {$item[ 'sheet_name' ]}, Row: {$item[ 'row' ]}, Code: {$item[ 'kode' ]}, Sparepart: {$item[ 'sparepart' ]}";
+                $this->addError ( "Error finding category with code {$item[ 'kode' ]}: " . $e->getMessage () . ". Location: {$locationInfo}" );
                 $errorCount++;
                 continue; // Skip this record
             }
@@ -278,7 +272,8 @@ class MasterDataSparepartSeeder2 extends Seeder
             }
             catch ( \Exception $e )
             {
-                $this->addError ( "Error creating sparepart '{$item[ 'sparepart' ]}': " . $e->getMessage () );
+                $locationInfo = "Sheet: {$item[ 'sheet_name' ]}, Row: {$item[ 'row' ]}, Sparepart: {$item[ 'sparepart' ]}";
+                $this->addError ( "Error creating sparepart '{$item[ 'sparepart' ]}': " . $e->getMessage () . ". Location: {$locationInfo}" );
                 $errorCount++;
                 continue; // Skip to next record if sparepart creation fails
             }
@@ -341,5 +336,67 @@ class MasterDataSparepartSeeder2 extends Seeder
             console ( "Total Errors: " . count ( $this->errorMessages ) );
             console ( "=================================" );
         }
+    }
+
+    /**
+     * Load suppliers from the MASTER sheet
+     * 
+     * @param \PhpOffice\PhpSpreadsheet\Spreadsheet $spreadsheet
+     * @return array [successCount, errorCount]
+     */
+    protected function loadSuppliersFromMasterSheet ( $spreadsheet )
+    {
+        $successCount = 0;
+        $errorCount   = 0;
+
+        // Try to get the MASTER sheet
+        $worksheet = $spreadsheet->getSheetByName ( 'MASTER' );
+
+        if ( ! $worksheet )
+        {
+            $this->addError ( "Sheet 'MASTER' not found in Excel file" );
+            return [ $successCount, $errorCount ];
+        }
+
+        console ( "Loading suppliers from MASTER sheet..." );
+
+        // Get the highest row with data
+        $highestRow = $worksheet->getHighestRow ();
+
+        // Start from row 3 as requested
+        for ( $row = 3; $row <= $highestRow; $row++ )
+        {
+            $supplierName = $worksheet->getCell ( 'E' . $row )->getValue ();
+
+            // Skip empty supplier names
+            if ( empty ( $supplierName ) || $supplierName == '-' )
+            {
+                continue;
+            }
+
+            try
+            {
+                // Create the supplier
+                $supplier = MasterDataSupplier::firstOrCreate (
+                    [ 'nama' => $supplierName ],
+                    [ 
+                        'alamat'         => '-',
+                        'contact_person' => '- (-)',
+                    ]
+                );
+
+                console ( "Added supplier: {$supplierName} (ID: {$supplier->id})" );
+                $successCount++;
+            }
+            catch ( \Exception $e )
+            {
+                $this->addError ( "Error creating supplier '{$supplierName}' from MASTER sheet: " . $e->getMessage () );
+                $errorCount++;
+            }
+        }
+
+        console ( "Finished loading suppliers: Success: {$successCount}, Errors: {$errorCount}" );
+
+        return [ $successCount, $errorCount ];
     }
 }

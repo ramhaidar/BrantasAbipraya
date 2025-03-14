@@ -16,7 +16,7 @@ class MasterDataSupplierSeeder extends Seeder
     {
         $suppliers = [ 
             [ "Cardig", "Bram", "+62817852629", "Jakarta" ],
-            [ "Centra Selang", "-", "-", "-" ],
+            // [ "Centra Selang", "-", "-", "-" ],
             [ "CV Cahaya Berkah Sentosa", "Slamet Khambali", "+6285257548948", "Sidoarjo" ],
             [ "CV Cahyadi Sukses Bersama", "Alvin Cahyadi", "+6281288932388", "Tarakan" ],
             [ "CV Daya Motor II", "Hartopo", "+62812561142", "Kalimantan Barat" ],
@@ -32,10 +32,10 @@ class MasterDataSupplierSeeder extends Seeder
             [ "CV Sinar Makmur Baru", "Adi", "+6285730063480", "Surabaya" ],
             [ "CV Tunggal Jaya", "Suryadi M", "+6285237759999", "Ende" ],
             [ "Eko Juhan", "Eko Juhan", "+6281288199845", "Jakarta" ],
-            [ "Indo Plastik", "-", "-", "-" ],
-            [ "Indra Jaya", "-", "-", "-" ],
-            [ "Istana Teknik", "-", "-", "-" ],
-            [ "Kurnia Motor", "-", "-", "-" ],
+            // [ "Indo Plastik", "-", "-", "-" ],
+            // [ "Indra Jaya", "-", "-", "-" ],
+            // [ "Istana Teknik", "-", "-", "-" ],
+            // [ "Kurnia Motor", "-", "-", "-" ],
             [ "PT Adhie Usaha Mandiri", "Ringo", "+6281383801009", "Bekasi" ],
             [ "PT Annapurna Jaya Agung", "-", "-", "-" ],
             [ "PT Angkasa Pura Logistik", "Redy", "+6281133899928", "Jakarta" ],
@@ -87,9 +87,9 @@ class MasterDataSupplierSeeder extends Seeder
             [ "PT United Tractors", "Restu", "+6285715655554", "Jakarta" ],
             [ "PT Vakamindo Mitra Prima", "Syahrul", "+6281319770019", "Jakarta" ],
             [ "PT Xpresindo Logistik Utama", "Indra", "+6283830795144", "Global" ],
-            [ "Pusaka Jaya Motor", "-", "-", "-" ],
-            [ "Ubung Jaya Motor", "-", "-", "-" ],
-            [ "UD Sri Murti Oxygen", "-", "-", "-" ],
+            // [ "Pusaka Jaya Motor", "-", "-", "-" ],
+            // [ "Ubung Jaya Motor", "-", "-", "-" ],
+            // [ "UD Sri Murti Oxygen", "-", "-", "-" ],
             [ "UD Yoko Motor", "Joseph", "+6281238414500", "Denpasar" ]
         ];
 

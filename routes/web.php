@@ -324,6 +324,9 @@ Route::middleware ( [ CheckRole::class . ':superadmin,svp,vp,admin_divisi,koordi
         Route::post ( '/store', [ APBController::class, 'store' ] )
             ->name ( 'post.store' );
 
+        Route::post ( '/store/bypass', [ APBController::class, 'store_bypass' ] )
+            ->name ( 'post.store.bypass' );
+
         Route::post ( '/mutasi_store', [ APBController::class, 'mutasi_store' ] )
             ->name ( 'post.mutasi' );
 
@@ -481,15 +484,6 @@ Route::middleware ( [ CheckRole::class . ':superadmin,svp,vp,admin_divisi,koordi
             ->name ( 'dokumentasi' );
     } );
 
-Route::get ( '/laporan/summary', [ LaporanController::class, 'summary' ] )->middleware ( [ 
-    CheckRole::class . ':superadmin,svp,vp,admin_divisi,koordinator_proyek',
-] )
-    ->name ( 'laporan.summary' );
-Route::get ( '/laporan/lnpb', [ LaporanController::class, 'LNPB' ] )->middleware ( [ 
-    CheckRole::class . ':superadmin,svp,vp,admin_divisi,koordinator_proyek',
-] )
-    ->name ( 'laporan.lnpb' );
-
 Route::prefix ( 'ajax' )->group ( function ()
 {
     Route::get ( '/atb/fetch-data', [ ATBController::class, 'fetchData' ] )->name ( 'atb.fetchData' );
@@ -505,10 +499,6 @@ Route::prefix ( 'ajax' )->group ( function ()
     Route::get ( '/saldo/fetch-data', [ SaldoController::class, 'fetchData' ] )->name ( 'saldo.fetchData' );
 } );
 
-Route::prefix ( 'ajax' )->group ( function ()
-{
-    Route::get ( '/summary/fetch-data', [ LaporanController::class, 'fetchData' ] )->name ( 'summary.fetchData' );
-} );
 
 // Route::get ( '/dashboard/proyek/actions/{id}', [ DashboardController::class, 'filterByProyek' ] )
 //     ->where ( 'id', '[0-9]+' )

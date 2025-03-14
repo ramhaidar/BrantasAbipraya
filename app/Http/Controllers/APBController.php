@@ -2,17 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Models\AlatProyek;
 use App\Models\APB;
 use App\Models\ATB;
-use App\Models\MasterDataSparepart;
-use App\Models\Proyek;
 use App\Models\RKB;
 use App\Models\Saldo;
+use App\Models\Proyek;
+use App\Models\AlatProyek;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Models\MasterDataAlat;
 use Illuminate\Support\Facades\DB;
+use App\Models\MasterDataSparepart;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class APBController extends Controller
 {
@@ -20,18 +21,22 @@ class APBController extends Controller
     {
         return $this->showApbPage ( "Hutang Unit Alat", "Data APB EX Unit Alat", $request->id_proyek );
     }
+
     public function panjar_unit_alat ( Request $request )
     {
         return $this->showApbPage ( "Panjar Unit Alat", "Data APB EX Panjar Unit Alat", $request->id_proyek );
     }
+
     public function mutasi_proyek ( Request $request )
     {
         return $this->showApbPage ( "Mutasi Proyek", "Data APB EX Mutasi Proyek", $request->id_proyek );
     }
+
     public function panjar_proyek ( Request $request )
     {
         return $this->showApbPage ( "Panjar Proyek", "Data APB EX Panjar Proyek", $request->id_proyek );
     }
+
     private function getBaseFilteredQuery ( $query, $excludeParam = null )
     {
         $request   = request ();
@@ -50,6 +55,7 @@ class APBController extends Controller
 
         return $query;
     }
+
     /**
      * Extract unique values for all filterable fields
      * 
@@ -416,6 +422,7 @@ class APBController extends Controller
             'quantity_digunakan' => $quantityDigunakan,
         ];
     }
+
     private function applyFilters ( $query, $request )
     {
         if ( $request->filled ( 'selected_tanggal' ) )
@@ -1594,6 +1601,7 @@ class APBController extends Controller
             return [];
         }
     }
+
     private function showApbPage ( $tipe, $pageTitle, $id_proyek )
     {
         $allowedPerPage = [ 10, 25, 50, 100 ];
@@ -1714,17 +1722,17 @@ class APBController extends Controller
             } )
             ->sum ( DB::raw ( 'apb.quantity * saldo.harga' ) );
 
-        $proyek                  = Proyek::with ( "users" )->findOrFail ( $id_proyek );
-        $alats                   = AlatProyek::where ( 'id_proyek', $id_proyek )->get ();
-        $spbs                    = $this->getFilteredSpbs ( $id_proyek );
-        $spareparts              = Saldo::where ( 'quantity', '>', 0 )->with ( [ 'masterDataSparepart', 'atb' ] )->whereHas ( 'atb', function ($query) use ($tipe)
+        $proyek              = Proyek::with ( "users" )->findOrFail ( $id_proyek );
+        $alats               = AlatProyek::where ( 'id_proyek', $id_proyek )->get ();
+        $spbs                = $this->getFilteredSpbs ( $id_proyek );
+        $spareparts          = Saldo::where ( 'quantity', '>', 0 )->with ( [ 'masterDataSparepart', 'atb' ] )->whereHas ( 'atb', function ($query) use ($tipe)
         {
             $query->where ( 'tipe', $tipe );
         } )->whereHas ( 'atb', function ($query) use ($id_proyek)
         {
             $query->where ( 'id_proyek', $id_proyek );
         } )->get ()->sortBy ( 'atb.tanggal' );
-        $sparepartsForMutasi     = Saldo::where ( 'quantity', '>', 0 )->with ( [ 'masterDataSparepart', 'atb' ] )->whereHas ( 'atb', function ($query) use ($tipe, $id_proyek)
+        $sparepartsForMutasi = Saldo::where ( 'quantity', '>', 0 )->with ( [ 'masterDataSparepart', 'atb' ] )->whereHas ( 'atb', function ($query) use ($tipe, $id_proyek)
         {
             $query->where ( 'id_proyek', $id_proyek );
             if ( $tipe !== 'mutasi-proyek' )
@@ -1732,6 +1740,10 @@ class APBController extends Controller
                 $query->where ( 'tipe', $tipe );
             }
         } )->get ()->sortBy ( 'atb.tanggal' );
+
+        // Add master data alats for bypass modal
+        $masterDataAlats = MasterDataAlat::orderBy ( 'jenis_alat' )->orderBy ( 'kode_alat' )->get ();
+
         $TableData               = $query->orderBy ( 'tanggal', 'desc' )->orderBy ( 'apb.updated_at', 'desc' )->orderBy ( 'apb.id', 'desc' )->paginate ( $perPage )->withQueryString ();
         $TableData->total_amount = $totalAmount;
         $user                    = Auth::user ();
@@ -1757,6 +1769,7 @@ class APBController extends Controller
             "TableData"           => $TableData,
             "search"              => $search,
             "uniqueValues"        => $uniqueValues,
+            "masterDataAlats"     => $masterDataAlats, // Added for bypass modal
         ] );
     }
 
@@ -1780,7 +1793,16 @@ class APBController extends Controller
     }
     public function store ( Request $request )
     {
-        $validated = $request->validate ( [ 'tanggal' => 'required|date', 'id_proyek' => 'required|exists:proyek,id', 'id_alat' => 'required|exists:alat_proyek,id', 'id_saldo' => 'required|exists:saldo,id', 'quantity' => 'required|integer|min:1', 'tipe' => 'required|string', 'mekanik' => 'required|string|max:255' ] );
+        $validated = $request->validate ( [ 
+            'tanggal'   => [ 'required', 'date' ],
+            'id_proyek' => [ 'required', 'exists:proyek,id' ],
+            'id_alat'   => [ 'required', 'exists:alat_proyek,id' ],
+            'id_saldo'  => [ 'required', 'exists:saldo,id' ],
+            'quantity'  => [ 'required', 'integer', 'min:1' ],
+            'tipe'      => [ 'required', 'string' ],
+            'mekanik'   => [ 'required', 'string', 'max:255' ]
+        ] );
+
         try
         {
             DB::beginTransaction ();
@@ -1801,9 +1823,113 @@ class APBController extends Controller
             return redirect ()->back ()->with ( 'error', 'Gagal menambahkan data APB: ' . $e->getMessage () );
         }
     }
+
+    /**
+     * Store a new APB entry using the bypass method
+     * The bypass allows selecting equipment from master data instead of project equipment
+     */
+    public function store_bypass ( Request $request )
+    {
+        $validated = $request->validate ( [ 
+            'tanggal'             => [ 'required', 'date' ],
+            'id_proyek'           => [ 'required', 'exists:proyek,id' ],
+            'id_master_data_alat' => [ 'required' ],
+            'id_saldo'            => [ 'required', 'exists:saldo,id' ],
+            'quantity'            => [ 'required', 'integer', 'min:1' ],
+            'tipe'                => [ 'required', 'string' ],
+            'mekanik'             => [ 'required', 'string', 'max:255' ]
+        ] );
+
+        try
+        {
+            DB::beginTransaction ();
+
+            // Get the saldo and master data sparepart
+            $saldo               = Saldo::find ( $request->id_saldo );
+            $masterDataSparepart = $saldo->masterDataSparepart;
+
+            // Check if quantity is available
+            if ( $saldo->quantity < $request->quantity )
+            {
+                throw new \Exception( 'Stok sparepart tidak mencukupi.' );
+            }
+
+            // Find or create AlatProyek for the given master data alat
+            $alatProyek = null;
+            if ( $request->id_master_data_alat === 'workshop' )
+            {
+                // For workshop, find or create a workshop entry
+                $masterDataAlat = MasterDataAlat::firstOrCreate (
+                    [ 'jenis_alat' => 'Workshop' ],
+                    [ 
+                        'kode_alat'     => 'WS',
+                        'merek_alat'    => 'Workshop',
+                        'tipe_alat'     => 'Workshop',
+                        'serial_number' => 'WS'
+                    ]
+                );
+
+                $alatProyek = AlatProyek::firstOrCreate (
+                    [ 
+                        'id_proyek'           => $request->id_proyek,
+                        'id_master_data_alat' => $masterDataAlat->id
+                    ]
+                );
+            }
+            else
+            {
+                // For regular equipment, find existing or create new
+                $alatProyek = AlatProyek::where ( 'id_proyek', $request->id_proyek )
+                    ->where ( 'id_master_data_alat', $request->id_master_data_alat )
+                    ->first ();
+
+                if ( ! $alatProyek )
+                {
+                    $alatProyek = AlatProyek::create ( [ 
+                        'id_proyek'           => $request->id_proyek,
+                        'id_master_data_alat' => $request->id_master_data_alat
+                    ] );
+                }
+            }
+
+            // Create the APB record
+            $apb = APB::create ( [ 
+                'tanggal'                  => $request->tanggal,
+                'tipe'                     => $request->tipe,
+                'mekanik'                  => $request->mekanik,
+                'quantity'                 => $request->quantity,
+                'id_saldo'                 => $saldo->id,
+                'id_proyek'                => $request->id_proyek,
+                'id_master_data_sparepart' => $masterDataSparepart->id,
+                'id_master_data_supplier'  => $saldo->id_master_data_supplier,
+                'id_alat_proyek'           => $alatProyek->id
+            ] );
+
+            // Decrement the saldo quantity
+            $saldo->decrementQuantity ( $request->quantity );
+
+            DB::commit ();
+            return redirect ()->back ()->with ( 'success', 'Data APB berhasil ditambahkan (bypass).' );
+        }
+        catch ( \Exception $e )
+        {
+            DB::rollBack ();
+            return redirect ()->back ()->with ( 'error', 'Gagal menambahkan data APB (bypass): ' . $e->getMessage () );
+        }
+    }
+
     public function mutasi_store ( Request $request )
     {
-        $validated = $request->validate ( [ 'tanggal' => 'required|date', 'id_proyek' => 'required|exists:proyek,id', 'id_proyek_tujuan' => 'required|exists:proyek,id|different:id_proyek', 'id_saldo' => 'required|exists:saldo,id', 'quantity' => 'required|integer|min:1', 'tipe' => 'required|string', 'keterangan' => 'nullable|string' ] );
+        $validated = $request->validate ( [ 
+            'tanggal'          => [ 'required', 'date' ],
+            'id_proyek'        => [ 'required', 'exists:proyek,id' ],
+            'id_proyek_tujuan' => [ 'required', 'exists:proyek,id', 'different:id_proyek' ],
+            'id_saldo'         => [ 'required', 'exists:saldo,id' ],
+            'quantity'         => [ 'required', 'integer', 'min:1' ],
+            'tipe'             => [ 'required', 'string' ],
+            'keterangan'       => [ 'nullable', 'string' ]
+        ] );
+
         try
         {
             DB::beginTransaction ();
@@ -1851,6 +1977,7 @@ class APBController extends Controller
             return redirect ()->back ()->with ( 'error', 'Gagal melakukan mutasi: ' . $e->getMessage () );
         }
     }
+
     public function mutasi_destroy ( $id )
     {
         try

@@ -43,6 +43,11 @@
                                 <a class="btn btn-primary btn-sm btn-hide-text-mobile" data-bs-toggle="modal" data-bs-target="#modalForAdd">
                                     <i class="fa fa-plus"></i> <span class="ms-2">Tambah Data APB</span>
                                 </a>
+                                @if (in_array(Auth::user()->role, env('IS_BETA') ? ['admin_divisi', 'vp', 'svp', 'superadmin', 'koordinator_proyek'] : ['admin_divisi', 'vp', 'svp', 'superadmin']) && $tipe === 'hutang-unit-alat')
+                                    <a class="btn btn-primary btn-sm btn-hide-text-mobile" data-bs-toggle="modal" data-bs-target="#modalForAddBypass">
+                                        <i class="fa fa-plus"></i> <span class="ms-2">Tambah Data ATB [Bypass]</span>
+                                    </a>
+                                @endif
                             @endif
                         @endif
                     </div>
@@ -96,6 +101,9 @@
         @else
             <!-- Modal for Adding Data -->
             @include('dashboard.apb.partials.modal-add')
+
+            <!-- Modal for Adding Bypass Data -->
+            @include('dashboard.apb.partials.modal-add-bypass')
         @endif
 
         @if ($tipe === 'mutasi-proyek')
